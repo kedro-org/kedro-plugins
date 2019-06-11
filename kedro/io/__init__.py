@@ -35,7 +35,6 @@ from .core import AbstractDataSet  # NOQA
 from .core import DataSetAlreadyExistsError  # NOQA
 from .core import DataSetError  # NOQA
 from .core import DataSetNotFoundError  # NOQA
-from .core import ExistsMixin  # NOQA
 from .core import FilepathVersionMixIn  # NOQA
 from .core import S3PathVersionMixIn  # NOQA
 from .core import Version  # NOQA
@@ -54,3 +53,4 @@ from .pickle_s3 import PickleS3DataSet  # NOQA
 from .sql import SQLQueryDataSet  # NOQA
 from .sql import SQLTableDataSet  # NOQA
 from .text_local import TextLocalDataSet  # NOQA
+from .transformers import AbstractTransformer  # NOQA

@@ -1,3 +1,3 @@
 # kedro-plugins
 
-Monorepo for Kedro plugins maintained by Kedro team.
+First-party plugins maintained by the core Kedro team.

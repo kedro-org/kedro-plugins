@@ -10,7 +10,7 @@ To find out how Kedro's features are used, the [Kedro team](https://github.com/q
 
 ## Why is data being collected?
 
-Telemetry data is made available to project maintainers of the Kedro Project. The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development
+Telemetry data is made available to project maintainers of the Kedro Project. The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics. 
 
 ## What about my personal data?
 

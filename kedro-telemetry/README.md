@@ -14,7 +14,7 @@ Telemetry data is made available to project maintainers of the Kedro Project. Th
 
 ## What about my personal data?
 
-The Kedro Project’s telemetry has been reviewed and approved under the [Linux Foundation’s Telemetry Data Collection and Usage Policy](TODO).
+The Kedro’s telemetry methodology within Kedro-Telemetry has been reviewed and approved under the [Linux Foundation’s Telemetry Data Collection and Usage Policy](TODO).
 
 ## What data do you collect?
 

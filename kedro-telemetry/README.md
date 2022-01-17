@@ -6,17 +6,19 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/quantumblacklabs/kedro) have created the Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised usage analytics. The data it gathers will help drive future development of Kedro because we can understand how the product is being used. Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/).
+To find out how Kedro's features are used, the [Kedro team](https://github.com/quantumblacklabs/kedro) have created an opt-in Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics. The data it gathers will help drive future development of Kedro because we can understand how the product is being used. Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/).
 
-## Privacy notice
+## Why is data being collected?
 
-### What about my personal data?
+Telemetry data is made available to project maintainers of the Kedro Project. The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development
+
+## What about my personal data?
 
 The Kedro Project’s telemetry has been reviewed and approved under the [Linux Foundation’s Telemetry Data Collection and Usage Policy](TODO).
 
-### What other information do you collect?
+## What data do you collect?
 
-Besides the hashed host and username, we collect the following project-related information. Again, we rely on your consent to do so:
+We process your hashed hostname and hashed computer username, which both is pseudonymized information that indirectly relates to you personally. Besides the hashed host and username, we collect the following project-related information. Again, we rely on your consent to do so:
 
 |Description|Example Input|What we receive|
 |-|-|-|
@@ -28,7 +30,7 @@ Besides the hashed host and username, we collect the following project-related i
 |Python version|3.8.10 (default, Jun  2 2021, 10:49:15)|3.8.10 (default, Jun  2 2021, 10:49:15)|
 |Operating system used|darwin|darwin|
 
-### How do I consent to the use of Kedro-Telemetry?
+## How do I consent to the use of Kedro-Telemetry?
 
 Kedro-Telemetry is a Python plugin. To install it:
 
@@ -46,7 +48,7 @@ consent: true
 
 >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
-### How do I withdraw consent?
+## How do I withdraw consent?
 
 To withdraw consent, you can change the `consent` variable to `false` in `.telemetry` YAML by editing the file in the following way:
 

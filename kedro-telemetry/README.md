@@ -12,13 +12,7 @@ To find out how Kedro's features are used, the [Kedro team](https://github.com/q
 
 ### What about my personal data?
 
-**McKinsey & Company Inc** (“McKinsey”, “we”) will process a minimal amount of personal data when you use **Kedro** with the Kedro-Telemetry plugin. McKinsey will only process such data under applicable data protection laws.
-
-McKinsey will process your hashed hostname and hashed computer username, which both is pseudonymized information that indirectly relates to you personally. We use this data to better understand how users use **Kedro’s** features, involving a third-party analytics provider. The aim is to enable constant improvement to make **Kedro** as user friendly, effective, and precise as possible for you and other users. Furthermore, we compare your hashed hostname and hashed computer username with our internal list to understand the proportion of McKinsey users vs. open-source users. For EU users, we have implemented additional data protection safeguards, where these processing activities include a data transfer to a third country. **As an open-source user, please note that McKinsey or the third-party analytics provider will not, at any time, have the possibility to identify you personally behind the hashed hostname or hashed username (f. ex. your name, location, etc.). **As a McKinsey user, you, and the engagement you are using **Kedro** for will be identified in internal systems to evaluate McKinsey’s internal use of **Kedro**.
-
-We base our processing activities on **your free consent**, and we will only store your personal data for so long as necessary for our analysis. **You can withdraw your consent at any time.** How to withdraw consent is explained below.
-
-You have furthermore certain data subject rights under applicable laws (incl. right to access, erasure, restriction). However, as an open-source user, please note that answering to these would require us to collect and process additional personal data and identify you personally only for this reason. Depending on your location, you may also have the right to lodge a complaint with the competent supervisory authority. If you have any questions, want to learn more about this Notice or exercise your rights, or if you would like to communicate with our EU Data Protection Officer or the Data Privacy Team, please contact us at: privacy@mckinsey.com.
+The Kedro Project’s telemetry has been reviewed and approved under the [Linux Foundation’s Telemetry Data Collection and Usage Policy](TODO).
 
 ### What other information do you collect?
 

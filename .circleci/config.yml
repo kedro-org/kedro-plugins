@@ -7,7 +7,7 @@ commands:
   # Windows-related commands
   win_setup_conda:
     # Miniconda3 is pre-installed on the machine:
-    # https://circleci.com/docs/2.0/hello-world-windows/
+    # https://circleci.com/docs/2.0/hello-world-windows
     description: Setup conda
     steps:
       - run:
@@ -52,7 +52,6 @@ jobs:
       # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
       image: circleci/classic:201711-01
       docker_layer_caching: true
-    working_directory: ~/kedro-telemetry
     environment:
       CONDA_ENV_PY_VERSION: "3.6"
     steps:
@@ -74,23 +73,26 @@ jobs:
       - run:
           name: Pip install dependencies
           command: |
+            cd kedro-telemetry
             make install-pip-setuptools
             pip install git+https://github.com/kedro-org/kedro
-#            export AIRFLOW_GPL_UNIDECODE=yes
             pip install -r test_requirements.txt
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
       - run:
           name: Run pylint and flake8
           command: |
+            cd kedro-telemetry
             make lint
       - run:
           name: Run tests
           command: |
+            cd kedro-telemetry
             make test
       - run:
           name: Run all end to end tests
           command: |
+            cd kedro-telemetry
             make e2e-tests
 
   build_37_telemetry:
@@ -107,7 +109,7 @@ jobs:
   win_build_36_telemetry:
     executor:
       name: win/default
-    working_directory: ~/kedro-telemetry
+    working_directory: ~/repo
     environment:
       CONDA_ENV_PY_VERSION: "3.6"
     steps: [win_build]

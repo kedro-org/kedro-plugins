@@ -9,7 +9,7 @@ install-pip-setuptools:
 	python -m pip install -U pip setuptools wheel
 
 lint:
-	pre-commit run -a --hook-stage manual
+	cd $(plugin) && pre-commit run -a --hook-stage manual
 
 test:
 	pytest -vv $(plugin)/tests

@@ -110,7 +110,7 @@ commands:
             pytest .\tests
 
 jobs:
-  build_telemetry:
+  unit_tests:
     parameters:
       python_version:
         type: string
@@ -129,11 +129,28 @@ jobs:
       - run:
           name: Run tests
           command: |
-            make plugin=kedro-telemetry test
+            make plugin=<<parameters.plugin>> test
+
+  e2e_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    environment:
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
       - run:
           name: Run all end to end tests
           command: |
-            make e2e-tests
+            make plugin=<<parameters.plugin>> e2e-tests
 
   lint:
     parameters:
@@ -175,11 +192,16 @@ workflows:
   version: 2
   regular:
     jobs:
-      - build_telemetry:
+      - unit_tests:
           matrix:
             parameters:
               python_version: [ "3.6", "3.7", "3.8" ]
               plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]
+      - e2e_tests:
+          matrix:
+            parameters:
+              python_version: [ "3.6", "3.7", "3.8" ]
+              plugin: [ "kedro-docker", "kedro-airflow" ]
       - win_build_telemetry:
           matrix:
             parameters:

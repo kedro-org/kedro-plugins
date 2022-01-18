@@ -90,13 +90,16 @@ commands:
             pytest .\tests
 
 jobs:
-  build_36_telemetry: &DEFAULT
+  build_telemetry:
+    parameters:
+      python_version:
+        type: string
     machine:
       # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
       image: circleci/classic:201711-01
       docker_layer_caching: true
     environment:
-      CONDA_ENV_PY_VERSION: "3.6"
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -127,23 +130,16 @@ jobs:
           command: |
             make lint
 
-  build_37_telemetry:
-    <<: *DEFAULT
-    environment:
-      CONDA_ENV_PY_VERSION: 3.7
-
-  build_38_telemetry:
-    <<: *DEFAULT
-    environment:
-      CONDA_ENV_PY_VERSION: 3.8
-
   # Windows-related jobs
-  win_build_36_telemetry:
+  win_build_telemetry:
+    parameters:
+      python_version:
+        type: string
     executor:
       name: win/default
     working_directory: ~/repo
     environment:
-      CONDA_ENV_PY_VERSION: "3.6"
+      python_version: <<parameters.python_version>>
     steps: [win_build]
 
   win_build_37_telemetry:
@@ -168,12 +164,14 @@ workflows:
   version: 2
   regular:
     jobs:
-      - build_36_telemetry
-      - build_37_telemetry
-      - build_38_telemetry
-      - win_build_36_telemetry
-      - win_build_37_telemetry
-      - win_build_38_telemetry
+      - build_telemetry:
+          matrix:
+            parameters:
+              python_version: [ "3.6", "3.7", "3.8" ]
+      - win_build_telemetry:
+          matrix:
+            parameters:
+              python_version: [ "3.6", "3.7", "3.8" ]
       - lint:
           matrix:
             parameters:

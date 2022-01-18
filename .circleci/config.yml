@@ -26,7 +26,6 @@ commands:
       - run:
           name: Install pip setuptools
           command: |
-            cd kedro-telemetry
             make install-pip-setuptools
       - run:
           name: Install kedro and test requirements
@@ -130,7 +129,7 @@ jobs:
           command: |
             make lint
 
-  # Windows-related jobs
+  # Windows jobs
   win_build_telemetry:
     parameters:
       python_version:
@@ -142,23 +141,6 @@ jobs:
       python_version: <<parameters.python_version>>
     steps: [win_build]
 
-  win_build_37_telemetry:
-    executor:
-      name: win/default
-    working_directory: ~/repo
-    environment:
-      CONDA_ENV_PY_VERSION: "3.7"
-    steps:
-      - win_build
-
-  win_build_38_telemetry:
-    executor:
-      name: win/default
-    working_directory: ~/repo
-    environment:
-      CONDA_ENV_PY_VERSION: "3.8"
-    steps:
-      - win_build
 
 workflows:
   version: 2

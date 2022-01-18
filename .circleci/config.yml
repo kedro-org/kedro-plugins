@@ -25,6 +25,9 @@ commands:
             source $BASH_ENV
 
   setup_requirements:
+    parameters:
+      plugin:
+        type: string
     steps:
       - run:
           name: Install pip setuptools
@@ -33,13 +36,13 @@ commands:
       - run:
           name: Install kedro and test requirements
           command: |
-            cd kedro-telemetry
+            cd <<parameters.plugin>>
             pip install git+https://github.com/kedro-org/kedro
             pip install -r test_requirements.txt
       - run:
           name: Install pre-commit hooks
           command: |
-            cd kedro-telemetry
+            cd <<parameters.plugin>>
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
 
@@ -47,11 +50,14 @@ commands:
     parameters:
       python_version:
         type: string
+      plugin:
+        type: string
     steps:
       - checkout
       - setup_conda:
           python_version: <<parameters.python_version>>
-      - setup_requirements
+      - setup_requirements:
+          plugin: <<parameters.plugin>>
 
   # Windows specific commands
   win_setup_conda:
@@ -108,27 +114,7 @@ jobs:
     parameters:
       python_version:
         type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-      - run:
-          name: Run tests
-          command: |
-            make test
-      - run:
-          name: Run all end to end tests
-          command: |
-            make e2e-tests
-
-  lint:
-    parameters:
-      python_version:
+      plugin:
         type: string
     machine:
       # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
@@ -139,6 +125,32 @@ jobs:
     steps:
       - setup:
           python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run tests
+          command: |
+            make plugin=kedro-telemetry test
+      - run:
+          name: Run all end to end tests
+          command: |
+            make e2e-tests
+
+  lint:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    environment:
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
       - run:
           name: Run pylint and flake8
           command: |
@@ -167,6 +179,7 @@ workflows:
           matrix:
             parameters:
               python_version: [ "3.6", "3.7", "3.8" ]
+              plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]
       - win_build_telemetry:
           matrix:
             parameters:
@@ -175,3 +188,4 @@ workflows:
           matrix:
             parameters:
               python_version: [ "3.6", "3.7", "3.8" ]
+              plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]

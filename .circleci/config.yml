@@ -110,13 +110,16 @@ jobs:
             cd kedro-telemetry
             make e2e-tests
 
-  lint_36:
+  lint:
+    parameters:
+      python_version:
+        type: string
     machine:
       # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
       image: circleci/classic:201711-01
       docker_layer_caching: true
     environment:
-      CONDA_ENV_PY_VERSION: "3.6"
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -171,4 +174,7 @@ workflows:
       - win_build_36_telemetry
       - win_build_37_telemetry
       - win_build_38_telemetry
-      - lint_36
+      - lint:
+          matrix:
+            parameters:
+              python_version: [ "3.6", "3.7", "3.8" ]

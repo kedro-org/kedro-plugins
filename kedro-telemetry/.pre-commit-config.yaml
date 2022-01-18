@@ -68,14 +68,14 @@ repos:
         language: system
         pass_filenames: false
         entry: black kedro-telemetry/kedro_telemetry kedro-telemetry/tests
-#      - id: secret_scan
-#        name: "Secret scan"
-#        language: system
-#        pass_filenames: false
-#        entry: make plugin=kedro-telemetry secret-scan
-#      - id: bandit
-#        name: "Bandit security check"
-#        language: system
-#        types: [file, python]
-#        exclude: ^tests/
-#        entry: bandit -ll
+      - id: secret_scan
+        name: "Secret scan"
+        language: system
+        pass_filenames: false
+        entry: make plugin=kedro-telemetry secret-scan
+      - id: bandit
+        name: "Bandit security check"
+        language: system
+        types: [file, python]
+        exclude: ^tests/
+        entry: bandit -ll

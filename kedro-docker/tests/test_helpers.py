@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from click import ClickException
-
 from kedro_docker.helpers import (
     add_jupyter_args,
     check_docker_image_exists,

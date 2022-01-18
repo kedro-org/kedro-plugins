@@ -5,6 +5,9 @@ orbs:
 
 commands:
   setup_conda:
+    parameters:
+      python_version:
+        type: string
     steps:
       - run:
           name: Create virtual env
@@ -14,11 +17,11 @@ commands:
             # Download and install miniconda
             curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh  > miniconda.sh
             bash miniconda.sh -b -p $HOME/miniconda
-            # Create an anaconda virtualenv for ${CONDA_ENV_PY_VERSION} and make that the default python interpreter
+            # Create an anaconda virtualenv for python_version and make that the default python interpreter
             echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
             echo "conda deactivate; conda activate kedro_plugins" >> $BASH_ENV
             . /home/circleci/miniconda/etc/profile.d/conda.sh
-            conda create --name kedro_plugins python=${CONDA_ENV_PY_VERSION} -y
+            conda create --name kedro_plugins python=<<parameters.python_version>> -y
             source $BASH_ENV
 
   setup_requirements:
@@ -41,9 +44,13 @@ commands:
             pre-commit install --hook-type pre-push
 
   setup:
+    parameters:
+      python_version:
+        type: string
     steps:
       - checkout
-      - setup_conda
+      - setup_conda:
+          python_version: <<parameters.python_version>>
       - setup_requirements
 
   # Windows specific commands
@@ -51,6 +58,9 @@ commands:
     # Miniconda3 is pre-installed on the machine:
     # https://circleci.com/docs/2.0/hello-world-windows
     description: Setup conda
+    parameters:
+      python_version:
+        type: string
     steps:
       - run:
           name: Initialize conda
@@ -58,7 +68,7 @@ commands:
       - run:
           name: Create 'kedro_plugins' conda environment
           command: |
-            conda create --name kedro_plugins python=$env:CONDA_ENV_PY_VERSION -y
+            conda create --name kedro_plugins python=<<parameters.python_version>> -y
 
   win_setup_requirements:
     description: Install Kedro plugins dependencies
@@ -73,9 +83,13 @@ commands:
 
   win_build:
     description: Run build on Windows
+    parameters:
+      python_version:
+        type: string
     steps:
       - checkout
-      - win_setup_conda
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
       - win_setup_requirements
       - run:
           # e2e tests are not currently runnable on CircleCI on Windows as
@@ -100,7 +114,8 @@ jobs:
     environment:
       python_version: <<parameters.python_version>>
     steps:
-      - setup
+      - setup:
+          python_version: <<parameters.python_version>>
       - run:
           name: Run tests
           command: |
@@ -123,7 +138,8 @@ jobs:
     environment:
       python_version: <<parameters.python_version>>
     steps:
-      - setup
+      - setup:
+          python_version: <<parameters.python_version>>
       - run:
           name: Run pylint and flake8
           command: |
@@ -139,7 +155,9 @@ jobs:
     working_directory: ~/repo
     environment:
       python_version: <<parameters.python_version>>
-    steps: [win_build]
+    steps:
+      - win_build:
+          python_version: <<parameters.python_version>>
 
 
 workflows:

@@ -17,11 +17,15 @@ repos:
         exclude: "^kedro_airflow/dag_template.py"
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
+        files: ^kedro-airflow/kedro_airflow/
+        args:
+          - "--max-line-length=88"
+          - "--max-complexity=18"
+          - "--max-complexity=18"
+          - "--select=B,C,E,F,W,T4,B9"
+          - "--ignore=E203,E266,E501,W503"
+        exclude: "^template.py"
 
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v4.3.21
-    hooks:
-      - id: isort
 
   - repo: local
     hooks:
@@ -32,21 +36,21 @@ repos:
         name: "Quick PyLint on kedro_airflow/*"
         language: system
         types: [file, python]
-        files: ^kedro_airflow/
+        files: ^kedro-airflow/kedro_airflow/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
       - id: pylint-quick-features
         name: "Quick PyLint on features/*"
         language: system
         types: [file, python]
-        files: ^features/
+        files: ^kedro-airflow/features/
         entry: pylint --disable=missing-docstring,no-name-in-module
         stages: [commit]
       - id: pylint-quick-tests
         name: "Quick PyLint on tests/*"
         language: system
         types: [file, python]
-        files: ^tests/
+        files: ^kedro-airflow/tests/
         entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
         stages: [commit]
       # The same pylint checks, but running on all files. It's for manual run with `make lint`
@@ -55,32 +59,38 @@ repos:
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro_airflow
+        entry: pylint --disable=unnecessary-pass kedro-airflow/kedro_airflow
       - id: pylint-features
         name: "PyLint on features/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=missing-docstring,no-name-in-module features
+        entry: pylint --disable=missing-docstring,no-name-in-module kedro-airflow/features
       - id: pylint-tests
         name: "PyLint on tests/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-airflow/tests
+      - id: isort
+        name: "Sort imports"
+        language: system
+        types: [ file, python ]
+        files: ^kedro-airflow/
+        entry: isort
       - id: black
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro_airflow features tests
-      - id: secret_scan
-        name: "Secret scan"
-        language: system
-        pass_filenames: false
-        entry: make secret-scan
-      - id: bandit
-        name: "Bandit security check"
-        language: system
-        types: [file, python]
-        exclude: ^tests/|^features/
-        entry: bandit -ll
+        entry: black kedro-airflow/kedro_airflow kedro-airflow/features kedro-airflow/tests
+#      - id: secret_scan
+#        name: "Secret scan"
+#        language: system
+#        pass_filenames: false
+#        entry: make secret-scan
+#      - id: bandit
+#        name: "Bandit security check"
+#        language: system
+#        types: [file, python]
+#        exclude: ^tests/|^features/
+#        entry: bandit -ll

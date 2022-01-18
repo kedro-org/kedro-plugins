@@ -16,6 +16,14 @@ repos:
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
+        files: ^kedro-telemetry/kedro_telemetry/
+        args:
+          - "--max-line-length=88"
+          - "--max-complexity=18"
+          - "--max-complexity=18"
+          - "--select=B,C,E,F,W,T4,B9"
+          - "--ignore=E126,E203,E231,E266,E501,W503"
+
 
   - repo: local
     hooks:
@@ -33,7 +41,7 @@ repos:
         name: "Quick PyLint on tests/*"
         language: system
         types: [file, python]
-        files: ^tests/
+        files: ^kedro_telemetry/tests/
         entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
         stages: [commit]
       # The same pylint checks, but running on all files. It's for manual run with `make lint`
@@ -42,31 +50,32 @@ repos:
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro_telemetry
+        entry: pylint --disable=unnecessary-pass kedro-telemetry/kedro_telemetry
       - id: pylint-tests
         name: "PyLint on tests/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-telemetry/tests
       - id: isort
         name: "Sort imports"
         language: system
         types: [ file, python ]
+        files: ^kedro-telemetry/
         entry: isort
       - id: black
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro_telemetry tests
-      - id: secret_scan
-        name: "Secret scan"
-        language: system
-        pass_filenames: false
-        entry: make secret-scan
-      - id: bandit
-        name: "Bandit security check"
-        language: system
-        types: [file, python]
-        exclude: ^tests/
-        entry: bandit -ll
+        entry: black kedro-telemetry/kedro_telemetry kedro-telemetry/tests
+#      - id: secret_scan
+#        name: "Secret scan"
+#        language: system
+#        pass_filenames: false
+#        entry: make plugin=kedro-telemetry secret-scan
+#      - id: bandit
+#        name: "Bandit security check"
+#        language: system
+#        types: [file, python]
+#        exclude: ^tests/
+#        entry: bandit -ll

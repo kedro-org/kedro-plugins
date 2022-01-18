@@ -219,5 +219,5 @@ workflows:
       - lint:
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
+              python_version: [ "3.8" ]
               plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]

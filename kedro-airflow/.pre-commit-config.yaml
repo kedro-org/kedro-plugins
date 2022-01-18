@@ -83,14 +83,14 @@ repos:
         language: system
         pass_filenames: false
         entry: black kedro-airflow/kedro_airflow kedro-airflow/features kedro-airflow/tests
-#      - id: secret_scan
-#        name: "Secret scan"
-#        language: system
-#        pass_filenames: false
-#        entry: make secret-scan
-#      - id: bandit
-#        name: "Bandit security check"
-#        language: system
-#        types: [file, python]
-#        exclude: ^tests/|^features/
-#        entry: bandit -ll
+      - id: secret_scan
+        name: "Secret scan"
+        language: system
+        pass_filenames: false
+        entry: make secret-scan
+      - id: bandit
+        name: "Bandit security check"
+        language: system
+        types: [file, python]
+        exclude: ^tests/|^features/
+        entry: bandit -ll

@@ -80,14 +80,14 @@ repos:
         language: system
         pass_filenames: false
         entry: black kedro-docker/kedro_docker kedro-docker/features kedro-docker/tests
-#      - id: secret_scan
-#        name: "Secret scan"
-#        language: system
-#        pass_filenames: false
-#        entry: make plugin=kedro-docker secret-scan
-#      - id: bandit
-#        name: "Bandit security check"
-#        language: system
-#        types: [file, python]
-#        exclude: ^kedro-docker/tests/|^kedro-docker/features/
-#        entry: bandit -ll
+      - id: secret_scan
+        name: "Secret scan"
+        language: system
+        pass_filenames: false
+        entry: make plugin=kedro-docker secret-scan
+      - id: bandit
+        name: "Bandit security check"
+        language: system
+        types: [file, python]
+        exclude: ^kedro-docker/tests/|^kedro-docker/features/
+        entry: bandit -ll

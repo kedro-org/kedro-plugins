@@ -12,6 +12,9 @@ parameters:
   run-build-kedro-docker:
     type: boolean
     default: false
+  run-build-kedro-airflow:
+    type: boolean
+    default: false
 
 
 commands:
@@ -208,12 +211,9 @@ jobs:
           plugin: <<parameters.plugin>>
 
 
-# here we specify our workflows, most of which are conditionally
-# executed based upon pipeline parameter values. Each workflow calls a
-# specific job defined above, in the jobs section.
 workflows:
-  # when pipeline parameter, run-build-service-1-job is true, the
-  # build-service-1 job is triggered.
+  # when pipeline parameter, run-build-kedro-telemetry is true, the
+  # kedro-telemetry job is triggered.
   kedro-telemetry:
     when: << pipeline.parameters.run-build-kedro-telemetry >>
     jobs:
@@ -232,8 +232,8 @@ workflows:
             parameters:
               python_version: [ "3.8" ]
               plugin: [ "kedro-telemetry" ]
-  # when pipeline parameter, run-build-service-2-job is true, the
-  # build-service-2 job is triggered.
+  # when pipeline parameter, run-build-kedro-docker is true, the
+  # kedro-docker job is triggered.
   kedro-docker:
     when: << pipeline.parameters.run-build-kedro-docker >>
     jobs:
@@ -257,3 +257,28 @@ workflows:
             parameters:
               python_version: [ "3.8" ]
               plugin: [  "kedro-docker" ]
+    # when pipeline parameter, run-build-kedro-airflow is true, the
+    # kedro-airflow job is triggered.
+    kedro-airflow:
+      when: << pipeline.parameters.run-build-kedro-airflow >>
+      jobs:
+        - unit_tests:
+            matrix:
+              parameters:
+                python_version: [ "3.6", "3.7", "3.8" ]
+                plugin: [ "kedro-airflow" ]
+        - e2e_tests:
+            matrix:
+              parameters:
+                python_version: [ "3.6", "3.7", "3.8" ]
+                plugin: [ "kedro-airflow" ]
+        - win_build:
+            matrix:
+              parameters:
+                python_version: [ "3.6", "3.7", "3.8" ]
+                plugin: [ "kedro-airflow" ]
+        - lint:
+            matrix:
+              parameters:
+                python_version: [ "3.8" ]
+                plugin: [ "kedro-airflow" ]

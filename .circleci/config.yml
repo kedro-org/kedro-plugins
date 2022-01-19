@@ -20,6 +20,7 @@ workflows:
           mapping: |
             kedro-telemetry/.* run-build-kedro-telemetry true
             kedro-docker/.* run-build-kedro-docker true
+            kedro-airflow/.* run-build-kedro-airflow true
           base-revision: setup-cci
           # this is the path of the configuration we should trigger once
           # path filtering and pipeline parameter value updates are

@@ -1,223 +1,28 @@
 version: 2.1
 
+setup: true
+
+# the path-filtering orb is required to continue a pipeline based on
+# the path of an updated fileset
 orbs:
-  win: circleci/windows@2.4.0
-
-commands:
-  setup_conda:
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Create virtual env
-          command: |
-            # Get rid of pyenv stuff
-            sudo rm -rf .pyenv/ /opt/circleci/.pyenv/
-            # Download and install miniconda
-            curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh  > miniconda.sh
-            bash miniconda.sh -b -p $HOME/miniconda
-            # Create an anaconda virtualenv for python_version and make that the default python interpreter
-            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-            echo "conda deactivate; conda activate kedro_plugins" >> $BASH_ENV
-            . /home/circleci/miniconda/etc/profile.d/conda.sh
-            conda create --name kedro_plugins python=<<parameters.python_version>> -y
-            source $BASH_ENV
-
-  setup_requirements:
-    parameters:
-      plugin:
-        type: string
-    steps:
-      - run:
-          name: Install pip setuptools
-          command: |
-            make install-pip-setuptools
-      - run:
-          name: Install kedro and test requirements
-          command: |
-            cd <<parameters.plugin>>
-            pip install git+https://github.com/kedro-org/kedro
-            pip install -r test_requirements.txt
-      - run:
-          name: Install pre-commit hooks
-          command: |
-            cd <<parameters.plugin>>
-            pre-commit install --install-hooks
-            pre-commit install --hook-type pre-push
-
-  setup:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    steps:
-      - checkout
-      - setup_conda:
-          python_version: <<parameters.python_version>>
-      - setup_requirements:
-          plugin: <<parameters.plugin>>
-
-  # Windows specific commands
-  win_setup_conda:
-    # Miniconda3 is pre-installed on the machine:
-    # https://circleci.com/docs/2.0/hello-world-windows
-    description: Setup conda
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Initialize conda
-          command: conda init powershell
-      - run:
-          name: Create 'kedro_plugins' conda environment
-          command: |
-            conda create --name kedro_plugins python=<<parameters.python_version>> -y
-
-  win_setup_requirements:
-    description: Install Kedro plugins dependencies
-    parameters:
-      plugin:
-        type: string
-    steps:
-      - run:
-          name: Install Kedro plugins dependencies
-          command: |
-            conda activate kedro_plugins
-            cd <<parameters.plugin>>
-            python -m pip install -U pip setuptools wheel
-            pip install git+https://github.com/kedro-org/kedro@main
-            pip install -r test_requirements.txt -U
-
-  win_tests:
-    description: Run build on Windows
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    steps:
-      - checkout
-      - win_setup_conda:
-          python_version: <<parameters.python_version>>
-      - win_setup_requirements:
-          plugin: <<parameters.plugin>>
-      - run:
-          # e2e tests are not currently runnable on CircleCI on Windows as
-          # those require the ability to run Linux containers:
-          # "The Windows executor currently only supports Windows containers.
-          # Running Linux containers on Windows is not possible for now"
-          # (from https://circleci.com/docs/2.0/hello-world-windows/)
-          name: Run unit tests
-          command: |
-            conda activate kedro_plugins
-            pytest <<parameters.plugin>>\tests
-
-jobs:
-  unit_tests:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run tests
-          command: |
-            make plugin=<<parameters.plugin>> test
-
-  e2e_tests:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run all end to end tests
-          command: |
-            make plugin=<<parameters.plugin>> e2e-tests
-
-  lint:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run pylint and flake8
-          command: |
-            make plugin=<<parameters.plugin>> lint
-
-  # Windows jobs
-  win_build:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    executor:
-      name: win/default
-    working_directory: ~/repo
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - win_tests:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-
+  path-filtering: circleci/path-filtering@0.1.1
 
 workflows:
-  version: 2
-  regular:
+  always-run:
     jobs:
-      - unit_tests:
-          matrix:
-            parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]
-      - e2e_tests:
-          matrix:
-            parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-docker", "kedro-airflow" ]
-      - win_build:
-          matrix:
-            parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]
-      - lint:
-          matrix:
-            parameters:
-              python_version: [ "3.8" ]
-              plugin: [ "kedro-telemetry", "kedro-docker", "kedro-airflow" ]
+      # the path-filtering/filter job determines which pipeline
+      # parameters to update.
+      - path-filtering/filter:
+          name: check-updated-files
+          # 3-column, whitespace-delimited mapping. One mapping per
+          # line:
+          # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
+          mapping: |
+            kedro-telemetry/.* run-build-kedro-telemetry true
+            kedro-docker/.* run-build-kedro-docker true
+          base-revision: setup-cci
+          # this is the path of the configuration we should trigger once
+          # path filtering and pipeline parameter value updates are
+          # complete. In this case, we are using the parent dynamic
+          # configuration itself.
+          config-path: .circleci/continue_config.yml

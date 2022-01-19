@@ -257,8 +257,8 @@ workflows:
             parameters:
               python_version: [ "3.8" ]
               plugin: [  "kedro-docker" ]
-    # when pipeline parameter, run-build-kedro-airflow is true, the
-    # kedro-airflow job is triggered.
+  # when pipeline parameter, run-build-kedro-airflow is true, the
+  # kedro-airflow job is triggered.
   kedro-airflow:
     when: << pipeline.parameters.run-build-kedro-airflow >>
     jobs:

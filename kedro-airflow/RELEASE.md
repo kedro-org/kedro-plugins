@@ -3,6 +3,8 @@
 ## Bugfix
 * Drop unnecessary dependency on apache-airflow
 
+## Thanks for supporting contributions
+
 # Release 0.4.0
 
 ## Major features and improvements

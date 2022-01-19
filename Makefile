@@ -18,7 +18,7 @@ e2e-tests:
 	cd $(plugin) && behave
 
 secret-scan:
-	cd $(plugin) && trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
+	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
 
 clean:
 	rm -rf build dist pip-wheel-metadata .pytest_cache

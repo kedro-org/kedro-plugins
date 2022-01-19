@@ -1,5 +1,5 @@
 # Kedro-Docker
-[![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro-docker/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro-docker/tree/master)
+[![CircleCI](https://circleci.com/gh/kedro-org/kedro-plugins/tree/main.svg?style=shield)](https://circleci.com/gh/kedro-org/kedro-plugins/tree/main)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro-docker/)
@@ -11,7 +11,7 @@ Docker is a tool that makes it easier to create, deploy and run applications. It
 Configuring a Docker container environment may become complex and tedious. Kedro-Docker significantly simplifies this process and reduces it to 2 steps:
 
 1. Build a Docker image
-2. Run your [Kedro](https://github.com/quantumblacklabs/kedro) project in a Docker environment
+2. Run your [Kedro](https://github.com/kedro-org/kedro/) project in a Docker environment
 
 > *Note:* Kedro-Docker also makes it easy for you to run IPython and Jupyter Notebooks in a Docker container.
 
@@ -163,9 +163,9 @@ Options:
 * `--docker-args` - optional string containing extra options for `docker run` command
 * `-h, --help` - show command help and exit.
 
-## Running Kedro-Docker with [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz/)
+## Running Kedro-Docker with [Kedro-Viz](https://github.com/kedro-org/kedro-viz/)
 
-These instructions allow you to access [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz/), Kedro's data pipeline visualisation tool, via Docker. In your terminal, run the following commands:
+These instructions allow you to access [Kedro-Viz](https://github.com/kedro-org/kedro-viz/), Kedro's data pipeline visualisation tool, via Docker. In your terminal, run the following commands:
 
 ```
 pip download -d data --no-deps kedro-viz
@@ -183,8 +183,8 @@ kedro docker cmd --docker-args="-p=4141:4141" kedro viz --host=0.0.0.0
 
 ## Can I contribute?
 
-Yes! Want to help build Kedro-Docker? Check out our guide to [contributing](https://github.com/quantumblacklabs/kedro-docker/blob/master/CONTRIBUTING.md).
+Yes! Want to help build Kedro-Docker? Check out our guide to [contributing](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-docker/CONTRIBUTING.md).
 
 ## What licence do you use?
 
-Kedro-Docker is licensed under the [Apache 2.0](https://github.com/quantumblacklabs/kedro-docker/blob/master/LICENSE.md) License.
+Kedro-Docker is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.

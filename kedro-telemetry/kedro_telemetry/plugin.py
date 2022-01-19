@@ -178,7 +178,7 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             "We cannot see nor store information contained in "
             "a Kedro project. \nYou can find out more by reading our "
             "privacy notice: \n"
-            "https://github.com/quantumblacklabs/kedro-telemetry#privacy-notice \n"
+            "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry#privacy-notice \n"
             "Do you opt into usage analytics? "
         )
         if click.confirm(confirm_msg):

@@ -38,7 +38,7 @@ setup(
     python_requires=">=3.6, <3.9",
     install_requires=requires,
     tests_require=test_requires,
-    author="kedro",
+    author="Kedro",
     packages=["kedro_docker"],
     package_data={
         "kedro_docker": [

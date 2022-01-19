@@ -77,5 +77,5 @@ repos:
         name: "Bandit security check"
         language: system
         types: [file, python]
-        exclude: ^tests/
+        exclude: ^kedro-telemetry/tests/|^kedro-airflow/|^kedro-docker/
         entry: bandit -ll

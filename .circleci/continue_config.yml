@@ -51,7 +51,7 @@ commands:
           name: Install kedro and test requirements
           command: |
             cd <<parameters.plugin>>
-            pip install git+https://github.com/kedro-org/kedro
+            pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt
       - run:
           name: Install pre-commit hooks
@@ -77,7 +77,6 @@ commands:
   win_setup_conda:
     # Miniconda3 is pre-installed on the machine:
     # https://circleci.com/docs/2.0/hello-world-windows
-    description: Setup conda
     parameters:
       python_version:
         type: string
@@ -147,7 +146,7 @@ jobs:
           python_version: <<parameters.python_version>>
           plugin: <<parameters.plugin>>
       - run:
-          name: Run tests
+          name: Run unit tests
           command: |
             make plugin=<<parameters.plugin>> test
 
@@ -168,7 +167,7 @@ jobs:
           python_version: <<parameters.python_version>>
           plugin: <<parameters.plugin>>
       - run:
-          name: Run all end to end tests
+          name: Run e2e tests
           command: |
             make plugin=<<parameters.plugin>> e2e-tests
 
@@ -215,13 +214,13 @@ workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
   kedro-telemetry:
-    when: << pipeline.parameters.run-build-kedro-telemetry >>
+    when: <<pipeline.parameters.run-build-kedro-telemetry>>
     jobs:
       - unit_tests:
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-telemetry" ]
+              python_version: ["3.6", "3.7", "3.8"]
+              plugin: ["kedro-telemetry"]
       - win_build:
           matrix:
             parameters:

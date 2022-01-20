@@ -45,8 +45,7 @@ commands:
     steps:
       - run:
           name: Install pip setuptools
-          command: |
-            make install-pip-setuptools
+          command: make install-pip-setuptools
       - run:
           name: Install kedro and test requirements
           command: |
@@ -86,11 +85,9 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_plugins' conda environment
-          command: |
-            conda create --name kedro_plugins python=<<parameters.python_version>> -y
+          command: conda create --name kedro_plugins python=<<parameters.python_version>> -y
 
   win_setup_requirements:
-    description: Install Kedro plugins dependencies
     parameters:
       plugin:
         type: string
@@ -100,17 +97,71 @@ commands:
           command: |
             conda activate kedro_plugins
             cd <<parameters.plugin>>
-            python -m pip install -U pip setuptools wheel
+            make install-pip-setuptools
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt -U
 
-  win_tests:
-    description: Run build on Windows
+jobs:
+  unit_tests:
     parameters:
       python_version:
         type: string
       plugin:
         type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run unit tests
+          command: make plugin=<<parameters.plugin>> test
+
+  e2e_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run e2e tests
+          command: make plugin=<<parameters.plugin>> e2e-tests
+
+  lint:
+    parameters:
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: "3.8"
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run pylint and flake8
+          command: make plugin=<<parameters.plugin>> lint
+
+  win_unit_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    executor:
+      name: win/default
     steps:
       - checkout
       - win_setup_conda:
@@ -128,88 +179,6 @@ commands:
             conda activate kedro_plugins
             pytest <<parameters.plugin>>\tests
 
-jobs:
-  unit_tests:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run unit tests
-          command: |
-            make plugin=<<parameters.plugin>> test
-
-  e2e_tests:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run e2e tests
-          command: |
-            make plugin=<<parameters.plugin>> e2e-tests
-
-  lint:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-      - run:
-          name: Run pylint and flake8
-          command: |
-            make plugin=<<parameters.plugin>> lint
-
-  # Windows jobs
-  win_build:
-    parameters:
-      python_version:
-        type: string
-      plugin:
-        type: string
-    executor:
-      name: win/default
-    working_directory: ~/repo
-    environment:
-      python_version: <<parameters.python_version>>
-    steps:
-      - win_tests:
-          python_version: <<parameters.python_version>>
-          plugin: <<parameters.plugin>>
-
-
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
@@ -217,67 +186,58 @@ workflows:
     when: <<pipeline.parameters.run-build-kedro-telemetry>>
     jobs:
       - unit_tests:
+          plugin: "kedro-telemetry"
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-              plugin: ["kedro-telemetry"]
-      - win_build:
+      - win_unit_tests:
+          plugin: "kedro-telemetry"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-telemetry" ]
+              python_version: ["3.6", "3.7", "3.8"]
       - lint:
-          matrix:
-            parameters:
-              python_version: [ "3.8" ]
-              plugin: [ "kedro-telemetry" ]
+          plugin: "kedro-telemetry"
   # when pipeline parameter, run-build-kedro-docker is true, the
   # kedro-docker job is triggered.
   kedro-docker:
-    when: << pipeline.parameters.run-build-kedro-docker >>
+    when: <<pipeline.parameters.run-build-kedro-docker>>
     jobs:
       - unit_tests:
+          plugin: "kedro-docker"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-docker" ]
+              python_version: ["3.6", "3.7", "3.8"]
       - e2e_tests:
+          plugin: "kedro-docker"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-docker" ]
-      - win_build:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          plugin: "kedro-docker"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-docker" ]
+              python_version: ["3.6", "3.7", "3.8"]
       - lint:
-          matrix:
-            parameters:
-              python_version: [ "3.8" ]
-              plugin: [  "kedro-docker" ]
+          plugin: "kedro-docker"
   # when pipeline parameter, run-build-kedro-airflow is true, the
   # kedro-airflow job is triggered.
   kedro-airflow:
-    when: << pipeline.parameters.run-build-kedro-airflow >>
+    when: <<pipeline.parameters.run-build-kedro-airflow>>
     jobs:
       - unit_tests:
+          plugin: "kedro-airflow"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-airflow" ]
+              python_version: ["3.6", "3.7", "3.8"]
       - e2e_tests:
+          plugin: "kedro-airflow"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-airflow" ]
-      - win_build:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          plugin: "kedro-airflow"
           matrix:
             parameters:
-              python_version: [ "3.6", "3.7", "3.8" ]
-              plugin: [ "kedro-airflow" ]
+              python_version: ["3.6", "3.7", "3.8"]
       - lint:
-          matrix:
-            parameters:
-              python_version: [ "3.8" ]
-              plugin: [ "kedro-airflow" ]
+          plugin: "kedro-airflow"

@@ -58,6 +58,9 @@ commands:
             cd <<parameters.plugin>>
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
+      - run:
+          name: Pip freeze
+          command: pip freeze
 
   setup:
     parameters:
@@ -100,6 +103,9 @@ commands:
             make install-pip-setuptools
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt -U
+      - run:
+          name: Pip freeze
+          command: conda activate kedro_plugins; pip freeze
 
 jobs:
   unit_tests:

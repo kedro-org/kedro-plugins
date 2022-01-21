@@ -2,11 +2,10 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro-telemetry/)
 [![PyPI version](https://badge.fury.io/py/kedro-telemetry.svg)](https://pypi.org/project/kedro-telemetry/)
-[![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro-telemetry/tree/main.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro-telemetry/tree/main)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/quantumblacklabs/kedro) have created the Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised usage analytics. The data it gathers will help drive future development of Kedro because we can understand how the product is being used. Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/).
+To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created the Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised usage analytics. The data it gathers will help drive future development of Kedro because we can understand how the product is being used. Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/).
 
 ## Privacy notice
 
@@ -76,4 +75,4 @@ Kedro-Telemetry is installed, but you have opted out of sharing usage analytics 
 
 ## What licence do you use?
 
-Kedro-Telemetry is licensed under the [Apache 2.0](https://github.com/quantumblacklabs/kedro-telemetry/blob/develop/LICENSE.md) License.
+Kedro-Telemetry is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.

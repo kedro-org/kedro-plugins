@@ -1,5 +1,4 @@
 # Kedro-Docker
-[![CircleCI](https://circleci.com/gh/kedro-org/kedro-plugins/tree/main.svg?style=shield)](https://circleci.com/gh/kedro-org/kedro-plugins/tree/main)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro-docker/)

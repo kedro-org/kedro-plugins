@@ -100,7 +100,7 @@ commands:
           command: |
             conda activate kedro_plugins
             cd <<parameters.plugin>>
-            make install-pip-setuptools
+            python -m pip install -U pip setuptools wheel
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt -U
       - run:

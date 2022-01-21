@@ -12,7 +12,7 @@ lint:
 	cd $(plugin) && pre-commit run -a --hook-stage manual
 
 test:
-	pytest -vv $(plugin)/tests
+	cd $(plugin) && pytest -vv tests
 
 e2e-tests:
 	cd $(plugin) && behave

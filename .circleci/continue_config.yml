@@ -24,18 +24,23 @@ commands:
         type: string
     steps:
       - run:
-          name: Create virtual env
+          name: Cleanup pyenv
+          command: sudo rm -rf .pyenv/ /opt/circleci/.pyenv/
+      - run:
+          name: Download and install miniconda
           command: |
-            # Get rid of pyenv stuff
-            sudo rm -rf .pyenv/ /opt/circleci/.pyenv/
-            # Download and install miniconda
             curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh  > miniconda.sh
             bash miniconda.sh -b -p $HOME/miniconda
-            # Create an anaconda virtualenv for python_version and make that the default python interpreter
-            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-            echo "conda deactivate; conda activate kedro_plugins" >> $BASH_ENV
+      - run:
+          name: Create conda environment with correct python version
+          command: |
             . /home/circleci/miniconda/etc/profile.d/conda.sh
             conda create --name kedro_plugins python=<<parameters.python_version>> -y
+      - run:
+          name: Setup bash env to run conda activation at each step
+          command: |
+            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+            echo "conda deactivate; conda activate kedro_plugins" >> $BASH_ENV
             source $BASH_ENV
 
   setup_requirements:

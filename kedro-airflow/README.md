@@ -1,5 +1,4 @@
 # Kedro-Airflow
-[![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro-airflow/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro-airflow/tree/master)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro-airflow/)
@@ -47,4 +46,4 @@ Please visit the guide to [deploy Kedro as a Python package](https://kedro.readt
 
 #### What if my DAG file is in a different directory to my project folder?
 
-By default the generated DAG file is configured to live in the same directory as your project as per this [template](https://github.com/quantumblacklabs/kedro-airflow/blob/master/kedro_airflow/airflow_dag_template.j2#L44). If your DAG file is located in a different directory to your project, you will need to tweak this  manually after running the `kedro airflow create` command.
+By default the generated DAG file is configured to live in the same directory as your project as per this [template](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/kedro_airflow/airflow_dag_template.j2#L44). If your DAG file is located in a different directory to your project, you will need to tweak this  manually after running the `kedro airflow create` command.

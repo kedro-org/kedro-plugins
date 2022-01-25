@@ -127,7 +127,7 @@ def docker_init(spark):
     if KEDRO_VERSION.match(">=0.17.0"):
         verbose = KedroCliError.VERBOSE_ERROR
     else:
-        from kedro.framework.cli.cli import (  # pylint: disable=import-outside-toplevel, no-name-in-module
+        from kedro.framework.cli.cli import (  # noqa # pylint:disable=import-outside-toplevel, no-name-in-module
             _VERBOSE as verbose,
         )
 

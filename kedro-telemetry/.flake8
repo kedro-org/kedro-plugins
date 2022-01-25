@@ -1,7 +1,0 @@
-# Copied from Black
-
-[flake8]
-ignore = E126, E203, E231, E266, E501, W503
-max-line-length = 80
-max-complexity = 18
-select = B,C,E,F,W,T4,B9

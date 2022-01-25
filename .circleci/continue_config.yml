@@ -1,0 +1,254 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.4.0
+
+# the default pipeline parameters, which will be updated according to
+# the results of the path-filtering orb
+parameters:
+  run-build-kedro-telemetry:
+    type: boolean
+    default: false
+  run-build-kedro-docker:
+    type: boolean
+    default: false
+  run-build-kedro-airflow:
+    type: boolean
+    default: false
+
+
+commands:
+  setup_conda:
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - run:
+          name: Cleanup pyenv
+          command: sudo rm -rf .pyenv/ /opt/circleci/.pyenv/
+      - run:
+          name: Download and install miniconda
+          command: |
+            curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh  > miniconda.sh
+            bash miniconda.sh -b -p $HOME/miniconda
+      - run:
+          name: Create conda environment with correct python version
+          command: |
+            . /home/circleci/miniconda/etc/profile.d/conda.sh
+            conda create --name kedro_plugins python=<<parameters.python_version>> -y
+      - run:
+          name: Setup bash env to run conda activation at each step
+          command: |
+            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+            echo "conda deactivate; conda activate kedro_plugins" >> $BASH_ENV
+            source $BASH_ENV
+
+  setup_requirements:
+    parameters:
+      plugin:
+        type: string
+    steps:
+      - run:
+          name: Install pip setuptools
+          command: make install-pip-setuptools
+      - run:
+          name: Install kedro and test requirements
+          command: |
+            cd <<parameters.plugin>>
+            pip install git+https://github.com/kedro-org/kedro@main
+            pip install -r test_requirements.txt
+      - run:
+          name: Install pre-commit hooks
+          command: |
+            cd <<parameters.plugin>>
+            pre-commit install --install-hooks
+            pre-commit install --hook-type pre-push
+      - run:
+          name: Pip freeze
+          command: pip freeze
+
+  setup:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    steps:
+      - checkout
+      - setup_conda:
+          python_version: <<parameters.python_version>>
+      - setup_requirements:
+          plugin: <<parameters.plugin>>
+
+  # Windows specific commands
+  win_setup_conda:
+    # Miniconda3 is pre-installed on the machine:
+    # https://circleci.com/docs/2.0/hello-world-windows
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - run:
+          name: Initialize conda
+          command: conda init powershell
+      - run:
+          name: Create 'kedro_plugins' conda environment
+          command: conda create --name kedro_plugins python=<<parameters.python_version>> -y
+
+  win_setup_requirements:
+    parameters:
+      plugin:
+        type: string
+    steps:
+      - run:
+          name: Install Kedro plugins dependencies
+          command: |
+            conda activate kedro_plugins
+            cd <<parameters.plugin>>
+            python -m pip install -U pip setuptools wheel
+            pip install git+https://github.com/kedro-org/kedro@main
+            pip install -r test_requirements.txt -U
+      - run:
+          name: Pip freeze
+          command: conda activate kedro_plugins; pip freeze
+
+jobs:
+  unit_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run unit tests
+          command: make plugin=<<parameters.plugin>> test
+
+  e2e_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: <<parameters.python_version>>
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run e2e tests
+          command: make plugin=<<parameters.plugin>> e2e-tests
+
+  lint:
+    parameters:
+      plugin:
+        type: string
+    machine:
+      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
+      image: circleci/classic:201711-01
+      docker_layer_caching: true
+    steps:
+      - setup:
+          python_version: "3.8"
+          plugin: <<parameters.plugin>>
+      - run:
+          name: Run pylint and flake8
+          command: make plugin=<<parameters.plugin>> lint
+
+  win_unit_tests:
+    parameters:
+      python_version:
+        type: string
+      plugin:
+        type: string
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - win_setup_requirements:
+          plugin: <<parameters.plugin>>
+      - run:
+          # e2e tests are not currently runnable on CircleCI on Windows as
+          # those require the ability to run Linux containers:
+          # "The Windows executor currently only supports Windows containers.
+          # Running Linux containers on Windows is not possible for now"
+          # (from https://circleci.com/docs/2.0/hello-world-windows/)
+          name: Run unit tests
+          command: |
+            conda activate kedro_plugins
+            pytest <<parameters.plugin>>\tests
+
+workflows:
+  # when pipeline parameter, run-build-kedro-telemetry is true, the
+  # kedro-telemetry job is triggered.
+  kedro-telemetry:
+    when: <<pipeline.parameters.run-build-kedro-telemetry>>
+    jobs:
+      - unit_tests:
+          plugin: "kedro-telemetry"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          plugin: "kedro-telemetry"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          plugin: "kedro-telemetry"
+  # when pipeline parameter, run-build-kedro-docker is true, the
+  # kedro-docker job is triggered.
+  kedro-docker:
+    when: <<pipeline.parameters.run-build-kedro-docker>>
+    jobs:
+      - unit_tests:
+          plugin: "kedro-docker"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - e2e_tests:
+          plugin: "kedro-docker"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          plugin: "kedro-docker"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          plugin: "kedro-docker"
+  # when pipeline parameter, run-build-kedro-airflow is true, the
+  # kedro-airflow job is triggered.
+  kedro-airflow:
+    when: <<pipeline.parameters.run-build-kedro-airflow>>
+    jobs:
+      - unit_tests:
+          plugin: "kedro-airflow"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - e2e_tests:
+          plugin: "kedro-airflow"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          plugin: "kedro-airflow"
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          plugin: "kedro-airflow"

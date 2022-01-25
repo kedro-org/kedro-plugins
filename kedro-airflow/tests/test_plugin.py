@@ -2,7 +2,6 @@ from pathlib import Path
 
 from kedro.framework.project import pipelines
 from kedro.pipeline import Pipeline, node
-
 from kedro_airflow.plugin import commands
 
 

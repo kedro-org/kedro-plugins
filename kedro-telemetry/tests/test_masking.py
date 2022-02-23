@@ -29,6 +29,7 @@ DEFAULT_KEDRO_COMMANDS = [
     "ipython",
     "jupyter",
     "lint",
+    "micropkg",
     "new",
     "package",
     "pipeline",

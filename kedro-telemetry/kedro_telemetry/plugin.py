@@ -146,7 +146,9 @@ def _send_heap_event(
     }
 
     try:
-        resp = requests.post(url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data))
+        resp = requests.post(
+            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data)
+        )
         if resp.status_code != 200:
             logger.warning(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
@@ -155,9 +157,9 @@ def _send_heap_event(
             )
     except requests.exceptions.RequestException as e:
         logger.warning(
-            "Failed to send data to Heap. Exception of type '%s' raised.", type(e)
+            "Failed to send data to Heap. Exception of type '%s' was raised.",
+            type(e).__name__,
         )
-        
 
 
 def _check_for_telemetry_consent(project_path: Path) -> bool:

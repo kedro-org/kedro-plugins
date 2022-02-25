@@ -136,6 +136,19 @@ class TestKedroTelemetryCLIHooks:
 
         mocked_heap_call.assert_not_called()
 
+     def test_before_command_rin_connection_error(self, mocker, fake_metadata):
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
+        )
+        telemetry_hook = KedroTelemetryCLIHooks()
+        command_args = ["--version"]
+        mocker.patch("requests.post", side_effect=requests.exceptions.ConnectionError)
+        
+        telemetry_hook.before_command_run(fake_metadata, command_args)
+
+        #assert exception
+    
+
     def test_before_command_run_anonymous(self, mocker, fake_metadata):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True

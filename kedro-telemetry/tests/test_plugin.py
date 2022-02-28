@@ -2,7 +2,6 @@ import socket
 import sys
 from pathlib import Path
 
-import pytest
 import requests
 import yaml
 from kedro import __version__ as kedro_version

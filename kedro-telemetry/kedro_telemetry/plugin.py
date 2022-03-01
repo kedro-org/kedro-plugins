@@ -145,12 +145,20 @@ def _send_heap_event(
         "properties": properties or {},
     }
 
-    resp = requests.post(url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data))
-    if resp.status_code != 200:
+    try:
+        resp = requests.post(
+            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data)
+        )
+        if resp.status_code != 200:
+            logger.warning(
+                "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
+                resp.status_code,
+                resp.reason,
+            )
+    except requests.exceptions.RequestException as exc:
         logger.warning(
-            "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
-            resp.status_code,
-            resp.reason,
+            "Failed to send data to Heap. Exception of type '%s' was raised.",
+            type(exc).__name__,
         )
 
 

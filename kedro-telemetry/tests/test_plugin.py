@@ -2,6 +2,7 @@ import socket
 import sys
 from pathlib import Path
 
+import requests
 import yaml
 from kedro import __version__ as kedro_version
 from kedro.framework.startup import ProjectMetadata
@@ -135,6 +136,21 @@ class TestKedroTelemetryCLIHooks:
         telemetry_hook.before_command_run(fake_metadata, command_args)
 
         mocked_heap_call.assert_not_called()
+
+    def test_before_command_run_connection_error(self, mocker, fake_metadata, caplog):
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
+        )
+        telemetry_hook = KedroTelemetryCLIHooks()
+        command_args = ["--version"]
+
+        mocked_post_request = mocker.patch(
+            "requests.post", side_effect=requests.exceptions.ConnectionError()
+        )
+        telemetry_hook.before_command_run(fake_metadata, command_args)
+        msg = "Failed to send data to Heap. Exception of type 'ConnectionError' was raised."
+        assert msg in caplog.messages[-1]
+        mocked_post_request.assert_called()
 
     def test_before_command_run_anonymous(self, mocker, fake_metadata):
         mocker.patch(

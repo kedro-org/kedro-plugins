@@ -1,7 +1,7 @@
 # Release 0.1.4
 
 ## Bug fixes and other changes
-* If consent is provided but there's no internet connection, `kedro-telemetry` will log a warning instead of raise an error. (addresses https://github.com/kedro-org/kedro/issues/1289 and https://github.com/kedro-org/kedro/issues/1249)
+* If consent is provided but there's no internet connection, `kedro-telemetry` will log a warning instead of raising an error (addresses https://github.com/kedro-org/kedro/issues/1289 and https://github.com/kedro-org/kedro/issues/1249).
 * Removed `click` requirement, defaulting instead to whatever `click` version is used by `kedro`.
 
 # Release 0.1.3

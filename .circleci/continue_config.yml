@@ -200,12 +200,12 @@ workflows:
           plugin: "kedro-telemetry"
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           plugin: "kedro-telemetry"
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           plugin: "kedro-telemetry"
   # when pipeline parameter, run-build-kedro-docker is true, the

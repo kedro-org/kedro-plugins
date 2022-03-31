@@ -176,6 +176,7 @@ def exec_kedro_command(context, command):
         print(res.stderr)
         assert False
 
+
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
@@ -190,6 +191,7 @@ def pip_install_dependencies(context):
         print(res.stdout)
         print(res.stderr)
         assert False
+
 
 @given("I have removed old docker image of test project")
 def remove_old_docker_images(context):

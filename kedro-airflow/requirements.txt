@@ -1,3 +1,3 @@
-kedro>=0.17.2
+git+https://github.com/kedro-org/kedro.git@main#egg=main
 python-slugify~=4.0
 semver~=2.10 # Needs to be at least 2.10.0 to get VersionInfo.match

@@ -4,7 +4,6 @@ bandit>=1.6.2, <2.0
 behave
 black~=22.0
 flake8
-Flask==1.1.1
 Jinja2==3.0.3
 pre-commit>=1.17.0, <2.0
 pylint>=2.5.2, <3.0

@@ -5,7 +5,7 @@ Feature: Docker commands in new projects
     Given I have prepared a config file
     And I run a non-interactive kedro new with starter
     And I have fixed logs write permission
-    And I have executed the kedro command "install"
+    And I have installed the project dependencies
     And I have removed old docker image of test project
 
   Scenario: Execute docker init

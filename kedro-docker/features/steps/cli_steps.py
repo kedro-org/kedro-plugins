@@ -176,6 +176,20 @@ def exec_kedro_command(context, command):
         print(res.stderr)
         assert False
 
+@given("I have installed the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
+
+    if res.returncode != OK_EXIT_CODE:
+        print(res.stdout)
+        print(res.stderr)
+        assert False
 
 @given("I have removed old docker image of test project")
 def remove_old_docker_images(context):

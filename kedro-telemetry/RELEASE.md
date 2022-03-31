@@ -1,3 +1,8 @@
+# Release 0.2.0
+* Add compatibility with `kedro` 0.18.0
+* Add compatibility with Python 3.9 and 3.10
+* Remove compatibility with Python 3.6
+
 # Release 0.1.4
 
 ## Bug fixes and other changes

@@ -55,7 +55,7 @@ commands:
           name: Install kedro and test requirements
           command: |
             cd <<parameters.plugin>>
-            pip install git+https://github.com/kedro-org/kedro@main
+            pip install git+https://github.com/kedro-org/kedro@develop
             pip install -r test_requirements.txt
       - run:
           name: Install pre-commit hooks

@@ -58,7 +58,7 @@ Feature: Docker commands in new projects
 
   Scenario: Execute docker run in parallel mode
     Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker run --parallel"
+    When I execute the kedro command "docker run --runner=ParallelRunner"
     Then I should get a successful exit code
     And I should get a message including "kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully"
 

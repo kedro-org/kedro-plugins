@@ -25,7 +25,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "build-docs",
     "build-reqs",
     "catalog",
-    "install",
     "ipython",
     "jupyter",
     "lint",

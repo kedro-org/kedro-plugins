@@ -4,7 +4,7 @@ Feature: Airflow
     Given I have initialized Airflow with home dir "airflow"
 
   Scenario: Print a list of tasks with latest Kedro
-    Given I have installed kedro version "0.17.4"
+    Given I have installed kedro version "0.17.5"
     And I have prepared a config file
     And I have run a non-interactive kedro new
     And I have prepared a data catalog
@@ -17,7 +17,7 @@ Feature: Airflow
     And I should get a message including "train"
 
   Scenario: Run Airflow task locally with latest Kedro
-    Given I have installed kedro version "0.17.4"
+    Given I have installed kedro version "0.17.5"
     And I have prepared a config file
     And I have run a non-interactive kedro new
     And I have prepared a data catalog

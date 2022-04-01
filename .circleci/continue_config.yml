@@ -55,7 +55,7 @@ commands:
           name: Install kedro and test requirements
           command: |
             cd <<parameters.plugin>>
-            pip install kedro==0.17.4
+            pip install kedro==0.17.5
             pip install -r test_requirements.txt
       - run:
           name: Install pre-commit hooks
@@ -106,7 +106,7 @@ commands:
             conda activate kedro_plugins
             cd <<parameters.plugin>>
             python -m pip install -U pip setuptools wheel
-            pip install kedro==0.17.4
+            pip install kedro==0.17.5
             pip install -r test_requirements.txt -U
       - run:
           name: Pip freeze

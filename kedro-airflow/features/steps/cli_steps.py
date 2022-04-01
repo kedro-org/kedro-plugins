@@ -159,8 +159,6 @@ def create_project_from_config_file(context):
             str(context.config_file),
             "--starter",
             "pandas-iris",
-            "--checkout",
-            "0.18.0",
         ],
         env=context.env,
         cwd=str(context.temp_dir),

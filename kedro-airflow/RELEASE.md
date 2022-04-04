@@ -2,6 +2,10 @@
 * Add compatibility with `kedro` 0.18.0
 * Add compatibility with Python 3.9 and 3.10
 * Remove compatibility with Python 3.6
+
+# Release 0.4.2
+* Drop context/session usage to fetch pipelines to support Kedro>=0.17.5.
+
 # Release 0.4.1
 
 ## Bugfix

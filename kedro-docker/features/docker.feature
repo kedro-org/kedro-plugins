@@ -5,7 +5,7 @@ Feature: Docker commands in new projects
     Given I have prepared a config file
     And I run a non-interactive kedro new with starter
     And I have fixed logs write permission
-    And I have executed the kedro command "install"
+    And I have installed the project dependencies
     And I have removed old docker image of test project
 
   Scenario: Execute docker init
@@ -58,7 +58,7 @@ Feature: Docker commands in new projects
 
   Scenario: Execute docker run in parallel mode
     Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker run --parallel"
+    When I execute the kedro command "docker run --runner=ParallelRunner"
     Then I should get a successful exit code
     And I should get a message including "kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully"
 
@@ -118,7 +118,7 @@ Feature: Docker commands in new projects
     When I execute the kedro command "docker ipython"
     Then I should see messages from docker ipython startup including "An enhanced Interactive Python"
     And  I should see messages from docker ipython startup including "INFO - ** Kedro project project-dummy"
-    And  I should see messages from docker ipython startup including "Starting a Kedro session with the following variables in scope"
+    And  I should see messages from docker ipython startup including "Defined global variable `context`, `session`, `catalog` and `pipelines`"
 
   Scenario: Execute docker run target without building image
     When I execute the kedro command "docker run"

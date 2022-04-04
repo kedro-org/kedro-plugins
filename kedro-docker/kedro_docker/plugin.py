@@ -164,14 +164,16 @@ def docker_init(spark):
     type=str,
     default=DEFAULT_BASE_IMAGE,
     show_default=True,
-    help="Base image for Dockerfile.",  # pylint: disable=too-many-arguments
+    help="Base image for Dockerfile.",
 )
 @_make_image_option()
 @_make_docker_args_option(
     help="Optional arguments to be passed to `docker build` command"
 )
 @click.pass_context
-def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):
+def docker_build(
+    ctx, uid, gid, spark, base_image, image, docker_args
+):  # pylint: disable=too-many-arguments
     """Build a Docker image for the project."""
     uid, gid = get_uid_gid(uid, gid)
     project_path = Path.cwd()

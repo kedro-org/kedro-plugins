@@ -28,7 +28,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry",
     author="Kedro",
-    python_requires=">=3.6, <3.9",
+    python_requires=">=3.7, <3.11",
     install_requires=requires,
     license="Apache Software License (Apache 2.0)",
     packages=["kedro_telemetry"],

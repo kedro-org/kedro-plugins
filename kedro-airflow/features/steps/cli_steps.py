@@ -101,6 +101,13 @@ def install_project_package(context):
     """Install the packaged project."""
     cmd = [context.pip, "install", "-e", "src/"]
     res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+    if res.returncode != OK_EXIT_CODE:
+        print(res.stdout)
+        print(res.stderr)
+        assert False
+
+    cmd = [context.pip, "install", "Jinja2==3.0.3"]
+    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)

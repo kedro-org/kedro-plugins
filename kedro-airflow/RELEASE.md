@@ -2,11 +2,6 @@
 * Add compatibility with `kedro` 0.18.0
 * Add compatibility with Python 3.9 and 3.10
 * Remove compatibility with Python 3.6
-
-## Bugfix
-
-## Thanks for supporting contributions
-
 # Release 0.4.1
 
 ## Bugfix

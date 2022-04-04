@@ -5,7 +5,6 @@ behave
 black==v19.10.b0
 flake8
 pre-commit>=1.17.0, <2.0
-psutil
 pylint>=2.5.2, <3.0
 pytest
 pytest-cov

@@ -23,7 +23,6 @@ def test_create_airflow_dag(mocker, cli_runner, metadata):
     result = cli_runner.invoke(commands, ["airflow", "create"], obj=metadata)
 
     assert result.exit_code == 0
-    assert str(dag_file) in result.output
     assert dag_file.exists()
 
     expected_airflow_dag = 'tasks["node0"] >> tasks["node1"]'

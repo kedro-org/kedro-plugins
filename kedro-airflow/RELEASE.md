@@ -1,3 +1,5 @@
+# Release 0.4.2
+* Drop context/session usage to fetch pipelines to support Kedro>=0.17.5.
 # Release 0.4.1
 
 ## Bugfix

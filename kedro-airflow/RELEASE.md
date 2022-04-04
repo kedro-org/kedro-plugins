@@ -1,7 +1,7 @@
 # Release 0.5.0
-* Add compatibility with Kedro 0.18.0
-* Add compatibility with python 3.9 + 3.10
-* Drop support for python 3.6
+* Add compatibility with `kedro` 0.18.0
+* Add compatibility with Python 3.9 and 3.10
+* Remove compatibility with Python 3.6
 
 ## Bugfix
 

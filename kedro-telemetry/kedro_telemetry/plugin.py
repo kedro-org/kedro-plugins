@@ -180,21 +180,28 @@ def _is_valid_syntax(telemetry: Any) -> bool:
 
 
 def _confirm_consent(telemetry_file_path: Path) -> bool:
-    with telemetry_file_path.open("w") as telemetry_file:
-        confirm_msg = (
-            "As an open-source project, we collect usage analytics. \n"
-            "We cannot see nor store information contained in "
-            "a Kedro project. \nYou can find out more by reading our "
-            "privacy notice: \n"
-            "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry#privacy-notice \n"
-            "Do you opt into usage analytics? "
+    try:
+        with telemetry_file_path.open("w") as telemetry_file:
+            confirm_msg = (
+                "As an open-source project, we collect usage analytics. \n"
+                "We cannot see nor store information contained in "
+                "a Kedro project. \nYou can find out more by reading our "
+                "privacy notice: \n"
+                "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry#privacy-notice \n"
+                "Do you opt into usage analytics? "
+            )
+            if click.confirm(confirm_msg):
+                yaml.dump({"consent": True}, telemetry_file)
+                click.secho("You have opted into product usage analytics.", fg="green")
+                return True
+            yaml.dump({"consent": False}, telemetry_file)
+            return False
+    except Exception as exc:
+        logger.warning(
+            "Failed to confirm consent.",
+            "Exception: %s",
+            exc,
         )
-        if click.confirm(confirm_msg):
-            yaml.dump({"consent": True}, telemetry_file)
-            click.secho("You have opted into product usage analytics.", fg="green")
-            return True
-        yaml.dump({"consent": False}, telemetry_file)
-        return False
 
 
 cli_hooks = KedroTelemetryCLIHooks()

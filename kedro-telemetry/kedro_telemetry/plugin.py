@@ -17,7 +17,6 @@ import yaml
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.startup import ProjectMetadata
-
 from kedro_telemetry import __version__ as telemetry_version
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 
@@ -205,7 +204,8 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             return False
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
-            "Failed to confirm consent. Exception: %s", exc,
+            "Failed to confirm consent. Exception: %s",
+            exc,
         )
         return False
 

@@ -9,7 +9,11 @@ from kedro.framework.startup import ProjectMetadata
 from pytest import fixture
 
 from kedro_telemetry import __version__ as telemetry_version
-from kedro_telemetry.plugin import KedroTelemetryCLIHooks, _check_for_telemetry_consent, _confirm_consent
+from kedro_telemetry.plugin import (
+    KedroTelemetryCLIHooks,
+    _check_for_telemetry_consent,
+    _confirm_consent,
+)
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
@@ -192,17 +196,18 @@ class TestKedroTelemetryCLIHooks:
         ]
         assert mocked_heap_call.call_args_list == expected_calls
 
-    def test_before_command_run_heap_call_error(self, mocker, fake_metadata, caplog):
+    def test_before_command_run_heap_call_error(self, mocker, fake_metadata):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event", side_effect=Exception)
+        mocked_heap_call = mocker.patch(
+            "kedro_telemetry.plugin._send_heap_event", side_effect=Exception
+        )
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
 
         telemetry_hook.before_command_run(fake_metadata, command_args)
         mocked_heap_call.assert_called()
-
 
     def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)

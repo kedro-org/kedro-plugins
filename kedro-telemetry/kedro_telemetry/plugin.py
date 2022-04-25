@@ -91,7 +91,7 @@ class KedroTelemetryCLIHooks:
                 identity=hashed_computer_name.hexdigest(),
                 properties=generic_properties,
             )
-        except Exception as exc: # pylint: disable=broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             logger.warning(
                 "Something went wrong in hook implementation to send command run data to Heap. "
                 "Exception: %s",
@@ -205,8 +205,7 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             return False
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
-            "Failed to confirm consent. Exception: %s",
-            exc,
+            "Failed to confirm consent. Exception: %s", exc,
         )
         return False
 

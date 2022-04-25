@@ -41,56 +41,62 @@ class KedroTelemetryCLIHooks:
     ):
         """Hook implementation to send command run data to Heap"""
         # pylint: disable=no-self-use
-
-        # get KedroCLI and its structure from actual project root
-        cli = KedroCLI(project_path=Path.cwd())
-        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-        masked_command_args = _mask_kedro_cli(
-            cli_struct=cli_struct, command_args=command_args
-        )
-        main_command = masked_command_args[0] if masked_command_args else "kedro"
-        if not project_metadata:  # in package mode
-            return
-
-        consent = _check_for_telemetry_consent(project_metadata.project_path)
-        if not consent:
-            click.secho(
-                "Kedro-Telemetry is installed, but you have opted out of "
-                "sharing usage analytics so none will be collected.",
-                fg="green",
-            )
-            return
-
-        logger.info("You have opted into product usage analytics.")
-
         try:
-            hashed_computer_name = hashlib.sha512(
-                bytes(socket.gethostname(), encoding="utf8")
+            # get KedroCLI and its structure from actual project root
+            cli = KedroCLI(project_path=Path.cwd())
+            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
+            masked_command_args = _mask_kedro_cli(
+                cli_struct=cli_struct, command_args=command_args
             )
-        except socket.timeout as exc:
+            main_command = masked_command_args[0] if masked_command_args else "kedro"
+            if not project_metadata:  # in package mode
+                return
+
+            consent = _check_for_telemetry_consent(project_metadata.project_path)
+            if not consent:
+                click.secho(
+                    "Kedro-Telemetry is installed, but you have opted out of "
+                    "sharing usage analytics so none will be collected.",
+                    fg="green",
+                )
+                return
+
+            logger.info("You have opted into product usage analytics.")
+
+            try:
+                hashed_computer_name = hashlib.sha512(
+                    bytes(socket.gethostname(), encoding="utf8")
+                )
+            except socket.timeout as exc:
+                logger.warning(
+                    "Socket timeout when trying to get the computer name. "
+                    "No data was sent to Heap. Exception: %s",
+                    exc,
+                )
+                return
+
+            properties = _format_user_cli_data(masked_command_args, project_metadata)
+
+            _send_heap_event(
+                event_name=f"Command run: {main_command}",
+                identity=hashed_computer_name.hexdigest(),
+                properties=properties,
+            )
+
+            # send generic event too so it's easier in data processing
+            generic_properties = deepcopy(properties)
+            generic_properties["main_command"] = main_command
+            _send_heap_event(
+                event_name="CLI command",
+                identity=hashed_computer_name.hexdigest(),
+                properties=generic_properties,
+            )
+        except Exception as exc: # pylint: disable=broad-except
             logger.warning(
-                "Socket timeout when trying to get the computer name. "
-                "No data was sent to Heap. Exception: %s",
+                "Something went wrong in hook implementation to send command run data to Heap. "
+                "Exception: %s",
                 exc,
             )
-            return
-
-        properties = _format_user_cli_data(masked_command_args, project_metadata)
-
-        _send_heap_event(
-            event_name=f"Command run: {main_command}",
-            identity=hashed_computer_name.hexdigest(),
-            properties=properties,
-        )
-
-        # send generic event too so it's easier in data processing
-        generic_properties = deepcopy(properties)
-        generic_properties["main_command"] = main_command
-        _send_heap_event(
-            event_name="CLI command",
-            identity=hashed_computer_name.hexdigest(),
-            properties=generic_properties,
-        )
 
 
 def _format_user_cli_data(command_args: List[str], project_metadata: ProjectMetadata):

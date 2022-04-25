@@ -17,6 +17,7 @@ import yaml
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.startup import ProjectMetadata
+
 from kedro_telemetry import __version__ as telemetry_version
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 

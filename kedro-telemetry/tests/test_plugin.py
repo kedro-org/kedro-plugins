@@ -6,13 +6,14 @@ import requests
 import yaml
 from kedro import __version__ as kedro_version
 from kedro.framework.startup import ProjectMetadata
+from pytest import fixture
+
 from kedro_telemetry import __version__ as telemetry_version
 from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     _check_for_telemetry_consent,
     _confirm_consent,
 )
-from pytest import fixture
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"

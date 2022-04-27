@@ -196,7 +196,7 @@ class TestKedroTelemetryCLIHooks:
         ]
         assert mocked_heap_call.call_args_list == expected_calls
 
-    def test_before_command_run_heap_call_error(self, mocker, fake_metadata):
+    def test_before_command_run_heap_call_error(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
@@ -205,8 +205,10 @@ class TestKedroTelemetryCLIHooks:
         )
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
-
+        
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        msg = "Something went wrong in hook implementation to send command run data to Heap. Exception:"
+        assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
     def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):
@@ -276,9 +278,13 @@ class TestKedroTelemetryCLIHooks:
         assert _check_for_telemetry_consent(fake_metadata.project_path)
         mock_create_file.assert_called_once_with(telemetry_file_path)
 
-    def test_confirm_consent_yaml_dump_error(self, mocker, fake_metadata):
+    def test_confirm_consent_yaml_dump_error(self, mocker, fake_metadata, caplog):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         mocker.patch("yaml.dump", side_effect=Exception)
 
         assert not _confirm_consent(telemetry_file_path)
+
+        msg = "Failed to confirm consent. No data was sent to Heap. Exception: " \
+              "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        assert msg in caplog.messages[-1]

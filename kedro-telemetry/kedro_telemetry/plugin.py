@@ -205,7 +205,7 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             return False
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
-            "Failed to confirm consent. Exception: %s",
+            "Failed to confirm consent. No data was sent to Heap. Exception: %s",
             exc,
         )
         return False

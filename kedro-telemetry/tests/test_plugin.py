@@ -205,10 +205,12 @@ class TestKedroTelemetryCLIHooks:
         )
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
-        
+
         telemetry_hook.before_command_run(fake_metadata, command_args)
-        msg = "Something went wrong in hook implementation to send command run data to" \
-              " Heap. Exception:"
+        msg = (
+            "Something went wrong in hook implementation to send command run data to"
+            " Heap. Exception:"
+        )
         assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
@@ -286,6 +288,8 @@ class TestKedroTelemetryCLIHooks:
 
         assert not _confirm_consent(telemetry_file_path)
 
-        msg = "Failed to confirm consent. No data was sent to Heap. Exception: " \
-              "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        msg = (
+            "Failed to confirm consent. No data was sent to Heap. Exception: "
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
         assert msg in caplog.messages[-1]

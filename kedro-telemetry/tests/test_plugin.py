@@ -207,7 +207,8 @@ class TestKedroTelemetryCLIHooks:
         command_args = ["--version"]
         
         telemetry_hook.before_command_run(fake_metadata, command_args)
-        msg = "Something went wrong in hook implementation to send command run data to Heap. Exception:"
+        msg = "Something went wrong in hook implementation to send command run data to" \
+              " Heap. Exception:"
         assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 

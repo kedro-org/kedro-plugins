@@ -1,4 +1,11 @@
+# Release 0.2.1
+
+## Bug fixes and other changes
+* `kedro telemetry` raising errors will no longer stop `kedro` running pipelines.
+
 # Release 0.2.0
+
+## Bug fixes and other changes
 * Add compatibility with `kedro` 0.18.0
 * Add compatibility with Python 3.9 and 3.10
 * Remove compatibility with Python 3.6

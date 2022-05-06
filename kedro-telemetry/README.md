@@ -7,7 +7,7 @@
 
 ## Introduction
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in the Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
+To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
 
 The data it gathers will help drive future development of Kedro because we can understand how the product is being used.
 

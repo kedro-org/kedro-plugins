@@ -1,3 +1,8 @@
+# Release 0.2.2
+
+## Bug fixes and other changes
+* Removed explicit `PyYAML` requirement since it is already a dependency of `Kedro`
+
 # Release 0.2.1
 
 ## Bug fixes and other changes

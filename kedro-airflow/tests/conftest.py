@@ -5,6 +5,7 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 from pathlib import Path
+from shutil import copyfile
 
 from click.testing import CliRunner
 from kedro import __version__ as kedro_version
@@ -15,7 +16,10 @@ from pytest import fixture
 @fixture(name="cli_runner")
 def cli_runner():
     runner = CliRunner()
+    owd = Path().cwd()
     with runner.isolated_filesystem():
+        fp = owd / "kedro_airflow/airflow_dag_template.j2"
+        copyfile(fp.resolve(), "./airflow_dag.j2")
         yield runner
 
 

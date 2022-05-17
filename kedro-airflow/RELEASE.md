@@ -1,3 +1,7 @@
+# Release 0.5.1
+* Add additional cli arguments (`--jinja-dir` and `--jinja-file`) to provide custom Jinja2 Templates
+* Change the naming convention for the dag outputfiles by adding a postfix for non-default pipelines
+
 # Release 0.5.0
 * Add compatibility with `kedro` 0.18.0
 * Add compatibility with Python 3.9 and 3.10

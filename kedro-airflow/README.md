@@ -31,7 +31,7 @@ kedro airflow create
 ```
 
 This command will generate an Airflow DAG file located in the `airflow_dags/` directory in your project.
-You can pass a `--pipeline` flag to generate the DAG file for a specific Kedro pipeline and an `--env` flag to generate the DAG file for a specific Kedro environment.
+You can pass a `--pipeline` flag to generate the DAG file for a specific Kedro pipeline (this file will be postfixed with the pipeline name) and an `--env` flag to generate the DAG file for a specific Kedro environment.
 
 ### Step 2: Copy the DAG file to the Airflow DAGs folder.
 
@@ -47,3 +47,11 @@ Please visit the guide to [deploy Kedro as a Python package](https://kedro.readt
 #### What if my DAG file is in a different directory to my project folder?
 
 By default the generated DAG file is configured to live in the same directory as your project as per this [template](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/kedro_airflow/airflow_dag_template.j2#L44). If your DAG file is located in a different directory to your project, you will need to tweak this  manually after running the `kedro airflow create` command.
+
+#### What if I want to use another Jinja2 Template in a different location
+
+There are two additional command line arguments (`--jinja-dir/-jd` and `--jinja-file/-j`) that allow the user to provide an alternative directory and/or file as the Jinja2 template. Note that these files have to accept the same variables as those used in the original Jinja2-Template.
+
+```bash
+kedro airflow create --jinja-dir ./custom/ --jinja-file template.j2
+```

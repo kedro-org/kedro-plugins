@@ -33,18 +33,30 @@ def airflow_commands():
     type=click.Path(writable=True, resolve_path=True, file_okay=False),
     default="./airflow_dags/",
 )
+@click.option(
+    "-jd", "--jinja-dir", "jinja_template_dir", default=str(Path(__file__).parent)
+)
+@click.option("-j", "--jinja-file", "jinja_template", default="airflow_dag_template.j2")
 @click.pass_obj
 def create(
-    metadata: ProjectMetadata, pipeline_name, env, target_path
+    metadata: ProjectMetadata,
+    pipeline_name,
+    env,
+    target_path,
+    jinja_template_dir,
+    jinja_template,
 ):  # pylint: disable=too-many-locals
     """Create an Airflow DAG for a project"""
-    loader = jinja2.FileSystemLoader(str(Path(__file__).parent))
+    loader = jinja2.FileSystemLoader(jinja_template_dir)
     jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)
     jinja_env.filters["slugify"] = slugify
-    template = jinja_env.get_template("airflow_dag_template.j2")
+    template = jinja_env.get_template(jinja_template)
 
     package_name = metadata.package_name
-    dag_filename = f"{package_name}_dag.py"
+    if pipeline_name != "__default__":
+        dag_filename = f"{package_name}_{pipeline_name}_dag.py"
+    else:
+        dag_filename = f"{package_name}_dag.py"
 
     target_path = Path(target_path)
     target_path = target_path / dag_filename

@@ -45,7 +45,7 @@ def create(
     target_path,
     jinja_template_dir,
     jinja_template,
-):  # pylint: disable=too-many-locals
+):  # pylint: disable=too-many-locals,too-many-arguments
     """Create an Airflow DAG for a project"""
     loader = jinja2.FileSystemLoader(jinja_template_dir)
     jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)

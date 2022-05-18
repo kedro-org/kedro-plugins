@@ -1,8 +1,9 @@
 from pathlib import Path
-import pytest
 
+import pytest
 from kedro.framework.project import pipelines
 from kedro.pipeline import Pipeline, node
+
 from kedro_airflow.plugin import commands
 
 

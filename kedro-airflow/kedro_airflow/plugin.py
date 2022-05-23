@@ -28,38 +28,43 @@ def airflow_commands():
 @click.option("-e", "--env", default="local")
 @click.option(
     "-t",
-    "--target-dir",
+    "--target-path",
     "target_path",
-    type=click.Path(writable=True, resolve_path=True, file_okay=False),
-    default="./airflow_dags/",
+    default="./airflow_dags/{package_name}_dag.py",
 )
 @click.option(
-    "-jd", "--jinja-dir", "jinja_template_dir", default=str(Path(__file__).parent)
+    "-j",
+    "--jinja-file",
+    "jinja_template",
+    type=click.Path(exists=True, readable=True, resolve_path=True, file_okay=True),
+    default=Path(__file__).parent / "airflow_dag_template.j2",
 )
-@click.option("-j", "--jinja-file", "jinja_template", default="airflow_dag_template.j2")
 @click.pass_obj
 def create(
     metadata: ProjectMetadata,
     pipeline_name,
     env,
     target_path,
-    jinja_template_dir,
     jinja_template,
 ):  # pylint: disable=too-many-locals,too-many-arguments
     """Create an Airflow DAG for a project"""
-    loader = jinja2.FileSystemLoader(jinja_template_dir)
-    jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)
-    jinja_env.filters["slugify"] = slugify
-    template = jinja_env.get_template(jinja_template)
+    jinja_template = Path(jinja_template)
+    if jinja_template.is_file():
+        jinja_template = jinja_template.absolute()
+        loader = jinja2.FileSystemLoader(jinja_template.parent)
+        jinja_env = jinja2.Environment(
+            autoescape=True, loader=loader, lstrip_blocks=True
+        )
+        jinja_env.filters["slugify"] = slugify
+        template = jinja_env.get_template(jinja_template.name)
+    else:
+        raise ValueError("jinja_template must be a file")
 
     package_name = metadata.package_name
-    if pipeline_name != "__default__":
-        dag_filename = f"{package_name}_{pipeline_name}_dag.py"
-    else:
-        dag_filename = f"{package_name}_dag.py"
 
-    target_path = Path(target_path)
-    target_path = target_path / dag_filename
+    # This should only fill in the package_name if the default is used.
+    # In cases where a user supplies a value nothing will happen
+    target_path = Path(target_path.format(package_name=package_name))
 
     target_path.parent.mkdir(parents=True, exist_ok=True)
 

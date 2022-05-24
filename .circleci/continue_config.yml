@@ -188,7 +188,8 @@ jobs:
           name: Run unit tests
           command: |
             conda activate kedro_plugins
-            pytest <<parameters.plugin>>\tests
+            cd <<parameters.plugin>>
+            pytest tests
 
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the

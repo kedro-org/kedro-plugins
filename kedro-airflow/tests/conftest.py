@@ -19,10 +19,7 @@ def cli_runner():
     runner = CliRunner()
     owd = Path.cwd()
     with runner.isolated_filesystem():
-        if system() == "Windows":
-            fp = owd / "kedro-airflow/kedro_airflow/airflow_dag_template.j2"
-        else:
-            fp = owd / "kedro_airflow/airflow_dag_template.j2"
+        fp = owd / "kedro_airflow/airflow_dag_template.j2"
         copyfile(fp.resolve(), Path("./airflow_dag.j2").resolve())
         yield runner
 

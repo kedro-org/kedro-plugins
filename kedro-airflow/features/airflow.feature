@@ -8,21 +8,20 @@ Feature: Airflow
     And I have prepared a config file
     And I have run a non-interactive kedro new
     And I have prepared a data catalog
-    And I have executed the kedro command "airflow create -t ../airflow/dags/"
+    And I have executed the kedro command "airflow create -t ../airflow/dags/project_dummy_dag.py"
     When I execute the airflow command "tasks list project-dummy"
     Then I should get a successful exit code
     And I should get a message including "predict"
     And I should get a message including "report"
     And I should get a message including "split"
-    And I should get a message including "train"
 
   Scenario: Run Airflow task locally with latest Kedro
     Given I have installed kedro version "latest"
     And I have prepared a config file
     And I have run a non-interactive kedro new
     And I have prepared a data catalog
-    And I have executed the kedro command "airflow create -t ../airflow/dags/"
+    And I have executed the kedro command "airflow create -t ../airflow/dags/project_dummy_dag.py"
     And I have installed the kedro project package
     When I execute the airflow command "tasks test project-dummy split 2016-06-01T00:00:00+00:00"
     Then I should get a successful exit code
-    And I should get a message including "Loading data from `params:"
+    And I should get a message including "Loading data from `parameters"

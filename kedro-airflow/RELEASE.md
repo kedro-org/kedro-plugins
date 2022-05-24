@@ -1,6 +1,7 @@
 # Release 0.5.1
-* Add additional cli arguments (`--jinja-dir` and `--jinja-file`) to provide custom Jinja2 Templates
-* Change the naming convention for the dag outputfiles by adding a postfix for non-default pipelines
+* Add additional cli argument `--jinja-file` to provide custom Jinja2 Templates
+* Change the `--target-dir` to `--target-path` so a users can define directory and filename of the output
+* Change e2e behave tests to adjust for changes in pandas-iris starter (no more train node and loading from parameters instead of params:)
 
 # Release 0.5.0
 * Add compatibility with `kedro` 0.18.0

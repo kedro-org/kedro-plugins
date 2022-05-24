@@ -2,6 +2,7 @@
 
 ## Bug fixes and other changes
 * `kedro telemetry` raising errors will no longer stop `kedro` running pipelines.
+* Lowered some of the log level to `DEBUG`, so they will not be shown by default.
 
 # Release 0.2.0
 

@@ -16,7 +16,7 @@ from pytest import fixture
 @fixture(name="cli_runner")
 def cli_runner():
     runner = CliRunner()
-    owd = Path().cwd()
+    owd = Path.cwd()
     with runner.isolated_filesystem():
         fp = owd / "kedro_airflow/airflow_dag_template.j2"
         copyfile(fp.resolve(), "./airflow_dag.j2")

@@ -5,6 +5,7 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 from pathlib import Path
+from platform import system
 from shutil import copyfile
 
 from click.testing import CliRunner
@@ -18,7 +19,10 @@ def cli_runner():
     runner = CliRunner()
     owd = Path.cwd()
     with runner.isolated_filesystem():
-        fp = owd / "kedro_airflow/airflow_dag_template.j2"
+        if system() == "Windows":
+            fp = owd / "kedro_airflow/kedro_airflow/airflow_dag_template.j2"
+        else:
+            fp = owd / "kedro_airflow/airflow_dag_template.j2"
         copyfile(fp.resolve(), Path("./airflow_dag.j2").resolve())
         yield runner
 

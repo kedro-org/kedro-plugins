@@ -5,7 +5,6 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 from pathlib import Path
-from platform import system
 from shutil import copyfile
 
 from click.testing import CliRunner

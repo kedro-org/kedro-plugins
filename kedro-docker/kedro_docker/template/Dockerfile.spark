@@ -48,14 +48,14 @@ RUN pip install -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
 ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 RUN groupadd -f -g ${KEDRO_GID} kedro_group && \
-useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro
+useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro_docker
 
 # copy the whole project except what is in .dockerignore
-WORKDIR /home/kedro
+WORKDIR /home/kedro_docker
 COPY . .
-RUN chown -R kedro:${KEDRO_GID} /home/kedro
-USER kedro
-RUN chmod -R a+w /home/kedro
+RUN chown -R kedro:${KEDRO_GID} /home/kedro_docker
+USER kedro_docker
+RUN chmod -R a+w /home/kedro_docker
 
 EXPOSE 8888
 

@@ -120,8 +120,7 @@ jobs:
       plugin:
         type: string
     machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
+      image: ubuntu-2004:202201-02
       docker_layer_caching: true
     steps:
       - setup:
@@ -138,8 +137,7 @@ jobs:
       plugin:
         type: string
     machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
+      image: ubuntu-2004:202201-02
       docker_layer_caching: true
     steps:
       - setup:
@@ -154,8 +152,7 @@ jobs:
       plugin:
         type: string
     machine:
-      # Don't use 2018 image: https://discuss.circleci.com/t/24639/18
-      image: circleci/classic:201711-01
+      image: ubuntu-2004:202201-02
       docker_layer_caching: true
     steps:
       - setup:

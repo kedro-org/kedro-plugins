@@ -54,14 +54,13 @@ class KedroTelemetryCLIHooks:
 
             consent = _check_for_telemetry_consent(project_metadata.project_path)
             if not consent:
-                click.secho(
+                logger.debug(
                     "Kedro-Telemetry is installed, but you have opted out of "
                     "sharing usage analytics so none will be collected.",
-                    fg="green",
                 )
                 return
 
-            logger.info("You have opted into product usage analytics.")
+            logger.debug("You have opted into product usage analytics.")
 
             try:
                 hashed_computer_name = hashlib.sha512(
@@ -201,6 +200,10 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
                 yaml.dump({"consent": True}, telemetry_file)
                 click.secho("You have opted into product usage analytics.", fg="green")
                 return True
+            click.secho(
+                "You have opted out of product usage analytics, so none will be collected.",
+                fg="green",
+            )
             yaml.dump({"consent": False}, telemetry_file)
             return False
     except Exception as exc:  # pylint: disable=broad-except

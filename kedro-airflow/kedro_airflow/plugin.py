@@ -35,7 +35,9 @@ def airflow_commands():
 @click.option(
     "-j",
     "--jinja-file",
-    type=click.Path(exists=True, readable=True, resolve_path=True, file_okay=True, dir_okay=False),
+    type=click.Path(
+        exists=True, readable=True, resolve_path=True, file_okay=True, dir_okay=False
+    ),
     default=Path(__file__).parent / "airflow_dag_template.j2",
 )
 @click.pass_obj
@@ -48,16 +50,11 @@ def create(
 ):  # pylint: disable=too-many-locals,too-many-arguments
     """Create an Airflow DAG for a project"""
     jinja_file = Path(jinja_file).resolve()
-    if jinja_template.is_file():
-        jinja_template = jinja_template.absolute()
-        loader = jinja2.FileSystemLoader(jinja_template.parent)
-        jinja_env = jinja2.Environment(
-            autoescape=True, loader=loader, lstrip_blocks=True
-        )
-        jinja_env.filters["slugify"] = slugify
-        template = jinja_env.get_template(jinja_template.name)
-    else:
-        raise ValueError("jinja_template must be a file")
+    jinja_file = jinja_file.absolute()
+    loader = jinja2.FileSystemLoader(jinja_file.parent)
+    jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)
+    jinja_env.filters["slugify"] = slugify
+    template = jinja_env.get_template(jinja_file.name)
 
     package_name = metadata.package_name
 

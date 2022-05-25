@@ -53,24 +53,3 @@ def test_create_airflow_dag(
     with open(dag_file, "r", encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
     assert expected_airflow_dag in dag_code
-
-
-def test_creating_airflow_dag_given_folder_instead_of_jinjafile_raises_error(
-    mocker, cli_runner, metadata
-):
-    """Check the generation and validity of a simple Airflow DAG."""
-    mock_pipeline = Pipeline(
-        [
-            node(identity, ["input"], ["intermediate"], name="node0"),
-            node(identity, ["intermediate"], ["output"], name="node1"),
-        ],
-        tags="pipeline0",
-    )
-    mocker.patch.dict(pipelines, {"__default__": mock_pipeline})
-    with pytest.raises(ValueError, match="jinja_template must be a file"):
-        cli_runner.invoke(
-            commands,
-            ["airflow", "create", "-j", "."],
-            obj=metadata,
-            catch_exceptions=False,
-        )

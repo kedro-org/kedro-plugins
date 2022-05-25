@@ -14,7 +14,7 @@ useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro_docker
 # copy the whole project except what is in .dockerignore
 WORKDIR /home/kedro_docker
 COPY . .
-RUN chown -R kedro:${KEDRO_GID} /home/kedro_docker
+RUN chown -R kedro_docker:${KEDRO_GID} /home/kedro_docker
 USER kedro_docker
 RUN chmod -R a+w /home/kedro_docker
 

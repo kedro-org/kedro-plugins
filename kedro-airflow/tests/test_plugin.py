@@ -23,12 +23,6 @@ def identity(arg):
             "__default__",
             ["airflow", "create", "-j", "airflow_dag.j2"],
         ),
-        # Test execution with different target filename
-        (
-            "foo_bar",
-            "__default__",
-            ["airflow", "create", "-t", "airflow_dags/foo_bar.py"],
-        ),
     ],
 )
 def test_create_airflow_dag(

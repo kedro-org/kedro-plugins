@@ -28,9 +28,10 @@ def airflow_commands():
 @click.option("-e", "--env", default="local")
 @click.option(
     "-t",
-    "--target-path",
+    "--target-dir",
     "target_path",
-    default="./airflow_dags/{package_name}_dag.py",
+    type=click.Path(writable=True, resolve_path=True, file_okay=False),
+    default="./airflow_dags/",
 )
 @click.option(
     "-j",
@@ -57,10 +58,10 @@ def create(
     template = jinja_env.get_template(jinja_file.name)
 
     package_name = metadata.package_name
+    dag_filename = f"{package_name}_dag.py"
 
-    # This should only fill in the package_name if the default is used.
-    # In cases where a user supplies a value nothing will happen
-    target_path = Path(target_path.format(package_name=package_name))
+    target_path = Path(target_path)
+    target_path = target_path / dag_filename
 
     target_path.parent.mkdir(parents=True, exist_ok=True)
 

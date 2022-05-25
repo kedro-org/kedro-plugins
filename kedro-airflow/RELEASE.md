@@ -1,6 +1,5 @@
 # Release 0.5.1
 * Add additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template
-* Change the `--target-dir` to `--target-path` so a users can define directory and filename of the output
 
 # Release 0.5.0
 * Add compatibility with `kedro` 0.18.0

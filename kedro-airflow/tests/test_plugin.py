@@ -15,7 +15,7 @@ def identity(arg):
     [
         # Test normal execution
         ("hello_world_dag", "__default__", ["airflow", "create"]),
-        # Test execution with alternate pipeline and output name
+        # Test execution with alternate pipeline name
         ("hello_world_dag", "ds", ["airflow", "create", "--pipeline", "ds"]),
         # Test execution with different dir and filename for Jinja2 Template
         (

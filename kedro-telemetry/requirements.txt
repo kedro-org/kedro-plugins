@@ -1,3 +1,2 @@
 kedro~=0.18.0
-PyYAML>=4.2, <6.0
 requests~=2.25.1

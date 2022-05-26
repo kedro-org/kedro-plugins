@@ -10,6 +10,6 @@ pylint>=2.4.4, <3.0
 pytest
 pytest-cov
 pytest-mock
-PyYAML>=5.1, <6.0
+PyYAML>=5.1, <7.0
 trufflehog>=2.0.99, <3.0
 wheel==0.32.2

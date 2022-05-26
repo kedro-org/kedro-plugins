@@ -12,7 +12,7 @@
 
 ## Installation
 
-`kedro-airflow` is a Python plugin. To install it run:
+`kedro-airflow` is a Python plugin. To install it:
 
 ```bash
 pip install kedro-airflow

@@ -16,7 +16,7 @@ Configuring a Docker container environment may become complex and tedious. Kedro
 
 ## How do I install Kedro-Docker?
 
-Kedro-Docker is a Python plugin. To install it run:
+Kedro-Docker is a Python plugin. To install it:
 
 ```bash
 pip install kedro-docker

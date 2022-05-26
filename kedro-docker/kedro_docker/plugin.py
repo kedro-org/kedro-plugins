@@ -198,7 +198,7 @@ def docker_build(
 def _mount_info() -> Dict[str, Union[str, Tuple]]:
     res = dict(
         host_root=str(Path.cwd()),
-        container_root="/home/kedro",
+        container_root="/home/kedro_docker",
         mount_volumes=DOCKER_DEFAULT_VOLUMES,
     )
     return res

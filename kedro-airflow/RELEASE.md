@@ -1,3 +1,6 @@
+# Release 0.5.1
+* Add additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template
+
 # Release 0.5.0
 * Add compatibility with `kedro` 0.18.0
 * Add compatibility with Python 3.9 and 3.10

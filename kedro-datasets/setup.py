@@ -4,7 +4,7 @@ from os import path
 
 from setuptools import setup
 
-name = "kedro-airflow"
+name = "kedro-datasets"
 here = path.abspath(path.dirname(__file__))
 
 # get package version

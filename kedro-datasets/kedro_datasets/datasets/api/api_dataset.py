@@ -4,9 +4,8 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 from typing import Any, Dict, Iterable, List, Union
 
 import requests
-from requests.auth import AuthBase
-
 from kedro.io.core import AbstractDataSet, DataSetError
+from requests.auth import AuthBase
 
 
 class APIDataSet(AbstractDataSet):

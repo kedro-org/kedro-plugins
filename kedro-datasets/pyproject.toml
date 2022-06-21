@@ -2,3 +2,30 @@
 
 [tool.isort]
 profile = "black"
+
+[tool.pylint]
+[tool.pylint.master]
+ignore = "CVS"
+load-plugins = [
+    "pylint.extensions.docparams",
+    "pylint.extensions.no_self_use"
+]
+unsafe-load-any-extension = false
+[tool.pylint.messages_control]
+disable = [
+    "ungrouped-imports",
+    "duplicate-code"
+]
+enable = ["useless-suppression"]
+[tool.pylint.refactoring]
+max-nested-blocks = 5
+[tool.pylint.format]
+indent-after-paren=4
+indent-string="    "
+[tool.pylint.miscellaneous]
+notes = [
+    "FIXME",
+    "XXX"
+]
+[tool.pylint.design]
+min-public-methods = 1

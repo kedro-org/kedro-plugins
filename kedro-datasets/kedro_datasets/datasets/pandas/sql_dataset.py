@@ -7,15 +7,14 @@ from typing import Any, Dict, Optional
 
 import fsspec
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy.exc import NoSuchModuleError
-
 from kedro.io.core import (
     AbstractDataSet,
     DataSetError,
     get_filepath_str,
     get_protocol_and_path,
 )
+from sqlalchemy import create_engine
+from sqlalchemy.exc import NoSuchModuleError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 

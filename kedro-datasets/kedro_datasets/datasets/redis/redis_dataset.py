@@ -8,7 +8,6 @@ from copy import deepcopy
 from typing import Any, Dict
 
 import redis
-
 from kedro.io.core import AbstractDataSet, DataSetError
 
 

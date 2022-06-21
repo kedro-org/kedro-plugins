@@ -6,8 +6,6 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-from PIL import Image
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -15,10 +13,11 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+from PIL import Image
 
 
 class ImageDataSet(AbstractVersionedDataSet):
-	"""``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+    """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example:

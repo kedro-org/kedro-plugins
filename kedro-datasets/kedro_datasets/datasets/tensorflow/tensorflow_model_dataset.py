@@ -8,7 +8,6 @@ from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,

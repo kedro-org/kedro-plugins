@@ -9,7 +9,6 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,

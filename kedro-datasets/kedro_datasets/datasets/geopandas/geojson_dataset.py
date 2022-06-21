@@ -29,7 +29,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
 
         >>> import geopandas as gpd
         >>> from shapely.geometry import Point
-        >>> from kedro_datasets.extras.datasets.geopandas import GeoJSONDataSet
+        >>> from kedro_datasets.datasets.geopandas import GeoJSONDataSet
         >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])

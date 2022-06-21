@@ -35,7 +35,7 @@ class EmailMessageDataSet(
 
         >>> from email.message import EmailMessage
         >>>
-        >>> from kedro_datasets.extras.datasets.email import EmailMessageDataSet
+        >>> from kedro_datasets.datasets.email import EmailMessageDataSet
         >>>
         >>> string_to_write = "what would you do if you were invisable for one day????"
         >>>

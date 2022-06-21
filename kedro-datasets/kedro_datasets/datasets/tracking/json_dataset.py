@@ -17,7 +17,7 @@ class JSONDataSet(JDS):
         Example:
         ::
 
-        >>> from kedro_datasets.extras.datasets.tracking import JSONDataSet
+        >>> from kedro_datasets.datasets.tracking import JSONDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>

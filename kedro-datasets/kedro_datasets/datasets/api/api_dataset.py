@@ -16,7 +16,7 @@ class APIDataSet(AbstractDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.extras.datasets.api import APIDataSet
+        >>> from kedro_datasets.datasets.api import APIDataSet
         >>>
         >>>
         >>> data_set = APIDataSet(

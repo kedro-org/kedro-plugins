@@ -49,7 +49,7 @@ class PickleDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pickle import PickleDataSet
+        >>> from kedro_datasets.datasets.pickle import PickleDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

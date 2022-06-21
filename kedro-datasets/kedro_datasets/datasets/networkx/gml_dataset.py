@@ -27,7 +27,7 @@ class GMLDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.extras.datasets.networkx import GMLDataSet
+        >>> from kedro_datasets.datasets.networkx import GMLDataSet
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
         >>> graph_dataset = GMLDataSet(filepath="test.gml")

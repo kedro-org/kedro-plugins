@@ -42,7 +42,7 @@ class PickleDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.redis import PickleDataSet
+        >>> from kedro_datasets.datasets.redis import PickleDataSet
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                       'col3': [5, 6]})

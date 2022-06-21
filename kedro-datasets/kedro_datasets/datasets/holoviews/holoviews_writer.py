@@ -29,7 +29,7 @@ class HoloviewsWriter(AbstractVersionedDataSet):
     ::
 
         >>> import holoviews as hv
-        >>> from kedro_datasets.extras.datasets.holoviews import HoloviewsWriter
+        >>> from kedro_datasets.datasets.holoviews import HoloviewsWriter
         >>>
         >>> curve = hv.Curve(range(10))
         >>> holoviews_writer = HoloviewsWriter("/tmp/holoviews")

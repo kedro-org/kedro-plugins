@@ -19,7 +19,7 @@ class MetricsDataSet(JSONDataSet):
         Example:
         ::
 
-        >>> from kedro_datasets.extras.datasets.tracking import MetricsDataSet
+        >>> from kedro_datasets.datasets.tracking import MetricsDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>

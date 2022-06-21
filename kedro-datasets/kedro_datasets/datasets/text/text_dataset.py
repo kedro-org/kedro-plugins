@@ -23,7 +23,7 @@ class TextDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.extras.datasets.text import TextDataSet
+        >>> from kedro_datasets.datasets.text import TextDataSet
         >>>
         >>> string_to_write = "This will go in a file."
         >>>

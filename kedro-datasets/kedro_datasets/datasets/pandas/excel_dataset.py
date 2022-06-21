@@ -48,7 +48,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pandas import ExcelDataSet
+        >>> from kedro_datasets.datasets.pandas import ExcelDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

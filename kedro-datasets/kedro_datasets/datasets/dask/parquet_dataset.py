@@ -18,7 +18,7 @@ class ParquetDataSet(AbstractDataSet):
         Example (AWS S3):
         ::
 
-            >>> from kedro_datasets.extras.datasets.dask import ParquetDataSet
+            >>> from kedro_datasets.datasets.dask import ParquetDataSet
             >>> import pandas as pd
             >>> import dask.dataframe as dd
             >>>

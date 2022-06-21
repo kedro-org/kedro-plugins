@@ -128,7 +128,7 @@ class SQLTableDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pandas import SQLTableDataSet
+        >>> from kedro_datasets.datasets.pandas import SQLTableDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
@@ -293,7 +293,7 @@ class SQLQueryDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pandas import SQLQueryDataSet
+        >>> from kedro_datasets.datasets.pandas import SQLQueryDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],

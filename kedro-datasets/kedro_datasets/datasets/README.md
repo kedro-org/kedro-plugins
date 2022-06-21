@@ -1,6 +1,6 @@
 # Datasets
 
-Welcome to `kedro.extras.datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
+Welcome to `kedro_datasets.datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
 
 ## What `AbstractDataSet` implementations are supported?
 
@@ -10,7 +10,7 @@ These data descriptions are supported with the APIs of `pandas`, `spark`, `netwo
 
 [The Data Catalog](https://kedro.readthedocs.io/en/stable/data/data_catalog.html) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
 
-Here is a full list of [supported data descriptions and APIs](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html).
+Here is a full list of [supported data descriptions and APIs](https://kedro.readthedocs.io/en/stable/kedro.datasets.html).
 
 ## How can I create my own `AbstractDataSet` implementation?
 

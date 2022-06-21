@@ -44,7 +44,7 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> from pyspark.sql.types import (StructField, StringType,
         >>>                                IntegerType, StructType)
         >>>
-        >>> from kedro_datasets.extras.datasets.spark import SparkHiveDataSet
+        >>> from kedro_datasets.datasets.spark import SparkHiveDataSet
         >>>
         >>> schema = StructType([StructField("name", StringType(), True),
         >>>                      StructField("age", IntegerType(), True)])

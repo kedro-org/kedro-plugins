@@ -39,7 +39,7 @@ class HDFDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pandas import HDFDataSet
+        >>> from kedro_datasets.datasets.pandas import HDFDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

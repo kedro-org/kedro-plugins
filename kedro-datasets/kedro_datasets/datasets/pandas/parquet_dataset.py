@@ -58,7 +58,7 @@ class ParquetDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.extras.datasets.pandas import ParquetDataSet
+        >>> from kedro_datasets.datasets.pandas import ParquetDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

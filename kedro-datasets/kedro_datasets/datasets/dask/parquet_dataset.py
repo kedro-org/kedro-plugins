@@ -7,7 +7,7 @@ from typing import Any, Dict
 import dask.dataframe as dd
 import fsspec
 
-from kedro_datasets.io.core import AbstractDataSet, get_protocol_and_path
+from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
 
 class ParquetDataSet(AbstractDataSet):

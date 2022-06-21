@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 import redis
 
-from kedro_datasets.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class PickleDataSet(AbstractDataSet):

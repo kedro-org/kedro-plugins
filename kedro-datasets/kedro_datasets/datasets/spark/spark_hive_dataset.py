@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 # pylint:disable=too-many-instance-attributes

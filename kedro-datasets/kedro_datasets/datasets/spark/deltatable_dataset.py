@@ -12,7 +12,7 @@ from kedro_datasets.datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
-from kedro_datasets.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class DeltaTableDataSet(AbstractDataSet):

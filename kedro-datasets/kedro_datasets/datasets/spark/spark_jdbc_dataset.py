@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from kedro_datasets.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 __all__ = ["SparkJDBCDataSet"]
 

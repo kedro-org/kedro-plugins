@@ -5,7 +5,7 @@ The ``JSONDataSet`` is part of Kedro Experiment Tracking. The dataset is version
 from typing import Dict
 
 from kedro_datasets.datasets.json import JSONDataSet as JDS
-from kedro_datasets.io.core import DataSetError
+from kedro.io.core import DataSetError
 
 
 class JSONDataSet(JDS):

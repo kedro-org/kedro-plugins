@@ -10,7 +10,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
 
-from kedro_datasets.io.core import (
+from kedro.io.core import (
     AbstractDataSet,
     DataSetError,
     get_filepath_str,

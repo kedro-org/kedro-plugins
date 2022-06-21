@@ -9,7 +9,7 @@ from typing import Any, Dict, Union
 import fsspec
 import geopandas as gpd
 
-from kedro_datasets.io.core import (
+from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
     Version,
@@ -74,7 +74,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.to_file.html
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
-                ``kedro_datasets.io.core.Version``. If its ``load`` attribute is
+                ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
             credentials: credentials required to access the underlying filesystem.
                 Eg. for ``GCFileSystem`` it would look like `{'token': None}`.

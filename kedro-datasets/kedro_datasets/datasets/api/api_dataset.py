@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, List, Union
 import requests
 from requests.auth import AuthBase
 
-from kedro_datasets.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class APIDataSet(AbstractDataSet):

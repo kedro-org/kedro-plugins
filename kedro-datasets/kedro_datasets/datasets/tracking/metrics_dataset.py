@@ -7,7 +7,7 @@ import json
 from typing import Dict
 
 from kedro_datasets.datasets.json import JSONDataSet
-from kedro_datasets.io.core import DataSetError, get_filepath_str
+from kedro.io.core import DataSetError, get_filepath_str
 
 
 class MetricsDataSet(JSONDataSet):

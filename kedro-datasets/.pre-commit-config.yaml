@@ -1,0 +1,93 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+default_stages: [commit, manual]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.3
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml # Checks yaml files for parseable syntax.
+      - id: check-added-large-files
+      - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
+      - id: check-merge-conflict # Check for files that contain merge conflict strings.
+      - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
+      - id: requirements-txt-fixer # Sorts entries in requirements.txt
+      - id: flake8
+        files: ^kedro-datasets/kedro_datasets/
+        args:
+          - "--max-line-length=88"
+          - "--max-complexity=18"
+          - "--max-complexity=18"
+          - "--select=B,C,E,F,W,T4,B9"
+          - "--ignore=E203,E266,E501,W503"
+
+  - repo: local
+    hooks:
+      # It's impossible to specify per-directory configuration, so we just run it many times.
+      # https://github.com/PyCQA/pylint/issues/618
+      # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
+      - id: pylint-quick-kedro-datasets
+        name: "Quick PyLint on kedro_datasets/*"
+        language: system
+        types: [file, python]
+        files: ^kedro-datasets/kedro_datasets/
+        entry: pylint --disable=unnecessary-pass
+        stages: [commit]
+      - id: pylint-quick-features
+        name: "Quick PyLint on features/*"
+        language: system
+        types: [file, python]
+        files: ^kedro-datasets/features/
+        entry: pylint --disable=missing-docstring,no-name-in-module
+        stages: [commit]
+      - id: pylint-quick-tests
+        name: "Quick PyLint on tests/*"
+        language: system
+        types: [file, python]
+        files: ^kedro-datasets/tests/
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
+        stages: [commit]
+      # The same pylint checks, but running on all files. It's for manual run with `make lint`
+      - id: pylint-kedro_datasets
+        name: "PyLint on kedro_datasets/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --disable=unnecessary-pass kedro-datasets/kedro_datasets
+      - id: pylint-features
+        name: "PyLint on features/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --disable=missing-docstring,no-name-in-module kedro-datasets/features
+      - id: pylint-tests
+        name: "PyLint on tests/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-datasets/tests
+      - id: isort
+        name: "Sort imports"
+        language: system
+        types: [ file, python ]
+        files: ^kedro-datasets/
+        entry: isort
+      - id: black
+        name: "Black"
+        language: system
+        pass_filenames: false
+        entry: black kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests
+      - id: secret_scan
+        name: "Secret scan"
+        language: system
+        pass_filenames: false
+        entry: make plugin=kedro-datasets secret-scan
+      - id: bandit
+        name: "Bandit security check"
+        language: system
+        types: [file, python]
+        exclude: ^kedro-datasets/tests/|^kedro-datasets/features/|^kedro-telemetry|^kedro-airflow
+        entry: bandit -ll

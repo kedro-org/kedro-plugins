@@ -1,0 +1,1 @@
+"""Kedro plugin to support Kedro's DataCatalog"""

@@ -38,10 +38,4 @@ setup(
     tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
     packages=["kedro_datasets"],
-    # package_data={"kedro_airflow": ["kedro_airflow/airflow_dag_template.j2"]},
-    # include_package_data=True,
-    # zip_safe=False,
-    # entry_points={
-        # "kedro.project_commands": ["airflow = kedro_airflow.plugin:commands"]
-    # },
 )

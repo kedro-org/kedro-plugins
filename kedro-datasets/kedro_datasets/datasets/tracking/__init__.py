@@ -8,4 +8,4 @@ from contextlib import suppress
 with suppress(ImportError):
     from kedro_datasets.datasets.tracking.metrics_dataset import MetricsDataSet
 with suppress(ImportError):
-    pass
+    from kedro_datasets.datasets.tracking.json_dataset import JSONDataSet

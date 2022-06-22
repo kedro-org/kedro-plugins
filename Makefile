@@ -3,6 +3,9 @@ package:
 	rm -Rf dist;\
 	python setup.py sdist bdist_wheel
 
+pypi:
+	python -m twine upload $(plugin)/dist/*
+
 install: package
 	cd $(plugin) && pip install -U dist/*.whl
 

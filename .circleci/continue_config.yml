@@ -17,7 +17,7 @@ parameters:
     default: false
   run-build-kedro-datasets:
     type: boolean
-    default: false
+    default: true
 
 
 commands:

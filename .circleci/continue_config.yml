@@ -263,11 +263,11 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-      - e2e_tests:
-          plugin: "kedro-datasets"
-          matrix:
-            parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      # - e2e_tests:
+      #     plugin: "kedro-datasets"
+      #     matrix:
+      #       parameters:
+      #         python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           plugin: "kedro-datasets"
           matrix:

@@ -2,7 +2,7 @@ import re
 from codecs import open
 from os import path
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 name = "kedro-datasets"
 here = path.abspath(path.dirname(__file__))
@@ -28,7 +28,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 setup(
     name=name,
     version=version,
-    description="Kedro-Datasets is the core plugin that support Kedro's DataCatalog",
+    description="Kedro-Datasets is the core plugin that power Kedro's DataCatalog",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets",
@@ -37,5 +37,5 @@ setup(
     install_requires=requires,
     tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
-    packages=["kedro_datasets"],
+    packages=find_packages(exclude=["tests*"]),
 )

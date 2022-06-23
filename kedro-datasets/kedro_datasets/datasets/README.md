@@ -4,7 +4,7 @@ Welcome to `kedro_datasets.datasets`, the home of Kedro's data connectors. Here 
 
 ## What `AbstractDataSet` implementations are supported?
 
-We support a range of data descriptions, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. We even allow support for working with images.
+We support a range of data descriptions, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. 
 
 These data descriptions are supported with the APIs of `pandas`, `spark`, `networkx`, `matplotlib`, `yaml` and more.
 

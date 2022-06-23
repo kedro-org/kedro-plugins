@@ -15,6 +15,9 @@ parameters:
   run-build-kedro-airflow:
     type: boolean
     default: false
+  run-build-kedro-datasets:
+    type: boolean
+    default: false
 
 
 commands:
@@ -250,3 +253,25 @@ workflows:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           plugin: "kedro-airflow"
+  # when pipeline parameter, run-build-kedro-datasets is true, the
+  # kedro-datasets job is triggered.
+  kedro-datasets:
+    when: <<pipeline.parameters.run-build-kedro-airflow>>
+    jobs:
+      - unit_tests:
+          plugin: "kedro-datasets"
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - e2e_tests:
+          plugin: "kedro-datasets"
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - win_unit_tests:
+          plugin: "kedro-datasets"
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - lint:
+          plugin: "kedro-datasets"

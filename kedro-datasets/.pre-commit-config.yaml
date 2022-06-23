@@ -34,21 +34,21 @@ repos:
         language: system
         types: [file, python]
         files: ^kedro-datasets/kedro_datasets/
-        entry: pylint --disable=unnecessary-pass
+        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=unnecessary-pass
         stages: [commit]
       - id: pylint-quick-features
         name: "Quick PyLint on features/*"
         language: system
         types: [file, python]
         files: ^kedro-datasets/features/
-        entry: pylint --disable=missing-docstring,no-name-in-module
+        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module
         stages: [commit]
       - id: pylint-quick-tests
         name: "Quick PyLint on tests/*"
         language: system
         types: [file, python]
         files: ^kedro-datasets/tests/
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
+        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
         stages: [commit]
       # The same pylint checks, but running on all files. It's for manual run with `make lint`
       - id: pylint-kedro_datasets
@@ -56,19 +56,19 @@ repos:
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-datasets/kedro_datasets
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets
       - id: pylint-features
         name: "PyLint on features/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=missing-docstring,no-name-in-module kedro-datasets/features
+        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module kedro-datasets/features
       - id: pylint-tests
         name: "PyLint on tests/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-datasets/tests
+        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-datasets/tests
       - id: isort
         name: "Sort imports"
         language: system

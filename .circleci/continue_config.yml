@@ -256,7 +256,7 @@ workflows:
   # when pipeline parameter, run-build-kedro-datasets is true, the
   # kedro-datasets job is triggered.
   kedro-datasets:
-    when: <<pipeline.parameters.run-build-kedro-airflow>>
+    when: <<pipeline.parameters.run-build-kedro-datasets>>
     jobs:
       - unit_tests:
           plugin: "kedro-datasets"

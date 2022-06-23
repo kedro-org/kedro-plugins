@@ -4,9 +4,9 @@ from pathlib import PosixPath
 import pandas as pd
 import pytest
 import sqlalchemy
+from kedro.io import DataSetError
 
 from kedro_datasets.datasets.pandas import SQLQueryDataSet, SQLTableDataSet
-from kedro.io import DataSetError
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"

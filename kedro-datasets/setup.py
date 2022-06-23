@@ -2,7 +2,7 @@ import re
 from codecs import open
 from os import path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 name = "kedro-datasets"
 here = path.abspath(path.dirname(__file__))

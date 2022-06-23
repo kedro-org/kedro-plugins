@@ -4,11 +4,11 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from kedro.io import DataSetError
+from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs.core import S3FileSystem
 
 from kedro_datasets.datasets.json import JSONDataSet
-from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
 @pytest.fixture

@@ -1,13 +1,13 @@
 import pytest
 from delta import DeltaTable
+from kedro.io import DataCatalog, DataSetError
+from kedro.pipeline import Pipeline, node
+from kedro.runner import ParallelRunner
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.datasets.spark import DeltaTableDataSet, SparkDataSet
-from kedro.io import DataCatalog, DataSetError
-from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner
 
 
 @pytest.fixture

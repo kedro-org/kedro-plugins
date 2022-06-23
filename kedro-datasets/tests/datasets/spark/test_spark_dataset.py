@@ -6,6 +6,10 @@ from pathlib import Path, PurePosixPath
 import boto3
 import pandas as pd
 import pytest
+from kedro.io import DataCatalog, DataSetError, Version
+from kedro.io.core import generate_timestamp
+from kedro.pipeline import Pipeline, node
+from kedro.runner import ParallelRunner, SequentialRunner
 from moto import mock_s3
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
@@ -26,10 +30,6 @@ from kedro_datasets.datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
-from kedro.io import DataCatalog, DataSetError, Version
-from kedro.io.core import generate_timestamp
-from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner, SequentialRunner
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -616,7 +616,8 @@ class TestSparkDataSetVersionedDBFS:
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset._get_dbutils", return_value=None
+            "kedro_datasets.datasets.spark.spark_dataset._get_dbutils",
+            return_value=None,
         )
 
         data_set = SparkDataSet(filepath="/dbfs/tmp/data")

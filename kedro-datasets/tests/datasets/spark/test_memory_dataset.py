@@ -1,9 +1,8 @@
 import pytest
+from kedro.io import MemoryDataSet
 from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
-
-from kedro.io import MemoryDataSet
 
 
 def _update_spark_df(data, idx, jdx, value):

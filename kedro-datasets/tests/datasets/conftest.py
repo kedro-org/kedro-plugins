@@ -5,9 +5,8 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-from pytest import fixture
-
 from kedro.io.core import generate_timestamp
+from pytest import fixture
 
 
 @fixture(params=[None])

@@ -1,10 +1,7 @@
 adlfs>=2021.7.1, <=2022.2
 bandit>=1.6.2, <2.0
-
 biopython~=1.73
-
 compress-pickle[lz4]~=1.2.0
-
 dask[complete]~=2021.10  # pinned by Snyk to avoid a vulnerability
 delta-spark~=1.2.1  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
 dill~=0.3.1

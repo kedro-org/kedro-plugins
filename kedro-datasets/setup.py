@@ -28,7 +28,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 setup(
     name=name,
     version=version,
-    description="Kedro-Datasets is the core plugin that power Kedro's DataCatalog",
+    description="Kedro-Datasets is where you can find all of Kedro's data connectors.",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets",

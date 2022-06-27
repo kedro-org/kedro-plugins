@@ -3,6 +3,9 @@ package:
 	rm -Rf dist;\
 	python setup.py sdist bdist_wheel
 
+pypi:
+	python -m twine upload $(plugin)/dist/*
+
 install: package
 	cd $(plugin) && pip install -U dist/*.whl
 
@@ -13,7 +16,7 @@ lint:
 	cd $(plugin) && pre-commit run -a --hook-stage manual
 
 test:
-	cd $(plugin) && pytest -vv tests
+	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 e2e-tests:
 	cd $(plugin) && behave

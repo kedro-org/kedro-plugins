@@ -249,7 +249,7 @@ jobs:
       # For anything not `kedro-datasets`
       - unless:
           condition:
-            equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
+            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
 
           # e2e tests are not currently runnable on CircleCI on Windows as
           # those require the ability to run Linux containers:

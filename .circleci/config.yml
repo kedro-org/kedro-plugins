@@ -21,6 +21,7 @@ workflows:
             kedro-telemetry/.* run-build-kedro-telemetry true
             kedro-docker/.* run-build-kedro-docker true
             kedro-airflow/.* run-build-kedro-airflow true
+            kedro-airflow/.* run-build-kedro-datasets true
           base-revision: main
           # this is the path of the configuration we should trigger once
           # path filtering and pipeline parameter value updates are

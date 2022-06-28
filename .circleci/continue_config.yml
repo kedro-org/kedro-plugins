@@ -19,8 +19,6 @@ parameters:
     type: boolean
     default: false
 
-
-
 commands:
   setup_conda:
     parameters:
@@ -56,6 +54,11 @@ commands:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
+          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # if pip-installed, so we install this dependency via conda
+          name: Install pytables
+          command: conda install -c conda-forge pytables -y
+      - run:
           name: Install kedro and test requirements
           command: |
             cd <<parameters.plugin>>
@@ -67,6 +70,23 @@ commands:
             cd <<parameters.plugin>>
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
+      - run:
+          # this is needed to fix java cacerts so
+          # spark can automatically download packages from mvn
+          # https://stackoverflow.com/a/50103533/1684058
+          name: Fix cacerts
+          command: |
+            sudo rm /etc/ssl/certs/java/cacerts
+            sudo update-ca-certificates -f
+      - run:
+          # Since recently Spark installation for some reason does not have enough permissions to execute
+          # /home/circleci/miniconda/envs/kedro_plugins/lib/python3.X/site-packages/pyspark/bin/spark-class.
+          # So fixing it manually here.
+          name: Fix Spark permissions
+          command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_plugins/lib/
+      - run:
+          name: Print Python environment
+          command: make print-python-env
       - run:
           name: Pip freeze
           command: pip freeze
@@ -103,15 +123,21 @@ commands:
     parameters:
       plugin:
         type: string
+      python_version:
+        type: string
     steps:
       - run:
-          name: Install Kedro plugins dependencies
-          command: |
-            conda activate kedro_plugins
-            cd <<parameters.plugin>>
-            python -m pip install -U pip setuptools wheel
-            pip install git+https://github.com/kedro-org/kedro@main
-            pip install -r test_requirements.txt -U
+          name: Install GDAL, Fiona and pytables
+          command: conda activate kedro_plugins; conda install gdal fiona pytables -c conda-forge -y
+      - run:
+          name: Install Kedro
+          command: pip install git+https://github.com/kedro-org/kedro@main
+      - run:
+          name: Install all requirements
+          command: conda activate kedro_plugins; pip install -r test_requirements.txt -U
+      - run:
+          name: Print Python environment
+          command: conda activate kedro_plugins; make print-python-env
       - run:
           name: Pip freeze
           command: conda activate kedro_plugins; pip freeze
@@ -180,6 +206,7 @@ jobs:
           python_version: <<parameters.python_version>>
       - win_setup_requirements:
           plugin: <<parameters.plugin>>
+          python_version: <<parameters.python_version>>
       - run:
           # e2e tests are not currently runnable on CircleCI on Windows as
           # those require the ability to run Linux containers:
@@ -264,11 +291,11 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-      - e2e_tests:
-          plugin: "kedro-datasets"
-          matrix:
-            parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      # - e2e_tests:
+      #     plugin: "kedro-datasets"
+      #     matrix:
+      #       parameters:
+      #         python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           plugin: "kedro-datasets"
           matrix:

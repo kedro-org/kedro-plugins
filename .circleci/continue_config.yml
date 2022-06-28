@@ -247,17 +247,23 @@ jobs:
           plugin: <<parameters.plugin>>
           python_version: <<parameters.python_version>>
       # For anything not `kedro-datasets`
-      - run:
+      - unless:
+          condition:
+            equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
+
           # e2e tests are not currently runnable on CircleCI on Windows as
           # those require the ability to run Linux containers:
           # "The Windows executor currently only supports Windows containers.
           # Running Linux containers on Windows is not possible for now"
           # (from https://circleci.com/docs/2.0/hello-world-windows/)
-          name: Run unit tests
-          command: |
-            conda activate kedro_plugins
-            cd <<parameters.plugin>>
-            pytest tests
+          steps:
+            - run:
+                name: Run unit tests
+                command: |
+                  conda activate kedro_plugins
+                  cd <<parameters.plugin>>
+                  pytest tests
+
       - run:
           # geopandas and tensorflow conflicts when imported simultaneously.
           # The HDF5 header files used to compile this application do not match

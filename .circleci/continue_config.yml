@@ -85,9 +85,6 @@ commands:
           name: Fix Spark permissions
           command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_plugins/lib/
       - run:
-          name: Print Python environment
-          command: make print-python-env
-      - run:
           name: Pip freeze
           command: pip freeze
 
@@ -131,7 +128,7 @@ commands:
           command: conda activate kedro_plugins; conda install gdal fiona pytables -c conda-forge -y
       - run:
           name: Install Kedro
-          command: pip install git+https://github.com/kedro-org/kedro@main
+          command: conda activate kedro_plugins; pip install git+https://github.com/kedro-org/kedro@main
       - run:
           name: Install all requirements
           command: conda activate kedro_plugins; pip install -r test_requirements.txt -U

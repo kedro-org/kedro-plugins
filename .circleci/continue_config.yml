@@ -295,7 +295,7 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark sequentially
-                command: conda activate kedro_plugins; pytest tests --no-cov --ignore tests/extras/datasets/spark
+                command: conda activate kedro_plugins; make test-no-spark-sequential
 
 
 workflows:

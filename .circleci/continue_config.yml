@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.4.0
+  win: circleci/windows@2.4.1
 
 # the default pipeline parameters, which will be updated according to
 # the results of the path-filtering orb
@@ -16,9 +16,6 @@ parameters:
     type: boolean
     default: false
   run-build-kedro-datasets:
-    type: boolean
-    default: false
-  release_kedro_plugin:
     type: boolean
     default: false
 
@@ -99,9 +96,6 @@ commands:
         type: string
     steps:
       - checkout
-      - run:
-          name: REMOVE THIS BEFORE MERGE
-          command: python env.py
       - setup_conda:
           python_version: <<parameters.python_version>>
       - setup_requirements:
@@ -304,38 +298,6 @@ jobs:
                 command: conda activate kedro_plugins; make test-no-spark-sequential
 
 
-  publish_plugin:
-    executor:
-      name: docker
-      python_version: "3.7"
-    steps:
-      - setup
-      - add_ssh_keys
-      - run:
-          name: Check Kedro version
-          command: |
-            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-            if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
-            then
-                echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
-            else
-                echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
-                exit 1
-            fi
-      - run:
-          name: Tag and publish release on Github
-          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
-      - run:
-          name: Publish to PyPI
-          command: |
-            make package
-            python -m pip install twine -U
-            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
-
-
-
-
-
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
@@ -408,11 +370,6 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-      # - e2e_tests:
-      #     plugin: "kedro-datasets"
-      #     matrix:
-      #       parameters:
-      #         python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           plugin: "kedro-datasets"
           matrix:
@@ -420,15 +377,3 @@ workflows:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           plugin: "kedro-datasets"
-  # kedro_plugin_release:
-  #   when:
-  #     and:
-  #       - <<pipeline.parameters.release_kedro_plugin>>
-  #   jobs:
-  #     - build_plugin:
-  #         matrix:
-  #           parameters:
-  #             python_version: ["3.7", "3.8", "3.9", "3.10"]
-  #     - publish_kedro:
-  #         requires:
-  #           - build_plugin

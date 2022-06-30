@@ -191,7 +191,7 @@ jobs:
     steps:
       - run:
           name: REMOVE THIS BEFORE MERGE
-          run: python env.py
+          command: python env.py
       - setup:
           python_version: <<parameters.python_version>>
           plugin: <<parameters.plugin>>
@@ -420,15 +420,15 @@ workflows:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           plugin: "kedro-datasets"
-  kedro_plugin_release:
-    when:
-      and:
-        - <<pipeline.parameters.release_kedro_plugin>>
-    jobs:
-      - build_plugin:
-          matrix:
-            parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
-      - publish_kedro:
-          requires:
-            - build_plugin
+  # kedro_plugin_release:
+  #   when:
+  #     and:
+  #       - <<pipeline.parameters.release_kedro_plugin>>
+  #   jobs:
+  #     - build_plugin:
+  #         matrix:
+  #           parameters:
+  #             python_version: ["3.7", "3.8", "3.9", "3.10"]
+  #     - publish_kedro:
+  #         requires:
+  #           - build_plugin

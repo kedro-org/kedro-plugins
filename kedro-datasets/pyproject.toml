@@ -33,14 +33,14 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-# omit = ["kedro_datasets/extras/logging/color_logger.py","tests/*"]
+omit = ["tests/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""
 --cov-report xml:coverage.xml \
 --cov-report term-missing \
---cov kedro \
+--cov kedro_datasets \
 --cov tests \
 --ignore tests/template/fake_repo \
 --no-cov-on-fail \

@@ -99,6 +99,9 @@ commands:
         type: string
     steps:
       - checkout
+      - run:
+          name: REMOVE THIS BEFORE MERGE
+          command: python env.py
       - setup_conda:
           python_version: <<parameters.python_version>>
       - setup_requirements:
@@ -189,9 +192,6 @@ jobs:
       image: ubuntu-2004:202201-02
       docker_layer_caching: true
     steps:
-      - run:
-          name: REMOVE THIS BEFORE MERGE
-          command: python env.py
       - setup:
           python_version: <<parameters.python_version>>
           plugin: <<parameters.plugin>>

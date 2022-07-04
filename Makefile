@@ -45,3 +45,10 @@ sign-off:
 	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
 	echo '--in-place "$$1"' >> .git/hooks/commit-msg
 	chmod +x .git/hooks/commit-msg
+
+# kedro-datasets related only
+test-no-spark:
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/datasets/spark --numprocesses 4 --dist loadfile
+
+test-no-spark-sequential:
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/datasets/spark

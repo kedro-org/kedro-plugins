@@ -1,18 +1,24 @@
+import os
 from pathlib import Path, PurePosixPath
 from time import sleep
 
+import boto3
 import pandas as pd
 import pytest
 from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
+from moto import mock_s3
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.datasets.pandas import CSVDataSet
+from kedro.extras.datasets.pandas import CSVDataSet
+from kedro.io import DataSetError
+from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
+
+BUCKET_NAME = "test_bucket"
+FILE_NAME = "test.csv"
 
 
 @pytest.fixture
@@ -37,6 +43,45 @@ def versioned_csv_data_set(filepath_csv, load_version, save_version):
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+@pytest.fixture
+def partitioned_data_pandas():
+    return {
+        f"p{counter:02d}/data.csv": pd.DataFrame(
+            {"part": counter, "col": list(range(counter + 1))}
+        )
+        for counter in range(5)
+    }
+
+
+@pytest.fixture
+def mocked_s3_bucket():
+    """Create a bucket for testing using moto."""
+    with mock_s3():
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
+
+
+@pytest.fixture
+def mocked_dataframe():
+    df = pd.DataFrame([{"dummy": "dummy"}])
+    return df
+
+
+@pytest.fixture
+def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe):
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME,
+        Key=FILE_NAME,
+        Body=mocked_dataframe.to_csv(index=False),
+    )
+    return f"s3://{BUCKET_NAME}/{FILE_NAME}"
 
 
 class TestCSVDataSet:
@@ -298,3 +343,16 @@ class TestCSVDataSetVersioned:
         Path(csv_data_set._filepath.as_posix()).unlink()
         versioned_csv_data_set.save(dummy_dataframe)
         assert versioned_csv_data_set.exists()
+
+
+class TestCSVDataSetS3:
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+
+    def test_load_and_confirm(self, mocked_csv_in_s3, mocked_dataframe):
+        """Test the standard flow for loading, confirming and reloading
+        a IncrementalDataSet in S3"""
+        df = CSVDataSet(mocked_csv_in_s3)
+        assert df._protocol == "s3"
+        loaded = df.load()
+        assert_frame_equal(loaded, mocked_dataframe)

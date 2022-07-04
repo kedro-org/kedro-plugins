@@ -18,6 +18,12 @@ parameters:
   run-build-kedro-datasets:
     type: boolean
     default: false
+  release_package:
+    type: string
+    default: ""
+  release_version:
+    type: string
+    default: ""
 
 commands:
   setup_conda:
@@ -298,6 +304,98 @@ jobs:
                 command: conda activate kedro_plugins; make test-no-spark-sequential
 
 
+  sync:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - add_ssh_keys
+      - run:
+          name: Set git email and name
+          command: |
+            git config --global user.email "kedro@kedro.com"
+            git config --global user.name "Kedro"
+      # - run:
+      #     name: Trigger Read The Docs build
+      #     command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
+      # - run:
+      #     name: Maybe merge main into develop or raise a PR
+      #     command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+      - run:
+          name: Maybe trigger the release workflow
+          command: ./tools/circleci/circleci_release.py
+
+
+
+  # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
+  # It's used to check that the nightly docker image is working ok and before publishing a release.
+  build_package:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
+      - run:
+          name: Run linters
+          command: make lint
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
+
+  publish_package:
+    executor:
+      name: docker
+      python_version: "3.7"
+    steps:
+      - setup
+      - add_ssh_keys
+      - run:
+          name: Check Kedro version
+          command: |
+            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
+            if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
+            then
+                echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
+            else
+                echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
+                exit 1
+            fi
+      - run:
+          name: Tag and publish release on Github
+          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+      - run:
+          name: Publish to PyPI
+          command: |
+            make package
+            python -m pip install twine -U
+            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
+      - run:
+          name: Trigger Read The Docs build
+          command: |
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
+            # give some time for GitHub release to propagate
+            # otherwise RTD fails to build a new tag
+            sleep 120
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
+
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
@@ -377,3 +475,48 @@ workflows:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           plugin: "kedro-datasets"
+
+  # For release
+  main_updated:
+    # when:
+    #   and:
+    #     - not: <<pipeline.parameters.release_kedro>>
+    #     - not: <<pipeline.parameters.run_hourly>>
+    #     - not: <<pipeline.parameters.run_nightly>>
+    jobs:
+      - sync:
+          filters:
+            branches:
+              only: feat/refactor-auto-release  # TODO: Changed to main before merge
+  # package_release:
+  #   when:
+  #     and:
+  #       - not:
+  #         equal: ["", <<pipeline.parameters.release_package>>]
+  #       - not:
+  #         equal: ["", <<pipeline.parameters.release_version>>]
+  #   jobs:
+  #     - build_package:
+  #         matrix:
+  #           parameters:
+  #             python_version: ["3.7", "3.8", "3.9", "3.10"]
+  #     - publish_package:
+  #         requires:
+  #           - build_package
+  # kedro_plugin_release:
+  #   when:
+  #     and:
+  #       - not:
+  #         equal: ["", <<pipeline.parameters.release_package>>]
+  #       - not:
+  #         equal: ["", <<pipeline.parameters.release_version>>]
+  #       # - not: <<pipeline.parameters.run_hourly>>
+  #       # - not: <<pipeline.parameters.run_nightly>>
+  #   jobs:
+  #     - build_package:
+  #         matrix:
+  #           parameters:
+  #             python_version: ["3.7", "3.8", "3.9", "3.10"]
+  #     - publish_package:
+  #         requires:
+  #           - build_kedro

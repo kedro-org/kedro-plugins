@@ -515,9 +515,9 @@ workflows:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
 
-      - publish_package:
-          requires:
-            - build_package
+      - publish_package
+          # requires:
+          #   - build_package
   kedro_plugin_release:
     when:
       and:

@@ -11,8 +11,7 @@ from requests.structures import CaseInsensitiveDict
 from utils.check_no_version_pypi import check_no_version_pypi
 from utils.package_version import get_package_version
 
-
-PACKAGE_PATH = (
+PACKAGE_PATHS = (
     "kedro-datasets/kedro_datasets",
     "kedro-telemetry/kedro_telemetry",
     "kedro-airflow/kedro_airflow",
@@ -42,31 +41,28 @@ def circleci_release(project_slug, payload, circle_endpoint, circle_release_toke
 
 if __name__ == "__main__":
     """Trigger the CircleCI Release Process"""
-
+    from pathlib import Path
     CIRCLE_RELEASE_TOKEN = os.environ.get("CIRCLE_RELEASE_TOKEN")
     if not CIRCLE_RELEASE_TOKEN:
         raise ValueError("CIRCLE_RELEASE_TOKEN is not defined as envionrmnet variable.")
 
-
-
-    base_path = "/Users/Nok_Lam_Chan/GitHub/kedro_plugins_release"
-    package_paths = PACKAGE_PATH
+    base_path = Path()
     # Loop for all 4 repositories
-    for package_path in package_paths:
-        PACKAGE_NAME, _ = package_path.split("/")
-        PACKAGE_VERSION = get_package_version(base_path, package_path)
-        PYPI_ENDPOINT = f"https://pypi.org/pypi/{PACKAGE_NAME}/{PACKAGE_VERSION}/json/"
-        CIRCLE_ENDPOINT = f"https://circleci.com/api/v2/project/{PROJECT_SLUG}/pipeline"
-        PAYLOAD = {
+    for package_path in PACKAGE_PATHS:
+        package_name, _ = package_path.split("/")
+        package_version = get_package_version(base_path, package_path)
+        pypi_endpoint = f"https://pypi.org/pypi/{package_name}/{package_version}/json/"
+        circleci_endpoint = f"https://circleci.com/api/v2/project/{PROJECT_SLUG}/pipeline"
+        payload = {
             "branch": CIRCLE_BRANCH,
             "parameters": {
-                "release_package": PACKAGE_NAME,
-                "release_version": PACKAGE_VERSION,
+                "release_package": package_name,
+                "release_version": package_version,
             },
         }
 
-        print(PACKAGE_NAME, PACKAGE_VERSION)
-        if check_no_version_pypi(PYPI_ENDPOINT, PACKAGE_NAME, PACKAGE_VERSION):
+        print(package_name, package_version)
+        if check_no_version_pypi(pypi_endpoint, package_name, package_version):
             circleci_release(
-                PROJECT_SLUG, PAYLOAD, CIRCLE_ENDPOINT, CIRCLE_RELEASE_TOKEN
+                PROJECT_SLUG, payload, circleci_endpoint, CIRCLE_RELEASE_TOKEN
             )

@@ -1,5 +1,13 @@
 version: 2.1
 
+parameters:
+  release_package:
+    type: string
+    default: ""
+  release_version:
+    type: string
+    default: ""
+
 setup: true
 
 # the path-filtering orb is required to continue a pipeline based on

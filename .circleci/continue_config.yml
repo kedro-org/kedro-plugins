@@ -322,9 +322,10 @@ jobs:
       # - run:
       #     name: Maybe merge main into develop or raise a PR
       #     command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+      - setup_conda
       - run:
           name: Maybe trigger the release workflow
-          command: ./tools/circleci/circleci_release.py
+          command: conda activate kedro_plugins; kedro./tools/circleci/circleci_release.py
 
 
 

@@ -504,21 +504,8 @@ workflows:
             # We just need one Python enviornment to trigger the job
             parameters:
               python_version: ["3.8"]
-  package_release:
-    when:
-      and:
-        -  <<pipeline.parameters.release_package>>
-        -  <<pipeline.parameters.release_version>>
-    jobs:
-      - build_package:
-          matrix:
-            parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
 
-      - publish_package
-          # requires:
-          #   - build_package
-  kedro_plugin_release:
+  package_release:
     when:
       and:
         # - not:
@@ -532,6 +519,6 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-      - publish_package:
-          requires:
-            - build_kedro
+      - publish_package
+          # requires:
+          #   - build_kedro

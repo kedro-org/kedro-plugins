@@ -486,9 +486,10 @@ workflows:
 
   # For release
   main_updated:
-    # when:
-    #   and:
-    #     - not: <<pipeline.parameters.release_kedro>>
+    when:
+      and:
+        - not: <<pipeline.parameters.release_package>>
+        - not: <<pipeline.parameters.release_version>>
     #     - not: <<pipeline.parameters.run_hourly>>
     #     - not: <<pipeline.parameters.run_nightly>>
     jobs:

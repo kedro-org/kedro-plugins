@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+CircleCI pipeline to check if it needs to trigger a release
+"""
 
 import os
 

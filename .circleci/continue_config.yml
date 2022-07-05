@@ -329,7 +329,10 @@ jobs:
           python_version: <<parameters.python_version>>
       - run:
           name: Maybe trigger the release workflow
-          command: conda activate kedro_plugins; ./tools/circleci/circleci_release.py
+          command: |
+            conda activate kedro_plugins;
+            pip install requests
+            ./tools/circleci/circleci_release.py
 
 
 

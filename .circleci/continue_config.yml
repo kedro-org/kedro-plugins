@@ -386,6 +386,7 @@ jobs:
       - run:
           name: Publish to PyPI
           command: |
+            export plugin=<<pipeline.parameters.release_package>>
             make package
             python -m pip install twine -U
             python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*

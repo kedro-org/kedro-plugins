@@ -305,6 +305,9 @@ jobs:
 
 
   sync:
+    parameters:
+      python_version:
+        type: string
     docker:
       # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
       - image: cimg/base:2020.01
@@ -322,7 +325,8 @@ jobs:
       # - run:
       #     name: Maybe merge main into develop or raise a PR
       #     command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
-      - setup_conda
+      - setup_conda:
+          python_version: <<parameters.python_version>>
       - run:
           name: Maybe trigger the release workflow
           command: conda activate kedro_plugins; kedro./tools/circleci/circleci_release.py
@@ -489,6 +493,10 @@ workflows:
           filters:
             branches:
               only: feat/refactor-auto-release  # TODO: Changed to main before merge
+          matrix:
+            # We just need one Python enviornment to trigger the job
+            parameters:
+              python_version: ["3.8"]
   # package_release:
   #   when:
   #     and:

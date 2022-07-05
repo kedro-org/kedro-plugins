@@ -408,7 +408,11 @@ workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
   kedro-telemetry:
-    when: <<pipeline.parameters.run-build-kedro-telemetry>>
+    when:
+      and:
+        - <<pipeline.parameters.run-build-kedro-telemetry>>
+        - not: <<pipeline.parameters.release_package>>
+        - not: <<pipeline.parameters.release_version>>
     jobs:
       - unit_tests:
           plugin: "kedro-telemetry"
@@ -425,7 +429,11 @@ workflows:
   # when pipeline parameter, run-build-kedro-docker is true, the
   # kedro-docker job is triggered.
   kedro-docker:
-    when: <<pipeline.parameters.run-build-kedro-docker>>
+    when:
+      and:
+        -  <<pipeline.parameters.run-build-kedro-docker>>
+        - not: <<pipeline.parameters.release_package>>
+        - not: <<pipeline.parameters.release_version>>
     jobs:
       - unit_tests:
           plugin: "kedro-docker"
@@ -447,7 +455,11 @@ workflows:
   # when pipeline parameter, run-build-kedro-airflow is true, the
   # kedro-airflow job is triggered.
   kedro-airflow:
-    when: <<pipeline.parameters.run-build-kedro-airflow>>
+    when:
+      and:
+        - <<pipeline.parameters.run-build-kedro-airflow>>
+        - not: <<pipeline.parameters.release_package>>
+        - not: <<pipeline.parameters.release_version>>
     jobs:
       - unit_tests:
           plugin: "kedro-airflow"
@@ -469,7 +481,11 @@ workflows:
   # when pipeline parameter, run-build-kedro-datasets is true, the
   # kedro-datasets job is triggered.
   kedro-datasets:
-    when: <<pipeline.parameters.run-build-kedro-datasets>>
+    when:
+      and:
+        - <<pipeline.parameters.run-build-kedro-datasets>>
+        - not: <<pipeline.parameters.release_package>>
+        - not: <<pipeline.parameters.release_version>>
     jobs:
       - unit_tests:
           plugin: "kedro-datasets"

@@ -335,7 +335,6 @@ jobs:
             ./tools/circleci/circleci_release.py
 
 
-
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
   # It's used to check that the nightly docker image is working ok and before publishing a release.
   build_package:
@@ -349,7 +348,7 @@ jobs:
     #   name: docker
     #   python_version: <<parameters.python_version>>
     steps:
-      # - setup
+      - setup
       - run:
           name: Run linters
           command: make lint
@@ -494,8 +493,6 @@ workflows:
       and:
         - not: <<pipeline.parameters.release_package>>
         - not: <<pipeline.parameters.release_version>>
-    #     - not: <<pipeline.parameters.run_hourly>>
-    #     - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - sync:
           filters:
@@ -509,10 +506,6 @@ workflows:
   package_release:
     when:
       and:
-        # - not:
-        #   equal: ["", <<pipeline.parameters.release_package>>]
-        # - not:
-        #   equal: ["", <<pipeline.parameters.release_version>>]
         -  <<pipeline.parameters.release_package>>
         -  <<pipeline.parameters.release_version>>
     jobs:

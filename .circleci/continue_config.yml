@@ -357,17 +357,17 @@ jobs:
           steps:
             - run:
                 name: Run unit tests in parallel
-                command: make test
+                command: export plugin=<<pipeline.parameters.release_package>>; make test
       - when:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests sequentially
-                command: pytest tests --cov-config pyproject.toml
+                command: export plugin=<<pipeline.parameters.release_package>>; make test-sequential
       - run:
           name: Run e2e tests
-          command: make e2e-tests
+          command: export plugin=<<pipeline.parameters.release_package>>; make e2e-tests
 
   publish_package:
     machine:

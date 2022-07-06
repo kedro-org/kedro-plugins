@@ -353,7 +353,7 @@ jobs:
           plugin: <<pipeline.parameters.release_package>>
       - run:
           name: Run linters
-          command: make lint
+          command: export plugin=<<pipeline.parameters.release_package>>; make lint
       - unless:
           condition:
             equal: ["3.10", <<parameters.python_version>>]

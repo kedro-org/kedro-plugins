@@ -5,7 +5,7 @@ package:
 
 pypi:
 	python -m pip install twine -U
-	python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} $(plugin)/dist/*
+	python -m twine upload $(plugin)/dist/*
 
 install: package
 	cd $(plugin) && pip install -U dist/*.whl

@@ -344,9 +344,6 @@ jobs:
     machine:
       image: ubuntu-2004:202201-02
       docker_layer_caching: true
-    # executor:
-    #   name: docker
-    #   python_version: <<parameters.python_version>>
     steps:
       - setup:
           python_version: <<parameters.python_version>>  # Just need one Python version here
@@ -517,6 +514,6 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-      - publish_package
-          # requires:
-          #   - build_kedro
+      - publish_package:
+          requires:
+            - build_package

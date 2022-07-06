@@ -393,9 +393,7 @@ jobs:
           command: |
             export plugin=<<pipeline.parameters.release_package>>
             make package
-            python -m pip install twine -U
-            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
-
+            make pypi
 
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the

@@ -4,7 +4,8 @@ package:
 	python setup.py sdist bdist_wheel
 
 pypi:
-	python -m twine upload $(plugin)/dist/*
+	python -m pip install twine -U
+	python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} $(plugin)/dist/*
 
 install: package
 	cd $(plugin) && pip install -U dist/*.whl

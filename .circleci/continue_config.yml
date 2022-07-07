@@ -498,7 +498,7 @@ workflows:
       - sync:
           filters:
             branches:
-              only: feat/refactor-auto-release  # TODO: Changed to main before merge
+              only: main
           matrix:
             # We just need one Python enviornment to trigger the job
             parameters:

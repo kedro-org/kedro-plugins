@@ -16,8 +16,6 @@ def get_package_version(base_path, package_path):
 
 
 if __name__ == "__main__":
-    from pathlib import Path
-
     base_path = Path()
     package_path = "kedro-datasets/kedro_datasets"
     print(get_package_version(base_path, package_path))

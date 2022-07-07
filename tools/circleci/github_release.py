@@ -7,6 +7,7 @@ from requests.structures import CaseInsensitiveDict
 
 GITHUB_USER = "kedro-org"
 GITHUB_REPO = "kedro-plugins"
+# On GitHub select "Settings" > "Developer Setting" -> "Personal access Token""
 GITHUB_TAGGING_TOKEN = os.environ.get("GITHUB_TAGGING_TOKEN")
 
 

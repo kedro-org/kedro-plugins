@@ -45,6 +45,7 @@ if __name__ == "__main__":
     """Trigger the CircleCI Release Process"""
     from pathlib import Path
 
+    # Personal API Tokens - https://circleci.com/docs/managing-api-tokens
     CIRCLE_RELEASE_TOKEN = os.environ.get("CIRCLE_RELEASE_TOKEN")
     if not CIRCLE_RELEASE_TOKEN:
         raise ValueError("CIRCLE_RELEASE_TOKEN is not defined as envionrmnet variable.")

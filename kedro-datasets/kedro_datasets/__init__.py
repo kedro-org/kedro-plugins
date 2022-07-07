@@ -2,5 +2,3 @@
 
 __version__ = "0.0.4"
 
-
-# todo: remove this before merge Trigger CI with file changes

@@ -33,7 +33,7 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["tests/*"]
+omit = ["tests/*", "kedro_datasets/datasets/holoviews/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]

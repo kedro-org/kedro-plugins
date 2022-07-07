@@ -21,6 +21,7 @@ PROJECT_SLUG = "github/kedro-org/kedro-plugins"
 # CIRCLE_BRANCH = "feat/cicd-auto-release"
 CIRCLE_BRANCH = os.environ.get("CIRCLE_BRANCH")
 
+
 def circleci_release(project_slug, payload, circle_endpoint, circle_release_token):
     """Trigging the CircleCI Release Pipeline"""
     # See https://circleci.com/docs/2.0/api-developers-guide
@@ -43,6 +44,7 @@ def circleci_release(project_slug, payload, circle_endpoint, circle_release_toke
 if __name__ == "__main__":
     """Trigger the CircleCI Release Process"""
     from pathlib import Path
+
     CIRCLE_RELEASE_TOKEN = os.environ.get("CIRCLE_RELEASE_TOKEN")
     if not CIRCLE_RELEASE_TOKEN:
         raise ValueError("CIRCLE_RELEASE_TOKEN is not defined as envionrmnet variable.")
@@ -53,7 +55,9 @@ if __name__ == "__main__":
         package_name, _ = package_path.split("/")
         package_version = get_package_version(base_path, package_path)
         pypi_endpoint = f"https://pypi.org/pypi/{package_name}/{package_version}/json/"
-        circleci_endpoint = f"https://circleci.com/api/v2/project/{PROJECT_SLUG}/pipeline"
+        circleci_endpoint = (
+            f"https://circleci.com/api/v2/project/{PROJECT_SLUG}/pipeline"
+        )
         payload = {
             "branch": CIRCLE_BRANCH,
             "parameters": {

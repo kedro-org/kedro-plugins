@@ -1,7 +1,6 @@
 import requests
 
 
-
 def check_no_version_pypi(pypi_endpoint, package_name, package_version):
     print("Check if {package_name} {package_version} is on pypi")
     response = requests.get(pypi_endpoint)

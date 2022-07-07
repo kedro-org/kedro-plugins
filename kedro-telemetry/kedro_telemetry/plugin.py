@@ -40,7 +40,6 @@ class KedroTelemetryCLIHooks:
         self, project_metadata: ProjectMetadata, command_args: List[str]
     ):
         """Hook implementation to send command run data to Heap"""
-        # pylint: disable=no-self-use
         try:
             # get KedroCLI and its structure from actual project root
             cli = KedroCLI(project_path=Path.cwd())

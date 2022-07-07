@@ -1,2 +1,2 @@
 kedro~=0.18.0
-requests~=2.25.1
+requests~=2.20

@@ -303,7 +303,6 @@ jobs:
                 name: Run unit tests without spark sequentially
                 command: conda activate kedro_plugins; make test-no-spark-sequential
 
-
   sync:
     parameters:
       python_version:
@@ -391,6 +390,7 @@ jobs:
             export plugin=<<pipeline.parameters.release_package>>
             make package
             make pypi
+
 
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the

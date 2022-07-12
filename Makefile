@@ -4,6 +4,7 @@ package:
 	python setup.py sdist bdist_wheel
 
 pypi:
+	python -m pip install twine -U
 	python -m twine upload $(plugin)/dist/*
 
 install: package
@@ -17,6 +18,9 @@ lint:
 
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
+
+test-sequential:
+	cd $(plugin) && pytest tests --cov-config pyproject.toml
 
 e2e-tests:
 	cd $(plugin) && behave

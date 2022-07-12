@@ -321,9 +321,6 @@ jobs:
       # - run:
       #     name: Trigger Read The Docs build
       #     command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
-      # - run:
-      #     name: Maybe merge main into develop or raise a PR
-      #     command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
       - setup_conda:
           python_version: <<parameters.python_version>>
       - run:

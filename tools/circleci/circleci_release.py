@@ -33,6 +33,7 @@ def circleci_release(project_slug, payload, circle_endpoint, circle_release_toke
     headers["Circle-Token"] = circle_release_token
 
     resp = requests.post(circle_endpoint, headers=headers, json=payload)
+    print(f"Status Code: {resp.status_code}")
     if resp.status_code == 201:
         print("Creating CircleCI Pipeline successfully")
         print(resp.content)

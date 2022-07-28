@@ -87,9 +87,7 @@ def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
         mock_save(spark_jdbc_args_credentials_with_none_password)
 
 
-@mock.patch(
-    "kedro_datasets.spark.spark_jdbc_dataset.SparkSession.builder.getOrCreate"
-)
+@mock.patch("kedro_datasets.spark.spark_jdbc_dataset.SparkSession.builder.getOrCreate")
 def mock_load(mock_get_or_create, arg_dict):
     spark = mock_get_or_create.return_value
     data_set = SparkJDBCDataSet(**arg_dict)

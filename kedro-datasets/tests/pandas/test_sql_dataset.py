@@ -213,9 +213,7 @@ class TestSQLTableDataSetSingleConnection:
         """Test that two datasets that need to connect to the same db
         (but different tables, for example) only create a connection once.
         """
-        mock_engine = mocker.patch(
-            "kedro_datasets.pandas.sql_dataset.create_engine"
-        )
+        mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
 
@@ -231,9 +229,7 @@ class TestSQLTableDataSetSingleConnection:
         """Test that two datasets that need to connect to different dbs
         only create one connection per db.
         """
-        mock_engine = mocker.patch(
-            "kedro_datasets.pandas.sql_dataset.create_engine"
-        )
+        mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
 
@@ -361,9 +357,7 @@ class TestSQLQueryDataSet:
         """Test that two datasets that need to connect to the same db
         (but different tables, for example) only create a connection once.
         """
-        mock_engine = mocker.patch(
-            "kedro_datasets.pandas.sql_dataset.create_engine"
-        )
+        mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         first = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
 

@@ -99,9 +99,7 @@ class TestGBQDataSet:
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
         pattern = r"Failed while loading data from data set GBQTableDataSet\(.*\)"
-        mocked_read_gbq = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.pd.read_gbq"
-        )
+        mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.side_effect = ValueError
         with pytest.raises(DataSetError, match=pattern):
             gbq_dataset.load()
@@ -139,9 +137,7 @@ class TestGBQDataSet:
         """Test saving and reloading the data set."""
         sql = f"select * from {DATASET}.{TABLE_NAME}"
         table_id = f"{DATASET}.{TABLE_NAME}"
-        mocked_read_gbq = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.pd.read_gbq"
-        )
+        mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.return_value = dummy_dataframe
         mocked_df = mocker.Mock()
 
@@ -159,9 +155,7 @@ class TestGBQDataSet:
     @pytest.mark.parametrize("load_args", [{"query": "Select 1"}], indirect=True)
     def test_read_gbq_with_query(self, gbq_dataset, dummy_dataframe, mocker, load_args):
         """Test loading data set with query in the argument."""
-        mocked_read_gbq = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.pd.read_gbq"
-        )
+        mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.return_value = dummy_dataframe
         loaded_data = gbq_dataset.load()
 
@@ -192,9 +186,7 @@ class TestGBQDataSet:
             "kedro_datasets.pandas.gbq_dataset.Credentials",
             return_value=credentials_obj,
         )
-        mocked_bigquery = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.bigquery"
-        )
+        mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
         data_set = GBQTableDataSet(
             dataset=DATASET,
@@ -235,9 +227,7 @@ class TestGBQQueryDataSet:
             "kedro_datasets.pandas.gbq_dataset.Credentials",
             return_value=credentials_obj,
         )
-        mocked_bigquery = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.bigquery"
-        )
+        mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
         data_set = GBQQueryDataSet(
             sql=SQL_QUERY,
@@ -253,9 +243,7 @@ class TestGBQQueryDataSet:
 
     def test_load(self, mocker, gbq_sql_dataset, dummy_dataframe):
         """Test `load` method invocation"""
-        mocked_read_gbq = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.pd.read_gbq"
-        )
+        mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.return_value = dummy_dataframe
 
         loaded_data = gbq_sql_dataset.load()
@@ -268,9 +256,7 @@ class TestGBQQueryDataSet:
 
     def test_load_query_file(self, mocker, gbq_sql_file_dataset, dummy_dataframe):
         """Test `load` method invocation using a file as input query"""
-        mocked_read_gbq = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.pd.read_gbq"
-        )
+        mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.return_value = dummy_dataframe
 
         loaded_data = gbq_sql_file_dataset.load()

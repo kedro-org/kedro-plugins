@@ -141,7 +141,7 @@ class TestPickleDataSet:
             r"Missing one of 'load' and 'dump' on the backend."
         )
         mocker.patch(
-            "kedro_datasets.datasets.pickle.pickle_dataset.importlib.import_module",
+            "kedro_datasets.pickle.pickle_dataset.importlib.import_module",
             return_value=object,
         )
         with pytest.raises(ValueError, match=pattern):
@@ -153,7 +153,7 @@ class TestPickleDataSet:
             r"Make sure it is installed and importable."
         )
         mocker.patch(
-            "kedro_datasets.datasets.pickle.pickle_dataset.importlib.import_module",
+            "kedro_datasets.pickle.pickle_dataset.importlib.import_module",
             side_effect=ImportError,
         )
         with pytest.raises(ImportError, match=pattern):

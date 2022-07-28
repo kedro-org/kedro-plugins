@@ -612,7 +612,7 @@ class TestSparkDataSetVersionedDBFS:
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset._get_dbutils",
             return_value=None,
         )
 
@@ -623,7 +623,7 @@ class TestSparkDataSetVersionedDBFS:
 
     def test_ds_init_dbutils_available(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset._get_dbutils",
             return_value="mock",
         )
 
@@ -638,7 +638,7 @@ class TestSparkDataSetVersionedDBFS:
 
     def test_get_dbutils_from_globals(self, mocker):
         mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.globals",
+            "kedro_datasets.spark.spark_dataset.globals",
             return_value={"dbutils": "dbutils_from_globals"},
         )
         assert _get_dbutils("spark") == "dbutils_from_globals"
@@ -661,7 +661,7 @@ class TestSparkDataSetVersionedDBFS:
 
     def test_get_dbutils_no_modules(self, mocker):
         mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.globals", return_value={}
+            "kedro_datasets.spark.spark_dataset.globals", return_value={}
         )
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
         assert _get_dbutils("spark") is None
@@ -793,7 +793,7 @@ class TestSparkDataSetVersionedS3:
 class TestSparkDataSetVersionedHdfs:
     def test_no_version(self, mocker, version):
         hdfs_walk = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.InsecureClient.walk"
+            "kedro_datasets.spark.spark_dataset.InsecureClient.walk"
         )
         hdfs_walk.return_value = []
 
@@ -807,11 +807,11 @@ class TestSparkDataSetVersionedHdfs:
 
     def test_load_latest(self, mocker, version):
         mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.InsecureClient.status",
+            "kedro_datasets.spark.spark_dataset.InsecureClient.status",
             return_value=True,
         )
         hdfs_walk = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.InsecureClient.walk"
+            "kedro_datasets.spark.spark_dataset.InsecureClient.walk"
         )
         hdfs_walk.return_value = HDFS_FOLDER_STRUCTURE
 
@@ -844,7 +844,7 @@ class TestSparkDataSetVersionedHdfs:
 
     def test_save(self, mocker, version):
         hdfs_status = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.InsecureClient.status"
+            "kedro_datasets.spark.spark_dataset.InsecureClient.status"
         )
         hdfs_status.return_value = None
 
@@ -894,7 +894,7 @@ class TestSparkDataSetVersionedHdfs:
 
     def test_prevent_overwrite(self, mocker, version):
         hdfs_status = mocker.patch(
-            "kedro_datasets.datasets.spark.spark_dataset.InsecureClient.status"
+            "kedro_datasets.spark.spark_dataset.InsecureClient.status"
         )
         hdfs_status.return_value = True
 

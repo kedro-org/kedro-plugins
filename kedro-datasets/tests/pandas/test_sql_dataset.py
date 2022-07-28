@@ -87,7 +87,7 @@ class TestSQLTableDataSet:
     def test_driver_missing(self, mocker):
         """Check the error when the sql driver is missing"""
         mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine",
+            "kedro_datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'mysqldb'"),
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
@@ -106,7 +106,7 @@ class TestSQLTableDataSet:
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine",
+            "kedro_datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'unknown_module'"),
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
@@ -214,7 +214,7 @@ class TestSQLTableDataSetSingleConnection:
         (but different tables, for example) only create a connection once.
         """
         mock_engine = mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine"
+            "kedro_datasets.pandas.sql_dataset.create_engine"
         )
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
@@ -232,7 +232,7 @@ class TestSQLTableDataSetSingleConnection:
         only create one connection per db.
         """
         mock_engine = mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine"
+            "kedro_datasets.pandas.sql_dataset.create_engine"
         )
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
@@ -288,7 +288,7 @@ class TestSQLQueryDataSet:
         then the error should contain the original error message"""
         _err = ImportError("No module named 'mysqldb'")
         mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+            "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
             SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
@@ -298,7 +298,7 @@ class TestSQLQueryDataSet:
         then the error should contain the original error message"""
         _err = ImportError("Invalid module some_module")
         mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+            "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DataSetError, match=pattern):
@@ -309,7 +309,7 @@ class TestSQLQueryDataSet:
         then the error should contain the original error message"""
         _err = ImportError("No module named 'unknown_module'")
         mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+            "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
@@ -362,7 +362,7 @@ class TestSQLQueryDataSet:
         (but different tables, for example) only create a connection once.
         """
         mock_engine = mocker.patch(
-            "kedro_datasets.datasets.pandas.sql_dataset.create_engine"
+            "kedro_datasets.pandas.sql_dataset.create_engine"
         )
         first = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1

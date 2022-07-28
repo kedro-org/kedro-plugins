@@ -3,9 +3,10 @@ from codecs import open
 from itertools import chain
 from os import path
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
-name = "kedro-datasets"
+name = "kedro.datasets"
+dir_name = "kedro_datasets"
 here = path.abspath(path.dirname(__file__))
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
@@ -15,8 +16,7 @@ HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 
 # get package version
-package_name = name.replace("-", "_")
-with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
+with open(path.join(here, dir_name, "__init__.py"), encoding="utf-8") as f:
     version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
 
 # get the dependencies and installs
@@ -140,6 +140,6 @@ setup(
     install_requires=requires,
     tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
-    packages=find_packages(exclude=["tests*"]),
+    packages=find_namespace_packages(include=["kedro-datasets.*"], exclude=["tests*"]),
     extras_require=extras_require
 )

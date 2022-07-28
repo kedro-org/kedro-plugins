@@ -10,7 +10,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.datasets.yaml import YAMLDataSet
+from kedro_datasets.yaml import YAMLDataSet
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.datasets.spark import DeltaTableDataSet, SparkDataSet
+from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
 
 
 @pytest.fixture

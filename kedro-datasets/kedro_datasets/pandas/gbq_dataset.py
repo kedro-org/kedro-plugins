@@ -45,7 +45,7 @@ class GBQTableDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.datasets.pandas import GBQTableDataSet
+        >>> from kedro_datasets.pandas import GBQTableDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
@@ -192,7 +192,7 @@ class GBQQueryDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.datasets.pandas import GBQQueryDataSet
+        >>> from kedro_datasets.pandas import GBQQueryDataSet
         >>>
         >>> sql = "SELECT * FROM dataset_1.table_a"
         >>>

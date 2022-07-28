@@ -66,7 +66,7 @@ class GenericDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.datasets.pandas import GenericDataSet
+        >>> from kedro_datasets.pandas import GenericDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

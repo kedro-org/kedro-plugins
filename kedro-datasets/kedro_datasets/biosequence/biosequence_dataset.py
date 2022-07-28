@@ -16,7 +16,7 @@ class BioSequenceDataSet(AbstractDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.datasets.biosequence import BioSequenceDataSet
+        >>> from kedro_datasets.biosequence import BioSequenceDataSet
         >>> from io import StringIO
         >>> from Bio import SeqIO
         >>>

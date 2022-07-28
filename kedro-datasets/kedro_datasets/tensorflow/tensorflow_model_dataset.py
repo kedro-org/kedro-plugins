@@ -27,7 +27,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.datasets.tensorflow import TensorFlowModelDataset
+        >>> from kedro_datasets.tensorflow import TensorFlowModelDataset
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>

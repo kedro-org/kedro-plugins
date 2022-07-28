@@ -9,7 +9,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.datasets.spark.spark_dataset import (
+from kedro_datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
@@ -40,7 +40,7 @@ class DeltaTableDataSet(AbstractDataSet):
             >>> from pyspark.sql.types import (StructField, StringType,
             >>>                                IntegerType, StructType)
             >>>
-            >>> from kedro_datasets.datasets.spark import DeltaTableDataSet, SparkDataSet
+            >>> from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
             >>>
             >>> schema = StructType([StructField("name", StringType(), True),
             >>>                      StructField("age", IntegerType(), True)])

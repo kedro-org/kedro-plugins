@@ -9,7 +9,7 @@ from kedro.io import DataSetError, Version
 from moto import mock_s3
 from s3fs import S3FileSystem
 
-from kedro_datasets.datasets.matplotlib import MatplotlibWriter
+from kedro_datasets.matplotlib import MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}

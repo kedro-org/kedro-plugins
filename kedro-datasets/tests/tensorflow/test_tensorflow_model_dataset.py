@@ -34,7 +34,7 @@ def tf():
 
 @pytest.fixture(scope="module")
 def tensorflow_model_dataset():
-    from kedro_datasets.datasets.tensorflow import TensorFlowModelDataset
+    from kedro_datasets.tensorflow import TensorFlowModelDataset
 
     return TensorFlowModelDataset
 

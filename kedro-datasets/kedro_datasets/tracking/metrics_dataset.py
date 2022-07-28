@@ -8,7 +8,7 @@ from typing import Dict
 
 from kedro.io.core import DataSetError, get_filepath_str
 
-from kedro_datasets.datasets.json import JSONDataSet
+from kedro_datasets.json import JSONDataSet
 
 
 class MetricsDataSet(JSONDataSet):
@@ -20,7 +20,7 @@ class MetricsDataSet(JSONDataSet):
         Example:
         ::
 
-        >>> from kedro_datasets.datasets.tracking import MetricsDataSet
+        >>> from kedro_datasets.tracking import MetricsDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>

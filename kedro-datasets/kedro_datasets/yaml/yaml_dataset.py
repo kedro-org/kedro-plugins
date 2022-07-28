@@ -23,7 +23,7 @@ class YAMLDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.datasets.yaml import YAMLDataSet
+        >>> from kedro_datasets.yaml import YAMLDataSet
         >>>
         >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from kedro.io import DataSetError
 
-from kedro_datasets.datasets.spark import SparkJDBCDataSet
+from kedro_datasets.spark import SparkJDBCDataSet
 
 
 @pytest.fixture

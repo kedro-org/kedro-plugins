@@ -6,7 +6,7 @@ from typing import Dict
 
 from kedro.io.core import DataSetError
 
-from kedro_datasets.datasets.json import JSONDataSet as JDS
+from kedro_datasets.json import JSONDataSet as JDS
 
 
 class JSONDataSet(JDS):
@@ -18,7 +18,7 @@ class JSONDataSet(JDS):
         Example:
         ::
 
-        >>> from kedro_datasets.datasets.tracking import JSONDataSet
+        >>> from kedro_datasets.tracking import JSONDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>

@@ -22,10 +22,10 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.datasets.pandas import CSVDataSet, ParquetDataSet
-from kedro_datasets.datasets.pickle import PickleDataSet
-from kedro_datasets.datasets.spark import SparkDataSet
-from kedro_datasets.datasets.spark.spark_dataset import (
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
+from kedro_datasets.pickle import PickleDataSet
+from kedro_datasets.spark import SparkDataSet
+from kedro_datasets.spark.spark_dataset import (
     _dbfs_exists,
     _dbfs_glob,
     _get_dbutils,

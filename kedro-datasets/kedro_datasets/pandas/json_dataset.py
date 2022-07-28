@@ -45,7 +45,7 @@ class JSONDataSet(AbstractVersionedDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.datasets.pandas import JSONDataSet
+        >>> from kedro_datasets.pandas import JSONDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

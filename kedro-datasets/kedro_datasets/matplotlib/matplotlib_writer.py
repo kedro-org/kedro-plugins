@@ -26,7 +26,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
     ::
 
         >>> import matplotlib.pyplot as plt
-        >>> from kedro_datasets.datasets.matplotlib import MatplotlibWriter
+        >>> from kedro_datasets.matplotlib import MatplotlibWriter
         >>>
         >>> # Saving single plot
         >>> fig = plt.figure()

@@ -9,7 +9,7 @@ from kedro.io import DataSetError, Version
 from kedro.io.core import PROTOCOL_DELIMITER
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.datasets.networkx import GMLDataSet
+from kedro_datasets.networkx import GMLDataSet
 
 ATTRS = {
     "source": "from",

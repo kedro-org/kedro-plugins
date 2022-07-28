@@ -10,7 +10,7 @@ from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.datasets.biosequence import BioSequenceDataSet
+from kedro_datasets.biosequence import BioSequenceDataSet
 
 LOAD_ARGS = {"format": "fasta"}
 SAVE_ARGS = {"format": "fasta"}

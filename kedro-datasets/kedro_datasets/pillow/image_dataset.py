@@ -23,7 +23,7 @@ class ImageDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.datasets.pillow import ImageDataSet
+        >>> from kedro_datasets.pillow import ImageDataSet
         >>>
         >>> # data_set = ImageDataSet(filepath="gcs://bucket/test.png")
         >>> data_set = ImageDataSet(filepath="test.png")

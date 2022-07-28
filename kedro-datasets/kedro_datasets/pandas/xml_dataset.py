@@ -28,7 +28,7 @@ class XMLDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.datasets.pandas import XMLDataSet
+        >>> from kedro_datasets.pandas import XMLDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

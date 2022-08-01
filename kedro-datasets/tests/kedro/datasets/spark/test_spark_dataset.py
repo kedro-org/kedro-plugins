@@ -660,7 +660,9 @@ class TestSparkDataSetVersionedDBFS:
         ipython_mock.get_ipython.assert_called_once_with()
 
     def test_get_dbutils_no_modules(self, mocker):
-        mocker.patch("kedro_datasets.spark.spark_dataset.globals", return_value={})
+        mocker.patch(
+            "kedro_datasets.spark.spark_dataset.globals", return_value={}
+        )
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
         assert _get_dbutils("spark") is None
 

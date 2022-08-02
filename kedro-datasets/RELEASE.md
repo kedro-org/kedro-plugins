@@ -1,7 +1,10 @@
 
 ## Thanks for supporting contributions
 
+# Upcoming Release
+
 ## Major features and improvements
+* Namespace `kedro-datasets` as `kedro.datasets`.
 
 
 # Release 0.1.0:

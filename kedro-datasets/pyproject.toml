@@ -33,14 +33,14 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["tests/*", "kedro_datasets/datasets/holoviews/*"]
+omit = ["tests/*", "kedro/datasets/datasets/holoviews/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""
 --cov-report xml:coverage.xml \
 --cov-report term-missing \
---cov kedro_datasets \
+--cov kedro/datasets \
 --cov tests \
 --ignore tests/template/fake_repo \
 --no-cov-on-fail \

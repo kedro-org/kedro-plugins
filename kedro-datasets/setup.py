@@ -6,7 +6,7 @@ from os import path
 from setuptools import find_namespace_packages, setup
 
 name = "kedro.datasets"
-dir_name = "kedro_datasets"
+dir_name = "kedro/datasets"
 here = path.abspath(path.dirname(__file__))
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
@@ -140,6 +140,6 @@ setup(
     install_requires=requires,
     tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
-    packages=find_namespace_packages(include=["kedro_datasets*"], exclude=["tests*"]),
+    packages=find_namespace_packages(exclude=["tests*"]),
     extras_require=extras_require
 )

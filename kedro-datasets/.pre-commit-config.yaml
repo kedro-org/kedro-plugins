@@ -16,7 +16,7 @@ repos:
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
-        files: ^kedro-datasets/kedro_datasets/
+        files: ^kedro-datasets/kedro/datasets/
         args:
           - "--max-line-length=88"
           - "--max-complexity=18"
@@ -30,10 +30,10 @@ repos:
       # https://github.com/PyCQA/pylint/issues/618
       # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
       - id: pylint-quick-kedro-datasets
-        name: "Quick PyLint on kedro_datasets/*"
+        name: "Quick PyLint on kedro/datasets/*"
         language: system
         types: [file, python]
-        files: ^kedro-datasets/kedro_datasets/
+        files: ^kedro-datasets/kedro/datasets/
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=unnecessary-pass
         stages: [commit]
       - id: pylint-quick-features
@@ -51,12 +51,12 @@ repos:
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
         stages: [commit]
       # The same pylint checks, but running on all files. It's for manual run with `make lint`
-      - id: pylint-kedro_datasets
-        name: "PyLint on kedro_datasets/*"
+      - id: pylint-kedro/datasets
+        name: "PyLint on kedro/datasets/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro/datasets
       - id: pylint-features
         name: "PyLint on features/*"
         language: system
@@ -79,7 +79,7 @@ repos:
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests
+        entry: black kedro-datasets/kedro/datasets kedro-datasets/features kedro-datasets/tests
       - id: secret_scan
         name: "Secret scan"
         language: system

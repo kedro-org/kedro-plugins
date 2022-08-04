@@ -87,7 +87,7 @@ def _make_docker_args_option(**kwargs):
 
 
 @click.group(name="Docker")
-def commands():
+def commands():  # pylint: disable=missing-function-docstring
     pass
 
 

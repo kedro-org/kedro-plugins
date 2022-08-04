@@ -5,7 +5,7 @@ from os import path
 
 from setuptools import find_namespace_packages, setup
 
-name = "kedro.datasets"
+name = "kedro-datasets" # distribution name
 dir_name = "kedro/datasets"
 here = path.abspath(path.dirname(__file__))
 

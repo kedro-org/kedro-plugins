@@ -12,7 +12,7 @@ from slugify import slugify
 
 
 @click.group(name="Airflow")
-def commands():
+def commands():  # pylint: disable=missing-function-docstring
     pass
 
 

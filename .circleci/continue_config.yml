@@ -72,9 +72,9 @@ commands:
             pip install -r test_requirements.txt
           python_version: <<parameters.python_version>>
       # Only for `kedro-datasets`
-      - unless:
-          condition:
-            equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
+      - when:
+          condition: 
+            - equal: [ kedro-datasets, <<parameters.plugin>>]
           steps:
             - run:
                 name: Install kedro-datasets

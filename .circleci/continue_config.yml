@@ -77,7 +77,7 @@ commands:
           steps:
             - run:
                 name: Install kedro-datasets
-                command: echo pwd
+                command: pwd
       - run:
           name: Install pre-commit hooks
           command: |

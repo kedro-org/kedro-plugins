@@ -70,13 +70,15 @@ commands:
             cd <<parameters.plugin>>
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt
+          python_version: <<parameters.python_version>>
+      # Only for `kedro-datasets`
       - unless:
           condition:
             equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
-          steps: 
-            - run: 
-              name: Install kedro-datasets
-              command: pip install .
+          steps:
+            - run:
+                name: Install kedro-datasets
+                command: pip install .
       - run:
           name: Install pre-commit hooks
           command: |

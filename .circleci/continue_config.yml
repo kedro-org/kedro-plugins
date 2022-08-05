@@ -77,7 +77,9 @@ commands:
           steps:
             - run:
                 name: Install kedro-datasets
-                command: pwd
+                command: |
+                  cd kedro-datasets 
+                  pip install .
       - run:
           name: Install pre-commit hooks
           command: |

@@ -72,13 +72,13 @@ commands:
             pip install -r test_requirements.txt
       # Only for `kedro-datasets`
       - when:
-          condition: 
+          condition:
             equal: [kedro-datasets, <<parameters.plugin>>]
           steps:
             - run:
                 name: Install kedro-datasets
                 command: |
-                  cd kedro-datasets 
+                  cd kedro-datasets
                   pip install .
       - run:
           name: Install pre-commit hooks

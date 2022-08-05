@@ -70,7 +70,6 @@ commands:
             cd <<parameters.plugin>>
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt
-          python_version: <<parameters.python_version>>
       # Only for `kedro-datasets`
       - when:
           condition: 

@@ -186,7 +186,7 @@ commands:
           command: conda activate kedro_plugins; pip install git+https://github.com/kedro-org/kedro@main
       - run:
           name: Install all requirements
-          command: conda activate kedro_plugins; cd <<parameters.plugin>>; pip install -r test_requirements.txt -U 
+          command: conda activate kedro_plugins; cd <<parameters.plugin>>; pip install -r test_requirements.txt -U
       # Only for `kedro-datasets`
       - when:
           condition:

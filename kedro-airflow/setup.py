@@ -7,12 +7,12 @@ from setuptools import setup
 name = "kedro-airflow"
 here = path.abspath(path.dirname(__file__))
 
-# Get package version
+# get package version
 package_name = name.replace("-", "_")
 with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
     version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
 
-# Get the dependencies and installs
+# get the dependencies and installs
 with open("requirements.txt", "r", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 

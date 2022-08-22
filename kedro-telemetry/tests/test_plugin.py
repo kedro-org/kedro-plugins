@@ -128,13 +128,13 @@ class TestKedroTelemetryCLIHooks:
 
         mocked_heap_call.assert_not_called()
 
-    def test_before_command_run_socket_timeout(self, mocker, fake_metadata):
+    def test_before_command_run_get_username_failed(self, mocker, fake_metadata):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
-        mocker.patch("socket.gethostname", side_effect=socket.timeout)
+        mocker.patch("pwd.getpwuid", side_effect=socket.timeout)
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
 
         telemetry_hook.before_command_run(fake_metadata, command_args)
@@ -168,7 +168,7 @@ class TestKedroTelemetryCLIHooks:
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "anonymous",
+            "username": "digested",
             "command": "kedro --version",
             "package_name": "digested",
             "project_name": "digested",
@@ -194,6 +194,7 @@ class TestKedroTelemetryCLIHooks:
                 properties=generic_properties,
             ),
         ]
+        print(f"mocked_heap_call args list is {mocked_heap_call.call_args_list}")
         assert mocked_heap_call.call_args_list == expected_calls
 
     def test_before_command_run_heap_call_error(self, mocker, fake_metadata, caplog):

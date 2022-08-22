@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import os
-import socket
+import pwd
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -62,22 +62,20 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
 
             try:
-                hashed_computer_name = hashlib.sha512(
-                    bytes(socket.gethostname(), encoding="utf8")
-                )
-            except socket.timeout as exc:
+                username = pwd.getpwuid(os.getuid())[0]
+                hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
+            except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
-                    "Socket timeout when trying to get the computer name. "
-                    "No data was sent to Heap. Exception: %s",
+                    "Something went wrong with getting the username. "
+                    "Exception: %s",
                     exc,
                 )
-                return
 
             properties = _format_user_cli_data(masked_command_args, project_metadata)
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=hashed_computer_name.hexdigest(),
+                identity=hashed_username.hexdigest(),
                 properties=properties,
             )
 
@@ -86,7 +84,7 @@ class KedroTelemetryCLIHooks:
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=hashed_computer_name.hexdigest(),
+                identity=hashed_username.hexdigest(),
                 properties=generic_properties,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -101,7 +99,8 @@ def _format_user_cli_data(command_args: List[str], project_metadata: ProjectMeta
     """Hash username, format CLI command, system and project data to send to Heap."""
     hashed_username = ""
     try:
-        hashed_username = hashlib.sha512(bytes(os.getlogin(), encoding="utf8"))
+        username = pwd.getpwuid(os.getuid())[0]
+        hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
             "Something went wrong with getting the username to send to Heap. "

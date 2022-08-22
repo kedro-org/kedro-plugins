@@ -37,7 +37,6 @@ setup(
     license="Apache Software License (Apache 2.0)",
     python_requires=">=3.7, <3.11",
     install_requires=requires,
-    tests_require=test_requires,
     author="Kedro",
     packages=["kedro_docker"],
     package_data={

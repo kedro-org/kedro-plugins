@@ -133,7 +133,6 @@ setup(
     author="Kedro",
     python_requires=">=3.7, <3.11",
     install_requires=requires,
-    tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
     packages=find_packages(exclude=["tests*"]),
     extras_require=extras_require

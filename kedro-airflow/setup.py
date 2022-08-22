@@ -30,7 +30,6 @@ setup(
     author="Kedro",
     python_requires=">=3.7, <3.11",
     install_requires=requires,
-    tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
     packages=["kedro_airflow"],
     package_data={"kedro_airflow": ["kedro_airflow/airflow_dag_template.j2"]},

@@ -5,7 +5,6 @@ from os import path
 from setuptools import setup
 
 name = "kedro-docker"
-
 here = path.abspath(path.dirname(__file__))
 
 # get package version

@@ -15,6 +15,7 @@ with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
 # get the dependencies and installs
 with open("requirements.txt", "r", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
+
 # get test dependencies and installs
 with open("test_requirements.txt", "r", encoding="utf-8") as f:
     test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]

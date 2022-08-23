@@ -66,12 +66,13 @@ class KedroTelemetryCLIHooks:
                 hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
-                    "Something went wrong with getting the username. "
-                    "Exception: %s",
+                    "Something went wrong with getting the username. " "Exception: %s",
                     exc,
                 )
 
-            properties = _format_user_cli_data(masked_command_args, project_metadata)
+            properties = _format_user_cli_data(
+                hashed_username, masked_command_args, project_metadata
+            )
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
@@ -79,7 +80,7 @@ class KedroTelemetryCLIHooks:
                 properties=properties,
             )
 
-            # send generic event too so it's easier in data processing
+            # send generic event too, so it's easier in data processing
             generic_properties = deepcopy(properties)
             generic_properties["main_command"] = main_command
             _send_heap_event(
@@ -95,19 +96,10 @@ class KedroTelemetryCLIHooks:
             )
 
 
-def _format_user_cli_data(command_args: List[str], project_metadata: ProjectMetadata):
+def _format_user_cli_data(
+    hashed_username: str, command_args: List[str], project_metadata: ProjectMetadata
+):
     """Hash username, format CLI command, system and project data to send to Heap."""
-    hashed_username = ""
-    try:
-        username = pwd.getpwuid(os.getuid())[0]
-        hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.warning(
-            "Something went wrong with getting the username to send to Heap. "
-            "Exception: %s",
-            exc,
-        )
-
     hashed_package_name = hashlib.sha512(
         bytes(project_metadata.package_name, encoding="utf8")
     )

@@ -15,6 +15,10 @@ with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
 # get the dependencies and installs
 with open("requirements.txt", "r", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
+# get test dependencies and installs
+with open("test_requirements.txt", "r", encoding="utf-8") as f:
+    test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
+
 
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
@@ -30,6 +34,7 @@ setup(
     author="Kedro",
     python_requires=">=3.7, <3.11",
     install_requires=requires,
+    tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
     packages=["kedro_airflow"],
     package_data={"kedro_airflow": ["kedro_airflow/airflow_dag_template.j2"]},

@@ -71,6 +71,7 @@ class KedroTelemetryCLIHooks:
                     "Something went wrong with getting the username. Exception: %s",
                     exc,
                 )
+                hashed_username = "anonymous"
 
             properties = _format_user_cli_data(
                 hashed_username, masked_command_args, project_metadata
@@ -104,17 +105,17 @@ def _format_user_cli_data(
     """Hash username, format CLI command, system and project data to send to Heap."""
     hashed_package_name = hashlib.sha512(
         bytes(project_metadata.package_name, encoding="utf8")
-    )
+    ).hexdigest()
     hashed_project_name = hashlib.sha512(
         bytes(project_metadata.project_name, encoding="utf8")
-    )
+    ).hexdigest()
     project_version = project_metadata.project_version
 
     return {
-        "username": hashed_username if hashed_username else "anonymous",
+        "username": hashed_username,
         "command": f"kedro {' '.join(command_args)}" if command_args else "kedro",
-        "package_name": hashed_package_name.hexdigest(),
-        "project_name": hashed_project_name.hexdigest(),
+        "package_name": hashed_package_name,
+        "project_name": hashed_project_name,
         "project_version": project_version,
         "telemetry_version": telemetry_version,
         "python_version": sys.version,

@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import os
-import pwd
+import getpass
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -62,8 +62,9 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
 
             try:
-                username = pwd.getpwuid(os.getuid())[0]
-                hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
+                username = getpass.getuser()
+                #username = "jannic_holzer"
+                hashed_username = hashlib.sha512(bytes(username, encoding="utf8")).hexdigest()
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
                     "Something went wrong with getting the username. Exception: %s",
@@ -76,7 +77,7 @@ class KedroTelemetryCLIHooks:
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=hashed_username.hexdigest(),
+                identity=hashed_username,
                 properties=properties,
             )
 
@@ -85,7 +86,7 @@ class KedroTelemetryCLIHooks:
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=hashed_username.hexdigest(),
+                identity=hashed_username,
                 properties=generic_properties,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -109,7 +110,7 @@ def _format_user_cli_data(
     project_version = project_metadata.project_version
 
     return {
-        "username": hashed_username.hexdigest() if hashed_username else "anonymous",
+        "username": hashed_username if hashed_username else "anonymous",
         "command": f"kedro {' '.join(command_args)}" if command_args else "kedro",
         "package_name": hashed_package_name.hexdigest(),
         "project_name": hashed_project_name.hexdigest(),

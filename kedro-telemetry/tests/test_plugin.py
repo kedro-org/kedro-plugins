@@ -134,7 +134,7 @@ class TestKedroTelemetryCLIHooks:
         )
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
-        mocker.patch("pwd.getpwuid", side_effect=socket.timeout)
+        mocker.patch("getpass.getuser", side_effect=Exception)
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
 
         telemetry_hook.before_command_run(fake_metadata, command_args)
@@ -162,7 +162,7 @@ class TestKedroTelemetryCLIHooks:
         )
         mocked_anon_id = mocker.patch("hashlib.sha512")
         mocked_anon_id.return_value.hexdigest.return_value = "digested"
-        mocker.patch("os.getlogin", side_effect=Exception)
+        #mocker.patch("getpass.getuser", side_effect=Exception)
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]

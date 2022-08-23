@@ -1,3 +1,4 @@
+import socket
 import sys
 from pathlib import Path
 
@@ -127,19 +128,6 @@ class TestKedroTelemetryCLIHooks:
 
         mocked_heap_call.assert_not_called()
 
-    def test_before_command_run_get_username_failed(self, mocker, fake_metadata):
-        mocker.patch(
-            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
-        )
-        telemetry_hook = KedroTelemetryCLIHooks()
-        command_args = ["--version"]
-        mocker.patch("getpass.getuser", side_effect=Exception)
-        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-
-        telemetry_hook.before_command_run(fake_metadata, command_args)
-
-        mocked_heap_call.assert_not_called()
-
     def test_before_command_run_connection_error(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
@@ -154,6 +142,47 @@ class TestKedroTelemetryCLIHooks:
         msg = "Failed to send data to Heap. Exception of type 'ConnectionError' was raised."
         assert msg in caplog.messages[-1]
         mocked_post_request.assert_called()
+
+    def test_before_command_run_anonymous(self, mocker, fake_metadata):
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
+        )
+        mocked_anon_id = mocker.patch("hashlib.sha512")
+        mocked_anon_id.return_value.hexdigest.return_value = "digested"
+        mocker.patch("getpass.getuser", side_effect=Exception)
+
+        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        telemetry_hook = KedroTelemetryCLIHooks()
+        command_args = ["--version"]
+        telemetry_hook.before_command_run(fake_metadata, command_args)
+        expected_properties = {
+            "username": "anonymous",
+            "command": "kedro --version",
+            "package_name": "digested",
+            "project_name": "digested",
+            "project_version": kedro_version,
+            "telemetry_version": telemetry_version,
+            "python_version": sys.version,
+            "os": sys.platform,
+        }
+        generic_properties = {
+            "main_command": "--version",
+            **expected_properties,
+        }
+
+        expected_calls = [
+            mocker.call(
+                event_name="Command run: --version",
+                identity="anonymous",
+                properties=expected_properties,
+            ),
+            mocker.call(
+                event_name="CLI command",
+                identity="anonymous",
+                properties=generic_properties,
+            ),
+        ]
+        assert mocked_heap_call.call_args_list == expected_calls
 
     def test_before_command_run_heap_call_error(self, mocker, fake_metadata, caplog):
         mocker.patch(

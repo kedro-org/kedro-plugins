@@ -63,7 +63,6 @@ class KedroTelemetryCLIHooks:
 
             try:
                 username = getpass.getuser()
-                #username = "jannic_holzer"
                 hashed_username = hashlib.sha512(bytes(username, encoding="utf8")).hexdigest()
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(

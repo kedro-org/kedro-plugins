@@ -86,7 +86,7 @@ def _make_docker_args_option(**kwargs):
     return click.option("--docker-args", **kwargs)
 
 
-@click.group(name="Kedro-Docker")
+@click.group(name="Docker")
 def commands():
     """Kedro plugin for packaging a project with Docker"""
     pass

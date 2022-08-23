@@ -66,7 +66,7 @@ class KedroTelemetryCLIHooks:
                 hashed_username = hashlib.sha512(bytes(username, encoding="utf8"))
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
-                    "Something went wrong with getting the username. " "Exception: %s",
+                    "Something went wrong with getting the username. Exception: %s",
                     exc,
                 )
 

@@ -1,10 +1,10 @@
 """Kedro Telemetry plugin for collecting Kedro usage data."""
 
+import getpass
 import hashlib
 import json
 import logging
 import os
-import getpass
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -63,7 +63,9 @@ class KedroTelemetryCLIHooks:
 
             try:
                 username = getpass.getuser()
-                hashed_username = hashlib.sha512(bytes(username, encoding="utf8")).hexdigest()
+                hashed_username = hashlib.sha512(
+                    bytes(username, encoding="utf8")
+                ).hexdigest()
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
                     "Something went wrong with getting the username. Exception: %s",

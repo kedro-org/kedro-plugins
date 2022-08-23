@@ -156,47 +156,6 @@ class TestKedroTelemetryCLIHooks:
         assert msg in caplog.messages[-1]
         mocked_post_request.assert_called()
 
-    def test_before_command_run_anonymous(self, mocker, fake_metadata):
-        mocker.patch(
-            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
-        )
-        mocked_anon_id = mocker.patch("hashlib.sha512")
-        mocked_anon_id.return_value.hexdigest.return_value = "digested"
-        #mocker.patch("getpass.getuser", side_effect=Exception)
-        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
-        command_args = ["--version"]
-        telemetry_hook.before_command_run(fake_metadata, command_args)
-        expected_properties = {
-            "username": "digested",
-            "command": "kedro --version",
-            "package_name": "digested",
-            "project_name": "digested",
-            "project_version": kedro_version,
-            "telemetry_version": telemetry_version,
-            "python_version": sys.version,
-            "os": sys.platform,
-        }
-        generic_properties = {
-            "main_command": "--version",
-            **expected_properties,
-        }
-
-        expected_calls = [
-            mocker.call(
-                event_name="Command run: --version",
-                identity="digested",
-                properties=expected_properties,
-            ),
-            mocker.call(
-                event_name="CLI command",
-                identity="digested",
-                properties=generic_properties,
-            ),
-        ]
-        print(f"mocked_heap_call args list is {mocked_heap_call.call_args_list}")
-        assert mocked_heap_call.call_args_list == expected_calls
-
     def test_before_command_run_heap_call_error(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True

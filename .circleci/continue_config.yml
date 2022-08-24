@@ -286,11 +286,12 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            and:
-              - equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
-            or:
-              - equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
+            or: 
+              - and:
+                - equal: [ "3.10", <<parameters.python_version>> ]
+                - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - or:
+                - equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
           steps:
             - run:
                 name: Run unit tests without spark in parallel

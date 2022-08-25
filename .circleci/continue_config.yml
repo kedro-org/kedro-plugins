@@ -286,7 +286,7 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            or: 
+            or:
               - and:
                 - equal: [ "3.10", <<parameters.python_version>> ]
                 - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]

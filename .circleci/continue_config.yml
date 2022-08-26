@@ -451,7 +451,7 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-          pre_steps:
+          pre-steps:
           - run:
               name: Avoid GPL dependency (unidecode)
               command: export SLUGIFY_USES_TEXT_UNIDECODE=yes

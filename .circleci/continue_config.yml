@@ -454,7 +454,7 @@ workflows:
           pre-steps:
           - run:
               name: Avoid GPL dependency (unidecode)
-              command: export SLUGIFY_USES_TEXT_UNIDECODE=yes
+              command: echo 'export SLUGIFY_USES_TEXT_UNIDECODE=yes' >> $BASH_ENV
       - e2e_tests:
           plugin: "kedro-airflow"
           matrix:

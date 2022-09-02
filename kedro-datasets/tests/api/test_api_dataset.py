@@ -7,7 +7,7 @@ import requests
 import requests_mock
 from kedro.io.core import DataSetError
 
-from kedro.datasets.api import APIDataSet
+from ...kedro.datasets.api import APIDataSet
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 

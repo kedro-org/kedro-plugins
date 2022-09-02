@@ -12,7 +12,7 @@ from pandas.testing import assert_frame_equal
 from pyarrow.fs import FSSpecHandler, PyFileSystem
 from s3fs.core import S3FileSystem
 
-from kedro.datasets.pandas import ParquetDataSet
+from ...kedro.datasets.pandas import ParquetDataSet
 
 FILENAME = "test.parquet"
 

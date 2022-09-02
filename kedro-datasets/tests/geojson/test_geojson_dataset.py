@@ -11,7 +11,7 @@ from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 from shapely.geometry import Point
 
-from kedro.datasets.geopandas import GeoJSONDataSet
+from ...kedro.datasets.geopandas import GeoJSONDataSet
 
 
 @pytest.fixture(params=[None])

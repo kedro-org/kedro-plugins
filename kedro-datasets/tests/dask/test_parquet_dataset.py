@@ -9,7 +9,7 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro.datasets.dask import ParquetDataSet
+from ...kedro.datasets.dask import ParquetDataSet
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"

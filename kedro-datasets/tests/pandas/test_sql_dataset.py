@@ -6,7 +6,7 @@ import pytest
 import sqlalchemy
 from kedro.io import DataSetError
 
-from kedro.datasets.pandas import SQLQueryDataSet, SQLTableDataSet
+from ...kedro.datasets.pandas import SQLQueryDataSet, SQLTableDataSet
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"

@@ -12,7 +12,7 @@ from plotly import graph_objects
 from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
 
-from kedro.datasets.plotly import PlotlyDataSet
+from ...kedro.datasets.plotly import PlotlyDataSet
 
 
 @pytest.fixture

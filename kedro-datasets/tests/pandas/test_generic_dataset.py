@@ -12,7 +12,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, generate_timestamp
 from pandas._testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro.datasets.pandas import GenericDataSet
+from ...kedro.datasets.pandas import GenericDataSet
 
 
 @pytest.fixture

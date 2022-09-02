@@ -6,7 +6,7 @@ from google.cloud.exceptions import NotFound
 from kedro.io.core import DataSetError
 from pandas.testing import assert_frame_equal
 
-from kedro.datasets.pandas import GBQQueryDataSet, GBQTableDataSet
+from ...kedro.datasets.pandas import GBQQueryDataSet, GBQTableDataSet
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"

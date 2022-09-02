@@ -22,10 +22,10 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-from kedro.datasets.pandas import CSVDataSet, ParquetDataSet
-from kedro.datasets.pickle import PickleDataSet
-from kedro.datasets.spark import SparkDataSet
-from kedro.datasets.spark.spark_dataset import _dbfs_exists, _dbfs_glob, _get_dbutils
+from ...kedro.datasets.pandas import CSVDataSet, ParquetDataSet
+from ...kedro.datasets.pickle import PickleDataSet
+from ...kedro.datasets.spark import SparkDataSet
+from ...kedro.datasets.spark.spark_dataset import _dbfs_exists, _dbfs_glob, _get_dbutils
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"

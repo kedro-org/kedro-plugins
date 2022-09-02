@@ -6,7 +6,7 @@ from typing import Dict
 
 from kedro.io.core import DataSetError
 
-from kedro.datasets.json import JSONDataSet as JDS
+from datasets.json import JSONDataSet as JDS
 
 
 class JSONDataSet(JDS):

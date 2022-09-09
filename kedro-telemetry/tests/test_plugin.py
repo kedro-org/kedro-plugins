@@ -155,7 +155,7 @@ class TestKedroTelemetryCLIHooks:
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "anonymous",
+            "username": "",
             "command": "kedro --version",
             "package_name": "digested",
             "project_name": "digested",
@@ -172,12 +172,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: --version",
-                identity="anonymous",
+                identity="",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="anonymous",
+                identity="",
                 properties=generic_properties,
             ),
         ]

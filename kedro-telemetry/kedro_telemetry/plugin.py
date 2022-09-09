@@ -146,7 +146,7 @@ def _send_heap_event(
 
     try:
         resp = requests.post(
-            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data)
+            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
         if resp.status_code != 200:
             logger.warning(

@@ -71,7 +71,7 @@ class KedroTelemetryCLIHooks:
                     "Something went wrong with getting the username. Exception: %s",
                     exc,
                 )
-                hashed_username = "anonymous"
+                hashed_username = ""
 
             properties = _format_user_cli_data(
                 hashed_username, masked_command_args, project_metadata
@@ -137,11 +137,12 @@ def _send_heap_event(
 ) -> None:
     data = {
         "app_id": _get_heap_app_id(),
-        "identity": identity,
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
     }
+    if identity:
+        data["identity"] = identity
 
     try:
         resp = requests.post(

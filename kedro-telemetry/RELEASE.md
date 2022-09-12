@@ -1,3 +1,8 @@
+# Release 0.2.2
+
+## Bug fixes and other changes
+* Changed the value associated with the `identity` key in the call to heap's /track endpoint from hashed computer name to hashed username.
+
 # Release 0.2.1
 
 ## Bug fixes and other changes

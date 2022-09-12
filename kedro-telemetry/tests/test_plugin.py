@@ -1,4 +1,3 @@
-import socket
 import sys
 from pathlib import Path
 
@@ -128,19 +127,6 @@ class TestKedroTelemetryCLIHooks:
 
         mocked_heap_call.assert_not_called()
 
-    def test_before_command_run_socket_timeout(self, mocker, fake_metadata):
-        mocker.patch(
-            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
-        )
-        telemetry_hook = KedroTelemetryCLIHooks()
-        command_args = ["--version"]
-        mocker.patch("socket.gethostname", side_effect=socket.timeout)
-        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-
-        telemetry_hook.before_command_run(fake_metadata, command_args)
-
-        mocked_heap_call.assert_not_called()
-
     def test_before_command_run_connection_error(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
@@ -162,13 +148,14 @@ class TestKedroTelemetryCLIHooks:
         )
         mocked_anon_id = mocker.patch("hashlib.sha512")
         mocked_anon_id.return_value.hexdigest.return_value = "digested"
-        mocker.patch("os.getlogin", side_effect=Exception)
+        mocker.patch("getpass.getuser", side_effect=Exception)
+
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "anonymous",
+            "username": "",
             "command": "kedro --version",
             "package_name": "digested",
             "project_name": "digested",
@@ -185,12 +172,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: --version",
-                identity="digested",
+                identity="",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="digested",
+                identity="",
                 properties=generic_properties,
             ),
         ]

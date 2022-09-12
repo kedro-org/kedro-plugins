@@ -1,10 +1,10 @@
 """Kedro Telemetry plugin for collecting Kedro usage data."""
 
+import getpass
 import hashlib
 import json
 import logging
 import os
-import socket
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -62,31 +62,33 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
 
             try:
-                hashed_computer_name = hashlib.sha512(
-                    bytes(socket.gethostname(), encoding="utf8")
-                )
-            except socket.timeout as exc:
+                username = getpass.getuser()
+                hashed_username = hashlib.sha512(
+                    bytes(username, encoding="utf8")
+                ).hexdigest()
+            except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
-                    "Socket timeout when trying to get the computer name. "
-                    "No data was sent to Heap. Exception: %s",
+                    "Something went wrong with getting the username. Exception: %s",
                     exc,
                 )
-                return
+                hashed_username = ""
 
-            properties = _format_user_cli_data(masked_command_args, project_metadata)
+            properties = _format_user_cli_data(
+                hashed_username, masked_command_args, project_metadata
+            )
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=hashed_computer_name.hexdigest(),
+                identity=hashed_username,
                 properties=properties,
             )
 
-            # send generic event too so it's easier in data processing
+            # send generic event too, so it's easier in data processing
             generic_properties = deepcopy(properties)
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=hashed_computer_name.hexdigest(),
+                identity=hashed_username,
                 properties=generic_properties,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -97,31 +99,23 @@ class KedroTelemetryCLIHooks:
             )
 
 
-def _format_user_cli_data(command_args: List[str], project_metadata: ProjectMetadata):
+def _format_user_cli_data(
+    hashed_username: str, command_args: List[str], project_metadata: ProjectMetadata
+):
     """Hash username, format CLI command, system and project data to send to Heap."""
-    hashed_username = ""
-    try:
-        hashed_username = hashlib.sha512(bytes(os.getlogin(), encoding="utf8"))
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.warning(
-            "Something went wrong with getting the username to send to Heap. "
-            "Exception: %s",
-            exc,
-        )
-
     hashed_package_name = hashlib.sha512(
         bytes(project_metadata.package_name, encoding="utf8")
-    )
+    ).hexdigest()
     hashed_project_name = hashlib.sha512(
         bytes(project_metadata.project_name, encoding="utf8")
-    )
+    ).hexdigest()
     project_version = project_metadata.project_version
 
     return {
-        "username": hashed_username.hexdigest() if hashed_username else "anonymous",
+        "username": hashed_username,
         "command": f"kedro {' '.join(command_args)}" if command_args else "kedro",
-        "package_name": hashed_package_name.hexdigest(),
-        "project_name": hashed_project_name.hexdigest(),
+        "package_name": hashed_package_name,
+        "project_name": hashed_project_name,
         "project_version": project_version,
         "telemetry_version": telemetry_version,
         "python_version": sys.version,
@@ -143,15 +137,16 @@ def _send_heap_event(
 ) -> None:
     data = {
         "app_id": _get_heap_app_id(),
-        "identity": identity,
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
     }
+    if identity:
+        data["identity"] = identity
 
     try:
         resp = requests.post(
-            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data)
+            url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
         if resp.status_code != 200:
             logger.warning(

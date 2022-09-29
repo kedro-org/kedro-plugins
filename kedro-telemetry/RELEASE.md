@@ -1,3 +1,7 @@
+# Release 0.2.3
+## Bug fixes and other changes
+* Expanding to track numbers of datasets, nodes, pipelines to better understand the size of kedro project.
+
 # Release 0.2.2
 
 ## Bug fixes and other changes

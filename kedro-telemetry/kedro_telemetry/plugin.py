@@ -23,19 +23,24 @@ from kedro_telemetry import __version__ as telemetry_version
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
-
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
 
+
+def _hash(string: str) -> str:
+    return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
+
+
 class TelemetryHooks:
     @hook_impl
     def after_context_created(self, context):
         from kedro.framework.project import pipelines
+
         print(pipelines)
-        print(pipelines._pipelines_module,pipelines._is_data_loaded)
+        print(pipelines._pipelines_module, pipelines._is_data_loaded)
 
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")
@@ -46,13 +51,11 @@ class TelemetryHooks:
 
         # Prepare the HEAP event
         username = getpass.getuser()
-        hashed_username = hashlib.sha512(
-                    bytes(username, encoding="utf8")
-                ).hexdigest()
+        hashed_username = _hash(username)
         _send_heap_event(
-                event_name="Project Statistics",
-                identity=hashed_username,
-                properties={},
+            event_name="Project Statistics",
+            identity=hashed_username,
+            properties={},
         )
 
 
@@ -89,9 +92,7 @@ class KedroTelemetryCLIHooks:
 
             try:
                 username = getpass.getuser()
-                hashed_username = hashlib.sha512(
-                    bytes(username, encoding="utf8")
-                ).hexdigest()
+                hashed_username = _hash(username)
             except Exception as exc:  # pylint: disable=broad-except
                 logger.warning(
                     "Something went wrong with getting the username. Exception: %s",
@@ -129,12 +130,8 @@ def _format_user_cli_data(
     hashed_username: str, command_args: List[str], project_metadata: ProjectMetadata
 ):
     """Hash username, format CLI command, system and project data to send to Heap."""
-    hashed_package_name = hashlib.sha512(
-        bytes(project_metadata.package_name, encoding="utf8")
-    ).hexdigest()
-    hashed_project_name = hashlib.sha512(
-        bytes(project_metadata.project_name, encoding="utf8")
-    ).hexdigest()
+    hashed_package_name = _hash(project_metadata.package_name)
+    hashed_project_name = _hash(project_metadata.project_name)
     project_version = project_metadata.project_version
 
     return {

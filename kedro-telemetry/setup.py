@@ -35,6 +35,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     entry_points={
-        "kedro.cli_hooks": ["kedro-telemetry = kedro_telemetry.plugin:cli_hooks"]
+        "kedro.cli_hooks": ["kedro-telemetry = kedro_telemetry.plugin:cli_hooks"],
+        "kedro.hooks": ["kedro-telemetry = kedro_telemetry.plugin:project_telemetry_hooks"]
     },
 )

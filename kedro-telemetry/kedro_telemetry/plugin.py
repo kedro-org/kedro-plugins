@@ -16,6 +16,7 @@ import requests
 import yaml
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
+from kedro.framework.hooks import hook_impl
 from kedro.framework.startup import ProjectMetadata
 
 from kedro_telemetry import __version__ as telemetry_version
@@ -28,6 +29,31 @@ HEAP_HEADERS = {"Content-Type": "application/json"}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
+
+class TelemetryHooks:
+    @hook_impl
+    def after_context_created(self, context):
+        from kedro.framework.project import pipelines
+        print(pipelines)
+        print(pipelines._pipelines_module,pipelines._is_data_loaded)
+
+        catalog = context.catalog
+        default_pipeline = pipelines.get("__default__")
+
+        num_of_datasets = len(catalog.datasets.__dict__.keys())
+        num_of_nodes = len(default_pipeline.nodes)
+        nums_of_pipelines = len(pipelines.keys())
+
+        # Prepare the HEAP event
+        username = getpass.getuser()
+        hashed_username = hashlib.sha512(
+                    bytes(username, encoding="utf8")
+                ).hexdigest()
+        _send_heap_event(
+                event_name="Project Statistics",
+                identity=hashed_username,
+                properties={},
+        )
 
 
 class KedroTelemetryCLIHooks:
@@ -209,3 +235,4 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
 
 
 cli_hooks = KedroTelemetryCLIHooks()
+project_telemetry_hooks = TelemetryHooks()

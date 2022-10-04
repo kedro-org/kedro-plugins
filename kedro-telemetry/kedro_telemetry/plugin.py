@@ -49,25 +49,6 @@ except Exception as exc:  # pylint: disable=broad-except
     HASHED_USERNAME = ""
 
 
-class TelemetryHooks:
-    @hook_impl
-    def after_context_created(self, context):
-        from kedro.framework.project import pipelines
-
-        catalog = context.catalog
-        default_pipeline = pipelines.get("__default__")
-
-        project_statistics_properties = _format_project_statistics_data(
-            PROJECT_PROPERTIES, catalog, default_pipeline, pipelines
-        )
-
-        _send_heap_event(
-            event_name="Kedro Project Statistics",
-            identity=HASHED_USERNAME,
-            properties=project_statistics_properties,
-        )
-
-
 class KedroTelemetryCLIHooks:
     """Hook to send CLI command data to Heap"""
 
@@ -126,6 +107,25 @@ class KedroTelemetryCLIHooks:
                 "Exception: %s",
                 exc,
             )
+
+
+class KedroTelemetryHooks:
+    @hook_impl
+    def after_context_created(self, context):
+        from kedro.framework.project import pipelines
+
+        catalog = context.catalog
+        default_pipeline = pipelines.get("__default__")
+
+        project_statistics_properties = _format_project_statistics_data(
+            PROJECT_PROPERTIES, catalog, default_pipeline, pipelines
+        )
+
+        _send_heap_event(
+            event_name="Kedro Project Statistics",
+            identity=HASHED_USERNAME,
+            properties=project_statistics_properties,
+        )
 
 
 def _prepare_project_properties(
@@ -260,4 +260,4 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
 
 
 cli_hooks = KedroTelemetryCLIHooks()
-project_telemetry_hooks = TelemetryHooks()
+project_telemetry_hooks = KedroTelemetryHooks()

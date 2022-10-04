@@ -7,7 +7,7 @@ from kedro import __version__ as kedro_version
 from kedro.framework.startup import ProjectMetadata
 from pytest import fixture
 
-from kedro_telemetry import __version__ as telemetry_version
+from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     _check_for_telemetry_consent,
@@ -51,7 +51,7 @@ class TestKedroTelemetryCLIHooks:
             "package_name": "digested",
             "project_name": "digested",
             "project_version": kedro_version,
-            "telemetry_version": telemetry_version,
+            "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
         }
@@ -91,7 +91,7 @@ class TestKedroTelemetryCLIHooks:
             "package_name": "digested",
             "project_name": "digested",
             "project_version": kedro_version,
-            "telemetry_version": telemetry_version,
+            "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
         }
@@ -160,7 +160,7 @@ class TestKedroTelemetryCLIHooks:
             "package_name": "digested",
             "project_name": "digested",
             "project_version": kedro_version,
-            "telemetry_version": telemetry_version,
+            "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
         }

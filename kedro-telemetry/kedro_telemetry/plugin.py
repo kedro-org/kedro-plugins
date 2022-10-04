@@ -18,8 +18,10 @@ from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
 from kedro.framework.startup import ProjectMetadata
+from kedro.io.data_catalog import DataCatalog
+from kedro.pipeline import Pipeline
 
-from kedro_telemetry import __version__ as telemetry_version
+from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
@@ -34,28 +36,35 @@ def _hash(string: str) -> str:
     return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
 
 
+# General Properties shared across hooks
+PROJECT_PROPERTIES = {}
+try:
+    username = getpass.getuser()
+    HASHED_USERNAME = _hash(username)
+except Exception as exc:  # pylint: disable=broad-except
+    logger.warning(
+        "Something went wrong with getting the username. Exception: %s",
+        exc,
+    )
+    HASHED_USERNAME = ""
+
+
 class TelemetryHooks:
     @hook_impl
     def after_context_created(self, context):
         from kedro.framework.project import pipelines
 
-        print(pipelines)
-        print(pipelines._pipelines_module, pipelines._is_data_loaded)
-
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")
 
-        num_of_datasets = len(catalog.datasets.__dict__.keys())
-        num_of_nodes = len(default_pipeline.nodes)
-        nums_of_pipelines = len(pipelines.keys())
+        project_statistics_properties = _format_project_statistics_data(
+            PROJECT_PROPERTIES, catalog, default_pipeline, pipelines
+        )
 
-        # Prepare the HEAP event
-        username = getpass.getuser()
-        hashed_username = _hash(username)
         _send_heap_event(
-            event_name="Project Statistics",
-            identity=hashed_username,
-            properties={},
+            event_name="Kedro Project Statistics",
+            identity=HASHED_USERNAME,
+            properties=project_statistics_properties,
         )
 
 
@@ -90,32 +99,25 @@ class KedroTelemetryCLIHooks:
 
             logger.debug("You have opted into product usage analytics.")
 
-            try:
-                username = getpass.getuser()
-                hashed_username = _hash(username)
-            except Exception as exc:  # pylint: disable=broad-except
-                logger.warning(
-                    "Something went wrong with getting the username. Exception: %s",
-                    exc,
-                )
-                hashed_username = ""
-
-            properties = _format_user_cli_data(
-                hashed_username, masked_command_args, project_metadata
+            _prepare_project_properties(
+                PROJECT_PROPERTIES, HASHED_USERNAME, project_metadata
+            )
+            cli_properties = _format_user_cli_data(
+                PROJECT_PROPERTIES, masked_command_args
             )
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=hashed_username,
-                properties=properties,
+                identity=HASHED_USERNAME,
+                properties=cli_properties,
             )
 
             # send generic event too, so it's easier in data processing
-            generic_properties = deepcopy(properties)
+            generic_properties = deepcopy(PROJECT_PROPERTIES)
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=hashed_username,
+                identity=HASHED_USERNAME,
                 properties=generic_properties,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -126,24 +128,50 @@ class KedroTelemetryCLIHooks:
             )
 
 
-def _format_user_cli_data(
-    hashed_username: str, command_args: List[str], project_metadata: ProjectMetadata
+def _prepare_project_properties(
+    properties: dict, hashed_username: str, project_metadata: ProjectMetadata
 ):
-    """Hash username, format CLI command, system and project data to send to Heap."""
+
     hashed_package_name = _hash(project_metadata.package_name)
     hashed_project_name = _hash(project_metadata.project_name)
     project_version = project_metadata.project_version
 
-    return {
-        "username": hashed_username,
-        "command": f"kedro {' '.join(command_args)}" if command_args else "kedro",
-        "package_name": hashed_package_name,
-        "project_name": hashed_project_name,
-        "project_version": project_version,
-        "telemetry_version": telemetry_version,
-        "python_version": sys.version,
-        "os": sys.platform,
-    }
+    properties.update(
+        {
+            "username": hashed_username,
+            "package_name": hashed_package_name,
+            "project_name": hashed_project_name,
+            "project_version": project_version,
+            "telemetry_version": TELEMETRY_VERSION,
+            "python_version": sys.version,
+            "os": sys.platform,
+        }
+    )
+
+
+def _format_user_cli_data(
+    properties: dict,
+    command_args: List[str],
+):
+    """Add format CLI command data to send to Heap."""
+    cli_properties = properties.copy()
+    cli_properties["command"] = (
+        f"kedro {' '.join(command_args)}" if command_args else "kedro"
+    )
+    return cli_properties
+
+
+def _format_project_statistics_data(
+    properties: dict, catalog: DataCatalog, default_pipeline: Pipeline, pipelines: dict
+):
+    """Add project staitsitcs to send to Heap."""
+    project_statistics_properties = properties.copy()
+    project_statistics_properties["number_of_datasets"] = len(
+        catalog.datasets.__dict__.keys()
+    )
+    project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes)
+    project_statistics_properties["number_of_pipelines"] = len(pipelines.keys())
+    return project_statistics_properties
 
 
 def _get_heap_app_id() -> str:

@@ -36,17 +36,21 @@ def _hash(string: str) -> str:
     return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
 
 
+def _get_hashed_username():
+
+    try:
+        username = getpass.getuser()
+        return _hash(username)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Something went wrong with getting the username. Exception: %s",
+            exc,
+        )
+        return ""
+
+
 # General Properties shared across hooks
 PROJECT_PROPERTIES = {}
-try:
-    username = getpass.getuser()
-    HASHED_USERNAME = _hash(username)
-except Exception as exc:  # pylint: disable=broad-except
-    logger.warning(
-        "Something went wrong with getting the username. Exception: %s",
-        exc,
-    )
-    HASHED_USERNAME = ""
 
 
 class KedroTelemetryCLIHooks:
@@ -80,8 +84,9 @@ class KedroTelemetryCLIHooks:
 
             logger.debug("You have opted into product usage analytics.")
 
+            hashed_username = _get_hashed_username()
             _prepare_project_properties(
-                PROJECT_PROPERTIES, HASHED_USERNAME, project_metadata
+                PROJECT_PROPERTIES, hashed_username, project_metadata
             )
             cli_properties = _format_user_cli_data(
                 PROJECT_PROPERTIES, masked_command_args
@@ -89,16 +94,16 @@ class KedroTelemetryCLIHooks:
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=HASHED_USERNAME,
+                identity=hashed_username,
                 properties=cli_properties,
             )
 
             # send generic event too, so it's easier in data processing
-            generic_properties = deepcopy(PROJECT_PROPERTIES)
+            generic_properties = deepcopy(cli_properties)
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=HASHED_USERNAME,
+                identity=hashed_username,
                 properties=generic_properties,
             )
         except Exception as exc:  # pylint: disable=broad-except
@@ -120,10 +125,10 @@ class KedroTelemetryHooks:
         project_statistics_properties = _format_project_statistics_data(
             PROJECT_PROPERTIES, catalog, default_pipeline, pipelines
         )
-
+        hashed_username = _get_hashed_username()
         _send_heap_event(
             event_name="Kedro Project Statistics",
-            identity=HASHED_USERNAME,
+            identity=hashed_username,
             properties=project_statistics_properties,
         )
 

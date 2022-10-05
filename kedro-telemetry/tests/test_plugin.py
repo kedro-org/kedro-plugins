@@ -361,5 +361,5 @@ class TestKedroTelemetryHooks:
             properties=expected_properties,
         )
 
-        # The first 2 calls are for CLI
-        assert mocked_heap_call.call_args_list[2] == expected_calls
+        # CLI hook makes the first 2 calls, the 3rd one is the Project hook
+        assert mocked_heap_call.call_args_list[2] == expected_call

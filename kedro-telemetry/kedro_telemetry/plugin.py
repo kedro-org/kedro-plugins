@@ -182,7 +182,7 @@ def _format_project_statistics_data(
     project_statistics_properties["number_of_nodes"] = 0
     project_statistics_properties["number_of_pipelines"] = 0
 
-    #
+    # Assign the project statistics
     project_statistics_properties["number_of_datasets"] = len(
         catalog.datasets.__dict__.keys()
     )

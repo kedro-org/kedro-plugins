@@ -17,6 +17,7 @@ import yaml
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
+from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
@@ -117,7 +118,6 @@ class KedroTelemetryCLIHooks:
 class KedroTelemetryHooks:
     @hook_impl
     def after_context_created(self, context):
-        from kedro.framework.project import pipelines
 
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")
@@ -171,10 +171,17 @@ def _format_project_statistics_data(
 ):
     """Add project staitsitcs to send to Heap."""
     project_statistics_properties = properties.copy()
+    # Initialize default value
+    project_statistics_properties["number_of_datasets"] = 0
+    project_statistics_properties["number_of_nodes"] = 0
+    project_statistics_properties["number_of_pipelines"] = 0
+
+    #
     project_statistics_properties["number_of_datasets"] = len(
         catalog.datasets.__dict__.keys()
     )
-    project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes)
+    if default_pipeline:
+        project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes)
     project_statistics_properties["number_of_pipelines"] = len(pipelines.keys())
     return project_statistics_properties
 

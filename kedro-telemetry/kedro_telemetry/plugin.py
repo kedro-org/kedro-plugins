@@ -115,9 +115,12 @@ class KedroTelemetryCLIHooks:
             )
 
 
-class KedroTelemetryHooks:
+class KedroTelemetryHooks:  # pylint: disable=too-few-public-methods
+    """Hook to send proejct statistics data to Heap"""
+
     @hook_impl
     def after_context_created(self, context):
+        """Hook implementation to send proejct statistics data to Heap"""
 
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")
@@ -167,7 +170,10 @@ def _format_user_cli_data(
 
 
 def _format_project_statistics_data(
-    properties: dict, catalog: DataCatalog, default_pipeline: Pipeline, pipelines: dict
+    properties: dict,
+    catalog: DataCatalog,
+    default_pipeline: Pipeline,
+    project_pipelines: dict,
 ):
     """Add project staitsitcs to send to Heap."""
     project_statistics_properties = properties.copy()
@@ -182,7 +188,7 @@ def _format_project_statistics_data(
     )
     if default_pipeline:
         project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes)
-    project_statistics_properties["number_of_pipelines"] = len(pipelines.keys())
+    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
     return project_statistics_properties
 
 

@@ -18,7 +18,7 @@ from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import pipelines
-from kedro.framework.startup import ProjectMetadata
+from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
@@ -118,17 +118,26 @@ class KedroTelemetryCLIHooks:
 class KedroTelemetryHooks:  # pylint: disable=too-few-public-methods
     """Hook to send proejct statistics data to Heap"""
 
+    project_properties = PROJECT_PROPERTIES if PROJECT_PROPERTIES else {}
+
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send proejct statistics data to Heap"""
 
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")
+        hashed_username = _get_hashed_username()
+
+        if not self.project_properties:  # `KedroSession.run` without invoking CLI
+            project_metadata = bootstrap_project(context.project_path)
+            _prepare_project_properties(
+                self.project_properties, hashed_username, project_metadata
+            )
 
         project_statistics_properties = _format_project_statistics_data(
-            PROJECT_PROPERTIES, catalog, default_pipeline, pipelines
+            self.project_properties, catalog, default_pipeline, pipelines
         )
-        hashed_username = _get_hashed_username()
+
         _send_heap_event(
             event_name="Kedro Project Statistics",
             identity=hashed_username,

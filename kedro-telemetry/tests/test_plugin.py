@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from numpy import fix
 
 import requests
 import yaml
@@ -47,6 +48,31 @@ def fake_context(mocker):
         {"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3}
     )
     return mock_context
+
+
+def identity(arg):
+    return arg
+
+
+@fixture
+def fake_default_pipeline():
+    mock_default_pipeline = pipeline(
+        [
+            node(identity, ["input"], ["intermediate"], name="node0"),
+            node(identity, ["intermediate"], ["output"], name="node1"),
+        ],
+    )
+    return mock_default_pipeline
+
+
+@fixture
+def fake_sub_pipeline():
+    mock_sub_pipeline = pipeline(
+        [
+            node(identity, ["input"], ["intermediate"], name="node0"),
+        ],
+    )
+    return mock_sub_pipeline
 
 
 class TestKedroTelemetryCLIHooks:
@@ -302,26 +328,18 @@ class TestKedroTelemetryCLIHooks:
         assert msg in caplog.messages[-1]
 
 
-def identity(arg):
-    return arg
-
-
 class TestKedroTelemetryHooks:
-    def test_after_context_created_with_kedro_run(self, mocker, fake_context, fake_metadata):
-        mock_default_pipeline = pipeline(
-            [
-                node(identity, ["input"], ["intermediate"], name="node0"),
-                node(identity, ["intermediate"], ["output"], name="node1"),
-            ],
-        )
-        mock_sub_pipeline = pipeline(
-            [
-                node(identity, ["input"], ["intermediate"], name="node0"),
-            ],
-        )
+    def test_after_context_created_with_kedro_run(
+        self,
+        mocker,
+        fake_context,
+        fake_metadata,
+        fake_default_pipeline,
+        fake_sub_pipeline,
+    ):
 
         mocker.patch.dict(
-            pipelines, {"__default__": mock_default_pipeline, "sub": mock_sub_pipeline}
+            pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
@@ -332,7 +350,6 @@ class TestKedroTelemetryHooks:
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
         )
-
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()

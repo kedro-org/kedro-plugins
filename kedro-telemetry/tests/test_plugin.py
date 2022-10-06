@@ -307,7 +307,7 @@ def identity(arg):
 
 
 class TestKedroTelemetryHooks:
-    def test_after_context_created(self, mocker, fake_context, fake_metadata):
+    def test_after_context_created_with_kedro_run(self, mocker, fake_context, fake_metadata):
         mock_default_pipeline = pipeline(
             [
                 node(identity, ["input"], ["intermediate"], name="node0"),
@@ -334,11 +334,15 @@ class TestKedroTelemetryHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
         telemetry_cli_hook.before_command_run(fake_metadata, command_args)
+
+        # Follow by project run
         telemetry_hook = KedroTelemetryHooks()
         telemetry_hook.after_context_created(fake_context)
+
         project_properties = {
             "username": "hashed_username",
             "package_name": "digested",

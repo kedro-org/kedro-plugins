@@ -116,7 +116,7 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
 
     @hook_impl
     def after_context_created(self, context):
-        """Hook implementation to send proejct statistics data to Heap"""
+        """Hook implementation to send project statistics data to Heap"""
 
         catalog = context.catalog
         default_pipeline = pipelines.get("__default__")  # __default__

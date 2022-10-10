@@ -18,7 +18,7 @@ from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import pipelines
-from kedro.framework.startup import ProjectMetadata, bootstrap_project
+from kedro.framework.startup import ProjectMetadata, _get_project_metadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
@@ -48,10 +48,6 @@ def _get_hashed_username():
             exc,
         )
         return ""
-
-
-# General Properties shared across hooks
-PROJECT_PROPERTIES = {}
 
 
 class KedroTelemetryCLIHooks:
@@ -86,11 +82,11 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
 
             hashed_username = _get_hashed_username()
-            _prepare_project_properties(
-                PROJECT_PROPERTIES, hashed_username, project_metadata
+            project_properties = _get_project_properties(
+                hashed_username, project_metadata
             )
             cli_properties = _format_user_cli_data(
-                PROJECT_PROPERTIES, masked_command_args
+                project_properties, masked_command_args
             )
 
             _send_heap_event(
@@ -118,8 +114,6 @@ class KedroTelemetryCLIHooks:
 class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
     """Hook to send proejct statistics data to Heap"""
 
-    project_properties = PROJECT_PROPERTIES if PROJECT_PROPERTIES else {}
-
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send proejct statistics data to Heap"""
@@ -128,14 +122,11 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
 
-        if not self.project_properties:  # `KedroSession.run` without invoking CLI
-            project_metadata = bootstrap_project(context.project_path)
-            _prepare_project_properties(
-                self.project_properties, hashed_username, project_metadata
-            )
+        project_metadata = _get_project_metadata(context.project_path)
+        project_properties = _get_project_properties(hashed_username, project_metadata)
 
         project_statistics_properties = _format_project_statistics_data(
-            self.project_properties, catalog, default_pipeline, pipelines
+            project_properties, catalog, default_pipeline, pipelines
         )
 
         _send_heap_event(
@@ -145,25 +136,23 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
         )
 
 
-def _prepare_project_properties(
-    properties: dict, hashed_username: str, project_metadata: ProjectMetadata
-):
+def _get_project_properties(
+    hashed_username: str, project_metadata: ProjectMetadata
+) -> Dict:
 
     hashed_package_name = _hash(project_metadata.package_name)
     hashed_project_name = _hash(project_metadata.project_name)
     project_version = project_metadata.project_version
 
-    properties.update(
-        {
-            "username": hashed_username,
-            "package_name": hashed_package_name,
-            "project_name": hashed_project_name,
-            "project_version": project_version,
-            "telemetry_version": TELEMETRY_VERSION,
-            "python_version": sys.version,
-            "os": sys.platform,
-        }
-    )
+    return {
+        "username": hashed_username,
+        "package_name": hashed_package_name,
+        "project_name": hashed_project_name,
+        "project_version": project_version,
+        "telemetry_version": TELEMETRY_VERSION,
+        "python_version": sys.version,
+        "os": sys.platform,
+    }
 
 
 def _format_user_cli_data(
@@ -184,12 +173,14 @@ def _format_project_statistics_data(
     default_pipeline: Pipeline,
     project_pipelines: dict,
 ):
-    """Add project staitsitcs to send to Heap."""
+    """Add project statistics to send to Heap."""
     project_statistics_properties = properties.copy()
     project_statistics_properties["number_of_datasets"] = len(
         catalog.datasets.__dict__.keys()
     )
-    project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes) if default_pipeline else None
+    project_statistics_properties["number_of_nodes"] = (
+        len(default_pipeline.nodes) if default_pipeline else None
+    )
     project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
     return project_statistics_properties
 

@@ -317,7 +317,7 @@ class TestKedroTelemetryCLIHooks:
     def test_confirm_consent_yaml_dump_error(self, mocker, fake_metadata, caplog):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
-        mocker.patch("yaml.dump", side_effect=Exception)
+        mocker.patch("yaml.dump", side_efyfect=Exception)
 
         assert not _confirm_consent(telemetry_file_path)
 
@@ -351,7 +351,7 @@ class TestKedroTelemetryHooks:
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch(
-            "kedro_telemetry.plugin.bootstrap_project", return_value=fake_metadata
+            "kedro_telemetry.plugin._get_project_metadata", return_value=fake_metadata
         )
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
@@ -404,6 +404,9 @@ class TestKedroTelemetryHooks:
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocker.patch(
+            "kedro_telemetry.plugin._get_project_metadata", return_value=fake_metadata
+        )
         # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]

@@ -115,7 +115,7 @@ class KedroTelemetryCLIHooks:
             )
 
 
-class KedroTelemetryHooks:  # pylint: disable=too-few-public-methods
+class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
     """Hook to send proejct statistics data to Heap"""
 
     project_properties = PROJECT_PROPERTIES if PROJECT_PROPERTIES else {}
@@ -125,7 +125,7 @@ class KedroTelemetryHooks:  # pylint: disable=too-few-public-methods
         """Hook implementation to send proejct statistics data to Heap"""
 
         catalog = context.catalog
-        default_pipeline = pipelines.get("__default__")
+        default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
 
         if not self.project_properties:  # `KedroSession.run` without invoking CLI
@@ -186,17 +186,10 @@ def _format_project_statistics_data(
 ):
     """Add project staitsitcs to send to Heap."""
     project_statistics_properties = properties.copy()
-    # Initialize default value
-    project_statistics_properties["number_of_datasets"] = 0
-    project_statistics_properties["number_of_nodes"] = 0
-    project_statistics_properties["number_of_pipelines"] = 0
-
-    # Assign the project statistics
     project_statistics_properties["number_of_datasets"] = len(
         catalog.datasets.__dict__.keys()
     )
-    if default_pipeline:
-        project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes)
+    project_statistics_properties["number_of_nodes"] = len(default_pipeline.nodes) if default_pipeline else None
     project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
     return project_statistics_properties
 
@@ -287,4 +280,4 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
 
 
 cli_hooks = KedroTelemetryCLIHooks()
-project_telemetry_hooks = KedroTelemetryHooks()
+project_hooks = KedroTelemetryProjectHooks()

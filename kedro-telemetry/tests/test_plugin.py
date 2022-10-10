@@ -14,7 +14,7 @@ from pytest import fixture
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
-    KedroTelemetryHooks,
+    KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
     _confirm_consent,
 )
@@ -355,7 +355,7 @@ class TestKedroTelemetryHooks:
         )
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
-        telemetry_hook = KedroTelemetryHooks()
+        telemetry_hook = KedroTelemetryProjectHooks()
         telemetry_hook.after_context_created(fake_context)
 
         project_properties = {
@@ -410,7 +410,7 @@ class TestKedroTelemetryHooks:
         telemetry_cli_hook.before_command_run(fake_metadata, command_args)
 
         # Follow by project run
-        telemetry_hook = KedroTelemetryHooks()
+        telemetry_hook = KedroTelemetryProjectHooks()
         telemetry_hook.after_context_created(fake_context)
 
         project_properties = {

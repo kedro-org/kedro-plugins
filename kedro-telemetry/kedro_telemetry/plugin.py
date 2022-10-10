@@ -112,7 +112,7 @@ class KedroTelemetryCLIHooks:
 
 
 class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
-    """Hook to send proejct statistics data to Heap"""
+    """Hook to send project statistics data to Heap"""
 
     @hook_impl
     def after_context_created(self, context):

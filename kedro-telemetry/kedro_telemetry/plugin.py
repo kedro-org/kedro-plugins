@@ -16,18 +16,38 @@ import requests
 import yaml
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
-from kedro.framework.startup import ProjectMetadata
+from kedro.framework.hooks import hook_impl
+from kedro.framework.project import pipelines
+from kedro.framework.startup import ProjectMetadata, _get_project_metadata
+from kedro.io.data_catalog import DataCatalog
+from kedro.pipeline import Pipeline
 
-from kedro_telemetry import __version__ as telemetry_version
+from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
-
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
+
+
+def _hash(string: str) -> str:
+    return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
+
+
+def _get_hashed_username():
+
+    try:
+        username = getpass.getuser()
+        return _hash(username)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Something went wrong with getting the username. Exception: %s",
+            exc,
+        )
+        return ""
 
 
 class KedroTelemetryCLIHooks:
@@ -61,30 +81,22 @@ class KedroTelemetryCLIHooks:
 
             logger.debug("You have opted into product usage analytics.")
 
-            try:
-                username = getpass.getuser()
-                hashed_username = hashlib.sha512(
-                    bytes(username, encoding="utf8")
-                ).hexdigest()
-            except Exception as exc:  # pylint: disable=broad-except
-                logger.warning(
-                    "Something went wrong with getting the username. Exception: %s",
-                    exc,
-                )
-                hashed_username = ""
-
-            properties = _format_user_cli_data(
-                hashed_username, masked_command_args, project_metadata
+            hashed_username = _get_hashed_username()
+            project_properties = _get_project_properties(
+                hashed_username, project_metadata
+            )
+            cli_properties = _format_user_cli_data(
+                project_properties, masked_command_args
             )
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
                 identity=hashed_username,
-                properties=properties,
+                properties=cli_properties,
             )
 
             # send generic event too, so it's easier in data processing
-            generic_properties = deepcopy(properties)
+            generic_properties = deepcopy(cli_properties)
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
@@ -99,28 +111,78 @@ class KedroTelemetryCLIHooks:
             )
 
 
-def _format_user_cli_data(
-    hashed_username: str, command_args: List[str], project_metadata: ProjectMetadata
-):
-    """Hash username, format CLI command, system and project data to send to Heap."""
-    hashed_package_name = hashlib.sha512(
-        bytes(project_metadata.package_name, encoding="utf8")
-    ).hexdigest()
-    hashed_project_name = hashlib.sha512(
-        bytes(project_metadata.project_name, encoding="utf8")
-    ).hexdigest()
+class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
+    """Hook to send project statistics data to Heap"""
+
+    @hook_impl
+    def after_context_created(self, context):
+        """Hook implementation to send project statistics data to Heap"""
+
+        catalog = context.catalog
+        default_pipeline = pipelines.get("__default__")  # __default__
+        hashed_username = _get_hashed_username()
+
+        project_metadata = _get_project_metadata(context.project_path)
+        project_properties = _get_project_properties(hashed_username, project_metadata)
+
+        project_statistics_properties = _format_project_statistics_data(
+            project_properties, catalog, default_pipeline, pipelines
+        )
+
+        _send_heap_event(
+            event_name="Kedro Project Statistics",
+            identity=hashed_username,
+            properties=project_statistics_properties,
+        )
+
+
+def _get_project_properties(
+    hashed_username: str, project_metadata: ProjectMetadata
+) -> Dict:
+
+    hashed_package_name = _hash(project_metadata.package_name)
+    hashed_project_name = _hash(project_metadata.project_name)
     project_version = project_metadata.project_version
 
     return {
         "username": hashed_username,
-        "command": f"kedro {' '.join(command_args)}" if command_args else "kedro",
         "package_name": hashed_package_name,
         "project_name": hashed_project_name,
         "project_version": project_version,
-        "telemetry_version": telemetry_version,
+        "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
     }
+
+
+def _format_user_cli_data(
+    properties: dict,
+    command_args: List[str],
+):
+    """Add format CLI command data to send to Heap."""
+    cli_properties = properties.copy()
+    cli_properties["command"] = (
+        f"kedro {' '.join(command_args)}" if command_args else "kedro"
+    )
+    return cli_properties
+
+
+def _format_project_statistics_data(
+    properties: dict,
+    catalog: DataCatalog,
+    default_pipeline: Pipeline,
+    project_pipelines: dict,
+):
+    """Add project statistics to send to Heap."""
+    project_statistics_properties = properties.copy()
+    project_statistics_properties["number_of_datasets"] = len(
+        catalog.datasets.__dict__.keys()
+    )
+    project_statistics_properties["number_of_nodes"] = (
+        len(default_pipeline.nodes) if default_pipeline else None
+    )
+    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
+    return project_statistics_properties
 
 
 def _get_heap_app_id() -> str:
@@ -209,3 +271,4 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
 
 
 cli_hooks = KedroTelemetryCLIHooks()
+project_hooks = KedroTelemetryProjectHooks()

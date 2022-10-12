@@ -2,6 +2,7 @@
 
 ## Bug fixes and other changes
 * Changed the value associated with the `identity` key in the call to heap's /track endpoint from hashed computer name to hashed username.
+* Expanding to track numbers of datasets, nodes, pipelines to better understand the size of kedro project.
 
 # Release 0.2.1
 

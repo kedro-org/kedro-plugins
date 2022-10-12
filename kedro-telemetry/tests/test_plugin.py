@@ -8,7 +8,6 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, pipeline
-from numpy import fix
 from pytest import fixture
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION

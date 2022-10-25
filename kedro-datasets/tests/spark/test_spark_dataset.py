@@ -25,11 +25,7 @@ from pyspark.sql.utils import AnalysisException
 from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro_datasets.pickle import PickleDataSet
 from kedro_datasets.spark import SparkDataSet
-from kedro_datasets.spark.spark_dataset import (
-    _dbfs_exists,
-    _dbfs_glob,
-    _get_dbutils,
-)
+from kedro_datasets.spark.spark_dataset import _dbfs_exists, _dbfs_glob, _get_dbutils
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -664,9 +660,7 @@ class TestSparkDataSetVersionedDBFS:
         ipython_mock.get_ipython.assert_called_once_with()
 
     def test_get_dbutils_no_modules(self, mocker):
-        mocker.patch(
-            "kedro_datasets.spark.spark_dataset.globals", return_value={}
-        )
+        mocker.patch("kedro_datasets.spark.spark_dataset.globals", return_value={})
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
         assert _get_dbutils("spark") is None
 

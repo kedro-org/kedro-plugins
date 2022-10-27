@@ -19,15 +19,6 @@ package_name = name.replace("-", "_")
 with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
     version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
 
-# get the dependencies and installs
-with open("requirements.txt", "r", encoding="utf-8") as f:
-    requires = [x.strip() for x in f if x.strip()]
-
-# get test dependencies and installs
-with open("test_requirements.txt", "r", encoding="utf-8") as f:
-    test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
-
-
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
@@ -137,8 +128,6 @@ setup(
     url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets",
     author="Kedro",
     python_requires=">=3.7, <3.11",
-    install_requires=requires,
-    tests_require=test_requires,
     license="Apache Software License (Apache 2.0)",
     packages=find_packages(exclude=["tests*"]),
     extras_require=extras_require

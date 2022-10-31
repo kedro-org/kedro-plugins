@@ -29,6 +29,7 @@ with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
+
 def _collect_requirements(requires):
     return sorted(set(chain.from_iterable(requires.values())))
 
@@ -137,5 +138,5 @@ setup(
     python_requires=">=3.7, <3.11",
     license="Apache Software License (Apache 2.0)",
     packages=find_packages(exclude=["tests*"]),
-    extras_require=extras_require
+    extras_require=extras_require,
 )

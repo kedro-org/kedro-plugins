@@ -14,6 +14,12 @@ SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 
+with open("requirements.txt", "r", encoding="utf-8") as f:
+    install_requires = [x.strip() for x in f if x.strip()]
+
+with open("test_requirements.txt", "r", encoding="utf-8") as f:
+    tests_require = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
+
 # get package version
 package_name = name.replace("-", "_")
 with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
@@ -22,7 +28,6 @@ with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
-
 
 def _collect_requirements(requires):
     return sorted(set(chain.from_iterable(requires.values())))
@@ -126,6 +131,8 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets",
+    install_requires=install_requires,
+    tests_require=tests_require,
     author="Kedro",
     python_requires=">=3.7, <3.11",
     license="Apache Software License (Apache 2.0)",

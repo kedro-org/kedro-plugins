@@ -2,7 +2,7 @@
 ``delta-spark``
 """
 from pathlib import PurePosixPath
-from typing import Any
+from typing import NoReturn
 
 from delta.tables import DeltaTable
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -12,12 +12,12 @@ from pyspark.sql.utils import AnalysisException
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
 
-class DeltaTableDataSet(AbstractDataSet):
+class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
         Example adding a catalog entry with
         `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-            01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+            01_data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
         .. code-block:: yaml
 
@@ -82,7 +82,7 @@ class DeltaTableDataSet(AbstractDataSet):
         load_path = self._fs_prefix + str(self._filepath)
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:

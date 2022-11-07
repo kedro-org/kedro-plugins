@@ -11,7 +11,7 @@ from pyspark.sql.functions import col, lit, row_number
 
 
 # pylint:disable=too-many-instance-attributes
-class SparkHiveDataSet(AbstractDataSet):
+class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
@@ -26,7 +26,7 @@ class SparkHiveDataSet(AbstractDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -113,7 +113,7 @@ class SparkHiveDataSet(AbstractDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-        self._format = self._save_args.get("format") or "hive"
+        self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
     def _describe(self) -> Dict[str, Any]:

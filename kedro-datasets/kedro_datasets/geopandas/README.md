@@ -8,7 +8,7 @@ See [geopandas.GeoDataFrame](http://geopandas.org/reference/geopandas.GeoDataFra
 ```python
 import geopandas as gpd
 from shapely.geometry import Point
-from kedro_datasets.datasets import GeoJSONDataSet
+from kedro_datasets.geopandas import GeoJSONDataSet
 
 data = gpd.GeoDataFrame(
     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},

@@ -16,7 +16,7 @@ from kedro.io.core import (
 from PIL import Image
 
 
-class ImageDataSet(AbstractVersionedDataSet):
+class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
     """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
@@ -106,13 +106,13 @@ class ImageDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> Image:
+    def _load(self) -> Image.Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return Image.open(fs_file).copy()
 
-    def _save(self, data: Image) -> None:
+    def _save(self, data: Image.Image) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

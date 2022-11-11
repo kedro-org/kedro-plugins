@@ -366,7 +366,7 @@ jobs:
                 command: export plugin=<<pipeline.parameters.release_package>>; make test-sequential
       - run:
           name: Run e2e tests
-          command: export plugin=<<pipeline.parameters.release_package>>; make e2e-tests
+          command: make plugin=<<pipeline.parameters.release_package>> e2e-tests
 
   publish_package:
     machine:

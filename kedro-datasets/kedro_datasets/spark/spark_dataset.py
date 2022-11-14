@@ -11,11 +11,6 @@ from warnings import warn
 
 import fsspec
 from hdfs import HdfsError, InsecureClient
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import StructType
-from pyspark.sql.utils import AnalysisException
-from s3fs import S3FileSystem
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -23,6 +18,10 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.types import StructType
+from pyspark.sql.utils import AnalysisException
+from s3fs import S3FileSystem
 
 
 def _parse_glob_pattern(pattern: str) -> str:

@@ -9,7 +9,6 @@ from typing import Any, Dict
 
 import fsspec
 import networkx
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     Version,

@@ -7,14 +7,13 @@ from typing import Any, Dict, Union
 
 import fsspec
 import plotly.io as pio
-from plotly import graph_objects as go
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
+from plotly import graph_objects as go
 
 
 class JSONDataSet(

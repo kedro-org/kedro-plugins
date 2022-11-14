@@ -6,8 +6,9 @@ and only takes metrics of numeric values.
 import json
 from typing import Dict, NoReturn
 
-from kedro_datasets.json import JSONDataSet
 from kedro.io.core import DataSetError, get_filepath_str
+
+from kedro_datasets.json import JSONDataSet
 
 
 class MetricsDataSet(JSONDataSet):

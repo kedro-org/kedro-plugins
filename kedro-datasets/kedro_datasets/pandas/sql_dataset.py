@@ -16,8 +16,6 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine
-from sqlalchemy.exc import NoSuchModuleError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 

@@ -7,7 +7,6 @@ from typing import Any, Dict
 
 import fsspec
 import yaml
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,

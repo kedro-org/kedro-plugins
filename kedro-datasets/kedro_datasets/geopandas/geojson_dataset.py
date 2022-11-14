@@ -8,7 +8,6 @@ from typing import Any, Dict, Union
 
 import fsspec
 import geopandas as gpd
-
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,

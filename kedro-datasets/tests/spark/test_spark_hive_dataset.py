@@ -4,13 +4,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from kedro.io import DataSetError
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro_datasets.spark import SparkHiveDataSet
+from kedro.io import DataSetError
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -301,3 +301,14 @@ class TestSparkHiveDataSet:
             r"table_doesnt_exist\], \[\], false\n",
         ):
             dataset.load()
+
+    def test_save_delta_format(self, mocker):
+        dataset = SparkHiveDataSet(
+            database="default_1", table="delta_table", save_args={"format": "delta"}
+        )
+        mocked_save = mocker.patch("pyspark.sql.DataFrameWriter.saveAsTable")
+        dataset.save(_generate_spark_df_one())
+        mocked_save.assert_called_with(
+            "default_1.delta_table", mode="errorifexists", format="delta"
+        )
+        assert dataset._format == "delta"

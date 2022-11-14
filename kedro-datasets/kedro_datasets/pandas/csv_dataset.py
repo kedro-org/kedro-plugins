@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 import fsspec
 import pandas as pd
+
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
@@ -21,14 +22,14 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class CSVDataSet(AbstractVersionedDataSet):
+class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
     Example adding a catalog entry with
     `YAML API
     <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -47,8 +48,6 @@ class CSVDataSet(AbstractVersionedDataSet):
         >>>   type: pandas.CSVDataSet
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
-        >>>
-
 
     Example using Python API:
     ::
@@ -59,7 +58,6 @@ class CSVDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

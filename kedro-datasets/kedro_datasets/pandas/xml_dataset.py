@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 import fsspec
 import pandas as pd
+
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
@@ -21,7 +22,7 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class XMLDataSet(AbstractVersionedDataSet):
+class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``XMLDataSet`` loads/saves data from/to a XML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
@@ -34,7 +35,6 @@ class XMLDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = XMLDataSet(filepath="gcs://bucket/test.xml")
         >>> data_set = XMLDataSet(filepath="test.xml")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

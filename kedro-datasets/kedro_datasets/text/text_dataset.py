@@ -6,6 +6,7 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
+
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -15,7 +16,7 @@ from kedro.io.core import (
 )
 
 
-class TextDataSet(AbstractVersionedDataSet):
+class TextDataSet(AbstractVersionedDataSet[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
@@ -26,7 +27,6 @@ class TextDataSet(AbstractVersionedDataSet):
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> # data_set = TextDataSet(filepath="gcs://bucket/test.md")
         >>> data_set = TextDataSet(filepath="test.md")
         >>> data_set.save(string_to_write)
         >>> reloaded = data_set.load()

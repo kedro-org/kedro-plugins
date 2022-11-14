@@ -3,10 +3,13 @@
 import copy
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.exc import NoSuchModuleError
+
 from kedro.io.core import (
     AbstractDataSet,
     DataSetError,
@@ -86,7 +89,7 @@ def _get_sql_alchemy_missing_error() -> DataSetError:
     )
 
 
-class SQLTableDataSet(AbstractDataSet):
+class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     """``SQLTableDataSet`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
     so it supports all allowed pandas options on ``read_sql_table`` and
@@ -103,7 +106,7 @@ class SQLTableDataSet(AbstractDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -256,7 +259,7 @@ class SQLTableDataSet(AbstractDataSet):
         return exists
 
 
-class SQLQueryDataSet(AbstractDataSet):
+class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     """``SQLQueryDataSet`` loads data from a provided SQL query. It
     uses ``pandas.DataFrame`` internally, so it supports all allowed
     pandas options on ``read_sql_query``. Since Pandas uses SQLAlchemy behind
@@ -272,7 +275,7 @@ class SQLQueryDataSet(AbstractDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -428,5 +431,5 @@ class SQLQueryDataSet(AbstractDataSet):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError("'save' is not supported on SQLQueryDataSet")

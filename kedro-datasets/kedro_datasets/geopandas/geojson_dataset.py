@@ -8,6 +8,7 @@ from typing import Any, Dict, Union
 
 import fsspec
 import geopandas as gpd
+
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -17,7 +18,11 @@ from kedro.io.core import (
 )
 
 
-class GeoJSONDataSet(AbstractVersionedDataSet):
+class GeoJSONDataSet(
+    AbstractVersionedDataSet[
+        gpd.GeoDataFrame, Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]
+    ]
+):
     """``GeoJSONDataSet`` loads/saves data to a GeoJSON file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all
@@ -32,10 +37,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
         >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
-        >>> # data_set = GeoJSONDataSet(filepath="gcs://bucket/test.geojson",
-        >>>                                save_args=None)
-        >>> data_set = GeoJSONDataSet(filepath="test.geojson",
-        >>>                                save_args=None)
+        >>> data_set = GeoJSONDataSet(filepath="test.geojson", save_args=None)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>>

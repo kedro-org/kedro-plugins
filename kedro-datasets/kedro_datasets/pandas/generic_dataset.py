@@ -8,6 +8,7 @@ from typing import Any, Dict
 
 import fsspec
 import pandas as pd
+
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -28,14 +29,14 @@ NON_FILE_SYSTEM_TARGETS = [
 ]
 
 
-class GenericDataSet(AbstractVersionedDataSet):
+class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
     Example using `YAML API
     <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -72,7 +73,6 @@ class GenericDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = GenericDataSet(filepath="s3://test.csv", file_format='csv')
         >>> data_set = GenericDataSet(filepath="test.csv", file_format='csv')
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
@@ -179,7 +179,7 @@ class GenericDataSet(AbstractVersionedDataSet):
                 f"does not support a filepath target/source."
             )
 
-    def _load(self) -> Any:
+    def _load(self) -> pd.DataFrame:
 
         self._ensure_file_system_target()
 

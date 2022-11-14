@@ -7,16 +7,19 @@ from typing import Any, Dict, Union
 
 import fsspec
 import plotly.io as pio
+from plotly import graph_objects as go
+
 from kedro.io.core import (
     AbstractVersionedDataSet,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
-from plotly import graph_objects as go
 
 
-class JSONDataSet(AbstractVersionedDataSet):
+class JSONDataSet(
+    AbstractVersionedDataSet[go.Figure, Union[go.Figure, go.FigureWidget]]
+):
     """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 

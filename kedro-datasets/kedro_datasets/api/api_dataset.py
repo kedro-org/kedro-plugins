@@ -1,18 +1,38 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, NoReturn, Union
 
 import requests
 from kedro.io.core import AbstractDataSet, DataSetError
 from requests.auth import AuthBase
 
 
-class APIDataSet(AbstractDataSet):
+class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> usda:
+        >>>   type: api.APIDataSet
+        >>>   url: https://quickstats.nass.usda.gov
+        >>>   params:
+        >>>     key: SOME_TOKEN,
+        >>>     format: JSON,
+        >>>     commodity_desc: CORN,
+        >>>     statisticcat_des: YIELD,
+        >>>     agg_level_desc: STATE,
+        >>>     year: 2000
+        >>>
+
+
+    Example using Python API:
     ::
 
         >>> from kedro_datasets.api import APIDataSet
@@ -108,7 +128,7 @@ class APIDataSet(AbstractDataSet):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:

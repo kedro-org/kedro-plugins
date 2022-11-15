@@ -21,7 +21,7 @@ from kedro.io.core import (
 
 
 class EmailMessageDataSet(
-    AbstractVersionedDataSet
+    AbstractVersionedDataSet[Message, Message]
 ):  # pylint: disable=too-many-instance-attributes
     """``EmailMessageDataSet`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
@@ -45,7 +45,6 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> # data_set = EmailMessageDataSet(filepath="gcs://bucket/test")
         >>> data_set = EmailMessageDataSet(filepath="test")
         >>> data_set.save(msg)
         >>> reloaded = data_set.load()

@@ -406,7 +406,7 @@ jobs:
               --data '{
                 "branch":"main",
                 "parameters": {
-                  "docs_change": true
+                  "docs_change":true
                 }
               }'
 
@@ -425,7 +425,7 @@ jobs:
               --data '{
                 "branch":"main",
                 "parameters": {
-                  "docs_change": true
+                  "docs_change":true
                 }
               }'
 

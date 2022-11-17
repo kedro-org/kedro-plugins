@@ -426,8 +426,7 @@ jobs:
               --data '{
                 "branch":"main",
                 "parameters": {
-                  "docs_change": true,
-                  "kedro_datasets_release": true
+                  "docs_change": true
                 }
               }'
 

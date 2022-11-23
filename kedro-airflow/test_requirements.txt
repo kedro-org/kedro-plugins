@@ -1,5 +1,5 @@
 -r requirements.txt
-apache-airflow<3.0
+apache-airflow>=1.10.4,<3.0
 bandit>=1.6.2, <2.0
 behave
 black~=22.0

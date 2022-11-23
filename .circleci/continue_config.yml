@@ -279,10 +279,11 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - unless:
+      - when:
           condition:
             and:
-              - equal: [ "3.10", <<parameters.python_version>> ]
+              - not:
+                  equal: [ "3.10", <<parameters.python_version>> ]
               - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
           steps:
             - run:

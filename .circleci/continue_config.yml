@@ -66,8 +66,11 @@ commands:
           command: conda install -c conda-forge pytables -y
       - run:
           name: Install kedro and test requirements
+          environment:
+            PLUGIN: <<parameters.plugin>>
           command: |
             cd <<parameters.plugin>>
+            if [ $PLUGIN = "kedro-airflow" ]; then export SLUGIFY_USES_TEXT_UNIDECODE=yes fi
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt
       - run:

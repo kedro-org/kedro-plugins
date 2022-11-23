@@ -70,7 +70,7 @@ commands:
             PLUGIN: <<parameters.plugin>>
           command: |
             cd <<parameters.plugin>>
-            if [ $PLUGIN = "kedro-airflow" ]; then export SLUGIFY_USES_TEXT_UNIDECODE=yes fi
+            if [ $PLUGIN = "kedro-airflow" ]; then export SLUGIFY_USES_TEXT_UNIDECODE=yes; fi
             pip install git+https://github.com/kedro-org/kedro@main
             pip install -r test_requirements.txt
       - run:

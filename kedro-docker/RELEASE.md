@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+* Optimized image layers that store project code
+
 ## Breaking changes to the API
 
 # Release 0.3.0

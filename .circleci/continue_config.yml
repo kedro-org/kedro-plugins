@@ -243,12 +243,7 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - when:
-          python_version: <<parameters.python_version>>
-          condition:
-            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
-          steps:
-            win_setup_env
+      - win_setup_env
       - win_setup_requirements:
           plugin: <<parameters.plugin>>
           python_version: <<parameters.python_version>>

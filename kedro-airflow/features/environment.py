@@ -53,7 +53,6 @@ def before_scenario(context, scenario):
     call([context.pip, "install", "-r", "test_requirements.txt"])
     call([context.pip, "install", "."])
 
-    # pylint: disable=unused-argument
     context.temp_dir = Path(tempfile.mkdtemp())
 
 

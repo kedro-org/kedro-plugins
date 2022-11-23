@@ -449,8 +449,8 @@ workflows:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
           pre-steps:
           - run:
-              name: Force install GPL dependency (unidecode)
-              command: echo 'export AIRFLOW_GPL_UNIDECODE=yes' >> $BASH_ENV
+              name: Avoid GPL dependency (unidecode)
+              command: echo 'export SLUGIFY_USES_TEXT_UNIDECODE=yes' >> $BASH_ENV
       - e2e_tests:
           plugin: "kedro-airflow"
           matrix:

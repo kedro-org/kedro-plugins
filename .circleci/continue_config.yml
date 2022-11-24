@@ -286,9 +286,12 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            and:
-              - equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+            or:
+              - and:
+                - equal: [ "3.10", <<parameters.python_version>> ]
+                - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - or:
+                - equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
           steps:
             - run:
                 name: Run unit tests without spark in parallel
@@ -363,7 +366,7 @@ jobs:
                 command: export plugin=<<pipeline.parameters.release_package>>; make test-sequential
       - run:
           name: Run e2e tests
-          command: export plugin=<<pipeline.parameters.release_package>>; make e2e-tests
+          command: make plugin=<<pipeline.parameters.release_package>> e2e-tests
 
   publish_package:
     machine:

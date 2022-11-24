@@ -11,7 +11,6 @@ from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
 
-
 @click.group(name="Kedro-Airflow")
 def commands():
     """Kedro plugin for running a project with Airflow"""

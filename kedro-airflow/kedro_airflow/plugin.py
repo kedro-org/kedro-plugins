@@ -12,8 +12,7 @@ from slugify import slugify
 
 
 @click.group(name="Airflow")
-def commands():
-    """Kedro plugin for running a project with Airflow"""
+def commands():  # pylint: disable=missing-function-docstring
     pass
 
 

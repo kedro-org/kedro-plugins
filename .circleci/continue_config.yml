@@ -243,12 +243,7 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - when:
-          python_version: <<parameters.python_version>>
-          condition:
-            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
-          steps:
-            win_setup_env
+      - win_setup_env
       - win_setup_requirements:
           plugin: <<parameters.plugin>>
           python_version: <<parameters.python_version>>
@@ -284,14 +279,12 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - unless:
+      - when:
           condition:
-            or:
-              - and:
-                - equal: [ "3.10", <<parameters.python_version>> ]
-                - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
-              - or:
-                - equal: [false, <<pipeline.parameters.run-build-kedro-datasets>>]
+            and:
+              - not:
+                  equal: [ "3.10", <<parameters.python_version>> ]
+              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
           steps:
             - run:
                 name: Run unit tests without spark in parallel
@@ -454,6 +447,10 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
+          pre-steps:
+          - run:
+              name: Avoid GPL dependency (unidecode)
+              command: echo 'export SLUGIFY_USES_TEXT_UNIDECODE=yes' >> $BASH_ENV
       - e2e_tests:
           plugin: "kedro-airflow"
           matrix:

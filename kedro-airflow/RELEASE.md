@@ -1,3 +1,5 @@
+# Upcoming release 0.5.2
+
 # Release 0.5.1
 * Added additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template.
 * Added support for Airflow>=2.3.0.

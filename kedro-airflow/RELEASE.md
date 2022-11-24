@@ -1,18 +1,20 @@
 # Release 0.5.1
-* Add additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template
+* Added additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template.
+* Added support for Airflow>=2.3.0.
+* Kept Kedro-Airflow plugin docstring from appearing in `kedro -h`.
 
 # Release 0.5.0
-* Add compatibility with `kedro` 0.18.0
-* Add compatibility with Python 3.9 and 3.10
-* Remove compatibility with Python 3.6
+* Added support for Kedro 0.18.
+* Added support for Python 3.9 and 3.10.
+* Removed compatibility with Python 3.6.
 
 # Release 0.4.2
-* Drop context/session usage to fetch pipelines to support Kedro>=0.17.5.
+* Dropped context/session usage to fetch pipelines to support Kedro>=0.17.5.
 
 # Release 0.4.1
 
 ## Bugfix
-* Drop unnecessary dependency on apache-airflow
+* Dropped unnecessary dependency on `apache-airflow`.
 
 ## Thanks for supporting contributions
 
@@ -39,18 +41,17 @@
 # Release 0.2.2
 
 ## Major features and improvements
-* Fix a bug deploying when the Airflow directory does not exist.
+* Fixed a bug deploying when the Airflow directory does not exist.
 
 # Release 0.2.1
 
 ## Major features and improvements
-* Fix installation issue due to dependency version conflict.
-
+* Fixed installation issue due to dependency version conflict.
 
 # Release 0.2.0
 
 ## Major features and improvements
-* Compatibility with kedro==0.15.0
+* Added support for Kedro 0.15.
 
 # Release 0.1.0:
 

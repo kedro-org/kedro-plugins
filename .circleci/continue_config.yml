@@ -391,44 +391,6 @@ jobs:
             make package
             make pypi
 
-  # Trigger kedro docs build on main branch
-  kedro_build_datasets_main:
-    docker:
-      - image: spotify/alpine # for bash and curl
-    steps:
-      - run:
-          name: Trigger kedro docs build
-          command: |
-            curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/kedro-org/kedro/pipeline \
-              --header "Circle-Token: $CIRCLE_KEDRO_BUILD_TOKEN" \
-              --header 'content-type: application/json' \
-              --data '{
-                "branch":"main",
-                "parameters": {
-                  "docs_change":true
-                }
-              }'
-
-  # Trigger kedro docs build on latest release
-  kedro_build_datasets_release:
-    docker:
-      - image: spotify/alpine # for bash and curl
-    steps:
-      - run:
-          name: Trigger kedro docs build
-          command: |
-            curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/kedro-org/kedro/pipeline \
-              --header "Circle-Token: $CIRCLE_KEDRO_BUILD_TOKEN" \
-              --header 'content-type: application/json' \
-              --data '{
-                "branch":"main",
-                "parameters": {
-                  "docs_change":true
-                }
-              }'
-
 workflows:
   # when pipeline parameter, run-build-kedro-telemetry is true, the
   # kedro-telemetry job is triggered.
@@ -540,7 +502,6 @@ workflows:
             # We just need one Python enviornment to trigger the job
             parameters:
               python_version: ["3.8"]
-      - kedro_build_datasets_main
 
   package_release:
     when:
@@ -555,4 +516,3 @@ workflows:
       - publish_package:
           requires:
             - build_package
-      - kedro_build_datasets_release

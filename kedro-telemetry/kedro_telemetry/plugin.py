@@ -9,7 +9,7 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import click
 import requests
@@ -122,7 +122,11 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
 
-        project_metadata = _get_project_metadata(context.project_path)
+        try:
+            project_metadata = _get_project_metadata(context.project_path)
+        except RuntimeError:
+            # Case: project is packaged + deployed without `pyproject.toml` (GH #83)
+            project_metadata = None
         project_properties = _get_project_properties(hashed_username, project_metadata)
 
         project_statistics_properties = _format_project_statistics_data(
@@ -137,12 +141,12 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
 
 
 def _get_project_properties(
-    hashed_username: str, project_metadata: ProjectMetadata
+    hashed_username: str, project_metadata: Optional[ProjectMetadata] = None
 ) -> Dict:
 
-    hashed_package_name = _hash(project_metadata.package_name)
-    hashed_project_name = _hash(project_metadata.project_name)
-    project_version = project_metadata.project_version
+    hashed_package_name = _hash(getattr(project_metadata, "package_name", "undefined"))
+    hashed_project_name = _hash(getattr(project_metadata, "project_name", "undefined"))
+    project_version = getattr(project_metadata, "project_version", "undefined")
 
     return {
         "username": hashed_username,

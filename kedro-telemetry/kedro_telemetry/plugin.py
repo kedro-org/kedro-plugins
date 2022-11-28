@@ -144,9 +144,12 @@ def _get_project_properties(
     hashed_username: str, project_metadata: Optional[ProjectMetadata] = None
 ) -> Dict:
 
-    hashed_package_name = _hash(getattr(project_metadata, "package_name", "undefined"))
-    hashed_project_name = _hash(getattr(project_metadata, "project_name", "undefined"))
-    project_version = getattr(project_metadata, "project_version", "undefined")
+    if project_metadata:
+        hashed_package_name = _hash(project_metadata.package_name)
+        hashed_project_name = _hash(project_metadata.project_name)
+        project_version = project_metadata.project_version
+    else:
+        hashed_package_name = hashed_project_name = project_version = "undefined"
 
     return {
         "username": hashed_username,

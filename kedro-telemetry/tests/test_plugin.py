@@ -332,7 +332,6 @@ class TestKedroTelemetryHooks:
         self,
         mocker,
         fake_context,
-        fake_metadata,
         fake_default_pipeline,
         fake_sub_pipeline,
     ):

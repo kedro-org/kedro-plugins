@@ -136,7 +136,7 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
 
 def _get_project_properties(hashed_username: str) -> Dict:
 
-    hashed_package_name = _hash(PACKAGE_NAME)
+    hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
 
     return {
         "username": hashed_username,

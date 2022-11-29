@@ -9,16 +9,17 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import click
 import requests
 import yaml
+from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import pipelines
-from kedro.framework.startup import ProjectMetadata, _get_project_metadata
+from kedro.framework.project import PACKAGE_NAME, pipelines
+from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
@@ -82,9 +83,7 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
 
             hashed_username = _get_hashed_username()
-            project_properties = _get_project_properties(
-                hashed_username, project_metadata
-            )
+            project_properties = _get_project_properties(hashed_username)
             cli_properties = _format_user_cli_data(
                 project_properties, masked_command_args
             )
@@ -122,12 +121,7 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
 
-        try:
-            project_metadata = _get_project_metadata(context.project_path)
-        except RuntimeError:
-            # Case: project is packaged + deployed without `pyproject.toml` (GH #83)
-            project_metadata = None
-        project_properties = _get_project_properties(hashed_username, project_metadata)
+        project_properties = _get_project_properties(hashed_username)
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines
@@ -140,22 +134,14 @@ class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
         )
 
 
-def _get_project_properties(
-    hashed_username: str, project_metadata: Optional[ProjectMetadata] = None
-) -> Dict:
+def _get_project_properties(hashed_username: str) -> Dict:
 
-    if project_metadata:
-        hashed_package_name = _hash(project_metadata.package_name)
-        hashed_project_name = _hash(project_metadata.project_name)
-        project_version = project_metadata.project_version
-    else:
-        hashed_package_name = hashed_project_name = project_version = "undefined"
+    hashed_package_name = _hash(PACKAGE_NAME)
 
     return {
         "username": hashed_username,
         "package_name": hashed_package_name,
-        "project_name": hashed_project_name,
-        "project_version": project_version,
+        "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,

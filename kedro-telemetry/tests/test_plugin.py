@@ -81,6 +81,7 @@ class TestKedroTelemetryCLIHooks:
         )
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
+        mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
@@ -93,7 +94,6 @@ class TestKedroTelemetryCLIHooks:
         expected_properties = {
             "username": "hashed_username",
             "package_name": "digested",
-            "project_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -125,6 +125,7 @@ class TestKedroTelemetryCLIHooks:
         )
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
+        mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()
@@ -133,7 +134,6 @@ class TestKedroTelemetryCLIHooks:
         expected_properties = {
             "username": "digested",
             "package_name": "digested",
-            "project_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -193,6 +193,7 @@ class TestKedroTelemetryCLIHooks:
         )
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
+        mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch("getpass.getuser", side_effect=Exception)
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -203,7 +204,6 @@ class TestKedroTelemetryCLIHooks:
             "username": "",
             "command": "kedro --version",
             "package_name": "digested",
-            "project_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -336,7 +336,6 @@ class TestKedroTelemetryHooks:
         fake_default_pipeline,
         fake_sub_pipeline,
     ):
-
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
@@ -344,14 +343,12 @@ class TestKedroTelemetryHooks:
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
+        mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch(
-            "kedro_telemetry.plugin._get_project_metadata", return_value=fake_metadata
-        )
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryProjectHooks()
@@ -360,7 +357,6 @@ class TestKedroTelemetryHooks:
         project_properties = {
             "username": "hashed_username",
             "package_name": "digested",
-            "project_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -398,14 +394,12 @@ class TestKedroTelemetryHooks:
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
+        mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch(
-            "kedro_telemetry.plugin._get_project_metadata", return_value=fake_metadata
-        )
         # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]
@@ -418,7 +412,6 @@ class TestKedroTelemetryHooks:
         project_properties = {
             "username": "hashed_username",
             "package_name": "digested",
-            "project_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,

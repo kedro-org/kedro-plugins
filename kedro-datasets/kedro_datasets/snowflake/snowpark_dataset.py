@@ -13,7 +13,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 # TODO: Add to docs example of using API to add dataset
 class SnowParkDataSet(
     AbstractDataSet[pd.DataFrame, pd.DataFrame]
-):  # pylint: disable=too-many-instance-attributes
+):
     """``SnowParkDataSet`` loads and saves Snowpark dataframes.
 
     Example adding a catalog entry with
@@ -80,6 +80,9 @@ class SnowParkDataSet(
         if not schema:
             raise DataSetError("'schema' argument cannot be empty.")
 
+        if not credentials:
+            raise DataSetError("'credentials' argument cannot be empty.")
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -88,11 +91,19 @@ class SnowParkDataSet(
         if save_args is not None:
             self._save_args.update(save_args)
 
-        self._session = self._get_session(credentials)
         self._table_name = table_name
         self._warehouse = warehouse
         self._database = database
         self._schema = schema
+        self._connection_parameters = {
+            "account": credentials["account"],
+            "user": credentials["user"],
+            "password": credentials["password"],
+            "warehouse": self._warehouse,
+            "database": self._database,
+            "schema": self._schema,
+        }
+        self._session = self._get_session(self._connection_parameters)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -104,7 +115,7 @@ class SnowParkDataSet(
 
     # TODO: Do we want to make it static method?
     @staticmethod
-    def _get_session(credentials) -> sp.Session:
+    def _get_session(connection_parameters) -> sp.Session:
         """Given a connection string, create singleton connection
         to be used across all instances of `SnowParkDataSet` that
         need to connect to the same source.
@@ -121,11 +132,9 @@ class SnowParkDataSet(
         try:
             # if hook is implemented, get active session
             session = sp.context.get_active_session()
-        except sp.exceptions.SnowparkSessionException:
-            if not credentials:
-                raise DataSetError("'credentials' argument cannot be empty.")
+        except sp.exceptions.SnowparkSessionException as exc:
             # create session if there is no active one
-            session = sp.Session.builder.configs(credentials).create()
+            session = sp.Session.builder.configs(connection_parameters).create()
         return session
 
     def _load(self) -> sp.DataFrame:
@@ -150,12 +159,7 @@ class SnowParkDataSet(
             self._table_name,
         ]
 
-        sp_df.write.mode(self._save_args["mode"]).save_as_table(
-            table_name,
-            column_order=self._save_args["column_order"],
-            table_type=self._save_args["table_type"],
-            statement_params=self._save_args["statement_params"],
-        )
+        sp_df.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:
         session = self._session

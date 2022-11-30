@@ -4,12 +4,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from kedro.io import DataSetError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro_datasets.dask import ParquetDataSet
+from kedro.io import DataSetError
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -155,8 +155,69 @@ class TestParquetDataSet:
     )
     def test_save_extra_params(self, s3_data_set, save_args):
         """Test overriding the default save arguments."""
+        s3_data_set._process_schema()
+        assert s3_data_set._save_args.get("schema") is None
+
         for key, value in save_args.items():
             assert s3_data_set._save_args[key] == value
 
         for key, value in s3_data_set.DEFAULT_SAVE_ARGS.items():
             assert s3_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"schema": {"col1": "[[int64]]", "col2": "string"}}],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_dict(self, s3_data_set, save_args):
+        """Test setting the schema as dictionary of pyarrow column types
+        in save arguments."""
+
+        for key, value in save_args["schema"].items():
+            assert s3_data_set._save_args["schema"][key] == value
+
+        s3_data_set._process_schema()
+
+        for field in s3_data_set._save_args["schema"].values():
+            assert isinstance(field, pa.DataType)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {
+                "schema": {
+                    "col1": "[[int64]]",
+                    "col2": "string",
+                    "col3": float,
+                    "col4": pa.int64(),
+                }
+            }
+        ],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_dict_mixed_types(self, s3_data_set, save_args):
+        """Test setting the schema as dictionary of mixed value types
+        in save arguments."""
+
+        for key, value in save_args["schema"].items():
+            assert s3_data_set._save_args["schema"][key] == value
+
+        s3_data_set._process_schema()
+
+        for field in s3_data_set._save_args["schema"].values():
+            assert isinstance(field, pa.DataType)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"schema": "c1:[int64],c2:int64"}],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_str_schema_fields(self, s3_data_set, save_args):
+        """Test setting the schema as string pyarrow schema (list of fields)
+        in save arguments."""
+
+        assert s3_data_set._save_args["schema"] == save_args["schema"]
+
+        s3_data_set._process_schema()
+
+        assert isinstance(s3_data_set._save_args["schema"], pa.Schema)

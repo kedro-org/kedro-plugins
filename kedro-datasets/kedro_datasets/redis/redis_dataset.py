@@ -42,6 +42,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     ::
 
         >>> from kedro_datasets.redis import PickleDataSet
+        >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                       'col3': [5, 6]})

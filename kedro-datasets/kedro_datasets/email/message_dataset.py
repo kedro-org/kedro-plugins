@@ -11,6 +11,7 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
+
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -45,7 +46,6 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> # data_set = EmailMessageDataSet(filepath="gcs://bucket/test")
         >>> data_set = EmailMessageDataSet(filepath="test")
         >>> data_set.save(msg)
         >>> reloaded = data_set.load()

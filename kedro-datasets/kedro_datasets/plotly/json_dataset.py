@@ -22,10 +22,20 @@ class JSONDataSet(
     """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example:
+    Example adding a catalog entry with YAML API:
+
+    .. code-block:: yaml
+
+        >>> scatter_plot:
+        >>>   type: plotly.JSONDataSet
+        >>>   filepath: data/08_reporting/scatter_plot.json
+        >>>   save_args:
+        >>>     engine: auto
+
+    Example using Python API:
     ::
 
-        >>> from kedro_datasets.plotly import JSONDataSet
+        >>> from kedro.extras.datasets.plotly import JSONDataSet
         >>> import plotly.express as px
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])

@@ -74,7 +74,7 @@ spark_require = {
     "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
 }
 snowpark_require = {
-    "snowflake.SnowParkDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow>=8.0, <9.0"]
+    "snowflake.SnowParkDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow==8.0"]
 }
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [

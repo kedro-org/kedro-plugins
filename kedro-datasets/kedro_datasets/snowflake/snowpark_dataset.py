@@ -13,7 +13,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 # TODO: Add to docs example of using API to add dataset
 class SnowParkDataSet(
     AbstractDataSet[pd.DataFrame, pd.DataFrame]
-):  # pylint: disable=too-many-instance-attributes
+):
     """``SnowParkDataSet`` loads and saves Snowpark dataframes.
 
     Example adding a catalog entry with
@@ -46,10 +46,10 @@ class SnowParkDataSet(
     # TODO: Update docstring
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        table_name: str,
-        warehouse: str,
-        database: str,
         schema: str,
+        table_name: str,
+        warehouse: str = None,
+        database: str = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
@@ -70,15 +70,25 @@ class SnowParkDataSet(
         if not table_name:
             raise DataSetError("'table_name' argument cannot be empty.")
 
-        # TODO: Check if we can use default warehouse when user is not providing one explicitly
-        if not warehouse:
-            raise DataSetError("'warehouse' argument cannot be empty.")
-
-        if not database:
-            raise DataSetError("'database' argument cannot be empty.")
-
         if not schema:
             raise DataSetError("'schema' argument cannot be empty.")
+
+        if not credentials:
+            raise DataSetError("'credentials' argument cannot be empty.")
+
+        # Taking warehouse and database from credentials if they are not
+        # provided with dataset
+        if not warehouse:
+            if "warehouse" not in credentials:
+                raise DataSetError("'warehouse' must be provided by credentials or dataset.")
+            else:
+                warehouse = credentials["warehouse"]
+
+        if not database:
+            if "database" not in credentials:
+                raise DataSetError("'database' must be provided by credentials or dataset.")
+            else:
+                database = credentials["database"]
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -88,11 +98,21 @@ class SnowParkDataSet(
         if save_args is not None:
             self._save_args.update(save_args)
 
-        self._session = self._get_session(credentials)
         self._table_name = table_name
         self._warehouse = warehouse
         self._database = database
         self._schema = schema
+
+        connection_parameters = credentials
+        connection_parameters.update(
+            {"warehouse": self._warehouse,
+            "database": self._database,
+            "schema": self._schema
+             }
+        )
+
+        self._connection_parameters = connection_parameters
+        self._session = self._get_session(self._connection_parameters)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -104,7 +124,7 @@ class SnowParkDataSet(
 
     # TODO: Do we want to make it static method?
     @staticmethod
-    def _get_session(credentials) -> sp.Session:
+    def _get_session(connection_parameters) -> sp.Session:
         """Given a connection string, create singleton connection
         to be used across all instances of `SnowParkDataSet` that
         need to connect to the same source.
@@ -121,11 +141,9 @@ class SnowParkDataSet(
         try:
             # if hook is implemented, get active session
             session = sp.context.get_active_session()
-        except sp.exceptions.SnowparkSessionException:
-            if not credentials:
-                raise DataSetError("'credentials' argument cannot be empty.")
+        except sp.exceptions.SnowparkSessionException as exc:
             # create session if there is no active one
-            session = sp.Session.builder.configs(credentials).create()
+            session = sp.Session.builder.configs(connection_parameters).create()
         return session
 
     def _load(self) -> sp.DataFrame:
@@ -150,12 +168,7 @@ class SnowParkDataSet(
             self._table_name,
         ]
 
-        sp_df.write.mode(self._save_args["mode"]).save_as_table(
-            table_name,
-            column_order=self._save_args["column_order"],
-            table_type=self._save_args["table_type"],
-            statement_params=self._save_args["statement_params"],
-        )
+        sp_df.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:
         session = self._session

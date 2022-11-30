@@ -46,10 +46,10 @@ class SnowParkDataSet(
     # TODO: Update docstring
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        table_name: str,
-        warehouse: str,
-        database: str,
         schema: str,
+        table_name: str,
+        warehouse: str = None,
+        database: str = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
@@ -70,18 +70,25 @@ class SnowParkDataSet(
         if not table_name:
             raise DataSetError("'table_name' argument cannot be empty.")
 
-        # TODO: Check if we can use default warehouse when user is not providing one explicitly
-        if not warehouse:
-            raise DataSetError("'warehouse' argument cannot be empty.")
-
-        if not database:
-            raise DataSetError("'database' argument cannot be empty.")
-
         if not schema:
             raise DataSetError("'schema' argument cannot be empty.")
 
         if not credentials:
             raise DataSetError("'credentials' argument cannot be empty.")
+
+        # Taking warehouse and database from credentials if they are not
+        # provided with dataset
+        if not warehouse:
+            if "warehouse" not in credentials:
+                raise DataSetError("'warehouse' must be provided by credentials or dataset.")
+            else:
+                warehouse = credentials["warehouse"]
+
+        if not database:
+            if "database" not in credentials:
+                raise DataSetError("'database' must be provided by credentials or dataset.")
+            else:
+                database = credentials["database"]
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -95,14 +102,16 @@ class SnowParkDataSet(
         self._warehouse = warehouse
         self._database = database
         self._schema = schema
-        self._connection_parameters = {
-            "account": credentials["account"],
-            "user": credentials["user"],
-            "password": credentials["password"],
-            "warehouse": self._warehouse,
+
+        connection_parameters = credentials
+        connection_parameters.update(
+            {"warehouse": self._warehouse,
             "database": self._database,
-            "schema": self._schema,
-        }
+            "schema": self._schema
+             }
+        )
+
+        self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
 
     def _describe(self) -> Dict[str, Any]:

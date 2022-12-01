@@ -4,11 +4,7 @@ import pytest
 from PIL import Image
 from utils import TEST_FPS, TEST_HEIGHT, TEST_WIDTH
 
-from kedro_datasets.video.video_dataset import (
-    FileVideo,
-    GeneratorVideo,
-    SequenceVideo,
-)
+from kedro_datasets.video.video_dataset import FileVideo, GeneratorVideo, SequenceVideo
 
 
 @pytest.fixture(scope="module")

@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 import dask.dataframe as dd
 import fsspec
+import triad
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
 

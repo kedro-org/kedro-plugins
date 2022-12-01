@@ -21,11 +21,7 @@ from utils import (
     assert_images_equal,
 )
 
-from kedro_datasets.video.video_dataset import (
-    FileVideo,
-    GeneratorVideo,
-    SequenceVideo,
-)
+from kedro_datasets.video.video_dataset import FileVideo, GeneratorVideo, SequenceVideo
 
 
 class TestSequenceVideo:

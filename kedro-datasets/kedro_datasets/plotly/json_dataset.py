@@ -35,7 +35,7 @@ class JSONDataSet(
     Example using Python API:
     ::
 
-        >>> from kedro.extras.datasets.plotly import JSONDataSet
+        >>> from kedro_datasets.plotly import JSONDataSet
         >>> import plotly.express as px
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])

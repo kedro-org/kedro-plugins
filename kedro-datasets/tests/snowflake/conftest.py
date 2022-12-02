@@ -9,9 +9,9 @@ import pytest
 def pytest_collection_modifyitems(config, items):
     markers_arg = config.getoption("-m")
 
-    # Naive implementation that will not work with complex marker expressions
-    # provided like "-m spark and not (snowflake or pandas)" but we are far
-    # from having these use-cases
+    # Naive implementation to handle basic marker expressions
+    # Will not work if someone will (ever) run pytest with complex marker
+    # expressions like "-m spark and not (snowflake or pandas)"
     if (
         "snowflake" in markers_arg.lower()
         and "not snowflake" not in markers_arg.lower()

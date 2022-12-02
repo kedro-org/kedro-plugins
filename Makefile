@@ -56,3 +56,7 @@ test-no-spark:
 
 test-no-spark-sequential:
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark
+
+# kedro-datasets/snowflake tests skipped from default scope
+test-snowflake-only:
+	cd kedro-datasets && pytest tests --no-cov --numprocesses 1 --dist loadfile -m snowflake

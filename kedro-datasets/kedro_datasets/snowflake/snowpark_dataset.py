@@ -46,8 +46,8 @@ class SnowParkDataSet(
     # TODO: Update docstring
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        schema: str,
         table_name: str,
+        schema: str = None,
         warehouse: str = None,
         database: str = None,
         load_args: Dict[str, Any] = None,
@@ -70,25 +70,29 @@ class SnowParkDataSet(
         if not table_name:
             raise DataSetError("'table_name' argument cannot be empty.")
 
-        if not schema:
-            raise DataSetError("'schema' argument cannot be empty.")
-
         if not credentials:
             raise DataSetError("'credentials' argument cannot be empty.")
 
         # Taking warehouse and database from credentials if they are not
         # provided with dataset
         if not warehouse:
-            if "warehouse" not in credentials:
+            if not ("warehouse" in credentials and credentials["warehouse"]):
                 raise DataSetError("'warehouse' must be provided by credentials or dataset.")
             else:
                 warehouse = credentials["warehouse"]
 
         if not database:
-            if "database" not in credentials:
+            if not ("database" in credentials and credentials["database"]):
                 raise DataSetError("'database' must be provided by credentials or dataset.")
             else:
                 database = credentials["database"]
+
+        if not schema:
+            if not ("schema" in credentials and credentials["schema"]):
+                raise DataSetError("'schema' must be provided by credentials or dataset.")
+            else:
+                schema = credentials["schema"]
+
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -172,6 +176,6 @@ class SnowParkDataSet(
 
     def _exists(self) -> bool:
         session = self._session
-        schema = self._schema
-        exists = self._table_name in session.table_names(schema)
-        return exists
+        query = "SELECT COUNT(*) FROM {database}.INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table_name}'"
+        rows = session.sql(query.format(database = self._database, schema = self._schema, table_name = self._table_name)).collect()
+        return rows[0][0] == 1

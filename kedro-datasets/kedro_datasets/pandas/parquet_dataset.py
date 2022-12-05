@@ -157,17 +157,7 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
     def _load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-
-        if self._fs.isdir(load_path):
-            # It doesn't work at least on S3 if root folder was created manually
-            # https://issues.apache.org/jira/browse/ARROW-7867
-            data = (
-                pq.ParquetDataset(load_path, filesystem=self._fs)
-                .read(**self._load_args)
-                .to_pandas()
-            )
-        else:
-            data = self._load_from_pandas()
+        data = self._load_from_pandas()
 
         return data
 

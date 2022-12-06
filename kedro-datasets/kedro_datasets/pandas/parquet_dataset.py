@@ -9,7 +9,6 @@ from typing import Any, Dict
 
 import fsspec
 import pandas as pd
-import pyarrow.parquet as pq
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,

@@ -1,7 +1,6 @@
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
-import pyarrow.parquet as pq
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem

@@ -156,12 +156,6 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         )
 
     def _load(self) -> pd.DataFrame:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        data = self._load_from_pandas()
-
-        return data
-
-    def _load_from_pandas(self):
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows

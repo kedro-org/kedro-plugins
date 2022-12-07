@@ -159,7 +159,7 @@ def create_project_from_config_file(context):
     )
 
     # add a consent file to prevent telemetry from prompting for input during e2e test
-    print("Does the project dir exist?", context.root_project_dir.exist())
+    print("Does the project dir exist?", context.root_project_dir.exists())
     telemetry_file = context.root_project_dir / ".telemetry"
     telemetry_file.write_text("consent: false", encoding="utf-8")
     assert res.returncode == 0

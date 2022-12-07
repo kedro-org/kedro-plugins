@@ -4,6 +4,7 @@
 
 * Introduced two-stage builds with separated runtime environment and project code
 * Optimized image layers that store project code
+* Redundant Spark and Hadoop libs removed from Spark's template
 
 ## Bug fixes and other changes
 

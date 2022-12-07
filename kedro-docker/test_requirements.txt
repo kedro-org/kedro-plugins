@@ -5,11 +5,12 @@ black~=22.0
 docker
 flake8>=3.5, <4.0
 pre-commit>=1.17.0, <2.0
-pylint>=2.5.2, <3.0
+psutil
+pylint>=2.4.4, <3.0
 pytest
 pytest-cov
 pytest-mock
 pytest-xdist[psutil]~=2.2.1
 PyYAML>=5.1, <7.0
-trufflehog>=2.1.0, <3.0
-wheel
+trufflehog>=2.0.99, <3.0
+wheel==0.32.2

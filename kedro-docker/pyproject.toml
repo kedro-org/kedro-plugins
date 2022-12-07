@@ -7,8 +7,3 @@ force_grid_wrap = 0
 use_parentheses = true
 line_length = 88
 default_section = "THIRDPARTY"
-
-[tool.coverage.report]
-fail_under = 100
-show_missing = true
-omit = ["tests/*"]

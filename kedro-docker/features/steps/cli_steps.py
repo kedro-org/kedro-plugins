@@ -164,7 +164,8 @@ def create_project_from_config_file(context, starter_name):
 
     # override base logging configuration to simplify assertions
     logging_conf = context.root_project_dir / "conf" / "base" / "logging.yml"
-    logging_conf.write_text("""
+    logging_conf.write_text(
+        """
 version: 1
 
 disable_existing_loggers: False
@@ -186,7 +187,8 @@ loggers:
 
 root:
   handlers: [console]
-""")
+"""
+    )
 
     assert res.returncode == 0
 

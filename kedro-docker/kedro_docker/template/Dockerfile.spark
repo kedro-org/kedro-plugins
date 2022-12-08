@@ -2,7 +2,8 @@ ARG BASE_IMAGE=python:3.9-slim
 FROM $BASE_IMAGE as runtime-environment
 
 # install JVM
-RUN apt-get update && apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && mkdir -p /usr/share/man/man1 && \
+apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
 # install project requirements
 COPY src/requirements.txt /tmp/requirements.txt

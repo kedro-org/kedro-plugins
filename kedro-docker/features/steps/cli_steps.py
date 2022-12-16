@@ -1,7 +1,6 @@
 """Behave step definitions for the cli_scenarios feature."""
 import re
 import sys
-import textwrap
 from pathlib import Path
 from time import sleep
 
@@ -166,31 +165,29 @@ def create_project_from_config_file(context, starter_name):
     # override base logging configuration to simplify assertions
     logging_conf = context.root_project_dir / "conf" / "base" / "logging.yml"
     logging_conf.write_text(
-        textwrap.dedent(
-            """
-        version: 1
-
-        disable_existing_loggers: False
-
-        formatters:
-          simple:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-        handlers:
-          console:
-            class: logging.StreamHandler
-            level: INFO
-            formatter: simple
-            stream: ext://sys.stdout
-
-        loggers:
-          kedro:
-            level: INFO
-
-        root:
-          handlers: [console]
         """
-        )
+version: 1
+
+disable_existing_loggers: False
+
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+loggers:
+  kedro:
+    level: INFO
+
+root:
+  handlers: [console]
+"""
     )
 
     assert res.returncode == 0

@@ -205,9 +205,8 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         >>>   type: video.VideoDataSet
         >>>   filepath: data/01_raw/cars.mp4
         >>>
-        >>> cars:
+        >>> motorbikes:
         >>>   type: video.VideoDataSet
-        >>>   filepath: data/01_raw/cars.mp4
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
         >>>   credentials: dev_s3
         >>>

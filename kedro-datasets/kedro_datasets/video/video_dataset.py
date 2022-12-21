@@ -201,6 +201,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
+
         >>> cars:
         >>>   type: video.VideoDataSet
         >>>   filepath: data/01_raw/cars.mp4

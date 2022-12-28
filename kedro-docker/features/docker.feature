@@ -1,9 +1,8 @@
-
 @docker
 Feature: Docker commands in new projects
   Background:
     Given I have prepared a config file
-    And I run a non-interactive kedro new with starter
+    And I run a non-interactive kedro new using pandas-iris starter
     And I have fixed logs write permission
     And I have installed the project dependencies
     And I have removed old docker image of test project
@@ -14,22 +13,6 @@ Feature: Docker commands in new projects
     And A Dockerfile file should exist
     And A .dive-ci file should exist
     And A .dockerignore file should exist
-
-  Scenario: Execute docker init --with-spark
-    When I execute the kedro command "docker init --with-spark"
-    Then I should get a successful exit code
-    And A Dockerfile file should exist
-    And A Dockerfile file should contain SPARK_VERSION string
-    And A .dive-ci file should exist
-    And A .dockerignore file should exist
-
-  Scenario: Execute docker build and run using spark Dockerfile
-    When I execute the kedro command "docker build --with-spark"
-    Then I should get a successful exit code
-    And A new docker image for test project should be created
-    When I execute the kedro command "docker run"
-    Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
 
   Scenario: Execute docker build target
     When I execute the kedro command "docker build"
@@ -66,7 +49,7 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build --uid 10001 --gid 20002"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "INFO - Pipeline execution completed successfully"
+    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
 
   Scenario: Execute docker jupyter notebook target
     Given I have executed the kedro command "docker build"
@@ -117,8 +100,8 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker ipython"
     Then I should see messages from docker ipython startup including "An enhanced Interactive Python"
-    And  I should see messages from docker ipython startup including "INFO - ** Kedro project project-dummy"
-    And  I should see messages from docker ipython startup including "Defined global variable `context`, `session`, `catalog` and `pipelines`"
+    And  I should see messages from docker ipython startup including "INFO - Kedro project project-dummy"
+    And  I should see messages from docker ipython startup including "INFO - Defined global variable 'context', 'session', 'catalog' and 'pipelines'"
 
   Scenario: Execute docker run target without building image
     When I execute the kedro command "docker run"

@@ -2,13 +2,18 @@
 
 ## Major features and improvements
 
-* Introduced two-stage builds with separated runtime environment and project code
-* Optimized image layers that store project code
-* Redundant Spark and Hadoop libs removed from Spark's template
-
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+
+# Release 0.3.1
+## Major features and improvements
+* Introduced two-stage builds with separated runtime environment and project code.
+* Optimized image layers that store project code.
+* Redundant Spark and Hadoop libs removed from Spark's template.
+
+## Thanks for supporting contributions
+[Mariusz Strzelecki](https://github.com/szczeles)
 
 # Release 0.3.0
 ## Major features and improvements

@@ -13,6 +13,7 @@ PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
+POLARS = "polars~=0.15.13"
 
 with open("requirements.txt", "r", encoding="utf-8") as f:
     install_requires = [x.strip() for x in f if x.strip()]
@@ -62,6 +63,7 @@ pandas_require = {
     "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+polars_require = {"polars.CSVDataSet": [POLARS],}
 video_require = {
     "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
 }
@@ -107,6 +109,7 @@ extras_require = {
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
+    "polars": _collect_requirements(polars_require),
     "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
@@ -123,6 +126,7 @@ extras_require = {
     **networkx_require,
     **pandas_require,
     **pillow_require,
+    **polars_require,
     **video_require,
     **plotly_require,
     **spark_require,

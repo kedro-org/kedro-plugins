@@ -1,13 +1,17 @@
 
 # Upcoming Release:
 
-## Major features and improvements
-
 
 # Release 1.1.0:
 
-Introducing [polars](https://www.pola.rs/), a lighting fast dataframe package built entirily using Rust.
-This first release introduces the CSVDataSet, similar to the pandas version. [polars-benchmarks](https://www.pola.rs/benchmarks.html)
+## Feature
+* Introducing [polars](https://www.pola.rs/), a lighting fast dataframe package built entirily using Rust.
+* This first release introduces the CSVDataSet, similar to the pandas version. [polars-benchmarks](https://www.pola.rs/benchmarks.html)
+
+# Release 1.0.1:
+
+## Bug fixes and other changes
+* Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
 
 
 

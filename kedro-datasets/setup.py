@@ -36,7 +36,7 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -47,8 +47,8 @@ pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
     "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
-    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
+    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
+    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
     "pandas.HDFDataSet": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",
@@ -62,6 +62,9 @@ pandas_require = {
     "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+video_require = {
+    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
+}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
@@ -76,6 +79,7 @@ spark_require = {
 snowpark_require = {
     "snowflake.SnowParkDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow==8.0"]
 }
+svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
@@ -106,9 +110,11 @@ extras_require = {
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
+    "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
+    "svmlight": _collect_requirements(svmlight_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
@@ -120,9 +126,11 @@ extras_require = {
     **networkx_require,
     **pandas_require,
     **pillow_require,
+    **video_require,
     **plotly_require,
     **spark_require,
-    **snowpark_require,    
+    **snowpark_require,
+    **svmlight_require,
     **tensorflow_required,
     **yaml_require,
 }

@@ -39,7 +39,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     ::
 
         >>> import pandas as pd
-        >>>
+        >>> from kedro_datasets import SparkJBDCDataSet
         >>> from pyspark.sql import SparkSession
         >>>
         >>> spark = SparkSession.builder.getOrCreate()

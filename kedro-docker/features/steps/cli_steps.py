@@ -1,6 +1,7 @@
 """Behave step definitions for the cli_scenarios feature."""
 import re
 import sys
+import textwrap
 from pathlib import Path
 from time import sleep
 
@@ -75,7 +76,7 @@ def _get_docker_ipython_output(context):
         return context.ipython_stdout
 
     try:
-        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=64)
+        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=128)
     finally:
         kill_docker_containers(context.project_name)
 
@@ -140,8 +141,8 @@ def modify_write_permission(context):
     journal_dir.chmod(0o777)
 
 
-@given("I run a non-interactive kedro new with starter")
-def create_project_from_config_file(context):
+@given("I run a non-interactive kedro new using {starter_name} starter")
+def create_project_from_config_file(context, starter_name):
     """Behave step to run kedro new
     given the config I previously created.
     """
@@ -152,7 +153,7 @@ def create_project_from_config_file(context):
             "-c",
             str(context.config_file),
             "--starter",
-            "pandas-iris",
+            starter_name,
         ],
         env=context.env,
         cwd=str(context.temp_dir),
@@ -161,6 +162,37 @@ def create_project_from_config_file(context):
     # add a consent file to prevent telemetry from prompting for input during e2e test
     telemetry_file = context.root_project_dir / ".telemetry"
     telemetry_file.write_text("consent: false", encoding="utf-8")
+
+    # override base logging configuration to simplify assertions
+    logging_conf = context.root_project_dir / "conf" / "base" / "logging.yml"
+    logging_conf.write_text(
+        textwrap.dedent(
+            """
+        version: 1
+
+        disable_existing_loggers: False
+
+        formatters:
+          simple:
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+        handlers:
+          console:
+            class: logging.StreamHandler
+            level: INFO
+            formatter: simple
+            stream: ext://sys.stdout
+
+        loggers:
+          kedro:
+            level: INFO
+
+        root:
+          handlers: [console]
+        """
+        )
+    )
+
     assert res.returncode == 0
 
 

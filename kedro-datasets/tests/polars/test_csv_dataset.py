@@ -71,17 +71,21 @@ def mocked_s3_bucket():
 
 @pytest.fixture
 def mocked_dataframe():
-    df = pl.DataFrame([{"dummy": "dummy"}])
+    df = pl.DataFrame({"dummy": ["dummy"]})
     return df
 
 
 @pytest.fixture
 def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe: pl.DataFrame):
+
+    binarycsv = mocked_dataframe.write_csv()[:-1]
+
     mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME,
         Key=FILE_NAME,
-        Body=mocked_dataframe.write_csv(),
+        Body=binarycsv,
     )
+
     return f"s3://{BUCKET_NAME}/{FILE_NAME}"
 
 

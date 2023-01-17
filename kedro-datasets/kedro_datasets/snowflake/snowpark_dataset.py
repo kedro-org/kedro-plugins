@@ -5,7 +5,7 @@ from copy import deepcopy
 from typing import Any, Dict, Union
 
 import pandas as pd
-import snowflake.snowpark as sp
+import snowflake.snowpark as sp  # pylint: disable=import-error
 from kedro.io.core import AbstractDataSet, DataSetError
 
 logger = logging.getLogger(__name__)

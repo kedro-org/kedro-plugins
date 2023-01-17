@@ -3,9 +3,13 @@ import os
 
 import pandas as pd
 import pytest
-import snowflake.snowpark as sp
 
-from kedro_datasets.snowflake import SnowParkDataSet as spds
+try:
+    import snowflake.snowpark as sp  # pylint: disable=import-error
+
+    from kedro_datasets.snowflake import SnowParkDataSet as spds
+except ImportError:
+    pass  # this is only for test discovery to succeed on Python <> 3.8
 
 
 def get_connection():

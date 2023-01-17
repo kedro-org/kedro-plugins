@@ -1,6 +1,6 @@
 # Snowpark connector testing
 
-Execution of automated tests for Snowpark connector requires real Snowflake instance access. Therefore tests located in this folder are **disabled** by default from pytest execution scope using [conftest.py](conftest.py). 
+Execution of automated tests for Snowpark connector requires real Snowflake instance access. Therefore tests located in this folder are **disabled** by default from pytest execution scope using [conftest.py](conftest.py).
 
 [Makefile](/Makefile) provides separate argument ``test-snowflake-only`` to run only tests related to Snowpark connector. To run tests one need to provide Snowflake connection parameters via environment variables:
 * SF_ACCOUNT - Snowflake account name with region. Ex `ab12345.eu-central-2`
@@ -13,12 +13,14 @@ Execution of automated tests for Snowpark connector requires real Snowflake inst
 
 All environment variables need to be provided for tests to run.
 
-Here is example shell command to run snowpark tests via make utility: 
+Here is example shell command to run snowpark tests via make utility:
 ```bash
 SF_ACCOUNT='ab12345.eu-central-2' SF_WAREHOUSE='DEV_WH' SF_DATABASE='DEV_DB' SF_ROLE='DEV_ROLE' SF_USER='DEV_USER' SF_SCHEMA='DATA' SF_PASSWORD='supersecret' make test-snowflake-only
 ```
 
 Currently running tests supports only simple username & password authentication and not SSO/MFA.
+
+As of Jan-2023, the snowpark connector only works with Python 3.8.
 
 ## Snowflake permissions required
 Credentials provided via environment variables should have following permissions granted to run tests successfully:
@@ -29,4 +31,4 @@ Credentials provided via environment variables should have following permissions
 * Query `INFORMATION_SCHEMA.TABLES` of respective database
 
 ## Extending tests
-Contributors adding new tests should add `@pytest.mark.snowflake` decorator to each test. Exclusion of Snowpark-related pytests from overall execution scope in [conftest.py](conftest.py) works based on markers. 
+Contributors adding new tests should add `@pytest.mark.snowflake` decorator to each test. Exclusion of Snowpark-related pytests from overall execution scope in [conftest.py](conftest.py) works based on markers.

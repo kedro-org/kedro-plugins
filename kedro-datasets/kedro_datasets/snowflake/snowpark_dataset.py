@@ -6,15 +6,12 @@ from typing import Any, Dict, Union
 
 import pandas as pd
 import snowflake.snowpark as sp
-
 from kedro.io.core import AbstractDataSet, DataSetError
 
 logger = logging.getLogger(__name__)
 
 
-class SnowParkDataSet(
-    AbstractDataSet[pd.DataFrame, pd.DataFrame]
-):
+class SnowParkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     """``SnowParkDataSet`` loads and saves Snowpark dataframes.
 
     Example adding a catalog entry with
@@ -71,6 +68,8 @@ class SnowParkDataSet(
         >>>   schema: "observations"
         >>>   user: "service_account_abc"
         >>>   password: "supersecret"
+
+    As of Jan-2023, the snowpark connector only works with Python 3.8
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -120,17 +119,17 @@ class SnowParkDataSet(
 
         if not database:
             if not ("database" in credentials and credentials["database"]):
-                raise DataSetError("'database' must be provided by credentials or dataset.")
-            else:
-                database = credentials["database"]
+                raise DataSetError(
+                    "'database' must be provided by credentials or dataset."
+                )
+            database = credentials["database"]
 
         if not schema:
             if not ("schema" in credentials and credentials["schema"]):
-                raise DataSetError("'schema' must be provided by credentials or dataset.")
-            else:
-                schema = credentials["schema"]
-
-
+                raise DataSetError(
+                    "'schema' must be provided by credentials or dataset."
+                )
+            schema = credentials["schema"]
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -145,11 +144,8 @@ class SnowParkDataSet(
 
         connection_parameters = credentials
         connection_parameters.update(
-            {"database": self._database,
-            "schema": self._schema
-             }
+            {"database": self._database, "schema": self._schema}
         )
-
         self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
 
@@ -166,7 +162,8 @@ class SnowParkDataSet(
         to be used across all instances of `SnowParkDataSet` that
         need to connect to the same source.
         connection_parameters is a dictionary of any values
-        supported by snowflake python connector: https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect
+        supported by snowflake python connector:
+                https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect
             example:
             connection_parameters = {
                 "account": "",
@@ -183,7 +180,7 @@ class SnowParkDataSet(
             logger.debug("Trying to reuse active snowpark session...")
             # if hook is implemented, get active session
             session = sp.context.get_active_session()
-        except sp.exceptions.SnowparkSessionException as exc:
+        except sp.exceptions.SnowparkSessionException:
             # create session if there is no active one
             logger.debug("No active snowpark session found. Creating")
             session = sp.Session.builder.configs(connection_parameters).create()
@@ -215,6 +212,14 @@ class SnowParkDataSet(
 
     def _exists(self) -> bool:
         session = self._session
-        query = "SELECT COUNT(*) FROM {database}.INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table_name}'"
-        rows = session.sql(query.format(database = self._database, schema = self._schema, table_name = self._table_name)).collect()
+        query = "SELECT COUNT(*) FROM {database}.INFORMATION_SCHEMA.TABLES \
+                WHERE TABLE_SCHEMA = '{schema}' \
+                AND TABLE_NAME = '{table_name}'"
+        rows = session.sql(
+            query.format(
+                database=self._database,
+                schema=self._schema,
+                table_name=self._table_name,
+            )
+        ).collect()
         return rows[0][0] == 1

@@ -1,6 +1,7 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
+import datetime as dt
 import re
 from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn, Optional
@@ -22,6 +23,7 @@ KNOWN_PIP_INSTALL = {
     "psycopg2": "psycopg2",
     "mysqldb": "mysqlclient",
     "cx_Oracle": "cx_Oracle",
+    "mssql": "pyodbc",
 }
 
 DRIVER_ERROR_MESSAGE = """
@@ -318,7 +320,28 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
         >>> sql_data = data_set.load()
         >>>
+    Example of usage for mssql:
+    ::
 
+
+        >>> credentials = {"server": "localhost", "port": "1433",
+        >>>                "database": "TestDB", "user": "SA",
+        >>>                "password": "StrongPassword"}
+        >>> def _make_mssql_connection_str(
+        >>>    server: str, port: str, database: str, user: str, password: str
+        >>> ) -> str:
+        >>>    import pyodbc  # noqa
+        >>>    from sqlalchemy.engine import URL  # noqa
+        >>>
+        >>>    driver = pyodbc.drivers()[-1]
+        >>>    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+        >>>                      f"ENCRYPT=yes;UID={user};PWD={password};
+        >>>                       "TrustServerCertificate=yes;")
+        >>>    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        >>> connection_str = _make_mssql_connection_str(**credentials)
+        >>> data_set = SQLQueryDataSet(credentials={"con": connection_str},
+        >>>                            sql="SELECT TOP 5 * FROM TestTable;")
+        >>> df = ds.load()
     """
 
     # using Any because of Sphinx but it should be
@@ -410,6 +433,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
+        if "mssql" in self._connection_str:
+            self._adapt_mssql_date_params()
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -453,3 +478,21 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _save(self, data: None) -> NoReturn:
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
+
+    # For mssql only
+    def _adapt_mssql_date_params(self) -> None:
+        """We need to change the format of datetime parameters.
+
+        MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
+        Here, we also accept plain dates"""
+
+        new_load_args = {}
+        for arg, value in self._load_args.get("params", {}).items():
+            try:
+                as_date = dt.date.fromisoformat(value)
+                new_val = dt.datetime.combine(as_date, dt.time.min)
+                new_load_args[arg] = new_val.strftime("%Y-%m-%dT%H:%M:%S")
+            except (TypeError, ValueError):
+                new_load_args[arg] = value
+        if new_load_args:
+            self._load_args["params"] = new_load_args

@@ -58,6 +58,7 @@ pandas_require = {
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    # TODO: Add the mssql dataset requirements here. Or maybe not needed?
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }

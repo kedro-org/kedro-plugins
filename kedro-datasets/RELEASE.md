@@ -1,6 +1,8 @@
 
 # Upcoming Release:
 
+* Relaxed PyArrow range in line with Pandas
+
 
 # Release 1.1.0:
 

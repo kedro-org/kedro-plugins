@@ -25,7 +25,7 @@ Example adding a catalog entry with
     .. code-block:: yaml
 
         >>> cars:
-        >>>   type: metrics.MetricsDataSet
+        >>>   type: tracking.MetricsDataSet
         >>>   filepath: data/09_tracking/cars.json
 
     Example using Python API:

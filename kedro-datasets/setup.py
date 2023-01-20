@@ -55,7 +55,7 @@ pandas_require = {
         "tables~=3.6; platform_system != 'Windows'",
     ],
     "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],

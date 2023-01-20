@@ -2,6 +2,7 @@
 # Upcoming Release:
 
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
+* Relaxed PyArrow range in line with Pandas
 
 # Release 1.0.1:
 

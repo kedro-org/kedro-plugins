@@ -52,7 +52,7 @@ sign-off:
 
 # kedro-datasets related only
 test-no-spark:
-	cd $(plugin) && pytest tests --no-cov --ignore tests/spark --numprocesses 4 --dist loadfile
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --numprocesses 4 --dist loadfile
 
 test-no-spark-sequential:
-	cd $(plugin) && pytest tests --no-cov --ignore tests/spark
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark

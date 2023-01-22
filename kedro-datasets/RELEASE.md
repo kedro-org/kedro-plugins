@@ -1,5 +1,6 @@
 
 # Upcoming Release:
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 
 # Release 1.0.1:
 

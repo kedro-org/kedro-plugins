@@ -12,3 +12,4 @@ pytest-mock
 pytest-xdist
 trufflehog>=2.1.0, <3.0
 wheel
+Pillow~=9.0

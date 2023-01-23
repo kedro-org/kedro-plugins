@@ -1,5 +1,5 @@
 """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 """
 import logging
 from copy import deepcopy
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
-    #TODO: REWRITE DOCSTRING
+
     Example adding a catalog entry with
     `YAML API
     <https://kedro.readthedocs.io/en/stable/data/\
@@ -33,26 +33,25 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     .. code-block:: yaml
 
         >>> cars:
-        >>>   type: pandas.CSVDataSet
+        >>>   type: polars.CSVDataSet
         >>>   filepath: data/01_raw/company/cars.csv
         >>>   load_args:
         >>>     sep: ","
-        >>>     na_values: ["#NA", NA]
+        >>>     parse_dates: False
         >>>   save_args:
-        >>>     index: False
-        >>>     date_format: "%Y-%m-%d %H:%M"
-        >>>     decimal: .
+        >>>     has_header: False
+                null_value: "somenullstring"
         >>>
         >>> motorbikes:
-        >>>   type: pandas.CSVDataSet
+        >>>   type: polars.CSVDataSet
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
 
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.pandas import CSVDataSet
-        >>> import pandas as pd
+        >>> from kedro_datasets.polars import CSVDataSet
+        >>> import polars as pl
         >>>
         >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
@@ -81,17 +80,19 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol like `s3://`.
-                If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol
+                `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem)
+                will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            load_args: Pandas options for loading CSV files.
+            load_args: Polars options for loading CSV files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+                https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.read_csv.html#polars.read_csv
                 All defaults are preserved.
-            save_args: Pandas options for saving CSV files.
+            save_args: Polars options for saving CSV files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
+                https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_csv.html
                 All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

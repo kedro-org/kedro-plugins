@@ -250,7 +250,7 @@ jobs:
       # For anything not `kedro-datasets`
       - unless:
           condition:
-            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+            equal: ["kedro-datasets", <<parameters.plugin>>]
 
           # e2e tests are not currently runnable on CircleCI on Windows as
           # those require the ability to run Linux containers:
@@ -284,7 +284,7 @@ jobs:
             and:
               - not:
                   equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - equal: [ "kedro-datasets", <<parameters.plugin>> ]
           steps:
             - run:
                 name: Run unit tests without spark in parallel
@@ -293,7 +293,7 @@ jobs:
           condition:
             and:
               - equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - equal: [ "kedro-datasets", <<parameters.plugin>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially

@@ -76,6 +76,9 @@ spark_require = {
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
 }
+snowpark_require = {
+    "snowflake.SnowParkDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow~=8.0"]
+}
 svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
@@ -126,6 +129,7 @@ extras_require = {
     **video_require,
     **plotly_require,
     **spark_require,
+    **snowpark_require,
     **svmlight_require,
     **tensorflow_required,
     **yaml_require,

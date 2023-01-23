@@ -428,6 +428,8 @@ class TestSQLQueryDataSet:
         mock_adapt_mssql_date_params = mocker.patch(
             "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet._adapt_mssql_date_params"
         )
+        mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         ds = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION))
+        mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1

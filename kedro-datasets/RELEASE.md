@@ -3,6 +3,14 @@
 
 ## Major features and improvements
 
+
+# Release 1.1.0:
+
+Introducing [polars](https://www.pola.rs/), a lighting fast dataframe package built entirily using Rust.
+This first release introduces the CSVDataSet, similar to the pandas version. [polars-benchmarks](https://www.pola.rs/benchmarks.html)
+
+
+
 # Release 1.0.0:
 
 First official release of Kedro-Datasets.

@@ -89,11 +89,12 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
             load_args: Polars options for loading CSV files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.read_csv.html#polars.read_csv
-                All defaults are preserved.
+                All defaults are preserved, but we explicity use `rechunk=True` for `seaborn`
+                compability.
             save_args: Polars options for saving CSV files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_csv.html
-                All defaults are preserved, but "index", which is set to False.
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

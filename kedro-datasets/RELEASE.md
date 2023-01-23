@@ -1,14 +1,16 @@
 
-# Upcoming Release:
+# Upcoming Release 1.1.0:
+
+
+## Major features and improvements:
+
+* Added the following new datasets:
+
+| `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
+## Bug fixes and other changes
 
 * Relaxed PyArrow range in line with Pandas
-
-
-# Release 1.1.0:
-
-## Feature
-* Introducing [polars](https://www.pola.rs/), a lighting fast dataframe package built entirily using Rust.
-* This first release introduces the CSVDataSet, similar to the pandas version. [polars-benchmarks](https://www.pola.rs/benchmarks.html)
 
 # Release 1.0.1:
 

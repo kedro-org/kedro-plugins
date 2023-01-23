@@ -335,7 +335,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
         >>>    driver = pyodbc.drivers()[-1]
         >>>    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
-        >>>                      f"ENCRYPT=yes;UID={user};PWD={password};
+        >>>                      f"ENCRYPT=yes;UID={user};PWD={password};"
         >>>                       "TrustServerCertificate=yes;")
         >>>    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
         >>> connection_str = _make_mssql_connection_str(**credentials)

@@ -11,6 +11,7 @@ from kedro_datasets.pandas import SQLQueryDataSet, SQLTableDataSet
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
+MSSQL_CONNECTION = "mssql+pyodbc://?odbc_connect=DRIVER%3DODBC+Driver+for+SQL"
 SQL_QUERY = "SELECT * FROM table_a"
 EXECUTION_OPTIONS = {"stream_results": True}
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
@@ -419,3 +420,14 @@ class TestSQLQueryDataSet:
         assert mock_engine.call_count == 2
         assert fourth.engines == first.engines
         assert len(first.engines) == 2
+
+    def test_adapt_mssql_date_params_called(self, mocker):
+        """Test that the _adapt_mssql_date_params
+        function is called when mssql backend is used.
+        """
+        mock_adapt_mssql_date_params = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet._adapt_mssql_date_params"
+        )
+        ds = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION))
+        assert mock_adapt_mssql_date_params.call_count == 1
+        assert len(ds.engines) == 1

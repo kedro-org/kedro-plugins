@@ -347,7 +347,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     ::
 
         >>> mssql_dataset:
-        >>>    type:
+        >>>    type: kedro_datasets.pandas.SQLQueryDataSet
         >>>    credentials: mssql_credentials
         >>>    sql: >
         >>>       SELECT *

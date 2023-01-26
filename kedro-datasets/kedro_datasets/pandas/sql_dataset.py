@@ -342,6 +342,25 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>> data_set = SQLQueryDataSet(credentials={"con": connection_str},
         >>>                            sql="SELECT TOP 5 * FROM TestTable;")
         >>> df = ds.load()
+
+    In addition, here is an example of a catalog with dates parsing:
+    ::
+
+        >>> mssql_dataset:
+        >>>    type:
+        >>>    credentials: mssql_credentials
+        >>>    sql: >
+        >>>       SELECT *
+        >>>       FROM  DateTable
+        >>>       WHERE date >= ? AND date <= ?
+        >>>       ORDER BY date
+        >>>    load_args:
+        >>>       params:
+        >>>        - ${begin}
+        >>>        - ${end}
+        >>>       index_col: date
+        >>>       parse_dates:
+        >>>         date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
     # using Any because of Sphinx but it should be
@@ -482,17 +501,29 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     # For mssql only
     def _adapt_mssql_date_params(self) -> None:
         """We need to change the format of datetime parameters.
-
         MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
-        Here, we also accept plain dates"""
+        Here, we also accept plain dates.
+        `pyodbc` does not accept named parameters, they must be provided as a list."""
 
-        new_load_args = {}
-        for arg, value in self._load_args.get("params", {}).items():
+        params = self._load_args.get("params", {})
+        if isinstance(params, dict):
+            raise DataSetError(
+                "pyodbc, which is used to connect to the MSSQL database does not "
+                "support named arguments. Please use `?` in your query and pass the "
+                "parameters as a `list`."
+            )
+        elif not isinstance(params, list):
+            raise DataSetError(
+                "Unrecognized `params` format. It can be only a `dict` or a `list`, "
+                f"got {type(params)!r}"
+            )
+        new_load_args = []
+        for value in params:
             try:
                 as_date = dt.date.fromisoformat(value)
                 new_val = dt.datetime.combine(as_date, dt.time.min)
-                new_load_args[arg] = new_val.strftime("%Y-%m-%dT%H:%M:%S")
+                new_load_args.append(new_val.strftime("%Y-%m-%dT%H:%M:%S"))
             except (TypeError, ValueError):
-                new_load_args[arg] = value
+                new_load_args.append(value)
         if new_load_args:
             self._load_args["params"] = new_load_args

@@ -1,7 +1,10 @@
+# Upcoming release 0.5.2
+
 # Release 0.5.1
 * Added additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template.
 * Added support for Airflow>=2.3.0.
 * Kept Kedro-Airflow plugin docstring from appearing in `kedro -h`.
+* Prefixed Airflow plugin name with "Kedro-" in usage message
 
 # Release 0.5.0
 * Added support for Kedro 0.18.

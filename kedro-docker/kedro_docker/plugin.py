@@ -35,7 +35,7 @@ DOCKER_DEFAULT_VOLUMES = (
     "results",
 )
 
-DEFAULT_BASE_IMAGE = f"python:{version_info.major}.{version_info.minor}-buster"
+DEFAULT_BASE_IMAGE = f"python:{version_info.major}.{version_info.minor}-slim"
 DIVE_IMAGE = "wagoodman/dive:latest"
 
 

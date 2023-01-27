@@ -1,4 +1,10 @@
-# Upcoming Release 0.2.3
+# Upcoming Release 0.2.4
+
+# Release 0.2.3
+
+## Bug fixes and other changes
+* Modified the process for reading a Kedro project's package name and version to avoid a failed run when no `pyproject.toml` can be read.
+* Report the version of Kedro used to run a project, no longer report the project's name.
 
 # Release 0.2.2
 

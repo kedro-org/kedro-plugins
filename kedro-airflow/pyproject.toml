@@ -1,2 +1,8 @@
 [tool.black]
 exclude=".*template.py"
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+omit = ["tests/*"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]

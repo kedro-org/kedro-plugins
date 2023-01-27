@@ -1,3 +1,17 @@
+# Upcoming Release 0.2.4
+
+# Release 0.2.3
+
+## Bug fixes and other changes
+* Modified the process for reading a Kedro project's package name and version to avoid a failed run when no `pyproject.toml` can be read.
+* Report the version of Kedro used to run a project, no longer report the project's name.
+
+# Release 0.2.2
+
+## Bug fixes and other changes
+* Changed the value associated with the `identity` key in the call to heap's /track endpoint from hashed computer name to hashed username.
+* Expanding to track numbers of datasets, nodes, pipelines to better understand the size of kedro project.
+
 # Release 0.2.1
 
 ## Bug fixes and other changes

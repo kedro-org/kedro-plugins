@@ -243,19 +243,14 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - when:
-          python_version: <<parameters.python_version>>
-          condition:
-            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
-          steps:
-            win_setup_env
+      - win_setup_env
       - win_setup_requirements:
           plugin: <<parameters.plugin>>
           python_version: <<parameters.python_version>>
       # For anything not `kedro-datasets`
       - unless:
           condition:
-            equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+            equal: ["kedro-datasets", <<parameters.plugin>>]
 
           # e2e tests are not currently runnable on CircleCI on Windows as
           # those require the ability to run Linux containers:
@@ -284,11 +279,12 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - unless:
+      - when:
           condition:
             and:
-              - equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - not:
+                  equal: [ "3.10", <<parameters.python_version>> ]
+              - equal: [ "kedro-datasets", <<parameters.plugin>> ]
           steps:
             - run:
                 name: Run unit tests without spark in parallel
@@ -297,7 +293,7 @@ jobs:
           condition:
             and:
               - equal: [ "3.10", <<parameters.python_version>> ]
-              - equal: [true, <<pipeline.parameters.run-build-kedro-datasets>>]
+              - equal: [ "kedro-datasets", <<parameters.plugin>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially
@@ -363,7 +359,7 @@ jobs:
                 command: export plugin=<<pipeline.parameters.release_package>>; make test-sequential
       - run:
           name: Run e2e tests
-          command: export plugin=<<pipeline.parameters.release_package>>; make e2e-tests
+          command: make plugin=<<pipeline.parameters.release_package>> e2e-tests
 
   publish_package:
     machine:
@@ -451,6 +447,10 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
+          pre-steps:
+          - run:
+              name: Avoid GPL dependency (unidecode)
+              command: echo 'export SLUGIFY_USES_TEXT_UNIDECODE=yes' >> $BASH_ENV
       - e2e_tests:
           plugin: "kedro-airflow"
           matrix:

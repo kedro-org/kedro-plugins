@@ -17,7 +17,7 @@ pip install kedro-datasets
 
 # Datasets
 
-Welcome to `kedro_datasets.datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
+Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
 
 ## What `AbstractDataSet` implementations are supported?
 

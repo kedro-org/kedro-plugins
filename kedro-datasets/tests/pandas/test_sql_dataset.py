@@ -422,14 +422,35 @@ class TestSQLQueryDataSet:
         assert len(first.engines) == 2
 
     def test_adapt_mssql_date_params_called(self, mocker):
-        """Test that the _adapt_mssql_date_params
+        """Test that the adapt_mssql_date_params
         function is called when mssql backend is used.
         """
         mock_adapt_mssql_date_params = mocker.patch(
-            "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet._adapt_mssql_date_params"
+            "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet.adapt_mssql_date_params"
         )
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         ds = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION))
         mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1
+
+    def test_adapt_mssql_date_params(self):
+        """Test that the adapt_mssql_date_params
+        function transforms the params as expected, i.e.
+        making datetime date into the format %Y-%m-%dT%H:%M:%S
+        and ignoring the other values.
+        """
+        load_args = {
+            "params": ["2023-01-01", "2023-01-01T20:26", "2023", "test", 1.0, 100]
+        }
+        ds = SQLQueryDataSet(
+            sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION), load_args=load_args
+        )
+        assert ds._load_args["params"] == [
+            "2023-01-01T00:00:00",
+            "2023-01-01T20:26",
+            "2023",
+            "test",
+            1.0,
+            100,
+        ]

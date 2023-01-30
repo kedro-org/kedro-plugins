@@ -453,7 +453,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
         if "mssql" in self._connection_str:
-            self._adapt_mssql_date_params()
+            self.adapt_mssql_date_params()
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -499,22 +499,15 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
 
     # For mssql only
-    def _adapt_mssql_date_params(self) -> None:
+    def adapt_mssql_date_params(self) -> None:
         """We need to change the format of datetime parameters.
         MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
         Here, we also accept plain dates.
         `pyodbc` does not accept named parameters, they must be provided as a list."""
-
-        params = self._load_args.get("params", {})
-        if isinstance(params, dict):
+        params = self._load_args.get("params", [])
+        if not isinstance(params, list):
             raise DataSetError(
-                "pyodbc, which is used to connect to the MSSQL database does not "
-                "support named arguments. Please use `?` in your query and pass the "
-                "parameters as a `list`."
-            )
-        elif not isinstance(params, list):
-            raise DataSetError(
-                "Unrecognized `params` format. It can be only a `dict` or a `list`, "
+                "Unrecognized `params` format. It can be only a `list`, "
                 f"got {type(params)!r}"
             )
         new_load_args = []

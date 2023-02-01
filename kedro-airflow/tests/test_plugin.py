@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 from kedro.framework.project import pipelines
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro_airflow.plugin import commands
 
 
@@ -30,7 +31,7 @@ def test_create_airflow_dag(
 ):
     """Check the generation and validity of a simple Airflow DAG."""
     dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}.py"
-    mock_pipeline = Pipeline(
+    mock_pipeline = modular_pipeline(
         [
             node(identity, ["input"], ["intermediate"], name="node0"),
             node(identity, ["intermediate"], ["output"], name="node1"),

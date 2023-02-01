@@ -7,7 +7,8 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from pytest import fixture
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
@@ -55,7 +56,7 @@ def identity(arg):
 
 @fixture
 def fake_default_pipeline():
-    mock_default_pipeline = pipeline(
+    mock_default_pipeline = modular_pipeline(
         [
             node(identity, ["input"], ["intermediate"], name="node0"),
             node(identity, ["intermediate"], ["output"], name="node1"),
@@ -66,7 +67,7 @@ def fake_default_pipeline():
 
 @fixture
 def fake_sub_pipeline():
-    mock_sub_pipeline = pipeline(
+    mock_sub_pipeline = modular_pipeline(
         [
             node(identity, ["input"], ["intermediate"], name="node0"),
         ],

@@ -78,7 +78,7 @@ class MatplotlibWriter(
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> plots_dict = dict()
+        >>> plots_dict = {}
         >>> for colour in ["blue", "green", "red"]:
         >>>     plots_dict[f"{colour}.png"] = plt.figure()
         >>>     plt.plot([1, 2, 3], color=colour)
@@ -181,12 +181,12 @@ class MatplotlibWriter(
         self._overwrite = overwrite
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> NoReturn:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")

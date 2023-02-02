@@ -14,15 +14,10 @@
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 
-## Bug fixes and other changes
-* Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
-
-# Release 1.0.2:
-
-## Bug fixes and other changes
+# Upcoming Release:
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
+
 * Relaxed PyArrow range in line with Pandas
-* Fixed outdated links to the dill package documentation
 
 # Release 1.0.1:
 

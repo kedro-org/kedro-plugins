@@ -1,9 +1,13 @@
 
 # Upcoming Release:
-* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
+# Release 1.0.2:
+
+## Bug fixes and other changes
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Relaxed PyArrow range in line with Pandas
+* Fixed outdated links to the dill package documentation
 
 # Release 1.0.1:
 

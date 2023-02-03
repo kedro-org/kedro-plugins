@@ -1,6 +1,7 @@
 """``AbstractVersionedDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
+import os
 import json
 from copy import deepcopy
 from fnmatch import fnmatch
@@ -269,6 +270,8 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
+        if not fs_prefix and not self._deployed_on_databricks():
+            filepath = self._build_dbfs_path(filepath)
         exists_function = None
         glob_function = None
 
@@ -415,3 +418,13 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 f"with mode '{write_mode}' on 'SparkDataSet'. "
                 f"Please use 'spark.DeltaTableDataSet' instead."
             )
+
+    @staticmethod
+    def _deployed_on_databricks() -> bool:
+        return "DATABRICKS_RUNTIME_VERSION" in os.environ
+
+    @staticmethod
+    def _build_dbfs_path(filepath: str) -> str:
+        if filepath.startswith("/dbfs"):
+            return filepath
+        return f"/dbfs/{filepath}"

@@ -7,7 +7,7 @@ import pytest
 try:
     import snowflake.snowpark as sp  # pylint: disable=import-error
 
-    from kedro_datasets.snowflake import SnowParkDataSet as spds
+    from kedro_datasets.snowflake import SnowparkDataSet as spds
 except ImportError:
     pass  # this is only for test discovery to succeed on Python <> 3.8
 
@@ -128,7 +128,7 @@ def sf_session():
     sf_session.close()
 
 
-class TestSnowParkDataSet:
+class TestSnowparkDataSet:
     @pytest.mark.snowflake
     def test_save(self, sample_pandas_df, sf_session):
         sp_df = spds(table_name="KEDRO_PYTEST_TESTSAVE", credentials=get_connection())

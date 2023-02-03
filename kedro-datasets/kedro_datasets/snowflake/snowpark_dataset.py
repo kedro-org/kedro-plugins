@@ -11,25 +11,24 @@ from kedro.io.core import AbstractDataSet, DataSetError
 logger = logging.getLogger(__name__)
 
 
-class SnowParkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
-    """``SnowParkDataSet`` loads and saves Snowpark dataframes.
+class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+    """``SnowparkDataSet`` loads and saves Snowpark dataframes.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
-
-        >>> weather:
-        >>>   type: kedro_datasets.snowflake.SnowParkDataSet
-        >>>   table_name: "weather_data"
-        >>>   database: "meteorology"
-        >>>   schema: "observations"
-        >>>   credentials: db_credentials
-        >>>   save_args:
-        >>>     mode: overwrite
-        >>>     column_order: name
-        >>>     table_type: ''
+        weather:
+          type: kedro_datasets.snowflake.SnowparkDataSet
+          table_name: "weather_data"
+          database: "meteorology"
+          schema: "observations"
+          credentials: db_credentials
+          save_args:
+            mode: overwrite
+            column_order: name
+            table_type: ''
 
     One can skip everything but "table_name" if database and
     schema provided via credentials. Therefore catalog entries can be shorter
@@ -44,30 +43,30 @@ class SnowParkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     catalog.yml
 
     .. code-block:: yaml
-        >>> weather:
-        >>>   type: kedro_datasets.snowflake.SnowParkDataSet
-        >>>   table_name: "weather_data"
-        >>>   save_args:
-        >>>     mode: overwrite
-        >>>     column_order: name
-        >>>     table_type: ''
+        weather:
+          type: kedro_datasets.snowflake.SnowparkDataSet
+          table_name: "weather_data"
+          save_args:
+            mode: overwrite
+            column_order: name
+            table_type: ''
 
-        >>> polygons:
-        >>>   type: kedro_datasets.snowflake.SnowParkDataSet
-        >>>   table_name: "geopolygons"
-        >>>   schema: "geodata"
+        polygons:
+          type: kedro_datasets.snowflake.SnowparkDataSet
+          table_name: "geopolygons"
+          schema: "geodata"
 
     credentials.yml
 
     .. code-block:: yaml
-        >>> snowflake_client:
-        >>>   account: 'ab12345.eu-central-1'
-        >>>   port: 443
-        >>>   warehouse: "datascience_wh"
-        >>>   database: "detailed_data"
-        >>>   schema: "observations"
-        >>>   user: "service_account_abc"
-        >>>   password: "supersecret"
+        snowflake_client:
+          account: 'ab12345.eu-central-1'
+          port: 443
+          warehouse: "datascience_wh"
+          database: "detailed_data"
+          schema: "observations"
+          user: "service_account_abc"
+          password: "supersecret"
 
     As of Jan-2023, the snowpark connector only works with Python 3.8
     """
@@ -90,7 +89,7 @@ class SnowParkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``SnowParkDataSet``.
+        """Creates a new instance of ``SnowparkDataSet``.
 
         Args:
             table_name: The table name to load or save data to.
@@ -159,7 +158,7 @@ class SnowParkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     @staticmethod
     def _get_session(connection_parameters) -> sp.Session:
         """Given a connection string, create singleton connection
-        to be used across all instances of `SnowParkDataSet` that
+        to be used across all instances of `SnowparkDataSet` that
         need to connect to the same source.
         connection_parameters is a dictionary of any values
         supported by snowflake python connector:

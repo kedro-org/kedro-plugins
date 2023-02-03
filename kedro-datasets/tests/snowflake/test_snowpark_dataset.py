@@ -3,9 +3,10 @@ import os
 
 import pandas as pd
 import pytest
+from kedro.io import DataSetError
 
 try:
-    import snowflake.snowpark as sp  # pylint: disable=import-error
+    import snowflake.snowpark as sp
 
     from kedro_datasets.snowflake import SnowparkDataSet as spds
 except ImportError:
@@ -24,7 +25,7 @@ def get_connection():
     if not (
         account and warehouse and database and role and user and schema and password
     ):
-        raise Exception(
+        raise DataSetError(
             "Snowflake connection environment variables provided not in full"
         )
 

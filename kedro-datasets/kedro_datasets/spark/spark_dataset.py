@@ -294,7 +294,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
         if not fs_prefix and _deployed_on_databricks():
-            print("HERE")
             filepath = _build_dbfs_path(filepath)
         exists_function = None
         glob_function = None

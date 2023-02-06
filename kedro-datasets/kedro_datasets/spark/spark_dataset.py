@@ -115,6 +115,16 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
         return False
 
 
+def _deployed_on_databricks() -> bool:
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+
+
+def _build_dbfs_path(filepath: str) -> str:
+    if filepath.startswith("/dbfs"):
+        return filepath
+    return f"/dbfs/{filepath}"
+
+
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
     and ``hdfs_glob`` methods required by ``SparkDataSet``"""
@@ -270,8 +280,8 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
-        if not fs_prefix and self._deployed_on_databricks():
-            filepath = self._build_dbfs_path(filepath)
+        if not fs_prefix and _deployed_on_databricks():
+            filepath = _build_dbfs_path(filepath)
         exists_function = None
         glob_function = None
 
@@ -418,13 +428,3 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 f"with mode '{write_mode}' on 'SparkDataSet'. "
                 f"Please use 'spark.DeltaTableDataSet' instead."
             )
-
-    @staticmethod
-    def _deployed_on_databricks() -> bool:
-        return "DATABRICKS_RUNTIME_VERSION" in os.environ
-
-    @staticmethod
-    def _build_dbfs_path(filepath: str) -> str:
-        if filepath.startswith("/dbfs"):
-            return filepath
-        return f"/dbfs/{filepath}"

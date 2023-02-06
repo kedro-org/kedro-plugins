@@ -116,13 +116,26 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
 
 
 def _deployed_on_databricks() -> bool:
+    """Check if running on Databricks."""
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 def _build_dbfs_path(filepath: str) -> str:
+    """Modify a file path so that it points to a location in DBFS.
+
+    Args:
+        filepath: Filepath to modify.
+
+    Returns:
+        Modified filepath.
+    """
     if filepath.startswith("/dbfs"):
         return filepath
-    return f"/dbfs/{filepath}"
+    if filepath.startswith("dbfs"):
+        return "/" + filepath
+    if filepath.startswith("/"):
+        return "/dbfs" + filepath
+    return "/dbfs/" + filepath
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -281,6 +294,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
         if not fs_prefix and _deployed_on_databricks():
+            print("HERE")
             filepath = _build_dbfs_path(filepath)
         exists_function = None
         glob_function = None

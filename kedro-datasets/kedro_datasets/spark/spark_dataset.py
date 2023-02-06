@@ -1,8 +1,8 @@
 """``AbstractVersionedDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
-import os
 import json
+import os
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial

@@ -440,9 +440,7 @@ class TestSparkDataSet:
         assert spark_dataset_copy._file_format == "csv"
         assert spark_dataset_copy._save_args == {"mode": "overwrite"}
 
-    @pytest.mark.parametrize(
-        "filepath", ["data", "/data", "dbfs/data","/dbfs/data"]
-    )
+    @pytest.mark.parametrize("filepath", ["data", "/data", "dbfs/data", "/dbfs/data"])
     def test_dbfs_filepath_prefix(self, filepath, mocker):
         mocker.patch.dict(os.environ, {"DATABRICKS_RUNTIME_VERSION": "7.3"})
         spark_dataset = SparkDataSet(filepath=filepath)

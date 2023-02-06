@@ -161,6 +161,7 @@ class FileInfo:
         return "." not in self.path.split("/")[-1]
 
 
+# pylint: disable=too-many-public-methods
 class TestSparkDataSet:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()

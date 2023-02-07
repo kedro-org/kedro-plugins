@@ -1,4 +1,5 @@
 """ Kedro plugin for packaging a project with Docker """
+# pylint: disable=unused-argument
 import shlex
 import subprocess
 from pathlib import Path
@@ -39,13 +40,13 @@ DEFAULT_BASE_IMAGE = f"python:{version_info.major}.{version_info.minor}-slim"
 DIVE_IMAGE = "wagoodman/dive:latest"
 
 
-def _image_callback(ctx, param, value):  # pylint: disable=unused-argument
+def _image_callback(ctx, param, value):
     image = value or Path.cwd().name
     check_docker_image_exists(image)
     return image
 
 
-def _port_callback(ctx, param, value):  # pylint: disable=unused-argument
+def _port_callback(ctx, param, value):
     if is_port_in_use(value):
         raise KedroCliError(
             f"Port {value} is already in use on the host. "
@@ -87,14 +88,11 @@ def _make_docker_args_option(**kwargs):
 
 
 @click.group(name="Kedro-Docker")
-def commands():
-    """Kedro plugin for packaging a project with Docker"""
+def commands():  # pylint: disable=missing-function-docstring
     pass
 
 
-@commands.group(
-    name="docker", context_settings=dict(help_option_names=["-h", "--help"])
-)
+@commands.group(name="docker", context_settings={"help_option_names": ["-h", "--help"]})
 def docker_group():
     """Dockerize your Kedro project."""
     # check that docker is running
@@ -196,18 +194,18 @@ def docker_build(
 
 
 def _mount_info() -> Dict[str, Union[str, Tuple]]:
-    res = dict(
-        host_root=str(Path.cwd()),
-        container_root="/home/kedro_docker",
-        mount_volumes=DOCKER_DEFAULT_VOLUMES,
-    )
+    res = {
+        "host_root": str(Path.cwd()),
+        "container_root": "/home/kedro_docker",
+        "mount_volumes": DOCKER_DEFAULT_VOLUMES,
+    }
     return res
 
 
 @forward_command(docker_group, "run")
 @_make_image_option(callback=_image_callback)
 @_make_docker_args_option()
-def docker_run(image, docker_args, args, **kwargs):  # pylint: disable=unused-argument
+def docker_run(image, docker_args, args, **kwargs):
     """Run the pipeline in the Docker container.
     Any extra arguments unspecified in this help
     are passed to `docker run` as is.
@@ -230,9 +228,7 @@ def docker_run(image, docker_args, args, **kwargs):  # pylint: disable=unused-ar
 @forward_command(docker_group, "ipython")
 @_make_image_option(callback=_image_callback)
 @_make_docker_args_option()
-def docker_ipython(
-    image, docker_args, args, **kwargs
-):  # pylint: disable=unused-argument
+def docker_ipython(image, docker_args, args, **kwargs):
     """Run ipython in the Docker container.
     Any extra arguments unspecified in this help are passed to
     `kedro ipython` command inside the container as is.
@@ -261,9 +257,7 @@ def docker_jupyter():
 @_make_image_option(callback=_image_callback)
 @_make_port_option()
 @_make_docker_args_option()
-def docker_jupyter_notebook(
-    docker_args, port, image, args, **kwargs
-):  # pylint: disable=unused-argument):
+def docker_jupyter_notebook(docker_args, port, image, args, **kwargs):
     """Run jupyter notebook in the Docker container.
     Any extra arguments unspecified in this help are passed to
     `kedro jupyter notebook` command inside the container as is.
@@ -292,9 +286,7 @@ def docker_jupyter_notebook(
 @_make_image_option(callback=_image_callback)
 @_make_port_option()
 @_make_docker_args_option()
-def docker_jupyter_lab(
-    docker_args, port, image, args, **kwargs
-):  # pylint: disable=unused-argument):
+def docker_jupyter_lab(docker_args, port, image, args, **kwargs):
     """Run jupyter lab in the Docker container.
     Any extra arguments unspecified in this help are passed to
     `kedro jupyter lab` command inside the container as is.
@@ -319,7 +311,7 @@ def docker_jupyter_lab(
 @forward_command(docker_group, "cmd")
 @_make_image_option(callback=_image_callback)
 @_make_docker_args_option()
-def docker_cmd(args, docker_args, image, **kwargs):  # pylint: disable=unused-argument):
+def docker_cmd(args, docker_args, image, **kwargs):
     """Run arbitrary command from ARGS in the Docker container.
     If ARGS are not specified, this will invoke `kedro run` inside the container.
 

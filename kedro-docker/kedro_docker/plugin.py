@@ -86,8 +86,8 @@ def _make_docker_args_option(**kwargs):
     return click.option("--docker-args", **kwargs)
 
 
-@click.group(name="Docker")
-def commands():  # pylint: disable=missing-function-docstring
+@click.group(name="Kedro-Docker")
+def commands():
     pass
 
 

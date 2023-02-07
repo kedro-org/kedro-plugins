@@ -15,73 +15,72 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
-        Example adding a catalog entry with
-        `YAML API
-        <https://kedro.readthedocs.io/en/stable/data/\
-            data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
-        .. code-block:: yaml
+    .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: dask.ParquetDataSet
-        >>>   filepath: s3://bucket_name/path/to/folder
-        >>>   save_args:
-        >>>     compression: GZIP
-        >>>   credentials:
-        >>>     client_kwargs:
-        >>>         aws_access_key_id: YOUR_KEY
-        >>>         aws_secret_access_key: YOUR_SECRET
+        cars:
+          type: dask.ParquetDataSet
+          filepath: s3://bucket_name/path/to/folder
+          save_args:
+            compression: GZIP
+          credentials:
+            client_kwargs:
+              aws_access_key_id: YOUR_KEY
+              aws_secret_access_key: YOUR_SECRET
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    ::
+
+        >>> from kedro.extras.datasets.dask import ParquetDataSet
+        >>> import pandas as pd
+        >>> import dask.dataframe as dd
         >>>
+        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [[5, 6], [7, 8]]})
+        >>> ddf = dd.from_pandas(data, npartitions=2)
+        >>>
+        >>> data_set = ParquetDataSet(
+        >>>     filepath="s3://bucket_name/path/to/folder",
+        >>>     credentials={
+        >>>         'client_kwargs':{
+        >>>             'aws_access_key_id': 'YOUR_KEY',
+        >>>             'aws_secret_access_key': 'YOUR SECRET',
+        >>>         }
+        >>>     },
+        >>>     save_args={"compression": "GZIP"}
+        >>> )
+        >>> data_set.save(ddf)
+        >>> reloaded = data_set.load()
+        >>>
+        >>> assert ddf.compute().equals(reloaded.compute())
 
+    The output schema can also be explicitly specified using
+    `Triad <https://triad.readthedocs.io/en/latest/api/\
+    triad.collections.html#module-triad.collections.schema>`_.
+    This is processed to map specific columns to
+    `PyArrow field types <https://arrow.apache.org/docs/python/api/\
+    datatypes.html>`_ or schema. For instance:
 
-        Example using Python API (AWS S3):
-        ::
+    .. code-block:: yaml
 
-            >>> from kedro_datasets.dask import ParquetDataSet
-            >>> import pandas as pd
-            >>> import dask.dataframe as dd
-            >>>
-            >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-            >>>                      'col3': [[5, 6], [7, 8]]})
-            >>> ddf = dd.from_pandas(data, npartitions=2)
-            >>>
-            >>> data_set = ParquetDataSet(
-            >>>     filepath="s3://bucket_name/path/to/folder",
-            >>>     credentials={
-            >>>         'client_kwargs':{
-            >>>             'aws_access_key_id': 'YOUR_KEY',
-            >>>             'aws_secret_access_key': 'YOUR SECRET',
-            >>>         }
-            >>>     },
-            >>>     save_args={"compression": "GZIP"}
-            >>> )
-            >>> data_set.save(ddf)
-            >>> reloaded = data_set.load()
-            >>>
-            >>> assert ddf.compute().equals(reloaded.compute())
-
-    The output schema can also be explicitly specified using Triad's grammar.
-    This is processed to map specific columns into pyarrow field types or schema.
-
-    References:
-    https://triad.readthedocs.io/en/latest/api/triad.collections.html#module-triad.collections.schema
-    https://arrow.apache.org/docs/python/api/datatypes.html
-
-        .. code-block:: yaml
-
-            >>> parquet_dataset:
-            >>>   type: dask.ParquetDataSet
-            >>>   filepath: "s3://bucket_name/path/to/folder"
-            >>>   credentials:
-            >>>     client_kwargs:
-            >>>       aws_access_key_id: YOUR_KEY
-            >>>       aws_secret_access_key: "YOUR SECRET"
-            >>>   save_args:
-            >>>     compression: GZIP
-            >>>     schema:
-            >>>       col1: [int32]
-            >>>       col2: [int32]
-            >>>       col3: [[int32]]
+        parquet_dataset:
+          type: dask.ParquetDataSet
+          filepath: "s3://bucket_name/path/to/folder"
+          credentials:
+            client_kwargs:
+              aws_access_key_id: YOUR_KEY
+              aws_secret_access_key: "YOUR SECRET"
+          save_args:
+            compression: GZIP
+            schema:
+              col1: [int32]
+              col2: [int32]
+              col3: [[int32]]
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
@@ -135,11 +134,11 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         return fs_args
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+        return {
+            "filepath": self._filepath,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
 
     def _load(self) -> dd.DataFrame:
         return dd.read_parquet(

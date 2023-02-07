@@ -9,7 +9,8 @@ import pandas as pd
 import pytest
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
 from moto import mock_s3
 from pyspark.sql import SparkSession
@@ -415,7 +416,7 @@ class TestSparkDataSet:
     def test_parallel_runner(self, is_async, spark_in):
         """Test ParallelRunner with SparkDataSet fails."""
         catalog = DataCatalog(data_sets={"spark_in": spark_in})
-        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
             r"The following data sets cannot be used with "
             r"multiprocessing: \['spark_in'\]"
@@ -957,7 +958,7 @@ def data_catalog(tmp_path):
 class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> Spark (save)."""
-        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
@@ -966,7 +967,7 @@ class TestDataFlowSequentialRunner:
 
     def test_spark_pickle(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> PickleDataSet (save)"""
-        pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
+        pipeline = modular_pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialised due to.*"
         with pytest.raises(DataSetError, match=pattern):
             SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
@@ -974,7 +975,7 @@ class TestDataFlowSequentialRunner:
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
         node -> SparkDataSet (save)"""
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [
                 node(identity, "spark_in", "memory_ds"),
                 node(identity, "memory_ds", "spark_out"),

@@ -59,7 +59,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
+        >>> assert data.frame_equal(reloaded)
 
     """
 

@@ -5,7 +5,7 @@ from copy import deepcopy
 from typing import Any, Dict, Union
 
 import pandas as pd
-import snowflake.snowpark as sp  # pylint: disable=import-error
+import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataSet, DataSetError
 
 logger = logging.getLogger(__name__)
@@ -149,11 +149,11 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         self._session = self._get_session(self._connection_parameters)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            table_name=self._table_name,
-            database=self._database,
-            schema=self._schema,
-        )
+        return {
+            "table_name": self._table_name,
+            "database": self._database,
+            "schema": self._schema,
+        }
 
     @staticmethod
     def _get_session(connection_parameters) -> sp.Session:

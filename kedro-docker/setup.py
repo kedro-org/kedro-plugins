@@ -5,7 +5,6 @@ from os import path
 from setuptools import setup
 
 name = "kedro-docker"
-
 here = path.abspath(path.dirname(__file__))
 
 # get package version
@@ -17,15 +16,9 @@ with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
 with open("requirements.txt", "r", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 
-# get test dependencies and installs
-with open("test_requirements.txt", "r", encoding="utf-8") as f:
-    test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
-
-
-# Get the long description from the README file
+# get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
-
 
 setup(
     name=name,
@@ -37,7 +30,6 @@ setup(
     license="Apache Software License (Apache 2.0)",
     python_requires=">=3.7, <3.11",
     install_requires=requires,
-    tests_require=test_requires,
     author="Kedro",
     packages=["kedro_docker"],
     package_data={

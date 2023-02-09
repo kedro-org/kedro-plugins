@@ -20,7 +20,19 @@
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 
-# Upcoming Release:
+# Upcoming Release 1.1.0:
+
+
+## Major features and improvements:
+
+* Added the following new datasets:
+
+| Type                                 | Description                                                                | Location                      |
+| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
+| `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
+## Bug fixes and other changes
+
 
 # Release 1.0.2:
 

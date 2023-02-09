@@ -8,19 +8,19 @@ from kedro.io import DataSetError
 try:
     import snowflake.snowpark as sp
 
-    from kedro_datasets.snowflake import SnowparkDataSet as spds
+    from kedro_datasets.snowflake import SnowparkTableDataSet as spds
 except ImportError:
     pass  # this is only for test discovery to succeed on Python <> 3.8
 
 
 def get_connection():
-    account = os.getenv("SF_ACCOUNT")
-    warehouse = os.getenv("SF_WAREHOUSE")
-    database = os.getenv("SF_DATABASE")
-    role = os.getenv("SF_ROLE")
-    user = os.getenv("SF_USER")
-    schema = os.getenv("SF_SCHEMA")
-    password = os.getenv("SF_PASSWORD")
+    account = os.getenv("SNOWSQL_ACCOUNT")
+    warehouse = os.getenv("SNOWSQL_WAREHOUSE")
+    database = os.getenv("SNOWSQL_DATABASE")
+    role = os.getenv("SNOWSQL_ROLE")
+    user = os.getenv("SNOWSQL_USER")
+    schema = os.getenv("SNOWSQL_SCHEMA")
+    password = os.getenv("SNOWSQL_PWD")
 
     if not (
         account and warehouse and database and role and user and schema and password
@@ -129,7 +129,7 @@ def sf_session():
     sf_session.close()
 
 
-class TestSnowparkDataSet:
+class TestSnowparkTableDataSet:
     @pytest.mark.snowflake
     def test_save(self, sample_pandas_df, sf_session):
         sp_df = spds(table_name="KEDRO_PYTEST_TESTSAVE", credentials=get_connection())

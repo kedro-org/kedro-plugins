@@ -11,8 +11,8 @@ from kedro.io.core import AbstractDataSet, DataSetError
 logger = logging.getLogger(__name__)
 
 
-class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
-    """``SnowparkDataSet`` loads and saves Snowpark dataframes.
+class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+    """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -20,7 +20,7 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     .. code-block:: yaml
         weather:
-          type: kedro_datasets.snowflake.SnowparkDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "weather_data"
           database: "meteorology"
           schema: "observations"
@@ -44,7 +44,7 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     .. code-block:: yaml
         weather:
-          type: kedro_datasets.snowflake.SnowparkDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "weather_data"
           save_args:
             mode: overwrite
@@ -52,7 +52,7 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
             table_type: ''
 
         polygons:
-          type: kedro_datasets.snowflake.SnowparkDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "geopolygons"
           schema: "geodata"
 
@@ -89,7 +89,7 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``SnowparkDataSet``.
+        """Creates a new instance of ``SnowparkTableDataSet``.
 
         Args:
             table_name: The table name to load or save data to.
@@ -158,7 +158,7 @@ class SnowparkDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     @staticmethod
     def _get_session(connection_parameters) -> sp.Session:
         """Given a connection string, create singleton connection
-        to be used across all instances of `SnowparkDataSet` that
+        to be used across all instances of `SnowparkTableDataSet` that
         need to connect to the same source.
         connection_parameters is a dictionary of any values
         supported by snowflake python connector:

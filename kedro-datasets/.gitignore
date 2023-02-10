@@ -145,3 +145,6 @@ kedro.db
 kedro/html
 docs/tmp-build-artifacts
 docs/build
+spark-warehouse
+metastore_db/
+derby.log

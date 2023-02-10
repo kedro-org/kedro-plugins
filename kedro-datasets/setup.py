@@ -37,6 +37,7 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
+databricks_require = {"databricks.UnityTableDataSet": [SPARK]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -90,6 +91,7 @@ extras_require = {
     "api": _collect_requirements(api_require),
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
+    "databricks": _collect_requirements(databricks_require),
     "docs": [
         "docutils==0.16",
         "sphinx~=3.4.3",
@@ -117,6 +119,7 @@ extras_require = {
     **api_require,
     **biosequence_require,
     **dask_require,
+    **databricks_require,
     **geopandas_require,
     **matplotlib_require,
     **holoviews_require,

@@ -51,7 +51,13 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-polars_require = {"polars.CSVDataSet": [POLARS]}
+polars_require = {
+    "polars.CSVDataSet": [POLARS],
+    "polars.GenericDataSet":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataSet": [

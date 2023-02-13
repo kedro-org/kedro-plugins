@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added automatic inference of file format for `pillow.ImageDataSet` to be passed to `save()`
+* Added `polars.GenericDataSet`, a `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust.
 
 ## Bug fixes and other changes
 

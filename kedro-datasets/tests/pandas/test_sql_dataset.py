@@ -434,12 +434,13 @@ class TestSQLQueryDataSet:
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1
 
-    def test_adapt_mssql_date_params(self):
+    def test_adapt_mssql_date_params(self, mocker):
         """Test that the adapt_mssql_date_params
         function transforms the params as expected, i.e.
         making datetime date into the format %Y-%m-%dT%H:%M:%S
         and ignoring the other values.
         """
+        mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         load_args = {
             "params": ["2023-01-01", "2023-01-01T20:26", "2023", "test", 1.0, 100]
         }

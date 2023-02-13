@@ -455,3 +455,21 @@ class TestSQLQueryDataSet:
             1.0,
             100,
         ]
+
+    def test_adapt_mssql_date_params_wrong_input(self, mocker):
+        """Test that the adapt_mssql_date_params
+        function fails with the correct error message
+        when given a wrong input
+        """
+        mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        load_args = {"params": {"value": 1000}}
+        pattern = (
+            "Unrecognized `params` format. It can be only a `list`, "
+            "got <class 'dict'>"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            SQLQueryDataSet(
+                sql=SQL_QUERY,
+                credentials=dict(con=MSSQL_CONNECTION),
+                load_args=load_args,
+            )

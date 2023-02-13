@@ -59,7 +59,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
-        >>> assert data.frame_equal(reloaded)
+        >>> assert data.equals(reloaded)
 
     """
 
@@ -140,13 +140,13 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return {
-            "filepath": self._filepath,
-            "protocol": self._protocol,
-            "load_args": self._load_args,
-            "save_args": self._save_args,
-            "version": self._version,
-        }
+        return dict(
+            filepath=self._filepath,
+            protocol=self._protocol,
+            load_args=self._load_args,
+            save_args=self._save_args,
+            version=self._version,
+        )
 
     def _load(self) -> pl.DataFrame:
         load_path = str(self._get_load_path())

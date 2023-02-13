@@ -63,7 +63,13 @@ pandas_require = {
     "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
-polars_require = {"polars.CSVDataSet": [POLARS],}
+polars_require = {
+    "polars.CSVDataSet": [POLARS],
+    "polars.GenericDataSet":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ]
+    }
 video_require = {
     "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
 }

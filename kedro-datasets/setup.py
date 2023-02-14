@@ -13,7 +13,7 @@ PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
-POLARS = "polars~=0.15.16"
+POLARS = "polars~=0.16.0"
 
 with open("requirements.txt", "r", encoding="utf-8") as f:
     install_requires = [x.strip() for x in f if x.strip()]

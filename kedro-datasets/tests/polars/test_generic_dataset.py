@@ -80,6 +80,18 @@ def filepath_excel(tmp_path):
 
 
 @pytest.fixture
+def parquet_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_parquet):
+    dummy_dataframe.write_parquet(filepath_parquet)
+
+    return GenericDataSet(
+        filepath=filepath_parquet.as_posix(),
+        file_format="parquet",
+        write_mode="ignore",
+        load_args={"low_memory": True},
+    )
+
+
+@pytest.fixture
 def excel_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_excel):
     pd_df = dummy_dataframe.to_pandas()
     pd_df.to_excel(filepath_excel, index=False)
@@ -97,13 +109,23 @@ def excel_data_set_overwrite(dummy_dataframe: pl.DataFrame, filepath_excel):
     pd_df.to_excel(filepath_excel, index=False)
 
     return GenericDataSet(
-        filepath=filepath_excel.as_posix(),
-        file_format="excel",
-        write_mode="overwrite",
+        filepath=filepath_excel.as_posix(), file_format="excel", write_mode="overwrite"
     )
 
 
 class TestGenericExcelDataSet:
+    def test_assert_write_mode(self):
+        pattern = (
+            "Write mode `test` is not supported. "
+            "Allowed values are: overwrite, ignore."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            GenericDataSet(
+                filepath="test.xlsx",
+                file_format="excel",
+                write_mode="test",
+            )
+
     def test_load(self, excel_data_set_ignore):
         df = excel_data_set_ignore.load()
         assert df.shape == (2, 3)
@@ -161,6 +183,10 @@ class TestGenericExcelDataSet:
 
 
 class TestGenericParquetDataSetVersioned:
+    def test_load_args(self, parquet_data_set_ignore):
+        df = parquet_data_set_ignore.load()
+        assert df.shape == (2, 3)
+
     def test_save_and_load(self, versioned_parquet_data_set, dummy_dataframe):
         """Test saving and reloading the data set."""
         versioned_parquet_data_set.save(dummy_dataframe)
@@ -517,18 +543,18 @@ class TestBadGenericDataSet:
         ds = GenericDataSet(filepath="test.kedro", file_format="kedro")
 
         pattern = (
-            "Cannot create a dataset of file_format 'kedro' as"
-            " it does not support a filepath target/source."
-        )
-
-        with pytest.raises(DataSetError, match=pattern):
-            _ = ds.load()
-
-        pattern2 = (
             "Unable to retrieve 'polars.DataFrame.write_kedro' method, please "
             "ensure that your 'file_format' parameter has been defined correctly as "
             "per the Polars API "
             "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
         )
-        with pytest.raises(DataSetError, match=pattern2):
+        with pytest.raises(DataSetError, match=pattern):
             ds.save(pd.DataFrame([1]))
+
+        pattern2 = (
+            "Unable to retrieve 'polars.read_kedro' method, please ensure that your "
+            "'file_format' parameter has been defined correctly as per the Polars API "
+            "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+        )
+        with pytest.raises(DataSetError, match=pattern2):
+            ds.load()

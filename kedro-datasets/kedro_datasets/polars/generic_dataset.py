@@ -172,7 +172,7 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         """Check that the write mode is supported."""
         if self._write_mode not in ("overwrite", "ignore"):
             raise DataSetError(
-                f"Write mode {self._write_mode} not supported. "
+                f"Write mode `{self._write_mode}` is not supported. "
                 "Allowed values are: overwrite, ignore."
             )
 
@@ -181,11 +181,14 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
 
         if self._file_format not in ACCEPTED_READ_FILE_FORMATS:
             raise DataSetError(
-                f"Cannot create a dataset of file_format '{self._file_format}' as it "
-                f"does not support a filepath target/source."
+                f"Unable to retrieve 'polars.read_{self._file_format}' method, please"
+                " ensure that your "
+                "'file_format' parameter has been defined correctly as per the Polars"
+                " API"
+                " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
 
-    def _load(self) -> pl.DataFrame:
+    def _load(self) -> pl.DataFrame:  # pylint: disable= inconsistent-return-statements
 
         self._ensure_file_system_target()
 
@@ -194,11 +197,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         if load_method:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
-        raise DataSetError(
-            f"Unable to retrieve 'polars.read_{self._file_format}' method, please ensure that your "
-            "'file_format' parameter has been defined correctly as per the Polars API "
-            "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
-        )
 
     def _save(self, data: pl.DataFrame) -> None:
         if (
@@ -230,13 +228,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
             with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
                 fs_file.write(buf.getvalue())
                 self._invalidate_cache()
-        else:
-            raise DataSetError(
-                f"Unable to retrieve 'polars.DataFrame.write_{self._file_format}' method, please "
-                "ensure that your 'file_format' parameter has been defined correctly as "
-                "per the Polars API "
-                "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
-            )
 
     def _exists(self) -> bool:
         try:

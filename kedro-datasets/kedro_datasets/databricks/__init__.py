@@ -1,8 +1,8 @@
 """Provides interface to Unity Catalog Tables."""
 
-__all__ = ["UnityTableDataSet"]
+__all__ = ["ManagedTableDataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .unity import UnityTableDataSet
+    from .unity import ManagedTableDataSet

@@ -15,8 +15,8 @@ from cachetools import Cache
 logger = logging.getLogger(__name__)
 
 
-class UnityTableDataSet(AbstractVersionedDataSet):
-    """``UnityTableDataSet`` loads data into Unity managed tables."""
+class ManagedTableDataSet(AbstractVersionedDataSet):
+    """``ManagedTableDataSet`` loads data into Unity managed tables."""
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
@@ -41,7 +41,7 @@ class UnityTableDataSet(AbstractVersionedDataSet):
         partition_columns: List[str] = None,  # pylint: disable=unused-argument
         owner_group: str = None,
     ) -> None:
-        """Creates a new instance of ``UnityTableDataSet``."""
+        """Creates a new instance of ``ManagedTableDataSet``."""
 
         self._database = database
         self._catalog = catalog

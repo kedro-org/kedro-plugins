@@ -1,4 +1,4 @@
-import os
+# pylint: disable=too-many-lines
 import re
 import sys
 import tempfile
@@ -444,9 +444,8 @@ class TestSparkDataSet:
 
     def test_dbfs_prefix_warning(self, monkeypatch, caplog):
         expected_message = (
-            "Using SparkDataSet on Databricks without `/dbfs` prefix in filepath "
-            "will raise an error with versioning enabled. Add this prefix to "
-            "fix the error."
+            "Using SparkDataSet on Databricks without the `/dbfs` prefix in the "
+            "filepath will raise an error. Add this prefix to fix the error."
         )
 
         # test that warning is not raised when not on Databricks
@@ -455,7 +454,7 @@ class TestSparkDataSet:
 
         # test that warning is not raised when on Databricks and filepath has /dbfs prefix
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataSet(filepath = "/dbfs/my_project/data/02_intermediate/processed_data")
+        SparkDataSet(filepath="/dbfs/my_project/data/02_intermediate/processed_data")
         assert expected_message not in caplog.text
 
         # test that warning is raised when on Databricks and filepath does not have /dbfs prefix

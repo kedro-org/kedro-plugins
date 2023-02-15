@@ -442,11 +442,24 @@ class TestSparkDataSet:
         assert spark_dataset_copy._file_format == "csv"
         assert spark_dataset_copy._save_args == {"mode": "overwrite"}
 
-    @pytest.mark.parametrize("filepath", ["data", "/data", "dbfs/data", "/dbfs/data"])
-    def test_dbfs_filepath_prefix(self, filepath, mocker):
+    def test_dbfs_prefix_warning(self, mocker, caplog):
+        expected_message = (
+            "Using SparkDataSet on Databricks without `/dbfs` prefix in filepath "
+            "will prevent versioning from working."
+        )
+
+        # test that warning is not raised when not on Databricks
+        SparkDataSet(filepath="my_project/data/02_intermediate/processed_data")
+        assert expected_message not in caplog.text
+
+        # test that warning is not raised when on Databricks and filepath has /dbfs prefix
         mocker.patch.dict(os.environ, {"DATABRICKS_RUNTIME_VERSION": "7.3"})
-        spark_dataset = SparkDataSet(filepath=filepath)
-        assert spark_dataset._filepath == PurePosixPath("/dbfs/data")
+        SparkDataSet(filepath = "/dbfs/my_project/data/02_intermediate/processed_data")
+        assert expected_message not in caplog.text
+
+        # test that warning is raised when on Databricks and filepath does not have /dbfs prefix
+        SparkDataSet(filepath="my_project/data/02_intermediate/processed_data")
+        assert expected_message in caplog.text
 
 
 class TestSparkDataSetVersionedLocal:

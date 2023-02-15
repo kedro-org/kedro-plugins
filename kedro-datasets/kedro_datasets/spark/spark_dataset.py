@@ -2,6 +2,7 @@
 ``pyspark``
 """
 import json
+import logging
 import os
 from copy import deepcopy
 from fnmatch import fnmatch
@@ -23,6 +24,8 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_glob_pattern(pattern: str) -> str:
@@ -120,22 +123,13 @@ def _deployed_on_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def _build_dbfs_path(filepath: str) -> str:
-    """Modify a file path so that it points to a location in DBFS.
+def _path_has_dbfs_prefix(path: str) -> bool:
+    """Check if a file path has a valid dbfs prefix.
 
     Args:
-        filepath: Filepath to modify.
-
-    Returns:
-        Modified filepath.
+        path: File path to check.
     """
-    if filepath.startswith("/dbfs"):
-        return filepath
-    if filepath.startswith("dbfs"):
-        return "/" + filepath
-    if filepath.startswith("/"):
-        return "/dbfs" + filepath
-    return "/dbfs/" + filepath
+    return path.startswith("/dbfs/")
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -295,8 +289,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
-        if not fs_prefix and _deployed_on_databricks():
-            filepath = _build_dbfs_path(filepath)
         exists_function = None
         glob_function = None
 
@@ -330,7 +322,11 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         else:
             path = PurePosixPath(filepath)
-
+            if _deployed_on_databricks() and not _path_has_dbfs_prefix(filepath):
+                logger.warning(
+                    "Using SparkDataSet on Databricks without `/dbfs` prefix in filepath "
+                    "will prevent versioning from working."
+                )
             if filepath.startswith("/dbfs"):
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:

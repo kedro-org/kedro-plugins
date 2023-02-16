@@ -258,9 +258,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
-                and working with data written to mount path points,
-                specify ``filepath``s for (versioned) ``SparkDataSet``s
-                starting with ``/dbfs/mnt``.
+                specify ``filepath``s starting with ``/dbfs/``.
             file_format: File format used during load and save
                 operations. These are formats supported by the running
                 SparkContext include parquet, csv, delta. For a list of supported

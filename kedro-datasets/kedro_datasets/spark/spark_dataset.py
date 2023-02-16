@@ -324,7 +324,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             path = PurePosixPath(filepath)
             if _deployed_on_databricks() and not _path_has_dbfs_prefix(filepath):
                 logger.warning(
-                    "Using SparkDataSet on Databricks without the `/dbfs` prefix in the "
+                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
                     "filepath causes undefined behaviour. You must add this prefix."
                 )
             if filepath.startswith("/dbfs"):

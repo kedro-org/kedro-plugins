@@ -444,7 +444,7 @@ class TestSparkDataSet:
 
     def test_dbfs_prefix_warning(self, monkeypatch, caplog):
         expected_message = (
-            "Using SparkDataSet on Databricks without the `/dbfs` prefix in the "
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
             "filepath causes undefined behaviour. You must add this prefix."
         )
 

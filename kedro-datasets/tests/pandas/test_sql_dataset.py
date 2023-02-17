@@ -429,7 +429,7 @@ class TestSQLQueryDataSet:
             "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet.adapt_mssql_date_params"
         )
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
-        ds = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION))
+        ds = SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
         mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1
@@ -445,7 +445,7 @@ class TestSQLQueryDataSet:
             "params": ["2023-01-01", "2023-01-01T20:26", "2023", "test", 1.0, 100]
         }
         ds = SQLQueryDataSet(
-            sql=SQL_QUERY, credentials=dict(con=MSSQL_CONNECTION), load_args=load_args
+            sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION}, load_args=load_args
         )
         assert ds._load_args["params"] == [
             "2023-01-01T00:00:00",
@@ -470,6 +470,6 @@ class TestSQLQueryDataSet:
         with pytest.raises(DataSetError, match=pattern):
             SQLQueryDataSet(
                 sql=SQL_QUERY,
-                credentials=dict(con=MSSQL_CONNECTION),
+                credentials={"con": MSSQL_CONNECTION},
                 load_args=load_args,
             )

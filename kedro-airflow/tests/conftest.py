@@ -34,4 +34,5 @@ def metadata(cli_runner):  # pylint: disable=unused-argument
         project_path,
         kedro_version,
         project_path / "src",
+        kedro_version,
     )

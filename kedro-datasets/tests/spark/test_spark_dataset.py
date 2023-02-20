@@ -442,23 +442,36 @@ class TestSparkDataSet:
         assert spark_dataset_copy._file_format == "csv"
         assert spark_dataset_copy._save_args == {"mode": "overwrite"}
 
-    def test_dbfs_prefix_warning(self, monkeypatch, caplog):
+    def test_dbfs_prefix_warning_no_databricks(self, caplog):
+        # test that warning is not raised when not on Databricks
+        filepath = "my_project/data/02_intermediate/processed_data"
         expected_message = (
             "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
-            "filepath is a known source of error. You must add this prefix."
+            f"filepath is a known source of error. You must add this prefix to {filepath}."
         )
-
-        # test that warning is not raised when not on Databricks
         SparkDataSet(filepath="my_project/data/02_intermediate/processed_data")
         assert expected_message not in caplog.text
 
+    def test_dbfs_prefix_warning_on_databricks_no_prefix(self, monkeypatch, caplog):
         # test that warning is not raised when on Databricks and filepath has /dbfs prefix
+        filepath = "/dbfs/my_project/data/02_intermediate/processed_data"
+        expected_message = (
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+            f"filepath is a known source of error. You must add this prefix to {filepath}"
+        )
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataSet(filepath="/dbfs/my_project/data/02_intermediate/processed_data")
+        SparkDataSet(filepath=filepath)
         assert expected_message not in caplog.text
 
+    def test_dbfs_prefix_warning_on_databricks_with_prefix(self, monkeypatch, caplog):
         # test that warning is raised when on Databricks and filepath does not have /dbfs prefix
-        SparkDataSet(filepath="my_project/data/02_intermediate/processed_data")
+        filepath = "my_project/data/02_intermediate/processed_data"
+        expected_message = (
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+            f"filepath is a known source of error. You must add this prefix to {filepath}."
+        )
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
+        SparkDataSet(filepath=filepath)
         assert expected_message in caplog.text
 
 

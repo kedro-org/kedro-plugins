@@ -4,10 +4,8 @@
 from pathlib import PurePosixPath
 from typing import NoReturn
 
-from delta.tables import DeltaTable
+from deltalake import DeltaTable, PyDeltaTableError
 from kedro.io.core import AbstractDataSet, DataSetError
-from pyspark.sql import SparkSession
-from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
@@ -76,13 +74,9 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
 
-    @staticmethod
-    def _get_spark():
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)
-        return DeltaTable.forPath(self._get_spark(), load_path)
+        return DeltaTable(load_path)
 
     def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
@@ -91,9 +85,9 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            self._get_spark().read.load(path=load_path, format="delta")
-        except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            DeltaTable(load_path)
+        except PyDeltaTableError as exception:
+            if "Not a Delta table" in str(exception):
                 return False
             raise
 

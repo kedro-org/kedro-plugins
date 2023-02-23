@@ -17,7 +17,15 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
-databricks_require = {"databricks.ManagedTableDataSet": [SPARK]}
+databricks_require = {
+    "databricks.ManagedTableDataSet": [SPARK, PANDAS],
+    "databricks.MLFlowModel":[SPARK, PANDAS, "mlflow>=2.0.0"],
+    "databricks.MLFlowArtifact":[SPARK, PANDAS, "mlflow>=2.0.0"],
+    "databricks.MLFlowDataSet":[SPARK, PANDAS, "mlflow>=2.0.0"],
+    "databricks.MLFlowMetrics":[SPARK, PANDAS, "mlflow>=2.0.0"],
+    "databricks.MLFlowModelMetadata":[SPARK, PANDAS, "mlflow>=2.0.0"],
+    "databricks.MLFlowTags":[SPARK, PANDAS, "mlflow>=2.0.0"]
+}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }

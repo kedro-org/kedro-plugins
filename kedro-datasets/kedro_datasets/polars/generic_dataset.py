@@ -45,12 +45,12 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     .. code-block:: yaml
         cars:
           type: polars.GenericDataSet
-          file_format: csv
-          filepath: s3://data/01_raw/company/cars.csv
+          file_format: parquet
+          filepath: s3://data/01_raw/company/cars.parquet
           load_args:
-            sep = ","
+            low_memory: True
           save_args:
-            date_format: "%Y-%m-%d"
+            compression: "snappy"
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
@@ -62,7 +62,7 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = GenericDataSet(filepath="test.csv", file_format='csv')
+        >>> data_set = GenericDataSet(filepath="test.parquet", file_format='parquet')
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.frame_equal(reloaded)

@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import pandas as pd
 import pytest
 from kedro.io import DataSetError
 
@@ -82,14 +81,16 @@ def run_query(session, query):
     return df
 
 
-def pandas_equals_ignore_dtype(df1, df2):
+def df_equals_ignore_dtype(df1, df2):
     # Pytest will show respective stdout only if test fails
     # this will help to debug what was exactly not matching right away
-    print(df1)
+
+    c1 = df1.to_pandas().values.tolist()
+    c2 = df2.to_pandas().values.tolist()
+
+    print(c1)
     print("--- comparing to ---")
-    print(df2)
-    c1 = df1.values.tolist()
-    c2 = df2.values.tolist()
+    print(c2)
 
     for i, row in enumerate(c1):
         for j, column in enumerate(row):
@@ -100,19 +101,25 @@ def pandas_equals_ignore_dtype(df1, df2):
 
 
 @pytest.fixture
-def sample_pandas_df() -> pd.DataFrame:
-    return pd.DataFrame(
-        {
-            "name": ["John", "Jane"],
-            "age": [23, 41],
-            "bday": [datetime.date(1999, 12, 2), datetime.date(1981, 1, 3)],
-            "height": [6.5, 5.7],
-            "insert_dttm": [
+def sample_sp_df(sf_session) -> sp.DataFrame:
+    return sf_session.create_dataframe(
+        [
+            [
+                "John",
+                23,
+                datetime.date(1999, 12, 2),
+                6.5,
                 datetime.datetime(2022, 12, 2, 13, 20, 1),
+            ],
+            [
+                "Jane",
+                41,
+                datetime.date(1981, 1, 3),
+                5.7,
                 datetime.datetime(2022, 12, 2, 13, 21, 11),
             ],
-        },
-        columns=["name", "age", "bday", "height", "insert_dttm"],
+        ],
+        schema=["name", "age", "bday", "height", "insert_dttm"],
     )
 
 
@@ -131,23 +138,22 @@ def sf_session():
 
 class TestSnowparkTableDataSet:
     @pytest.mark.snowflake
-    def test_save(self, sample_pandas_df, sf_session):
+    def test_save(self, sample_sp_df, sf_session):
         sp_df = spds(table_name="KEDRO_PYTEST_TESTSAVE", credentials=get_connection())
-        sp_df._save(sample_pandas_df)
+        sp_df._save(sample_sp_df)
         sp_df_saved = sf_session.table("KEDRO_PYTEST_TESTSAVE")
         assert sp_df_saved.count() == 2
 
     @pytest.mark.snowflake
-    def test_load(self, sample_pandas_df, sf_session):
+    def test_load(self, sample_sp_df, sf_session):
         print(sf_session)
-        df_sf = spds(
+        sp_df = spds(
             table_name="KEDRO_PYTEST_TESTLOAD", credentials=get_connection()
         )._load()
-        sf = df_sf.to_pandas()
 
         # Ignoring dtypes as ex. age can be int8 vs int64 and pandas.compare
         # fails on that
-        assert pandas_equals_ignore_dtype(sample_pandas_df, sf) is True
+        assert df_equals_ignore_dtype(sample_sp_df, sp_df) is True
 
     @pytest.mark.snowflake
     def test_exists(self, sf_session):

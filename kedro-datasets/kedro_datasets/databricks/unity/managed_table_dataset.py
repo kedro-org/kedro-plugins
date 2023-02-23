@@ -182,6 +182,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             dataframe_type=self._dataframe_type,
             primary_key=self._primary_key,
             version=self._version,
+            owner_group=self._owner_group,
         )
 
     def _exists(self) -> bool:

@@ -48,7 +48,7 @@ class SnowparkTableDataSet(AbstractDataSet[sp.DataFrame, sp.DataFrame]):
           table_name: "weather_data"
           database: "meteorology"
           schema: "observations"
-          credentials: db_credentials
+          credentials: snowflake_client
           save_args:
             mode: overwrite
             column_order: name
@@ -57,6 +57,7 @@ class SnowparkTableDataSet(AbstractDataSet[sp.DataFrame, sp.DataFrame]):
         polygons:
           type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "geopolygons"
+          credentials: snowflake_client
           schema: "geodata"
 
     credentials.yml

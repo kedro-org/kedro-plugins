@@ -89,8 +89,6 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         except PyDeltaTableError as exception:
             if "Not a Delta table" in str(exception):
                 return False
-            raise
-
         return True
 
     def _describe(self):

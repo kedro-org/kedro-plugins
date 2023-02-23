@@ -345,7 +345,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>> connection_str = _make_mssql_connection_str(**credentials)
         >>> data_set = SQLQueryDataSet(credentials={"con": connection_str},
         >>>                            sql="SELECT TOP 5 * FROM TestTable;")
-        >>> df = ds.load()
+        >>> df = data_set.load()
 
     In addition, here is an example of a catalog with dates parsing:
     ::

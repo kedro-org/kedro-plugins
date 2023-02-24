@@ -26,7 +26,6 @@
 ## Bug fixes and other changes
 * Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
 
-
 # Release 1.0.0:
 
 First official release of Kedro-Datasets.

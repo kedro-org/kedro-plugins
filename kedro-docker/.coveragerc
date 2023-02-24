@@ -1,0 +1,9 @@
+[report]
+fail_under=100
+show_missing=True
+omit=
+        */plugin.py
+        tests/*
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError

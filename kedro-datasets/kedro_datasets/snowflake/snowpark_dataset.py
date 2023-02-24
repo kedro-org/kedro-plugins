@@ -2,16 +2,15 @@
 """
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
-import pandas as pd
 import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataSet, DataSetError
 
 logger = logging.getLogger(__name__)
 
 
-class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+class SnowparkTableDataSet(AbstractDataSet[sp.DataFrame, sp.DataFrame]):
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     Example usage for the
@@ -38,7 +37,8 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     Example:
     Credentials file provides all connection attributes, catalog entry
     "weather" reuse credentials parameters, "polygons" catalog entry reuse
-    all credentials parameters except providing different schema name
+    all credentials parameters except providing different schema name.
+    Second example of credentials file uses externalbrowser authentication
 
     catalog.yml
 
@@ -46,6 +46,9 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         weather:
           type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "weather_data"
+          database: "meteorology"
+          schema: "observations"
+          credentials: snowflake_client
           save_args:
             mode: overwrite
             column_order: name
@@ -54,6 +57,7 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         polygons:
           type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "geopolygons"
+          credentials: snowflake_client
           schema: "geodata"
 
     credentials.yml
@@ -67,6 +71,18 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
           schema: "observations"
           user: "service_account_abc"
           password: "supersecret"
+
+    credentials.yml (with externalbrowser authenticator)
+
+    .. code-block:: yaml
+        snowflake_client:
+          account: 'ab12345.eu-central-1'
+          port: 443
+          warehouse: "datascience_wh"
+          database: "detailed_data"
+          schema: "observations"
+          user: "john_doe@wdomain.com"
+          authenticator: "externalbrowser"
 
     As of Jan-2023, the snowpark connector only works with Python 3.8
     """
@@ -177,10 +193,8 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         """
         try:
             logger.debug("Trying to reuse active snowpark session...")
-            # if hook is implemented, get active session
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
-            # create session if there is no active one
             logger.debug("No active snowpark session found. Creating")
             session = sp.Session.builder.configs(connection_parameters).create()
         return session
@@ -195,19 +209,14 @@ class SnowparkTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
-    def _save(self, data: Union[pd.DataFrame, sp.DataFrame]) -> None:
-        if not isinstance(data, sp.DataFrame):
-            sp_df = self._session.create_dataframe(data)
-        else:
-            sp_df = data
-
+    def _save(self, data: sp.DataFrame) -> None:
         table_name = [
             self._database,
             self._schema,
             self._table_name,
         ]
 
-        sp_df.write.save_as_table(table_name, **self._save_args)
+        data.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:
         session = self._session

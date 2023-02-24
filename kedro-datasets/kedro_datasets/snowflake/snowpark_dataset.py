@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 logger = logging.getLogger(__name__)
 
 
-class SnowparkTableDataSet(AbstractDataSet[sp.DataFrame, sp.DataFrame]):
+class SnowparkTableDataSet(AbstractDataSet):
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     Example usage for the

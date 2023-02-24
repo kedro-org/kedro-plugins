@@ -101,7 +101,7 @@ def df_equals_ignore_dtype(df1, df2):
 
 
 @pytest.fixture
-def sample_sp_df(sf_session) -> sp.DataFrame:
+def sample_sp_df(sf_session):
     return sf_session.create_dataframe(
         [
             [

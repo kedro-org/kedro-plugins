@@ -350,6 +350,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     In addition, here is an example of a catalog with dates parsing:
     ::
 
+
         >>> mssql_dataset:
         >>>    type: kedro_datasets.pandas.SQLQueryDataSet
         >>>    credentials: mssql_credentials

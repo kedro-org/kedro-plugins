@@ -58,7 +58,7 @@ pandas_require = {
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
-    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2", "pyodbc~=4.0"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }

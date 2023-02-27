@@ -38,6 +38,7 @@ pre-commit>=2.9.2, <3.0  # The hook `mypy` requires pre-commit version 2.9.2.
 psutil==5.8.0
 pyarrow>=1.0, <7.0
 pylint>=2.5.2, <3.0
+pyodbc~=4.0.35
 pyproj~=3.0
 pyspark>=2.2, <4.0
 pytest-cov~=3.0

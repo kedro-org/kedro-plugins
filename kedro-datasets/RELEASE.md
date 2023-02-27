@@ -32,7 +32,7 @@
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 
 ## Bug fixes and other changes
-
+* Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 
 # Release 1.0.2:
 

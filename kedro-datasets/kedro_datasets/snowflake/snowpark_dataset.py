@@ -95,7 +95,6 @@ class SnowparkTableDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # TODO: Update docstring
     def __init__(  # pylint: disable=too-many-arguments
         self,
         table_name: str,

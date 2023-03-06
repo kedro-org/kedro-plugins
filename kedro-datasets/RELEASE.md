@@ -34,6 +34,9 @@
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 
+## Bug fixes and other changes
+* Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
+
 # Release 1.0.2:
 
 ## Bug fixes and other changes

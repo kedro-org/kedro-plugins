@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class SnowparkTableDataSet(AbstractDataSet):
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
+    As of Mar-2023, the snowpark connector only works with Python 3.8.
+
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
@@ -29,16 +31,16 @@ class SnowparkTableDataSet(AbstractDataSet):
             column_order: name
             table_type: ''
 
-    One can skip everything but "table_name" if database and
-    schema provided via credentials. Therefore catalog entries can be shorter
-    if ex. all used Snowflake tables live in same database/schema.
-    Values in dataset definition take priority over ones defined in credentials
+    You can skip everything but "table_name" if the database and
+    schema are provided via credentials. That way catalog entries can be shorter
+    if, for example, all used Snowflake tables live in same database/schema.
+    Values in the dataset definition take priority over those defined in credentials.
 
     Example:
     Credentials file provides all connection attributes, catalog entry
-    "weather" reuse credentials parameters, "polygons" catalog entry reuse
-    all credentials parameters except providing different schema name.
-    Second example of credentials file uses externalbrowser authentication
+    "weather" reuses credentials parameters, "polygons" catalog entry reuses
+    all credentials parameters except providing a different schema name.
+    Second example of credentials file uses ``externalbrowser`` authentication.
 
     catalog.yml
 
@@ -83,8 +85,6 @@ class SnowparkTableDataSet(AbstractDataSet):
           schema: "observations"
           user: "john_doe@wdomain.com"
           authenticator: "externalbrowser"
-
-    As of Jan-2023, the snowpark connector only works with Python 3.8
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

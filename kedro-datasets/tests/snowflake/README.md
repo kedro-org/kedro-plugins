@@ -15,12 +15,12 @@ All environment variables need to be provided for tests to run.
 
 Here is example shell command to run snowpark tests via make utility:
 ```bash
-SF_ACCOUNT='ab12345.eu-central-2' SF_WAREHOUSE='DEV_WH' SF_DATABASE='DEV_DB' SF_ROLE='DEV_ROLE' SF_USER='DEV_USER' SF_SCHEMA='DATA' SF_PASSWORD='supersecret' make test-snowflake-only
+SNOWSQL_ACCOUNT='ab12345.eu-central-2' SNOWSQL_WAREHOUSE='DEV_WH' SNOWSQL_DATABASE='DEV_DB' SNOWSQL_ROLE='DEV_ROLE' SNOWSQL_USER='DEV_USER' SNOWSQL_SCHEMA='DATA' SNOWSQL_PWD='supersecret' make test-snowflake-only
 ```
 
 Currently running tests supports only simple username & password authentication and not SSO/MFA.
 
-As of Jan-2023, the snowpark connector only works with Python 3.8.
+As of Mar-2023, the snowpark connector only works with Python 3.8.
 
 ## Snowflake permissions required
 Credentials provided via environment variables should have following permissions granted to run tests successfully:

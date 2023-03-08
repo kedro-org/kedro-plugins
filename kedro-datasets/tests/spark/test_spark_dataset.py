@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 import re
 import sys
 import tempfile
@@ -161,6 +162,7 @@ class FileInfo:
         return "." not in self.path.split("/")[-1]
 
 
+# pylint: disable=too-many-public-methods
 class TestSparkDataSet:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()
@@ -439,6 +441,34 @@ class TestSparkDataSet:
         assert spark_dataset._save_args == {"mode": "overwrite"}
         assert spark_dataset_copy._file_format == "csv"
         assert spark_dataset_copy._save_args == {"mode": "overwrite"}
+
+    def test_dbfs_prefix_warning_no_databricks(self, caplog):
+        # test that warning is not raised when not on Databricks
+        filepath = "my_project/data/02_intermediate/processed_data"
+        expected_message = (
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+            f"filepath is a known source of error. You must add this prefix to {filepath}."
+        )
+        SparkDataSet(filepath="my_project/data/02_intermediate/processed_data")
+        assert expected_message not in caplog.text
+
+    def test_dbfs_prefix_warning_on_databricks_with_prefix(self, monkeypatch, caplog):
+        # test that warning is not raised when on Databricks and filepath has /dbfs prefix
+        filepath = "/dbfs/my_project/data/02_intermediate/processed_data"
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
+        SparkDataSet(filepath=filepath)
+        assert caplog.text == ""
+
+    def test_dbfs_prefix_warning_on_databricks_no_prefix(self, monkeypatch, caplog):
+        # test that warning is raised when on Databricks and filepath does not have /dbfs prefix
+        filepath = "my_project/data/02_intermediate/processed_data"
+        expected_message = (
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+            f"filepath is a known source of error. You must add this prefix to {filepath}"
+        )
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
+        SparkDataSet(filepath=filepath)
+        assert expected_message in caplog.text
 
 
 class TestSparkDataSetVersionedLocal:

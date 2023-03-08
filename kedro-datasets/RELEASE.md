@@ -1,5 +1,20 @@
 
-# Upcoming Release:
+# Upcoming Release 1.1.0:
+
+
+## Major features and improvements:
+
+* Added the following new datasets:
+
+| Type                                 | Description                                                                | Location                      |
+| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
+| `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
+## Bug fixes and other changes
+* Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
+
+## Bug fixes and other changes
+* Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
 
 # Release 1.0.2:
 
@@ -12,6 +27,7 @@
 
 ## Bug fixes and other changes
 * Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
+
 
 # Release 1.0.0:
 

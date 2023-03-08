@@ -2,6 +2,8 @@
 ``pyspark``
 """
 import json
+import logging
+import os
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -22,6 +24,8 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_glob_pattern(pattern: str) -> str:
@@ -112,6 +116,20 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
         return True
     except Exception:  # pylint: disable=broad-except
         return False
+
+
+def _deployed_on_databricks() -> bool:
+    """Check if running on Databricks."""
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+
+
+def _path_has_dbfs_prefix(path: str) -> bool:
+    """Check if a file path has a valid dbfs prefix.
+
+    Args:
+        path: File path to check.
+    """
+    return path.startswith("/dbfs/")
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -240,9 +258,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
-                and working with data written to mount path points,
-                specify ``filepath``s for (versioned) ``SparkDataSet``s
-                starting with ``/dbfs/mnt``.
+                specify ``filepath``s starting with ``/dbfs/``.
             file_format: File format used during load and save
                 operations. These are formats supported by the running
                 SparkContext include parquet, csv, delta. For a list of supported
@@ -304,7 +320,12 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         else:
             path = PurePosixPath(filepath)
-
+            if _deployed_on_databricks() and not _path_has_dbfs_prefix(filepath):
+                logger.warning(
+                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+                    "filepath is a known source of error. You must add this prefix to %s",
+                    filepath,
+                )
             if filepath.startswith("/dbfs"):
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:

@@ -1,5 +1,5 @@
 import pytest
-from kedro.io.core import DataSetError, VersionNotFoundError
+from kedro.io.core import DataSetError, VersionNotFoundError, Version
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql import DataFrame, SparkSession
 import pandas as pd
@@ -195,6 +195,7 @@ class TestManagedTableDataSet:
             "dataframe_type": "spark",
             "primary_key": None,
             "version": None,
+            "owner_group": None
         }
 
     def test_invalid_write_mode(self):
@@ -413,7 +414,7 @@ class TestManagedTableDataSet:
         unity_ds.save(sample_spark_df)
 
         delta_ds = ManagedTableDataSet(
-            database="test", table="test_load_spark", version=2
+            database="test", table="test_load_spark", version=Version(2,None)
         )
         with pytest.raises(VersionNotFoundError):
             _ = delta_ds.load()
@@ -426,7 +427,7 @@ class TestManagedTableDataSet:
         unity_ds.save(append_spark_df)
 
         loaded_ds = ManagedTableDataSet(
-            database="test", table="test_load_version", version=0
+            database="test", table="test_load_version", version=Version(0,None)
         )
         loaded_df = loaded_ds.load()
 

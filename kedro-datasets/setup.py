@@ -14,6 +14,7 @@ SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 POLARS = "polars~=0.15.16"
+DELTA = "delta-spark~=1.2.1"
 
 with open("requirements.txt", "r", encoding="utf-8") as f:
     install_requires = [x.strip() for x in f if x.strip()]
@@ -39,7 +40,7 @@ api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
 databricks_require = {
-    "databricks.ManagedTableDataSet": [SPARK, PANDAS]
+    "databricks.ManagedTableDataSet": [SPARK, PANDAS, DELTA]
 }
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]

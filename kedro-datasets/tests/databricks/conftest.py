@@ -6,7 +6,6 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 import pytest
 from pyspark.sql import SparkSession
-from delta.pip_utils import configure_spark_with_delta_pip
 
 
 @pytest.fixture(scope="class", autouse=True)

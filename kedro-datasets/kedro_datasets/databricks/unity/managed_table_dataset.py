@@ -1,22 +1,26 @@
 import logging
-from typing import Any, Dict, List, Union
 import pandas as pd
 
+from operator import attrgetter
+from functools import partial
+from cachetools.keys import hashkey
+from typing import Any, Dict, List, Union
+from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
+    Version,
     VersionNotFoundError,
 )
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
-from pyspark.sql.utils import AnalysisException
 from cachetools import Cache
 
 logger = logging.getLogger(__name__)
 
 
 class ManagedTableDataSet(AbstractVersionedDataSet):
-    """``ManagedTableDataSet`` loads data into Unity managed tables."""
+    """``ManagedTableDataSet`` loads and saves data into managed delta tables."""
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
@@ -34,7 +38,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         write_mode: str = "overwrite",
         dataframe_type: str = "spark",
         primary_key: Union[str, List[str]] = None,
-        version: int = None,
+        version: Version = None,
         *,
         # the following parameters are used by the hook to create or update unity
         schema: Dict[str, Any] = None,  # pylint: disable=unused-argument
@@ -73,9 +77,8 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
                 )
 
         self._primary_key = primary_key
-
-        self._version = version
         self._version_cache = Cache(maxsize=2)
+        self._version = version
 
         self._schema = None
         if schema is not None:
@@ -83,24 +86,16 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
 
     def _get_spark(self) -> SparkSession:
         return (
-            SparkSession.builder.config(
-                "spark.jars.packages", "io.delta:delta-core_2.12:1.2.1"
-            )
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config(
-                "spark.sql.catalog.spark_catalog",
-                "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-            )
-            .getOrCreate()
+            SparkSession.builder.getOrCreate()
         )
 
     def _load(self) -> Union[DataFrame, pd.DataFrame]:
-        if self._version is not None and self._version >= 0:
+        if self._version and self._version.load >= 0:
             try:
                 data = (
                     self._get_spark()
                     .read.format("delta")
-                    .option("versionAsOf", self._version)
+                    .option("versionAsOf", self._version.load)
                     .table(self._full_table_address)
                 )
             except:

@@ -11,6 +11,10 @@
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 | `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
 
+* Patched `kedro.io.core.py` and `kedro.utils` to `io.core.py` and `io.core.utils` respectively, 
+allowing for implementations of `AbstractDataSet` and `AbstractVersionedDataSet` to be shared with 
+and used by non-Kedro users.
+
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 

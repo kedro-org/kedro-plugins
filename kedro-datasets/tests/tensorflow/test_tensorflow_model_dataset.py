@@ -6,8 +6,8 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro_datasets.io import DataSetError
+from kedro_datasets.io.core import PROTOCOL_DELIMITER, Version
 from s3fs import S3FileSystem
 
 

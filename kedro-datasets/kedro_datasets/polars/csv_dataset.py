@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 import fsspec
 import polars as pl
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
     DataSetError,

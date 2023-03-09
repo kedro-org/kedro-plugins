@@ -1,6 +1,7 @@
 import pytest
 from delta import DeltaTable
-from kedro.io import DataCatalog, DataSetError
+from kedro.io import DataCatalog
+from kedro_datasets.io import DataSetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner

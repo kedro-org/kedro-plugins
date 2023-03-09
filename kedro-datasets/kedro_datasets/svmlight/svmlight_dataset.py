@@ -7,7 +7,7 @@ from pathlib import PurePosixPath
 from typing import Any, Dict, Optional, Tuple, Union
 
 import fsspec
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
     Version,

@@ -4,8 +4,8 @@ from time import sleep
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
-from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
+from kedro_datasets.io import DataSetError
+from kedro_datasets.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 from PIL import Image, ImageChops
 from s3fs.core import S3FileSystem
 

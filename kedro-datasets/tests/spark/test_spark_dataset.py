@@ -7,8 +7,9 @@ from pathlib import Path, PurePosixPath
 import boto3
 import pandas as pd
 import pytest
-from kedro.io import DataCatalog, DataSetError, Version
-from kedro.io.core import generate_timestamp
+from kedro.io import DataCatalog
+from kedro_datasets.io import DataSetError, Version
+from kedro_datasets.io.core import generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner

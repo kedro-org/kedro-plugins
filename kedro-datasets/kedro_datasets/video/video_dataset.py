@@ -13,7 +13,7 @@ import cv2
 import fsspec
 import numpy as np
 import PIL.Image
-from kedro.io.core import AbstractDataSet, get_protocol_and_path
+from kedro_datasets.io.core import AbstractDataSet, get_protocol_and_path
 
 
 class SlicedVideo:

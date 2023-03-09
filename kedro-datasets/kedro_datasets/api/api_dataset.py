@@ -4,7 +4,7 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 from typing import Any, Dict, Iterable, List, NoReturn, Union
 
 import requests
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro_datasets.io.core import AbstractDataSet, DataSetError
 from requests.auth import AuthBase
 
 

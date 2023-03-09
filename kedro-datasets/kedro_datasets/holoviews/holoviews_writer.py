@@ -8,7 +8,7 @@ from typing import Any, Dict, NoReturn, TypeVar
 
 import fsspec
 import holoviews as hv
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
     Version,

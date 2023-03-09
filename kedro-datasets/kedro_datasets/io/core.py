@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro.utils import load_obj
+from .utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
@@ -82,7 +82,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractDataSet
+        >>> from kedro_datasets.io import AbstractDataSet
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
@@ -465,7 +465,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from kedro_datasets.io import AbstractVersionedDataSet
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):

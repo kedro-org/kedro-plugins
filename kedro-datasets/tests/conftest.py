@@ -5,7 +5,7 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-from kedro.io.core import generate_timestamp
+from kedro_datasets.io.core import generate_timestamp
 from pytest import fixture
 
 

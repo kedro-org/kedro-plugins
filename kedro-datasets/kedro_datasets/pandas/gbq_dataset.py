@@ -11,7 +11,7 @@ import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractDataSet,
     DataSetError,
     get_filepath_str,

@@ -8,7 +8,7 @@ from copy import deepcopy
 from typing import Any, Dict
 
 import redis
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro_datasets.io.core import AbstractDataSet, DataSetError
 
 
 class PickleDataSet(AbstractDataSet[Any, Any]):

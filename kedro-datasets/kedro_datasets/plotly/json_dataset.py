@@ -7,7 +7,7 @@ from typing import Any, Dict, Union
 
 import fsspec
 import plotly.io as pio
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     Version,
     get_filepath_str,

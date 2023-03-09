@@ -3,7 +3,7 @@ from pathlib import PosixPath
 import pandas as pd
 import pytest
 from google.cloud.exceptions import NotFound
-from kedro.io.core import DataSetError
+from kedro_datasets.io.core import DataSetError
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.pandas import GBQQueryDataSet, GBQTableDataSet

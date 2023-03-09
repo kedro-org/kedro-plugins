@@ -8,7 +8,7 @@ from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractDataSet,
     DataSetError,
     get_filepath_str,

@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 import fsspec
 import pandas as pd
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
     DataSetError,

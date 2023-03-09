@@ -13,7 +13,7 @@ from warnings import warn
 
 import fsspec
 from hdfs import HdfsError, InsecureClient
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
     Version,

@@ -5,7 +5,7 @@ import boto3
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
-from kedro.io import DataSetError, Version
+from kedro_datasets.io import DataSetError, Version
 from moto import mock_s3
 from s3fs import S3FileSystem
 

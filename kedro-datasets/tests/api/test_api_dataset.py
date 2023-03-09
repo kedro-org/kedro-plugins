@@ -5,7 +5,7 @@ import socket
 import pytest
 import requests
 import requests_mock
-from kedro.io.core import DataSetError
+from kedro_datasets.io.core import DataSetError
 
 from kedro_datasets.api import APIDataSet
 

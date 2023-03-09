@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 import fsspec
 import networkx
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     Version,
     get_filepath_str,

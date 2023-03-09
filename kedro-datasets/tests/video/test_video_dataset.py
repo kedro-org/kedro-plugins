@@ -1,6 +1,6 @@
 import boto3
 import pytest
-from kedro.io import DataSetError
+from kedro_datasets.io import DataSetError
 from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 

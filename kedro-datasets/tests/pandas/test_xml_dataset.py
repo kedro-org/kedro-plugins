@@ -6,8 +6,8 @@ from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro_datasets.io import DataSetError
+from kedro_datasets.io.core import PROTOCOL_DELIMITER, Version
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 

@@ -9,7 +9,7 @@ from warnings import warn
 
 import fsspec
 import matplotlib.pyplot as plt
-from kedro.io.core import (
+from kedro_datasets.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
     Version,

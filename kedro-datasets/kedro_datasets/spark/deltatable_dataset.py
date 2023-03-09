@@ -5,7 +5,7 @@ from pathlib import PurePosixPath
 from typing import NoReturn
 
 from delta.tables import DeltaTable
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro_datasets.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 

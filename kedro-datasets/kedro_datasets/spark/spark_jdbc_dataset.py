@@ -126,7 +126,6 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:
-
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:

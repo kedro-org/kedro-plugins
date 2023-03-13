@@ -1,8 +1,9 @@
-import pytest
-from kedro.io.core import DataSetError, VersionNotFoundError, Version
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-from pyspark.sql import DataFrame, SparkSession
 import pandas as pd
+import pytest
+from kedro.io.core import DataSetError, Version, VersionNotFoundError
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+
 from kedro_datasets.databricks import ManagedTableDataSet
 
 
@@ -171,19 +172,16 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
 class TestManagedTableDataSet:
     def test_full_table(self):
         unity_ds = ManagedTableDataSet(catalog="test", database="test", table="test")
-        assert unity_ds._full_table_address == "test.test.test"
+        assert unity_ds._table.full_table_location == "test.test.test"
 
-    def test_database_table(self):
         unity_ds = ManagedTableDataSet(database="test", table="test")
-        assert unity_ds._full_table_address == "test.test"
+        assert unity_ds._table.full_table_location == "test.test"
 
-    def test_table_only(self):
         unity_ds = ManagedTableDataSet(table="test")
-        assert unity_ds._full_table_address == "default.test"
+        assert unity_ds._table.full_table_location == "default.test"
 
-    def test_table_missing(self):
         with pytest.raises(TypeError):
-            ManagedTableDataSet()
+            ManagedTableDataSet()  # pylint: disable=no-value-for-parameter
 
     def test_describe(self):
         unity_ds = ManagedTableDataSet(table="test")
@@ -195,7 +193,8 @@ class TestManagedTableDataSet:
             "dataframe_type": "spark",
             "primary_key": None,
             "version": None,
-            "owner_group": None
+            "owner_group": None,
+            "partition_columns": None,
         }
 
     def test_invalid_write_mode(self):
@@ -240,7 +239,9 @@ class TestManagedTableDataSet:
         assert unity_ds._schema == expected_schema
 
     def test_catalog_exists(self):
-        unity_ds = ManagedTableDataSet(catalog="test", database="invalid", table="test_not_there")
+        unity_ds = ManagedTableDataSet(
+            catalog="test", database="invalid", table="test_not_there"
+        )
         assert not unity_ds._exists()
 
     def test_table_does_not_exist(self):
@@ -251,7 +252,9 @@ class TestManagedTableDataSet:
         unity_ds = ManagedTableDataSet(database="test", table="test_save")
         unity_ds.save(sample_spark_df)
         saved_table = unity_ds.load()
-        assert unity_ds.exists() and sample_spark_df.exceptAll(saved_table).count() == 0
+        assert (
+            unity_ds._exists() and sample_spark_df.exceptAll(saved_table).count() == 0
+        )
 
     def test_save_schema_spark(
         self, subset_spark_df: DataFrame, subset_expected_df: DataFrame
@@ -414,7 +417,7 @@ class TestManagedTableDataSet:
         unity_ds.save(sample_spark_df)
 
         delta_ds = ManagedTableDataSet(
-            database="test", table="test_load_spark", version=Version(2,None)
+            database="test", table="test_load_spark", version=Version(2, None)
         )
         with pytest.raises(VersionNotFoundError):
             _ = delta_ds.load()
@@ -427,7 +430,7 @@ class TestManagedTableDataSet:
         unity_ds.save(append_spark_df)
 
         loaded_ds = ManagedTableDataSet(
-            database="test", table="test_load_version", version=Version(0,None)
+            database="test", table="test_load_version", version=Version(0, None)
         )
         loaded_df = loaded_ds.load()
 

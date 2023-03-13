@@ -359,7 +359,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
     @staticmethod
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
-
         filepath = schema.get("filepath")
         if not filepath:
             raise DataSetError(
@@ -375,7 +374,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         # Open schema file
         with file_system.open(load_path) as fs_file:
-
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:

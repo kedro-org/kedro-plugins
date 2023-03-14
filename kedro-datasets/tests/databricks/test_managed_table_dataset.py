@@ -172,13 +172,13 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
 class TestManagedTableDataSet:
     def test_full_table(self):
         unity_ds = ManagedTableDataSet(catalog="test", database="test", table="test")
-        assert unity_ds._table.full_table_location == "test.test.test"
+        assert unity_ds._table.full_table_location() == "test.test.test"
 
         unity_ds = ManagedTableDataSet(database="test", table="test")
-        assert unity_ds._table.full_table_location == "test.test"
+        assert unity_ds._table.full_table_location() == "test.test"
 
         unity_ds = ManagedTableDataSet(table="test")
-        assert unity_ds._table.full_table_location == "default.test"
+        assert unity_ds._table.full_table_location() == "default.test"
 
         with pytest.raises(TypeError):
             ManagedTableDataSet()  # pylint: disable=no-value-for-parameter
@@ -236,7 +236,7 @@ class TestManagedTableDataSet:
                 StructField("age", IntegerType(), True),
             ]
         )
-        assert unity_ds._schema == expected_schema
+        assert unity_ds._table.schema() == expected_schema
 
     def test_catalog_exists(self):
         unity_ds = ManagedTableDataSet(

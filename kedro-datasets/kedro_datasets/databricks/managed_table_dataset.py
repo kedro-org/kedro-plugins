@@ -1,8 +1,9 @@
 """``ManagedTableDataSet`` implementation to access managed delta tables
 in Databricks.
 """
-import dataclasses
 import logging
+import re
+from dataclasses import dataclass
 from functools import partial
 from operator import attrgetter
 from typing import Any, Dict, List, Union
@@ -21,21 +22,127 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
 logger = logging.getLogger(__name__)
+NAMING_REGEX = r"\b[0-9a-zA-Z_]{1,32}\b"
+_VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
+_VALID_DATAFRAME_TYPES = ["spark", "pandas"]
 
 
-@dataclasses.dataclass
-class Table:  # pylint: disable=R0902
+@dataclass(frozen=True)
+class ManagedTable:  # pylint: disable=R0902
     """Stores the definition of a managed table"""
 
     database: str
     catalog: str
     table: str
-    full_table_location: str
     write_mode: str
     dataframe_type: str
     primary_key: str
     owner_group: str
     partition_columns: str | List[str]
+    json_schema: StructType
+
+    def __post_init__(self):
+        """Run validation methods if declared.
+        The validation method can be a simple check
+        that raises ValueError or a transformation to
+        the field value.
+        The validation is performed by calling a function named:
+            `validate_<field_name>(self, value) -> raises DataSetError`
+        """
+        for name, _ in self.__dataclass_fields__.items():  # pylint: disable=E1101
+            if method := getattr(self, f"validate_{name}", None):
+                method()
+
+    def validate_table(self):
+        """validates table name
+
+        Raises:
+            DataSetError:
+        """
+        if not re.fullmatch(NAMING_REGEX, self.table):
+            raise DataSetError(
+                "table does not conform to naming and is a required field"
+            )
+
+    def validate_database(self):
+        """validates database name
+
+        Raises:
+            DataSetError:
+        """
+        if self.database:
+            if not re.fullmatch(NAMING_REGEX, self.database):
+                raise DataSetError("database does not conform to naming")
+
+    def validate_catalog(self):
+        """validates catalog name
+
+        Raises:
+            DataSetError:
+        """
+        if self.catalog:
+            if not re.fullmatch(NAMING_REGEX, self.catalog):
+                raise DataSetError("catalog does not conform to naming")
+
+    def validate_write_mode(self):
+        """validates the write mode
+
+        Raises:
+            DataSetError:
+        """
+        if self.write_mode not in _VALID_WRITE_MODES:
+            valid_modes = ", ".join(_VALID_WRITE_MODES)
+            raise DataSetError(
+                f"Invalid `write_mode` provided: {self.write_mode}. "
+                f"`write_mode` must be one of: {valid_modes}"
+            )
+
+    def validate_dataframe_type(self):
+        """validates the dataframe type
+
+        Raises:
+            DataSetError:
+        """
+        if self.dataframe_type not in _VALID_DATAFRAME_TYPES:
+            valid_types = ", ".join(_VALID_DATAFRAME_TYPES)
+            raise DataSetError(f"`dataframe_type` must be one of {valid_types}")
+
+    def validate_primary_key(self):
+        """validates the primary key of the table
+
+        Raises:
+            DataSetError:
+        """
+        if self.primary_key is None or len(self.primary_key) == 0:
+            if self.write_mode == "upsert":
+                raise DataSetError(
+                    f"`primary_key` must be provided for"
+                    f"`write_mode` {self.write_mode}"
+                )
+
+    def full_table_location(self) -> str:
+        """Returns the full table location
+
+        Returns:
+            str: table location in the format catalog.database.table
+        """
+        full_table_location = None
+        if self.catalog and self.database and self.table:
+            full_table_location = f"{self.catalog}.{self.database}.{self.table}"
+        elif self.table:
+            full_table_location = f"{self.database}.{self.table}"
+        return full_table_location
+
+    def schema(self) -> StructType:
+        """Returns the Spark schema of the table if it exists
+
+        Returns:
+            StructType:
+        """
+        schema = None
+        if self.json_schema is not None:
+            schema = StructType.fromJson(self.json_schema)
+        return schema
 
 
 class ManagedTableDataSet(AbstractVersionedDataSet):
@@ -82,8 +189,6 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
     # for parallelism within a Spark pipeline please consider
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
-    _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
-    _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
 
     def __init__(  # pylint: disable=R0913
         self,
@@ -103,43 +208,20 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
     ) -> None:
         """Creates a new instance of ``ManagedTableDataSet``."""
 
-        full_table_location = None
-        if catalog and database and table:
-            full_table_location = f"{catalog}.{database}.{table}"
-        elif table:
-            full_table_location = f"{database}.{table}"
-        if write_mode not in self._VALID_WRITE_MODES:
-            valid_modes = ", ".join(self._VALID_WRITE_MODES)
-            raise DataSetError(
-                f"Invalid `write_mode` provided: {write_mode}. "
-                f"`write_mode` must be one of: {valid_modes}"
-            )
-        if dataframe_type not in self._VALID_DATAFRAME_TYPES:
-            valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)
-            raise DataSetError(f"`dataframe_type` must be one of {valid_types}")
-        if primary_key is None or len(primary_key) == 0:
-            if write_mode == "upsert":
-                raise DataSetError(
-                    f"`primary_key` must be provided for" f"`write_mode` {write_mode}"
-                )
-        self._table = Table(
+        self._table = ManagedTable(
             database=database,
             catalog=catalog,
             table=table,
-            full_table_location=full_table_location,
             write_mode=write_mode,
             dataframe_type=dataframe_type,
             primary_key=primary_key,
             owner_group=owner_group,
             partition_columns=partition_columns,
+            json_schema=schema,
         )
 
         self._version_cache = Cache(maxsize=2)
         self._version = version
-
-        self._schema = None
-        if schema is not None:
-            self._schema = StructType.fromJson(schema)
 
         super().__init__(
             filepath=None,
@@ -153,12 +235,12 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         # version from the given path.
         latest_history = (
             self._get_spark()
-            .sql(f"DESCRIBE HISTORY {self._table.full_table_location} LIMIT 1")
+            .sql(f"DESCRIBE HISTORY {self._table.full_table_location()} LIMIT 1")
             .collect()
         )
         if len(latest_history) != 1:
             raise VersionNotFoundError(
-                f"Did not find any versions for {self._table.full_table_location}"
+                f"Did not find any versions for {self._table.full_table_location()}"
             )
         return latest_history[0].version
 
@@ -191,12 +273,12 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
                     self._get_spark()
                     .read.format("delta")
                     .option("versionAsOf", self._version.load)
-                    .table(self._table.full_table_location)
+                    .table(self._table.full_table_location())
                 )
             except Exception as exc:
                 raise VersionNotFoundError(self._version) from exc
         else:
-            data = self._get_spark().table(self._table.full_table_location)
+            data = self._get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data
@@ -209,7 +291,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             data (DataFrame): the Spark dataframe to append to the table
         """
         data.write.format("delta").mode("append").saveAsTable(
-            self._table.full_table_location
+            self._table.full_table_location()
         )
 
     def _save_overwrite(self, data: DataFrame) -> None:
@@ -224,7 +306,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             delta_table = delta_table.mode("overwrite").option(
                 "overwriteSchema", "true"
             )
-        delta_table.saveAsTable(self._table.full_table_location)
+        delta_table.saveAsTable(self._table.full_table_location())
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
@@ -234,14 +316,14 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             update_data (DataFrame): the Spark dataframe to upsert
         """
         if self._exists():
-            base_data = self._get_spark().table(self._table.full_table_location)
+            base_data = self._get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
 
             if set(update_columns) != set(base_columns):
                 raise DataSetError(
                     f"Upsert requires tables to have identical columns. "
-                    f"Delta table {self._table.full_table_location} "
+                    f"Delta table {self._table.full_table_location()} "
                     f"has columns: {base_columns}, whereas "
                     f"dataframe has columns {update_columns}"
                 )
@@ -258,7 +340,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
 
             update_data.createOrReplaceTempView("update")
             self._get_spark().conf.set(
-                "fullTableAddress", self._table.full_table_location
+                "fullTableAddress", self._table.full_table_location()
             )
             self._get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
@@ -277,11 +359,11 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             data (Any): Spark or pandas dataframe to save to the table location
         """
         # filter columns specified in schema and match their ordering
-        if self._schema:
-            cols = self._schema.fieldNames()
+        if self._table.schema():
+            cols = self._table.schema().fieldNames()
             if self._table.dataframe_type == "pandas":
                 data = self._get_spark().createDataFrame(
-                    data.loc[:, cols], schema=self._schema
+                    data.loc[:, cols], schema=self._table.schema()
                 )
             else:
                 data = data.select(*cols)

@@ -290,19 +290,19 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         exists_function = None
         glob_function = None
 
-        # if fs_prefix in ("s3a://", "s3n://"):
-        #     if fs_prefix == "s3n://":
-        #         warn(
-        #             "'s3n' filesystem has now been deprecated by Spark, "
-        #             "please consider switching to 's3a'",
-        #             DeprecationWarning,
-        #         )
-        #     _s3 = S3FileSystem(**credentials)
-        #     exists_function = _s3.exists
-        #     glob_function = partial(_s3.glob, refresh=True)
-        #     path = PurePosixPath(filepath)
+        if fs_prefix in ("s3a://", "s3n://"):
+            if fs_prefix == "s3n://":
+                warn(
+                    "'s3n' filesystem has now been deprecated by Spark, "
+                    "please consider switching to 's3a'",
+                    DeprecationWarning,
+                )
+            _s3 = S3FileSystem(**credentials)
+            exists_function = _s3.exists
+            glob_function = partial(_s3.glob, refresh=True)
+            path = PurePosixPath(filepath)
 
-        if fs_prefix == "hdfs://" and version:
+        elif fs_prefix == "hdfs://" and version:
             warn(
                 f"HDFS filesystem support for versioned {self.__class__.__name__} is "
                 f"in beta and uses 'hdfs.client.InsecureClient', please use with "
@@ -318,20 +318,19 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             glob_function = _hdfs_client.hdfs_glob  # type: ignore
             path = PurePosixPath(filepath)
 
-        elif filepath.startswith("/dbfs"):
-            path = PurePosixPath(filepath)
-            # Databricks handle the default path in a special way. See
-            # https://docs.databricks.com/files/index.html#understand-default-locations-with-examples
-            # More details in https://github.com/kedro-org/kedro-plugins/issues/117
-            dbutils = _get_dbutils(self._get_spark())
-            if dbutils:
-                glob_function = partial(_dbfs_glob, dbutils=dbutils)
-                exists_function = partial(_dbfs_exists, dbutils=dbutils)
         else:
-            protocol, path = get_protocol_and_path(filepath, version)
-            self._protocol = protocol
-            self._storage_options = {**credentials}
-            self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+            path = PurePosixPath(filepath)
+            if _deployed_on_databricks() and not _path_has_dbfs_prefix(filepath):
+                logger.warning(
+                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+                    "filepath is a known source of error. You must add this prefix to %s",
+                    filepath,
+                )
+            if filepath.startswith("/dbfs"):
+                dbutils = _get_dbutils(self._get_spark())
+                if dbutils:
+                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
+                    exists_function = partial(_dbfs_exists, dbutils=dbutils)
 
         super().__init__(
             filepath=path,

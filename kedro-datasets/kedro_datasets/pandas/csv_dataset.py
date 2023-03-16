@@ -188,3 +188,9 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _preview(self, nrows) -> Dict:
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        df = pd.read_csv(filepath, nrows=nrows)
+
+        return df.to_dict()

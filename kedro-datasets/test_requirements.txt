@@ -36,7 +36,7 @@ plotly>=4.8.0, <6.0
 polars~=0.15.13
 pre-commit>=2.9.2, <3.0  # The hook `mypy` requires pre-commit version 2.9.2.
 psutil==5.8.0
-pyarrow>=1.0, <7.0
+pyarrow
 pylint>=2.5.2, <3.0
 pyodbc~=4.0.35
 pyproj~=3.0

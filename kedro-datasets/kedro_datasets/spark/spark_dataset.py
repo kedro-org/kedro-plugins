@@ -123,15 +123,6 @@ def _deployed_on_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def _path_has_dbfs_prefix(path: str) -> bool:
-    """Check if a file path has a valid dbfs prefix.
-
-    Args:
-        path: File path to check.
-    """
-    return path.startswith("/dbfs/")
-
-
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
     and ``hdfs_glob`` methods required by ``SparkDataSet``"""
@@ -314,18 +305,17 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         else:
             path = PurePosixPath(filepath)
-            if _deployed_on_databricks() and not _path_has_dbfs_prefix(filepath):
-                logger.warning(
-                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
-                    "filepath is a known source of error. You must add this prefix to %s",
-                    filepath,
-                )
             if filepath.startswith("/dbfs"):
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)
                     exists_function = partial(_dbfs_exists, dbutils=dbutils)
-
+            elif _deployed_on_databricks():
+                logger.warning(
+                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+                    "filepath is a known source of error. You must add this prefix to %s",
+                    filepath,
+                )
         super().__init__(
             filepath=path,
             version=version,

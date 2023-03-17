@@ -277,17 +277,18 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
         """
         credentials = deepcopy(credentials) or {}
-        protocol, filepath = get_protocol_and_path(filepath, version)
+        fs_prefix, filepath = _split_filepath(filepath)
         exists_function = None
         glob_function = None
 
-        if protocol == "s3":
+        if fs_prefix == "s3":
             _s3 = S3FileSystem(**credentials)
             exists_function = _s3.exists
+            # Ensure cache is not used so latest version is retrieved correctly.
             glob_function = partial(_s3.glob, refresh=True)
             path = PurePosixPath(filepath)
 
-        elif protocol == "hdfs" and version:
+        elif fs_prefix == "hdfs" and version:
             warn(
                 f"HDFS filesystem support for versioned {self.__class__.__name__} is "
                 f"in beta and uses 'hdfs.client.InsecureClient', please use with "
@@ -295,7 +296,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             )
 
             # default namenode address
-            credentials.setdefault("url", "http://localhost:9870")
+            credentials.setdefault("url", "http://localhost:9`870")
             credentials.setdefault("user", "hadoop")
 
             _hdfs_client = KedroHdfsInsecureClient(**credentials)
@@ -305,6 +306,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         else:
             path = PurePosixPath(filepath)
+
             if filepath.startswith("/dbfs"):
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:

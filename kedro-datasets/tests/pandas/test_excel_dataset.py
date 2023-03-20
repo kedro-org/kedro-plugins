@@ -70,8 +70,8 @@ class TestExcelDataSet:
         excel_data_set.save(dummy_dataframe)
         response = excel_data_set._preview(nrows=nrows)
 
-        for key in response:
-            assert len(response[key]) == nrows
+        for rows in response.values():
+            assert len(rows) == nrows
 
     def test_save_and_load_multiple_sheets(
         self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe

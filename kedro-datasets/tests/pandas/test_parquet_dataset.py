@@ -74,8 +74,8 @@ class TestParquetDataSet:
         parquet_data_set.save(dummy_dataframe)
         response = parquet_data_set._preview(nrows=nrows)
 
-        for key in response:
-            assert len(response[key]) == nrows
+        for rows in response.values():
+            assert len(rows) == nrows
 
     def test_save_and_load_non_existing_dir(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set to non-existing directory."""

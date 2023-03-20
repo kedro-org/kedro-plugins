@@ -100,8 +100,8 @@ class TestCSVDataSet:
         csv_data_set.save(dummy_dataframe)
         response = csv_data_set._preview(nrows=nrows)
 
-        for key in response:
-            assert len(response[key]) == nrows
+        for rows in response.values():
+            assert len(rows) == nrows
 
     def test_exists(self, csv_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and

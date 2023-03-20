@@ -281,14 +281,14 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         exists_function = None
         glob_function = None
 
-        if fs_prefix == "s3":
+        if fs_prefix == "s3://":
             _s3 = S3FileSystem(**credentials)
             exists_function = _s3.exists
             # Ensure cache is not used so latest version is retrieved correctly.
             glob_function = partial(_s3.glob, refresh=True)
             path = PurePosixPath(filepath)
 
-        elif fs_prefix == "hdfs" and version:
+        elif fs_prefix == "hdfs://" and version:
             warn(
                 f"HDFS filesystem support for versioned {self.__class__.__name__} is "
                 f"in beta and uses 'hdfs.client.InsecureClient', please use with "

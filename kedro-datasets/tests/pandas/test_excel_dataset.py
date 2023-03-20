@@ -63,6 +63,16 @@ class TestExcelDataSet:
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
+    def test_preview(self, excel_data_set, dummy_dataframe):
+        """Test _preview returns the correct nrows amount."""
+        nrows = 2
+
+        excel_data_set.save(dummy_dataframe)
+        response = excel_data_set._preview(nrows=nrows)
+
+        for key in response:
+            assert len(response[key]) == nrows
+
     def test_save_and_load_multiple_sheets(
         self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe
     ):
@@ -110,7 +120,8 @@ class TestExcelDataSet:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = ExcelDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+        ds = ExcelDataSet(filepath=filepath,
+                          load_args=load_args, save_args=save_args)
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (

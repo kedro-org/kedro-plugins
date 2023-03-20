@@ -65,6 +65,18 @@ class TestParquetDataSet:
         assert all(files)
         assert len(files) == 1
 
+    def test_preview(self, tmp_path, dummy_dataframe):
+        """Test _preview returns the correct nrows amount."""
+        nrows = 2
+
+        filepath = (tmp_path / FILENAME).as_posix()
+        parquet_data_set = ParquetDataSet(filepath=filepath)
+        parquet_data_set.save(dummy_dataframe)
+        response = parquet_data_set._preview(nrows=nrows)
+
+        for key in response:
+            assert len(response[key]) == nrows
+
     def test_save_and_load_non_existing_dir(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set to non-existing directory."""
         filepath = (tmp_path / "non-existing" / FILENAME).as_posix()
@@ -107,7 +119,8 @@ class TestParquetDataSet:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = ParquetDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+        ds = ParquetDataSet(filepath=filepath,
+                            load_args=load_args, save_args=save_args)
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
@@ -167,7 +180,8 @@ class TestParquetDataSet:
 
     def test_read_partitioned_file(self, mocker, tmp_path, dummy_dataframe):
         """Test read partitioned parquet file from local directory."""
-        mock_pandas_call = mocker.patch("pandas.read_parquet", wraps=pd.read_parquet)
+        mock_pandas_call = mocker.patch(
+            "pandas.read_parquet", wraps=pd.read_parquet)
         dummy_dataframe.to_parquet(str(tmp_path), partition_cols=["col2"])
         data_set = ParquetDataSet(filepath=tmp_path.as_posix())
 
@@ -239,7 +253,8 @@ class TestParquetDataSetVersioned:
         the versioned data set."""
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
-            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+            return_value=PyFileSystem(FSSpecHandler(
+                versioned_parquet_data_set._fs)),
         )
         versioned_parquet_data_set.save(dummy_dataframe)
         reloaded_df = versioned_parquet_data_set.load()
@@ -256,7 +271,8 @@ class TestParquetDataSetVersioned:
         assert not versioned_parquet_data_set.exists()
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
-            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+            return_value=PyFileSystem(FSSpecHandler(
+                versioned_parquet_data_set._fs)),
         )
         versioned_parquet_data_set.save(dummy_dataframe)
         assert versioned_parquet_data_set.exists()
@@ -268,7 +284,8 @@ class TestParquetDataSetVersioned:
         corresponding parquet file for a given save version already exists."""
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
-            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+            return_value=PyFileSystem(FSSpecHandler(
+                versioned_parquet_data_set._fs)),
         )
         versioned_parquet_data_set.save(dummy_dataframe)
         pattern = (
@@ -300,7 +317,8 @@ class TestParquetDataSetVersioned:
         )
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
-            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+            return_value=PyFileSystem(FSSpecHandler(
+                versioned_parquet_data_set._fs)),
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_data_set.save(dummy_dataframe)

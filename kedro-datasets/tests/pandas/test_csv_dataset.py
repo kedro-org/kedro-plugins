@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path, PurePosixPath
 from time import sleep
+from urllib import response
 
 import boto3
 import pandas as pd
@@ -92,6 +93,16 @@ class TestCSVDataSet:
         reloaded = csv_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
+    def test_preview(self, csv_data_set, dummy_dataframe):
+        """Test _preview returns the correct nrows amount."""
+        nrows = 2
+
+        csv_data_set.save(dummy_dataframe)
+        response = csv_data_set._preview(nrows=nrows)
+
+        for key in response:
+            assert len(response[key]) == nrows
+
     def test_exists(self, csv_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
@@ -126,7 +137,8 @@ class TestCSVDataSet:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = CSVDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+        ds = CSVDataSet(filepath=filepath, load_args=load_args,
+                        save_args=save_args)
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
@@ -234,7 +246,8 @@ class TestCSVDataSetVersioned:
 
     def test_multiple_saves(self, dummy_dataframe, filepath_csv):
         """Test multiple cycles of save followed by load for the same dataset"""
-        ds_versioned = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        ds_versioned = CSVDataSet(
+            filepath=filepath_csv, version=Version(None, None))
 
         # first save
         ds_versioned.save(dummy_dataframe)
@@ -362,9 +375,11 @@ class TestCSVDataSetS3:
         assert df._protocol == "s3"
         # if Python >= 3.10, modify test procedure (see #67)
         if sys.version_info[1] >= 10:
-            read_patch = mocker.patch("pandas.read_csv", return_value=mocked_dataframe)
+            read_patch = mocker.patch(
+                "pandas.read_csv", return_value=mocked_dataframe)
             df.load()
-            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={})
+            read_patch.assert_called_once_with(
+                mocked_csv_in_s3, storage_options={})
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)

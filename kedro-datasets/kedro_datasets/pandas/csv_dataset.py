@@ -190,7 +190,9 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
     def _preview(self, nrows) -> Dict:
-        filepath = get_filepath_str(self._filepath, self._protocol)
-        df = pd.read_csv(filepath, nrows=nrows)
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        dataset_copy._load_args["nrows"] = nrows
+        data = dataset_copy.load()
 
-        return df.to_dict()
+        return data.to_dict()

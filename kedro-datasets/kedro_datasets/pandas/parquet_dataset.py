@@ -210,7 +210,9 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
     def _preview(self, nrows) -> Dict:
-        filepath = get_filepath_str(self._filepath, self._protocol)
-        df = pd.read_parquet(filepath).head(nrows)
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        data = dataset_copy.load().head(nrows)
+        print(data)
 
-        return df.to_dict()
+        return data.to_dict()

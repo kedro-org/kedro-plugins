@@ -296,7 +296,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             )
 
             # default namenode address
-            credentials.setdefault("url", "http://localhost:9`870")
+            credentials.setdefault("url", "http://localhost:9870")
             credentials.setdefault("user", "hadoop")
 
             _hdfs_client = KedroHdfsInsecureClient(**credentials)
@@ -304,20 +304,26 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             glob_function = _hdfs_client.hdfs_glob  # type: ignore
             path = PurePosixPath(filepath)
 
-        else:
+        elif filepath.startswith("/dbfs"):
+            # dbfs add prefix to Spark path by default
+            # See https://github.com/kedro-org/kedro-plugins/issues/117
             path = PurePosixPath(filepath)
 
-            if filepath.startswith("/dbfs"):
-                dbutils = _get_dbutils(self._get_spark())
-                if dbutils:
-                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
-                    exists_function = partial(_dbfs_exists, dbutils=dbutils)
+            dbutils = _get_dbutils(self._get_spark())
+            if dbutils:
+                glob_function = partial(_dbfs_glob, dbutils=dbutils)
+                exists_function = partial(_dbfs_exists, dbutils=dbutils)
             elif _deployed_on_databricks():
                 logger.warning(
                     "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
                     "filepath is a known source of error. You must add this prefix to %s",
                     filepath,
                 )
+        else:
+            fs = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
+            exists_function = fs.exists
+            glob_function = fs.glob
+
         super().__init__(
             filepath=path,
             version=version,
@@ -345,7 +351,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
     @staticmethod
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
-
         filepath = schema.get("filepath")
         if not filepath:
             raise DataSetError(
@@ -361,7 +366,6 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         # Open schema file
         with file_system.open(load_path) as fs_file:
-
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:

@@ -1,6 +1,10 @@
+# Upcoming Release:
 
-# Upcoming Release 1.1.0:
+## Major features and improvements:
 
+## Bug fixes and other changes
+
+# Release 1.1.0:
 
 ## Major features and improvements:
 

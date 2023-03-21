@@ -277,23 +277,36 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
         """
         credentials = deepcopy(credentials) or {}
+        # protocol, _ = get_protocol_and_path(filepath)
+        # if protocol == "hdfs":
+        #     # adhoc fix for hdfs on spark
+        #     filepath = _split_filepath(filepath)[1]
+        # else:
+        #     filepath = get_protocol_and_path(filepath)[1]
         fs_prefix, filepath = _split_filepath(filepath)
+        path = PurePosixPath(filepath)
         exists_function = None
         glob_function = None
 
-        if fs_prefix == "s3://":
+        if not filepath.startswith("/dbfs") and _deployed_on_databricks():
+            logger.warning(
+                "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+                "filepath is a known source of error. You must add this prefix to %s",
+                filepath,
+            )
+        if fs_prefix and fs_prefix in ("s3a://"):
             _s3 = S3FileSystem(**credentials)
             exists_function = _s3.exists
             # Ensure cache is not used so latest version is retrieved correctly.
             glob_function = partial(_s3.glob, refresh=True)
-            path = PurePosixPath(filepath)
 
-        elif fs_prefix == "hdfs://" and version:
-            warn(
-                f"HDFS filesystem support for versioned {self.__class__.__name__} is "
-                f"in beta and uses 'hdfs.client.InsecureClient', please use with "
-                f"caution"
-            )
+        elif fs_prefix == "hdfs://":
+            if version:
+                warn(
+                    f"HDFS filesystem support for versioned {self.__class__.__name__} is "
+                    f"in beta and uses 'hdfs.client.InsecureClient', please use with "
+                    f"caution"
+                )
 
             # default namenode address
             credentials.setdefault("url", "http://localhost:9870")
@@ -302,23 +315,14 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             _hdfs_client = KedroHdfsInsecureClient(**credentials)
             exists_function = _hdfs_client.hdfs_exists
             glob_function = _hdfs_client.hdfs_glob  # type: ignore
-            path = PurePosixPath(filepath)
 
         elif filepath.startswith("/dbfs"):
             # dbfs add prefix to Spark path by default
             # See https://github.com/kedro-org/kedro-plugins/issues/117
-            path = PurePosixPath(filepath)
-
             dbutils = _get_dbutils(self._get_spark())
             if dbutils:
                 glob_function = partial(_dbfs_glob, dbutils=dbutils)
                 exists_function = partial(_dbfs_exists, dbutils=dbutils)
-            elif _deployed_on_databricks():
-                logger.warning(
-                    "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
-                    "filepath is a known source of error. You must add this prefix to %s",
-                    filepath,
-                )
         else:
             fs = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
             exists_function = fs.exists

@@ -4,6 +4,12 @@
 
 ## Bug fixes and other changes
 
+# Release 1.1.1:
+
+## Bug fixes and other changes
+
+* Fixed problematic docstrings causing RTD builds on Kedro to fail.
+
 # Release 1.1.0:
 
 ## Major features and improvements:

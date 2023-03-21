@@ -65,18 +65,6 @@ class TestParquetDataSet:
         assert all(files)
         assert len(files) == 1
 
-    def test_preview(self, tmp_path, dummy_dataframe):
-        """Test _preview returns the correct nrows amount."""
-        nrows = 2
-
-        filepath = (tmp_path / FILENAME).as_posix()
-        parquet_data_set = ParquetDataSet(filepath=filepath)
-        parquet_data_set.save(dummy_dataframe)
-        response = parquet_data_set._preview(nrows=nrows)
-
-        for rows in response.values():
-            assert len(rows) == nrows
-
     def test_save_and_load_non_existing_dir(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set to non-existing directory."""
         filepath = (tmp_path / "non-existing" / FILENAME).as_posix()

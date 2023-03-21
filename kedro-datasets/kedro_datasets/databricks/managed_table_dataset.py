@@ -22,15 +22,16 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
 logger = logging.getLogger(__name__)
-NAMING_REGEX = r"\b[0-9a-zA-Z_]{1,32}\b"
-_VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
-_VALID_DATAFRAME_TYPES = ["spark", "pandas"]
 
 
 @dataclass(frozen=True)
 class ManagedTable:  # pylint: disable=R0902
     """Stores the definition of a managed table"""
 
+    # regex for tables, catalogs and schemas
+    _NAMING_REGEX = r"\b[0-9a-zA-Z_]{1,32}\b"
+    _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
+    _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
     catalog: str
     table: str
@@ -38,14 +39,13 @@ class ManagedTable:  # pylint: disable=R0902
     dataframe_type: str
     primary_key: str
     owner_group: str
-    partition_columns: str | List[str]
+    partition_columns: Union[str, List[str]]
     json_schema: StructType
 
     def __post_init__(self):
         """Run validation methods if declared.
         The validation method can be a simple check
-        that raises ValueError or a transformation to
-        the field value.
+        that raises DataSetError.
         The validation is performed by calling a function named:
             `validate_<field_name>(self, value) -> raises DataSetError`
         """
@@ -59,10 +59,8 @@ class ManagedTable:  # pylint: disable=R0902
         Raises:
             DataSetError:
         """
-        if not re.fullmatch(NAMING_REGEX, self.table):
-            raise DataSetError(
-                "table does not conform to naming and is a required field"
-            )
+        if not re.fullmatch(self._NAMING_REGEX, self.table):
+            raise DataSetError("table does not conform to naming")
 
     def validate_database(self):
         """validates database name
@@ -71,7 +69,7 @@ class ManagedTable:  # pylint: disable=R0902
             DataSetError:
         """
         if self.database:
-            if not re.fullmatch(NAMING_REGEX, self.database):
+            if not re.fullmatch(self._NAMING_REGEX, self.database):
                 raise DataSetError("database does not conform to naming")
 
     def validate_catalog(self):
@@ -81,7 +79,7 @@ class ManagedTable:  # pylint: disable=R0902
             DataSetError:
         """
         if self.catalog:
-            if not re.fullmatch(NAMING_REGEX, self.catalog):
+            if not re.fullmatch(self._NAMING_REGEX, self.catalog):
                 raise DataSetError("catalog does not conform to naming")
 
     def validate_write_mode(self):
@@ -90,8 +88,8 @@ class ManagedTable:  # pylint: disable=R0902
         Raises:
             DataSetError:
         """
-        if self.write_mode not in _VALID_WRITE_MODES:
-            valid_modes = ", ".join(_VALID_WRITE_MODES)
+        if self.write_mode not in self._VALID_WRITE_MODES:
+            valid_modes = ", ".join(self._VALID_WRITE_MODES)
             raise DataSetError(
                 f"Invalid `write_mode` provided: {self.write_mode}. "
                 f"`write_mode` must be one of: {valid_modes}"
@@ -103,8 +101,8 @@ class ManagedTable:  # pylint: disable=R0902
         Raises:
             DataSetError:
         """
-        if self.dataframe_type not in _VALID_DATAFRAME_TYPES:
-            valid_types = ", ".join(_VALID_DATAFRAME_TYPES)
+        if self.dataframe_type not in self._VALID_DATAFRAME_TYPES:
+            valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)
             raise DataSetError(f"`dataframe_type` must be one of {valid_types}")
 
     def validate_primary_key(self):
@@ -140,8 +138,11 @@ class ManagedTable:  # pylint: disable=R0902
             StructType:
         """
         schema = None
-        if self.json_schema is not None:
-            schema = StructType.fromJson(self.json_schema)
+        try:
+            if self.json_schema is not None:
+                schema = StructType.fromJson(self.json_schema)
+        except ParseException as exc:
+            raise DataSetError(exc) from exc
         return schema
 
 

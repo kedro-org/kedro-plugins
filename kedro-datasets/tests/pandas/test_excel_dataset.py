@@ -63,16 +63,6 @@ class TestExcelDataSet:
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
-    def test_preview(self, excel_data_set, dummy_dataframe):
-        """Test _preview returns the correct nrows amount."""
-        nrows = 2
-
-        excel_data_set.save(dummy_dataframe)
-        response = excel_data_set._preview(nrows=nrows)
-
-        for rows in response.values():
-            assert len(rows) == nrows
-
     def test_save_and_load_multiple_sheets(
         self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe
     ):
@@ -131,6 +121,25 @@ class TestExcelDataSet:
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
         assert "storage_options" not in ds._load_args
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (0, {'index': [], 'columns': ['col1', 'col2', 'col3'],
+             'data': [], }),
+            (1, {'index': [0], 'columns': [
+             'col1', 'col2', 'col3'], 'data': [[1, 4, 5]]}),
+            (None, {'index': [0, 1], 'columns': [
+             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
+            (10, {'index': [0, 1], 'columns': [
+             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
+        ],
+    )
+    def test_preview(self, excel_data_set, dummy_dataframe, nrows, expected):
+        """Test _preview returns the correct data structure."""
+        excel_data_set.save(dummy_dataframe)
+        previewed = excel_data_set._preview(nrows=nrows)
+        assert previewed == expected
 
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""

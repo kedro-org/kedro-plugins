@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path, PurePosixPath
 from time import sleep
-from urllib import response
 
 import boto3
 import pandas as pd

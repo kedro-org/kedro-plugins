@@ -265,4 +265,4 @@ class ExcelDataSet(
         dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
-        return data.to_dict(orient='tight')
+        return data.to_dict(orient='split')

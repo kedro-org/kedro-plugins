@@ -127,8 +127,7 @@ class TestCSVDataSet:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = CSVDataSet(filepath=filepath, load_args=load_args,
-                        save_args=save_args)
+        ds = CSVDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
@@ -142,14 +141,38 @@ class TestCSVDataSet:
     @pytest.mark.parametrize(
         "nrows,expected",
         [
-            (0, {'index': [], 'columns': ['col1', 'col2', 'col3'],
-             'data': [], }),
-            (1, {'index': [0], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5]]}),
-            (None, {'index': [0, 1], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
-            (10, {'index': [0, 1], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
         ],
     )
     def test_preview(self, csv_data_set, dummy_dataframe, nrows, expected):
@@ -255,8 +278,7 @@ class TestCSVDataSetVersioned:
 
     def test_multiple_saves(self, dummy_dataframe, filepath_csv):
         """Test multiple cycles of save followed by load for the same dataset"""
-        ds_versioned = CSVDataSet(
-            filepath=filepath_csv, version=Version(None, None))
+        ds_versioned = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
 
         # first save
         ds_versioned.save(dummy_dataframe)
@@ -384,11 +406,9 @@ class TestCSVDataSetS3:
         assert df._protocol == "s3"
         # if Python >= 3.10, modify test procedure (see #67)
         if sys.version_info[1] >= 10:
-            read_patch = mocker.patch(
-                "pandas.read_csv", return_value=mocked_dataframe)
+            read_patch = mocker.patch("pandas.read_csv", return_value=mocked_dataframe)
             df.load()
-            read_patch.assert_called_once_with(
-                mocked_csv_in_s3, storage_options={})
+            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={})
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)

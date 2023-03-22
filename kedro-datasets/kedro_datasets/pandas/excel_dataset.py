@@ -182,8 +182,7 @@ class ExcelDataSet(
         if save_args is not None:
             self._save_args.update(save_args)
         self._writer_args = self._save_args.pop("writer", {})  # type: ignore
-        self._writer_args.setdefault(
-            "engine", engine or "openpyxl")  # type: ignore
+        self._writer_args.setdefault("engine", engine or "openpyxl")  # type: ignore
 
         if version and self._writer_args.get("mode") == "a":  # type: ignore
             raise DataSetError(
@@ -265,4 +264,4 @@ class ExcelDataSet(
         dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
-        return data.to_dict(orient='split')
+        return data.to_dict(orient="split")

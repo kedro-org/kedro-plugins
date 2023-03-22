@@ -110,8 +110,7 @@ class TestExcelDataSet:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = ExcelDataSet(filepath=filepath,
-                          load_args=load_args, save_args=save_args)
+        ds = ExcelDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
@@ -125,14 +124,38 @@ class TestExcelDataSet:
     @pytest.mark.parametrize(
         "nrows,expected",
         [
-            (0, {'index': [], 'columns': ['col1', 'col2', 'col3'],
-             'data': [], }),
-            (1, {'index': [0], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5]]}),
-            (None, {'index': [0, 1], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
-            (10, {'index': [0, 1], 'columns': [
-             'col1', 'col2', 'col3'], 'data': [[1, 4, 5], [2, 5, 6]]}),
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
         ],
     )
     def test_preview(self, excel_data_set, dummy_dataframe, nrows, expected):

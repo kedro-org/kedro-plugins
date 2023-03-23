@@ -4,7 +4,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict
 
-import snowflake.snowpark as sp  # pylint: disable=import-error
+import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataSet, DataSetError
 
 logger = logging.getLogger(__name__)
@@ -195,7 +195,8 @@ class SnowparkTableDataSet(AbstractDataSet):
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
             logger.debug("No active snowpark session found. Creating")
-            session = sp.Session.builder.configs(connection_parameters).create()
+            session = sp.Session.builder.configs(
+                connection_parameters).create()
         return session
 
     def _load(self) -> sp.DataFrame:

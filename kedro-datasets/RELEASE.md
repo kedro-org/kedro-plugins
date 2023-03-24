@@ -7,7 +7,7 @@
 # Release 1.2.0:
 
 ## Bug fixes and other changes
-* Added `fsspec` in `SparkDataSet` to support more filesystems.
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
 * Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
 * Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
 

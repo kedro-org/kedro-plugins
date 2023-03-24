@@ -121,6 +121,49 @@ class TestExcelDataSet:
         assert "storage_options" not in ds._save_args
         assert "storage_options" not in ds._load_args
 
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, excel_data_set, dummy_dataframe, nrows, expected):
+        """Test _preview returns the correct data structure."""
+        excel_data_set.save(dummy_dataframe)
+        previewed = excel_data_set._preview(nrows=nrows)
+        assert previewed == expected
+
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set ExcelDataSet\(.*\)"

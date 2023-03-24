@@ -195,8 +195,7 @@ class SnowparkTableDataSet(AbstractDataSet):
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
             logger.debug("No active snowpark session found. Creating")
-            session = sp.Session.builder.configs(
-                connection_parameters).create()
+            session = sp.Session.builder.configs(connection_parameters).create()
         return session
 
     def _load(self) -> sp.DataFrame:

@@ -4,6 +4,15 @@
 
 ## Bug fixes and other changes
 
+# Release 1.2.0:
+
+## Major features and improvements:
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
+* Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
+
+## Bug fixes and other changes
+* Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
+
 # Release 1.1.1:
 
 ## Bug fixes and other changes
@@ -20,7 +29,6 @@
 | ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 | `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
-* Use `fsspec` in `SparkDataSet` to support more filesystems.
 
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.

@@ -1,0 +1,14 @@
+name: Greet on PR and push
+
+on:
+  pull_request:
+    types: [opened, edited, ready_for_review]
+  push:
+    branches: [main]
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print greeting
+        run: echo "hello"

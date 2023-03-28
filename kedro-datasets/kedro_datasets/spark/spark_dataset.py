@@ -318,9 +318,9 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 glob_function = partial(_dbfs_glob, dbutils=dbutils)
                 exists_function = partial(_dbfs_exists, dbutils=dbutils)
         else:
-            fs = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
-            exists_function = fs.exists
-            glob_function = fs.glob
+            filesystem = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
+            exists_function = filesystem.exists
+            glob_function = filesystem.glob
 
         super().__init__(
             filepath=path,

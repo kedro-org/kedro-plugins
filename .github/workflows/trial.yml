@@ -1,0 +1,13 @@
+name: Print Message
+
+on:
+  push:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  print-message:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print a message
+      run: echo "Hello, World!"

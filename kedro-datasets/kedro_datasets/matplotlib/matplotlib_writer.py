@@ -1,5 +1,5 @@
 """``MatplotlibWriter`` saves one or more Matplotlib objects as image
-files to an underlying filesystem (e.g. local, S3, GCS)."""
+files to an underlying filesystem (e.g. local, S3, GCS). [TO REMOVE]"""
 
 import io
 from copy import deepcopy

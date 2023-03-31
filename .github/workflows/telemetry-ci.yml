@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - "kedro-telemetry/**"
+  pull_request:
+    paths:
+      - "kedro-telemetry/**"
+    types: [ opened, synchronize ]
 
 jobs:
   telemetry-test:

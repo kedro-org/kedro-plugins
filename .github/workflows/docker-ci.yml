@@ -4,7 +4,10 @@ on:
   push:
     paths:
       - "kedro-docker/**"
-
+  pull_request:
+    paths:
+      - "kedro-docker/**"
+    types: [ opened, synchronize ]
 jobs:
   docker-test:
     uses: ./.github/workflows/unit-test.yml

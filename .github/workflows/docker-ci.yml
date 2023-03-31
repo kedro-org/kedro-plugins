@@ -4,11 +4,9 @@ on:
   push:
     paths:
       - "kedro-docker/**"
-  pull_request:
-    types: [ opened, synchronize ]
 
 jobs:
-  datasets-test:
+  docker-test:
     uses: ./.github/workflows/unit-test.yml
     with:
       plugin: kedro-docker

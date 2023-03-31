@@ -5,6 +5,8 @@ on:
     paths:
       - "kedro-airflow/**"
   pull_request:
+    paths:
+      - "kedro-airflow/**"
     types: [opened, synchronize]
 
 jobs:

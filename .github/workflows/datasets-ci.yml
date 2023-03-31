@@ -4,8 +4,6 @@ on:
   push:
     paths:
       - "kedro-datasets/**"
-  pull_request:
-    types: [ opened, synchronize ]
 
 jobs:
   datasets-test:

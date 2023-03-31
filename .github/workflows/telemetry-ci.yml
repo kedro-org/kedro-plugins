@@ -4,11 +4,9 @@ on:
   push:
     paths:
       - "kedro-telemetry/**"
-  pull_request:
-    types: [ opened, synchronize ]
 
 jobs:
-  datasets-test:
+  telemetry-test:
     uses: ./.github/workflows/unit-test.yml
     with:
       plugin: kedro-telemetry

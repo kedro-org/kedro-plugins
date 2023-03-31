@@ -5,7 +5,7 @@ on:
     paths:
       - "kedro-docker/**"
   pull_request:
-    types: [ opened, synchronized ]
+    types: [ opened, synchronize ]
 
 jobs:
   datasets-test:

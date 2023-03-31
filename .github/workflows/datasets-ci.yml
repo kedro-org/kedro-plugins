@@ -5,7 +5,7 @@ on:
     paths:
       - "kedro-datasets/**"
   pull_request:
-    types: [opened, synchronized]
+    types: [ opened, synchronize ]
 
 jobs:
   datasets-test:

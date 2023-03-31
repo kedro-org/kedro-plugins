@@ -1,0 +1,11 @@
+name: Run tests on kedro-telemetry
+
+on:
+  push:
+    paths:
+      - "kedro-telemetry/**"
+jobs:
+  datasets-test:
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      plugin: kedro-telemetry

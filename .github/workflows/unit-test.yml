@@ -1,0 +1,78 @@
+name: Unit tests
+
+on:
+  workflow_call:
+    inputs:
+      plugin:
+        type: string
+jobs:
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main
+          pip install -r test_requirements.txt
+          pip freeze
+      - name: Run unit tests
+        run: make plugin=${{ inputs.plugin }} test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+            cd ${{ inputs.plugin }}
+            pip install git+https://github.com/kedro-org/kedro@main
+            pip install -r test_requirements.txt
+            pip freeze
+      - name: Install pre-commit hooks
+        run: |
+            cd ${{ inputs.plugin }}
+            pre-commit install --install-hooks
+            pre-commit install --hook-type pre-push
+      - name: Run linter
+        run: make plugin=${{ inputs.plugin }} lint
+
+  e2e-tests:
+    if: inputs.plugin != 'kedro-datasets'
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main
+          pip install -r test_requirements.txt
+          pip freeze
+      - name: Run end to end tests
+        run: make plugin=${{ inputs.plugin }} e2e-tests

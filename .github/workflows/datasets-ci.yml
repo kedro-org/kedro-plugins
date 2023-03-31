@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - "kedro-datasets/**"
+  pull_request:
+    types: [opened, synchronized]
+
 jobs:
   datasets-test:
     uses: ./.github/workflows/unit-test.yml

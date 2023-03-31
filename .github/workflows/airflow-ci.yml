@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - "kedro-airflow/**"
+  pull_request:
+    types: [opened, synchronized]
+
 jobs:
   airflow-test:
     uses: ./.github/workflows/unit-test.yml

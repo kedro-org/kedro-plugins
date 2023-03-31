@@ -1,0 +1,11 @@
+name: Run tests on kedro-docker
+
+on:
+  push:
+    paths:
+      - "kedro-docker/**"
+jobs:
+  datasets-test:
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      plugin: kedro-docker

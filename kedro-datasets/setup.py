@@ -13,7 +13,7 @@ PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
-POLARS = "polars~=0.15.16"
+POLARS = "polars~=0.16.0"
 
 with open("requirements.txt", "r", encoding="utf-8") as f:
     install_requires = [x.strip() for x in f if x.strip()]
@@ -63,6 +63,16 @@ pandas_require = {
     "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+polars_require = {
+    "polars.CSVDataSet": [POLARS],
+    "polars.GenericDataSet":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ]
+    }
+video_require = {
+    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
+}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
@@ -76,7 +86,7 @@ spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
-    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
+    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "deltalake >= 0.6.2"],
 }
 svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {

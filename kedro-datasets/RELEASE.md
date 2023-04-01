@@ -2,6 +2,10 @@
 
 ## Major features and improvements:
 
+* Added the following new datasets:
+
+| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
 ## Bug fixes and other changes
 
 # Release 1.2.0:
@@ -25,10 +29,10 @@
 
 * Added the following new datasets:
 
-| Type                                 | Description                                                                | Location                      |
-| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 | `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
+
+
 
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
@@ -39,12 +43,12 @@
 ## Bug fixes and other changes
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Relaxed PyArrow range in line with Pandas
-* Fixed outdated links to the dill package documentation
 
 # Release 1.0.1:
 
 ## Bug fixes and other changes
 * Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
+
 
 
 # Release 1.0.0:

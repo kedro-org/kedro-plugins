@@ -1,11 +1,12 @@
 import pytest
-from deltalake import DeltaTable
+from delta import DeltaTable
 from kedro.io import DataCatalog, DataSetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
 
@@ -36,9 +37,8 @@ class TestDeltaTableDataSet:
         delta_table = delta_ds.load()
 
         assert isinstance(delta_table, DeltaTable)
-        loaded_with_deltalake = delta_table.to_pandas()
-        loaded_with_spark = loaded_with_spark.toPandas()
-        assert len(loaded_with_spark) == len(loaded_with_deltalake)
+        loaded_with_deltalake = delta_table.toDF()
+        assert loaded_with_deltalake.exceptAll(loaded_with_spark).count() == 0
 
     def test_save(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
@@ -62,6 +62,15 @@ class TestDeltaTableDataSet:
         spark_delta_ds.save(sample_spark_df)
 
         assert delta_ds.exists()
+
+    def test_exists_raises_error(self, mocker):
+        delta_ds = DeltaTableDataSet(filepath="")
+        mocker.patch.object(
+            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
+        )
+
+        with pytest.raises(DataSetError, match="Other Exception"):
+            delta_ds.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async):

@@ -2,6 +2,10 @@
 
 ## Major features and improvements:
 
+* Added the following new datasets:
+
+| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
 ## Bug fixes and other changes
 
 # Release 1.2.0:
@@ -27,7 +31,7 @@
 
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 | `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
-| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
 
 
 ## Bug fixes and other changes

@@ -1,6 +1,7 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
+import datetime as dt
 import re
 from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn, Optional
@@ -22,6 +23,7 @@ KNOWN_PIP_INSTALL = {
     "psycopg2": "psycopg2",
     "mysqldb": "mysqlclient",
     "cx_Oracle": "cx_Oracle",
+    "mssql": "pyodbc",
 }
 
 DRIVER_ERROR_MESSAGE = """
@@ -322,6 +324,48 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
         >>> sql_data = data_set.load()
 
+    Example of usage for mssql:
+    ::
+
+
+        >>> credentials = {"server": "localhost", "port": "1433",
+        >>>                "database": "TestDB", "user": "SA",
+        >>>                "password": "StrongPassword"}
+        >>> def _make_mssql_connection_str(
+        >>>    server: str, port: str, database: str, user: str, password: str
+        >>> ) -> str:
+        >>>    import pyodbc  # noqa
+        >>>    from sqlalchemy.engine import URL  # noqa
+        >>>
+        >>>    driver = pyodbc.drivers()[-1]
+        >>>    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+        >>>                      f"ENCRYPT=yes;UID={user};PWD={password};"
+        >>>                       "TrustServerCertificate=yes;")
+        >>>    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        >>> connection_str = _make_mssql_connection_str(**credentials)
+        >>> data_set = SQLQueryDataSet(credentials={"con": connection_str},
+        >>>                            sql="SELECT TOP 5 * FROM TestTable;")
+        >>> df = data_set.load()
+
+    In addition, here is an example of a catalog with dates parsing:
+    ::
+
+
+        >>> mssql_dataset:
+        >>>    type: kedro_datasets.pandas.SQLQueryDataSet
+        >>>    credentials: mssql_credentials
+        >>>    sql: >
+        >>>       SELECT *
+        >>>       FROM  DateTable
+        >>>       WHERE date >= ? AND date <= ?
+        >>>       ORDER BY date
+        >>>    load_args:
+        >>>       params:
+        >>>        - ${begin}
+        >>>        - ${end}
+        >>>       index_col: date
+        >>>       parse_dates:
+        >>>         date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
     # using Any because of Sphinx but it should be
@@ -413,6 +457,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
+        if "mssql" in self._connection_str:
+            self.adapt_mssql_date_params()
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -456,3 +502,26 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _save(self, data: None) -> NoReturn:
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
+
+    # For mssql only
+    def adapt_mssql_date_params(self) -> None:
+        """We need to change the format of datetime parameters.
+        MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
+        Here, we also accept plain dates.
+        `pyodbc` does not accept named parameters, they must be provided as a list."""
+        params = self._load_args.get("params", [])
+        if not isinstance(params, list):
+            raise DataSetError(
+                "Unrecognized `params` format. It can be only a `list`, "
+                f"got {type(params)!r}"
+            )
+        new_load_args = []
+        for value in params:
+            try:
+                as_date = dt.date.fromisoformat(value)
+                new_val = dt.datetime.combine(as_date, dt.time.min)
+                new_load_args.append(new_val.strftime("%Y-%m-%dT%H:%M:%S"))
+            except (TypeError, ValueError):
+                new_load_args.append(value)
+        if new_load_args:
+            self._load_args["params"] = new_load_args

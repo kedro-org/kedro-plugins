@@ -1,17 +1,43 @@
+# Upcoming Release:
 
-# Upcoming Release 1.1.0:
+## Major features and improvements:
 
+## Bug fixes and other changes
+
+# Release 1.2.0:
+
+## Major features and improvements:
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
+* Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
+
+## Bug fixes and other changes
+* Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
+
+# Release 1.1.1:
+
+## Bug fixes and other changes
+
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
+
+# Release 1.1.0:
 
 ## Major features and improvements:
 
 * Added the following new datasets:
 
 | `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
 | `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 
 
 ## Bug fixes and other changes
+* Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
+* Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
 
+# Release 1.0.2:
+
+## Bug fixes and other changes
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Relaxed PyArrow range in line with Pandas
 
 # Release 1.0.1:

@@ -34,6 +34,7 @@ def fake_metadata(tmp_path):
         tmp_path / REPO_NAME,
         kedro_version,
         tmp_path / REPO_NAME / "src",
+        kedro_version,
     )
     return metadata
 

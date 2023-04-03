@@ -41,8 +41,8 @@ dask_require = {"dask.ParquetDataSet": ["dask[complete]", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
-matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
+matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
@@ -63,31 +63,33 @@ pandas_require = {
     "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
-polars_require = {"polars.CSVDataSet": [POLARS],}
-video_require = {
-    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
-}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
+polars_require = {"polars.CSVDataSet": [POLARS],}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
+snowflake_require = {
+    "snowflake.SnowparkTableDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow~=8.0"]
+}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
 }
-snowpark_require = {
-    "snowflake.SnowparkTableDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow~=8.0"]
-}
 svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
-tensorflow_required = {
+tensorflow_require = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serialises differently
-        "tensorflow~=2.0"
+        "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+        # https://developer.apple.com/metal/tensorflow-plugin/
+        "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ]
+}
+video_require = {
+    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
 }
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
@@ -107,35 +109,36 @@ extras_require = {
         "myst-parser~=0.17.2",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
+    "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
-    "polars": _collect_requirements(polars_require),
-    "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
+    "polars": _collect_requirements(polars_require),
     "redis": _collect_requirements(redis_require),
+    "snowflake": _collect_requirements(snowflake_require),
     "spark": _collect_requirements(spark_require),
     "svmlight": _collect_requirements(svmlight_require),
-    "tensorflow": _collect_requirements(tensorflow_required),
+    "tensorflow": _collect_requirements(tensorflow_require),
+    "video": _collect_requirements(video_require),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
     **biosequence_require,
     **dask_require,
     **geopandas_require,
-    **matplotlib_require,
     **holoviews_require,
+    **matplotlib_require,
     **networkx_require,
     **pandas_require,
     **pillow_require,
-    **polars_require,
-    **video_require,
     **plotly_require,
+    **polars_require,
+    **snowflake_require,
     **spark_require,
-    **snowpark_require,
     **svmlight_require,
-    **tensorflow_required,
+    **tensorflow_require,
+    **video_require,
     **yaml_require,
 }
 

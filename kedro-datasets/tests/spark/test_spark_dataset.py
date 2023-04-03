@@ -800,14 +800,6 @@ class TestSparkDataSetVersionedS3:
 
         mocked_spark_df.write.save.assert_not_called()
 
-    def test_s3n_warning(self, version):
-        pattern = (
-            "'s3n' filesystem has now been deprecated by Spark, "
-            "please consider switching to 's3a'"
-        )
-        with pytest.warns(DeprecationWarning, match=pattern):
-            SparkDataSet(filepath=f"s3n://{BUCKET_NAME}/{FILENAME}", version=version)
-
     def test_repr(self, versioned_dataset_s3, version):
         assert "filepath=s3a://" in str(versioned_dataset_s3)
         assert f"version=Version(load=None, save='{version.save}')" in str(

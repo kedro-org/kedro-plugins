@@ -1,0 +1,15 @@
+name: Run tests on kedro-docker
+
+on:
+  push:
+    paths:
+      - "kedro-docker/**"
+  pull_request:
+    paths:
+      - "kedro-docker/**"
+    types: [ synchronize ]
+jobs:
+  docker-test:
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      plugin: kedro-docker

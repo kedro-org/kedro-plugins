@@ -1,0 +1,16 @@
+name: Run tests on kedro-airflow
+
+on:
+  push:
+    paths:
+      - "kedro-airflow/**"
+  pull_request:
+    paths:
+      - "kedro-airflow/**"
+    types: [ synchronize ]
+
+jobs:
+  airflow-test:
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      plugin: kedro-airflow

@@ -14,7 +14,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
@@ -219,7 +219,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
         """Given a connection string, create singleton connection
-        to be used across all instances of `SQLTableDataSet` that
+        to be used across all instances of ``SQLTableDataSet`` that
         need to connect to the same source.
         """
         if connection_str in cls.engines:
@@ -254,10 +254,10 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         data.to_sql(con=engine, **self._save_args)
 
     def _exists(self) -> bool:
-        eng = self.engines[self._connection_str]  # type: ignore
+        engine = self.engines[self._connection_str]  # type: ignore
+        insp = inspect(engine)
         schema = self._load_args.get("schema", None)
-        exists = self._load_args["table_name"] in eng.table_names(schema)
-        return exists
+        return insp.has_table(self._load_args["table_name"], schema)
 
 
 class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):

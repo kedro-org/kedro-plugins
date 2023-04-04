@@ -5,9 +5,23 @@ The `kedro-telemetry` plugin asks for consent to collect command run data. Howev
 
 <img width="730" alt="Screenshot 2023-04-04 at 16 17 43" src="https://user-images.githubusercontent.com/43755008/229840293-fea91403-b02d-4221-9167-71d3a6196cc5.png">
 
+Here is an example of what was collected. 
+
+|Description|What we received|
+|-|-|
+|_(Hashed)_ Package name| c7cd944c28cd888904f3efc2345198507...|
+|_(Hashed)_ Project name| a6392d359362dc9827cf8688c9d634520e...|
+|`kedro` project version| 0.18.4|
+|`kedro-telemetry` version| 0.2.3|
+|Python version| 3.8.10 (default, Jun  2 2021, 10:49:15) |
+|Operating system used| darwin |
+| Number of datasets | 7 |
+| Number of pipelines | 2 |
+| Number of nodes | 12 |
+
 A fix must go beyond just releasing a bugfix for `kedro-telemetry`. Additionally, we will:
 
-- Delete user data collected from `kedro-telemetry >= 0.2.2`.
+- Delete user data collected from `kedro-telemetry >= 0.2.2 <0.2.4`.
 - Host a team retrospective and will specify post-mortem actions
 
 > If you think of anything else we should prioritise then [let us know on Slack](https://slack.kedro.org/). And we also need to thank the contributor who flagged this: [@melvinkokxw](https://github.com/melvinkokxw) [helped identify this bug](https://github.com/kedro-org/kedro/issues/2492) and we're grateful to him because he helped give enough context for us to address this.

@@ -9,7 +9,7 @@ name = "kedro-datasets"
 here = path.abspath(path.dirname(__file__))
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
-PANDAS = "pandas~=1.3"
+PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -37,7 +37,7 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -57,8 +57,8 @@ pandas_require = {
     ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
-    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
-    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2", "pyodbc~=4.0"],
+    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0"],
+    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }

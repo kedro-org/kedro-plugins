@@ -1,7 +1,8 @@
 # Upcoming Release:
 
 ## Major features and improvements:
-* Added pandas 2.0.0 support.
+* Added pandas 2.0 support.
+* Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
 
 ## Bug fixes and other changes
 

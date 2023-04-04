@@ -29,7 +29,7 @@ KNOWN_PIP_INSTALL = {
 DRIVER_ERROR_MESSAGE = """
 A module/driver is missing when connecting to your SQL server. SQLDataSet
  supports SQLAlchemy drivers. Please refer to
- https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases
+ https://docs.sqlalchemy.org/en/20/core/engines.html#supported-databases
  for more information.
 \n\n
 """
@@ -83,7 +83,7 @@ def _get_sql_alchemy_missing_error() -> DataSetError:
     return DataSetError(
         "The SQL dialect in your connection is not supported by "
         "SQLAlchemy. Please refer to "
-        "https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases "
+        "https://docs.sqlalchemy.org/en/20/core/engines.html#supported-databases "
         "for more information."
     )
 
@@ -97,7 +97,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     string either in ``credentials`` (see the example code snippet below) or in
     ``load_args`` and ``save_args``. Connection string formats supported by
     SQLAlchemy can be found here:
-    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+    https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
 
     ``SQLTableDataSet`` modifies the save parameters and stores
     the data with no index. This is designed to make load and save methods
@@ -174,19 +174,19 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 through credentials. It overwrites `con` parameter in
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_table.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
             save_args: Provided to underlying pandas ``to_sql`` function along
                 with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
 
         Raises:
@@ -268,7 +268,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     a compatible connection string either in ``credentials`` (see the example
     code snippet below) or in ``load_args``. Connection string formats supported
     by SQLAlchemy can be found here:
-    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+    https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
 
     It does not support save method so it is a read only data set.
     To save data to a SQL server use ``SQLTableDataSet``.
@@ -390,13 +390,13 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 through credentials. It overwrites `con` parameter in
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_query``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested keys
@@ -408,7 +408,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:
-                https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Connection.execution_options
                 Note that this is not a standard argument supported by pandas API, but could be
                 useful for handling large datasets.
 

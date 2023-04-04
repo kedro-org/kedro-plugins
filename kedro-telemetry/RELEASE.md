@@ -21,7 +21,7 @@ Here is an example of what was collected.
 
 A fix must go beyond just releasing a bugfix for `kedro-telemetry`. Additionally, we will:
 
-- Delete user data collected from `kedro-telemetry >= 0.2.2 <0.2.4`.
+- Delete user data collected from `kedro-telemetry >= 0.2.2, <0.2.4`.
 - Host a team retrospective and will specify post-mortem actions
 
 > If you think of anything else we should prioritise then [let us know on Slack](https://slack.kedro.org/). And we also need to thank the contributor who flagged this: [@melvinkokxw](https://github.com/melvinkokxw) [helped identify this bug](https://github.com/kedro-org/kedro/issues/2492) and we're grateful to him because he helped give enough context for us to address this.

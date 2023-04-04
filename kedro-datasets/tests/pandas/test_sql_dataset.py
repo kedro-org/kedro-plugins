@@ -127,16 +127,20 @@ class TestSQLTableDataSet:
 
     def test_table_exists(self, mocker, table_data_set):
         """Test `exists` method invocation"""
-        mocker.patch("sqlalchemy.engine.reflection.Inspector.has_table")
+        mocker.patch(
+            "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
+        )
         assert not table_data_set.exists()
-        self._assert_sqlalchemy_called_once(TABLE_NAME)
+        self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
     @pytest.mark.parametrize(
         "table_data_set", [{"load_args": {"schema": "ingested"}}], indirect=True
     )
     def test_table_exists_schema(self, mocker, table_data_set):
         """Test `exists` method invocation with DB schema provided"""
-        mocker.patch("sqlalchemy.engine.reflection.Inspector.has_table")
+        mocker.patch(
+            "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
+        )
         assert not table_data_set.exists()
         self._assert_sqlalchemy_called_once(TABLE_NAME, "ingested")
 
@@ -146,7 +150,7 @@ class TestSQLTableDataSet:
             "sqlalchemy.engine.reflection.Inspector.has_table", return_value=True
         )
         assert table_data_set.exists()
-        self._assert_sqlalchemy_called_once(TABLE_NAME)
+        self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
     def test_load_sql_params(self, mocker, table_data_set):
         """Test `load` method invocation"""

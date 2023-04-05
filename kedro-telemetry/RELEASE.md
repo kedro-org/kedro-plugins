@@ -5,7 +5,7 @@ The `kedro-telemetry` plugin asks for consent to collect command run data. Howev
 
 <img width="730" alt="Screenshot 2023-04-04 at 16 17 43" src="https://user-images.githubusercontent.com/43755008/229840293-fea91403-b02d-4221-9167-71d3a6196cc5.png">
 
-Here is an example of what was collected. 
+Here is an example of what was collected.
 
 |Description|What we received|
 |-|-|

@@ -1,10 +1,25 @@
 # Upcoming Release:
 
 ## Major features and improvements:
+* Added pandas 2.0 support.
+* Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
 
 ## Bug fixes and other changes
 
-* Fixed problematic docstrings causing RTD builds on Kedro to fail.
+# Release 1.2.0:
+
+## Major features and improvements:
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
+* Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
+
+## Bug fixes and other changes
+* Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
+
+# Release 1.1.1:
+
+## Bug fixes and other changes
+
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
 # Release 1.1.0:
 
@@ -25,13 +40,13 @@
 
 ## Bug fixes and other changes
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
-* Relaxed PyArrow range in line with Pandas
-* Fixed outdated links to the dill package documentation
+* Relaxed PyArrow range in line with pandas.
+* Fixed outdated links to the dill package documentation.
 
 # Release 1.0.1:
 
 ## Bug fixes and other changes
-* Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
+* Fixed docstring formatting in `VideoDataSet` that was causing the documentation builds to fail.
 
 
 # Release 1.0.0:

@@ -126,9 +126,9 @@ class ManagedTable:  # pylint: disable=R0902
         """
         full_table_location = None
         if self.catalog and self.database and self.table:
-            full_table_location = f"{self.catalog}.{self.database}.{self.table}"
+            full_table_location = f"`{self.catalog}`.`{self.database}`.`{self.table}`"
         elif self.table:
-            full_table_location = f"{self.database}.{self.table}"
+            full_table_location = f"`{self.database}`.`{self.table}`"
         return full_table_location
 
     def schema(self) -> StructType:

@@ -5,6 +5,7 @@
 * Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
 
 ## Bug fixes and other changes
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
 # Release 1.2.0:
 

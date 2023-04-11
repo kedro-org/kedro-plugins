@@ -1,3 +1,26 @@
+[project]
+name = "kedro-datasets"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
+requires-python = ">=3.7, <3.11"
+license = {text = "Apache Software License (Apache 2.0)"}
+dynamic = ["readme", "version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"
+Documentation = "https://docs.kedro.org"
+Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[tool.setuptools.packages.find]
+include = ["kedro_datasets*"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro_datasets.__version__"}
+dependencies = {file = "requirements.txt"}
+
 [tool.black]
 
 [tool.isort]

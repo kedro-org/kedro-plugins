@@ -1,4 +1,4 @@
-name: Run tests on kedro-datasets
+name: Run checks on kedro-datasets
 
 on:
   push:

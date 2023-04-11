@@ -1,4 +1,4 @@
-name: Run tests on kedro-airflow
+name: Run checks on kedro-airflow
 
 on:
   push:

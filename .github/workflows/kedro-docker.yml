@@ -10,6 +10,6 @@ on:
     types: [ synchronize ]
 jobs:
   docker-test:
-    uses: ./.github/workflows/unit-test.yml
+    uses: ./.github/workflows/check-plugin.yml
     with:
       plugin: kedro-docker

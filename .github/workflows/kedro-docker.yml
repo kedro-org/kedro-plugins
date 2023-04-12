@@ -8,6 +8,7 @@ on:
     paths:
       - "kedro-docker/**"
     types: [ synchronize ]
+
 jobs:
   docker-test:
     uses: ./.github/workflows/check-plugin.yml

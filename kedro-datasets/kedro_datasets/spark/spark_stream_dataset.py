@@ -1,4 +1,5 @@
 """SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
+import os
 from typing import Any, Dict
 from copy import deepcopy
 import yaml
@@ -101,13 +102,15 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     @staticmethod
     def _get_spark(self):
-        # read spark configuration from spark yml file and create a spark context
-        with open("conf/base/spark.yml") as f:
-            self.parameters = yaml.load(f, Loader=SafeLoader)
-        self.spark_conf = SparkConf().setAll(self.parameters.items())
-
-        # Initialise the spark session
-        return SparkSession.builder.config(conf=self.spark_conf).getOrCreate()
+        spark_conf_path = "conf/base/spark.yml"
+        if os.path.exists(spark_conf_path):
+            with open(spark_conf_path) as f:
+                self.parameters = yaml.load(f, Loader=SafeLoader)
+            self.spark_conf = SparkConf().setAll(self.parameters.items())
+            spark = SparkSession.builder.config(conf=self.spark_conf).getOrCreate()
+        else:
+            spark = SparkSession.builder.getOrCreate()
+        return spark
 
     def _load(self) -> DataFrame:
         """Loads data from filepath.

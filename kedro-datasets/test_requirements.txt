@@ -48,7 +48,7 @@ pytest~=7.2
 redis~=4.1
 requests-mock~=1.6
 requests~=2.20
-s3fs>=0.3.0, <0.5  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
+s3fs>=2021.04, <2024.1  # Upper bound set arbitrarily, to be reassessed in early 2024
 scikit-learn~=1.0.2
 scipy~=1.7.3
 snowflake-snowpark-python~=1.0.0; python_version == '3.8'

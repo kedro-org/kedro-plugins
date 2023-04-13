@@ -1,13 +1,13 @@
 """SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
 from typing import Any, Dict
-
-import pyspark
+from copy import deepcopy
 import yaml
 from kedro.io import AbstractDataSet
 from pyspark import SparkConf
-from pyspark.sql import SparkSession
+from pathlib import PurePosixPath
+from pyspark.sql import SparkSession, DataFrame
 from yaml.loader import SafeLoader
-
+from kedro_datasets.spark.spark_dataset import _split_filepath
 
 class SparkStreamingDataSet(AbstractDataSet):
     """``SparkStreamingDataSet`` loads data into Spark Streaming Dataframe objects.
@@ -35,13 +35,16 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     """
 
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+
     def __init__(
         self,
         filepath: str = "",
         file_format: str = "",
-        save_args: Dict[str, str] = {},
-        load_args: Dict[str, str] = {},
-    ):
+        save_args: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+    ) -> None:
         """Creates a new instance of SparkStreamingDataSet.
 
         Args:
@@ -74,23 +77,46 @@ class SparkStreamingDataSet(AbstractDataSet):
             "kafka"
         ]  # message broker formats, such as Kafka, Kinesis, and others, require different methods for loading and saving.
 
+        fs_prefix, filepath = _split_filepath(filepath)
+
+        self._fs_prefix = fs_prefix
+        self._filepath = PurePosixPath(filepath)
+
+        # Handle default load and save arguments
+        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
+    def _describe(self) -> Dict[str, Any]:
+        """Returns a dict that describes attributes of the dataset."""
+        return {
+            "filepath": self._fs_prefix + str(self._filepath),
+            "file_format": self._file_format,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
+
+    @staticmethod
+    def _get_spark(self):
         # read spark configuration from spark yml file and create a spark context
         with open("conf/base/spark.yml") as f:
             self.parameters = yaml.load(f, Loader=SafeLoader)
         self.spark_conf = SparkConf().setAll(self.parameters.items())
 
         # Initialise the spark session
-        self.spark_session_conf = SparkSession.builder.config(conf=self.spark_conf)
-        self.spark = self.spark_session_conf.getOrCreate()
+        return SparkSession.builder.config(conf=self.spark_conf).getOrCreate()
 
-    def _load(self) -> pyspark.sql.DataFrame:
+    def _load(self) -> DataFrame:
         """Loads data from filepath.
         If the connector type is kafka then no file_path is required
 
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        input_constructor = self.spark.readStream.format(self.file_format).options(
+        input_constructor = self._get_spark().readStream.format(self.file_format).options(
             **self._load_args
         )
         return (
@@ -100,7 +126,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             else input_constructor.load(self._filepath_)
         )
 
-    def _save(self, data: pyspark.sql.DataFrame) -> None:
+    def _save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
 
         Args:
@@ -123,6 +149,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             .start()
         )
 
-    def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes attributes of the dataset."""
-        return None
+
+
+
+

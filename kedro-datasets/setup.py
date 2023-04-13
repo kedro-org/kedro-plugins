@@ -6,7 +6,7 @@ from setuptools import setup
 PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.5"
+S3FS = "s3fs>=2021.04, <2024.1"  # Upper bound set arbitrarily, to be reassessed in early 2024
 POLARS = "polars~=0.15.16"
 
 

@@ -19,7 +19,7 @@ class SparkStreamingDataSet(AbstractDataSet):
     .. code-block:: yaml
 
         raw.new_inventory:
-            type: streaming.extras.datasets.spark_streaming_dataset.SparkStreamingDataSet
+            type: spark.SparkStreamingDataSet
             filepath: data/01_raw/stream/inventory/
             file_format: json
 

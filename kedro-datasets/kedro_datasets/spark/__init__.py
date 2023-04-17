@@ -12,3 +12,5 @@ with suppress(ImportError):
     from .spark_jdbc_dataset import SparkJDBCDataSet
 with suppress(ImportError):
     from .deltatable_dataset import DeltaTableDataSet
+with suppress(ImportError):
+    from .spark_streaming_dataset import SparkStreamingDataSet

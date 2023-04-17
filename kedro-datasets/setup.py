@@ -7,7 +7,7 @@ PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
-POLARS = "polars~=0.15.16"
+POLARS = "polars~=0.17.0"
 
 
 def _collect_requirements(requires):

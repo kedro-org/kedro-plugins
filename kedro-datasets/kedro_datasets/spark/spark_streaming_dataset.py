@@ -2,13 +2,14 @@
 import os
 from typing import Any, Dict
 from copy import deepcopy
+from pathlib import PurePosixPath
 import yaml
 from kedro.io import AbstractDataSet
 from pyspark import SparkConf
-from pathlib import PurePosixPath
 from pyspark.sql import SparkSession, DataFrame
 from yaml.loader import SafeLoader
 from kedro_datasets.spark.spark_dataset import _split_filepath
+
 
 class SparkStreamingDataSet(AbstractDataSet):
     """``SparkStreamingDataSet`` loads data into Spark Streaming Dataframe objects.
@@ -71,12 +72,10 @@ class SparkStreamingDataSet(AbstractDataSet):
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
         """
         self._filepath_ = filepath
-        self.file_format = file_format
+        self._file_format = file_format
         self._save_args = save_args
         self._load_args = load_args
-        self.output_format = [
-            "kafka"
-        ]  # message broker formats, such as Kafka, Kinesis, and others, require different methods for loading and saving.
+        self.output_format = ["kafka"]
 
         fs_prefix, filepath = _split_filepath(filepath)
 
@@ -101,13 +100,15 @@ class SparkStreamingDataSet(AbstractDataSet):
         }
 
     @staticmethod
-    def _get_spark(self):
+    def _get_spark():
         spark_conf_path = "conf/base/spark.yml"
         if os.path.exists(spark_conf_path):
-            with open(spark_conf_path) as f:
-                self.parameters = yaml.load(f, Loader=SafeLoader)
-            self.spark_conf = SparkConf().setAll(self.parameters.items())
-            spark = SparkSession.builder.config(conf=self.spark_conf).getOrCreate()
+            with open(
+                spark_conf_path, encoding="utf-8"
+            ) as File:  # pylint: disable=invalid-name
+                parameters = yaml.load(File, Loader=SafeLoader)
+            spark_conf = SparkConf().setAll(parameters.items())
+            spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
         else:
             spark = SparkSession.builder.getOrCreate()
         return spark
@@ -119,12 +120,14 @@ class SparkStreamingDataSet(AbstractDataSet):
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        input_constructor = self._get_spark().readStream.format(self.file_format).options(
-            **self._load_args
+        input_constructor = (
+            self._get_spark()
+            .readStream.format(self._file_format)
+            .options(**self._load_args)
         )
         return (
             input_constructor.load()
-            if self.file_format
+            if self._file_format
             in self.output_format  # if the connector type is message broker
             else input_constructor.load(self._filepath_)
         )
@@ -137,10 +140,10 @@ class SparkStreamingDataSet(AbstractDataSet):
 
         """
 
-        output_constructor = data.writeStream.format(self.file_format)
+        output_constructor = data.writeStream.format(self._file_format)
 
         # for message brokers path is not needed
-        if self.file_format not in self.output_format:
+        if self._file_format not in self.output_format:
             output_constructor = output_constructor.option("path", self._filepath_)
 
         (
@@ -151,8 +154,3 @@ class SparkStreamingDataSet(AbstractDataSet):
             .options(**self._save_args)
             .start()
         )
-
-
-
-
-

@@ -20,6 +20,8 @@ TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 
 TEST_HEADERS = {"key": "value"}
 
+TEST_SAVE_DATA = [json.dumps({"key1": "info1", "key2": "info2"})]
+
 
 @pytest.mark.parametrize("method", POSSIBLE_METHODS)
 class TestAPIDataSet:
@@ -85,13 +87,55 @@ class TestAPIDataSet:
         with pytest.raises(DataSetError, match="Failed to connect"):
             api_data_set.load()
 
-    def test_read_only_mode(self, method):
-        """
-        Saving is disabled on the data set.
-        """
-        api_data_set = APIDataSet(url=TEST_URL, method=method)
-        with pytest.raises(DataSetError, match="is a read only data set type"):
-            api_data_set.save({})
+    def test_successful_save(self, requests_mocker, method):
+        # When we want to save some data on a server
+        # Given an APIDataSet class
+        # Then check we get a response
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=method,
+            params=TEST_PARAMS,
+            headers=TEST_HEADERS,
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            status_code=requests.codes.ok,
+        )
+        response = api_data_set._save(TEST_SAVE_DATA)
+
+        assert isinstance(response, requests.Response)  # pylance marks as unreachable ?
+
+    def test_successful_save_with_json(self, requests_mocker, method):
+        # When we want to save with json parameters
+        # Given an APIDataSet class
+        # Then check we get a response
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=method,
+            json=TEST_JSON_RESPONSE_DATA,
+            headers=TEST_HEADERS,
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL,
+            headers=TEST_HEADERS,
+            text=json.dumps(TEST_JSON_RESPONSE_DATA),
+        )
+        response = api_data_set._save(TEST_SAVE_DATA)
+
+        assert isinstance(response, requests.Response)
+
+    # def test_read_only_mode(self, method):
+    #     """
+    #     Saving is disabled on the data set.
+    #     """
+    #     # here we should maybe modify for the chunk size is None to throw error
+    #     # in some sense no chunk --> no save method
+    #     api_data_set = APIDataSet(url=TEST_URL, method=method)
+    #     with pytest.raises(DataSetError, match="is a read only data set type"):
+    #         api_data_set.save({})
 
     def test_exists_http_error(self, requests_mocker, method):
         """

@@ -18,7 +18,7 @@ dependencies = [
 dynamic = ["readme", "version"]
 
 [project.urls]
-Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow"
 Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/README.md"
 Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
@@ -36,7 +36,6 @@ kedro_airflow = ["kedro_airflow/airflow_dag_template.j2"]
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro_airflow.__version__"}
-dependencies = {file = "requirements.txt"}
 
 [tool.pytest.ini_options]
 addopts = """

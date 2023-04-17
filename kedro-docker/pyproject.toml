@@ -27,8 +27,11 @@ docker = "kedro_docker.plugin:commands"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["kedro_docker"]
 zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["kedro_docker*"]
+namespaces = true  # To include the template files
 
 [tool.setuptools.package-data]
 kedro_docker = [

@@ -1,7 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, Iterable, List, NoReturn, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import requests
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -63,6 +63,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
         credentials: Union[Iterable[str], AuthBase] = None,
+        chunk_size: int = 100,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -85,6 +86,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
             credentials: same as ``auth``. Allows specifying ``auth`` secrets in
                 credentials.yml.
+            chunk_size: only used by save method, size of each individual packet sent to server
 
         Raises:
             ValueError: if both ``credentials`` and ``auth`` are specified.
@@ -109,6 +111,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "json": json,
             "timeout": timeout,
         }
+        self.chunk_size = chunk_size
 
     def _describe(self) -> Dict[str, Any]:
         return {**self._request_args}
@@ -127,10 +130,40 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _save(self, data: None) -> NoReturn:
-        raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
+    def _execute_save_request(
+        self, json_data: List[Dict[str, Any]]
+    ) -> requests.Response:
+        # compute nb of chunks to send data to endpoint
+        n_chunks = len(json_data) // self.chunk_size + 1
+        print("n_chunks", n_chunks, "len of data", json_data)
+        for i in range(n_chunks):
+            print("here")
+            # are we sure we need to do this at each iteration ?
+            save_requests_args = self._describe()
+
+            del save_requests_args["data"]  # delete key from save_requests_args
+            send_data = json_data[i * self.chunk_size : (i + 1) * self.chunk_size]
+            save_requests_args["json"] = send_data
+            # same error catching as load method
+            try:
+                response = requests.request(**self._request_args)
+                print(response, response.raise_for_status())
+                response.raise_for_status()
+
+            except requests.exceptions.HTTPError as exc:
+                raise DataSetError("Failed to fetch data", exc) from exc
+
+            except OSError as exc:
+                raise DataSetError("Failed to connect to the remote server") from exc
+        print(response)
+        return response
+
+    def _save(self, data: Any) -> requests.Response:
+        # check here that we are correctly sending JSON format as an argument ?
+        # also in this case the expected format would be a list of JSON files
+        # should we keep this ? maybe too specific
+        return self._execute_save_request(json_data=data)
 
     def _exists(self) -> bool:
         response = self._execute_request()
-
         return response.ok

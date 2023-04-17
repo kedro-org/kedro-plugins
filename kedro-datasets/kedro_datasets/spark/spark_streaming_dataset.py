@@ -24,7 +24,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             file_format: json
 
         int.new_inventory:
-            type: streaming.extras.datasets.spark_streaming_dataset.SparkStreamingDataSet
+            type: spark.SparkStreamingDataSet
             filepath: data/02_intermediate/inventory/
             file_format: csv
             save_args:

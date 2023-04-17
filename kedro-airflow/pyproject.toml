@@ -1,3 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro-airflow"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
+requires-python = ">=3.7, <3.11"
+license = {text = "Apache Software License (Apache 2.0)"}
+dependencies = [
+    "kedro>=0.17.5",
+    "python-slugify>=4.0",
+    "semver~=2.10",  # Needs to be at least 2.10.0 to get VersionInfo.match
+]
+dynamic = ["readme", "version"]
+
+[project.urls]
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"
+Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/README.md"
+Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.entry-points."kedro.project_commands"]
+airflow = "kedro_airflow.plugin:commands"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["kedro_airflow"]
+zip-safe = false
+
+[tool.setuptools.package-data]
+kedro_airflow = ["kedro_airflow/airflow_dag_template.j2"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro_airflow.__version__"}
+dependencies = {file = "requirements.txt"}
+
+[tool.pytest.ini_options]
+addopts = """
+    --cov-report xml:coverage.xml
+    --cov-report term-missing
+    --cov kedro_airflow
+    --cov tests
+    --no-cov-on-fail
+    -ra"""
+
 [tool.black]
 exclude=".*template.py"
 

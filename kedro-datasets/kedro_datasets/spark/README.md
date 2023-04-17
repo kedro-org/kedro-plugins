@@ -1,6 +1,6 @@
 # Spark Streaming
 
-``SparkStreamingDatasets`` loads and saves data to spark streaming DatafFrames.
+``SparkStreamingDataSet`` loads and saves data to streaming DataFrames.
 See [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) for details.
 
 To work with multiple streaming nodes, 2 hook are required for: 

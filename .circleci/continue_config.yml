@@ -213,6 +213,13 @@ jobs:
           python_version: <<parameters.python_version>>
           plugin: <<parameters.plugin>>
       - run:
+          name: Install OpenJDK
+          command: |
+            sudo apt-get update
+            sudo apt-get install default-jdk -y
+            echo $JAVA_HOME
+            java -version
+      - run:
           name: Run e2e tests
           command: make plugin=<<parameters.plugin>> e2e-tests
 

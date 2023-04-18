@@ -147,7 +147,7 @@ class TestAPIDataSet:
             status_code=requests.codes.FORBIDDEN,
         )
 
-        with pytest.raises(DataSetError, match="Failed to fetch data"):
+        with pytest.raises(DataSetError, match="Failed to send data"):
             api_data_set.save(TEST_SAVE_DATA)
 
     def test_save_socket_error(self, requests_mocker, method):
@@ -156,7 +156,9 @@ class TestAPIDataSet:
         )
         requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
 
-        with pytest.raises(DataSetError, match="Failed to connect"):
+        with pytest.raises(
+            DataSetError, match="Failed to connect to the remote server"
+        ):
             api_data_set.save(TEST_SAVE_DATA)
 
     def test_exists_http_error(self, requests_mocker, method):

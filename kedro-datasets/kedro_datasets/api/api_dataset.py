@@ -1,7 +1,6 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-import json as json_  # make pylint happy
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Union
 
@@ -81,7 +80,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
         Args:
-            url: The API URL endpoint. method: The Method of the request, GET, POST, PUT,
+            url: The API URL endpoint.
+            method: The Method of the request, GET, POST, PUT,
             DELETE, HEAD, etc... data: The request payload, used for POST, PUT, etc
             requests
                 https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
@@ -101,9 +101,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             credentials: same as ``auth``. Allows specifying ``auth`` secrets in
                 credentials.yml.
             save_args: Options for saving data on server. Includes all parameters used
-            during load method.
-                        Adds an optional parameter, ``chunk_size`` which determines the
-                        size of the package sent at each request.
+                during load method. Adds an optional parameter, ``chunk_size`` which determines the
+                size of the package sent at each request.
         Raises:
             ValueError: if both ``credentials`` and ``auth`` are specified.
         """
@@ -173,10 +172,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         return response
 
     def _save(self, data: Any) -> requests.Response:
-        try:
-            json_.loads(data)
-        except ValueError:
-            print("Could not load data as json")
         return self._execute_save_request(json_data=data)
 
     def _exists(self) -> bool:

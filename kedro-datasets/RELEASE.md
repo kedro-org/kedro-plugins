@@ -3,6 +3,7 @@
 ## Major features and improvements:
 * Added pandas 2.0 support.
 * Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
+* Added a save method to the APIDataSet
 
 ## Bug fixes and other changes
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
@@ -28,10 +29,10 @@
 
 * Added the following new datasets:
 
-| Type                                 | Description                                                                | Location                      |
-| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
-| `polars.CSVDataSet` | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
-| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
+| Type                             | Description                                                                                                           | Location                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars`    |
+| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake.          | `kedro_datasets.snowflake` |
 
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.

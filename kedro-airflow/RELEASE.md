@@ -1,5 +1,6 @@
 # Upcoming release 0.5.2
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
+* Migrate all project metadata to static `pyproject.toml`.
 
 # Release 0.5.1
 * Added additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template.

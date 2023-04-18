@@ -1,34 +1,13 @@
-import re
-from codecs import open
 from itertools import chain
-from os import path
 
-from setuptools import find_packages, setup
-
-name = "kedro-datasets"
-here = path.abspath(path.dirname(__file__))
+from setuptools import setup
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
-PANDAS = "pandas~=1.3"
+PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 POLARS = "polars~=0.15.16"
-
-with open("requirements.txt", "r", encoding="utf-8") as f:
-    install_requires = [x.strip() for x in f if x.strip()]
-
-with open("test_requirements.txt", "r", encoding="utf-8") as f:
-    tests_require = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
-
-# get package version
-package_name = name.replace("-", "_")
-with open(path.join(here, package_name, "__init__.py"), encoding="utf-8") as f:
-    version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
-
-# Get the long description from the README file
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
-    readme = f.read()
 
 
 def _collect_requirements(requires):
@@ -37,7 +16,7 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -57,8 +36,8 @@ pandas_require = {
     ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
-    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
-    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2", "pyodbc~=4.0"],
+    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0"],
+    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
@@ -76,7 +55,7 @@ spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
-    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
+    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
 svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
@@ -145,17 +124,5 @@ extras_require = {
 extras_require["all"] = _collect_requirements(extras_require)
 
 setup(
-    name=name,
-    version=version,
-    description="Kedro-Datasets is where you can find all of Kedro's data connectors.",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    url="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets",
-    install_requires=install_requires,
-    tests_require=tests_require,
-    author="Kedro",
-    python_requires=">=3.7, <3.11",
-    license="Apache Software License (Apache 2.0)",
-    packages=find_packages(exclude=["tests*"]),
     extras_require=extras_require,
 )

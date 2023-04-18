@@ -1,3 +1,6 @@
+# Upcoming release
+* Migrate all project metadata to static `pyproject.toml`.
+
 # Release 0.2.4
 * Added consent checking for collecting project statistics.
 

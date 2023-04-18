@@ -1,6 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+import json as json_  # make pylint happy
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Union
 
@@ -149,7 +150,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _execute_save_request(
+    def _execute_save_with_chunks(
         self,
         json_data: List[Dict[str, Any]],
     ) -> requests.Response:
@@ -171,7 +172,28 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 raise DataSetError("Failed to connect to the remote server") from exc
         return response
 
+    def _execute_save_request(self, json_data: Any) -> requests.Response:
+        self._save_args["json"] = json_data
+
+        try:
+            response = requests.request(**self._request_args)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as exc:
+            raise DataSetError("Failed to send data", exc) from exc
+
+        except OSError as exc:
+            raise DataSetError("Failed to connect to the remote server") from exc
+        return response
+
     def _save(self, data: Any) -> requests.Response:
+        # case where we have a list of json data
+        if isinstance(data, list):
+            return self._execute_save_with_chunks(json_data=data)
+        try:
+            json_.loads(data)
+        except TypeError:
+            data = json_.dumps(data)
+
         return self._execute_save_request(json_data=data)
 
     def _exists(self) -> bool:

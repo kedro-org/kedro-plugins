@@ -127,9 +127,15 @@ class TestAPIDataSet:
             headers=TEST_HEADERS,
             text=json.dumps(TEST_JSON_RESPONSE_DATA),
         )
-        response = api_data_set._save(TEST_SAVE_DATA)
+        response_list = api_data_set._save(TEST_SAVE_DATA)
 
-        assert isinstance(response, requests.Response)
+        assert isinstance(response_list, requests.Response)
+
+        response_dict = api_data_set._save({"item1": "key1"})
+        assert isinstance(response_dict, requests.Response)
+
+        response_json = api_data_set._save(TEST_SAVE_DATA[0])
+        assert isinstance(response_json, requests.Response)
 
     def test_save_http_error(self, requests_mocker, method):
         api_data_set = APIDataSet(

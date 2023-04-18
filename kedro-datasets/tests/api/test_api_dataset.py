@@ -105,12 +105,14 @@ class TestAPIDataSet:
         )
         response = api_data_set._save(TEST_SAVE_DATA)
 
-        assert isinstance(response, requests.Response)  # pylance marks as unreachable ?
+        assert isinstance(response, requests.Response)
 
     def test_successful_save_with_json(self, requests_mocker, method):
-        # When we want to save with json parameters
-        # Given an APIDataSet class
-        # Then check we get a response
+        """
+        When we want to save with json parameters
+        Given an APIDataSet class
+        Then check we get a response
+        """
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=method,
@@ -127,15 +129,33 @@ class TestAPIDataSet:
 
         assert isinstance(response, requests.Response)
 
-    # def test_read_only_mode(self, method):
-    #     """
-    #     Saving is disabled on the data set.
-    #     """
-    #     # here we should maybe modify for the chunk size is None to throw error
-    #     # in some sense no chunk --> no save method
-    #     api_data_set = APIDataSet(url=TEST_URL, method=method)
-    #     with pytest.raises(DataSetError, match="is a read only data set type"):
-    #         api_data_set.save({})
+    def test_save_http_error(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=method,
+            params=TEST_PARAMS,
+            headers=TEST_HEADERS,
+            save_args={"method": "POST", "chunk_size": 2},
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text="Nope, not found",
+            status_code=requests.codes.FORBIDDEN,
+        )
+
+        with pytest.raises(DataSetError, match="Failed to fetch data"):
+            api_data_set.save(TEST_SAVE_DATA)
+
+    def test_save_socket_error(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
+
+        with pytest.raises(DataSetError, match="Failed to connect"):
+            api_data_set.save(TEST_SAVE_DATA)
 
     def test_exists_http_error(self, requests_mocker, method):
         """

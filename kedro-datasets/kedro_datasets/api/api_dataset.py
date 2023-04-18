@@ -50,6 +50,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>>     }
         >>> )
         >>> data = data_set.load()
+
+    Example of saving data with a REST API.
     """
 
     DEFAULT_SAVE_ARGS = {
@@ -79,15 +81,16 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
         Args:
-            url: The API URL endpoint.
-            method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
-            data: The request payload, used for POST, PUT, etc requests
+            url: The API URL endpoint. method: The Method of the request, GET, POST, PUT,
+            DELETE, HEAD, etc... data: The request payload, used for POST, PUT, etc
+            requests
                 https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
             params: The url parameters of the API.
                 https://requests.readthedocs.io/en/latest/user/quickstart/#passing-parameters-in-urls
             headers: The HTTP headers.
                 https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
-            auth: Anything ``requests`` accepts. Normally it's either ``('login', 'password')``,
+            auth: Anything ``requests`` accepts. Normally it's either ``('login',
+            'password')``,
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases. Any
                 iterable will be cast to a tuple.
             json: The request payload, used for POST, PUT, etc requests, passed in
@@ -97,8 +100,10 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
             credentials: same as ``auth``. Allows specifying ``auth`` secrets in
                 credentials.yml.
-            chunk_size: only used by save method, size of each individual packet sent to server
-
+            save_args: Options for saving data on server. Includes all parameters used
+            during load method.
+                        Adds an optional parameter, ``chunk_size`` which determines the
+                        size of the package sent at each request.
         Raises:
             ValueError: if both ``credentials`` and ``auth`` are specified.
         """

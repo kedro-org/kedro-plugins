@@ -88,9 +88,11 @@ class TestAPIDataSet:
             api_data_set.load()
 
     def test_successful_save(self, requests_mocker, method):
-        # When we want to save some data on a server
-        # Given an APIDataSet class
-        # Then check we get a response
+        """
+        When we want to save some data on a server
+        Given an APIDataSet class
+        Then check we get a response
+        """
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=method,

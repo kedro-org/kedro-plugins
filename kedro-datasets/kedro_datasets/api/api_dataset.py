@@ -1,6 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+import json as json_  # make pylint happy
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Union
 
@@ -51,7 +52,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> )
         >>> data = data_set.load()
 
-    Example of saving data with a REST API.
     """
 
     DEFAULT_SAVE_ARGS = {
@@ -154,34 +154,29 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         self,
         json_data: List[Dict[str, Any]],
     ) -> requests.Response:
-        # retrieve parameters to execute request
         chunk_size = self._save_args["chunk_size"]
-
-        print(self._save_args)
-        # compute nb of chunks to send data to endpoint
         n_chunks = len(json_data) // chunk_size + 1
+
         for i in range(n_chunks):
-            # are we sure we need to do this at each iteration ?
             send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
 
             self._save_args["json"] = send_data
-            # same error catching as load method
             try:
                 response = requests.request(**self._request_args)
-                print(response, response.raise_for_status())
                 response.raise_for_status()
 
             except requests.exceptions.HTTPError as exc:
-                raise DataSetError("Failed to fetch data", exc) from exc
+                raise DataSetError("Failed to send data", exc) from exc
 
             except OSError as exc:
                 raise DataSetError("Failed to connect to the remote server") from exc
         return response
 
     def _save(self, data: Any) -> requests.Response:
-        # check here that we are correctly sending JSON format as an argument ?
-        # also in this case the expected format would be a list of JSON files
-        # should we keep this ? maybe too specific
+        try:
+            json_.loads(data)
+        except ValueError:
+            print("Could not load data as json")
         return self._execute_save_request(json_data=data)
 
     def _exists(self) -> bool:

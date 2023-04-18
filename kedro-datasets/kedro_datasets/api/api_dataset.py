@@ -1,6 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Union
 
 import requests
@@ -51,7 +52,17 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> data = data_set.load()
     """
 
+    DEFAULT_SAVE_ARGS = {
+        "method": "POST",
+        "params": None,
+        "headers": None,
+        "auth": None,
+        "json": None,
+        "timeout": 60,
+        "chunk_size": 100,
+    }
     # pylint: disable=too-many-arguments
+
     def __init__(
         self,
         url: str,
@@ -63,7 +74,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
         credentials: Union[Iterable[str], AuthBase] = None,
-        chunk_size: int = 100,
+        save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -93,6 +104,11 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         """
         super().__init__()
 
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+
+        if save_args is not None:
+            self._save_args.update(save_args)
+
         if credentials is not None and auth is not None:
             raise ValueError("Cannot specify both auth and credentials.")
 
@@ -111,7 +127,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "json": json,
             "timeout": timeout,
         }
-        self.chunk_size = chunk_size
 
     def _describe(self) -> Dict[str, Any]:
         return {**self._request_args}
@@ -131,19 +146,20 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         return self._execute_request()
 
     def _execute_save_request(
-        self, json_data: List[Dict[str, Any]]
+        self,
+        json_data: List[Dict[str, Any]],
     ) -> requests.Response:
-        # compute nb of chunks to send data to endpoint
-        n_chunks = len(json_data) // self.chunk_size + 1
-        print("n_chunks", n_chunks, "len of data", json_data)
-        for i in range(n_chunks):
-            print("here")
-            # are we sure we need to do this at each iteration ?
-            save_requests_args = self._describe()
+        # retrieve parameters to execute request
+        chunk_size = self._save_args["chunk_size"]
 
-            del save_requests_args["data"]  # delete key from save_requests_args
-            send_data = json_data[i * self.chunk_size : (i + 1) * self.chunk_size]
-            save_requests_args["json"] = send_data
+        print(self._save_args)
+        # compute nb of chunks to send data to endpoint
+        n_chunks = len(json_data) // chunk_size + 1
+        for i in range(n_chunks):
+            # are we sure we need to do this at each iteration ?
+            send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
+
+            self._save_args["json"] = send_data
             # same error catching as load method
             try:
                 response = requests.request(**self._request_args)
@@ -155,7 +171,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
             except OSError as exc:
                 raise DataSetError("Failed to connect to the remote server") from exc
-        print(response)
         return response
 
     def _save(self, data: Any) -> requests.Response:

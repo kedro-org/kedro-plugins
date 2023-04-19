@@ -125,7 +125,8 @@ jobs:
           cd ${{ inputs.plugin }}
           pip install git+https://github.com/kedro-org/kedro@main
           pip install -r test_requirements.txt
-          pip freeze
+      - name: pip freeze
+        run: pip freeze
       - name: Run end to end tests
         # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`
         # isn't supported on Github Actions. See https://github.com/actions/runner/issues/241

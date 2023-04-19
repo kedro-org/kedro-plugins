@@ -1,0 +1,16 @@
+name: Run checks on kedro-docker
+
+on:
+  push:
+    paths:
+      - "kedro-docker/**"
+  pull_request:
+    paths:
+      - "kedro-docker/**"
+    types: [ synchronize ]
+
+jobs:
+  docker-test:
+    uses: ./.github/workflows/check-plugin.yml
+    with:
+      plugin: kedro-docker

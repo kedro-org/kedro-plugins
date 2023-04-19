@@ -1,0 +1,16 @@
+name: Run checks on kedro-datasets
+
+on:
+  push:
+    paths:
+      - "kedro-datasets/**"
+  pull_request:
+    paths:
+      - "kedro-datasets/**"
+    types: [ synchronize ]
+
+jobs:
+  datasets-test:
+    uses: ./.github/workflows/check-plugin.yml
+    with:
+      plugin: kedro-datasets

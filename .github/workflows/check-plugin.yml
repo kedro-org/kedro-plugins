@@ -1,4 +1,4 @@
-name: Running tests
+name: Running tests and linter
 
 on:
   workflow_call:

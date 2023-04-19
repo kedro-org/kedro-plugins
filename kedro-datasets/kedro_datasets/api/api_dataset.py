@@ -14,27 +14,18 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
         usda:
-          type: api.APIDataSet
-          url: https://quickstats.nass.usda.gov
-          params:
-            key: SOME_TOKEN,
-            format: JSON,
-            commodity_desc: CORN,
-            statisticcat_des: YIELD,
-            agg_level_desc: STATE,
-            year: 2000
+          type: api.APIDataSet url: https://quickstats.nass.usda.gov params:
+            key: SOME_TOKEN, format: JSON, commodity_desc: CORN, statisticcat_des: YIELD,
+            agg_level_desc: STATE, year: 2000
 
-    Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
-    ::
+    Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_: ::
 
         >>> from kedro_datasets.api import APIDataSet
         >>>
@@ -52,6 +43,35 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> )
         >>> data = data_set.load()
 
+    ``APIDataSet`` can also be used to save some output on some remote server using
+    HTTP(S) methods.
+
+        >>> import pandas as pd
+        >>> example_table = pd.DataFrame({"col1":["val1", "val2"], "col2":["val3", "val4"]}
+
+    Here we initialise our APIDataSet with the correct parameters to make requests
+    towards the configured remote server.
+
+        >>> data_set = APIDataSet(
+                url = "url_of_remote_server",
+                save_args = {"method":"POST",
+                            "chunk_size":1}
+        )
+    On initialization, we can specify all the necessary parameters in the save args
+    dictionary. The default HTTP(S) method is POST but all other methods are supported.
+    Two important parameters to keep in mind are timeout and chunk_size. ``Timeout``
+    defines how long  our program waits for a response after a request. ``Chunk_size``, is
+    only used if the input of save method is a list. It will, divide the request into
+    chunks of size ``chunk_size``. For example, here we will send two requests each
+    containing one row of our example DataFrame.
+
+        >>> data_to_save = example_table.to_dict(orient="records")
+        >>> data_set.save(data_to_save)
+
+    If the data passed to the save method is not a list, ``APIDataSet`` will check if
+    it can be loaded as JSON. If true, it will send the data unchanged in a single
+    request. Otherwise, the ``_save`` method will try to dump the data in JSON format and
+    execute the request.
     """
 
     DEFAULT_SAVE_ARGS = {

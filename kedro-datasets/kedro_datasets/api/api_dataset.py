@@ -174,7 +174,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
     def _execute_save_request(self, json_data: Any) -> requests.Response:
         self._save_args["json"] = json_data
-
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()

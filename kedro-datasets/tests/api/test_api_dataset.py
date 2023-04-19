@@ -156,6 +156,9 @@ class TestAPIDataSet:
         with pytest.raises(DataSetError, match="Failed to send data"):
             api_data_set.save(TEST_SAVE_DATA)
 
+        with pytest.raises(DataSetError, match="Failed to send data"):
+            api_data_set.save(TEST_SAVE_DATA[0])
+
     def test_save_socket_error(self, requests_mocker, method):
         api_data_set = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
@@ -166,6 +169,11 @@ class TestAPIDataSet:
             DataSetError, match="Failed to connect to the remote server"
         ):
             api_data_set.save(TEST_SAVE_DATA)
+
+        with pytest.raises(
+            DataSetError, match="Failed to connect to the remote server"
+        ):
+            api_data_set.save(TEST_SAVE_DATA[0])
 
     def test_exists_http_error(self, requests_mocker, method):
         """

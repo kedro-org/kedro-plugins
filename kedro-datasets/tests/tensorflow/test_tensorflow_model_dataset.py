@@ -11,7 +11,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs import S3FileSystem
 
 
-# In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
+# In this test module, we wrap tensorflow and TensorFlowModelDataSet imports into a module-scoped
 # fixtures to avoid them being evaluated immediately when a new test process is spawned.
 # Specifically:
 #   - ParallelRunner spawns a new subprocess.
@@ -34,9 +34,9 @@ def tf():
 
 @pytest.fixture(scope="module")
 def tensorflow_model_dataset():
-    from kedro_datasets.tensorflow import TensorFlowModelDataset
+    from kedro_datasets.tensorflow import TensorFlowModelDataSet
 
-    return TensorFlowModelDataset
+    return TensorFlowModelDataSet
 
 
 @pytest.fixture
@@ -134,7 +134,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
-class TestTensorFlowModelDataset:
+class TestTensorFlowModelDataSet:
     """No versioning passed to creator"""
 
     def test_save_and_load(self, tf_model_dataset, dummy_tf_base_model, dummy_x_test):
@@ -152,7 +152,7 @@ class TestTensorFlowModelDataset:
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
         pattern = (
-            r"Failed while loading data from data set TensorFlowModelDataset\(.*\)"
+            r"Failed while loading data from data set TensorFlowModelDataSet\(.*\)"
         )
         with pytest.raises(DataSetError, match=pattern):
             tf_model_dataset.load()
@@ -277,8 +277,8 @@ class TestTensorFlowModelDataset:
         assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
-class TestTensorFlowModelDatasetVersioned:
-    """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
+class TestTensorFlowModelDataSetVersioned:
+    """Test suite with versioning argument passed into TensorFlowModelDataSet creator"""
 
     @pytest.mark.parametrize(
         "load_version,save_version",
@@ -340,7 +340,7 @@ class TestTensorFlowModelDatasetVersioned:
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for TensorFlowModelDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -362,7 +362,7 @@ class TestTensorFlowModelDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version '{load_version}' "
-            rf"for TensorFlowModelDataset\(.+\)"
+            rf"for TensorFlowModelDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
@@ -383,7 +383,7 @@ class TestTensorFlowModelDatasetVersioned:
 
     def test_no_versions(self, versioned_tf_model_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for TensorFlowModelDataset\(.+\)"
+        pattern = r"Did not find any versions for TensorFlowModelDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_tf_model_dataset.load()
 
@@ -408,7 +408,7 @@ class TestTensorFlowModelDatasetVersioned:
         self, tf_model_dataset, versioned_tf_model_dataset, dummy_tf_base_model
     ):
         """Check behavior when attempting to save a versioned dataset on top of an
-        already existing (non-versioned) dataset. Note: because TensorFlowModelDataset
+        already existing (non-versioned) dataset. Note: because TensorFlowModelDataSet
         saves to a directory even if non-versioned, an error is not expected."""
         tf_model_dataset.save(dummy_tf_base_model)
         assert tf_model_dataset.exists()

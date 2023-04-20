@@ -19,7 +19,7 @@ from kedro.io.core import (
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
 
-class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
+class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
@@ -31,7 +31,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     .. code-block:: yaml
 
         tensorflow_model:
-          type: tensorflow.TensorFlowModelDataset
+          type: tensorflow.TensorFlowModelDataSet
           filepath: data/06_models/tensorflow_model.h5
           load_args:
             compile: False
@@ -45,11 +45,11 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro_datasets.tensorflow import TensorFlowModelDataset
+        >>> from kedro_datasets.tensorflow import TensorFlowModelDataSet
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> data_set = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
+        >>> data_set = TensorFlowModelDataSet("data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>
@@ -73,7 +73,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``TensorFlowModelDataset``.
+        """Creates a new instance of ``TensorFlowModelDataSet``.
 
         Args:
             filepath: Filepath in POSIX format to a TensorFlow model directory prefixed with a

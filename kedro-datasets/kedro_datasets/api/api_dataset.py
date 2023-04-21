@@ -4,10 +4,9 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 from typing import Any, Dict, List, NoReturn, Tuple, Union
 
 import requests
+from kedro.io.core import AbstractDataSet, DataSetError
 from requests import Session, sessions
 from requests.auth import AuthBase
-
-from kedro.io.core import AbstractDataSet, DataSetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets

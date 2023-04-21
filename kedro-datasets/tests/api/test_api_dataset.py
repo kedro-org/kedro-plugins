@@ -4,10 +4,10 @@ import socket
 
 import pytest
 import requests
+from kedro.io.core import DataSetError
 from requests.auth import HTTPBasicAuth
 
 from kedro_datasets.api import APIDataSet
-from kedro.io.core import DataSetError
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 
@@ -177,7 +177,6 @@ class TestAPIDataSet:
         ],
     )
     def test_certs(self, requests_mock, cert_in, cert_out):
-
         api_data_set = APIDataSet(
             url=TEST_URL, method=TEST_METHOD, load_args={"cert": cert_in}
         )

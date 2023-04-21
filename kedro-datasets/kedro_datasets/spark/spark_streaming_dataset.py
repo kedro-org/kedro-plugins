@@ -6,9 +6,10 @@ from pathlib import PurePosixPath
 import yaml
 from kedro.io import AbstractDataSet
 from pyspark import SparkConf
+from pyspark.errors.exceptions.captured import AnalysisException
 from pyspark.sql import SparkSession, DataFrame
 from yaml.loader import SafeLoader
-from kedro_datasets.spark.spark_dataset import _split_filepath
+from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
 
 class SparkStreamingDataSet(AbstractDataSet):
@@ -154,3 +155,14 @@ class SparkStreamingDataSet(AbstractDataSet):
             .options(**self._save_args)
             .start()
         )
+    def _exists(self) -> bool:
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+
+        try:
+            self._get_spark().read.load(path=load_path, format="delta")
+        except AnalysisException as exception:
+            if "is not a Delta table" in exception.desc:
+                return False
+            raise
+
+        return True

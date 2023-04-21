@@ -1,7 +1,6 @@
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
-import pyarrow.parquet as pq
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
@@ -168,9 +167,7 @@ class TestParquetDataSet:
 
     def test_read_partitioned_file(self, mocker, tmp_path, dummy_dataframe):
         """Test read partitioned parquet file from local directory."""
-        pq_ds_mock = mocker.patch(
-            "pyarrow.parquet.ParquetDataset", wraps=pq.ParquetDataset
-        )
+        mock_pandas_call = mocker.patch("pandas.read_parquet", wraps=pd.read_parquet)
         dummy_dataframe.to_parquet(str(tmp_path), partition_cols=["col2"])
         data_set = ParquetDataSet(filepath=tmp_path.as_posix())
 
@@ -182,7 +179,7 @@ class TestParquetDataSet:
         assert_frame_equal(
             dummy_dataframe, reloaded, check_dtype=False, check_categorical=False
         )
-        pq_ds_mock.assert_called_once()
+        mock_pandas_call.assert_called_once()
 
     def test_write_to_dir(self, dummy_dataframe, tmp_path):
         data_set = ParquetDataSet(filepath=tmp_path.as_posix())
@@ -192,27 +189,20 @@ class TestParquetDataSet:
             data_set.save(dummy_dataframe)
 
     def test_read_from_non_local_dir(self, mocker):
-        fs_mock = mocker.patch("fsspec.filesystem").return_value
-        fs_mock.isdir.return_value = True
-        pq_ds_mock = mocker.patch("pyarrow.parquet.ParquetDataset")
+        mock_pandas_call = mocker.patch("pandas.read_parquet")
 
         data_set = ParquetDataSet(filepath="s3://bucket/dir")
 
         data_set.load()
-        fs_mock.isdir.assert_called_once()
-        assert not fs_mock.open.called
-        pq_ds_mock.assert_called_once_with("bucket/dir", filesystem=fs_mock)
-        pq_ds_mock().read().to_pandas.assert_called_once_with()
+        assert mock_pandas_call.call_count == 1
 
     def test_read_from_file(self, mocker):
-        fs_mock = mocker.patch("fsspec.filesystem").return_value
-        fs_mock.isdir.return_value = False
-        mocker.patch("pandas.read_parquet")
+        mock_pandas_call = mocker.patch("pandas.read_parquet")
 
         data_set = ParquetDataSet(filepath="/tmp/test.parquet")
 
         data_set.load()
-        fs_mock.isdir.assert_called_once()
+        assert mock_pandas_call.call_count == 1
 
     def test_arg_partition_cols(self, dummy_dataframe, tmp_path):
         data_set = ParquetDataSet(

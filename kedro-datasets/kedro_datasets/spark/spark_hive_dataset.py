@@ -73,6 +73,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         write_mode: str = "errorifexists",
         table_pk: List[str] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -88,6 +89,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 on a list of column names.
                 Other `HiveOptions` can be found here:
                 https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables
+            metadata: Any arbitrary user metadata.
 
         Note:
             For users leveraging the `upsert` functionality,
@@ -118,6 +120,8 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
             self._save_args.update(save_args)
         self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

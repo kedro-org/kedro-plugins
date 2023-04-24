@@ -77,6 +77,7 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``FeatherDataSet`` pointing to a concrete
         filepath.
@@ -102,6 +103,7 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary user metadata.
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -113,6 +115,8 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         self._protocol = protocol
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

@@ -74,6 +74,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         credentials: Union[Dict[str, Any], Credentials] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataSet``.
 
@@ -96,6 +97,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
                 All defaults are preserved, but "progress_bar", which is set to False.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: When ``load_args['location']`` and ``save_args['location']``
@@ -124,6 +126,8 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
             credentials=self._credentials,
             location=self._save_args.get("location"),
         )
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {
@@ -214,6 +218,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataSet``.
 
@@ -235,6 +240,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
                 SQL query from filepath.
             filepath: A path to a file with a sql query statement.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: When ``sql`` and ``filepath`` parameters are either both empty
@@ -282,6 +288,8 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)

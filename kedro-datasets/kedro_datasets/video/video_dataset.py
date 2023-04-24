@@ -19,9 +19,10 @@ from kedro.io.core import AbstractDataSet, get_protocol_and_path
 class SlicedVideo:
     """A representation of slices of other video types"""
 
-    def __init__(self, video, slice_indexes):
+    def __init__(self, video, slice_indexes, metadata: Dict[str, Any] = None):
         self.video = video
         self.indexes = range(*slice_indexes.indices(len(video)))
+        self.metadata = metadata
 
     def __getitem__(self, index: Union[int, slice]) -> PIL.Image.Image:
         if isinstance(index, slice):
@@ -67,10 +68,11 @@ class AbstractVideo(abc.Sequence):
 class FileVideo(AbstractVideo):
     """A video object read from a file"""
 
-    def __init__(self, filepath: str) -> None:
+    def __init__(self, filepath: str, metadata: Dict[str, Any] = None) -> None:
         self._filepath = filepath
         self._cap = cv2.VideoCapture(filepath)
         self._n_frames = self._get_length()
+        self.metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -126,13 +128,14 @@ class SequenceVideo(AbstractVideo):
     """A video object read from an indexable sequence of frames"""
 
     def __init__(
-        self, frames: Sequence[PIL.Image.Image], fps: float, fourcc: str = "mp4v"
+        self, frames: Sequence[PIL.Image.Image], fps: float, fourcc: str = "mp4v", metadata: Dict[str, Any] = None,
     ) -> None:
         self._n_frames = len(frames)
         self._frames = frames
         self._fourcc = fourcc
         self._size = frames[0].size
         self._fps = fps
+        self.metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -161,6 +164,7 @@ class GeneratorVideo(AbstractVideo):
         length,
         fps: float,
         fourcc: str = "mp4v",
+        metadata: Dict[str, Any] = None,
     ) -> None:
         self._n_frames = length
         first = next(frames)
@@ -168,6 +172,7 @@ class GeneratorVideo(AbstractVideo):
         self._fourcc = fourcc
         self._size = first.size
         self._fps = fps
+        self.metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -264,6 +269,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         fourcc: Optional[str] = "mp4v",
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of VideoDataSet to load / save video data for given filepath.
 
@@ -276,6 +282,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary user metadata.
         """
         # parse the path and protocol (e.g. file, http, s3, etc.)
         protocol, path = get_protocol_and_path(filepath)
@@ -286,6 +293,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         _credentials = deepcopy(credentials) or {}
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+        self.metadata = metadata
 
     def _load(self) -> AbstractVideo:
         """Loads data from the video file.

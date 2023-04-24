@@ -98,6 +98,7 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
         version: Optional[Version] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -110,6 +111,8 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

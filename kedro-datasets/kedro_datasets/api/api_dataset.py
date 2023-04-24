@@ -110,7 +110,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "auth": auth,
             "json": json,
             "timeout": timeout,
-            "metadata": metadata
         }
 
         self.metadata = metadata

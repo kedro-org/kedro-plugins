@@ -68,6 +68,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         redis_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet``. This loads/saves data from/to
         a Redis database while deserialising/serialising. Supports custom backends to
@@ -109,6 +110,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
                 https://redis-py.readthedocs.io/en/stable/connections.html?highlight=from_url#redis.Redis.from_url
                 All defaults are preserved, except `url`, which is set to `redis://127.0.0.1:6379`.
                 You could also specify the url through the env variable ``REDIS_URL``.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             ValueError: If ``backend`` does not satisfy the `pickle` interface.
@@ -133,6 +135,8 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         self._backend = backend
 
         self._key = key
+
+        self.metadata = metadata
 
         _redis_args = deepcopy(redis_args) or {}
         self._redis_from_url_args = _redis_args.pop("from_url_args", {})

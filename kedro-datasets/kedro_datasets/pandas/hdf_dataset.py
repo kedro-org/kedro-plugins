@@ -69,6 +69,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -100,6 +101,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set `wb` when saving.
+            metadata: Any arbitrary user metadata.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -112,6 +114,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

@@ -244,6 +244,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkDataSet``.
 
@@ -275,12 +276,14 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 ``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.
                 Optional keyword arguments passed to ``hdfs.client.InsecureClient``
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
+            metadata: Any arbitrary user metadata.
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
         path = PurePosixPath(filepath)
         exists_function = None
         glob_function = None
+        self.metadata = metadata
 
         if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
             logger.warning(

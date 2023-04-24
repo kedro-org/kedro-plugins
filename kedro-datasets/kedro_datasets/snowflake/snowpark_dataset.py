@@ -108,6 +108,7 @@ class SnowparkTableDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SnowparkTableDataSet``.
 
@@ -128,6 +129,7 @@ class SnowparkTableDataSet(AbstractDataSet):
             credentials: A dictionary with a snowpark connection string.
                 To find all supported arguments, see here:
                 https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect
+            metadata: Any arbitrary user metadata.
         """
 
         if not table_name:
@@ -167,6 +169,8 @@ class SnowparkTableDataSet(AbstractDataSet):
         )
         self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

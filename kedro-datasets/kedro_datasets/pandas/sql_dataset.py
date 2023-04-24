@@ -162,6 +162,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         credentials: Dict[str, Any],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataSet``.
 
@@ -188,6 +189,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: When either ``table_name`` or ``con`` is empty.
@@ -215,6 +217,8 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._connection_str = credentials["con"]
         self.create_connection(self._connection_str)
+
+        self.metadata = metadata
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -380,6 +384,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
         execution_options: Optional[Dict[str, Any]] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -411,6 +416,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 https://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options
                 Note that this is not a standard argument supported by pandas API, but could be
                 useful for handling large datasets.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
@@ -440,6 +446,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             if load_args is not None
             else default_load_args
         )
+
+        self.metadata = metadata
 
         # load sql query from file
         if sql:

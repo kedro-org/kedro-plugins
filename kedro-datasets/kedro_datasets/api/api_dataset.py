@@ -63,6 +63,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
         credentials: Union[Iterable[str], AuthBase] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -85,6 +86,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
             credentials: same as ``auth``. Allows specifying ``auth`` secrets in
                 credentials.yml.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             ValueError: if both ``credentials`` and ``auth`` are specified.
@@ -108,7 +110,10 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "auth": auth,
             "json": json,
             "timeout": timeout,
+            "metadata": metadata
         }
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {**self._request_args}

@@ -3,11 +3,16 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 import json as json_  # make pylint happy
 from copy import deepcopy
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import requests
 from kedro.io.core import AbstractDataSet, DataSetError
+from requests import Session, sessions
 from requests.auth import AuthBase
+
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
@@ -27,19 +32,22 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_: ::
 
-        >>> from kedro_datasets.api import APIDataSet
+        >>> from kedro.extras.datasets.api import APIDataSet
         >>>
         >>>
         >>> data_set = APIDataSet(
         >>>     url="https://quickstats.nass.usda.gov",
-        >>>     params={
-        >>>         "key": "SOME_TOKEN",
-        >>>         "format": "JSON",
-        >>>         "commodity_desc": "CORN",
-        >>>         "statisticcat_des": "YIELD",
-        >>>         "agg_level_desc": "STATE",
-        >>>         "year": 2000
-        >>>     }
+        >>>     load_args={
+        >>>         "params": {
+        >>>             "key": "SOME_TOKEN",
+        >>>             "format": "JSON",
+        >>>             "commodity_desc": "CORN",
+        >>>             "statisticcat_des": "YIELD",
+        >>>             "agg_level_desc": "STATE",
+        >>>             "year": 2000
+        >>>         }
+        >>>     },
+        >>>     credentials=("username", "password")
         >>> )
         >>> data = data_set.load()
 
@@ -89,76 +97,65 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         self,
         url: str,
         method: str = "GET",
-        data: Any = None,
-        params: Dict[str, Any] = None,
-        headers: Dict[str, Any] = None,
-        auth: Union[Iterable[str], AuthBase] = None,
-        json: Union[List, Dict[str, Any]] = None,
-        timeout: int = 60,
-        credentials: Union[Iterable[str], AuthBase] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
         Args:
             url: The API URL endpoint.
-            method: The Method of the request, GET, POST, PUT,
-            DELETE, HEAD, etc... data: The request payload, used for POST, PUT, etc
-            requests
-                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
-            params: The url parameters of the API.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#passing-parameters-in-urls
-            headers: The HTTP headers.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
-            auth: Anything ``requests`` accepts. Normally it's either ``('login',
-            'password')``,
-                or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases. Any
-                iterable will be cast to a tuple.
-            json: The request payload, used for POST, PUT, etc requests, passed in
-                to the json kwarg in the requests object.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
-            timeout: The wait time in seconds for a response, defaults to 1 minute.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
-            credentials: same as ``auth``. Allows specifying ``auth`` secrets in
-                credentials.yml.
-            save_args: Options for saving data on server. Includes all parameters used
-                during load method. Adds an optional parameter, ``chunk_size`` which determines the
-                size of the package sent at each request.
+            method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
+            load_args: Additional parameters to be fed to requests.request.
+                https://requests.readthedocs.io/en/latest/api/#requests.request
+            credentials: Allows specifying secrets in credentials.yml.
+                Expected format is ``('login', 'password')`` if given as a tuple or list.
+                An ``AuthBase`` instance can be provided for more complex cases.
         Raises:
-            ValueError: if both ``credentials`` and ``auth`` are specified.
+            ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are specified.
         """
         super().__init__()
 
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        self._load_args = load_args or {}
+        self._load_args_auth = self._load_args.pop("auth", None)
 
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        if credentials is not None and auth is not None:
+        if credentials is not None and self._load_args_auth is not None:
             raise ValueError("Cannot specify both auth and credentials.")
 
-        auth = credentials or auth
+        self._auth = credentials or self._load_args_auth
 
-        if isinstance(auth, Iterable):
-            auth = tuple(auth)
+        if "cert" in self._load_args:
+            self._load_args["cert"] = self._convert_type(self._load_args["cert"])
+
+        if "timeout" in self._load_args:
+            self._load_args["timeout"] = self._convert_type(self._load_args["timeout"])
 
         self._request_args: Dict[str, Any] = {
             "url": url,
             "method": method,
-            "data": data,
-            "params": params,
-            "headers": headers,
-            "auth": auth,
-            "json": json,
-            "timeout": timeout,
+            "auth": self._convert_type(self._auth),
+            **self._load_args,
         }
 
-    def _describe(self) -> Dict[str, Any]:
-        return {**self._request_args}
+    @staticmethod
+    def _convert_type(value: Any):
+        """
+        From the Data Catalog, iterables are provided as Lists.
+        However, for some parameters in the Python requests library,
+        only Tuples are allowed.
+        """
+        if isinstance(value, List):
+            return tuple(value)
+        return value
 
-    def _execute_request(self) -> requests.Response:
+    def _describe(self) -> Dict[str, Any]:
+        # prevent auth from logging
+        request_args_cp = self._request_args.copy()
+        request_args_cp.pop("auth", None)
+        return request_args_cp
+
+    def _execute_request(self, session: Session) -> requests.Response:
         try:
-            response = requests.request(**self._request_args)
+            response = session.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
             raise DataSetError("Failed to fetch data", exc) from exc
@@ -170,50 +167,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _execute_save_with_chunks(
-        self,
-        json_data: List[Dict[str, Any]],
-    ) -> requests.Response:
-        chunk_size = self._save_args["chunk_size"]
-        n_chunks = len(json_data) // chunk_size + 1
-
-        for i in range(n_chunks):
-            send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
-
-            self._save_args["json"] = send_data
-            try:
-                response = requests.request(**self._request_args)
-                response.raise_for_status()
-
-            except requests.exceptions.HTTPError as exc:
-                raise DataSetError("Failed to send data", exc) from exc
-
-            except OSError as exc:
-                raise DataSetError("Failed to connect to the remote server") from exc
-        return response
-
-    def _execute_save_request(self, json_data: Any) -> requests.Response:
-        self._save_args["json"] = json_data
-        try:
-            response = requests.request(**self._request_args)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as exc:
-            raise DataSetError("Failed to send data", exc) from exc
-
-        except OSError as exc:
-            raise DataSetError("Failed to connect to the remote server") from exc
-        return response
-
-    def _save(self, data: Any) -> requests.Response:
-        # case where we have a list of json data
-        if isinstance(data, list):
-            return self._execute_save_with_chunks(json_data=data)
-        try:
-            json_.loads(data)
-        except TypeError:
-            data = json_.dumps(data)
-
-        return self._execute_save_request(json_data=data)
+    def _save(self, data: None) -> NoReturn:
+        raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:
         response = self._execute_request()

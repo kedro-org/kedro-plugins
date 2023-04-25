@@ -55,6 +55,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> data = data_set.load()
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         url: str,

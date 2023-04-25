@@ -55,8 +55,7 @@ scikit-learn~=1.0.2
 scipy~=1.7.3
 snowflake-snowpark-python~=1.0.0; python_version == '3.8'
 SQLAlchemy>=1.4, <3.0  # The `Inspector.has_table()` method replaces the `Engine.has_table()` method in version 1.4.
-tables~=3.6.0; platform_system == "Windows" and python_version < '3.9'
-tables~=3.6; platform_system != "Windows"
+tables~=3.7
 tensorflow-macos~=2.0; platform_system == "Darwin" and platform_machine == "arm64"
 tensorflow~=2.0; platform_system != "Darwin" or platform_machine != "arm64"
 triad>=0.6.7, <1.0

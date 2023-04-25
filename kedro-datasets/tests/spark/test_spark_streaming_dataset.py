@@ -1,12 +1,27 @@
+import json
 import pytest
 import time
 from pyspark.sql import SparkSession
-from kedro_datasets.spark import SparkStreamingDataSet,SparkDataSet
+from kedro_datasets.pandas import ParquetDataSet
+from kedro.io.core import DataSetError
+from kedro_datasets.spark.spark_dataset import SparkDataSet
+from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 
+
+def sample_schema(schema_path):
+    with open(schema_path, encoding='utf-8') as f:
+        try:
+            return StructType.fromJson(json.loads(f.read()))
+        except Exception as exc:
+            raise DataSetError(
+                f"Contents of 'schema.filepath' ({schema_path}) are invalid. "
+                f"Schema is required for streaming data load, Please provide a valid schema_path."
+            ) from exc
+
 @pytest.fixture
-def sample_spark_streaming_df_one():
+def sample_spark_streaming_df(tmp_path):
     schema = StructType(
         [
             StructField("sku", StringType(), True),
@@ -14,34 +29,41 @@ def sample_spark_streaming_df_one():
         ]
     )
     data = [("0001", 2), ("0001", 7), ("0002", 4)]
-
-    return SparkSession.builder.getOrCreate() \
-            .createDataFrame(data, schema)
+    schema_path = (tmp_path / "test.json").as_posix()
+    with open(schema_path, "w") as f:
+        json.dump(schema.jsonValue(), f)
+    return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 
 
 class TestStreamingDataSet:
-    def test_load(self,tmp_path, sample_spark_streaming_df_one):
+    def test_load(self, tmp_path, sample_spark_streaming_df):
         filepath = (tmp_path / "test_streams").as_posix()
-        spark_json_ds = SparkDataSet(filepath=filepath, file_format="json",save_args=["mode","overwrite"])
-        spark_json_ds.save(sample_spark_streaming_df_one)
-        loaded_with_spark = spark_json_ds.load()
+        schema_path = (tmp_path / "test.json").as_posix()
 
-        stream_df = SparkStreamingDataSet(filepath=filepath, file_format="json")._load()
-        assert stream_df.isStreaming
+        spark_json_ds = SparkDataSet(
+            filepath=filepath, file_format="json", save_args=[{"mode","overwrite"}]
+        )
+        spark_json_ds.save(sample_spark_streaming_df)
 
-        stream_query = stream_df.writeStream.format("memory").queryName("test").start()
-        assert stream_query.isActive
-        time.sleep(3)
-        stream_query.stop()
-        loaded_memory_stream = SparkSession.builder.getOrCreate().sql("select * from test")
+        streaming_ds = SparkStreamingDataSet(filepath=filepath, file_format="json",
+                                          load_args={"schema": {"filepath": schema_path}}).load()
+        assert streaming_ds.isStreaming
+        schema = sample_schema(schema_path)
+        assert streaming_ds.schema == schema
 
-        assert loaded_memory_stream.exceptAll(loaded_with_spark).count()==0
-
-
-    def test_save(self, tmp_path, sample_spark_df):
-        filepath = (tmp_path / "test_streams").as_posix()
+    def test_save(self, tmp_path, sample_spark_streaming_df):
+        filepath = (tmp_path / "test_streams_input").as_posix()
+        schema_path = (tmp_path / "test.json").as_posix()
         checkpoint_path = (tmp_path / "checkpoint").as_posix()
-        streaming_ds = SparkStreamingDataSet(filepath=filepath, save_args=["checkpointLocation",checkpoint_path])
-        assert not streaming_ds.exists()
+
+        spark_json_ds = SparkDataSet(
+            filepath=filepath, file_format="json", save_args=[{"mode","overwrite"}]
+        )
+        spark_json_ds.save(sample_spark_streaming_df)
+
+        streaming_ds = SparkStreamingDataSet(
+            filepath=filepath, file_format="json",save_args={"checkpoint": checkpoint_path, "output_mode":"append"}
+        )
+        assert streaming_ds._exists(schema_path)
 
 

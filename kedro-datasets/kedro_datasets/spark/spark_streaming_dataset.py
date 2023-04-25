@@ -1,13 +1,17 @@
 """SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
+import json
 import os
 from typing import Any, Dict
 from copy import deepcopy
 from pathlib import PurePosixPath
 import yaml
-from kedro.io import AbstractDataSet
+
+import fsspec
+from kedro.io.core import AbstractDataSet,DataSetError, get_filepath_str, get_protocol_and_path
 from pyspark import SparkConf
-from pyspark.errors.exceptions.captured import AnalysisException
+from pyspark.sql.utils import AnalysisException
 from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.types import StructType
 from yaml.loader import SafeLoader
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
@@ -91,6 +95,37 @@ class SparkStreamingDataSet(AbstractDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        # Handle schema load argument
+        self._schema = self._load_args.pop("schema", None)
+        if self._schema is not None:
+            if isinstance(self._schema, dict):
+                self._schema = self._load_schema_from_file(self._schema)
+
+    @staticmethod
+    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
+        filepath = schema.get("filepath")
+        if not filepath:
+            raise DataSetError(
+                "Schema load argument does not specify a 'filepath' attribute. Please"
+                "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
+            )
+
+        credentials = deepcopy(schema.get("credentials")) or {}
+        protocol, schema_path = get_protocol_and_path(filepath)
+        file_system = fsspec.filesystem(protocol, **credentials)
+        pure_posix_path = PurePosixPath(schema_path)
+        load_path = get_filepath_str(pure_posix_path, protocol)
+
+        # Open schema file
+        with file_system.open(load_path, encoding='utf-8') as fs_file:
+            try:
+                return StructType.fromJson(json.loads(fs_file.read()))
+            except Exception as exc:
+                raise DataSetError(
+                    f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
+                    f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
+                ) from exc
+
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes attributes of the dataset."""
         return {
@@ -116,16 +151,23 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     def _load(self) -> DataFrame:
         """Loads data from filepath.
-        If the connector type is kafka then no file_path is required
+        If the connector type is kafka then no file_path is required, schema needs to be seperated from load_args
 
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        input_constructor = (
-            self._get_spark()
-            .readStream.format(self._file_format)
-            .options(**self._load_args)
-        )
+        if self._schema:
+            input_constructor = (
+                self._get_spark()
+                .readStream.schema(self._schema).format(self._file_format)
+                .options(**self._load_args)
+            )
+        else:
+            input_constructor = (
+                self._get_spark()
+                .readStream.format(self._file_format)
+                .options(**self._load_args)
+            )
         return (
             input_constructor.load()
             if self._file_format
@@ -155,14 +197,22 @@ class SparkStreamingDataSet(AbstractDataSet):
             .options(**self._save_args)
             .start()
         )
-    def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+    def _exists(self, schema_path:str) -> bool:
+        """Check the existence of pyspark dataframe.
 
+        Args:
+            schema_path: schema of saved streaming dataframe
+        """
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        with open(schema_path, encoding='utf-8') as f:
+            schema = StructType.fromJson(json.loads(f.read()))
         try:
-            self._get_spark().read.load(path=load_path, format="delta")
+            self._get_spark().readStream.schema(schema).load(load_path, self._file_format)
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            if (
+                exception.desc.startswith("Path does not exist:")
+                or "is not a Streaming data" in exception.desc
+            ):
                 return False
             raise
-
         return True

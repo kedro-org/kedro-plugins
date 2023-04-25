@@ -63,8 +63,8 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {"rechunk": True}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {"rechunk": True}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(

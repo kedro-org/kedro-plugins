@@ -62,7 +62,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         load_args: Dict[str, Any] = None,
         credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
         metadata: Dict[str, Any] = None,
-
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -114,7 +113,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         if isinstance(value, List):
             return tuple(value)
         return value
-
 
     def _describe(self) -> Dict[str, Any]:
         # prevent auth from logging

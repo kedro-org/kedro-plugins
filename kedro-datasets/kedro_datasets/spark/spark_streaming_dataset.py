@@ -7,7 +7,12 @@ from pathlib import PurePosixPath
 import yaml
 
 import fsspec
-from kedro.io.core import AbstractDataSet,DataSetError, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from pyspark import SparkConf
 from pyspark.sql.utils import AnalysisException
 from pyspark.sql import SparkSession, DataFrame
@@ -117,7 +122,7 @@ class SparkStreamingDataSet(AbstractDataSet):
         load_path = get_filepath_str(pure_posix_path, protocol)
 
         # Open schema file
-        with file_system.open(load_path, encoding='utf-8') as fs_file:
+        with file_system.open(load_path, encoding="utf-8") as fs_file:
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
@@ -159,7 +164,8 @@ class SparkStreamingDataSet(AbstractDataSet):
         if self._schema:
             input_constructor = (
                 self._get_spark()
-                .readStream.schema(self._schema).format(self._file_format)
+                .readStream.schema(self._schema)
+                .format(self._file_format)
                 .options(**self._load_args)
             )
         else:
@@ -197,17 +203,20 @@ class SparkStreamingDataSet(AbstractDataSet):
             .options(**self._save_args)
             .start()
         )
-    def _exists(self, schema_path:str) -> bool:
+
+    def _exists(self, schema_path: str) -> bool:
         """Check the existence of pyspark dataframe.
 
         Args:
             schema_path: schema of saved streaming dataframe
         """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
-        with open(schema_path, encoding='utf-8') as f:
+        with open(schema_path, encoding="utf-8") as f:
             schema = StructType.fromJson(json.loads(f.read()))
         try:
-            self._get_spark().readStream.schema(schema).load(load_path, self._file_format)
+            self._get_spark().readStream.schema(schema).load(
+                load_path, self._file_format
+            )
         except AnalysisException as exception:
             if (
                 exception.desc.startswith("Path does not exist:")

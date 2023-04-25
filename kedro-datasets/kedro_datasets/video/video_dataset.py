@@ -128,7 +128,11 @@ class SequenceVideo(AbstractVideo):
     """A video object read from an indexable sequence of frames"""
 
     def __init__(
-        self, frames: Sequence[PIL.Image.Image], fps: float, fourcc: str = "mp4v", metadata: Dict[str, Any] = None,
+        self,
+        frames: Sequence[PIL.Image.Image],
+        fps: float,
+        fourcc: str = "mp4v",
+        metadata: Dict[str, Any] = None,
     ) -> None:
         self._n_frames = len(frames)
         self._frames = frames

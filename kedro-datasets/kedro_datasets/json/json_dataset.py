@@ -59,7 +59,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        metadata: Dict [str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
         on a specific filesystem.

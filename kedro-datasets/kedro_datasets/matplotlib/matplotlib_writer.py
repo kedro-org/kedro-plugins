@@ -156,7 +156,7 @@ class MatplotlibWriter(
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
         self.metadata = metadata
-        
+
         super().__init__(
             filepath=PurePosixPath(path),
             version=version,

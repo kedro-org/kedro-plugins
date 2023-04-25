@@ -52,18 +52,26 @@ class TestStreamingDataSet:
         assert streaming_ds.schema == schema
 
     def test_save(self, tmp_path, sample_spark_streaming_df):
-        filepath = (tmp_path / "test_streams_input").as_posix()
+        filepath_json = (tmp_path / "test_streams").as_posix()
+        filepath_output = (tmp_path / "test_streams_output").as_posix()
         schema_path = (tmp_path / "test.json").as_posix()
         checkpoint_path = (tmp_path / "checkpoint").as_posix()
 
         spark_json_ds = SparkDataSet(
-            filepath=filepath, file_format="json", save_args=[{"mode","overwrite"}]
+            filepath=filepath_json, file_format="json", save_args=[{"mode","overwrite"}]
         )
         spark_json_ds.save(sample_spark_streaming_df)
+        loaded_with_streaming = SparkStreamingDataSet(filepath=filepath_json, file_format="json",
+                                          load_args={"schema": {"filepath": schema_path}}).load()
+
 
         streaming_ds = SparkStreamingDataSet(
-            filepath=filepath, file_format="json",save_args={"checkpoint": checkpoint_path, "output_mode":"append"}
+            filepath=filepath_output, file_format="json",save_args={"checkpoint": checkpoint_path, "output_mode":"append"}
         )
+        assert not streaming_ds._exists(schema_path)
+
+        streaming_ds.save(loaded_with_streaming)
         assert streaming_ds._exists(schema_path)
+
 
 

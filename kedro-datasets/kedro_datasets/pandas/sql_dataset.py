@@ -156,6 +156,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         table_name: str,

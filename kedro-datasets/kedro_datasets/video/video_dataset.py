@@ -162,6 +162,7 @@ class SequenceVideo(AbstractVideo):
 class GeneratorVideo(AbstractVideo):
     """A video object with frames yielded by a generator"""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         frames: Generator[PIL.Image.Image, None, None],
@@ -267,6 +268,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

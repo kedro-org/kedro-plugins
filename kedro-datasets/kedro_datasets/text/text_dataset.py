@@ -45,6 +45,7 @@ class TextDataSet(AbstractVersionedDataSet[str, str]):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

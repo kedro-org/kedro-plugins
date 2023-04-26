@@ -2,9 +2,11 @@
 underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
 ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import fsspec
 from kedro.io.core import (
@@ -23,9 +25,9 @@ from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 # Type of data input
-_DI = Tuple[Union[ndarray, csr_matrix], ndarray]
+_DI = tuple[Union[ndarray, csr_matrix], ndarray]
 # Type of data output
-_DO = Tuple[csr_matrix, ndarray]
+_DO = tuple[csr_matrix, ndarray]
 
 
 class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
@@ -86,18 +88,18 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Optional[Version] = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})

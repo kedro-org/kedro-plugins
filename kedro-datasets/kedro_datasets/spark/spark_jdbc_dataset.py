@@ -1,7 +1,8 @@
 """SparkJDBCDataSet to load and save a PySpark DataFrame via JDBC."""
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import DataFrame, SparkSession
@@ -63,17 +64,17 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         url: str,
         table: str,
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -140,7 +141,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
             self._load_args["properties"] = {**load_properties, **credentials}
             self._save_args["properties"] = {**save_properties, **credentials}
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = self._load_args
         save_args = self._save_args
 

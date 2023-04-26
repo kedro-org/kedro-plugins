@@ -1,9 +1,11 @@
 """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 import fsspec
 import plotly.io as pio
@@ -49,18 +51,18 @@ class JSONDataSet(
         >>> assert fig == reloaded
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -124,7 +126,7 @@ class JSONDataSet(
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

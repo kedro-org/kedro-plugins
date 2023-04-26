@@ -1,10 +1,11 @@
 """``GBQTableDataSet`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
 to read and write from/to BigQuery table.
 """
+from __future__ import annotations
 
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Union
+from typing import Any, NoReturn, Union
 
 import fsspec
 import pandas as pd
@@ -62,8 +63,8 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"progress_bar": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -71,9 +72,9 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         dataset: str,
         table_name: str,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataSet``.
 
@@ -125,7 +126,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
             location=self._save_args.get("location"),
         )
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "dataset": self._dataset,
             "table_name": self._table_name,
@@ -203,16 +204,16 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         sql: str = None,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataSet``.
@@ -283,7 +284,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         desc = {}
         desc["sql"] = str(load_args.pop("query", None))

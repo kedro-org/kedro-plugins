@@ -1,7 +1,9 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, List, NoReturn, Tuple, Union
+from __future__ import annotations
+
+from typing import Any, NoReturn, Union
 
 import requests
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -63,8 +65,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         self,
         url: str,
         method: str = "GET",
-        load_args: Dict[str, Any] = None,
-        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
+        load_args: dict[str, Any] = None,
+        credentials: Union[tuple[str, str], list[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -95,7 +97,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         if "timeout" in self._load_args:
             self._load_args["timeout"] = self._convert_type(self._load_args["timeout"])
 
-        self._request_args: Dict[str, Any] = {
+        self._request_args: dict[str, Any] = {
             "url": url,
             "method": method,
             "auth": self._convert_type(self._auth),
@@ -109,11 +111,11 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         However, for some parameters in the Python requests library,
         only Tuples are allowed.
         """
-        if isinstance(value, List):
+        if isinstance(value, list):
             return tuple(value)
         return value
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)

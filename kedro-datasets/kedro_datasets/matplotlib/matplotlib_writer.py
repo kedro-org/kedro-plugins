@@ -1,10 +1,11 @@
 """``MatplotlibWriter`` saves one or more Matplotlib objects as image
 files to an underlying filesystem (e.g. local, S3, GCS)."""
+from __future__ import annotations
 
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, NoReturn, Union
+from typing import Any, NoReturn, Union
 from warnings import warn
 
 import fsspec
@@ -20,7 +21,7 @@ from kedro.io.core import (
 
 class MatplotlibWriter(
     AbstractVersionedDataSet[
-        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
+        Union[plt.figure, list[plt.figure], dict[str, plt.figure]], NoReturn
     ]
 ):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
@@ -104,15 +105,15 @@ class MatplotlibWriter(
 
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        fs_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
         overwrite: bool = False,
     ) -> None:
@@ -176,7 +177,7 @@ class MatplotlibWriter(
             overwrite = False
         self._overwrite = overwrite
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -188,7 +189,7 @@ class MatplotlibWriter(
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
-        self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]
+        self, data: Union[plt.figure, list[plt.figure], dict[str, plt.figure]]
     ) -> None:
         save_path = self._get_save_path()
 

@@ -1,8 +1,10 @@
 """``AbstractDataSet`` implementation to access Snowflake using Snowpark dataframes
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -97,17 +99,17 @@ class SnowparkTableDataSet(AbstractDataSet):
     # for parallelism within a pipeline please consider
     # ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         table_name: str,
         schema: str = None,
         database: str = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SnowparkTableDataSet``.
 
@@ -168,7 +170,7 @@ class SnowparkTableDataSet(AbstractDataSet):
         self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "table_name": self._table_name,
             "database": self._database,

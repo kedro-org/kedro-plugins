@@ -1,9 +1,11 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive.
 """
+from __future__ import annotations
+
 import pickle
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any
 
 from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import DataFrame, SparkSession, Window
@@ -63,7 +65,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         >>> reloaded.take(4)
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint:disable=too-many-arguments
     def __init__(
@@ -71,8 +73,8 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         database: str,
         table: str,
         write_mode: str = "errorifexists",
-        table_pk: List[str] = None,
-        save_args: Dict[str, Any] = None,
+        table_pk: list[str] = None,
+        save_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -119,7 +121,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "database": self._database,
             "table": self._table,

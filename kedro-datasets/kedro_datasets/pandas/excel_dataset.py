@@ -1,11 +1,13 @@
 """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 import fsspec
 import pandas as pd
@@ -23,8 +25,8 @@ logger = logging.getLogger(__name__)
 
 class ExcelDataSet(
     AbstractVersionedDataSet[
-        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
-        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
+        Union[pd.DataFrame, dict[str, pd.DataFrame]],
+        Union[pd.DataFrame, dict[str, pd.DataFrame]],
     ]
 ):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
@@ -68,7 +70,7 @@ class ExcelDataSet(
         >>> assert data.equals(reloaded)
 
     To save a multi-sheet Excel file, no special ``save_args`` are required.
-    Instead, return a dictionary of ``Dict[str, pd.DataFrame]`` where the string
+    Instead, return a dictionary of ``dict[str, pd.DataFrame]`` where the string
     keys are your sheet names.
 
     Example usage for the
@@ -113,11 +115,11 @@ class ExcelDataSet(
         self,
         filepath: str,
         engine: str = "openpyxl",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ExcelDataSet`` pointing to a concrete Excel file
         on a specific filesystem.
@@ -198,7 +200,7 @@ class ExcelDataSet(
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -208,7 +210,7 @@ class ExcelDataSet(
             "version": self._version,
         }
 
-    def _load(self) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
+    def _load(self) -> Union[pd.DataFrame, dict[str, pd.DataFrame]]:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -222,7 +224,7 @@ class ExcelDataSet(
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def _save(self, data: Union[pd.DataFrame, Dict[str, pd.DataFrame]]) -> None:
+    def _save(self, data: Union[pd.DataFrame, dict[str, pd.DataFrame]]) -> None:
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
@@ -258,7 +260,7 @@ class ExcelDataSet(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _preview(self, nrows: int = 40) -> Dict:
+    def _preview(self, nrows: int = 40) -> dict:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access

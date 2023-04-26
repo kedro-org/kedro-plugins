@@ -1,11 +1,13 @@
 """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import polars as pl
@@ -63,18 +65,18 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {"rechunk": True}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {"rechunk": True}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
         on a specific filesystem.
@@ -139,7 +141,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

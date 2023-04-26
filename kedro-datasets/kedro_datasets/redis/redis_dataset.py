@@ -1,11 +1,12 @@
 """``PickleDataSet`` loads/saves data from/to a Redis database. The underlying
 functionality is supported by the redis library, so it supports all allowed
 options for instantiating the redis app ``from_url`` and setting a value."""
+from __future__ import annotations
 
 import importlib
 import os
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import redis
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -56,18 +57,18 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     """
 
     DEFAULT_REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379")
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         key: str,
         backend: str = "pickle",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        redis_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        redis_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet``. This loads/saves data from/to
         a Redis database while deserialising/serialising. Supports custom backends to
@@ -151,7 +152,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
             **self._redis_from_url_args, **_credentials
         )
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {"key": self._key, **self._redis_from_url_args}
 
     # `redis_db` mypy does not work since it is optional and optional is not

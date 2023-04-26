@@ -2,9 +2,11 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the
 type of read/write target.
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import pandas as pd
@@ -81,19 +83,19 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
         file_format: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ):
         """Creates a new instance of ``GenericDataSet`` pointing to a concrete data file
         on a specific filesystem. The appropriate pandas load/save methods are
@@ -222,7 +224,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         return self._fs.exists(load_path)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "file_format": self._file_format,
             "filepath": self._filepath,

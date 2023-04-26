@@ -2,12 +2,14 @@
 filesystem (e.g.: local, S3, GCS). It uses OpenCV VideoCapture to read
 and decode videos and OpenCV VideoWriter to encode and write video.
 """
+from __future__ import annotations
+
 import itertools
 import tempfile
 from collections import abc
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Generator, Optional, Sequence, Tuple, Union
+from typing import Any, Generator, Optional, Sequence, Union
 
 import cv2
 import fsspec
@@ -52,7 +54,7 @@ class AbstractVideo(abc.Sequence):
         raise NotImplementedError()
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         """Get the resolution of the video"""
         raise NotImplementedError()
 
@@ -82,7 +84,7 @@ class FileVideo(AbstractVideo):
         return self._cap.get(cv2.CAP_PROP_FPS)
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return width, height
@@ -143,7 +145,7 @@ class SequenceVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -178,7 +180,7 @@ class GeneratorVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -262,8 +264,8 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         self,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of VideoDataSet to load / save video data for given filepath.
 
@@ -348,7 +350,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         finally:
             writer.release()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {"filepath": self._filepath, "protocol": self._protocol}
 
     def _exists(self) -> bool:

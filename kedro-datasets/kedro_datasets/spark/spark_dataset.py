@@ -1,6 +1,8 @@
 """``AbstractVersionedDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -8,7 +10,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 from warnings import warn
 
 import fsspec
@@ -38,7 +40,7 @@ def _parse_glob_pattern(pattern: str) -> str:
     return "/".join(clean)
 
 
-def _split_filepath(filepath: str) -> Tuple[str, str]:
+def _split_filepath(filepath: str) -> tuple[str, str]:
     split_ = filepath.split("://", 1)
     if len(split_) == 2:
         return split_[0] + "://", split_[1]
@@ -49,7 +51,7 @@ def _strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
     return path[len(prefix) :] if path.startswith(prefix) else path
 
 
-def _dbfs_glob(pattern: str, dbutils: Any) -> List[str]:
+def _dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     """Perform a custom glob search in DBFS using the provided pattern.
     It is assumed that version paths are managed by Kedro only.
 
@@ -138,7 +140,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         """
         return bool(self.status(hdfs_path, strict=False))
 
-    def hdfs_glob(self, pattern: str) -> List[str]:
+    def hdfs_glob(self, pattern: str) -> list[str]:
         """Perform a glob search in HDFS using the provided pattern.
 
         Args:
@@ -233,17 +235,17 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     # for parallelism within a Spark pipeline please consider
     # ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: str,
         file_format: str = "parquet",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkDataSet``.
 
@@ -348,7 +350,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         self._handle_delta_format()
 
     @staticmethod
-    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
+    def _load_schema_from_file(schema: dict[str, Any]) -> StructType:
         filepath = schema.get("filepath")
         if not filepath:
             raise DataSetError(
@@ -372,7 +374,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                     f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._fs_prefix + str(self._filepath),
             "file_format": self._file_format,

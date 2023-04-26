@@ -1,10 +1,11 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
+from __future__ import annotations
 
 import copy
 import datetime as dt
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Optional
+from typing import Any, NoReturn, Optional
 
 import fsspec
 import pandas as pd
@@ -150,18 +151,18 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: dict[str, Any] = {}
 
     def __init__(
         self,
         table_name: str,
-        credentials: Dict[str, Any],
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        credentials: dict[str, Any],
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataSet``.
 
@@ -234,7 +235,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
         cls.engines[connection_str] = engine
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         save_args = copy.deepcopy(self._save_args)
         del load_args["table_name"]
@@ -370,16 +371,16 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         sql: str = None,
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
-        execution_options: Optional[Dict[str, Any]] = None,
+        execution_options: Optional[dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -433,7 +434,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args: Dict[str, Any] = {}
+        default_load_args: dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -478,7 +479,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
         cls.engines[connection_str] = engine
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         return {
             "sql": str(load_args.pop("sql", None)),

@@ -2,8 +2,10 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 import plotly.express as px
@@ -69,12 +71,12 @@ class PlotlyDataSet(JSONDataSet):
     def __init__(
         self,
         filepath: str,
-        plotly_args: Dict[str, Any],
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        plotly_args: dict[str, Any],
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PlotlyDataSet`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -121,7 +123,7 @@ class PlotlyDataSet(JSONDataSet):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}
 
     def _save(self, data: pd.DataFrame) -> None:

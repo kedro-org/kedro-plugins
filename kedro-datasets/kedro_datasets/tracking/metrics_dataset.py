@@ -3,8 +3,10 @@ filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 The ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is versioned by default
 and only takes metrics of numeric values.
 """
+from __future__ import annotations
+
 import json
-from typing import Dict, NoReturn
+from typing import NoReturn
 
 from kedro.io.core import DataSetError, get_filepath_str
 
@@ -46,7 +48,7 @@ class MetricsDataSet(JSONDataSet):
     def _load(self) -> NoReturn:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: Dict[str, float]) -> None:
+    def _save(self, data: dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataSet`` to float to make sure
         they are numeric values which can be displayed in Kedro Viz and then saves the dataset.
         """

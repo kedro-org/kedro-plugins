@@ -1,8 +1,9 @@
 """``ParquetDataSet`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import dask.dataframe as dd
 import fsspec
@@ -83,17 +84,17 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
               col3: [[int32]]
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"write_index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ParquetDataSet`` pointing to concrete
         parquet files.
@@ -123,7 +124,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
             self._save_args.update(save_args)
 
     @property
-    def fs_args(self) -> Dict[str, Any]:
+    def fs_args(self) -> dict[str, Any]:
         """Property of optional file system parameters.
 
         Returns:
@@ -133,7 +134,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         fs_args.update(self._credentials)
         return fs_args
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "load_args": self._load_args,

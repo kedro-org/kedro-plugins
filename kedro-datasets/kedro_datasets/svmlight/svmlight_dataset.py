@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Tuple
 
 import fsspec
 from kedro.io.core import (
@@ -25,9 +25,9 @@ from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 # Type of data input
-_DI = tuple[Union[ndarray, csr_matrix], ndarray]
+_DI = Tuple[Union[ndarray, csr_matrix], ndarray]
 # Type of data output
-_DO = tuple[csr_matrix, ndarray]
+_DO = Tuple[csr_matrix, ndarray]
 
 
 class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):

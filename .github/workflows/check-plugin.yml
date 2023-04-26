@@ -1,4 +1,4 @@
-name: Running tests and linter
+name: Lint and test plugin
 
 on:
   workflow_call:
@@ -37,13 +37,12 @@ jobs:
           path: ~\AppData\Local\pip\Cache
           key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
-      - name: Install Kedro
-        run: pip install git+https://github.com/kedro-org/kedro@main
-      - name: Install dependencies
+      - name: Install latest Kedro, the plugin and its dependencies
         run: |
           cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main .
           pip install -r test_requirements.txt
-      - name: pip freeze
+      - name: Output installed packages in requirements format
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
         if: matrix.os != 'windows-latest'
@@ -80,17 +79,18 @@ jobs:
           path: ~/.cache/pip
           key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
-      - name: Install dependencies
+      - name: Install latest Kedro, the plugin and its dependencies
         run: |
-            cd ${{ inputs.plugin }}
-            pip install git+https://github.com/kedro-org/kedro@main
-            pip install -r test_requirements.txt
-            pip freeze
+          cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main .
+          pip install -r test_requirements.txt
+      - name: Output installed packages in requirements format
+        run: pip freeze
       - name: Install pre-commit hooks
         run: |
-            cd ${{ inputs.plugin }}
-            pre-commit install --install-hooks
-            pre-commit install --hook-type pre-push
+          cd ${{ inputs.plugin }}
+          pre-commit install --install-hooks
+          pre-commit install --hook-type pre-push
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
 
@@ -117,12 +117,12 @@ jobs:
           path: ~/.cache/pip
           key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
-      - name: Install dependencies
+      - name: Install latest Kedro, the plugin and its dependencies
         run: |
           cd ${{ inputs.plugin }}
-          pip install git+https://github.com/kedro-org/kedro@main
+          pip install git+https://github.com/kedro-org/kedro@main .
           pip install -r test_requirements.txt
-      - name: pip freeze
+      - name: Output installed packages in requirements format
         run: pip freeze
       - name: Run end to end tests
         # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`

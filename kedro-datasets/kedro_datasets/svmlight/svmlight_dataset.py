@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Optional, Union, Tuple
+from typing import Any, Optional, Tuple, Union
 
 import fsspec
 from kedro.io.core import (

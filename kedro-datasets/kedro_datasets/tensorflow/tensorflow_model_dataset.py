@@ -60,8 +60,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"save_format": "tf"}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"save_format": "tf"}
 
     # pylint: disable=too-many-arguments
     def __init__(

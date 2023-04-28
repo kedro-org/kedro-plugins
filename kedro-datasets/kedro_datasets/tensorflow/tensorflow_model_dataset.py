@@ -1,4 +1,4 @@
-"""``TensorflowModelDataset`` is a data set implementation which can save and load
+"""``TensorFlowModelDataSet`` is a data set implementation which can save and load
 TensorFlow models.
 """
 import copy
@@ -20,7 +20,7 @@ TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
 
 class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
-    """``TensorflowModelDataset`` loads and saves TensorFlow models.
+    """``TensorFlowModelDataSet`` loads and saves TensorFlow models.
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 

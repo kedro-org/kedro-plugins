@@ -166,7 +166,7 @@ class TestTensorFlowModelDataSet:
     def test_hdf5_save_format(
         self, dummy_tf_base_model, dummy_x_test, filepath, tensorflow_model_dataset
     ):
-        """Test TensorflowModelDataset can save TF graph models in HDF5 format"""
+        """Test TensorFlowModelDataSet can save TF graph models in HDF5 format"""
         hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath, save_args={"save_format": "h5"}
         )
@@ -187,7 +187,7 @@ class TestTensorFlowModelDataSet:
         filepath,
         tensorflow_model_dataset,
     ):
-        """Test TensorflowModelDataset cannot save subclassed user models in HDF5 format
+        """Test TensorFlowModelDataSet cannot save subclassed user models in HDF5 format
 
         Subclassed model
 
@@ -320,7 +320,7 @@ class TestTensorFlowModelDataSetVersioned:
         load_version,
         save_version,
     ):
-        """Test versioned TensorflowModelDataset can save TF graph models in
+        """Test versioned TensorFlowModelDataSet can save TF graph models in
         HDF5 format"""
         hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath,
@@ -425,7 +425,7 @@ class TestTensorFlowModelDataSetVersioned:
         load_version,
         save_version,
     ):
-        """Test versioned TensorflowModelDataset can load models using an explicit tf_device"""
+        """Test versioned TensorFlowModelDataSet can load models using an explicit tf_device"""
         hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath,
             load_args={"tf_device": "/CPU:0"},

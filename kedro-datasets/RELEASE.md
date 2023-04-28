@@ -10,10 +10,9 @@
 # Release 1.2.1:
 
 ## Major features and improvements:
-* `TBD`
 
 ## Bug fixes and other changes
-* Renamed `TensorFlowDataset` to `TensorFlowDataSet` to be consistent with all other plugins in kedro-datasets.
+* Renamed `TensorFlowModelDataset` to `TensorFlowModelDataSet` to be consistent with all other plugins in kedro-datasets.
 
 # Release 1.2.0:
 

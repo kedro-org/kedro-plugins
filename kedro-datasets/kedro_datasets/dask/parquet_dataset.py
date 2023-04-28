@@ -110,7 +110,8 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
                 https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html#optional-parameters
-            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}

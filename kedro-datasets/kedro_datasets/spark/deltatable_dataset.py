@@ -70,7 +70,8 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         fs_prefix, filepath = _split_filepath(filepath)
 

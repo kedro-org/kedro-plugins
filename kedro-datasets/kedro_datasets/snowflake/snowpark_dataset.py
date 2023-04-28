@@ -131,7 +131,8 @@ class SnowparkTableDataSet(
             credentials: A dictionary with a snowpark connection string.
                 To find all supported arguments, see here:
                 https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect
-            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
 
         if not table_name:

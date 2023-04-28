@@ -141,7 +141,8 @@ class MatplotlibWriter(
             overwrite: If True, any existing image files will be removed.
                 Only relevant when saving multiple Matplotlib objects at
                 once.
-            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+            metadata: Any arbitrary Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _credentials = deepcopy(credentials) or {}
         _fs_args = deepcopy(fs_args) or {}

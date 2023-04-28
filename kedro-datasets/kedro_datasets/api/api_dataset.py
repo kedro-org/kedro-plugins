@@ -74,7 +74,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             credentials: Allows specifying secrets in credentials.yml.
                 Expected format is ``('login', 'password')`` if given as a tuple or list.
                 An ``AuthBase`` instance can be provided for more complex cases.
-            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are specified.

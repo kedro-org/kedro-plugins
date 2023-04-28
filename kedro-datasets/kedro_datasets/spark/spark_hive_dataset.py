@@ -90,7 +90,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 Other `HiveOptions` can be found here:
                 https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Note:
             For users leveraging the `upsert` functionality,

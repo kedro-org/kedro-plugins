@@ -138,7 +138,7 @@ class GenericDataSet(
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: Will be raised if at least less than one appropriate

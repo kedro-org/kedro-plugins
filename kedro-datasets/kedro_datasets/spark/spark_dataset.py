@@ -277,7 +277,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 Optional keyword arguments passed to ``hdfs.client.InsecureClient``
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)

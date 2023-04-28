@@ -136,7 +136,7 @@ class PickleDataSet(
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If ``backend`` does not satisfy the `pickle` interface.

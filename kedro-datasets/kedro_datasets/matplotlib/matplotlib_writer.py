@@ -142,7 +142,7 @@ class MatplotlibWriter(
                 Only relevant when saving multiple Matplotlib objects at
                 once.
             metadata: Any arbitrary Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins.. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _credentials = deepcopy(credentials) or {}
         _fs_args = deepcopy(fs_args) or {}

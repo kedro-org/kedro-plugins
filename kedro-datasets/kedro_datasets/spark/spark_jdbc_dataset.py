@@ -95,7 +95,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 supported arguments, see here:
                 https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or

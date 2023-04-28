@@ -75,7 +75,7 @@ class GMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
             metadata: Any Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})

@@ -191,7 +191,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``table_name`` or ``con`` is empty.
@@ -419,7 +419,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 Note that this is not a standard argument supported by pandas API, but could be
                 useful for handling large datasets.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.

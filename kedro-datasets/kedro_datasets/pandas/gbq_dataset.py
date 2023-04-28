@@ -100,7 +100,7 @@ class GBQTableDataSet(
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
                 All defaults are preserved, but "progress_bar", which is set to False.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When ``load_args['location']`` and ``save_args['location']``
@@ -246,7 +246,7 @@ class GBQQueryDataSet(
                 SQL query from filepath.
             filepath: A path to a file with a sql query statement.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When ``sql`` and ``filepath`` parameters are either both empty

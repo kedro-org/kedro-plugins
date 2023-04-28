@@ -113,7 +113,7 @@ class PickleDataSet(
                 All defaults are preserved, except `url`, which is set to `redis://127.0.0.1:6379`.
                 You could also specify the url through the env variable ``REDIS_URL``.
             metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins. arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If ``backend`` does not satisfy the `pickle` interface.

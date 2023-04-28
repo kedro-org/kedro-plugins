@@ -110,7 +110,7 @@ class PlotlyDataSet(JSONDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `w` when saving.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
         self._plotly_args = plotly_args

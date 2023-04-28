@@ -288,7 +288,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         # parse the path and protocol (e.g. file, http, s3, etc.)
         protocol, path = get_protocol_and_path(filepath)

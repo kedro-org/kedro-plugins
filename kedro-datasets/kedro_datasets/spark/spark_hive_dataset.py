@@ -89,7 +89,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 on a list of column names.
                 Other `HiveOptions` can be found here:
                 https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Note:
             For users leveraging the `upsert` functionality,

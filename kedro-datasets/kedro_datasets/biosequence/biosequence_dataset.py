@@ -72,7 +72,7 @@ class BioSequenceDataSet(
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Note: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO
         """

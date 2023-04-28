@@ -276,7 +276,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 ``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.
                 Optional keyword arguments passed to ``hdfs.client.InsecureClient``
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata. This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)

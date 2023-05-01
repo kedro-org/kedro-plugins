@@ -4,9 +4,8 @@ import pandas as pd
 import pytest
 from google.cloud.exceptions import NotFound
 from kedro.io.core import DataSetError
-from pandas.testing import assert_frame_equal
-
 from kedro_datasets.pandas import GBQQueryDataSet, GBQTableDataSet
+from pandas.testing import assert_frame_equal
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"

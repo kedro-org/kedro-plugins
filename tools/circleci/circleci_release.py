@@ -8,7 +8,6 @@ import sys
 
 import requests
 from requests.structures import CaseInsensitiveDict
-
 from utils.check_no_version_pypi import check_no_version_pypi
 from utils.package_version import get_package_version
 

@@ -1,10 +1,11 @@
 import json
+
 import pytest
-from pyspark.sql import SparkSession
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from kedro.io.core import DataSetError
 from kedro_datasets.spark.spark_dataset import SparkDataSet
 from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
+from pyspark.sql import SparkSession
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 
 def sample_schema(schema_path):

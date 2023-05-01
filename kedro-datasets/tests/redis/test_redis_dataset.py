@@ -8,9 +8,8 @@ import pandas as pd
 import pytest
 import redis
 from kedro.io import DataSetError
-from pandas.testing import assert_frame_equal
-
 from kedro_datasets.redis import PickleDataSet
+from pandas.testing import assert_frame_equal
 
 
 @pytest.fixture(params=["pickle"])

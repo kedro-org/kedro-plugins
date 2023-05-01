@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 from kedro.io import DataSetError
-
 from kedro_datasets.spark import SparkJDBCDataSet
 
 

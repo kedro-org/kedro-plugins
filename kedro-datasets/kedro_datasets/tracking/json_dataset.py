@@ -5,7 +5,6 @@ The ``JSONDataSet`` is part of Kedro Experiment Tracking. The dataset is version
 from typing import NoReturn
 
 from kedro.io.core import DataSetError
-
 from kedro_datasets.json import JSONDataSet as JDS
 
 

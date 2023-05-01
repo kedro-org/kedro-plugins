@@ -46,10 +46,15 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-polars_require = {"polars.CSVDataSet": [POLARS],}
+polars_require = {
+    "polars.CSVDataSet": [POLARS],
+}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
-    "snowflake.SnowparkTableDataSet": ["snowflake-snowpark-python~=1.0.0", "pyarrow~=8.0"]
+    "snowflake.SnowparkTableDataSet": [
+        "snowflake-snowpark-python~=1.0.0",
+        "pyarrow~=8.0",
+    ]
 }
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
@@ -67,9 +72,7 @@ tensorflow_require = {
         "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ]
 }
-video_require = {
-    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
-}
+video_require = {"video.VideoDataSet": ["opencv-python~=4.5.5.64"]}
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {

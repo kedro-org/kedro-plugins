@@ -12,11 +12,10 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
+from kedro_datasets.polars import CSVDataSet
 from moto import mock_s3
 from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
-
-from kedro_datasets.polars import CSVDataSet
 
 BUCKET_NAME = "test_bucket"
 FILE_NAME = "test.csv"

@@ -4,11 +4,10 @@ from kedro.io import DataCatalog, DataSetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
+from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
-
-from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
 
 
 @pytest.fixture

@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from kedro_datasets.video.video_dataset import FileVideo, GeneratorVideo, SequenceVideo
 from utils import (
     DEFAULT_FOURCC,
     MJPEG_FOURCC,
@@ -20,8 +21,6 @@ from utils import (
     TEST_WIDTH,
     assert_images_equal,
 )
-
-from kedro_datasets.video.video_dataset import FileVideo, GeneratorVideo, SequenceVideo
 
 
 class TestSequenceVideo:

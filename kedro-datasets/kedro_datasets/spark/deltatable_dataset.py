@@ -6,10 +6,9 @@ from typing import NoReturn
 
 from delta.tables import DeltaTable
 from kedro.io.core import AbstractDataSet, DataSetError
+from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
-
-from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
 
 class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):

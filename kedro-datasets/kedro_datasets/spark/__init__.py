@@ -1,6 +1,12 @@
 """Provides I/O modules for Apache Spark."""
 
-__all__ = ["SparkDataSet", "SparkHiveDataSet", "SparkJDBCDataSet", "DeltaTableDataSet","SparkStreamingDataSet"]
+__all__ = [
+    "SparkDataSet",
+    "SparkHiveDataSet",
+    "SparkJDBCDataSet",
+    "DeltaTableDataSet",
+    "SparkStreamingDataSet",
+]
 
 from contextlib import suppress
 

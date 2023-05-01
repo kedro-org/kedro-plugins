@@ -7,6 +7,13 @@
 ## Bug fixes and other changes
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
+# Release 1.2.1:
+
+## Major features and improvements:
+
+## Bug fixes and other changes
+* Renamed `TensorFlowModelDataset` to `TensorFlowModelDataSet` to be consistent with all other plugins in kedro-datasets.
+
 # Release 1.2.0:
 
 ## Major features and improvements:

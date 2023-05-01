@@ -433,7 +433,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args = {}  # type: Dict[str, Any]
+        default_load_args: Dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}

@@ -5,8 +5,9 @@ import socket
 import pytest
 import requests
 from kedro.io.core import DataSetError
-from kedro_datasets.api import APIDataSet
 from requests.auth import HTTPBasicAuth
+
+from kedro_datasets.api import APIDataSet
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 

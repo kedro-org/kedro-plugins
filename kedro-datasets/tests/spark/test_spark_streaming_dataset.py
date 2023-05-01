@@ -2,10 +2,11 @@ import json
 
 import pytest
 from kedro.io.core import DataSetError
-from kedro_datasets.spark.spark_dataset import SparkDataSet
-from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+
+from kedro_datasets.spark.spark_dataset import SparkDataSet
+from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 
 
 def sample_schema(schema_path):
@@ -29,7 +30,7 @@ def sample_spark_streaming_df(tmp_path):
     )
     data = [("0001", 2), ("0001", 7), ("0002", 4)]
     schema_path = (tmp_path / "test.json").as_posix()
-    with open(schema_path, "w") as f:
+    with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema.jsonValue(), f)
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 

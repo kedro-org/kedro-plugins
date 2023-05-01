@@ -13,12 +13,13 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 from pyspark import SparkConf
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from yaml.loader import SafeLoader
+
+from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
 
 class SparkStreamingDataSet(AbstractDataSet):
@@ -47,6 +48,7 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     """
 
+    # pylint: disable=too-many-instance-attributes
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -156,7 +158,8 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     def _load(self) -> DataFrame:
         """Loads data from filepath.
-        If the connector type is kafka then no file_path is required, schema needs to be seperated from load_args
+        If the connector type is kafka then no file_path is required, schema needs to be
+        seperated from load_args.
 
         Returns:
             Data from filepath as pyspark dataframe.
@@ -211,8 +214,8 @@ class SparkStreamingDataSet(AbstractDataSet):
             schema_path: schema of saved streaming dataframe
         """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
-        with open(schema_path, encoding="utf-8") as f:
-            schema = StructType.fromJson(json.loads(f.read()))
+        with open(schema_path, encoding="utf-8") as schema_file:
+            schema = StructType.fromJson(json.loads(schema_file.read()))
         try:
             self._get_spark().readStream.schema(schema).load(
                 load_path, self._file_format

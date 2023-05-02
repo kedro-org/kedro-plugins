@@ -1,23 +1,19 @@
 """SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
 import json
-import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-import yaml
 from kedro.io.core import (
     AbstractDataSet,
     DataSetError,
     get_filepath_str,
     get_protocol_and_path,
 )
-from pyspark import SparkConf
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
-from yaml.loader import SafeLoader
 
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
 
@@ -151,8 +147,7 @@ class SparkStreamingDataSet(AbstractDataSet):
         """
         input_constructor = (
             self._get_spark()
-            .readStream
-            .schema(self._schema)
+            .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
         )

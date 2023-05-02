@@ -199,16 +199,15 @@ class SparkStreamingDataSet(AbstractDataSet):
             .start()
         )
 
-    def custom_exists(self, schema_path: str) -> bool:
+    def _exists(self) -> bool:
         """Check the existence of pyspark dataframe.
         Args:
             schema_path: schema of saved streaming dataframe
         """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
-        with open(schema_path, encoding="utf-8") as schema_file:
-            schema = StructType.fromJson(json.loads(schema_file.read()))
+
         try:
-            self._get_spark().readStream.schema(schema).load(
+            self._get_spark().readStream.schema(self._schema).load(
                 load_path, self._file_format
             )
         except AnalysisException as exception:

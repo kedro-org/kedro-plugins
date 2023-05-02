@@ -75,9 +75,10 @@ class TestStreamingDataSet:
         streaming_ds = SparkStreamingDataSet(
             filepath=filepath_output,
             file_format="json",
+            load_args={"schema": {"filepath": schema_path}},
             save_args={"checkpoint": checkpoint_path, "output_mode": "append"},
         )
-        assert not streaming_ds.custom_exists(schema_path)
+        assert not streaming_ds.exists()
 
         streaming_ds.save(loaded_with_streaming)
-        assert streaming_ds.custom_exists(schema_path)
+        assert streaming_ds.exists()

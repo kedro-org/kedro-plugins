@@ -1,13 +1,16 @@
+import re
 import json
-
+from pathlib import Path
 import pytest
 from kedro.io.core import DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
+from pyspark.sql.utils import AnalysisException
 from kedro_datasets.spark.spark_dataset import SparkDataSet
 from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 
+SCHEMA_FILE_NAME = "schema.json"
 
 def sample_schema(schema_path):
     with open(schema_path, encoding="utf-8") as f:
@@ -29,7 +32,7 @@ def sample_spark_streaming_df(tmp_path):
         ]
     )
     data = [("0001", 2), ("0001", 7), ("0002", 4)]
-    schema_path = (tmp_path / "test.json").as_posix()
+    schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema.jsonValue(), f)
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
@@ -38,7 +41,7 @@ def sample_spark_streaming_df(tmp_path):
 class TestStreamingDataSet:
     def test_load(self, tmp_path, sample_spark_streaming_df):
         filepath = (tmp_path / "test_streams").as_posix()
-        schema_path = (tmp_path / "test.json").as_posix()
+        schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataSet(
             filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
@@ -57,7 +60,7 @@ class TestStreamingDataSet:
     def test_save(self, tmp_path, sample_spark_streaming_df):
         filepath_json = (tmp_path / "test_streams").as_posix()
         filepath_output = (tmp_path / "test_streams_output").as_posix()
-        schema_path = (tmp_path / "test.json").as_posix()
+        schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
         checkpoint_path = (tmp_path / "checkpoint").as_posix()
 
         spark_json_ds = SparkDataSet(
@@ -82,3 +85,46 @@ class TestStreamingDataSet:
 
         streaming_ds.save(loaded_with_streaming)
         assert streaming_ds.exists()
+    def test_load_options_invalid_schema_file(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+        Path(schemapath).write_text("dummy", encoding="utf-8")
+
+        pattern = (
+            f"Contents of 'schema.filepath' ({schemapath}) are invalid. Please"
+            f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            SparkStreamingDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {"filepath": schemapath}},
+            )
+
+    def test_load_options_invalid_schema(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+
+        pattern = (
+            "Schema load argument does not specify a 'filepath' attribute. Please"
+            "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
+            SparkStreamingDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {}},
+            )
+    def test_exists_raises_error(self, mocker):
+        # exists should raise all errors except for
+        # AnalysisExceptions clearly indicating a missing file
+        spark_data_set = SparkStreamingDataSet(filepath="")
+        mocker.patch.object(
+            spark_data_set,
+            "_get_spark",
+            side_effect=AnalysisException("Other Exception", []),
+        )
+
+        with pytest.raises(DataSetError, match="Other Exception"):
+            spark_data_set.exists()

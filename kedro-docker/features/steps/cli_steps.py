@@ -8,6 +8,7 @@ from time import sleep
 import behave
 import yaml
 from behave import given, then, when
+
 from features.steps.sh_run import ChildTerminatingPopen, run
 from features.steps.util import (
     TimeoutException,

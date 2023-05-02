@@ -80,4 +80,4 @@ class TestStreamingDataSet:
         assert not streaming_ds._exists(schema_path)
 
         streaming_ds.save(loaded_with_streaming)
-        assert streaming_ds._exists(schema_path)
+        assert streaming_ds.custom_exists(schema_path)

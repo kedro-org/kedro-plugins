@@ -199,7 +199,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             .start()
         )
 
-    def _exists(self, schema_path: str) -> bool:
+    def custom_exists(self, schema_path: str) -> bool:
         """Check the existence of pyspark dataframe.
         Args:
             schema_path: schema of saved streaming dataframe

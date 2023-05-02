@@ -6,6 +6,7 @@ from kedro.io import DataSetError
 
 try:
     import snowflake.snowpark as sp
+
     from kedro_datasets.snowflake import SnowparkTableDataSet as spds
 except ImportError:
     pass  # this is only for test discovery to succeed on Python <> 3.8

@@ -5,11 +5,12 @@ from tempfile import TemporaryDirectory
 
 import pytest
 from kedro.io import DataSetError
-from kedro_datasets.spark import SparkHiveDataSet
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+
+from kedro_datasets.spark import SparkHiveDataSet
 
 TESTSPARKDIR = "test_spark_dir"
 

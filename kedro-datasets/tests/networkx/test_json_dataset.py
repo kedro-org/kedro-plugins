@@ -7,8 +7,9 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import DataSetError, Version
 from kedro.io.core import PROTOCOL_DELIMITER
-from kedro_datasets.networkx import JSONDataSet
 from s3fs.core import S3FileSystem
+
+from kedro_datasets.networkx import JSONDataSet
 
 ATTRS = {
     "source": "from",

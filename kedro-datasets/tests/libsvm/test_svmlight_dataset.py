@@ -7,8 +7,9 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
-from kedro_datasets.svmlight import SVMLightDataSet
 from s3fs.core import S3FileSystem
+
+from kedro_datasets.svmlight import SVMLightDataSet
 
 
 @pytest.fixture

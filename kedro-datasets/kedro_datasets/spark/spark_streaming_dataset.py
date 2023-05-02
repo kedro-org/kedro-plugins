@@ -24,17 +24,14 @@ from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_pref
 
 class SparkStreamingDataSet(AbstractDataSet):
     """``SparkStreamingDataSet`` loads data into Spark Streaming Dataframe objects.
-
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
     .. code-block:: yaml
-
         raw.new_inventory:
             type: spark.SparkStreamingDataSet
             filepath: data/01_raw/stream/inventory/
             file_format: json
-
         int.new_inventory:
             type: spark.SparkStreamingDataSet
             filepath: data/02_intermediate/inventory/
@@ -45,7 +42,6 @@ class SparkStreamingDataSet(AbstractDataSet):
                 header: True
             load_args:
                 header: True
-
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -60,7 +56,6 @@ class SparkStreamingDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataSet.
-
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
                 specify ``filepath``s starting with ``/dbfs/``. For message brokers such as
@@ -160,7 +155,6 @@ class SparkStreamingDataSet(AbstractDataSet):
         """Loads data from filepath.
         If the connector type is kafka then no file_path is required, schema needs to be
         seperated from load_args.
-
         Returns:
             Data from filepath as pyspark dataframe.
         """
@@ -186,10 +180,8 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     def _save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
-
         Args:
             data: PySpark streaming dataframe for saving
-
         """
 
         output_constructor = data.writeStream.format(self._file_format)
@@ -209,7 +201,6 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     def _exists(self, schema_path: str) -> bool:
         """Check the existence of pyspark dataframe.
-
         Args:
             schema_path: schema of saved streaming dataframe
         """

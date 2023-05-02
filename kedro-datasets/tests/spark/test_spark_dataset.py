@@ -12,10 +12,6 @@ from kedro.io.core import generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
-from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
-from kedro_datasets.pickle import PickleDataSet
-from kedro_datasets.spark import SparkDataSet
-from kedro_datasets.spark.spark_dataset import _dbfs_exists, _dbfs_glob, _get_dbutils
 from moto import mock_s3
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
@@ -27,6 +23,11 @@ from pyspark.sql.types import (
     StructType,
 )
 from pyspark.sql.utils import AnalysisException
+
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
+from kedro_datasets.pickle import PickleDataSet
+from kedro_datasets.spark import SparkDataSet
+from kedro_datasets.spark.spark_dataset import _dbfs_exists, _dbfs_glob, _get_dbutils
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"

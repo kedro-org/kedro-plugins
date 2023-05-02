@@ -8,10 +8,11 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER
-from kedro_datasets.plotly import PlotlyDataSet
 from plotly import graph_objects
 from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
+
+from kedro_datasets.plotly import PlotlyDataSet
 
 
 @pytest.fixture

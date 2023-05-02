@@ -65,18 +65,22 @@ class TestStreamingDataSet:
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
         checkpoint_path = (tmp_path / "checkpoint").as_posix()
 
+        # Save the sample json file to temp_path for creating dataframe
         spark_json_ds = SparkDataSet(
             filepath=filepath_json,
             file_format="json",
             save_args=[{"mode", "overwrite"}],
         )
         spark_json_ds.save(sample_spark_streaming_df)
+
+        # Load the json file as the streaming dataframe
         loaded_with_streaming = SparkStreamingDataSet(
             filepath=filepath_json,
             file_format="json",
             load_args={"schema": {"filepath": schema_path}},
         ).load()
 
+        # Append json streams to filepath_output with specified schema path
         streaming_ds = SparkStreamingDataSet(
             filepath=filepath_output,
             file_format="json",

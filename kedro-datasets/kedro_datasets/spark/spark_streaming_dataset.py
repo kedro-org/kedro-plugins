@@ -180,10 +180,6 @@ class SparkStreamingDataSet(AbstractDataSet):
         )
 
     def _exists(self) -> bool:
-        """Check the existence of pyspark dataframe.
-        Args:
-            schema_path: schema of saved streaming dataframe
-        """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:

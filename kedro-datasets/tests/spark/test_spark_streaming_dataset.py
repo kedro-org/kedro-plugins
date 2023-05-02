@@ -1,16 +1,18 @@
-import re
 import json
+import re
 from pathlib import Path
+
 import pytest
 from kedro.io.core import DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-
 from pyspark.sql.utils import AnalysisException
+
 from kedro_datasets.spark.spark_dataset import SparkDataSet
 from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 
 SCHEMA_FILE_NAME = "schema.json"
+
 
 def sample_schema(schema_path):
     with open(schema_path, encoding="utf-8") as f:
@@ -85,6 +87,7 @@ class TestStreamingDataSet:
 
         streaming_ds.save(loaded_with_streaming)
         assert streaming_ds.exists()
+
     def test_load_options_invalid_schema_file(self, tmp_path):
         filepath = (tmp_path / "data").as_posix()
         schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
@@ -116,6 +119,7 @@ class TestStreamingDataSet:
                 file_format="csv",
                 load_args={"header": True, "schema": {}},
             )
+
     def test_exists_raises_error(self, mocker):
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file

@@ -139,16 +139,7 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     @staticmethod
     def _get_spark():
-        spark_conf_path = "conf/base/spark.yml"
-        if os.path.exists(spark_conf_path):
-            with open(
-                spark_conf_path, encoding="utf-8"
-            ) as File:  # pylint: disable=invalid-name
-                parameters = yaml.load(File, Loader=SafeLoader)
-            spark_conf = SparkConf().setAll(parameters.items())
-            spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
-        else:
-            spark = SparkSession.builder.getOrCreate()
+        spark = SparkSession.builder.getOrCreate()
         return spark
 
     def _load(self) -> DataFrame:
@@ -158,19 +149,13 @@ class SparkStreamingDataSet(AbstractDataSet):
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        if self._schema:
-            input_constructor = (
-                self._get_spark()
-                .readStream.schema(self._schema)
-                .format(self._file_format)
-                .options(**self._load_args)
-            )
-        else:
-            input_constructor = (
-                self._get_spark()
-                .readStream.format(self._file_format)
-                .options(**self._load_args)
-            )
+        input_constructor = (
+            self._get_spark()
+            .readStream
+            .schema(self._schema)
+            .format(self._file_format)
+            .options(**self._load_args)
+        )
         return (
             input_constructor.load()
             if self._file_format

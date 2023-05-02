@@ -77,7 +77,7 @@ class TestStreamingDataSet:
             file_format="json",
             save_args={"checkpoint": checkpoint_path, "output_mode": "append"},
         )
-        assert not streaming_ds._exists(schema_path)
+        assert not streaming_ds.custom_exists(schema_path)
 
         streaming_ds.save(loaded_with_streaming)
         assert streaming_ds.custom_exists(schema_path)

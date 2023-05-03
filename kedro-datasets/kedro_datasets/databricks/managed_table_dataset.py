@@ -76,7 +76,7 @@ class ManagedTable:  # pylint: disable=R0902
         """validates catalog name
 
         Raises:
-            DataSetError:
+            DataSetError: If the catalog name does not conform to naming constraints.
         """
         if self.catalog:
             if not re.fullmatch(self._NAMING_REGEX, self.catalog):

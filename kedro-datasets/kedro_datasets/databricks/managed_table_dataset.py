@@ -149,7 +149,7 @@ class ManagedTable:  # pylint: disable=R0902
 class ManagedTableDataSet(AbstractVersionedDataSet):
     """``ManagedTableDataSet`` loads and saves data into managed delta tables on Databricks.
         Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
-        When saving data, you can specify one of three modes: overwtire(default), append,
+        When saving data, you can specify one of three modes: overwrite(default), append,
         or upsert. Upsert requires you to specify the primary_column parameter which
         will be used as part of the join condition. This dataset works best with
         the databricks kedro starter. That starter comes with hooks that allow this

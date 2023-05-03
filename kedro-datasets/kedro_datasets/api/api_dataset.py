@@ -103,7 +103,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             **self._load_args,
         }
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     @staticmethod
     def _convert_type(value: Any):

@@ -105,7 +105,7 @@ class BioSequenceDataSet(
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

@@ -173,7 +173,7 @@ class SnowparkTableDataSet(
         self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

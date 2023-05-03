@@ -91,7 +91,7 @@ class TextDataSet(AbstractVersionedDataSet[str, str]):
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
-        self.metadata = metadata
+        self._metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

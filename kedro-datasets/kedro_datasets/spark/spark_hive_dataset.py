@@ -122,7 +122,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

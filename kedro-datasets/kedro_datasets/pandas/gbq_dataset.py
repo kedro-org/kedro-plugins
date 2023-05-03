@@ -130,7 +130,7 @@ class GBQTableDataSet(
             location=self._save_args.get("location"),
         )
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {
@@ -295,7 +295,7 @@ class GBQQueryDataSet(
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
 
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)

@@ -77,7 +77,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
-        self.metadata = metadata
+        self._metadata = metadata
 
     @staticmethod
     def _get_spark():

@@ -22,7 +22,7 @@ class SlicedVideo:
     def __init__(self, video, slice_indexes, metadata: Dict[str, Any] = None):
         self.video = video
         self.indexes = range(*slice_indexes.indices(len(video)))
-        self.metadata = metadata
+        self._metadata = metadata
 
     def __getitem__(self, index: Union[int, slice]) -> PIL.Image.Image:
         if isinstance(index, slice):
@@ -72,7 +72,7 @@ class FileVideo(AbstractVideo):
         self._filepath = filepath
         self._cap = cv2.VideoCapture(filepath)
         self._n_frames = self._get_length()
-        self.metadata = metadata
+        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -139,7 +139,7 @@ class SequenceVideo(AbstractVideo):
         self._fourcc = fourcc
         self._size = frames[0].size
         self._fps = fps
-        self.metadata = metadata
+        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -177,7 +177,7 @@ class GeneratorVideo(AbstractVideo):
         self._fourcc = fourcc
         self._size = first.size
         self._fps = fps
-        self.metadata = metadata
+        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -300,7 +300,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         _credentials = deepcopy(credentials) or {}
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _load(self) -> AbstractVideo:
         """Loads data from the video file.

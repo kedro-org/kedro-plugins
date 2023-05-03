@@ -119,7 +119,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._url = url
         self._table = table
 
-        self.metadata = metadata
+        self._metadata = metadata
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

@@ -284,7 +284,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         path = PurePosixPath(filepath)
         exists_function = None
         glob_function = None
-        self.metadata = metadata
+        self._metadata = metadata
 
         if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
             logger.warning(

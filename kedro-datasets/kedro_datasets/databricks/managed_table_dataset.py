@@ -86,7 +86,7 @@ class ManagedTable:  # pylint: disable=R0902
         """validates the write mode
 
         Raises:
-            DataSetError:
+            DataSetError: If an invalid `write_mode` is passed.
         """
         if self.write_mode not in self._VALID_WRITE_MODES:
             valid_modes = ", ".join(self._VALID_WRITE_MODES)

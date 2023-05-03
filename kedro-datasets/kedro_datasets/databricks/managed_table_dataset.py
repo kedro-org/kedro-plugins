@@ -429,7 +429,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             "write_mode": self._table.write_mode,
             "dataframe_type": self._table.dataframe_type,
             "primary_key": self._table.primary_key,
-            "version": self._version,
+            "version": str(self._version),
             "owner_group": self._table.owner_group,
             "partition_columns": self._table.partition_columns,
         }

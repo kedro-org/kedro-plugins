@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from functools import partial
 from operator import attrgetter
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from cachetools import Cache, cachedmethod
@@ -439,7 +439,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         """
         if self._table.catalog:
             try:
-                self._get_spark().sql(f"USE CATALOG {self._table.catalog}")
+                self._get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
             except (ParseException, AnalysisException) as exc:
                 logger.warning(
                     "catalog %s not found or unity not enabled. Error message: %s",

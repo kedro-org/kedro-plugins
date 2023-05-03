@@ -174,6 +174,11 @@ class TestManagedTableDataSet:
         unity_ds = ManagedTableDataSet(catalog="test", database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test`.`test`.`test`"
 
+        unity_ds = ManagedTableDataSet(
+            catalog="test-test", database="test", table="test"
+        )
+        assert unity_ds._table.full_table_location() == "`test-test`.`test`.`test`"
+
         unity_ds = ManagedTableDataSet(database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test`.`test`"
 
@@ -192,7 +197,7 @@ class TestManagedTableDataSet:
             "write_mode": "overwrite",
             "dataframe_type": "spark",
             "primary_key": None,
-            "version": None,
+            "version": "None",
             "owner_group": None,
             "partition_columns": None,
         }

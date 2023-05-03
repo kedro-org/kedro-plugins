@@ -207,7 +207,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         database: str = "default",
         write_mode: str = "overwrite",
         dataframe_type: str = "spark",
-        primary_key: Union[str, List[str]] = None,
+        primary_key: Optional[Union[str, List[str]]] = None,
         version: Version = None,
         *,
         # the following parameters are used by project hooks

@@ -66,7 +66,7 @@ class ManagedTable:  # pylint: disable=R0902
         """validates database name
 
         Raises:
-            DataSetError:
+            DataSetError: If the table name does not conform to naming constraints.
         """
         if self.database:
             if not re.fullmatch(self._NAMING_REGEX, self.database):

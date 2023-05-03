@@ -174,24 +174,20 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         Example usage for the
         `Python API <https://kedro.readthedocs.io/en/stable/data/\
         data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
-        ::
+        .. code-block:: python
 
-            % pyspark --packages io.delta:delta-core_2.12:1.2.1
-            --conf "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension"
-            --conf "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
-
-            >>> from pyspark.sql import SparkSession
-            >>> from pyspark.sql.types import (StructField, StringType,
+            from pyspark.sql import SparkSession
+            from pyspark.sql.types import (StructField, StringType,
                                             IntegerType, StructType)
-            >>> from kedro_datasets.databricks import ManagedTableDataSet
-            >>> schema = StructType([StructField("name", StringType(), True),
-                                    StructField("age", IntegerType(), True)])
-            >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
-            >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-            >>> data_set = ManagedTableDataSet(table="names_and_ages")
-            >>> data_set.save(spark_df)
-            >>> reloaded = data_set.load()
-            >>> reloaded.take(4)
+            from kedro_datasets.databricks import ManagedTableDataSet
+            schema = StructType([StructField("name", StringType(), True),
+                                 StructField("age", IntegerType(), True)])
+            data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+            spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+            data_set = ManagedTableDataSet(table="names_and_ages")
+            data_set.save(spark_df)
+            reloaded = data_set.load()
+            reloaded.take(4)
         """
 
     # this dataset cannot be used with ``ParallelRunner``,

@@ -109,7 +109,7 @@ class ManagedTable:  # pylint: disable=R0902
         """validates the primary key of the table
 
         Raises:
-            DataSetError:
+            DataSetError: If no `primary_key` is specified.
         """
         if self.primary_key is None or len(self.primary_key) == 0:
             if self.write_mode == "upsert":

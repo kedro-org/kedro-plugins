@@ -37,7 +37,7 @@ class ManagedTable:  # pylint: disable=R0902
     table: str
     write_mode: str
     dataframe_type: str
-    primary_key: str
+    primary_key: Optional[str]
     owner_group: str
     partition_columns: Union[str, List[str]]
     json_schema: StructType

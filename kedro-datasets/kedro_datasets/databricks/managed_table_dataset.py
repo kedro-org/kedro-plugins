@@ -222,7 +222,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             table (str): the name of the table
             catalog (str, optional): the name of the catalog in Unity.
              Defaults to None.
-            database (str, optional): the name of the database
+            database (str, optional): the name of the database.
              (also referred to as schema). Defaults to "default".
             write_mode (str, optional): the mode to write the data into the table.
              Options are:["overwrite", "append", "upsert"].

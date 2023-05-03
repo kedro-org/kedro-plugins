@@ -99,7 +99,7 @@ class ManagedTable:  # pylint: disable=R0902
         """validates the dataframe type
 
         Raises:
-            DataSetError:
+            DataSetError: If an invalid `dataframe_type` is passed
         """
         if self.dataframe_type not in self._VALID_DATAFRAME_TYPES:
             valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)

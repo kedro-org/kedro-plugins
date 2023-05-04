@@ -11,11 +11,11 @@ To work with multiple streaming nodes, 2 hook are required for:
 
 Supported file formats are:
 
-- Text
-- CSV
-- JSON
-- ORC
-- Parquet
+1. Text
+1. CSV
+1. JSON
+1. ORC
+1. Parquet
 
 #### Example SparkStreamsHook:
 

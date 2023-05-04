@@ -10,7 +10,6 @@ To work with multiple streaming nodes, 2 hook are required for:
 #### Supported file formats
 
 Supported file formats are:
-
 - Text
 - CSV
 - JSON

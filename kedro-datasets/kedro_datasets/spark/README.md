@@ -7,6 +7,15 @@ To work with multiple streaming nodes, 2 hook are required for:
     - Integrating Pyspark, see [Build a Kedro pipeline with PySpark](https://docs.kedro.org/en/stable/tools_integration/pyspark.html) for details
     - Running streaming query without termination unless exception
 
+#### Supported file formats
+
+Supported file formats are:
+- Text
+- CSV
+- JSON
+- ORC
+- Parquet
+
 #### Example SparkStreamsHook:
 
 ```python
@@ -30,9 +39,5 @@ To make the application work with kafka format, respective spark configuration n
 ```yaml
 spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
-spark.sql.streaming.schemaInference: True
-spark.streaming.stopGracefullyOnShutdown: true # graceful shutdown guarantees (under some conditions, listed below in the post) that all received data is processed before destroying Spark context
-spark.sql.streaming.stateStore.stateSchemaCheck: false # since schema is not mentioned explicitly
-spark.jars.packages: org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.1 # spark and kafka configuraton for reading kafka files (not required if kafka is not used)
 
 ```

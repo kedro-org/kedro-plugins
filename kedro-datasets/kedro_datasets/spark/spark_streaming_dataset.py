@@ -74,7 +74,6 @@ class SparkStreamingDataSet(AbstractDataSet):
         self._file_format = file_format
         self._save_args = save_args
         self._load_args = load_args
-        self.output_format = ["kafka"]
 
         fs_prefix, filepath = _split_filepath(filepath)
 
@@ -122,12 +121,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             .format(self._file_format)
             .options(**self._load_args)
         )
-        return (
-            input_constructor.load()
-            if self._file_format
-            in self.output_format  # if the connector type is message broker
-            else input_constructor.load(self._filepath_)
-        )
+        return input_constructor.load(self._filepath_)
 
     def _save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
@@ -137,14 +131,11 @@ class SparkStreamingDataSet(AbstractDataSet):
 
         output_constructor = data.writeStream.format(self._file_format)
 
-        # for message brokers path is not needed
-        if self._file_format not in self.output_format:
-            output_constructor = output_constructor.option("path", self._filepath_)
-
         (
             output_constructor.option(
                 "checkpointLocation", self._save_args.pop("checkpoint")
             )
+            .option("path", self._filepath_)
             .outputMode(self._save_args.pop("output_mode"))
             .options(**self._save_args)
             .start()

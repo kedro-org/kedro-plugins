@@ -214,6 +214,18 @@ class TestManagedTableDataSet:
         with pytest.raises(DataSetError):
             ManagedTableDataSet(table="test", write_mode="upsert")
 
+    def test_invalid_table_name(self):
+        with pytest.raises(DataSetError):
+            ManagedTableDataSet(table="invalid!")
+
+    def test_invalid_database(self):
+        with pytest.raises(DataSetError):
+            ManagedTableDataSet(table="test", database="invalid!")
+
+    def test_invalid_catalog(self):
+        with pytest.raises(DataSetError):
+            ManagedTableDataSet(table="test", catalog="invalid!")
+
     def test_schema(self):
         unity_ds = ManagedTableDataSet(
             table="test",

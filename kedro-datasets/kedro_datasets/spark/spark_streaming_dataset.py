@@ -3,15 +3,15 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet
+from kedro.io.core import (
+    AbstractDataSet,
+)
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark.spark_dataset import (
-    SparkDataSet,
-    _split_filepath,
-    _strip_dbfs_prefix,
-)
+from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
+from kedro_datasets.spark.spark_dataset import SparkDataSet
+
 
 
 class SparkStreamingDataSet(AbstractDataSet):

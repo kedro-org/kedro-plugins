@@ -4,7 +4,6 @@ import pytest
 from kedro.io.core import DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark.spark_dataset import SparkDataSet
 from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
@@ -89,6 +88,7 @@ class TestStreamingDataSet:
 
         streaming_ds.save(loaded_with_streaming)
         assert streaming_ds.exists()
+<<<<<<< HEAD
 
     def test_exists_raises_error(self, mocker):
         # exists should raise all errors except for
@@ -102,3 +102,5 @@ class TestStreamingDataSet:
 
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
+=======
+>>>>>>> d1472e2 (update test and remove redundacy)

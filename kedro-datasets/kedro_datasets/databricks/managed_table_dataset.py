@@ -50,7 +50,8 @@ class ManagedTable:  # pylint: disable=R0902
             `validate_<field_name>(self, value) -> raises DataSetError`
         """
         for name, _ in self.__dataclass_fields__.items():  # pylint: disable=E1101
-            if method := getattr(self, f"validate_{name}", None):
+            method = getattr(self, f"validate_{name}", None)
+            if method:
                 method()
 
     def validate_table(self):

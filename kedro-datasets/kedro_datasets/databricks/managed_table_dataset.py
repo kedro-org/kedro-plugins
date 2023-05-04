@@ -4,13 +4,9 @@ in Databricks.
 import logging
 import re
 from dataclasses import dataclass
-from functools import partial
-from operator import attrgetter
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
-from cachetools import Cache, cachedmethod
-from cachetools.keys import hashkey
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,
@@ -256,7 +252,6 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             json_schema=schema,
         )
 
-        self._version_cache = Cache(maxsize=2)
         self._version = version
 
         super().__init__(
@@ -264,28 +259,6 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             version=version,
             exists_function=self._exists,
         )
-
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
-    def _fetch_latest_load_version(self) -> int:
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
-        latest_history = (
-            self._get_spark()
-            .sql(f"DESCRIBE HISTORY {self._table.full_table_location()} LIMIT 1")
-            .collect()
-        )
-        if len(latest_history) != 1:
-            raise VersionNotFoundError(
-                f"Did not find any versions for {self._table.full_table_location()}"
-            )
-        return latest_history[0].version
-
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> int:
-        """Generate and cache the current save version"""
-        return None
 
     @staticmethod
     def _get_spark() -> SparkSession:
@@ -312,7 +285,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
                     .table(self._table.full_table_location())
                 )
             except Exception as exc:
-                raise VersionNotFoundError(self._version) from exc
+                raise VersionNotFoundError(self._version.load) from exc
         else:
             data = self._get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":

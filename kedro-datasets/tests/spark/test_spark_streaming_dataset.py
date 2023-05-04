@@ -4,6 +4,7 @@ import pytest
 from kedro.io.core import DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark.spark_dataset import SparkDataSet
 from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
@@ -88,3 +89,16 @@ class TestStreamingDataSet:
 
         streaming_ds.save(loaded_with_streaming)
         assert streaming_ds.exists()
+
+    def test_exists_raises_error(self, mocker):
+        # exists should raise all errors except for
+        # AnalysisExceptions clearly indicating a missing file
+        spark_data_set = SparkStreamingDataSet(filepath="")
+        mocker.patch.object(
+            spark_data_set,
+            "_get_spark",
+            side_effect=AnalysisException("Other Exception", []),
+        )
+
+        with pytest.raises(DataSetError, match="Other Exception"):
+            spark_data_set.exists()

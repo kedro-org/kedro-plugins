@@ -14,3 +14,8 @@ jobs:
     uses: ./.github/workflows/check-plugin.yml
     with:
       plugin: kedro-datasets
+  check-release:
+    uses: ./.github/workflows/check-release.yml
+    with:
+      plugin: kedro-airflow
+

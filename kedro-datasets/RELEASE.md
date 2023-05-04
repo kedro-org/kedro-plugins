@@ -7,6 +7,11 @@
 ## Bug fixes and other changes
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [BrianCechmanek](https://github.com/BrianCechmanek)
+
 # Release 1.2.1:
 
 ## Major features and improvements:

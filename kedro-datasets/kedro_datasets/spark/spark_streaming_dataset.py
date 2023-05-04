@@ -1,21 +1,17 @@
 """SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
-import json
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-import fsspec
 from kedro.io.core import (
     AbstractDataSet,
-    DataSetError,
-    get_filepath_str,
-    get_protocol_and_path,
 )
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
+from kedro_datasets.spark.spark_dataset import SparkDataSet
+
 
 
 class SparkStreamingDataSet(AbstractDataSet):
@@ -97,32 +93,8 @@ class SparkStreamingDataSet(AbstractDataSet):
         self._schema = self._load_args.pop("schema", None)
         if self._schema is not None:
             if isinstance(self._schema, dict):
-                self._schema = self._load_schema_from_file(self._schema)
+                self._schema = SparkDataSet._load_schema_from_file(self._schema)
 
-    @staticmethod
-    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
-        filepath = schema.get("filepath")
-        if not filepath:
-            raise DataSetError(
-                "Schema load argument does not specify a 'filepath' attribute. Please"
-                "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
-            )
-
-        credentials = deepcopy(schema.get("credentials")) or {}
-        protocol, schema_path = get_protocol_and_path(filepath)
-        file_system = fsspec.filesystem(protocol, **credentials)
-        pure_posix_path = PurePosixPath(schema_path)
-        load_path = get_filepath_str(pure_posix_path, protocol)
-
-        # Open schema file
-        with file_system.open(load_path, encoding="utf-8") as fs_file:
-            try:
-                return StructType.fromJson(json.loads(fs_file.read()))
-            except Exception as exc:
-                raise DataSetError(
-                    f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
-                    f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
-                ) from exc
 
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes attributes of the dataset."""

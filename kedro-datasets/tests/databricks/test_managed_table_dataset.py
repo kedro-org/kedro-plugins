@@ -255,6 +255,20 @@ class TestManagedTableDataSet:
         )
         assert unity_ds._table.schema() == expected_schema
 
+    def test_invalid_schema(self):
+        with pytest.raises(DataSetError):
+            ManagedTableDataSet(
+                table="test",
+                schema={
+                    "fields": [
+                        {
+                            "invalid": "schema",
+                        }
+                    ],
+                    "type": "struct",
+                },
+            )._table.schema()
+
     def test_catalog_exists(self):
         unity_ds = ManagedTableDataSet(
             catalog="test", database="invalid", table="test_not_there"

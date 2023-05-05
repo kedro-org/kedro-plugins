@@ -22,6 +22,7 @@ from kedro.framework.project import PACKAGE_NAME, pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
+
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 

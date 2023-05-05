@@ -21,19 +21,16 @@ class SparkStreamingDataSet(AbstractDataSet):
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
     .. code-block:: yaml
         raw.new_inventory:
-            type: spark.SparkStreamingDataSet
-            filepath: data/01_raw/stream/inventory/
-            file_format: json
-        int.new_inventory:
-            type: spark.SparkStreamingDataSet
-            filepath: data/02_intermediate/inventory/
-            file_format: csv
-            save_args:
-                output_mode: append
-                checkpoint: data/04_checkpoint/int_new_inventory
-                header: True
-            load_args:
-                header: True
+        type: streaming.extras.datasets.spark_streaming_dataset.SparkStreamingDataSet
+        filepath: data/01_raw/stream/inventory/
+        file_format: json
+        save_args:
+            output_mode: append
+            checkpoint: data/04_checkpoint/raw_new_inventory
+            header: True
+        load_args:
+            schema:
+            filepath: data/01_raw/schema/inventory_schema.json
     """
 
     # pylint: disable=too-many-instance-attributes

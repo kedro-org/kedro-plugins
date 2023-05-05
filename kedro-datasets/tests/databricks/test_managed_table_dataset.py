@@ -169,6 +169,7 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
     return spark_session.createDataFrame(data, schema)
 
 
+# pylint: disable=too-many-public-methods
 class TestManagedTableDataSet:
     def test_full_table(self):
         unity_ds = ManagedTableDataSet(catalog="test", database="test", table="test")

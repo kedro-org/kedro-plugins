@@ -138,7 +138,7 @@ class ManagedTable:  # pylint: disable=R0902
         try:
             if self.json_schema is not None:
                 schema = StructType.fromJson(self.json_schema)
-        except ParseException as exc:
+        except (KeyError, ValueError) as exc:
             raise DataSetError(exc) from exc
         return schema
 

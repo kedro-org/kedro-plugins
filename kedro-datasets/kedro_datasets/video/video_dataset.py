@@ -19,10 +19,9 @@ from kedro.io.core import AbstractDataSet, get_protocol_and_path
 class SlicedVideo:
     """A representation of slices of other video types"""
 
-    def __init__(self, video, slice_indexes, metadata: Dict[str, Any] = None):
+    def __init__(self, video, slice_indexes):
         self.video = video
         self.indexes = range(*slice_indexes.indices(len(video)))
-        self._metadata = metadata
 
     def __getitem__(self, index: Union[int, slice]) -> PIL.Image.Image:
         if isinstance(index, slice):
@@ -68,11 +67,10 @@ class AbstractVideo(abc.Sequence):
 class FileVideo(AbstractVideo):
     """A video object read from a file"""
 
-    def __init__(self, filepath: str, metadata: Dict[str, Any] = None) -> None:
+    def __init__(self, filepath: str) -> None:
         self._filepath = filepath
         self._cap = cv2.VideoCapture(filepath)
         self._n_frames = self._get_length()
-        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -132,14 +130,12 @@ class SequenceVideo(AbstractVideo):
         frames: Sequence[PIL.Image.Image],
         fps: float,
         fourcc: str = "mp4v",
-        metadata: Dict[str, Any] = None,
     ) -> None:
         self._n_frames = len(frames)
         self._frames = frames
         self._fourcc = fourcc
         self._size = frames[0].size
         self._fps = fps
-        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:
@@ -169,7 +165,6 @@ class GeneratorVideo(AbstractVideo):
         length,
         fps: float,
         fourcc: str = "mp4v",
-        metadata: Dict[str, Any] = None,
     ) -> None:
         self._n_frames = length
         first = next(frames)
@@ -177,7 +172,6 @@ class GeneratorVideo(AbstractVideo):
         self._fourcc = fourcc
         self._size = first.size
         self._fps = fps
-        self._metadata = metadata
 
     @property
     def fourcc(self) -> str:

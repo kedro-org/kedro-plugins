@@ -100,7 +100,7 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of SVMLightDataSet to load / save data from a svmlight/libsvm file format.
+        """Creates a new instance of SVMLightDataSet to load/save data from a svmlight/libsvm file.
 
         Args:
             filepath: Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.

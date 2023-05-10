@@ -33,6 +33,7 @@ jobs:
           "kedro-docker/kedro_docker"
         )
 
+        new_release=false
         for package_path in "${PACKAGE_PATHS[@]}"; do
           package_name="${package_path%%/*}"
           package_version=$(python -c "import re; print(re.search(r'__version__\s*=\s*\"([^\"]+)\"', open('$package_path/__init__.py').read()).group(1))")
@@ -45,9 +46,10 @@ jobs:
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi
         done
+        echo "::set-output name=new_release::$new_release"
 
     - name: Publish distribution to Test PyPI
-      if: success()
+      if: steps.build.outputs.new_release == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}

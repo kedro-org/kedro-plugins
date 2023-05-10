@@ -39,8 +39,9 @@ jobs:
           if [ "$status_code" -eq 404 ]; then
             echo "Starting the release of $package_name $package_version"
             cd $package_path
-            echo $package_path
+            cd ..
             python -m build
+            new_release=true
           else
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi

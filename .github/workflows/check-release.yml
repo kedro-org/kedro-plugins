@@ -22,9 +22,6 @@ jobs:
         pip install requests build twine
 
     - name: Check versions and Build-Publish to PyPI
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         PACKAGE_PATHS=(
           "kedro-datasets/kedro_datasets"
@@ -41,7 +38,9 @@ jobs:
           status_code=$(curl --write-out %{http_code} --silent --output /dev/null "$pypi_endpoint")
           if [ "$status_code" -eq 404 ]; then
             echo "Starting the release of $package_name $package_version"
-            python -m build $package_path
+            cd $package_path
+            echo $package_path
+            python -m build
           else
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi

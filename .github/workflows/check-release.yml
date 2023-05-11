@@ -50,7 +50,7 @@ jobs:
         echo "new_release=$new_release" >> "$GITHUB_ENV"
         echo "dist_path=$dist_path" >> "$GITHUB_ENV"
         echo "package_name=$package_name" >> "$GITHUB_ENV"
-        echo "package_version=package_version" >> "$GITHUB_ENV"
+        echo "package_version=$package_version" >> "$GITHUB_ENV"
 
     - name: Create GitHub Release
       if: ${{ env.new_release == 'true' }}

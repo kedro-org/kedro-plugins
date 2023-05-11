@@ -46,10 +46,10 @@ jobs:
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi
         done
-        echo "::set-output name=new_release::$new_release"
+        echo "{new_release}={$new_release}" >> $GITHUB_OUTPUT
 
     - name: Publish distribution to Test PyPI
-      if: steps.build.outputs.new_release == 'true'
+      if: echo "${{ env.new_release }}" == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}

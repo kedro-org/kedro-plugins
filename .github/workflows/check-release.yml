@@ -49,6 +49,28 @@ jobs:
         done
         echo "new_release=$new_release" >> "$GITHUB_ENV"
         echo "dist_path=$dist_path" >> "$GITHUB_ENV"
+        echo "package_name=$package_name" >> "$GITHUB_ENV"
+        echo "package_version=package_version" >> "$GITHUB_ENV"
+
+    - name: Create GitHub Release
+      if: ${{ env.new_release == 'true' }}
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{ secrets.GH_TAGGING_TOKEN }}
+        script: |
+          const package_name = ${{ env.package_name }}
+          const package_version = ${{ env.package_version }}
+          const response = await github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: `${package_name}-${package_version}`,
+            target_commitish: 'main',
+            name: `${package_version}`,
+            body: `Release ${package_version}`,
+            draft: false,
+            prerelease: false,
+          });
+          return response.data;
 
     - name: Publish distribution to Test PyPI
       if: ${{ env.new_release == 'true' }}

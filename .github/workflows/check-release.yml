@@ -48,7 +48,7 @@ jobs:
           fi
         done
         echo "new_release=$new_release" >> "$GITHUB_ENV"
-        echo "dist_path=dist_path" >> "$GITHUB_ENV"
+        echo "dist_path=$dist_path" >> "$GITHUB_ENV"
 
     - name: Publish distribution to Test PyPI
       if: ${{ env.new_release }} == true

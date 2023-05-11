@@ -40,7 +40,7 @@ jobs:
             echo "Starting the release of $package_name $package_version"
             cd $package_path/..
             python -m build
-            package=$(pwd)
+            package=$(pwd)/dist
             new_release=true
             break
           else

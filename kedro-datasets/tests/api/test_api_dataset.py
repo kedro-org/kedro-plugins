@@ -5,7 +5,6 @@ import socket
 
 import pytest
 import requests
-import requests_mock
 from kedro.io.core import DataSetError
 from requests.auth import HTTPBasicAuth
 

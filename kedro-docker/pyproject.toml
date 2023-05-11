@@ -1,3 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro-docker"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro-Docker makes it easy to package Kedro projects with Docker."
+requires-python = ">=3.7, <3.11"
+license = {text = "Apache Software License (Apache 2.0)"}
+dependencies = [
+    "anyconfig~=0.10.0",  # not directly required, pinned by Snyk to avoid a vulnerability
+    "kedro>=0.16.0",
+    "semver~=2.10",  # Needs to be at least 2.10.0 to get VersionInfo.match
+]
+dynamic = ["readme", "version"]
+
+[project.urls]
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker"
+Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-docker/README.md"
+Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.entry-points."kedro.project_commands"]
+docker = "kedro_docker.plugin:commands"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["kedro_docker*"]
+namespaces = true  # To include the template files
+
+[tool.setuptools.package-data]
+kedro_docker = [
+    "template/Dockerfile.*",
+    "template/.dockerignore",
+    "template/.dive-ci",
+]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro_docker.__version__"}
+
+[tool.pytest.ini_options]
+addopts = """
+    --cov-report xml:coverage.xml
+    --cov-report term-missing
+    --cov kedro_docker
+    --cov tests
+    --no-cov-on-fail
+    -ra"""
+
 [tool.black]
 
 [tool.isort]

@@ -16,7 +16,7 @@ from requests.auth import AuthBase
 
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
-    """``APIDataSet`` loads the data from HTTP(S) APIs.
+    """``APIDataSet`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -27,7 +27,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         usda:
           type: api.APIDataSet
           url: https://quickstats.nass.usda.gov
-        params:
+          params:
             key: SOME_TOKEN,
             format: JSON,
             commodity_desc: CORN,
@@ -57,34 +57,29 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> )
         >>> data = data_set.load()
 
-    ``APIDataSet`` can also be used to save output on a remote server using
-    HTTP(S) methods.
+    ``APIDataSet`` can also be used to save output on a remote server using HTTP(S)
+    methods.
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
-
-    Here we initialise our APIDataSet with the correct parameters to make requests
-    towards the configured remote server.
 
         >>> data_set = APIDataSet(
                 method = "POST"
                 url = "url_of_remote_server",
                 save_args = {"chunk_size":1}
         )
+        >>> data_set.save(example_table)
+
     On initialisation, we can specify all the necessary parameters in the save args
-    dictionary. The default HTTP(S) method is POST but PUT is also supported.
-    Two important parameters to keep in mind are timeout and chunk_size. ``Timeout``
-    defines how long  our program waits for a response after a request. ``Chunk_size``, is
-    only used if the input of save method is a list. It will divide the request into
-    chunks of size ``chunk_size``. For example, here we will send two requests each
-    containing one row of our example DataFrame.
-
-        >>> data_to_save = example_table.to_dict(orient="records")
-        >>> data_set.save(data_to_save)
-
-    If the data passed to the save method is not a list, ``APIDataSet`` will check if
-    it can be loaded as JSON. If true, it will send the data unchanged in a single
-    request. Otherwise, the ``_save`` method will try to dump the data in JSON format and
-    execute the request.
+    dictionary. The default HTTP(S) method is POST but PUT is also supported. Two
+    important parameters to keep in mind are timeout and chunk_size. `timeout` defines
+    how long  our program waits for a response after a request. `chunk_size`, is only
+    used if the input of save method is a list. It will divide the request into chunks
+    of size `chunk_size`. For example, here we will send two requests each containing
+    one row of our example DataFrame.
+    If the data passed to the save method is not a list, ``APIDataSet`` will check if it
+    can be loaded as JSON. If true, it will send the data unchanged in a single request.
+    Otherwise, the ``_save`` method will try to dump the data in JSON format and execute
+    the request.
     """
 
     DEFAULT_SAVE_ARGS = {
@@ -109,7 +104,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
         Args:
             url: The API URL endpoint.
-            method: The Method of the request. GET, POST, PUT are the only supported
+            method: The method of the request. GET, POST, PUT are the only supported
                 methods
             load_args: Additional parameters to be fed to requests.request.
                 https://requests.readthedocs.io/en/latest/api/#requests.request

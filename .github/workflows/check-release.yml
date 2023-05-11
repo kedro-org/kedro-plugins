@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests build twine
+        pip install requests build
 
     - name: Check versions and Build-Publish to PyPI
       run: |
@@ -38,10 +38,10 @@ jobs:
           status_code=$(curl --write-out %{http_code} --silent --output /dev/null "$pypi_endpoint")
           if [ "$status_code" -eq 404 ]; then
             echo "Starting the release of $package_name $package_version"
-            cd $package_path
-            cd ..
+            cd $package_path/..
             python -m build
             new_release=true
+            break
           else
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi

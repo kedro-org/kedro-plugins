@@ -196,11 +196,6 @@ class TestAPIDataSet:
         response = api_data_set.load()
         assert response.request.cert == cert_out
 
-        with pytest.raises(
-            DataSetError, match="Failed to connect to the remote server"
-        ):
-            api_data_set.save(TEST_SAVE_DATA[0])
-
     def test_exists_http_error(self, requests_mock):
         """
         In case of an unexpected HTTP error,

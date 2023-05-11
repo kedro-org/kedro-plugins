@@ -40,15 +40,15 @@ jobs:
             echo "Starting the release of $package_name $package_version"
             cd $package_path/..
             python -m build
-            package=$package_path/..
+            package=$(pwd)
             new_release=true
             break
           else
             echo "Skipped: $package_name $package_version already exists on PyPI"
           fi
         done
-        echo "{new_release}={$new_release}" >> $GITHUB_OUTPUT
-        echo "{package}={$package}" >> $GITHUB_OUTPUT
+        echo "new_release=$new_release" >> "$GITHUB_ENV"
+        echo "package=$package" >> "$GITHUB_ENV"
         echo "${{ env.new_release }}"
         echo "${{ env.package }}"
 

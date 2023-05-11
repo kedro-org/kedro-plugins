@@ -10,6 +10,7 @@ from requests.auth import HTTPBasicAuth
 from kedro_datasets.api import APIDataSet
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
+SAVE_METHODS = ["POST", "PUT"]
 
 TEST_URL = "http://example.com/api/test"
 TEST_TEXT_RESPONSE_DATA = "This is a response."
@@ -26,8 +27,17 @@ TEST_SAVE_DATA = [json.dumps({"key1": "info1", "key2": "info2"})]
 class TestAPIDataSet:
     @pytest.mark.parametrize("method", POSSIBLE_METHODS)
     def test_request_method(self, requests_mock, method):
-        api_data_set = APIDataSet(url=TEST_URL, method=method)
-        requests_mock.register_uri(method, TEST_URL, text=TEST_TEXT_RESPONSE_DATA)
+        if method in ["OPTIONS", "HEAD", "PATCH", "DELETE"]:
+            with pytest.raises(
+                ValueError,
+                match="Only GET, POST and PUT methods are supported",
+            ):
+                APIDataSet(url=TEST_URL, method=method)
+
+        else:
+            api_data_set = APIDataSet(url=TEST_URL, method=method)
+
+            requests_mock.register_uri(method, TEST_URL, text=TEST_TEXT_RESPONSE_DATA)
 
         response = api_data_set.load()
         assert response.text == TEST_TEXT_RESPONSE_DATA
@@ -343,6 +353,104 @@ class TestAPIDataSet:
         """
         Saving is disabled on the data set.
         """
-        api_data_set = APIDataSet(url=TEST_URL, method=TEST_METHOD)
-        with pytest.raises(DataSetError, match="is a read only data set type"):
-            api_data_set.save({})
+        if method in ["PUT", "POST"]:
+            api_data_set = APIDataSet(
+                url=TEST_URL,
+                method=method,
+                save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
+            )
+            requests_mocker.register_uri(
+                method,
+                TEST_URL_WITH_PARAMS,
+                headers=TEST_HEADERS,
+                status_code=requests.codes.ok,
+            )
+            response = api_data_set._save(TEST_SAVE_DATA)
+
+            assert isinstance(response, requests.Response)
+        elif method == "GET":
+            api_data_set = APIDataSet(
+                url=TEST_URL,
+                method=method,
+                save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
+            )
+            with pytest.raises(
+                DataSetError, match="Use PUT, POST or DELETE methods for save"
+            ):
+                api_data_set._save(TEST_SAVE_DATA)
+        else:
+            with pytest.raises(
+                ValueError,
+                match="Only GET, POST and PUT methods are supported",
+            ):
+                APIDataSet(url=TEST_URL, method=method)
+
+    @pytest.mark.parametrize("save_methods", SAVE_METHODS)
+    def test_successful_save_with_json(self, requests_mocker, save_methods):
+        """
+        When we want to save with json parameters
+        Given an APIDataSet class
+        Then check we get a response
+        """
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=save_methods,
+            save_args={"json": TEST_JSON_RESPONSE_DATA, "headers": TEST_HEADERS},
+        )
+        requests_mocker.register_uri(
+            save_methods,
+            TEST_URL,
+            headers=TEST_HEADERS,
+            text=json.dumps(TEST_JSON_RESPONSE_DATA),
+        )
+        response_list = api_data_set._save(TEST_SAVE_DATA)
+
+        assert isinstance(response_list, requests.Response)
+
+        response_dict = api_data_set._save({"item1": "key1"})
+        assert isinstance(response_dict, requests.Response)
+
+        response_json = api_data_set._save(TEST_SAVE_DATA[0])
+        assert isinstance(response_json, requests.Response)
+
+    @pytest.mark.parametrize("save_methods", SAVE_METHODS)
+    def test_save_http_error(self, requests_mocker, save_methods):
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=save_methods,
+            save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS, "chunk_size": 2},
+        )
+        requests_mocker.register_uri(
+            save_methods,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text="Nope, not found",
+            status_code=requests.codes.FORBIDDEN,
+        )
+
+        with pytest.raises(DataSetError, match="Failed to send data"):
+            api_data_set.save(TEST_SAVE_DATA)
+
+        with pytest.raises(DataSetError, match="Failed to send data"):
+            api_data_set.save(TEST_SAVE_DATA[0])
+
+    @pytest.mark.parametrize("save_methods", SAVE_METHODS)
+    def test_save_socket_error(self, requests_mocker, save_methods):
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=save_methods,
+            save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
+        )
+        requests_mocker.register_uri(
+            save_methods, TEST_URL_WITH_PARAMS, exc=socket.error
+        )
+
+        with pytest.raises(
+            DataSetError, match="Failed to connect to the remote server"
+        ):
+            api_data_set.save(TEST_SAVE_DATA)
+
+        with pytest.raises(
+            DataSetError, match="Failed to connect to the remote server"
+        ):
+            api_data_set.save(TEST_SAVE_DATA[0])

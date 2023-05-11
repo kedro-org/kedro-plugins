@@ -1,9 +1,11 @@
 # pylint: disable=no-member
 import base64
+import json
 import socket
 
 import pytest
 import requests
+import requests_mock
 from kedro.io.core import DataSetError
 from requests.auth import HTTPBasicAuth
 
@@ -15,6 +17,7 @@ SAVE_METHODS = ["POST", "PUT"]
 TEST_URL = "http://example.com/api/test"
 TEST_TEXT_RESPONSE_DATA = "This is a response."
 TEST_JSON_REQUEST_DATA = [{"key": "value"}]
+TEST_JSON_RESPONSE_DATA = [{"key": "value"}]
 
 TEST_PARAMS = {"param": "value"}
 TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
@@ -39,8 +42,14 @@ class TestAPIDataSet:
 
             requests_mock.register_uri(method, TEST_URL, text=TEST_TEXT_RESPONSE_DATA)
 
-        response = api_data_set.load()
-        assert response.text == TEST_TEXT_RESPONSE_DATA
+            if method == "GET":
+                response = api_data_set.load()
+                assert response.text == TEST_TEXT_RESPONSE_DATA
+            else:
+                with pytest.raises(
+                    DataSetError, match="Only GET method is supported for load"
+                ):
+                    api_data_set.load()
 
     @pytest.mark.parametrize(
         "parameters_in, url_postfix",
@@ -263,9 +272,17 @@ class TestAPIDataSet:
         with pytest.raises(DataSetError, match="Failed to connect"):
             api_data_set.load()
 
-    def test_read_only_mode(self):
+    @pytest.fixture
+    def requests_mocker(self):
+        with requests_mock.Mocker() as mock:
+            yield mock
+
+    @pytest.mark.parametrize("method", POSSIBLE_METHODS)
+    def test_successful_save(self, requests_mocker, method):
         """
-        Saving is disabled on the data set.
+        When we want to save some data on a server
+        Given an APIDataSet class
+        Then check we get a response
         """
         if method in ["PUT", "POST"]:
             api_data_set = APIDataSet(
@@ -288,9 +305,7 @@ class TestAPIDataSet:
                 method=method,
                 save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
             )
-            with pytest.raises(
-                DataSetError, match="Use PUT, POST or DELETE methods for save"
-            ):
+            with pytest.raises(DataSetError, match="Use PUT or POST methods for save"):
                 api_data_set._save(TEST_SAVE_DATA)
         else:
             with pytest.raises(

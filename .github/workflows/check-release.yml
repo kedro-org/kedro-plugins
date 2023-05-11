@@ -65,7 +65,7 @@ jobs:
             repo: context.repo.repo,
             tag_name: `${package_name}-${package_version}`,
             target_commitish: 'main',
-            name: `${package_version}`,
+            name: `${package_name}-${package_version}`,
             body: `Release ${package_version}`,
             draft: false,
             prerelease: false,

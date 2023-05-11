@@ -25,14 +25,14 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     .. code-block:: yaml
 
         usda:
-          type: api.APIDataSet 
-          url: https://quickstats.nass.usda.gov 
+          type: api.APIDataSet
+          url: https://quickstats.nass.usda.gov
         params:
-            key: SOME_TOKEN, 
-            format: JSON, 
-            commodity_desc: CORN, 
+            key: SOME_TOKEN,
+            format: JSON,
+            commodity_desc: CORN,
             statisticcat_des: YIELD,
-            agg_level_desc: STATE, 
+            agg_level_desc: STATE,
             year: 2000
 
     Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\

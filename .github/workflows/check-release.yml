@@ -40,7 +40,7 @@ jobs:
             echo "Starting the release of $package_name $package_version"
             cd $package_path/..
             python -m build
-            package=$(pwd)/dist
+            dist_path=$(pwd)/dist
             new_release=true
             break
           else
@@ -48,14 +48,12 @@ jobs:
           fi
         done
         echo "new_release=$new_release" >> "$GITHUB_ENV"
-        echo "package=$package" >> "$GITHUB_ENV"
-        echo "${{ env.new_release }}"
-        echo "${{ env.package }}"
+        echo "dist_path=dist_path" >> "$GITHUB_ENV"
 
     - name: Publish distribution to Test PyPI
       if: echo "${{ env.new_release }}" == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        packages-dir: ${{ env.package }}
+        packages-dir: ${{ env.dist_path }}
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         repository-url: https://test.pypi.org/legacy/

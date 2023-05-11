@@ -272,13 +272,8 @@ class TestAPIDataSet:
         with pytest.raises(DataSetError, match="Failed to connect"):
             api_data_set.load()
 
-    @pytest.fixture
-    def requests_mocker(self):
-        with requests_mock.Mocker() as mock:
-            yield mock
-
     @pytest.mark.parametrize("method", POSSIBLE_METHODS)
-    def test_successful_save(self, requests_mocker, method):
+    def test_successful_save(self, requests_mock, method):
         """
         When we want to save some data on a server
         Given an APIDataSet class
@@ -290,7 +285,7 @@ class TestAPIDataSet:
                 method=method,
                 save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
             )
-            requests_mocker.register_uri(
+            requests_mock.register_uri(
                 method,
                 TEST_URL_WITH_PARAMS,
                 headers=TEST_HEADERS,
@@ -315,7 +310,7 @@ class TestAPIDataSet:
                 APIDataSet(url=TEST_URL, method=method)
 
     @pytest.mark.parametrize("save_methods", SAVE_METHODS)
-    def test_successful_save_with_json(self, requests_mocker, save_methods):
+    def test_successful_save_with_json(self, requests_mock, save_methods):
         """
         When we want to save with json parameters
         Given an APIDataSet class
@@ -326,7 +321,7 @@ class TestAPIDataSet:
             method=save_methods,
             save_args={"json": TEST_JSON_RESPONSE_DATA, "headers": TEST_HEADERS},
         )
-        requests_mocker.register_uri(
+        requests_mock.register_uri(
             save_methods,
             TEST_URL,
             headers=TEST_HEADERS,
@@ -343,13 +338,13 @@ class TestAPIDataSet:
         assert isinstance(response_json, requests.Response)
 
     @pytest.mark.parametrize("save_methods", SAVE_METHODS)
-    def test_save_http_error(self, requests_mocker, save_methods):
+    def test_save_http_error(self, requests_mock, save_methods):
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=save_methods,
             save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS, "chunk_size": 2},
         )
-        requests_mocker.register_uri(
+        requests_mock.register_uri(
             save_methods,
             TEST_URL_WITH_PARAMS,
             headers=TEST_HEADERS,
@@ -364,15 +359,13 @@ class TestAPIDataSet:
             api_data_set.save(TEST_SAVE_DATA[0])
 
     @pytest.mark.parametrize("save_methods", SAVE_METHODS)
-    def test_save_socket_error(self, requests_mocker, save_methods):
+    def test_save_socket_error(self, requests_mock, save_methods):
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=save_methods,
             save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
         )
-        requests_mocker.register_uri(
-            save_methods, TEST_URL_WITH_PARAMS, exc=socket.error
-        )
+        requests_mock.register_uri(save_methods, TEST_URL_WITH_PARAMS, exc=socket.error)
 
         with pytest.raises(
             DataSetError, match="Failed to connect to the remote server"

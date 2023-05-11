@@ -72,10 +72,9 @@ jobs:
           });
           return response.data;
 
-    - name: Publish distribution to Test PyPI
+    - name: Publish distribution 📦 to PyPI
       if: ${{ env.new_release == 'true' }}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: ${{ env.dist_path }}
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.PYPI_API_TOKEN }}

@@ -54,7 +54,7 @@ jobs:
 
     - name: Create GitHub Release
       if: ${{ env.new_release == 'true' }}
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GH_TAGGING_TOKEN }}
         script: |

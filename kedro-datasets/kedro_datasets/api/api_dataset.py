@@ -172,18 +172,6 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "auth": self._convert_type(self._auth),
             **self._load_args,
         }
-        self.chunk_size = chunk_size
-
-    @staticmethod
-    def _convert_type(value: Any):
-        """
-        From the Data Catalog, iterables are provided as Lists.
-        However, for some parameters in the Python requests library,
-        only Tuples are allowed.
-        """
-        if isinstance(value, List):
-            return tuple(value)
-        return value
 
     @staticmethod
     def _convert_type(value: Any):

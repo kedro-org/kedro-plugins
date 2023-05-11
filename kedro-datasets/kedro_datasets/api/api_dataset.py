@@ -1,5 +1,5 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
-It uses the python requests library: https://requests.readthedocs.io/en/latest/
+It uses the python requests library: https://requests.readthedocs.io/en/latest/ [TO DELETE]
 """
 from typing import Any, Dict, List, NoReturn, Tuple, Union
 

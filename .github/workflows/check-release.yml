@@ -1,0 +1,81 @@
+name: Check Versions and Build-Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version-and-build-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests build
+
+    - name: Check versions and Build-Publish to PyPI
+      run: |
+        PACKAGE_PATHS=(
+          "kedro-datasets/kedro_datasets"
+          "kedro-telemetry/kedro_telemetry"
+          "kedro-airflow/kedro_airflow"
+          "kedro-docker/kedro_docker"
+        )
+
+        new_release=false
+        for package_path in "${PACKAGE_PATHS[@]}"; do
+          package_name="${package_path%%/*}"
+          package_version=$(python -c "import re; print(re.search(r'__version__\s*=\s*\"([^\"]+)\"', open('$package_path/__init__.py').read()).group(1))")
+          pypi_endpoint="https://pypi.org/pypi/$package_name/$package_version/json"
+          status_code=$(curl --write-out %{http_code} --silent --output /dev/null "$pypi_endpoint")
+          if [ "$status_code" -eq 404 ]; then
+            echo "Starting the release of $package_name $package_version"
+            cd $package_path/..
+            python -m build
+            dist_path=$(pwd)/dist
+            new_release=true
+            break
+          else
+            echo "Skipped: $package_name $package_version already exists on PyPI"
+          fi
+        done
+        echo "new_release=$new_release" >> "$GITHUB_ENV"
+        echo "dist_path=$dist_path" >> "$GITHUB_ENV"
+        echo "package_name=$package_name" >> "$GITHUB_ENV"
+        echo "package_version=$package_version" >> "$GITHUB_ENV"
+
+    - name: Create GitHub Release
+      if: ${{ env.new_release == 'true' }}
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GH_TAGGING_TOKEN }}
+        script: |
+          const package_name = "${{ env.package_name }}"
+          const package_version = "${{ env.package_version }}"
+          const response = await github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: `${package_name}-${package_version}`,
+            target_commitish: 'main',
+            name: `${package_version}`,
+            body: `Release ${package_version}`,
+            draft: false,
+            prerelease: false,
+          });
+          return response.data;
+
+    - name: Publish distribution to Test PyPI
+      if: ${{ env.new_release == 'true' }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: ${{ env.dist_path }}
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/

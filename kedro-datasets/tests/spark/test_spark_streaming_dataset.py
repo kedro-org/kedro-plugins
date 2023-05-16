@@ -115,6 +115,7 @@ class TestStreamingDataSet:
         #     filepath=s3_path, file_format="json", save_args=[{"mode", "overwrite"}]
         # )
         # spark_json_ds.save(sample_spark_streaming_df)
+
         sample_spark_streaming_df.write.json(s3_path)
 
         streaming_ds = SparkStreamingDataSet(

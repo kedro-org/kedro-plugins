@@ -65,6 +65,15 @@ def mocked_s3_bucket():
 
 
 @pytest.fixture
+def s3_bucket():
+    with mock_s3():
+        s3 = boto3.resource("s3", region_name="us-east-1")
+        bucket_name = "test-bucket"
+        s3.create_bucket(Bucket=bucket_name)
+        yield bucket_name
+
+
+@pytest.fixture
 def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructType):
     """Creates schema file and adds it to mocked S3 bucket."""
     temporary_path = tmp_path / SCHEMA_FILE_NAME
@@ -91,6 +100,28 @@ class TestStreamingDataSet:
             file_format="json",
             load_args={"schema": {"filepath": schema_path}},
         ).load()
+        assert streaming_ds.isStreaming
+        schema = sample_schema(schema_path)
+        assert streaming_ds.schema == schema
+
+    def test_read_dataframe_from_s3(
+        self, tmp_path, sample_spark_streaming_df, s3_bucket
+    ):
+
+        s3_path = f"s3://{s3_bucket}/test-data"
+        schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+
+        spark_json_ds = SparkDataSet(
+            filepath=s3_path, file_format="json", save_args=[{"mode", "overwrite"}]
+        )
+        spark_json_ds.save(sample_spark_streaming_df)
+
+        streaming_ds = SparkStreamingDataSet(
+            filepath=s3_path,
+            file_format="json",
+            load_args={"schema": {"filepath": schema_path}},
+        ).load()
+
         assert streaming_ds.isStreaming
         schema = sample_schema(schema_path)
         assert streaming_ds.schema == schema

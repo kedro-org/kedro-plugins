@@ -108,7 +108,7 @@ class TestStreamingDataSet:
         self, tmp_path, sample_spark_streaming_df, s3_bucket
     ):
 
-        s3_path = f"s3://{s3_bucket}/test-data"
+        s3_path = f"s3a://{s3_bucket}/test-data/01_raw/*"
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataSet(

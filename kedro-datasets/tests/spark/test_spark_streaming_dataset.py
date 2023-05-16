@@ -111,10 +111,11 @@ class TestStreamingDataSet:
         s3_path = f"s3a://{s3_bucket}/test-data/01_raw/*"
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
-        spark_json_ds = SparkDataSet(
-            filepath=s3_path, file_format="json", save_args=[{"mode", "overwrite"}]
-        )
-        spark_json_ds.save(sample_spark_streaming_df)
+        # spark_json_ds = SparkDataSet(
+        #     filepath=s3_path, file_format="json", save_args=[{"mode", "overwrite"}]
+        # )
+        # spark_json_ds.save(sample_spark_streaming_df)
+        sample_spark_streaming_df.write.json(s3_path)
 
         streaming_ds = SparkStreamingDataSet(
             filepath=s3_path,

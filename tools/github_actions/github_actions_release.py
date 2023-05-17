@@ -40,7 +40,6 @@ if __name__ == "__main__":
         pypi_endpoint = f"https://pypi.org/pypi/{package_name}/{package_version}/json/"
         env_file = os.getenv('GITHUB_ENV')
 
-        print(package_name, package_version)
         if check_no_version_pypi(pypi_endpoint, package_name, package_version):
             with open(env_file, "a") as env_file:
                 env_file.write(f"new_release=true\npackage_name={package_name}\npackage_version={package_version}\n")

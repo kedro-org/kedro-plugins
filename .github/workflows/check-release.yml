@@ -1,4 +1,4 @@
-name: Check Versions and Build-Publish
+name: Check versions and build-publish
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
       plugin: ${{ needs.check-version.outputs.package_name }}
 
   build-publish:
-    needs: test
+    needs: [check-version, test]
     if: ${{ needs.check-version.outputs.new_release == 'true' }}
     runs-on: ubuntu-latest
     steps:

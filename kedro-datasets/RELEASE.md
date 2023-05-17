@@ -3,7 +3,7 @@
 ## Major features and improvements:
 * Added pandas 2.0 support.
 * Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
-* Added `metadata` attribute to all existing datasets.
+* Added `metadata` attribute to all existing datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 
 ## Bug fixes and other changes

@@ -36,7 +36,7 @@ def github_release(
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
     headers["Authorization"] = f"token {github_tagging_token}"
-    resp = requests.post(github_endpoint, headers=headers, json=payload)
+    resp = requests.post(github_endpoint, headers=headers, json=payload, timeout=5)
     if resp.status_code == 200:
         print("Create GitHub release successfully")
         print(resp.content)

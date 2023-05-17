@@ -1,4 +1,4 @@
-name: Run checks on kedro-telemetry
+name: Run checks on Kedro-Telemetry
 
 on:
   push:

@@ -3,13 +3,13 @@ name: Run checks on Kedro-Airflow
 on:
   push:
     paths-ignore:
-       - "kedro-docker/**"
        - "kedro-datasets/**"
+       - "kedro-docker/**"
        - "kedro-telemetry/**"
   pull_request:
     paths-ignore:
-       - "kedro-docker/**"
        - "kedro-datasets/**"
+       - "kedro-docker/**"
        - "kedro-telemetry/**"
     types: [ synchronize ]
 

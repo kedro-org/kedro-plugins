@@ -45,7 +45,7 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         The validation is performed by calling a function named:
             `validate_<field_name>(self, value) -> raises DataSetError`
         """
-        for name, _ in self.__dataclass_fields__.items():  # pylint: disable=E1101
+        for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
             method = getattr(self, f"validate_{name}", None)
             if method:
                 method()

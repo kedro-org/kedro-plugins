@@ -13,7 +13,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8
+        python-version: '3.10'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -23,9 +23,9 @@ jobs:
     - name: Set outputs
       id: version_check
       run: |
-        echo "new_release=${{ env.new_release }}" >> $GITHUB_OUTPUT
-        echo "package_name=${{ env.package_name }}" >> $GITHUB_OUTPUT
-        echo "package_version=${{ env.package_version }}" >> $GITHUB_OUTPUT
+        echo "new_release=${{ env.NEW_RELEASE }}" >> $GITHUB_OUTPUT
+        echo "package_name=${{ env.PACKAGE_NAME }}" >> $GITHUB_OUTPUT
+        echo "package_version=${{ env.PACKAGE_VERSION }}" >> $GITHUB_OUTPUT
     outputs:
       new_release: ${{ steps.version_check.outputs.new_release }}
       package_name: ${{ steps.version_check.outputs.package_name }}
@@ -47,7 +47,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8
+        python-version: '3.10'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

@@ -2,11 +2,15 @@ name: Run checks on Kedro-Docker
 
 on:
   push:
-    paths:
-      - "kedro-docker/**"
+    paths-ignore:
+       - "kedro-airflow/**"
+       - "kedro-datasets/**"
+       - "kedro-telemetry/**"
   pull_request:
-    paths:
-      - "kedro-docker/**"
+    paths-ignore:
+       - "kedro-airflow/**"
+       - "kedro-datasets/**"
+       - "kedro-telemetry/**"
     types: [ synchronize ]
 
 jobs:

@@ -1,6 +1,40 @@
+# Upcoming Release:
 
-# Upcoming Release 1.1.0:
+## Major features and improvements:
+* Added pandas 2.0 support.
+* Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+## Bug fixes and other changes
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [BrianCechmanek](https://github.com/BrianCechmanek)
+
+# Release 1.2.1:
+
+## Major features and improvements:
+
+## Bug fixes and other changes
+* Renamed `TensorFlowModelDataset` to `TensorFlowModelDataSet` to be consistent with all other plugins in kedro-datasets.
+
+# Release 1.2.0:
+
+## Major features and improvements:
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
+* Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
+
+## Bug fixes and other changes
+* Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
+
+# Release 1.1.1:
+
+## Bug fixes and other changes
+
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
+
+# Release 1.1.0:
 
 ## Major features and improvements:
 
@@ -13,21 +47,19 @@
 
 ## Bug fixes and other changes
 * Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
-
-## Bug fixes and other changes
 * Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
 
 # Release 1.0.2:
 
 ## Bug fixes and other changes
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
-* Relaxed PyArrow range in line with Pandas
-* Fixed outdated links to the dill package documentation
+* Relaxed PyArrow range in line with pandas.
+* Fixed outdated links to the dill package documentation.
 
 # Release 1.0.1:
 
 ## Bug fixes and other changes
-* Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
+* Fixed docstring formatting in `VideoDataSet` that was causing the documentation builds to fail.
 
 
 # Release 1.0.0:

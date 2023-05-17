@@ -6,7 +6,7 @@ import pyarrow.parquet as pq
 import pytest
 from kedro.io import DataSetError
 from moto import mock_s3
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro_datasets.dask import ParquetDataSet
@@ -37,7 +37,7 @@ def dummy_dd_dataframe() -> dd.DataFrame:
     df = pd.DataFrame(
         {"Name": ["Alex", "Bob", "Clarke", "Dave"], "Age": [31, 12, 65, 29]}
     )
-    return dd.from_pandas(df, npartitions=2)
+    return dd.from_pandas(df, npartitions=1)
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ class TestParquetDataSet:
         pd_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
         )
-        dd_data = dd.from_pandas(pd_data, npartitions=2)
+        dd_data = dd.from_pandas(pd_data, npartitions=1)
         s3_data_set.save(dd_data)
         loaded_data = s3_data_set.load()
         assert_frame_equal(loaded_data.compute(), dd_data.compute())

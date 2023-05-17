@@ -65,8 +65,8 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -188,3 +188,11 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _preview(self, nrows: int = 40) -> Dict:
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        data = dataset_copy.load()
+
+        return data.to_dict(orient="split")

@@ -4,6 +4,7 @@ CircleCI pipeline to check if it needs to trigger a release
 """
 
 import os
+import sys
 
 import requests
 from requests.structures import CaseInsensitiveDict
@@ -32,13 +33,7 @@ def circleci_release(project_slug, payload, circle_endpoint, circle_release_toke
     headers["Content-Type"] = "application/json"
     headers["Circle-Token"] = circle_release_token
 
-    resp = requests.post(circle_endpoint, headers=headers, json=payload)
-    print(f"Status Code: {resp.status_code}")
-    if resp.status_code == 201:
-        print("Creating CircleCI Pipeline successfully")
-        print(resp.content)
-    else:
-        print("Failed to create CircleCI Pipeline")
+    resp = requests.post(circle_endpoint, headers=headers, json=payload, timeout=10)
     return resp
 
 
@@ -70,6 +65,14 @@ if __name__ == "__main__":
 
         print(package_name, package_version)
         if check_no_version_pypi(pypi_endpoint, package_name, package_version):
-            circleci_release(
+            res = circleci_release(
                 PROJECT_SLUG, payload, circleci_endpoint, CIRCLE_RELEASE_TOKEN
             )
+            print(f"Status Code: {resp.status_code}")
+            if resp.status_code == 201:
+                print("Creating CircleCI Pipeline successfully")
+            else:
+                print("Failed to create CircleCI Pipeline")
+            print(resp.content)
+            if resp.status_code != 201:
+                sys.exit(1)

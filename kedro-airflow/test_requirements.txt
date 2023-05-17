@@ -1,4 +1,3 @@
--r requirements.txt
 apache-airflow<3.0
 bandit>=1.6.2, <2.0
 behave

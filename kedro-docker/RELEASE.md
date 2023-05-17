@@ -1,4 +1,5 @@
 # Upcoming release
+* Migrate all project metadata to static `pyproject.toml`.
 
 ## Major features and improvements
 

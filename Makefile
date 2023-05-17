@@ -1,7 +1,7 @@
 package:
 	cd $(plugin);\
 	rm -Rf dist;\
-	python setup.py sdist bdist_wheel
+	python -m build
 
 pypi:
 	python -m pip install twine -U

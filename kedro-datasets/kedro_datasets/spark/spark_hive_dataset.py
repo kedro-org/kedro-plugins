@@ -20,11 +20,10 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     This DataSet has some key assumptions:
 
     - Schemas do not change during the pipeline run (defined PKs must be present for the
-    duration of the pipeline)
+      duration of the pipeline).
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
-
-    to external changes to the target table while executing.
-    Upsert methodology works by leveraging Spark DataFrame execution plan checkpointing.
+      to external changes to the target table while executing. Upsert methodology works by
+      leveraging Spark DataFrame execution plan checkpointing.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -64,7 +63,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         >>> reloaded.take(4)
     """
 
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint:disable=too-many-arguments
     def __init__(

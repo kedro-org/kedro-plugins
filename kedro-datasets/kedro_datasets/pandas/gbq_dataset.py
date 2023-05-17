@@ -62,8 +62,8 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"progress_bar": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -203,7 +203,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(

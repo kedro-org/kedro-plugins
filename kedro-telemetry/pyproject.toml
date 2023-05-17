@@ -37,11 +37,5 @@ readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro_telemetry.__version__"}
 
 [tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 88
-known_third_party = "kedro"
-
-[tool.black]
+profile = "black"
+known_first_party = "kedro_telemetry"

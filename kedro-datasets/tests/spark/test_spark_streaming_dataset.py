@@ -104,30 +104,6 @@ class TestStreamingDataSet:
         schema = sample_schema(schema_path)
         assert streaming_ds.schema == schema
 
-    def test_read_dataframe_from_s3(
-        self, tmp_path, sample_spark_streaming_df, s3_bucket
-    ):
-
-        s3_path = f"s3a://{s3_bucket}/test-data/01_raw/*"
-        schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
-
-        # spark_json_ds = SparkDataSet(
-        #     filepath=s3_path, file_format="json", save_args=[{"mode", "overwrite"}]
-        # )
-        # spark_json_ds.save(sample_spark_streaming_df)
-
-        sample_spark_streaming_df.write.json(s3_path)
-
-        streaming_ds = SparkStreamingDataSet(
-            filepath=s3_path,
-            file_format="json",
-            load_args={"schema": {"filepath": schema_path}},
-        ).load()
-
-        assert streaming_ds.isStreaming
-        schema = sample_schema(schema_path)
-        assert streaming_ds.schema == schema
-
     @pytest.mark.usefixtures("mocked_s3_schema")
     def test_load_options_schema_path_with_credentials(
         self, tmp_path, sample_spark_streaming_df

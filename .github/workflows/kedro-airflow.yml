@@ -2,16 +2,19 @@ name: Run checks on Kedro-Airflow
 
 on:
   push:
+    branches:
+      - main
     paths-ignore:
-       - "kedro-datasets/**"
-       - "kedro-docker/**"
-       - "kedro-telemetry/**"
+      - "kedro-datasets/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
   pull_request:
+    branches:
+      - main
     paths-ignore:
-       - "kedro-datasets/**"
-       - "kedro-docker/**"
-       - "kedro-telemetry/**"
-    types: [ synchronize ]
+      - "kedro-datasets/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
 
 jobs:
   airflow-test:

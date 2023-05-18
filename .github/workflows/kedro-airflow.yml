@@ -5,15 +5,15 @@ on:
     branches:
       - main
     paths-ignore:
-      - "kedro-docker/**"
       - "kedro-datasets/**"
+      - "kedro-docker/**"
       - "kedro-telemetry/**"
   pull_request:
     branches:
       - main
     paths-ignore:
-      - "kedro-docker/**"
       - "kedro-datasets/**"
+      - "kedro-docker/**"
       - "kedro-telemetry/**"
 
 jobs:

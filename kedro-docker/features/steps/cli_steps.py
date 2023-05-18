@@ -126,21 +126,6 @@ def create_configuration_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given("I have fixed logs write permission")
-def modify_write_permission(context):
-    """
-    Kedro-docker mounts some subdirectories the current directory (like logs, notebooks etc)
-    into the Docker container.
-    If you run kedro commands with different users,
-    they might create files and directories not writable by each other.
-    So we are fixing the permissions here.
-    """
-    (context.root_project_dir / "logs").chmod(0o777)
-    journal_dir = context.root_project_dir / "logs" / "journals"
-    journal_dir.mkdir(parents=True, exist_ok=True)
-    journal_dir.chmod(0o777)
-
-
 @given("I run a non-interactive kedro new using {starter_name} starter")
 def create_project_from_config_file(context, starter_name):
     """Behave step to run kedro new

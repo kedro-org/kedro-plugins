@@ -74,8 +74,20 @@ jobs:
             prerelease: false,
           });
           return response.data;
+    - name: Set PyPI token
+      run: |
+        if [ "${{ needs.check-version.outputs.PACKAGE_NAME }}" == "kedro-airflow" ]; then
+          echo 'PYPI_TOKEN=${{ secrets.AIRFLOW_PYPI_TOKEN }}' >> $GITHUB_ENV
+        elif [ "${{ needs.check-version.outputs.PACKAGE_NAME }}" == "kedro-datasets" ]; then
+          echo 'PYPI_TOKEN=${{ secrets.DATASETS_PYPI_TOKEN }}' >> $GITHUB_ENV
+        elif [ "${{ needs.check-version.outputs.PACKAGE_NAME }}" == "kedro-docker" ]; then
+          echo 'PYPI_TOKEN=${{ secrets.DOCKER_PYPI_TOKEN }}' >> $GITHUB_ENV
+        elif [ "${{ needs.check-version.outputs.PACKAGE_NAME }}" == "kedro-telemetry" ]; then
+          echo 'PYPI_TOKEN=${{ secrets.TELEMETRY_PYPI_TOKEN }}' >> $GITHUB_ENV
+        fi
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: ${{ needs.check-version.outputs.package_name }}/dist
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        password: ${{ env.PYPI_TOKEN }}
+

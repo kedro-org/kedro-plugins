@@ -11,7 +11,7 @@ description = "Kedro-Datasets is where you can find all of Kedro's data connecto
 requires-python = ">=3.7, <3.11"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "kedro~=0.18.4",
+    "kedro>=0.16",
 ]
 dynamic = ["readme", "version", "optional-dependencies"]
 

@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          pip install -r test_requirements.txt
+          pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
@@ -84,7 +84,7 @@ jobs:
         run: |
             cd ${{ inputs.plugin }}
             pip install git+https://github.com/kedro-org/kedro@main
-            pip install -r test_requirements.txt
+            pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
             pip freeze
       - name: Install pre-commit hooks
         run: |
@@ -121,7 +121,7 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pip install git+https://github.com/kedro-org/kedro@main
-          pip install -r test_requirements.txt
+          pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
       - name: pip freeze
         run: pip freeze
       - name: Run end to end tests

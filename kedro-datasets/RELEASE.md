@@ -1,6 +1,7 @@
 # Upcoming Release:
 
 ## Major features and improvements:
+* Relaxed Kedro version pin to `>=0.16`
 
 ## Bug fixes and other changes
 

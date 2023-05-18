@@ -44,7 +44,7 @@ class GeoJSONDataSet(
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}
 
     # pylint: disable=too-many-arguments

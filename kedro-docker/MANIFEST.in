@@ -1,0 +1,1 @@
+recursive-include kedro_docker/template *

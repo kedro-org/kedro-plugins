@@ -69,6 +69,7 @@ commands:
           command: |
             cd <<parameters.plugin>>
             pip install git+https://github.com/kedro-org/kedro@main
+            pip install .
             pip install -r test_requirements.txt
       - run:
           name: Install pre-commit hooks

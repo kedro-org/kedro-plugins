@@ -20,6 +20,7 @@ class SnowparkTableDataSet(AbstractDataSet):
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
+
         weather:
           type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "weather_data"
@@ -45,6 +46,7 @@ class SnowparkTableDataSet(AbstractDataSet):
     catalog.yml
 
     .. code-block:: yaml
+
         weather:
           type: kedro_datasets.snowflake.SnowparkTableDataSet
           table_name: "weather_data"
@@ -65,6 +67,7 @@ class SnowparkTableDataSet(AbstractDataSet):
     credentials.yml
 
     .. code-block:: yaml
+
         snowflake_client:
           account: 'ab12345.eu-central-1'
           port: 443
@@ -77,6 +80,7 @@ class SnowparkTableDataSet(AbstractDataSet):
     credentials.yml (with externalbrowser authenticator)
 
     .. code-block:: yaml
+
         snowflake_client:
           account: 'ab12345.eu-central-1'
           port: 443
@@ -85,6 +89,7 @@ class SnowparkTableDataSet(AbstractDataSet):
           schema: "observations"
           user: "john_doe@wdomain.com"
           authenticator: "externalbrowser"
+
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -92,8 +97,8 @@ class SnowparkTableDataSet(AbstractDataSet):
     # for parallelism within a pipeline please consider
     # ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

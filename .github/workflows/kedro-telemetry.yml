@@ -1,0 +1,16 @@
+name: Run checks on kedro-telemetry
+
+on:
+  push:
+    paths:
+      - "kedro-telemetry/**"
+  pull_request:
+    paths:
+      - "kedro-telemetry/**"
+    types: [ synchronize ]
+
+jobs:
+  telemetry-test:
+    uses: ./.github/workflows/check-plugin.yml
+    with:
+      plugin: kedro-telemetry

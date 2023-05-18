@@ -117,7 +117,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
 
-        self._metadata = metadata
+        self.metadata = metadata
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

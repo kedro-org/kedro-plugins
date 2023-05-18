@@ -126,7 +126,7 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
-        self._metadata = metadata
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

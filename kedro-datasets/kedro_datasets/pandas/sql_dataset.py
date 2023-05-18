@@ -220,7 +220,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         self._connection_str = credentials["con"]
         self.create_connection(self._connection_str)
 
-        self._metadata = metadata
+        self.metadata = metadata
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -450,7 +450,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             else default_load_args
         )
 
-        self._metadata = metadata
+        self.metadata = metadata
 
         # load sql query from file
         if sql:

@@ -294,7 +294,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         _credentials = deepcopy(credentials) or {}
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
-        self._metadata = metadata
+        self.metadata = metadata
 
     def _load(self) -> AbstractVideo:
         """Loads data from the video file.

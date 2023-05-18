@@ -124,7 +124,7 @@ class PlotlyDataSet(JSONDataSet):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-        self._metadata = metadata
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}

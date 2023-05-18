@@ -139,7 +139,7 @@ class PickleDataSet(
 
         self._key = key
 
-        self._metadata = metadata
+        self.metadata = metadata
 
         _redis_args = deepcopy(redis_args) or {}
         self._redis_from_url_args = _redis_args.pop("from_url_args", {})

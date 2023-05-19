@@ -22,5 +22,5 @@ jobs:
         uses: upsidr/merge-gatekeeper@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          timeout: 1800
+          timeout: 2400
           interval: 30

@@ -35,6 +35,7 @@ def _recurse_cli(
         None (underlying `io_dict` is mutated by the recursion)
     """
     if isinstance(cli_element, (click.Group, click.CommandCollection)):
+        print("Kedro!!")
         element_name = cli_element.name or "kedro"
         io_dict[element_name] = {}
         for command_name in cli_element.list_commands(ctx):

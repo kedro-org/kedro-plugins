@@ -69,8 +69,7 @@ commands:
           command: |
             cd <<parameters.plugin>>
             pip install git+https://github.com/kedro-org/kedro@main
-            pip install .
-            pip install -r test_requirements.txt
+            pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
       - run:
           name: Install pre-commit hooks
           command: |
@@ -177,7 +176,7 @@ commands:
           command: conda activate kedro_plugins; pip install git+https://github.com/kedro-org/kedro@main
       - run:
           name: Install all requirements
-          command: conda activate kedro_plugins; cd <<parameters.plugin>>; pip install -r test_requirements.txt -U
+          command: conda activate kedro_plugins; cd <<parameters.plugin>>; pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
       - run:
           name: Pip freeze
           command: conda activate kedro_plugins; pip freeze
@@ -323,7 +322,7 @@ jobs:
       - run:
           name: Maybe trigger the release workflow
           command: |
-            conda activate kedro_plugins;
+            conda activate kedro_plugins
             pip install requests
             ./tools/circleci/circleci_release.py
 

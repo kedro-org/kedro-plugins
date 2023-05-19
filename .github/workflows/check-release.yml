@@ -57,11 +57,11 @@ jobs:
         export plugin=${{ needs.check-version.outputs.package_name }}
         make package
     - name: Extract release notes from ${{needs.check-version.outputs.package_name}}/RELEASE.md
-        id: extract
-        run: |
-          python tools/github_actions/extract_release_notes.py \
-          "${{needs.check-version.outputs.package_name}}/RELEASE.md" \
-          "Release ${{needs.check-version.outputs.package_version}}"
+      id: extract
+      run: |
+        python tools/github_actions/extract_release_notes.py \
+        "${{needs.check-version.outputs.package_name}}/RELEASE.md" \
+        "Release ${{needs.check-version.outputs.package_version}}"
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:

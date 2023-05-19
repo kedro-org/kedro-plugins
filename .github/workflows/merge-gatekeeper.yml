@@ -24,4 +24,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           timeout: 1800
           interval: 30
-          

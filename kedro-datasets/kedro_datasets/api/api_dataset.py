@@ -97,8 +97,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         url: str,
         method: str = "GET",
         load_args: Dict[str, Any] = None,
-        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
         save_args: Dict[str, Any] = None,
+        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 

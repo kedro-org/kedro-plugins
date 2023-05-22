@@ -1,12 +1,21 @@
 # Upcoming Release:
 
-## Major features and improvements:
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Community contributions
+
+# Release 1.3.0:
+
+## Major features and improvements
 * Added pandas 2.0 support.
 * Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
 * Added a save method to the APIDataSet
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 * Relaxed Kedro version pin to `>=0.16`
 * Added `metadata` attribute to all existing datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
+* Added `ManagedTableDataset` for managed delta tables on Databricks.
 
 ## Bug fixes and other changes
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
@@ -17,10 +26,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [BrianCechmanek](https://github.com/BrianCechmanek)
 * [McDonnellJoseph](https://github.com/McDonnellJoseph)
+* [Danny Farah](https://github.com/dannyrfar)
 
-# Release 1.2.0:
+# Release 1.2.0
 
-## Major features and improvements:
+## Major features and improvements
 * Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
 * Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
 
@@ -35,7 +45,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 # Release 1.1.0:
 
-## Major features and improvements:
+## Major features and improvements
 
 * Added the following new datasets:
 

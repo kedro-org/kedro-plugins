@@ -72,6 +72,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``TensorFlowModelDataSet``.
 
@@ -96,6 +97,8 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
                 E.g. for ``GCSFileSystem`` it should look like `{'token': None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = copy.deepcopy(fs_args) or {}
         _credentials = copy.deepcopy(credentials) or {}
@@ -105,6 +108,9 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
+
         super().__init__(
             filepath=PurePosixPath(path),
             version=version,

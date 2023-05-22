@@ -10,10 +10,6 @@ from kedro.io.core import AbstractDataSet, DataSetError
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
-# Any contribution to datasets should be made in kedro-datasets
-# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
-
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads/saves data from/to HTTP(S) APIs.
@@ -38,7 +34,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_: ::
 
-        >>> from kedro.extras.datasets.api import APIDataSet
+        >>> from kedro_datasets.api import APIDataSet
         >>>
         >>>
         >>> data_set = APIDataSet(
@@ -99,6 +95,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -108,12 +105,15 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 methods
             load_args: Additional parameters to be fed to requests.request.
                 https://requests.readthedocs.io/en/latest/api/#requests.request
-            credentials: Allows specifying secrets in credentials.yml.
-                Expected format is ``('login', 'password')`` if given as a tuple or
-                list. An ``AuthBase`` instance can be provided for more complex cases.
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.
+            credentials: Allows specifying secrets in credentials.yml.
+                Expected format is ``('login', 'password')`` if given as a tuple or list.
+                An ``AuthBase`` instance can be provided for more complex cases.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
+
         Raises:
             ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are
             specified.
@@ -152,6 +152,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "auth": self._convert_type(self._auth),
             **self._params,
         }
+
+        self.metadata = metadata
 
     @staticmethod
     def _convert_type(value: Any):

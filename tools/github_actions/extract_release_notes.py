@@ -5,9 +5,8 @@ def extract_section(filename, heading):
     with open(filename, 'r') as file:
         lines = file.readlines()
 
-    start_line = None
-    end_line = None
-
+    start_line, end_line = None, None
+    
     for i, line in enumerate(lines):
         if line.startswith('# '):
             current_heading = line.strip('#').replace(':', '').strip()

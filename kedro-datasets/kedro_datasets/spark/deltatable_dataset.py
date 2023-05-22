@@ -2,7 +2,7 @@
 ``delta-spark``
 """
 from pathlib import PurePosixPath
-from typing import NoReturn
+from typing import Any, Dict, NoReturn
 
 from delta.tables import DeltaTable
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -62,7 +62,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, filepath: str) -> None:
+    def __init__(self, filepath: str, metadata: Dict[str, Any] = None) -> None:
         """Creates a new instance of ``DeltaTableDataSet``.
 
         Args:
@@ -70,11 +70,14 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         fs_prefix, filepath = _split_filepath(filepath)
 
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
+        self.metadata = metadata
 
     @staticmethod
     def _get_spark():

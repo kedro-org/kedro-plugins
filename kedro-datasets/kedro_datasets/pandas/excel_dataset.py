@@ -118,6 +118,7 @@ class ExcelDataSet(
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ExcelDataSet`` pointing to a concrete Excel file
         on a specific filesystem.
@@ -150,6 +151,8 @@ class ExcelDataSet(
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: If versioning is enabled while in append mode.
@@ -164,6 +167,8 @@ class ExcelDataSet(
         self._protocol = protocol
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

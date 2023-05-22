@@ -19,7 +19,9 @@ from kedro.io.core import (
 HDFSTORE_DRIVER = "H5FD_CORE"
 
 
-class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class HDFDataSet(
+    AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]
+):  # pylint:disable=too-many-instance-attributes
     """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
@@ -69,6 +71,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -100,6 +103,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set `wb` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -112,6 +117,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

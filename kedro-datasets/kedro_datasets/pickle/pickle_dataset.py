@@ -18,7 +18,9 @@ from kedro.io.core import (
 )
 
 
-class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
+class PickleDataSet(
+    AbstractVersionedDataSet[Any, Any]
+):  # pylint:disable=too-many-instance-attributes
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
@@ -81,6 +83,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports custom backends to
@@ -132,6 +135,8 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If ``backend`` does not satisfy the `pickle` interface.
@@ -169,6 +174,8 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

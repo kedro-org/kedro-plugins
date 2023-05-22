@@ -56,9 +56,6 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         Raises:
             DataSetError: If the table name does not conform to naming constraints.
         """
-        if not self.table:
-            raise DataSetError("table name must be provided")
-
         if not re.fullmatch(self._NAMING_REGEX, self.table):
             raise DataSetError("table does not conform to naming")
 
@@ -68,9 +65,6 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         Raises:
             DataSetError: If the dataset name does not conform to naming constraints.
         """
-        if not self.database:
-            raise DataSetError("database name must be provided")
-
         if not re.fullmatch(self._NAMING_REGEX, self.database):
             raise DataSetError("database does not conform to naming")
 

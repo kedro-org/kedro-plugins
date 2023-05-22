@@ -25,7 +25,7 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
     """Stores the definition of a managed table"""
 
     # regex for tables, catalogs and schemas
-    _NAMING_REGEX = r"\b[0-9a-zA-Z_-]{1,32}\b"
+    _NAMING_REGEX = r"\b[0-9a-zA-Z_-]{1,}\b"
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str

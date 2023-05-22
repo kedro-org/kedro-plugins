@@ -56,24 +56,21 @@ jobs:
       run: |
         export plugin=${{ needs.check-version.outputs.package_name }}
         make package
+    - name: Extract release notes from ${{needs.check-version.outputs.package_name}}/RELEASE.md
+      id: extract
+      run: |
+        python tools/github_actions/extract_release_notes.py \
+        "${{needs.check-version.outputs.package_name}}/RELEASE.md" \
+        "Release ${{needs.check-version.outputs.package_version}}"
     - name: Create GitHub Release
-      uses: actions/github-script@v6
+      uses: softprops/action-gh-release@v1
       with:
-        github-token: ${{ secrets.GH_TAGGING_TOKEN }}
-        script: |
-          const package_name = "${{ needs.check-version.outputs.package_name }}"
-          const package_version = "${{ needs.check-version.outputs.package_version }}"
-          const response = await github.rest.repos.createRelease({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            tag_name: `${package_name}-${package_version}`,
-            target_commitish: 'main',
-            name: `${package_name}-${package_version}`,
-            body: `Release ${package_version}`,
-            draft: false,
-            prerelease: false,
-          });
-          return response.data;
+        tag_name: ${{needs.check-version.outputs.package_name}}-${{needs.check-version.outputs.package_version}}
+        name: ${{needs.check-version.outputs.package_name}}-${{needs.check-version.outputs.package_version}}
+        body_path: release_body.txt
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GH_TAGGING_TOKEN }}
     - name: Set PyPI token
       run: |
         if [ "${{ needs.check-version.outputs.PACKAGE_NAME }}" == "kedro-airflow" ]; then
@@ -90,4 +87,3 @@ jobs:
       with:
         packages-dir: ${{ needs.check-version.outputs.package_name }}/dist
         password: ${{ env.PYPI_TOKEN }}
-

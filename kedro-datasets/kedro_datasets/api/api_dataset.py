@@ -59,7 +59,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
 
         >>> data_set = APIDataSet(
-                method = "POST"
+                method = "POST",
                 url = "url_of_remote_server",
                 save_args = {"chunk_size":1}
         )
@@ -109,14 +109,14 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.
             credentials: Allows specifying secrets in credentials.yml.
-                Expected format is ``('login', 'password')`` if given as a tuple or list.
-                An ``AuthBase`` instance can be provided for more complex cases.
+                Expected format is ``('login', 'password')`` if given as a tuple or
+                list. An ``AuthBase`` instance can be provided for more complex cases.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are
-            specified.
+            ValueError: if both ``auth`` and ``credentials`` are specified or used
+            unsupported RESTful API method.
         """
         super().__init__()
 
@@ -124,7 +124,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         if method == "GET":
             self._params = load_args or {}
 
-        # PUT, POST, DELETE means save
+        # PUT, POST means save
         elif method in ["PUT", "POST"]:
             self._params = deepcopy(self.DEFAULT_SAVE_ARGS)
             if save_args is not None:

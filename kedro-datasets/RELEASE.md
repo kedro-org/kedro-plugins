@@ -19,6 +19,7 @@
 
 ## Bug fixes and other changes
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
+* Upgraded required `polars` version to 0.17.
 * Renamed `TensorFlowModelDataset` to `TensorFlowModelDataSet` to be consistent with all other plugins in kedro-datasets.
 
 ## Community contributions

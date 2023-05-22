@@ -29,7 +29,7 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
-    catalog: str
+    catalog: Optional[str]
     table: str
     write_mode: str
     dataframe_type: str
@@ -46,31 +46,36 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
             `validate_<field_name>(self, value) -> raises DataSetError`
         """
         for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
-            method = getattr(self, f"validate_{name}", None)
+            method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()
 
-    def validate_table(self):
-        """validates table name
-
-        Raises:
-            DataSetError:
-        """
-        if not re.fullmatch(self._NAMING_REGEX, self.table):
-            raise DataSetError("table does not conform to naming")
-
-    def validate_database(self):
-        """validates database name
+    def _validate_table(self):
+        """Validates table name
 
         Raises:
             DataSetError: If the table name does not conform to naming constraints.
         """
-        if self.database:
-            if not re.fullmatch(self._NAMING_REGEX, self.database):
-                raise DataSetError("database does not conform to naming")
+        if not self.table:
+            raise DataSetError("table name must be provided")
 
-    def validate_catalog(self):
-        """validates catalog name
+        if not re.fullmatch(self._NAMING_REGEX, self.table):
+            raise DataSetError("table does not conform to naming")
+
+    def _validate_database(self):
+        """Validates database name
+
+        Raises:
+            DataSetError: If the dataset name does not conform to naming constraints.
+        """
+        if not self.database:
+            raise DataSetError("database name must be provided")
+
+        if not re.fullmatch(self._NAMING_REGEX, self.database):
+            raise DataSetError("database does not conform to naming")
+
+    def _validate_catalog(self):
+        """Validates catalog name
 
         Raises:
             DataSetError: If the catalog name does not conform to naming constraints.
@@ -79,8 +84,8 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
             if not re.fullmatch(self._NAMING_REGEX, self.catalog):
                 raise DataSetError("catalog does not conform to naming")
 
-    def validate_write_mode(self):
-        """validates the write mode
+    def _validate_write_mode(self):
+        """Validates the write mode
 
         Raises:
             DataSetError: If an invalid `write_mode` is passed.
@@ -92,8 +97,8 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
                 f"`write_mode` must be one of: {valid_modes}"
             )
 
-    def validate_dataframe_type(self):
-        """validates the dataframe type
+    def _validate_dataframe_type(self):
+        """Validates the dataframe type
 
         Raises:
             DataSetError: If an invalid `dataframe_type` is passed
@@ -102,8 +107,8 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
             valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)
             raise DataSetError(f"`dataframe_type` must be one of {valid_types}")
 
-    def validate_primary_key(self):
-        """validates the primary key of the table
+    def _validate_primary_key(self):
+        """Validates the primary key of the table
 
         Raises:
             DataSetError: If no `primary_key` is specified.

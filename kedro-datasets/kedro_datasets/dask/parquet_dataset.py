@@ -83,8 +83,8 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
               col3: [[int32]]
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"write_index": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(

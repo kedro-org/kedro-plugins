@@ -59,7 +59,7 @@ spark_require = {
 }
 svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
-    "tensorflow.TensorflowModelDataset": [
+    "tensorflow.TensorFlowModelDataSet": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serialises differently
         "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",

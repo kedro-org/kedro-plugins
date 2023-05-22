@@ -43,6 +43,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ImageDataSet`` pointing to a concrete image file
         on a specific filesystem.
@@ -70,6 +71,8 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -82,6 +85,8 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

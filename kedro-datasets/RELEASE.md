@@ -15,6 +15,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [BrianCechmanek](https://github.com/BrianCechmanek)
+* [McDonnellJoseph](https://github.com/McDonnellJoseph)
 
 # Release 1.2.1:
 

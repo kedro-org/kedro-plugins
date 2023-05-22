@@ -52,10 +52,10 @@ sign-off:
 
 # kedro-datasets related only
 test-no-spark:
-	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --numprocesses 4 --dist loadfile
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
 test-no-spark-sequential:
-	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
 
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:

@@ -75,6 +75,7 @@ class PlotlyDataSet(JSONDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PlotlyDataSet`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -109,6 +110,8 @@ class PlotlyDataSet(JSONDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
         self._plotly_args = plotly_args
@@ -120,6 +123,8 @@ class PlotlyDataSet(JSONDataSet):
 
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}

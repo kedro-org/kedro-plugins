@@ -95,6 +95,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -110,6 +111,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             credentials: Allows specifying secrets in credentials.yml.
                 Expected format is ``('login', 'password')`` if given as a tuple or
                 list. An ``AuthBase`` instance can be provided for more complex cases.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: if both ``auth`` and ``credentials`` are specified or used
@@ -149,6 +152,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             "auth": self._convert_type(self._auth),
             **self._params,
         }
+
+        self.metadata = metadata
 
     @staticmethod
     def _convert_type(value: Any):

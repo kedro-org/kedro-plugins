@@ -29,11 +29,12 @@ def extract_section(filename, heading):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        sys.exit(1)
+        raise Exception("Usage: python extract_release_notes.py <filename> <heading>")
 
     filename = sys.argv[1]
     heading = sys.argv[2]
     section = extract_section(filename, heading)
-
+    if not section:
+        raise Exception(f"Section not found under the {heading} heading")
     with open("release_body.txt", "w") as text_file:
         text_file.write(section)

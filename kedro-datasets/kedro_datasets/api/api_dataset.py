@@ -10,10 +10,6 @@ from kedro.io.core import AbstractDataSet, DataSetError
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
-# Any contribution to datasets should be made in kedro-datasets
-# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
-
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads/saves data from/to HTTP(S) APIs.
@@ -38,7 +34,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_: ::
 
-        >>> from kedro.extras.datasets.api import APIDataSet
+        >>> from kedro_datasets.api import APIDataSet
         >>>
         >>>
         >>> data_set = APIDataSet(
@@ -63,7 +59,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
 
         >>> data_set = APIDataSet(
-                method = "POST"
+                method = "POST",
                 url = "url_of_remote_server",
                 save_args = {"chunk_size":1}
         )
@@ -116,7 +112,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 list. An ``AuthBase`` instance can be provided for more complex cases.
 
         Raises:
-            ValueError: if both ``auth`` and ``credentials`` are specified or used 
+            ValueError: if both ``auth`` and ``credentials`` are specified or used
             unsupported RESTful API method.
         """
         super().__init__()
@@ -125,7 +121,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         if method == "GET":
             self._params = load_args or {}
 
-        # PUT, POST, DELETE means save
+        # PUT, POST means save
         elif method in ["PUT", "POST"]:
             self._params = deepcopy(self.DEFAULT_SAVE_ARGS)
             if save_args is not None:

@@ -10,7 +10,9 @@ from kedro.io.core import AbstractDataSet, DataSetError
 logger = logging.getLogger(__name__)
 
 
-class SnowparkTableDataSet(AbstractDataSet):
+class SnowparkTableDataSet(
+    AbstractDataSet
+):  # pylint:disable=too-many-instance-attributes
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     As of Mar-2023, the snowpark connector only works with Python 3.8.
@@ -108,6 +110,7 @@ class SnowparkTableDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SnowparkTableDataSet``.
 
@@ -128,6 +131,8 @@ class SnowparkTableDataSet(AbstractDataSet):
             credentials: A dictionary with a snowpark connection string.
                 To find all supported arguments, see here:
                 https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
 
         if not table_name:
@@ -167,6 +172,8 @@ class SnowparkTableDataSet(AbstractDataSet):
         )
         self._connection_parameters = connection_parameters
         self._session = self._get_session(self._connection_parameters)
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

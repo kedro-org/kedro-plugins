@@ -28,7 +28,9 @@ NON_FILE_SYSTEM_TARGETS = [
 ]
 
 
-class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class GenericDataSet(
+    AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]
+):  # pylint:disable=too-many-instance-attributes
     """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
@@ -94,6 +96,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``GenericDataSet`` pointing to a concrete data file
         on a specific filesystem. The appropriate pandas load/save methods are
@@ -134,6 +137,8 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: Will be raised if at least less than one appropriate
@@ -153,6 +158,8 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

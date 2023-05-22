@@ -74,6 +74,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -93,6 +94,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
                 https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or
@@ -115,6 +118,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
         self._url = url
         self._table = table
+
+        self.metadata = metadata
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

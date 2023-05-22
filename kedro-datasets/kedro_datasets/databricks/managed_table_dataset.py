@@ -124,7 +124,7 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         full_table_location = None
         if self.catalog and self.database and self.table:
             full_table_location = f"`{self.catalog}`.`{self.database}`.`{self.table}`"
-        elif self.table:
+        elif self.database and self.table:
             full_table_location = f"`{self.database}`.`{self.table}`"
         return full_table_location
 

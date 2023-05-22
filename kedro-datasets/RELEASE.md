@@ -28,7 +28,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [McDonnellJoseph](https://github.com/McDonnellJoseph)
 * [Danny Farah](https://github.com/dannyrfar)
 
-# Release 1.2.0
+# Release 1.2.0:
 
 ## Major features and improvements
 * Added `fsspec` resolution in `SparkDataSet` to support more filesystems.

@@ -116,7 +116,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 list. An ``AuthBase`` instance can be provided for more complex cases.
 
         Raises:
-            ValueError: if both ``auth`` and ``credentials`` are specified or used 
+            ValueError: if both ``auth`` and ``credentials`` are specified or used
             unsupported RESTful API method.
         """
         super().__init__()

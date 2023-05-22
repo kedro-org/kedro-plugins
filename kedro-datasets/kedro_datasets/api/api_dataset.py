@@ -108,15 +108,16 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
                 methods
             load_args: Additional parameters to be fed to requests.request.
                 https://requests.readthedocs.io/en/latest/api/#requests.request
-            credentials: Allows specifying secrets in credentials.yml.
-                Expected format is ``('login', 'password')`` if given as a tuple or
-                list. An ``AuthBase`` instance can be provided for more complex cases.
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.
+            credentials: Allows specifying secrets in credentials.yml.
+                Expected format is ``('login', 'password')`` if given as a tuple or
+                list. An ``AuthBase`` instance can be provided for more complex cases.
+
         Raises:
-            ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are
-            specified.
+            ValueError: if both ``auth`` and ``credentials`` are specified or used 
+            unsupported RESTful API method.
         """
         super().__init__()
 

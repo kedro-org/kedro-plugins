@@ -81,17 +81,6 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "databricks": _collect_requirements(databricks_require),
-    "docs": [
-        "docutils==0.16",
-        "sphinx~=3.4.3",
-        "sphinx_rtd_theme==0.4.1",
-        "nbsphinx==0.8.1",
-        "nbstripout~=0.4",
-        "sphinx-autodoc-typehints==1.11.1",
-        "sphinx_copybutton==0.3.1",
-        "ipykernel>=5.3, <7.0",
-        "myst-parser~=0.17.2",
-    ],
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
     "matplotlib": _collect_requirements(matplotlib_require),
@@ -128,6 +117,17 @@ extras_require = {
 }
 
 extras_require["all"] = _collect_requirements(extras_require)
+extras_require["docs"] = [
+    "docutils==0.16",
+    "sphinx~=3.4.3",
+    "sphinx_rtd_theme==0.4.1",
+    "nbsphinx==0.8.1",
+    "nbstripout~=0.4",
+    "sphinx-autodoc-typehints==1.11.1",
+    "sphinx_copybutton==0.3.1",
+    "ipykernel>=5.3, <7.0",
+    "myst-parser~=0.17.2",
+]
 
 setup(
     extras_require=extras_require,

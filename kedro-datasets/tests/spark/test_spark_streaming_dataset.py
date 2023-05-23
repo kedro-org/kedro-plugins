@@ -85,7 +85,7 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
     return mocked_s3_bucket
 
 
-class TestStreamingDataSet:
+class TestSparkStreamingDataSet:
     def test_load(self, tmp_path, sample_spark_streaming_df):
         filepath = (tmp_path / "test_streams").as_posix()
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()

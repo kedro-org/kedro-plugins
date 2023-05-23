@@ -67,7 +67,6 @@ class SparkStreamingDataSet(AbstractDataSet):
                 write documentation:
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
         """
-        self._filepath_ = filepath
         self._file_format = file_format
         self._save_args = save_args
         self._load_args = load_args
@@ -102,8 +101,7 @@ class SparkStreamingDataSet(AbstractDataSet):
 
     @staticmethod
     def _get_spark():
-        spark = SparkSession.builder.getOrCreate()
-        return spark
+        return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
         """Loads data from filepath.
@@ -112,27 +110,28 @@ class SparkStreamingDataSet(AbstractDataSet):
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        input_constructor = (
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        data_stream_reader = (
             self._get_spark()
             .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
         )
-        return input_constructor.load(self._filepath_)
+        return data_stream_reader.load(load_path)
 
     def _save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
         Args:
             data: PySpark streaming dataframe for saving
         """
-
+        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         output_constructor = data.writeStream.format(self._file_format)
 
         (
             output_constructor.option(
                 "checkpointLocation", self._save_args.pop("checkpoint")
             )
-            .option("path", self._filepath_)
+            .option("path", save_path)
             .outputMode(self._save_args.pop("output_mode"))
             .options(**self._save_args)
             .start()

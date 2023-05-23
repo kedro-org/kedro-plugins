@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
 ## Community contributions
 

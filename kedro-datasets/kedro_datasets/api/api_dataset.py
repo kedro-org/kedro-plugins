@@ -54,7 +54,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>> data = data_set.load()
 
     ``APIDataSet`` can also be used to save output on a remote server using HTTP(S)
-    methods.
+    methods. ::
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
 
@@ -116,7 +116,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
         Raises:
             ValueError: if both ``auth`` and ``credentials`` are specified or used
-            unsupported RESTful API method.
+                unsupported RESTful API method.
         """
         super().__init__()
 

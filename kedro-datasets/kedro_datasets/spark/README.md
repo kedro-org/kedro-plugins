@@ -11,7 +11,7 @@ To work with multiple streaming nodes, 2 hooks are required for:
 
 Supported file formats are:
 
-- Text 
+- Text
 - CSV
 - JSON
 - ORC

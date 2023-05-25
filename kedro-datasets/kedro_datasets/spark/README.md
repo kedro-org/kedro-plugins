@@ -3,7 +3,7 @@
 ``SparkStreamingDataSet`` loads and saves data to streaming DataFrames.
 See [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) for details.
 
-To work with multiple streaming nodes, 2 hook are required for:
+To work with multiple streaming nodes, 2 hooks are required for:
     - Integrating Pyspark, see [Build a Kedro pipeline with PySpark](https://docs.kedro.org/en/stable/tools_integration/pyspark.html) for details
     - Running streaming query without termination unless exception
 
@@ -11,8 +11,8 @@ To work with multiple streaming nodes, 2 hook are required for:
 
 Supported file formats are:
 
-- Text
--  CSV
+- Text 
+- CSV
 - JSON
 - ORC
 - Parquet
@@ -33,7 +33,7 @@ class SparkStreamsHook:
         spark = SparkSession.builder.getOrCreate()
         spark.streams.awaitAnyTermination()
 ```
-To make the application work with kafka format, respective spark configuration need to be added in ``conf/base/spark.yml``.
+To make the application work with Kafka format, the respective spark configuration needs to be added to``conf/base/spark.yml``.
 
 #### Example spark.yml:
 

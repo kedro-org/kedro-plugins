@@ -30,10 +30,9 @@ class SparkStreamingDataSet(AbstractDataSet):
             header: True
         load_args:
             schema:
-            filepath: data/01_raw/schema/inventory_schema.json
+              filepath: data/01_raw/schema/inventory_schema.json
     """
 
-    # pylint: disable=too-many-instance-attributes
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -58,7 +57,9 @@ class SparkStreamingDataSet(AbstractDataSet):
                 It is dependent on the selected file format. You can find
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
+                https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html,
+                Please note that a schema is mandatory for a streaming DataFrame if schemaInference
+                is not True.
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file
                 format. You can pass ``mode`` and ``partitionBy`` to specify

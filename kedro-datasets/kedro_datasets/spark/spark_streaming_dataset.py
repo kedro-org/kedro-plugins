@@ -58,7 +58,7 @@ class SparkStreamingDataSet(AbstractDataSet):
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html,
-                Please note that a schema is mandatory for a streaming DataFrame if schemaInference
+                Please note that a schema is mandatory for a streaming DataFrame if ``schemaInference``
                 is not True.
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file

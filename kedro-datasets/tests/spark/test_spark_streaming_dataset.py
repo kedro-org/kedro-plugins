@@ -41,7 +41,7 @@ def sample_spark_df_schema() -> StructType:
 
 @pytest.fixture
 def sample_spark_streaming_df(tmp_path, sample_spark_df_schema):
-    """Create s sample dataframe for streaming"""
+    """Create a sample dataframe for streaming"""
     data = [("0001", 2), ("0001", 7), ("0002", 4)]
     schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
     with open(schema_path, "w", encoding="utf-8") as f:

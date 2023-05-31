@@ -7,6 +7,13 @@
 
 ## Community contributions
 
+# Release 1.4.0:
+
+## Major features and improvements
+* Added `SparkStreamingDataSet`.
+
+## Bug fixes and other changes
+* Fixed problematic docstrings of `APIDataSet`.
 # Release 1.3.0:
 
 ## Major features and improvements

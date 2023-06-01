@@ -6,6 +6,6 @@ contact_links:
   - name: Documentation
     url: https://docs.kedro.org
     about: To learn more about how Kedro works
-  - name: Case studies, articles and video tutorials
-    url: https://github.com/kedro-org/kedro-community
+  - name: Plugins, extensions, case studies, articles, and video tutorials
+    url: https://github.com/kedro-org/awesome-kedro
     about: Community-generated content, project examples and video tutorials

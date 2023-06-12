@@ -31,4 +31,4 @@ example_tensorflow_data:
     tf_device: "/CPU:0"  # optional
 ```
 
-Contributed by (Aleks Hughes)[https://github.com/w0rdsm1th].
+Contributed by [Aleks Hughes](https://github.com/w0rdsm1th).

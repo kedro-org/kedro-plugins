@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Union
 
 from airflow import DAG
 from airflow.models import BaseOperator
@@ -10,14 +11,13 @@ from kedro.framework.project import configure_project
 
 
 class KedroOperator(BaseOperator):
-
     @apply_defaults
     def __init__(
         self,
         package_name: str,
         pipeline_name: str,
         node_name: str,
-        project_path: str,
+        project_path: Union[str, Path],
         env: str,
         *args, **kwargs
     ) -> None:
@@ -35,46 +35,43 @@ class KedroOperator(BaseOperator):
                                  env=self.env) as session:
             session.run(self.pipeline_name, node_names=[self.node_name])
 
+
 # Kedro settings required to run your pipeline
 env = "{{ env }}"
 pipeline_name = "{{ pipeline_name }}"
 project_path = Path.cwd()
 package_name = "{{ package_name }}"
 
-# Default settings applied to all tasks
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5)
-}
-
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
-    "{{ dag_name | safe | slugify }}",
-    start_date=datetime(2019, 1, 1),
-    max_active_runs=3,
-    schedule_interval=timedelta(minutes=30),  # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
-    default_args=default_args,
-    catchup=False # enable if you don't want historical dag runs to run
-) as dag:
-
-    tasks = {}
-    {% for node in pipeline.nodes %}
-    tasks["{{ node.name | safe | slugify }}"] = KedroOperator(
-        task_id="{{ node.name | safe | slugify  }}",
-        package_name=package_name,
-        pipeline_name=pipeline_name,
-        node_name="{{ node.name | safe }}",
-        project_path=project_path,
-        env=env,
+    dag_id="{{ dag_name | safe | slugify }}",
+    start_date=datetime({{ start_date | default([2023, 1, 1]) | join(",")}}),
+    max_active_runs={{ max_active_runs | default(3) }},
+    # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
+    schedule_interval="{{ schedule_interval | default('@once') }}",
+    catchup={{ catchup | default(False) }},
+    # Default settings applied to all tasks
+    default_args=dict(
+        owner="{{ owner | default('airflow') }}",
+        depends_on_past={{ depends_on_past | default(False) }},
+        email_on_failure={{ email_on_failure | default(False) }},
+        email_on_retry={{ email_on_retry | default(False) }},
+        retries={{ retries | default(1) }},
+        retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
     )
-    {% endfor %}
+) as dag:
+    tasks = {
+    {% for node in pipeline.nodes %}        "{{ node.name | safe | slugify }}": KedroOperator(
+            task_id="{{ node.name | safe | slugify  }}",
+            package_name=package_name,
+            pipeline_name=pipeline_name,
+            node_name="{{ node.name | safe }}",
+            project_path=project_path,
+            env=env,
+        ),
+{% endfor %}    }
 
     {% for parent_node, child_nodes in dependencies.items() -%}
-    {% for child in child_nodes %}
-    tasks["{{ parent_node.name | safe | slugify }}"] >> tasks["{{ child.name | safe | slugify }}"]
+    {% for child in child_nodes %}    tasks["{{ parent_node.name | safe | slugify }}"] >> tasks["{{ child.name | safe | slugify }}"]
     {% endfor %}
     {%- endfor %}

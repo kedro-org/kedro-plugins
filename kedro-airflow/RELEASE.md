@@ -1,6 +1,11 @@
 # Upcoming release 0.5.2
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Migrate all project metadata to static `pyproject.toml`.
+* Configure DAG kwargs via `airflow.yml`.
+* The generated DAG file now contains the pipeline name.
+* Included help for CLI arguments (see `kedro airflow create --help`).
+* Raise error when pipeline does not exists.
+* Added tests for CLI arugments.
 
 # Release 0.5.1
 * Added additional CLI argument `--jinja-file` to provide a path to a custom Jinja2 template.

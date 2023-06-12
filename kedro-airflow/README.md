@@ -46,7 +46,7 @@ Please visit the guide to [deploy Kedro as a Python package](https://kedro.readt
 
 #### What if my DAG file is in a different directory to my project folder?
 
-By default the generated DAG file is configured to live in the same directory as your project as per this [template](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/kedro_airflow/airflow_dag_template.j2#L44). If your DAG file is located in a different directory to your project, you will need to tweak this  manually after running the `kedro airflow create` command.
+By default, the generated DAG file is configured to live in the same directory as your project as per this [template](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/kedro_airflow/airflow_dag_template.j2#L44). If your DAG file is located in a different directory to your project, you will need to tweak this  manually after running the `kedro airflow create` command.
 
 #### What if I want to use a different Jinja2 template?
 
@@ -55,6 +55,78 @@ You can use the additional command line argument `--jinja-file` (alias `-j`) to 
 ```bash
 kedro airflow create --jinja-file=./custom/template.j2
 ```
+
+#### How can I pass arguments to the Airflow DAGs dynamically?
+
+`kedro-airflow` picks up configuration from `airflow.yml` files. The [parameters](https://docs.kedro.org/en/stable/configuration/parameters.html) are read by Kedro.
+Arguments can be specified globally, or per pipeline:
+
+```yaml
+# Global parameters
+default:
+    start_date: [2023, 1, 1]
+    max_active_runs: 3
+    # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
+    schedule_interval: "@once"
+    catchup: false
+    # Default settings applied to all tasks
+    owner: "airflow"
+    depends_on_past: false
+    email_on_failure: false
+    email_on_retry: false
+    retries: 1
+    retry_delay: 5
+
+# Arguments specific to the pipeline (overrides the parameters above)
+data_science:
+    owner: "airflow-ds"
+```
+
+Arguments can also be passed via `--params` in the command line:
+
+```bash
+kedro airflow create --params "schedule_interval='@weekly'"
+```
+
+These variables are passed to the Jinja2 template.
+
+#### What if I want to pass different arguments?
+
+In order to pass arguments other than those specified in the default template, simply pass a custom template (see: _"What if I want to use a different Jinja2 template?"_)
+
+The syntax for arguments is:
+```
+{{ argument_name }}
+```
+
+In order to make arguments optional, one can use:
+```
+{{ argument_name | default("default_value") }}
+```
+
+For examples, please have a look at the default template (`airflow_dag_template.j2`).
+
+### What if I want to use a configuration file other than `airflow.yml`?
+
+The default configuration pattern is `["airflow*", "airflow/**"]`.
+In order to configure the `OmegaConfigLoader`, update the `settings.py` file in your Kedro project as follows:
+
+```python
+from kedro.config import OmegaConfigLoader
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+CONFIG_LOADER_ARGS = {
+    # other args
+    "config_patterns": {"airflow": ["airflow*", "airflow/**"]}  # configure the pattern for configuration files
+}
+```
+
+Follow Kedro's official documentation, to see how to add templating, custom resolvers etc. (https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader)[https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader]
+
+#### How can I use Airflow runtime parameters?
+
+It is possible to pass parameters when triggering an Airflow DAG from the user interface.
+In order to use this feature, create a custom template using the [Params syntax](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html).
+See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 
 #### What if I want to use a different Airflow Operator?
 

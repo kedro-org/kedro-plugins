@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Any, Dict, List
 
 import pandas as pd
-from deltalake import DeltaTable
+from deltalake import DeltaTable, Metadata
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -72,6 +72,10 @@ class DeltaTableDataSet(AbstractDataSet):
         return json.loads(
             self.delta_table().schema().to_json()
         )
+
+    @property
+    def metadata(self) -> Metadata:
+        return self.delta_table().metadata()
 
     @property
     def history(self) -> List[Dict[str, Any]]:

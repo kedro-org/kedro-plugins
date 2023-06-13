@@ -2,6 +2,7 @@
 
 __all__ = [
     "CSVDataSet",
+    "DeltaTableDataSet",
     "ExcelDataSet",
     "FeatherDataSet",
     "GBQTableDataSet",
@@ -19,6 +20,8 @@ from contextlib import suppress
 
 with suppress(ImportError):
     from .csv_dataset import CSVDataSet
+with suppress(ImportError):
+    from .deltatable_dataset import DeltaTableDataSet
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet
 with suppress(ImportError):

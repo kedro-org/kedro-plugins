@@ -17,10 +17,10 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
-databricks_require = {
-    "databricks.ManagedTableDataSet": [SPARK, PANDAS, DELTA]
+dask_require = {
+    "dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]
 }
+databricks_require = {"databricks.ManagedTableDataSet": [SPARK, PANDAS, DELTA]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -46,14 +46,13 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
+pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-polars_require = {
-    "polars.CSVDataSet": [POLARS]
-}
+polars_require = {"polars.CSVDataSet": [POLARS]}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataSet": [
@@ -90,6 +89,7 @@ extras_require = {
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
+    "pickle": _collect_requirements(pickle_require),
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
     "polars": _collect_requirements(polars_require),
@@ -109,6 +109,7 @@ extras_require = {
     **matplotlib_require,
     **networkx_require,
     **pandas_require,
+    **pickle_require,
     **pillow_require,
     **plotly_require,
     **polars_require,

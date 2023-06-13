@@ -7,6 +7,11 @@
 
 ## Community contributions
 
+# Release 1.4.1:
+
+## Bug fixes and other changes
+* Fixed missing `pickle.PickleDataSet` extras in `setup.py`.
+
 # Release 1.4.0:
 
 ## Major features and improvements

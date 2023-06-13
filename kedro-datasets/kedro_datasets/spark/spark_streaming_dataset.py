@@ -35,6 +35,7 @@ class SparkStreamingDataSet(AbstractDataSet):
             schema:
                 filepath: data/01_raw/schema/inventory_schema.json
     """
+
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -51,21 +52,21 @@ class SparkStreamingDataSet(AbstractDataSet):
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
                 specify ``filepath``s starting with ``/dbfs/``. For message brokers such as
                 Kafka and all filepath is not required.
-            file_format: File format used during load and save operations. 
+            file_format: File format used during load and save operations.
                 These are formats supported by the running SparkContext including parquet,
                 csv, and delta. For a list of supported formats please refer to the Apache
-                Spark documentation at 
+                Spark documentation at
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
             load_args: Load args passed to Spark DataFrameReader load method.
                 It is dependent on the selected file format. You can find a list of read options
                 for each selected format in Spark DataFrame read documentation, see
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html.
-                Please note that a schema is mandatory for a streaming DataFrame 
+                Please note that a schema is mandatory for a streaming DataFrame
                 if ``schemaInference`` is not True.
             save_args: Save args passed to Spark DataFrameReader write options.
                 Similar to load_args, this is dependent on the selected file format. You can pass
                 ``mode`` and ``partitionBy`` to specify your overwrite mode and partitioning
-                respectively. You can find a list of options for each selected format in 
+                respectively. You can find a list of options for each selected format in
                 Spark DataFrame write documentation, see
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
         """

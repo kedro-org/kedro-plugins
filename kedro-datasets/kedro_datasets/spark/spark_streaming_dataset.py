@@ -20,15 +20,16 @@ class SparkStreamingDataSet(AbstractDataSet):
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
     .. code-block:: yaml
+
         raw.new_inventory:
-        type: streaming.extras.datasets.spark_streaming_dataset.SparkStreamingDataSet
-        filepath: data/01_raw/stream/inventory/
-        file_format: json
-        save_args:
-            output_mode: append
-            checkpoint: data/04_checkpoint/raw_new_inventory
-            header: True
-        load_args:
+          type: spark.SparkStreamingDataSet
+          filepath: data/01_raw/stream/inventory/
+          file_format: json
+          save_args:
+                output_mode: append
+                checkpoint: data/04_checkpoint/raw_new_inventory
+                header: True
+          load_args:
             schema:
               filepath: data/01_raw/schema/inventory_schema.json
     """

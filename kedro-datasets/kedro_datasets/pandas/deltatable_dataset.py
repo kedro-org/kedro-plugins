@@ -27,14 +27,11 @@ class DeltaTableDataSet(AbstractDataSet):
         version: int = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None
     ) -> None:
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
         self._version = version
-
-        self.metadata = metadata
 
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args:

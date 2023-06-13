@@ -15,6 +15,26 @@ from kedro_datasets.spark.spark_dataset import (
 
 
 class SparkStreamingDataSet(AbstractDataSet):
+    """``SparkStreamingDataSet`` loads data to Spark Streaming Dataframe objects.
+
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        raw.new_inventory:
+          type: spark.SparkStreamingDataSet
+          filepath: data/01_raw/stream/inventory/
+          file_format: json
+          save_args:
+            output_mode: append
+            checkpoint: data/04_checkpoint/raw_new_inventory
+            header: True
+          load_args:
+            schema:
+                filepath: data/01_raw/schema/inventory_schema.json
+    """
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 

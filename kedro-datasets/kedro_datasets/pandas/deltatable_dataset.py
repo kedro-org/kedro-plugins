@@ -24,14 +24,12 @@ class DeltaTableDataSet(AbstractDataSet):
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        version: int = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
-        self._version = version
 
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args:
@@ -48,6 +46,8 @@ class DeltaTableDataSet(AbstractDataSet):
                 f"Please use any of the following accepted modes "
                 f"{self.ACCEPTED_WRITE_MODES}"
             )
+
+        self._version = self._load_args.get("version", None)
 
     @property
     def fs_args(self) -> Dict[str, Any]:

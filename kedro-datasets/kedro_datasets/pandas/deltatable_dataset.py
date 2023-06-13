@@ -67,6 +67,13 @@ class DeltaTableDataSet(AbstractDataSet):
         return delta_table
 
     @property
+    def schema(self) -> Dict[str, Any]:
+        import json
+        return json.loads(
+            self.delta_table().schema().to_json()
+        )
+
+    @property
     def history(self) -> List[Dict[str, Any]]:
         return self.delta_table().history()
 

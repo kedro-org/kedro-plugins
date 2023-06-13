@@ -58,7 +58,6 @@ class DeltaTableDataSet(AbstractDataSet):
         fs_args.update(self._credentials)
         return fs_args
 
-    @property
     def delta_table(self) -> DeltaTable:
         delta_table = DeltaTable(
             self._filepath,
@@ -69,13 +68,13 @@ class DeltaTableDataSet(AbstractDataSet):
 
     @property
     def history(self) -> List[Dict[str, Any]]:
-        return self.delta_table.history()
+        return self.delta_table().history()
 
     def get_loaded_version(self) -> int:
-        return self.delta_table.version()
+        return self.delta_table().version()
 
     def _load(self) -> pd.DataFrame:
-        return self.delta_table.to_pandas()
+        return self.delta_table().to_pandas()
 
     def _save(self, data: pd.DataFrame) -> None:
         write_deltalake(

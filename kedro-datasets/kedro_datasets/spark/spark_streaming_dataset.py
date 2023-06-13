@@ -15,22 +15,25 @@ from kedro_datasets.spark.spark_dataset import (
 
 
 class SparkStreamingDataSet(AbstractDataSet):
-    """``SparkStreamingDataSet`` loads data into Spark Streaming Dataframe objects.
+    """``SparkStreamingDataSet`` loads data to Spark Streaming Dataframe objects.
+
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
     .. code-block:: yaml
+
         raw.new_inventory:
-        type: streaming.extras.datasets.spark_streaming_dataset.SparkStreamingDataSet
-        filepath: data/01_raw/stream/inventory/
-        file_format: json
-        save_args:
+          type: spark.SparkStreamingDataSet
+          filepath: data/01_raw/stream/inventory/
+          file_format: json
+          save_args:
             output_mode: append
             checkpoint: data/04_checkpoint/raw_new_inventory
             header: True
-        load_args:
+          load_args:
             schema:
-              filepath: data/01_raw/schema/inventory_schema.json
+                filepath: data/01_raw/schema/inventory_schema.json
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
@@ -44,28 +47,27 @@ class SparkStreamingDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataSet.
+
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
                 specify ``filepath``s starting with ``/dbfs/``. For message brokers such as
                 Kafka and all filepath is not required.
-            file_format: File format used during load and save
-                operations. These are formats supported by the running
-                SparkContext include parquet, csv, delta. For a list of supported
-                formats please refer to Apache Spark documentation at
+            file_format: File format used during load and save operations.
+                These are formats supported by the running SparkContext including parquet,
+                csv, and delta. For a list of supported formats please refer to the Apache
+                Spark documentation at
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
             load_args: Load args passed to Spark DataFrameReader load method.
-                It is dependent on the selected file format. You can find
-                a list of read options for each supported format
-                in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html,
+                It is dependent on the selected file format. You can find a list of read options
+                for each selected format in Spark DataFrame read documentation, see
+                https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html.
                 Please note that a schema is mandatory for a streaming DataFrame
                 if ``schemaInference`` is not True.
-            save_args: Save args passed to Spark DataFrame write options.
-                Similar to load_args this is dependent on the selected file
-                format. You can pass ``mode`` and ``partitionBy`` to specify
-                your overwrite mode and partitioning respectively. You can find
-                a list of options for each format in Spark DataFrame
-                write documentation:
+            save_args: Save args passed to Spark DataFrameReader write options.
+                Similar to load_args, this is dependent on the selected file format. You can pass
+                ``mode`` and ``partitionBy`` to specify your overwrite mode and partitioning
+                respectively. You can find a list of options for each selected format in
+                Spark DataFrame write documentation, see
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
         """
         self._file_format = file_format

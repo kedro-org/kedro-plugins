@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
+from kedro.io import DataSetError
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.pandas import DeltaTableDataSet
-from kedro.io import DataSetError
 
 
 @pytest.fixture
@@ -55,3 +55,18 @@ class TestDeltaTableDataSet:
         deltatable_data_set.save(new_df)
         reloaded = deltatable_data_set.load()
         assert_frame_equal(new_df, reloaded)
+
+    def test_versioning(self, filepath, dummy_dataframe):
+        """Test Delta Table versioning."""
+        deltatable_data_set = DeltaTableDataSet(filepath)
+        deltatable_data_set.save(dummy_dataframe)
+        new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
+        deltatable_data_set.save(new_df)
+
+        deltatable_data_set0 = DeltaTableDataSet(filepath, version=0)
+        version_0 = deltatable_data_set0.load()
+        assert_frame_equal(dummy_dataframe, version_0)
+
+        deltatable_data_set1 = DeltaTableDataSet(filepath, version=1)
+        version_1 = deltatable_data_set1.load()
+        assert_frame_equal(new_df, version_1)

@@ -49,7 +49,7 @@ class SparkStreamingDataSet(AbstractDataSet):
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
-                specify ``filepath``s starting with ``/dbfs/``. For messag ebrokers such as
+                specify ``filepath``s starting with ``/dbfs/``. For message brokers such as
                 Kafka and all filepath is not required.
             file_format: File format used during load and save operations. 
                 These are formats supported by the running SparkContext including parquet,

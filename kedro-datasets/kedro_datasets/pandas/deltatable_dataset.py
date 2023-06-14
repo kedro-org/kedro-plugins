@@ -21,7 +21,6 @@ class DeltaTableDataSet(AbstractDataSet):
         catalog_type: Optional[DataCatalog] = None,
         catalog_name: Optional[str] = None,
         database: Optional[str] = None,
-        schema: Optional[str] = None,
         table: Optional[str] = None,
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
@@ -32,7 +31,6 @@ class DeltaTableDataSet(AbstractDataSet):
         self._catalog_type = catalog_type
         self._catalog_name = catalog_name
         self._database = database
-        self._schema = schema
         self._table = table
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
@@ -77,19 +75,20 @@ class DeltaTableDataSet(AbstractDataSet):
             except TableNotFoundError:
                 self.is_empty_dir = True
         else:
-            if self._catalog_type == DataCatalog.AWS:
-                self._delta_table = DeltaTable.from_data_catalog(
+            delta_table_impl_map = {
+                DataCatalog.AWS: DeltaTable.from_data_catalog(
                     data_catalog=self._catalog_type,
                     database_name=self._database,
                     table_name=self._table,
-                )
-            else:
-                self._delta_table = DeltaTable.from_data_catalog(
+                ),
+                DataCatalog.UNITY: DeltaTable.from_data_catalog(
                     data_catalog=self._catalog_type,
                     data_catalog_id=self._catalog_name,
-                    database_name=self._schema,
+                    database_name=self._database,
                     table_name=self._table,
-                )
+                ),
+            }
+            self._delta_table = delta_table_impl_map[self._catalog_type]
 
     @property
     def fs_args(self) -> Dict[str, Any]:
@@ -142,6 +141,7 @@ class DeltaTableDataSet(AbstractDataSet):
         return {
             "filepath": self._filepath,
             "catalog_type": self._catalog_type,
+            "catalog_name": self._catalog_name,
             "database": self._database,
             "table": self._table,
             "load_args": self._load_args,

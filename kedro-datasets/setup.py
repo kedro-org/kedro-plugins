@@ -55,7 +55,7 @@ polars_require = {"polars.CSVDataSet": [POLARS]}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataSet": [
-        "snowflake-snowpark-python~=1.0.0",
+        "snowflake-snowpark-python~=1.0",
         "pyarrow~=8.0",
     ]
 }

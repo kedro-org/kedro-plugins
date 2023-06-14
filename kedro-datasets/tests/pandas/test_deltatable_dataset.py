@@ -63,10 +63,10 @@ class TestDeltaTableDataSet:
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
         deltatable_data_set.save(new_df)
 
-        deltatable_data_set0 = DeltaTableDataSet(filepath, version=0)
+        deltatable_data_set0 = DeltaTableDataSet(filepath, load_args={"version": 0})
         version_0 = deltatable_data_set0.load()
         assert_frame_equal(dummy_dataframe, version_0)
 
-        deltatable_data_set1 = DeltaTableDataSet(filepath, version=1)
+        deltatable_data_set1 = DeltaTableDataSet(filepath, load_args={"version": 1})
         version_1 = deltatable_data_set1.load()
         assert_frame_equal(new_df, version_1)

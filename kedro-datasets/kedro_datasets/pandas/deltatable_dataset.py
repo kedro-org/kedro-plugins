@@ -1,9 +1,10 @@
+import json
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
-import json
 import pandas as pd
-from deltalake import DeltaTable, Metadata, DataCatalog
+from deltalake import DataCatalog, DeltaTable, Metadata
+from deltalake._internal import TableNotFoundError
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -33,6 +34,11 @@ class DeltaTableDataSet(AbstractDataSet):
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
 
+        # DeltaTable cannot be instantiated from an empty directory
+        # for the first time creation from filepath, we need to delay the instantiation
+        self.is_empty_dir: bool = False
+        self._delta_table: Optional[DeltaTable] = None
+
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args:
             self._load_args.update(load_args)
@@ -59,11 +65,14 @@ class DeltaTableDataSet(AbstractDataSet):
             )
 
         if self._filepath:
-            self._delta_table = DeltaTable(
-                table_uri=self._filepath,
-                storage_options=self.fs_args,
-                version=self._version,
-            )
+            try:
+                self._delta_table = DeltaTable(
+                    table_uri=self._filepath,
+                    storage_options=self.fs_args,
+                    version=self._version,
+                )
+            except TableNotFoundError:
+                self.is_empty_dir = True
         else:
             catalog = DataCatalog[catalog]
             self._delta_table = DeltaTable.from_data_catalog(
@@ -97,12 +106,27 @@ class DeltaTableDataSet(AbstractDataSet):
         return self._delta_table.to_pandas()
 
     def _save(self, data: pd.DataFrame) -> None:
-        write_deltalake(
-            self._delta_table,
-            data,
-            storage_options=self.fs_args,
-            **self._save_args,
-        )
+        if self.is_empty_dir:
+            # first time creation of delta table
+            write_deltalake(
+                self._filepath,
+                data,
+                storage_options=self.fs_args,
+                **self._save_args,
+            )
+            self.is_empty_dir = False
+            self._delta_table = DeltaTable(
+                table_uri=self._filepath,
+                storage_options=self.fs_args,
+                version=self._version,
+            )
+        else:
+            write_deltalake(
+                self._delta_table,
+                data,
+                storage_options=self.fs_args,
+                **self._save_args,
+            )
 
     def _describe(self) -> Dict[str, Any]:
         return {

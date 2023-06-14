@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
@@ -74,7 +73,7 @@ class DeltaTableDataSet(AbstractDataSet):
             except TableNotFoundError:
                 self.is_empty_dir = True
         else:
-            catalog = DataCatalog[catalog]
+            catalog = DataCatalog[self._catalog]
             self._delta_table = DeltaTable.from_data_catalog(
                 data_catalog=catalog,
                 database_name=self._database,
@@ -89,7 +88,7 @@ class DeltaTableDataSet(AbstractDataSet):
 
     @property
     def schema(self) -> Dict[str, Any]:
-        return json.loads(self._delta_table.schema().to_json())
+        return self._delta_table.schema().json()
 
     @property
     def metadata(self) -> Metadata:

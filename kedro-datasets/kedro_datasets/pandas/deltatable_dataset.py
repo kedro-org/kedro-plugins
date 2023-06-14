@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Dict, List, Optional
 
 import json
 import pandas as pd
@@ -15,12 +15,10 @@ class DeltaTableDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
 
-    CATALOG = {"AWS": DataCatalog.AWS, "UNITY": DataCatalog.UNITY}
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: Optional[str] = None,
-        catalog: Optional[Literal["AWS", "UNITY"]] = None,
+        catalog: Optional[DataCatalog] = None,
         database: Optional[str] = None,
         table: Optional[str] = None,
         load_args: Optional[Dict[str, Any]] = None,
@@ -67,7 +65,7 @@ class DeltaTableDataSet(AbstractDataSet):
                 version=self._version,
             )
         else:
-            catalog = self.CATALOG[catalog]
+            catalog = DataCatalog[catalog]
             self._delta_table = DeltaTable.from_data_catalog(
                 data_catalog=catalog,
                 database_name=self._database,

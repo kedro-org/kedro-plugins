@@ -55,9 +55,9 @@ class DeltaTableDataSet(AbstractDataSet):
 
         if self._filepath and self._catalog:
             raise DataSetError(
-                "DeltaTableDataSet can either from filepath or "
-                "catalog. Please provide either filepath or "
-                "catalog."
+                "DeltaTableDataSet can either load from "
+                "filepath or catalog. Please provide "
+                "one of either filepath or catalog."
             )
 
         if self._filepath:

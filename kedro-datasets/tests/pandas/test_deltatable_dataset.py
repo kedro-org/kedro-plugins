@@ -27,8 +27,8 @@ def deltatable_data_set_from_path(filepath, load_args, save_args, fs_args):
 
 
 class TestDeltaTableDataSet:
-    def test_save_and_load(self, deltatable_data_set_from_path, dummy_df):
-        """Test saving and reloading the data set."""
+    def test_save_to_empty_dir(self, deltatable_data_set_from_path, dummy_df):
+        """Test saving to an empty directory (first time creation of delta table)."""
         deltatable_data_set_from_path.save(dummy_df)
         reloaded = deltatable_data_set_from_path.load()
         assert_frame_equal(dummy_df, reloaded)
@@ -42,8 +42,7 @@ class TestDeltaTableDataSet:
         assert_frame_equal(new_df, reloaded)
 
     def test_overwrite_with_diff_schema(self, deltatable_data_set_from_path, dummy_df):
-        """Test saving with the default overwrite mode with new data of
-        different schema."""
+        """Test saving with the default overwrite mode with new data of diff schema."""
         deltatable_data_set_from_path.save(dummy_df)
         new_df = pd.DataFrame({"new_col": [1, 2]})
         pattern = "Schema of data does not match table schema"
@@ -63,7 +62,7 @@ class TestDeltaTableDataSet:
 
     @pytest.mark.parametrize("save_args", [{"mode": "append"}], indirect=True)
     def test_append(self, deltatable_data_set_from_path, dummy_df):
-        """Test saving with append mode."""
+        """Test saving by appending new data."""
         deltatable_data_set_from_path.save(dummy_df)
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
         appended = pd.concat([dummy_df, new_df], ignore_index=True)
@@ -75,20 +74,40 @@ class TestDeltaTableDataSet:
         """Test loading different versions."""
         deltatable_data_set_from_path = DeltaTableDataSet(filepath)
         deltatable_data_set_from_path.save(dummy_df)
+        assert deltatable_data_set_from_path.get_loaded_version() == 0
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
         deltatable_data_set_from_path.save(new_df)
+        assert deltatable_data_set_from_path.get_loaded_version() == 1
 
         deltatable_data_set_from_path0 = DeltaTableDataSet(
             filepath, load_args={"version": 0}
         )
         version_0 = deltatable_data_set_from_path0.load()
+        assert deltatable_data_set_from_path0.get_loaded_version() == 0
         assert_frame_equal(dummy_df, version_0)
 
         deltatable_data_set_from_path1 = DeltaTableDataSet(
             filepath, load_args={"version": 1}
         )
         version_1 = deltatable_data_set_from_path1.load()
+        assert deltatable_data_set_from_path1.get_loaded_version() == 1
         assert_frame_equal(new_df, version_1)
 
-    def test_save_and_load_from_catalog(self):
-        pass
+    def test_filepath_and_catalog_both_exist(self, filepath):
+        """Test when both filepath and catalog are provided."""
+        with pytest.raises(DataSetError):
+            DeltaTableDataSet(filepath=filepath, catalog_type="AWS")
+
+    def test_property_schema(self, deltatable_data_set_from_path, dummy_df):
+        """Test the schema property to return the underlying delta table schema."""
+        deltatable_data_set_from_path.save(dummy_df)
+        s1 = deltatable_data_set_from_path.schema
+        s2 = deltatable_data_set_from_path._delta_table.schema().json()
+        assert s1 == s2
+
+    def test_describe(self, filepath, dummy_df):
+        """Test the describe method."""
+        deltatable_data_set_from_path = DeltaTableDataSet(filepath)
+        desc = deltatable_data_set_from_path._describe()
+        assert desc["filepath"] == filepath
+        assert desc["version"] is None

@@ -18,8 +18,10 @@ class DeltaTableDataSet(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: Optional[str] = None,
-        catalog: Optional[DataCatalog] = None,
+        catalog_type: Optional[DataCatalog] = None,
+        catalog_name: Optional[str] = None,
         database: Optional[str] = None,
+        schema: Optional[str] = None,
         table: Optional[str] = None,
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
@@ -27,8 +29,10 @@ class DeltaTableDataSet(AbstractDataSet):
         fs_args: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._filepath = filepath
-        self._catalog = catalog
+        self._catalog_type = catalog_type
+        self._catalog_name = catalog_name
         self._database = database
+        self._schema = schema
         self._table = table
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
@@ -56,11 +60,11 @@ class DeltaTableDataSet(AbstractDataSet):
 
         self._version = self._load_args.get("version", None)
 
-        if self._filepath and self._catalog:
+        if self._filepath and self._catalog_type:
             raise DataSetError(
                 "DeltaTableDataSet can either load from "
-                "filepath or catalog. Please provide "
-                "one of either filepath or catalog."
+                "filepath or catalog_type. Please provide "
+                "one of either filepath or catalog_type."
             )
 
         if self._filepath:
@@ -73,12 +77,19 @@ class DeltaTableDataSet(AbstractDataSet):
             except TableNotFoundError:
                 self.is_empty_dir = True
         else:
-            catalog = DataCatalog[self._catalog]
-            self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=catalog,
-                database_name=self._database,
-                table_name=self._table,
-            )
+            if self._catalog_type == DataCatalog.AWS:
+                self._delta_table = DeltaTable.from_data_catalog(
+                    data_catalog=self._catalog_type,
+                    database_name=self._database,
+                    table_name=self._table,
+                )
+            else:
+                self._delta_table = DeltaTable.from_data_catalog(
+                    data_catalog=self._catalog_type,
+                    data_catalog_id=self._catalog_name,
+                    database_name=self._schema,
+                    table_name=self._table,
+                )
 
     @property
     def fs_args(self) -> Dict[str, Any]:
@@ -130,7 +141,7 @@ class DeltaTableDataSet(AbstractDataSet):
     def _describe(self) -> Dict[str, Any]:
         return {
             "filepath": self._filepath,
-            "catalog": self._catalog,
+            "catalog_type": self._catalog_type,
             "database": self._database,
             "table": self._table,
             "load_args": self._load_args,

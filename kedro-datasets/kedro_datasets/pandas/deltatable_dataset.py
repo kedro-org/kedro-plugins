@@ -75,20 +75,12 @@ class DeltaTableDataSet(AbstractDataSet):
             except TableNotFoundError:
                 self.is_empty_dir = True
         else:
-            delta_table_impl_map = {
-                DataCatalog.AWS: DeltaTable.from_data_catalog(
-                    data_catalog=self._catalog_type,
-                    database_name=self._database,
-                    table_name=self._table,
-                ),
-                DataCatalog.UNITY: DeltaTable.from_data_catalog(
-                    data_catalog=self._catalog_type,
-                    data_catalog_id=self._catalog_name,
-                    database_name=self._database,
-                    table_name=self._table,
-                ),
-            }
-            self._delta_table = delta_table_impl_map[self._catalog_type]
+            self._delta_table = DeltaTable.from_data_catalog(
+                data_catalog=DataCatalog[self._catalog_type],
+                data_catalog_id=self._catalog_name,
+                database_name=self._database,
+                table_name=self._table,
+            )
 
     @property
     def fs_args(self) -> Dict[str, Any]:

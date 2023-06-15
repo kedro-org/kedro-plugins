@@ -1,5 +1,8 @@
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
+from deltalake import DataCatalog
 from kedro.io import DataSetError
 from pandas.testing import assert_frame_equal
 
@@ -111,3 +114,32 @@ class TestDeltaTableDataSet:
         desc = deltatable_data_set_from_path._describe()
         assert desc["filepath"] == filepath
         assert desc["version"] is None
+
+    @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
+    def test_from_aws_glue_catalog(self, mock_delta_table):
+        _ = DeltaTableDataSet(catalog_type="AWS", database="db", table="tbl")
+        mock_delta_table.from_data_catalog.assert_called_once()
+        mock_delta_table.from_data_catalog.assert_called_with(
+            data_catalog=DataCatalog.AWS,
+            data_catalog_id=None,
+            database_name="db",
+            table_name="tbl",
+        )
+
+    @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
+    def test_from_databricks_unity_catalog(self, mock_delta_table):
+        _ = DeltaTableDataSet(
+            catalog_type="UNITY", catalog_name="id", database="db", table="tbl"
+        )
+        mock_delta_table.from_data_catalog.assert_called_once()
+        mock_delta_table.from_data_catalog.assert_called_with(
+            data_catalog=DataCatalog.UNITY,
+            data_catalog_id="id",
+            database_name="db",
+            table_name="tbl",
+        )
+
+    @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
+    def test_from_unsupported_catalog(self, mock_delta_table):
+        with pytest.raises(KeyError):
+            DeltaTableDataSet(catalog_type="unsupported", database="db", table="tbl")

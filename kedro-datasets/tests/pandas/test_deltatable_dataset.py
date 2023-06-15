@@ -141,8 +141,7 @@ class TestDeltaTableDataSet:
             table_name="tbl",
         )
 
-    @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
-    def test_from_unsupported_catalog(self, mock_delta_table):
+    def test_from_unsupported_catalog(self):
         """Test dataset creation from unsupported catalog."""
         with pytest.raises(KeyError):
             DeltaTableDataSet(catalog_type="unsupported", database="db", table="tbl")

@@ -117,6 +117,7 @@ class TestDeltaTableDataSet:
 
     @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
     def test_from_aws_glue_catalog(self, mock_delta_table):
+        """Test dataset creation from AWS Glue catalog."""
         _ = DeltaTableDataSet(catalog_type="AWS", database="db", table="tbl")
         mock_delta_table.from_data_catalog.assert_called_once()
         mock_delta_table.from_data_catalog.assert_called_with(
@@ -128,6 +129,7 @@ class TestDeltaTableDataSet:
 
     @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
     def test_from_databricks_unity_catalog(self, mock_delta_table):
+        """Test dataset creation from Databricks Unity catalog."""
         _ = DeltaTableDataSet(
             catalog_type="UNITY", catalog_name="id", database="db", table="tbl"
         )
@@ -141,5 +143,6 @@ class TestDeltaTableDataSet:
 
     @patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
     def test_from_unsupported_catalog(self, mock_delta_table):
+        """Test dataset creation from unsupported catalog."""
         with pytest.raises(KeyError):
             DeltaTableDataSet(catalog_type="unsupported", database="db", table="tbl")

@@ -38,7 +38,7 @@ jobs:
           key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
-        run: pip install git+https://github.com/kedro-org/kedro@main
+        run: pip install git+https://github.com/kedro-org/kedro@refactor/rename-data-set
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
@@ -83,7 +83,7 @@ jobs:
       - name: Install dependencies
         run: |
             cd ${{ inputs.plugin }}
-            pip install git+https://github.com/kedro-org/kedro@main
+            pip install git+https://github.com/kedro-org/kedro@refactor/rename-data-set
             pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
             pip freeze
       - name: Install pre-commit hooks
@@ -120,7 +120,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          pip install git+https://github.com/kedro-org/kedro@main
+          pip install git+https://github.com/kedro-org/kedro@refactor/rename-data-set
           pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
       - name: pip freeze
         run: pip freeze

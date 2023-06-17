@@ -1,5 +1,5 @@
 import pytest
-from kedro.io import MemoryDataSet
+from kedro.io import MemoryDataset
 from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
@@ -31,7 +31,7 @@ def spark_data_frame(spark_session):
 
 @pytest.fixture
 def memory_dataset(spark_data_frame):
-    return MemoryDataSet(data=spark_data_frame)
+    return MemoryDataset(data=spark_data_frame)
 
 
 def test_load_modify_original_data(memory_dataset, spark_data_frame):

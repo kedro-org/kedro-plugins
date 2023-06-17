@@ -368,7 +368,7 @@ class TestTensorFlowModelDataSetVersioned:
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     def test_http_filesystem_no_versioning(self, tensorflow_model_dataset):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DataSetError, match=pattern):
             tensorflow_model_dataset(

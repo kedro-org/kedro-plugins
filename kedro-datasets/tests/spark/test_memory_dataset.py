@@ -44,7 +44,7 @@ def test_load_modify_original_data(memory_dataset, spark_data_frame):
 def test_save_modify_original_data(spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
-    memory_dataset = MemoryDataSet()
+    memory_dataset = MemoryDataset()
     memory_dataset.save(spark_data_frame)
     spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, "new value")
 

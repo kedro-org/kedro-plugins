@@ -86,6 +86,37 @@ class DeltaTableDataSet(AbstractDataSet):
         credentials: Optional[Dict[str, Any]] = None,
         fs_args: Optional[Dict[str, Any]] = None,
     ) -> None:
+        """Creates a new instance of ``DeltaTableDataSet``
+
+        Args:
+            filepath (str): Filepath to a delta lake file with the following accepted protocol:
+                ``S3``:
+                    `s3://<bucket>/<path>`
+                    `s3a://<bucket>/<path>`
+                ``Azure``:
+                    `az://<container>/<path>`
+                    `adl://<container>/<path>`
+                    `abfs://<container>/<path>`
+                ``GCS``:
+                    `gs://<bucket>/<path>`
+                If any of the prefix above is not provided, `file` protocol (local filesystem)
+                will be used.
+            catalog_type (DataCatalog, optional): `AWS` or `UNITY` if filepath is not provided. Defaults to None.
+            catalog_name (str, optional): the name of catalog in AWS Glue or Databricks Unity. Defaults to None.
+            database (str, optional): the name of the database (also referred to as schema). Defaults to None.
+            table (str, optional): the name of the table.
+            load_args (Dict[str, Any], optional): Additional options for loading file(s) into DeltaTableDataSet.
+                `load_args` accepts `version` to load the appropriate version when loading from a filesystem.
+            save_args (Dict[str, Any], optional): Additional saving options for saving into Delta lake.
+                Here you can find all available arguments:
+                https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables
+            credentials (Dict[str, Any], optional): Credentials required to get access to the underlying filesystem.
+                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+            fs_args (Dict[str, Any], optional): Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+        Raises:
+            DataSetError: Invalid configuration supplied (through DeltaTableDataSet validation)
+        """
         self._filepath = filepath
         self._catalog_type = catalog_type
         self._catalog_name = catalog_name

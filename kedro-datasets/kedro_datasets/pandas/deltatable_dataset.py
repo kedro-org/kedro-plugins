@@ -9,6 +9,65 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class DeltaTableDataSet(AbstractDataSet):
+    """``DeltaTableDataSet`` loads/saves delta tables from/to a filesystem (e.g.: local,
+    S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
+    load and save using a pandas dataframe. When saving data, you can specify one of two
+    modes: overwrite(default), append. If you wish to alter the schema as a part of
+    overwrite, pass overwrite_schema=True. You can overwrite a specific partition by using
+    mode=overwrite together with partition_filters. This will remove all files within the
+    matching partition and insert your data as new files.
+
+    Example usage for the `YAML API`_:
+
+    .. code-block:: yaml
+
+        boats_filesystem:
+          type: pandas.DeltaTableDataSet
+          filepath: data/01_raw/boats
+          credentials: dev_creds
+          load_args:
+            version: 7
+          save_args:
+            mode: overwrite
+
+        boats_databricks_unity_catalog:
+          type: pandas.DeltaTableDataSet
+          credentials: dev_creds
+          catalog_type: UNITY
+          database: simple_database
+          table: simple_table
+          save_args:
+            mode: overwrite
+
+        trucks_aws_glue_catalog:
+          type: pandas.DeltaTableDataSet
+          credentials: dev_creds
+          catalog_type: AWS
+          catalog_name: main
+          database: db_schema
+          table: db_table
+          save_args:
+            mode: overwrite
+
+    Example usage for the `Python API`_:
+    ::
+
+        >>> from kedro_datasets.pandas import DeltaTableDataSet
+        >>> import pandas as pd
+        >>>
+        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]})
+        >>> data_set = DeltaTableDataSet(filepath="test")
+        >>>
+        >>> data_set.save(data)
+        >>> reloaded = data_set.load()
+        >>> assert data.equals(reloaded)
+        >>>
+        >>> new_data = pd.DataFrame({'col1': [7, 8], 'col2': [9, 10], 'col3': [11, 12]})
+        >>> data_set.save(new_data)
+        >>> data_set.get_loaded_version()
+
+    """
+
     DEFAULT_WRITE_MODE = "overwrite"
     ACCEPTED_WRITE_MODES = ("overwrite", "append")
 

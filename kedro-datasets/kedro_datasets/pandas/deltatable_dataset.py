@@ -101,18 +101,24 @@ class DeltaTableDataSet(AbstractDataSet):
                     `gs://<bucket>/<path>`
                 If any of the prefix above is not provided, `file` protocol (local filesystem)
                 will be used.
-            catalog_type (DataCatalog, optional): `AWS` or `UNITY` if filepath is not provided. Defaults to None.
-            catalog_name (str, optional): the name of catalog in AWS Glue or Databricks Unity. Defaults to None.
-            database (str, optional): the name of the database (also referred to as schema). Defaults to None.
+            catalog_type (DataCatalog, optional): `AWS` or `UNITY` if filepath is not provided.
+                Defaults to None.
+            catalog_name (str, optional): the name of catalog in AWS Glue or Databricks Unity.
+                Defaults to None.
+            database (str, optional): the name of the database (also referred to as schema).
+                Defaults to None.
             table (str, optional): the name of the table.
-            load_args (Dict[str, Any], optional): Additional options for loading file(s) into DeltaTableDataSet.
-                `load_args` accepts `version` to load the appropriate version when loading from a filesystem.
-            save_args (Dict[str, Any], optional): Additional saving options for saving into Delta lake.
-                Here you can find all available arguments:
-                https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables
-            credentials (Dict[str, Any], optional): Credentials required to get access to the underlying filesystem.
-                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
-            fs_args (Dict[str, Any], optional): Extra arguments to pass into underlying filesystem class constructor
+            load_args (Dict[str, Any], optional): Additional options for loading file(s)
+                into DeltaTableDataSet. `load_args` accepts `version` to load the appropriate
+                 version when loading from a filesystem.
+            save_args (Dict[str, Any], optional): Additional saving options for saving into
+                Delta lake. Here you can find all available arguments:
+                https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables # noqa: C0301
+            credentials (Dict[str, Any], optional): Credentials required to get access to
+                the underlying filesystem. E.g. for ``GCSFileSystem`` it should look like
+                `{"token": None}`.
+            fs_args (Dict[str, Any], optional): Extra arguments to pass into underlying
+                filesystem class constructor.
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         Raises:
             DataSetError: Invalid configuration supplied (through DeltaTableDataSet validation)

@@ -29,6 +29,7 @@ matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
+    "pandas.DeltaTableDataSet": [PANDAS, "deltalake>=0.10.0"],
     "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],

@@ -108,7 +108,7 @@ class TestDeltaTableDataSet:
         s2 = deltatable_data_set_from_path._delta_table.schema().json()
         assert s1 == s2
 
-    def test_describe(self, filepath, dummy_df):
+    def test_describe(self, filepath):
         """Test the describe method."""
         deltatable_data_set_from_path = DeltaTableDataSet(filepath)
         desc = deltatable_data_set_from_path._describe()

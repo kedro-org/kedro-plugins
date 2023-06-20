@@ -1,3 +1,7 @@
+"""``DeltaTableDataSet`` loads/saves delta tables from/to a filesystem (e.g.: local,
+S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
+load and save using a pandas dataframe.
+"""
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
@@ -8,7 +12,7 @@ from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class DeltaTableDataSet(AbstractDataSet):
+class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-attributes
     """``DeltaTableDataSet`` loads/saves delta tables from/to a filesystem (e.g.: local,
     S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
     load and save using a pandas dataframe. When saving data, you can specify one of two
@@ -180,23 +184,39 @@ class DeltaTableDataSet(AbstractDataSet):
 
     @property
     def fs_args(self) -> Dict[str, Any]:
+        """Appends and returns filesystem credentials to fs_args."""
         fs_args = deepcopy(self._fs_args)
         fs_args.update(self._credentials)
         return fs_args
 
     @property
     def schema(self) -> Dict[str, Any]:
+        """Returns the schema of the DeltaTableDataSet as a dictionary."""
         return self._delta_table.schema().json()
 
     @property
     def metadata(self) -> Metadata:
+        """Returns the metadata of the DeltaTableDataSet as a dictionary.
+        Metadata contains the following:
+        1. A unique id
+        2. A name, if provided
+        3. A description, if provided
+        4. The list of partition_columns.
+        5. The created_time of the table
+        6. A map of table configuration. This includes fields such as delta.appendOnly,
+            which if true indicates the table is not meant to have data deleted from it.
+
+        Returns: Metadata object containing the above metadata attributes.
+        """
         return self._delta_table.metadata()
 
     @property
     def history(self) -> List[Dict[str, Any]]:
+        """Returns the history of actions on DeltaTableDataSet as a list of dictionaries."""
         return self._delta_table.history()
 
     def get_loaded_version(self) -> int:
+        """Returns the version of the DeltaTableDataSet that is currently loaded."""
         return self._delta_table.version()
 
     def _load(self) -> pd.DataFrame:

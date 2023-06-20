@@ -21,7 +21,7 @@ HDFSTORE_DRIVER = "H5FD_CORE"
 
 class HDFDataSet(
     AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]
-):  # pylint:disable=too-many-instance-attributes
+):
     """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 

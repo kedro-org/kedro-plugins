@@ -22,7 +22,7 @@ from kedro.io.core import (
 
 class GBQTableDataSet(
     AbstractDataSet[None, pd.DataFrame]
-):  # pylint:disable=too-many-instance-attributes
+):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
@@ -180,7 +180,7 @@ class GBQTableDataSet(
 
 class GBQQueryDataSet(
     AbstractDataSet[None, pd.DataFrame]
-):  # pylint:disable=too-many-instance-attributes
+):
     """``GBQQueryDataSet`` loads data from a provided SQL query from Google
     BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed

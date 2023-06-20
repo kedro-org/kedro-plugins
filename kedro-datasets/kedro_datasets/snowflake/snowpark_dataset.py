@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class SnowparkTableDataSet(
     AbstractDataSet
-):  # pylint:disable=too-many-instance-attributes
+):
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     As of Mar-2023, the snowpark connector only works with Python 3.8.

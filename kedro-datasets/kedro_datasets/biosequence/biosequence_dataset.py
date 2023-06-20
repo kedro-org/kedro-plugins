@@ -12,7 +12,7 @@ from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_pa
 
 class BioSequenceDataSet(
     AbstractDataSet[List, List]
-):  # pylint:disable=too-many-instance-attributes
+):
     r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
 
     Example:

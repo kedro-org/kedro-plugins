@@ -1,3 +1,0 @@
-[FORMAT]
-# Regexp for a line that is allowed to be longer than the limit.
-ignore-long-lines=^\s*(# )?<?https?://\S+>?$

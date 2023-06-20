@@ -113,7 +113,7 @@ class DeltaTableDataSet(AbstractDataSet):
                  version when loading from a filesystem.
             save_args (Dict[str, Any], optional): Additional saving options for saving into
                 Delta lake. Here you can find all available arguments:
-                https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables # noqa: C0301
+                https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables
             credentials (Dict[str, Any], optional): Credentials required to get access to
                 the underlying filesystem. E.g. for ``GCSFileSystem`` it should look like
                 `{"token": None}`.

@@ -49,7 +49,7 @@ enable = ["useless-suppression"]
 max-nested-blocks = 5
 [tool.pylint.format]
 # Regexp for a line that is allowed to be longer than the limit.
-ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+ignore-long-lines='^\s*(# )?<?https?://\S+>?$'
 indent-after-paren=4
 indent-string="    "
 [tool.pylint.miscellaneous]

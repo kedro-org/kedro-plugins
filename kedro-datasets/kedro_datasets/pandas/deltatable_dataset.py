@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
-from deltalake._internal import TableNotFoundError
+from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataSet, DataSetError
 

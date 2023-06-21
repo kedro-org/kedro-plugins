@@ -115,7 +115,9 @@ class TestDeltaTableDataSet:
 
     def test_from_aws_glue_catalog(self, mocker):
         """Test dataset creation from AWS Glue catalog."""
-        mock_delta_table = mocker.patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
+        mock_delta_table = mocker.patch(
+            "kedro_datasets.pandas.deltatable_dataset.DeltaTable"
+        )
         _ = DeltaTableDataSet(catalog_type="AWS", database="db", table="tbl")
         mock_delta_table.from_data_catalog.assert_called_once()
         mock_delta_table.from_data_catalog.assert_called_with(
@@ -127,7 +129,9 @@ class TestDeltaTableDataSet:
 
     def test_from_databricks_unity_catalog(self, mocker):
         """Test dataset creation from Databricks Unity catalog."""
-        mock_delta_table = mocker.patch("kedro_datasets.pandas.deltatable_dataset.DeltaTable")
+        mock_delta_table = mocker.patch(
+            "kedro_datasets.pandas.deltatable_dataset.DeltaTable"
+        )
         _ = DeltaTableDataSet(
             catalog_type="UNITY", catalog_name="id", database="db", table="tbl"
         )

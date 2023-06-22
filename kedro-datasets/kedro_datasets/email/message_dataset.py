@@ -20,9 +20,7 @@ from kedro.io.core import (
 )
 
 
-class EmailMessageDataSet(
-    AbstractVersionedDataSet[Message, Message]
-):
+class EmailMessageDataSet(AbstractVersionedDataSet[Message, Message]):
     """``EmailMessageDataSet`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
     ``email`` package in the standard library to manage email messages.

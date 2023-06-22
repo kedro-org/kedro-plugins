@@ -10,9 +10,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 logger = logging.getLogger(__name__)
 
 
-class SnowparkTableDataSet(
-    AbstractDataSet
-):
+class SnowparkTableDataSet(AbstractDataSet):
     """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
 
     As of Mar-2023, the snowpark connector only works with Python 3.8.

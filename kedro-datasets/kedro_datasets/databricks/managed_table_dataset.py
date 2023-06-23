@@ -31,7 +31,7 @@ class ManagedTable:
 
     # regex for tables, catalogs and schemas
     _NAMING_REGEX = r"\b[0-9a-zA-Z_-]{1,}\b"
-    _VALID_EXTERNAL_PREFIX = ["s3", "abfss", "abfs", "gs"]
+    _VALID_EXTERNAL_TABLE_PREFIX = ["s3", "abfss", "abfs", "gs"]
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
@@ -127,8 +127,8 @@ class ManagedTable:
             DataSetError: If an invalid `external_table_path` is passed
         """
         fs_prefix, filepath = _split_filepath(self.external_table_path)
-        if fs_prefix in self._VALID_EXTERNAL_PREFIX:
-            raise DataSetError(f"`external_table_path` must begin with {self._VALID_EXTERNAL_PREFIX}")
+        if fs_prefix in self._VALID_EXTERNAL_TABLE_PREFIX:
+            raise DataSetError(f"`external_table_path` must begin with {self._VALID_EXTERNAL_TABLE_PREFIX}")
 
     def full_table_location(self) -> str:
         """Returns the full table location

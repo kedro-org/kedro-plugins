@@ -227,6 +227,10 @@ class TestManagedTableDataSet:
         with pytest.raises(DataSetError):
             ManagedTableDataSet(table="test", catalog="invalid!")
 
+    def test_invalid_external_table_path(self):
+        with pytest.raises(DataSetError):
+            ManagedTableDataSet(table="test", external_table_path='invalid!')
+
     def test_schema(self):
         unity_ds = ManagedTableDataSet(
             table="test",

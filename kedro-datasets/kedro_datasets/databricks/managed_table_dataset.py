@@ -4,7 +4,8 @@ in Databricks.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from pathlib import PurePosixPath
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 import pandas as pd
 from kedro.io.core import (
@@ -13,12 +14,17 @@ from kedro.io.core import (
     Version,
     VersionNotFoundError,
 )
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession, DataFrameWriter
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
 logger = logging.getLogger(__name__)
 
+def _split_filepath(filepath: str) -> Tuple[str, str]:
+    split_ = filepath.split("://", 1)
+    if len(split_) == 2:
+        return split_[0] + "://", split_[1]
+    return "", split_[0]
 
 @dataclass(frozen=True)
 class ManagedTable:
@@ -26,6 +32,7 @@ class ManagedTable:
 
     # regex for tables, catalogs and schemas
     _NAMING_REGEX = r"\b[0-9a-zA-Z_-]{1,}\b"
+    _VALID_EXTERNAL_PREFIX = ["s3", "abfss", "abfs", "gs"]
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
@@ -37,6 +44,7 @@ class ManagedTable:
     owner_group: str
     partition_columns: Union[str, List[str]]
     json_schema: StructType
+    external_table_path: str
 
     def __post_init__(self):
         """Run validation methods if declared.
@@ -113,6 +121,16 @@ class ManagedTable:
                     f"`primary_key` must be provided for"
                     f"`write_mode` {self.write_mode}"
                 )
+    def _validate_external_table_path(self):
+        """Validates the externallocation path
+
+        Raises:
+            DataSetError: If an invalid `external_table_path` is passed
+        """
+        fs_prefix, filepath = _split_filepath(self.external_table_path)
+        PurePosixPath(filepath)
+        if fs_prefix in self._VALID_EXTERNAL_PREFIX:
+            raise DataSetError(f"`external_table_path` must a valid path")
 
     def full_table_location(self) -> str:
         """Returns the full table location
@@ -201,6 +219,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         dataframe_type: str = "spark",
         primary_key: Optional[Union[str, List[str]]] = None,
         version: Version = None,
+        external_table_path: str = None,
         *,
         # the following parameters are used by project hooks
         # to create or update table properties
@@ -226,6 +245,8 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
              Can be in the form of a list. Defaults to None.
             version (Version, optional): kedro.io.core.Version instance to load the data.
              Defaults to None.
+            external_table_path (str, optional): the path for storing data as an external table.
+             Defaults to None.
             schema (Dict[str, Any], optional): the schema of the table in JSON form.
              Dataframes will be truncated to match the schema if provided.
              Used by the hooks to create the table if the schema is provided
@@ -249,6 +270,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             owner_group=owner_group,
             partition_columns=partition_columns,
             json_schema=schema,
+            external_table_path=external_table_path,
         )
 
         self._version = version
@@ -291,6 +313,21 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             data = data.toPandas()
         return data
 
+    def _check_save_external_path(self, data: DataFrame) -> DataFrameWriter:
+        """Adds the external table path to the DataFrame writer if is needed
+
+        Args:
+            data (DataFrame):  the Spark dataframe to be stored
+
+        Returns:
+            DataFrameWriter: Return a DataFrameWriter in format delta
+            with the external table path option
+        """
+        delta_table = data.write.format("delta")
+        if self._table.external_table_path is not None:
+            delta_table = delta_table.option("path", self._table.external_table_path)
+        return delta_table
+
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it
         to the location defined in the init
@@ -298,7 +335,8 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         Args:
             data (DataFrame): the Spark dataframe to append to the table
         """
-        data.write.format("delta").mode("append").saveAsTable(
+        delta_table = self._check_save_external_path
+        delta_table.mode("append").saveAsTable(
             self._table.full_table_location()
         )
 
@@ -309,7 +347,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         Args:
             data (DataFrame): the Spark dataframe to overwrite the table with.
         """
-        delta_table = data.write.format("delta")
+        delta_table = self._check_save_external_path
         if self._table.write_mode == "overwrite":
             delta_table = delta_table.mode("overwrite").option(
                 "overwriteSchema", "true"
@@ -401,6 +439,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             "version": str(self._version),
             "owner_group": self._table.owner_group,
             "partition_columns": self._table.partition_columns,
+            "external_table_path": self._table.external_table_path,
         }
 
     def _exists(self) -> bool:

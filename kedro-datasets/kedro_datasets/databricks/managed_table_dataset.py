@@ -4,7 +4,6 @@ in Databricks.
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Union, Tuple
 
 import pandas as pd
@@ -128,9 +127,8 @@ class ManagedTable:
             DataSetError: If an invalid `external_table_path` is passed
         """
         fs_prefix, filepath = _split_filepath(self.external_table_path)
-        PurePosixPath(filepath)
         if fs_prefix in self._VALID_EXTERNAL_PREFIX:
-            raise DataSetError(f"`external_table_path` must a valid path")
+            raise DataSetError(f"`external_table_path` must begin with {self._VALID_EXTERNAL_PREFIX}")
 
     def full_table_location(self) -> str:
         """Returns the full table location

@@ -7,15 +7,14 @@ import boto3
 import pandas as pd
 import pytest
 import s3fs
+from kedro.io import DataSetError
+from kedro.io.data_catalog import CREDENTIALS_KEY
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
-from kedro_datasets.pandas import CSVDataSet
-from kedro_datasets.pandas import ParquetDataSet
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro_datasets.partitions import PartitionedDataSet
 from kedro_datasets.partitions.partitioned_dataset import KEY_PROPAGATION_WARNING
-from kedro.io import DataSetError
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 
 @pytest.fixture
@@ -48,7 +47,7 @@ LOCAL_DATASET_DEFINITION = [
 ]
 
 
-class FakeDataSet():  # pylint: disable=too-few-public-methods
+class FakeDataSet:  # pylint: disable=too-few-public-methods
     pass
 
 

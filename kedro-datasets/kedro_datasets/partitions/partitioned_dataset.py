@@ -9,9 +9,8 @@ from typing import Any, Callable
 from urllib.parse import urlparse
 from warnings import warn
 
+import fsspec
 from cachetools import Cache, cachedmethod
-
-from . import KEY_PROPAGATION_WARNING
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -21,7 +20,7 @@ from kedro.io.core import (
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
-import fsspec
+from . import KEY_PROPAGATION_WARNING
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 

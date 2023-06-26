@@ -8,7 +8,6 @@ from copy import deepcopy
 from typing import Any, Callable
 
 from cachetools import cachedmethod
-
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -18,7 +17,8 @@ from kedro.io.core import (
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
-from . import PartitionedDataSet, KEY_PROPAGATION_WARNING
+
+from . import KEY_PROPAGATION_WARNING, PartitionedDataSet
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 

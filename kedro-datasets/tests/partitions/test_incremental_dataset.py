@@ -8,14 +8,14 @@ from typing import Any
 import boto3
 import pandas as pd
 import pytest
+from kedro.io import AbstractDataSet, DataSetError
+from kedro.io.data_catalog import CREDENTIALS_KEY
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
+from kedro_datasets.partitions import IncrementalDataSet
 from kedro_datasets.pickle import PickleDataSet
 from kedro_datasets.text import TextDataSet
-from kedro_datasets.partitions import IncrementalDataSet
-from kedro.io import AbstractDataSet, DataSetError
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 DATASET = "kedro_datasets.pandas.csv_dataset.CSVDataSet"
 
@@ -229,7 +229,10 @@ class TestIncrementalDataSetLocal:
         [
             (None, TextDataSet),
             ({"type": "kedro_datasets.pickle.PickleDataSet"}, PickleDataSet),
-            ({"type": "tests.partitions.test_incremental_dataset.DummyDataset"}, DummyDataset),
+            (
+                {"type": "tests.partitions.test_incremental_dataset.DummyDataset"},
+                DummyDataset,
+            ),
         ],
     )
     def test_checkpoint_type(

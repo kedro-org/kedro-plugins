@@ -126,9 +126,10 @@ class ManagedTable:
         Raises:
             DataSetError: If an invalid `external_table_path` is passed
         """
-        fs_prefix, filepath = _split_filepath(self.external_table_path)
-        if fs_prefix in self._VALID_EXTERNAL_TABLE_PREFIX:
-            raise DataSetError(f"`external_table_path` must begin with {self._VALID_EXTERNAL_TABLE_PREFIX}")
+        if self.external_table_path is not None:
+            fs_prefix, filepath = _split_filepath(self.external_table_path)
+            if fs_prefix in self._VALID_EXTERNAL_TABLE_PREFIX:
+                raise DataSetError(f"`external_table_path` must begin with {self._VALID_EXTERNAL_TABLE_PREFIX}")
 
     def full_table_location(self) -> str:
         """Returns the full table location

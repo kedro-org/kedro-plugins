@@ -85,7 +85,7 @@ class TestIncrementalDataSetLocal:
 
         pds.release()
         reloaded_after_release = pds.load()
-        assert reloaded_after_release == {}
+        assert not reloaded_after_release
 
     def test_save(self, local_csvs):
         """Test saving a new partition into an IncrementalDataSet"""
@@ -205,7 +205,7 @@ class TestIncrementalDataSetLocal:
         partitions being returned"""
         pds = IncrementalDataSet(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
         loaded = pds.load()
-        assert loaded == {}
+        assert not loaded
 
         confirm_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
         assert not confirm_path.exists()
@@ -500,7 +500,7 @@ class TestPartitionedDataSetS3:
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
         loaded = pds.load()
-        assert loaded == {}
+        assert not loaded
 
         assert not pds._checkpoint.exists()
         pds.confirm()

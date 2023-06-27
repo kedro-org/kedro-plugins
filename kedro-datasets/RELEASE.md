@@ -6,6 +6,7 @@
 * Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
 ## Community contributions
+* Migrated `PartitionedDataSet` and `IncrementalDataSet` to from main repository to kedro-datasets.
 
 # Release 1.4.1:
 

@@ -1,5 +1,9 @@
-"""``PartitionedDataset`` loads and saves partitioned file-like data using the
-underlying dataset definition. It also uses `fsspec` for filesystem level operations.
+"""``IncrementalDataset`` inherits from ``PartitionedDataset``, which loads
+and saves partitioned file-like data using the underlying dataset
+definition. ``IncrementalDataset`` also stores the information about the last
+processed partition in so-called `checkpoint` that is persisted to the location
+of the data partitions by default, so that subsequent pipeline run loads only
+new partitions past the checkpoint.It also uses `fsspec` for filesystem level operations.
 """
 from __future__ import annotations
 
@@ -18,9 +22,7 @@ from kedro.io.core import (
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
-from . import KEY_PROPAGATION_WARNING, PartitionedDataSet
-
-S3_PROTOCOLS = ("s3", "s3a", "s3n")
+from .partitioned_dataset import KEY_PROPAGATION_WARNING, PartitionedDataSet
 
 
 class IncrementalDataSet(PartitionedDataSet):
@@ -35,7 +37,7 @@ class IncrementalDataSet(PartitionedDataSet):
     Example:
     ::
 
-        >>> from kedro.io import IncrementalDataset
+        >>> from kedro_datasets.partitions import IncrementalDataSet
         >>>
         >>> # these credentials will be passed to:
         >>> # a) 'fsspec.filesystem()' call,
@@ -43,7 +45,7 @@ class IncrementalDataSet(PartitionedDataSet):
         >>> # c) the checkpoint initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = IncrementalDataset(
+        >>> data_set = IncrementalDataSet(
         >>>     path="s3://bucket-name/path/to/folder",
         >>>     dataset="pandas.CSVDataset",
         >>>     credentials=credentials
@@ -75,7 +77,7 @@ class IncrementalDataSet(PartitionedDataSet):
         fs_args: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``IncrementalDataset``.
+        """Creates a new instance of ``IncrementalDataSet``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -123,7 +125,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DatasetError: If versioning is enabled for the underlying dataset.
+            DataSetError: If versioning is enabled for the underlying dataset.
         """
 
         super().__init__(

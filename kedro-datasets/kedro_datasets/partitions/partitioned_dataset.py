@@ -1,4 +1,4 @@
-"""``PartitionedDataset`` loads and saves partitioned file-like data using the
+"""``PartitionedDataSet`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
 from __future__ import annotations
@@ -20,14 +20,17 @@ from kedro.io.core import (
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
-from . import KEY_PROPAGATION_WARNING
+KEY_PROPAGATION_WARNING = (
+    "Top-level %(keys)s will not propagate into the %(target)s since "
+    "%(keys)s were explicitly defined in the %(target)s config."
+)
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], Any]]]):
     # pylint: disable=too-many-instance-attributes,protected-access
-    """``PartitionedDataset`` loads and saves partitioned file-like data using the
+    """``PartitionedDataSet`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
@@ -42,7 +45,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
     .. code-block:: yaml
 
         station_data:
-          type: PartitionedDataset
+          type: PartitionedDataSet
           path: data/03_primary/station_data
           dataset:
             type: pandas.CSVDataset
@@ -59,7 +62,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
     ::
 
         >>> import pandas as pd
-        >>> from kedro.io import PartitionedDataset
+        >>> from kedro_datasets.partitions import PartitionedDataSet
         >>>
         >>> # Create a fake pandas dataframe with 10 rows of data
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
@@ -71,7 +74,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
             }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
-        >>> data_set = PartitionedDataset(
+        >>> data_set = PartitionedDataSet(
                 path="df_with_partition",
                 dataset="pandas.CSVDataset",
                 filename_suffix=".csv"
@@ -96,13 +99,13 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
     ::
 
         >>> import pandas as pd
-        >>> from kedro.io import PartitionedDataset
+        >>> from kedro_datasets.partitions import PartitionedDataSet
         >>>
         >>> # these credentials will be passed to both 'fsspec.filesystem()' call
         >>> # and the dataset initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = PartitionedDataset(
+        >>> data_set = PartitionedDataSet(
                 path="s3://bucket-name/path/to/folder",
                 dataset="pandas.CSVDataset",
                 credentials=credentials
@@ -136,7 +139,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
         overwrite: bool = False,
         metadata: dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PartitionedDataset``.
+        """Creates a new instance of ``PartitionedDataSet``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -146,7 +149,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
                 ``fsspec.implementations.local.LocalFileSystem`` will be used.
                 **Note:** Some concrete implementations are bundled with ``fsspec``,
                 while others (like ``s3`` or ``gcs``) must be installed separately
-                prior to usage of the ``PartitionedDataset``.
+                prior to usage of the ``PartitionedDataSet``.
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:

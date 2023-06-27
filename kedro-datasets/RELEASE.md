@@ -17,7 +17,7 @@
 * Fixed problematic `kedro-datasets` optional dependencies, revert to `setup.py`
 
 ## Community contributions
-* Migrated `PartitionedDataSet` and `IncrementalDataSet` to from main repository to kedro-datasets.
+* Migrated `PartitionedDataSet` and `IncrementalDataSet` from main repository to kedro-datasets.
 
 # Release 1.5.2:
 

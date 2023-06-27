@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import operator
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 from cachetools import cachedmethod
 from kedro.io.core import (
@@ -68,14 +68,14 @@ class IncrementalDataSet(PartitionedDataSet):
     def __init__(
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
-        checkpoint: str | dict[str, Any] | None = None,
+        dataset: str | type[AbstractDataSet] | Dict[str, Any],
+        checkpoint: str | Dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``IncrementalDataSet``.
 
@@ -148,8 +148,8 @@ class IncrementalDataSet(PartitionedDataSet):
         self._comparison_func = comparison_func
 
     def _parse_checkpoint_config(
-        self, checkpoint_config: str | dict[str, Any] | None
-    ) -> dict[str, Any]:
+        self, checkpoint_config: str | Dict[str, Any] | None
+    ) -> Dict[str, Any]:
         checkpoint_config = deepcopy(checkpoint_config)
         if isinstance(checkpoint_config, str):
             checkpoint_config = {"force_checkpoint": checkpoint_config}
@@ -218,8 +218,8 @@ class IncrementalDataSet(PartitionedDataSet):
         except DataSetError:
             return None
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
-        partitions: dict[str, Any] = {}
+    def _load(self) -> Dict[str, Callable[[], Any]]:
+        partitions: Dict[str, Any] = {}
 
         for partition in self._list_partitions():
             partition_id = self._path_to_partition(partition)

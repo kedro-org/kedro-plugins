@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import operator
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -28,7 +28,7 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], Any]]]):
+class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], Any]]]):
     # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataSet`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
@@ -130,14 +130,14 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        dataset: str | type[AbstractDataSet] | Dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
         overwrite: bool = False,
-        metadata: dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -276,7 +276,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
             path = path[: -len(self._filename_suffix)]
         return path
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def _load(self) -> Dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():
@@ -292,7 +292,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
 
         return partitions
 
-    def _save(self, data: dict[str, Any]) -> None:
+    def _save(self, data: Dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
@@ -307,7 +307,7 @@ class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], 
             dataset.save(partition_data)
         self._invalidate_caches()
 
-    def _describe(self) -> dict[str, Any]:
+    def _describe(self) -> Dict[str, Any]:
         clean_dataset_config = (
             {k: v for k, v in self._dataset_config.items() if k != CREDENTIALS_KEY}
             if isinstance(self._dataset_config, dict)

@@ -25,7 +25,7 @@ from . import KEY_PROPAGATION_WARNING
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataSet(AbstractDataSet):
+class PartitionedDataSet(AbstractDataSet[dict[str, Any], dict[str, Callable[[], Any]]]):
     # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
@@ -135,7 +135,7 @@ class PartitionedDataSet(AbstractDataSet):
         fs_args: dict[str, Any] = None,
         overwrite: bool = False,
         metadata: dict[str, Any] = None,
-    ):
+    ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
 
         Args:
@@ -316,7 +316,7 @@ class PartitionedDataSet(AbstractDataSet):
             "dataset_config": clean_dataset_config,
         }
 
-    def _invalidate_caches(self):
+    def _invalidate_caches(self) -> None:
         self._partition_cache.clear()
         self._filesystem.invalidate_cache(self._normalized_path)
 

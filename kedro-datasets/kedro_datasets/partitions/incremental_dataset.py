@@ -74,7 +74,7 @@ class IncrementalDataSet(PartitionedDataSet):
         load_args: dict[str, Any] = None,
         fs_args: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
-    ):
+    ) -> None:
         """Creates a new instance of ``IncrementalDataset``.
 
         Args:
@@ -217,7 +217,7 @@ class IncrementalDataSet(PartitionedDataSet):
             return None
 
     def _load(self) -> dict[str, Callable[[], Any]]:
-        partitions = {}
+        partitions: dict[str, Any] = {}
 
         for partition in self._list_partitions():
             partition_id = self._path_to_partition(partition)

@@ -12,11 +12,12 @@ import polars as pl
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from .._io import DatasetError as DataSetError
 
 logger = logging.getLogger(__name__)
 

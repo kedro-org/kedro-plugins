@@ -15,7 +15,6 @@ import fsspec
 from hdfs import HdfsError, InsecureClient
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -24,6 +23,8 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
+
+from .._io import DatasetError as DataSetError
 
 logger = logging.getLogger(__name__)
 

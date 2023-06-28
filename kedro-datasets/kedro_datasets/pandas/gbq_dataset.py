@@ -13,11 +13,12 @@ from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 from kedro.io.core import (
     AbstractDataSet,
-    DataSetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
 )
+
+from .._io import DatasetError as DataSetError
 
 
 class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):

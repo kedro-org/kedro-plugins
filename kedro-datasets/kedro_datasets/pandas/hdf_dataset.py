@@ -10,11 +10,12 @@ import fsspec
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from .._io import DatasetError as DataSetError
 
 HDFSTORE_DRIVER = "H5FD_CORE"
 

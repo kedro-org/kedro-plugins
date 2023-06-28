@@ -10,11 +10,12 @@ import fsspec
 import holoviews as hv
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from .._io import DatasetError as DataSetError
 
 # HoloViews to be passed in `hv.save()`
 HoloViews = TypeVar("HoloViews")

@@ -42,7 +42,8 @@ unsafe-load-any-extension = false
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "duplicate-code"
+    "duplicate-code",
+    "too-many-instance-attributes"
 ]
 enable = ["useless-suppression"]
 [tool.pylint.refactoring]

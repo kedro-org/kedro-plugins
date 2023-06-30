@@ -170,6 +170,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+
     .. code-block:: python
 
         from pyspark.sql import SparkSession

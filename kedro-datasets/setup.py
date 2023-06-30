@@ -130,7 +130,7 @@ extras_require["docs"] = [
     "sphinx-autodoc-typehints==1.11.1",
     "sphinx_copybutton==0.3.1",
     "ipykernel>=5.3, <7.0",
-    "myst-parser~=0.17.2",
+    "myst-parser~=1.0.0",
 ]
 
 setup(

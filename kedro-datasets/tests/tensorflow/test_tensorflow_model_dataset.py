@@ -260,7 +260,7 @@ class TestTensorFlowModelDataSet:
 
     def test_exists_with_exception(self, tf_model_dataset, mocker):
         """Test `exists` method invocation when `get_filepath_str` raises an exception."""
-        mocker.patch("kedro.io.core.get_filepath_str", side_effct=DataSetError)
+        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DataSetError)
         assert not tf_model_dataset.exists()
 
     def test_save_and_overwrite_existing_model(
@@ -368,7 +368,7 @@ class TestTensorFlowModelDataSetVersioned:
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     def test_http_filesystem_no_versioning(self, tensorflow_model_dataset):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DataSetError, match=pattern):
             tensorflow_model_dataset(

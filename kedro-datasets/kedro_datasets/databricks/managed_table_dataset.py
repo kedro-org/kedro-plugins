@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class ManagedTable:  # pylint: disable=too-many-instance-attributes
+class ManagedTable:
     """Stores the definition of a managed table"""
 
     # regex for tables, catalogs and schemas

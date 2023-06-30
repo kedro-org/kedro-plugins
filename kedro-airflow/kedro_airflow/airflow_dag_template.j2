@@ -1,12 +1,9 @@
-from collections import defaultdict
-
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from airflow import DAG
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
-from airflow.version import version
-from datetime import datetime, timedelta
 
 from kedro.framework.session import KedroSession
 from kedro.framework.project import configure_project

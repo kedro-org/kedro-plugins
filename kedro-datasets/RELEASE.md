@@ -7,6 +7,10 @@
 
 ## Community contributions
 
+# Release 1.4.2
+## Bug fixes and other changes
+* Fixed documentations of `GeoJSONDataSet` and `SparkStreamingDataSet`
+
 # Release 1.4.1:
 
 ## Bug fixes and other changes

@@ -144,47 +144,47 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
 
 class ManagedTableDataSet(AbstractVersionedDataSet):
     """``ManagedTableDataSet`` loads and saves data into managed delta tables on Databricks.
-        Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
-        When saving data, you can specify one of three modes: overwrite(default), append,
-        or upsert. Upsert requires you to specify the primary_column parameter which
-        will be used as part of the join condition. This dataset works best with
-        the databricks kedro starter. That starter comes with hooks that allow this
-        dataset to function properly. Follow the instructions in that starter to
-        setup your project for this dataset.
+    Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
+    When saving data, you can specify one of three modes: overwrite(default), append,
+    or upsert. Upsert requires you to specify the primary_column parameter which
+    will be used as part of the join condition. This dataset works best with
+    the databricks kedro starter. That starter comes with hooks that allow this
+    dataset to function properly. Follow the instructions in that starter to
+    setup your project for this dataset.
 
-        Example usage for the
-        `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
-        .. code-block:: yaml
+    .. code-block:: yaml
 
-            names_and_ages@spark:
-              type: databricks.ManagedTableDataSet
-              table: names_and_ages
+        names_and_ages@spark:
+            type: databricks.ManagedTableDataSet
+            table: names_and_ages
 
-            names_and_ages@pandas:
-              type: databricks.ManagedTableDataSet
-              table: names_and_ages
-              dataframe_type: pandas
+        names_and_ages@pandas:
+            type: databricks.ManagedTableDataSet
+            table: names_and_ages
+            dataframe_type: pandas
 
-        Example usage for the
-        `Python API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
-        .. code-block:: python
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    .. code-block:: python
 
-            from pyspark.sql import SparkSession
-            from pyspark.sql.types import (StructField, StringType,
-                                            IntegerType, StructType)
-            from kedro_datasets.databricks import ManagedTableDataSet
-            schema = StructType([StructField("name", StringType(), True),
-                                 StructField("age", IntegerType(), True)])
-            data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
-            spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-            data_set = ManagedTableDataSet(table="names_and_ages")
-            data_set.save(spark_df)
-            reloaded = data_set.load()
-            reloaded.take(4)
-        """
+        from pyspark.sql import SparkSession
+        from pyspark.sql.types import (StructField, StringType,
+                                        IntegerType, StructType)
+        from kedro_datasets.databricks import ManagedTableDataSet
+        schema = StructType([StructField("name", StringType(), True),
+                                StructField("age", IntegerType(), True)])
+        data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        data_set = ManagedTableDataSet(table="names_and_ages")
+        data_set.save(spark_df)
+        reloaded = data_set.load()
+        reloaded.take(4)
+    """
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``

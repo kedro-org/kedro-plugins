@@ -3,10 +3,14 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
 ## Community contributions
 * Migrated `PartitionedDataSet` and `IncrementalDataSet` from main repository to kedro-datasets.
+
+# Release 1.4.2
+## Bug fixes and other changes
+* Fixed documentations of `GeoJSONDataSet` and `SparkStreamingDataSet`
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
 # Release 1.4.1:
 

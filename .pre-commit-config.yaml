@@ -16,17 +16,17 @@ repos:
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
-        files: ^(kedro-datasets/kedro_datasets|kedro-telemetry/kedro_telemetry)/
+        files: ^kedro-datasets/kedro_datasets/|^kedro-airflow/kedro_airflow/|^kedro-docker/kedro_docker/|^kedro-telemetry/kedro_telemetry/
         args:
           - "--max-line-length=88"
           - "--max-complexity=18"
+          - "--max-complexity=18"
           - "--select=B,C,E,F,W,T4,B9"
           - "--ignore=E203,E266,E501,W503"
+        exclude: "^template.py|^kedro_airflow/dag_template.py"
+
   - repo: local
     hooks:
-      # It's impossible to specify per-directory configuration, so we just run it many times.
-      # https://github.com/PyCQA/pylint/issues/618
-      # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
       - id: pylint-quick-kedro-datasets
         name: "Quick PyLint on kedro_datasets/*"
         language: system
@@ -34,34 +34,69 @@ repos:
         files: ^kedro-datasets/kedro_datasets/
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=unnecessary-pass
         stages: [commit]
-      # Add more hooks here for each of the directories in your repository
-      # ...
-      - id: pylint-quick-kedro-telemetry
-        name: "Quick PyLint on kedro_telemetry/*"
+      - id: pylint-quick-features
+        name: "Quick PyLint on features/*"
         language: system
         types: [file, python]
-        files: ^kedro-telemetry/kedro_telemetry/
-        entry: pylint --disable=unnecessary-pass
+        files: ^kedro-datasets/features/|^kedro-airflow/features/|^kedro-docker/features/
+        entry: pylint --disable=missing-docstring,no-name-in-module
         stages: [commit]
-      # ...
-      - id: isort
-        name: "Sort imports"
-        language: system
-        types: [ file, python ]
-        files: ^(kedro-datasets/|kedro-telemetry/)
-        entry: isort
-      - id: black
-        name: "Black"
-        language: system
-        pass_filenames: false
-        entry: black kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests kedro-telemetry/kedro_telemetry kedro-telemetry/tests
-      - id: secret_scan
-        name: "Secret scan"
-        language: system
-        pass_filenames: false
-        entry: make plugin=kedro-datasets secret-scan plugin=kedro-telemetry secret-scan
-      - id: bandit
-        name: "Bandit security check"
+      - id: pylint-quick-tests
+        name: "Quick PyLint on tests/*"
         language: system
         types: [file, python]
-        exclude: ^(kedro-datasets/tests/|kedro-datasets/features/|kedro-telemetry/tests/|kedro-airflow/|kedro
+        files: ^kedro-datasets/tests/|^kedro-airflow/tests/|^kedro-docker/tests/
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
+        stages: [commit]
+      - id: pylint-kedro_datasets
+        name: "PyLint on kedro_datasets/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets
+      - id: pylint-features
+        name: "PyLint on features/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --disable=missing-docstring,no-name-in-module kedro-datasets/features kedro-airflow/features kedro-docker/features
+      - id: pylint-tests
+        name: "PyLint on tests/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-datasets/tests kedro-airflow/tests kedro-docker/tests
+      - id: mypy-kedro_datasets
+        name: "MyPy on kedro_datasets/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: mypy kedro-datasets/kedro_datasets
+      - id: mypy-features
+        name: "MyPy on features/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: mypy kedro-datasets/features kedro-airflow/features kedro-docker/features
+      - id: mypy-tests
+        name: "MyPy on tests/*"
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        entry: mypy kedro-datasets/tests kedro-airflow/tests kedro-docker/tests
+
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+      - id: black
+        language_version: python3.8
+        files: ^kedro-datasets/kedro_datasets/|^kedro-airflow/kedro_airflow/|^kedro-docker/kedro_docker/
+        args: ["--target-version=py38"]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.5.4
+    hooks:
+      - id: isort
+        files: ^kedro-datasets/kedro_datasets/|^kedro-airflow/kedro_airflow/|^kedro-docker/kedro_docker/
+        args: ["--multi-line=3", "--trailing-comma", "--force-grid-wrap=0", "--use-parentheses", "--line-width=88"]
+

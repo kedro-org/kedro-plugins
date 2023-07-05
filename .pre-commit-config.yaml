@@ -23,7 +23,6 @@ repos:
           - "--select=B,C,E,F,W,T4,B9"
           - "--ignore=E203,E266,E501,W503"
         exclude: "^kedro-plugins/kedro_airflow/dag_template.py|^template.py"
-
   - repo: local
     hooks:
       - id: pylint-quick-kedro-datasets
@@ -31,6 +30,7 @@ repos:
         language: system
         types: [file, python]
         files: ^kedro-plugins/kedro-datasets/kedro_datasets/
+        exclude: '^kedro-plugins/(?!kedro-datasets).*$'
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml  --disable=unnecessary-pass
         stages: [commit]
       - id: pylint-quick-features
@@ -38,6 +38,7 @@ repos:
         language: system
         types: [file, python]
         files: ^(kedro-plugins/kedro-datasets/features/|kedro-plugins/kedro-airflow/features/|kedro-plugins/kedro-docker/features/)
+        exclude: '^kedro-plugins/(?!kedro-datasets|kedro-airflow|kedro-docker).*$'
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module
         stages: [commit]
       - id: pylint-quick-tests
@@ -45,12 +46,13 @@ repos:
         language: system
         types: [file, python]
         files: ^(kedro-plugins/kedro-datasets/tests/|kedro-plugins/kedro-airflow/tests/|kedro-plugins/kedro-docker/tests/)
+        exclude: '^kedro-plugins/(?!kedro-datasets|kedro-airflow|kedro-docker).*$'
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
         stages: [commit]
       - id: pylint-kedro_datasets
         name: "PyLint on kedro_datasets/*"
         language: system
-        pass_filenames: false
+        pass_filenames
         stages: [manual]
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-plugins/kedro-datasets/kedro_datasets
       - id: pylint-features
@@ -60,6 +62,7 @@ repos:
         stages: [manual]
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module
         files: ^kedro-plugins/kedro-telemetry/
+        exclude: '^kedro-plugins/(?!kedro-telemetry).*$'
       - id: isort
         name: "Sort imports"
         language: system
@@ -82,4 +85,3 @@ repos:
         types: [file, python]
         exclude: ^kedro-plugins/kedro-telemetry/tests/|^kedro-plugins/kedro-telemetry/features/|^kedro-plugins/kedro-docker|^kedro-plugins/kedro-airflow|^kedro-plugins/kedro-datasets
         entry: bandit -ll
-

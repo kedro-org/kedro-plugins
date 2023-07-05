@@ -8,13 +8,9 @@ from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
 from .._io import DatasetError as DataSetError
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"

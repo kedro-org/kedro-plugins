@@ -9,13 +9,9 @@ from warnings import warn
 
 import fsspec
 import matplotlib.pyplot as plt
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
 from .._io import DatasetError as DataSetError
 
 

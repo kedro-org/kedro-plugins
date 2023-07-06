@@ -16,7 +16,7 @@ repos:
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
-        files: ^(kedro-plugins/kedro-datasets/kedro_datasets/|kedro-plugins/kedro-airflow/kedro_airflow/|kedro-plugins/kedro-docker/kedro_docker/|kedro-plugins/kedro-telemetry/kedro_telemetry/)
+        files: ^(kedro-datasets/kedro_datasets/|kedro-airflow/kedro_airflow/|kedro-docker/kedro_docker/|kedro-telemetry/kedro_telemetry/)
         args:
           - "--max-line-length=88"
           - "--max-complexity=18"
@@ -110,4 +110,3 @@ repos:
         types: [ file, python ]
         files: ^kedro-plugins/
         entry: flake8
-  

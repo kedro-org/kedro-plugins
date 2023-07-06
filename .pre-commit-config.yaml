@@ -52,7 +52,7 @@ repos:
       - id: pylint-kedro_datasets
         name: "PyLint on kedro_datasets/*"
         language: system
-        pass_filenames
+        pass_filenames: false
         stages: [manual]
         entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-plugins/kedro-datasets/kedro_datasets
       - id: pylint-features

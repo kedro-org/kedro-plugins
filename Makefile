@@ -14,7 +14,7 @@ install-pip-setuptools:
 	python -m pip install -U pip setuptools wheel
 
 lint:
-	cd $(plugin) && pre-commit run -a --hook-stage manual
+	pre-commit run -a --hook-stage manual
 
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile

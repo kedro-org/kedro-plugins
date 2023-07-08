@@ -11,7 +11,7 @@ def patch_kedro_io_core_dataset_error():
         dataset_error_new = kedro_io_core.DatasetError
         del kedro_io_core.DatasetError
         dataset_error_old = None
-    except:
+    except AttributeError:
         dataset_error_new = None
         dataset_error_old = kedro_io_core.DataSetError
         del kedro_io_core.DataSetError
@@ -23,12 +23,12 @@ def patch_kedro_io_core_dataset_error():
         kedro_io_core.DatasetError = dataset_error_new
         try:
             del kedro_io_core.DataSetError
-        except:
+        except AttributeError:
             pass
     else:
         try:
             del kedro_io_core.DatasetError
-        except:
+        except AttributeError:
             pass
         kedro_io_core.DataSetError = dataset_error_old
 
@@ -44,7 +44,7 @@ def patch_kedro_io_core_abstract_dataset():
         del kedro_io_core.AbstractVersionedDataset
         abstract_dataset_old = None
         abstract_versioned_dataset_old = None
-    except:
+    except AttributeError:
         abstract_dataset_new = None
         abstract_versioned_dataset_new = None
         abstract_dataset_old = kedro_io_core.AbstractDataSet
@@ -61,13 +61,13 @@ def patch_kedro_io_core_abstract_dataset():
         try:
             del kedro_io_core.AbstractDataSet
             del kedro_io_core.AbstractVersionedDataSet
-        except:
+        except AttributeError:
             pass
     else:
         try:
             del kedro_io_core.AbstractDataset
             del kedro_io_core.AbstractVersionedDataset
-        except:
+        except AttributeError:
             pass
         kedro_io_core.AbstractDataSet = abstract_dataset_old
         kedro_io_core.AbstractVersionedDataSet = abstract_versioned_dataset_old

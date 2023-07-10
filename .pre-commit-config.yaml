@@ -110,4 +110,4 @@ repos:
         types: [ file, python ]
         files: ^./
         entry: flake8
-  
+

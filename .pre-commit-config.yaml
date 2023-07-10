@@ -9,108 +9,106 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: check-yaml # Checks yaml files for parseable syntax.
+      - id: check-yaml
       - id: check-added-large-files
-      - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
-      - id: check-merge-conflict # Check for files that contain merge conflict strings.
-      - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-      - id: requirements-txt-fixer # Sorts entries in requirements.txt
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: requirements-txt-fixer
       - id: flake8
-        files: ^(./kedro-datasets/kedro_datasets/|./kedro-airflow/kedro_airflow/|./kedro-docker/kedro_docker/|./kedro-telemetry/kedro_telemetry/)
+        files: ^(kedro-datasets/kedro_datasets/|kedro-airflow/kedro_airflow/|kedro-docker/kedro_docker/|kedro-telemetry/kedro_telemetry/)
         args:
           - "--max-line-length=88"
           - "--max-complexity=18"
           - "--select=B,C,E,F,W,T4,B9"
           - "--ignore=E203,E266,E501,W503"
-        exclude: "^./kedro_airflow/dag_template.py|^template.py"
+        exclude: "^kedro_airflow/dag_template.py|^template.py"
+        additional_dependencies: [flake8]
 
   - repo: local
     hooks:
-      # pylint quick checks
       - id: pylint-quick-kedro-datasets
         name: "Quick PyLint on kedro_datasets/*"
         language: system
-        types: [file, python]
-        files: ^./kedro-datasets/kedro_datasets/
-        entry: pylint --rcfile ./kedro-datasets/pyproject.toml --disable=unnecessary-pass
+        types: [python]
+        files: ^kedro-datasets/kedro_datasets/
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass
         stages: [commit]
 
       - id: pylint-quick-kedro-airflow
         name: "Quick PyLint on kedro_airflow/*"
         language: system
-        types: [file, python]
-        files: ^./kedro-airflow/kedro_airflow/
+        types: [python]
+        files: ^kedro-airflow/kedro_airflow/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
       - id: pylint-quick-kedro-docker
         name: "Quick PyLint on kedro_docker/*"
         language: system
-        types: [file, python]
-        files: ^./kedro-docker/kedro_docker/
+        types: [python]
+        files: ^kedro-docker/kedro_docker/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
       - id: pylint-quick-kedro-telemetry
         name: "Quick PyLint on kedro_telemetry/*"
         language: system
-        types: [file, python]
-        files: ^./kedro-telemetry/kedro_telemetry/
+        types: [python]
+        files: ^kedro-telemetry/kedro_telemetry/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
-      # pylint full checks
       - id: pylint-kedro-datasets
         name: "PyLint on kedro_datasets/*"
         language: system
-        files: ^./kedro-datasets/kedro_datasets/
+        files: ^kedro-datasets/kedro_datasets/.*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --rcfile ./kedro-datasets/pyproject.toml --disable=unnecessary-pass ./kedro-datasets/kedro_datasets
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets/*.py
 
       - id: pylint-kedro-airflow
         name: "PyLint on kedro_airflow/*"
         language: system
-        files: ^./kedro-airflow/kedro_airflow/
+        files: ^kedro-airflow/kedro_airflow/.*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass ./kedro-airflow/kedro_airflow
+        entry: pylint --disable=unnecessary-pass kedro-airflow/kedro_airflow/*.py
 
       - id: pylint-kedro-docker
         name: "PyLint on kedro_docker/*"
         language: system
-        files: ^./kedro-docker/kedro_docker/
+        files: ^kedro-docker/kedro_docker/.*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass ./kedro-docker/kedro_docker
+        entry: pylint --disable=unnecessary-pass kedro-docker/kedro_docker/*.py
 
       - id: pylint-kedro-telemetry
         name: "PyLint on kedro_telemetry/*"
         language: system
-        files: ^./kedro-telemetry/kedro_telemetry/
+        files: ^kedro-telemetry/kedro_telemetry/.*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass ./kedro-telemetry/kedro_telemetry
+        entry: pylint --disable=unnecessary-pass kedro-telemetry/kedro_telemetry/*.py
 
-      # isort
       - id: isort
         name: "Sort imports"
-        language: system
-        types: [file, python]
+        language: python
+        types: [python]
         files: ^./
-        entry: isort
+        additional_dependencies: [isort]
 
-      # black
       - id: black
         name: "Black"
-        language: system
+        language: python
         pass_filenames: false
-        entry: black ./kedro-datasets/kedro_datasets ./kedro-airflow/kedro_airflow ./kedro-docker/kedro_docker ./kedro-telemetry/kedro_telemetry
+        entry: black kedro-datasets/kedro_datasets kedro-airflow/kedro_airflow kedro-docker/kedro_docker kedro-telemetry/kedro_telemetry
+        additional_dependencies: [black]
 
-      # flake8
       - id: flake8
         name: "Flake8"
-        language: system
-        types: [ file, python ]
+        language: python
+        types: [python]
         files: ^./
         entry: flake8
+        additional_dependencies: [flake8]

@@ -16,13 +16,13 @@ repos:
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
-        files: ^(kedro-plugins/kedro-datasets/kedro_datasets/|kedro-plugins/kedro-airflow/kedro_airflow/|kedro-plugins/kedro-docker/kedro_docker/|kedro-plugins/kedro-telemetry/kedro_telemetry/)
+        files: ^(./kedro-datasets/kedro_datasets/|./kedro-airflow/kedro_airflow/|./kedro-docker/kedro_docker/|./kedro-telemetry/kedro_telemetry/)
         args:
           - "--max-line-length=88"
           - "--max-complexity=18"
           - "--select=B,C,E,F,W,T4,B9"
           - "--ignore=E203,E266,E501,W503"
-        exclude: "^kedro-plugins/kedro_airflow/dag_template.py|^template.py"
+        exclude: "^./kedro_airflow/dag_template.py|^template.py"
 
   - repo: local
     hooks:
@@ -31,15 +31,15 @@ repos:
         name: "Quick PyLint on kedro_datasets/*"
         language: system
         types: [file, python]
-        files: ^kedro-plugins/kedro-datasets/kedro_datasets/
-        entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml --disable=unnecessary-pass
+        files: ^./kedro-datasets/kedro_datasets/
+        entry: pylint --rcfile ./kedro-datasets/pyproject.toml --disable=unnecessary-pass
         stages: [commit]
 
       - id: pylint-quick-kedro-airflow
         name: "Quick PyLint on kedro_airflow/*"
         language: system
         types: [file, python]
-        files: ^kedro-plugins/kedro-airflow/kedro_airflow/
+        files: ^./kedro-airflow/kedro_airflow/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
@@ -47,7 +47,7 @@ repos:
         name: "Quick PyLint on kedro_docker/*"
         language: system
         types: [file, python]
-        files: ^kedro-plugins/kedro-docker/kedro_docker/
+        files: ^./kedro-docker/kedro_docker/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
@@ -55,7 +55,7 @@ repos:
         name: "Quick PyLint on kedro_telemetry/*"
         language: system
         types: [file, python]
-        files: ^kedro-plugins/kedro-telemetry/kedro_telemetry/
+        files: ^./kedro-telemetry/kedro_telemetry/
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
@@ -65,35 +65,35 @@ repos:
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --rcfile kedro-plugins/kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-plugins/kedro-datasets/kedro_datasets
+        entry: pylint --rcfile ./kedro-datasets/pyproject.toml --disable=unnecessary-pass ./kedro-datasets/kedro_datasets
 
       - id: pylint-kedro-airflow
         name: "PyLint on kedro_airflow/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-plugins/kedro-airflow/kedro_airflow
+        entry: pylint --disable=unnecessary-pass ./kedro-airflow/kedro_airflow
 
       - id: pylint-kedro-docker
         name: "PyLint on kedro_docker/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-plugins/kedro-docker/kedro_docker
+        entry: pylint --disable=unnecessary-pass ./kedro-docker/kedro_docker
 
       - id: pylint-kedro-telemetry
         name: "PyLint on kedro_telemetry/*"
         language: system
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-plugins/kedro-telemetry/kedro_telemetry
+        entry: pylint --disable=unnecessary-pass ./kedro-telemetry/kedro_telemetry
 
       # isort
       - id: isort
         name: "Sort imports"
         language: system
         types: [file, python]
-        files: ^kedro-plugins/
+        files: ^./
         entry: isort
 
       # black
@@ -101,13 +101,13 @@ repos:
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro-plugins/kedro-datasets/kedro_datasets kedro-plugins/kedro-airflow/kedro_airflow kedro-plugins/kedro-docker/kedro_docker kedro-plugins/kedro-telemetry/kedro_telemetry
+        entry: black ./kedro-datasets/kedro_datasets ./kedro-airflow/kedro_airflow ./kedro-docker/kedro_docker ./kedro-telemetry/kedro_telemetry
 
       # flake8
       - id: flake8
         name: "Flake8"
         language: system
         types: [ file, python ]
-        files: ^kedro-plugins/
+        files: ^./
         entry: flake8
   

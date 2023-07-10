@@ -69,7 +69,7 @@ repos:
         language: system
         files: ^kedro-datasets/kedro_datasets/.*\.py$
         exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
-        pass_filenames: false
+        pass_filenames: true
         stages: [manual]
         entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets
 
@@ -78,7 +78,7 @@ repos:
         language: system
         files: ^kedro-airflow/kedro_airflow/.*\.py$
         exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
-        pass_filenames: false
+        pass_filenames: true
         stages: [manual]
         entry: pylint --disable=unnecessary-pass kedro-airflow/kedro_airflow
 
@@ -87,7 +87,7 @@ repos:
         language: system
         files: ^kedro-docker/kedro_docker/.*\.py$
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
-        pass_filenames: false
+        pass_filenames: true
         stages: [manual]
         entry: pylint --disable=unnecessary-pass kedro-docker/kedro_docker
 
@@ -96,7 +96,7 @@ repos:
         language: system
         files: ^kedro-telemetry/kedro_telemetry/.*\.py$
         exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
-        pass_filenames: false
+        pass_filenames: true
         stages: [manual]
         entry: pylint --disable=unnecessary-pass kedro-telemetry/kedro_telemetry
 

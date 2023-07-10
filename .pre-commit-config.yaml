@@ -94,9 +94,10 @@ repos:
       - id: isort
         name: "Sort imports"
         language: python
-        types: [python]
+        types: [ python ]
         files: ^./
-        additional_dependencies: [isort]
+        entry: isort .
+        additional_dependencies: [ isort ]
 
       - id: black
         name: "Black"

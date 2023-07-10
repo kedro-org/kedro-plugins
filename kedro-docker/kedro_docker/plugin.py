@@ -1,4 +1,4 @@
-""" Kedro plugin for packaging a project with Docker TEST"""
+""" Kedro plugin for packaging a project with Docker """
 # pylint: disable=unused-argument
 import shlex
 import subprocess

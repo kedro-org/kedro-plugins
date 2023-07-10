@@ -1,4 +1,4 @@
-""" Kedro plugin for running a project with Airflow TEST"""
+""" Kedro plugin for running a project with Airflow """
 
 from collections import defaultdict
 from pathlib import Path

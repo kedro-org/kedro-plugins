@@ -35,7 +35,7 @@ clean:
 	find . -regex ".*\.egg-info" -exec rm -rf {} +;\
 
 install-test-requirements:
-	cd $(plugin) && pip install -r test_requirements.txt
+	cd $(plugin) && pip install ".[test]"
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks

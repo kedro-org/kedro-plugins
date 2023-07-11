@@ -91,21 +91,7 @@ jobs:
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
       - name: Run linter
-        run: |
-            pre-commit run trailing-whitespace
-            pre-commit run end-of-file-fixer
-            pre-commit run check-yaml
-            pre-commit run check-added-large-files
-            pre-commit run check-case-conflict
-            pre-commit run check-merge-conflict
-            pre-commit run debug-statements
-            pre-commit run requirements-txt-fixer
-            pre-commit run flake8
-            pre-commit run isort
-            pre-commit run black
-            pre-commit run secret_scan
-            pre-commit run bandit
-            pre-commit run pylint-${{ inputs.plugin }}
+        run: make lint
 
   e2e-tests:
     if: inputs.plugin != 'kedro-datasets'

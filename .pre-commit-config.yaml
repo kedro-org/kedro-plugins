@@ -71,7 +71,7 @@ repos:
         exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass kedro-datasets/kedro_datasets
+        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass,E0401 kedro-datasets/kedro_datasets
 
       - id: pylint-kedro-airflow
         name: "PyLint on kedro_airflow/*"
@@ -80,7 +80,7 @@ repos:
         exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-airflow/kedro_airflow
+        entry: pylint --disable=unnecessary-pass,E0401 kedro-airflow/kedro_airflow
 
       - id: pylint-kedro-docker
         name: "PyLint on kedro_docker/*"
@@ -89,7 +89,7 @@ repos:
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-docker/kedro_docker
+        entry: pylint --disable=unnecessary-pass,E0401 kedro-docker/kedro_docker
 
       - id: pylint-kedro-telemetry
         name: "PyLint on kedro_telemetry/*"
@@ -98,7 +98,7 @@ repos:
         exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: pylint --disable=unnecessary-pass kedro-telemetry/kedro_telemetry
+        entry: pylint --disable=unnecessary-pass,E0401 kedro-telemetry/kedro_telemetry
 
       - id: isort
         name: "Sort imports"

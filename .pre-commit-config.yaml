@@ -67,20 +67,26 @@ repos:
       - id: pylint-kedro-datasets
         name: "PyLint on kedro_datasets/*"
         language: system
+        files: ^kedro-datasets/kedro_datasets/.*\.py$
+        exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
         pass_filenames: false
         stages: [manual]
         entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass,E0401 kedro-datasets/kedro_datasets
 
       - id: pylint-kedro-datasets-features
-        name: "PyLint on features/*"
+        name: "PyLint on kedro-datasets features/*"
         language: system
+        files: ^kedro-datasets/features/.*\.py$
+        exclude: ^(?!kedro-datasets/features/).*\.py$
         pass_filenames: false
         stages: [manual]
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module,E0401 kedro-datasets/features
 
       - id: pylint-kedro-datasets-tests
-        name: "PyLint on tests/*"
+        name: "PyLint on kedro-datasets tests/*"
         language: system
+        files: ^kedro-datasets/tests/.*\.py$
+        exclude: ^(?!kedro-datasets/tests/).*\.py$
         pass_filenames: false
         stages: [manual]
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,E0401 kedro-datasets/tests

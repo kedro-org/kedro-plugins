@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from deltalake import DataCatalog
+from deltalake import DataCatalog, Metadata
 from kedro.io import DataSetError
 from pandas.testing import assert_frame_equal
 
@@ -147,3 +147,22 @@ class TestDeltaTableDataSet:
         """Test dataset creation from unsupported catalog."""
         with pytest.raises(KeyError):
             DeltaTableDataSet(catalog_type="unsupported", database="db", table="tbl")
+
+    def test_unsupported_write_mode(self, filepath):
+        """Test write mode not supported."""
+        pattern = "Write mode unsupported is not supported"
+        with pytest.raises(DataSetError, match=pattern):
+          DeltaTableDataSet(filepath, save_args={"mode": "unsupported"})
+
+    def test_metadata(self, deltatable_data_set_from_path, dummy_df):
+        """Test metadata property exists and return a metadata object."""
+        deltatable_data_set_from_path.save(dummy_df)
+        metadata = deltatable_data_set_from_path.metadata
+        assert isinstance(metadata, Metadata)
+
+    def test_history(self, deltatable_data_set_from_path, dummy_df):
+        """Test history property exists with a create table operation."""
+        deltatable_data_set_from_path.save(dummy_df)
+        history = deltatable_data_set_from_path.history
+        assert isinstance(history, list)
+        assert history[0]["operation"] == "CREATE TABLE"

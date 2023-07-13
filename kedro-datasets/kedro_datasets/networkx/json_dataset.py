@@ -36,8 +36,8 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -48,6 +48,7 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONDataSet``.
 
@@ -73,6 +74,8 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -85,6 +88,8 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

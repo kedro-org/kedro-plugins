@@ -83,8 +83,8 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
               col3: [[int32]]
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"write_index": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -94,6 +94,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ParquetDataSet`` pointing to concrete
         parquet files.
@@ -109,10 +110,14 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
                 https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html#optional-parameters
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
+
+        self.metadata = metadata
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

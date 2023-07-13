@@ -1,17 +1,93 @@
-
 # Upcoming Release:
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Community contributions
+
+# Release 1.4.2
+## Bug fixes and other changes
+* Fixed documentations of `GeoJSONDataSet` and `SparkStreamingDataSet`
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
+
+# Release 1.4.1:
+
+## Bug fixes and other changes
+* Fixed missing `pickle.PickleDataSet` extras in `setup.py`.
+
+# Release 1.4.0:
+
+## Major features and improvements
+* Added `SparkStreamingDataSet`.
+
+## Bug fixes and other changes
+* Fixed problematic docstrings of `APIDataSet`.
+# Release 1.3.0:
+
+## Major features and improvements
+* Added pandas 2.0 support.
+* Added SQLAlchemy 2.0 support (and dropped support for versions below 1.4).
+* Added a save method to the APIDataSet
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Relaxed Kedro version pin to `>=0.16`
+* Added `metadata` attribute to all existing datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
+* Added `ManagedTableDataSet` for managed delta tables on Databricks.
+
+## Bug fixes and other changes
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
+* Upgraded required `polars` version to 0.17.
+* Renamed `TensorFlowModelDataset` to `TensorFlowModelDataSet` to be consistent with all other plugins in kedro-datasets.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [BrianCechmanek](https://github.com/BrianCechmanek)
+* [McDonnellJoseph](https://github.com/McDonnellJoseph)
+* [Danny Farah](https://github.com/dannyrfar)
+
+# Release 1.2.0:
+
+## Major features and improvements
+* Added `fsspec` resolution in `SparkDataSet` to support more filesystems.
+* Added the `_preview` method to the Pandas `ExcelDataSet` and `CSVDataSet` classes.
+
+## Bug fixes and other changes
+* Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
+
+# Release 1.1.1:
+
+## Bug fixes and other changes
+
+* Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
+
+# Release 1.1.0:
+
+## Major features and improvements
+
+* Added the following new datasets:
+
+| Type                             | Description                                                                                                           | Location                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars`    |
+| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake.          | `kedro_datasets.snowflake` |
+
+## Bug fixes and other changes
+* Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
+* Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
 
 # Release 1.0.2:
 
 ## Bug fixes and other changes
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
-* Relaxed PyArrow range in line with Pandas
-* Fixed outdated links to the dill package documentation
+* Relaxed PyArrow range in line with pandas.
+* Fixed outdated links to the dill package documentation.
 
 # Release 1.0.1:
 
 ## Bug fixes and other changes
-* Fixed doc string formatting in `VideoDataSet` causing the documentation builds to fail.
+* Fixed docstring formatting in `VideoDataSet` that was causing the documentation builds to fail.
+
 
 # Release 1.0.0:
 

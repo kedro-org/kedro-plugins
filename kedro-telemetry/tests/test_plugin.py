@@ -34,6 +34,7 @@ def fake_metadata(tmp_path):
         tmp_path / REPO_NAME,
         kedro_version,
         tmp_path / REPO_NAME / "src",
+        kedro_version,
     )
     return metadata
 
@@ -328,7 +329,7 @@ class TestKedroTelemetryCLIHooks:
         assert msg in caplog.messages[-1]
 
 
-class TestKedroTelemetryHooks:
+class TestKedroTelemetryProjectHooks:
     def test_after_context_created_without_kedro_run(
         self,
         mocker,
@@ -386,7 +387,6 @@ class TestKedroTelemetryHooks:
         fake_default_pipeline,
         fake_sub_pipeline,
     ):
-
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
@@ -432,3 +432,14 @@ class TestKedroTelemetryHooks:
 
         # CLI hook makes the first 2 calls, the 3rd one is the Project hook
         assert mocked_heap_call.call_args_list[2] == expected_call
+
+    def test_after_context_created_no_consent_given(self, mocker, fake_context):
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=False
+        )
+
+        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        telemetry_hook = KedroTelemetryProjectHooks()
+        telemetry_hook.after_context_created(fake_context)
+
+        mocked_heap_call.assert_not_called()

@@ -1,4 +1,31 @@
-[tool.black]
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro-datasets"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
+requires-python = ">=3.7, <3.11"
+license = {text = "Apache Software License (Apache 2.0)"}
+dependencies = [
+    "kedro>=0.16",
+]
+dynamic = ["readme", "version", "optional-dependencies"]
+
+[project.urls]
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"
+Documentation = "https://docs.kedro.org"
+Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[tool.setuptools.packages.find]
+include = ["kedro_datasets*"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro_datasets.__version__"}
 
 [tool.isort]
 profile = "black"
@@ -15,7 +42,8 @@ unsafe-load-any-extension = false
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "duplicate-code"
+    "duplicate-code",
+    "too-many-instance-attributes"
 ]
 enable = ["useless-suppression"]
 [tool.pylint.refactoring]
@@ -34,7 +62,7 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["tests/*", "kedro_datasets/holoviews/*"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]

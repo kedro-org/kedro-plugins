@@ -126,7 +126,10 @@ class SequenceVideo(AbstractVideo):
     """A video object read from an indexable sequence of frames"""
 
     def __init__(
-        self, frames: Sequence[PIL.Image.Image], fps: float, fourcc: str = "mp4v"
+        self,
+        frames: Sequence[PIL.Image.Image],
+        fps: float,
+        fourcc: str = "mp4v",
     ) -> None:
         self._n_frames = len(frames)
         self._frames = frames
@@ -155,6 +158,7 @@ class SequenceVideo(AbstractVideo):
 class GeneratorVideo(AbstractVideo):
     """A video object with frames yielded by a generator"""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         frames: Generator[PIL.Image.Image, None, None],
@@ -265,6 +269,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         fourcc: Optional[str] = "mp4v",
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of VideoDataSet to load / save video data for given filepath.
 
@@ -277,6 +282,8 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         # parse the path and protocol (e.g. file, http, s3, etc.)
         protocol, path = get_protocol_and_path(filepath)
@@ -287,6 +294,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         _credentials = deepcopy(credentials) or {}
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+        self.metadata = metadata
 
     def _load(self) -> AbstractVideo:
         """Loads data from the video file.

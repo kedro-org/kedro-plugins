@@ -65,8 +65,8 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -77,6 +77,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
         on a specific filesystem.
@@ -102,6 +103,8 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -113,6 +116,8 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         self._protocol = protocol
         self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -188,3 +193,11 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _preview(self, nrows: int = 40) -> Dict:
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        data = dataset_copy.load()
+
+        return data.to_dict(orient="split")

@@ -170,7 +170,6 @@ class TestMatplotlibWriter:
         plot_writer.save(mock_dict_plot)
 
         for colour in COLOUR_LIST:
-
             download_path = tmp_path / "downloaded_image.png"
             actual_filepath = tmp_path / "locally_saved.png"
 
@@ -317,7 +316,7 @@ class TestMatplotlibWriterVersioned:
             versioned_plot_writer.save(mock_single_plot)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DataSetError, match=pattern):
             MatplotlibWriter(
@@ -361,7 +360,6 @@ class TestMatplotlibWriterVersioned:
         versioned_plot_writer.save(mock_list_plot)
 
         for index in range(5):
-
             test_path = tmp_path / "test_image.png"
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 

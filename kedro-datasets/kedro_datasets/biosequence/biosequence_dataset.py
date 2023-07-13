@@ -36,8 +36,8 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -47,6 +47,7 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """
         Creates a new instance of ``BioSequenceDataSet`` pointing
@@ -69,6 +70,8 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Note: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO
         """
@@ -99,6 +102,8 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
         _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
+
+        self.metadata = metadata
 
     def _describe(self) -> Dict[str, Any]:
         return {

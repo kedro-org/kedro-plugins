@@ -23,6 +23,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
     .. code-block:: yaml
 
         cars:
@@ -48,7 +49,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
 
     """
 
-    DEFAULT_SAVE_ARGS = {"indent": 2}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"indent": 2}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -58,6 +59,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -85,6 +87,8 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -97,6 +101,8 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

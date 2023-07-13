@@ -7,7 +7,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 from shapely.geometry import Point
 
@@ -204,7 +204,7 @@ class TestGeoJSONDataSetVersioned:
             versioned_geojson_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DataSetError, match=pattern):
             GeoJSONDataSet(

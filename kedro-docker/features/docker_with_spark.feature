@@ -3,7 +3,6 @@ Feature: Docker commands in new Spark projects
   Background:
     Given I have prepared a config file
     And I run a non-interactive kedro new using pyspark-iris starter
-    And I have fixed logs write permission
     And I have installed the project dependencies
     And I have removed old docker image of test project
 

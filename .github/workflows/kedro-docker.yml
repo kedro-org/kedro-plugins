@@ -1,0 +1,23 @@
+name: Run checks on Kedro-Docker
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "kedro-airflow/**"
+      - "kedro-datasets/**"
+      - "kedro-telemetry/**"
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "kedro-airflow/**"
+      - "kedro-datasets/**"
+      - "kedro-telemetry/**"
+
+jobs:
+  docker-test:
+    uses: ./.github/workflows/check-plugin.yml
+    with:
+      plugin: kedro-docker

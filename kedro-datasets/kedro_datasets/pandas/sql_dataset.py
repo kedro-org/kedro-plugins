@@ -1,6 +1,7 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
+import datetime as dt
 import re
 from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn, Optional
@@ -13,7 +14,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
@@ -22,12 +23,13 @@ KNOWN_PIP_INSTALL = {
     "psycopg2": "psycopg2",
     "mysqldb": "mysqlclient",
     "cx_Oracle": "cx_Oracle",
+    "mssql": "pyodbc",
 }
 
 DRIVER_ERROR_MESSAGE = """
 A module/driver is missing when connecting to your SQL server. SQLDataSet
  supports SQLAlchemy drivers. Please refer to
- https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases
+ https://docs.sqlalchemy.org/core/engines.html#supported-databases
  for more information.
 \n\n
 """
@@ -81,7 +83,7 @@ def _get_sql_alchemy_missing_error() -> DataSetError:
     return DataSetError(
         "The SQL dialect in your connection is not supported by "
         "SQLAlchemy. Please refer to "
-        "https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases "
+        "https://docs.sqlalchemy.org/core/engines.html#supported-databases "
         "for more information."
     )
 
@@ -95,7 +97,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     string either in ``credentials`` (see the example code snippet below) or in
     ``load_args`` and ``save_args``. Connection string formats supported by
     SQLAlchemy can be found here:
-    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+    https://docs.sqlalchemy.org/core/engines.html#database-urls
 
     ``SQLTableDataSet`` modifies the save parameters and stores
     the data with no index. This is designed to make load and save methods
@@ -154,12 +156,14 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         table_name: str,
         credentials: Dict[str, Any],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataSet``.
 
@@ -172,20 +176,22 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 through credentials. It overwrites `con` parameter in
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_table.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
             save_args: Provided to underlying pandas ``to_sql`` function along
                 with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``table_name`` or ``con`` is empty.
@@ -214,10 +220,12 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         self._connection_str = credentials["con"]
         self.create_connection(self._connection_str)
 
+        self.metadata = metadata
+
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
         """Given a connection string, create singleton connection
-        to be used across all instances of `SQLTableDataSet` that
+        to be used across all instances of ``SQLTableDataSet`` that
         need to connect to the same source.
         """
         if connection_str in cls.engines:
@@ -252,10 +260,10 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         data.to_sql(con=engine, **self._save_args)
 
     def _exists(self) -> bool:
-        eng = self.engines[self._connection_str]  # type: ignore
+        engine = self.engines[self._connection_str]  # type: ignore
+        insp = inspect(engine)
         schema = self._load_args.get("schema", None)
-        exists = self._load_args["table_name"] in eng.table_names(schema)
-        return exists
+        return insp.has_table(self._load_args["table_name"], schema)
 
 
 class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
@@ -266,7 +274,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     a compatible connection string either in ``credentials`` (see the example
     code snippet below) or in ``load_args``. Connection string formats supported
     by SQLAlchemy can be found here:
-    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+    https://docs.sqlalchemy.org/core/engines.html#database-urls
 
     It does not support save method so it is a read only data set.
     To save data to a SQL server use ``SQLTableDataSet``.
@@ -322,6 +330,48 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>
         >>> sql_data = data_set.load()
 
+    Example of usage for mssql:
+    ::
+
+
+        >>> credentials = {"server": "localhost", "port": "1433",
+        >>>                "database": "TestDB", "user": "SA",
+        >>>                "password": "StrongPassword"}
+        >>> def _make_mssql_connection_str(
+        >>>    server: str, port: str, database: str, user: str, password: str
+        >>> ) -> str:
+        >>>    import pyodbc  # noqa
+        >>>    from sqlalchemy.engine import URL  # noqa
+        >>>
+        >>>    driver = pyodbc.drivers()[-1]
+        >>>    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+        >>>                      f"ENCRYPT=yes;UID={user};PWD={password};"
+        >>>                       "TrustServerCertificate=yes;")
+        >>>    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        >>> connection_str = _make_mssql_connection_str(**credentials)
+        >>> data_set = SQLQueryDataSet(credentials={"con": connection_str},
+        >>>                            sql="SELECT TOP 5 * FROM TestTable;")
+        >>> df = data_set.load()
+
+    In addition, here is an example of a catalog with dates parsing:
+    ::
+
+
+        >>> mssql_dataset:
+        >>>    type: kedro_datasets.pandas.SQLQueryDataSet
+        >>>    credentials: mssql_credentials
+        >>>    sql: >
+        >>>       SELECT *
+        >>>       FROM  DateTable
+        >>>       WHERE date >= ? AND date <= ?
+        >>>       ORDER BY date
+        >>>    load_args:
+        >>>       params:
+        >>>        - ${begin}
+        >>>        - ${end}
+        >>>       index_col: date
+        >>>       parse_dates:
+        >>>         date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
     # using Any because of Sphinx but it should be
@@ -336,6 +386,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
         execution_options: Optional[Dict[str, Any]] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -346,13 +397,13 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 through credentials. It overwrites `con` parameter in
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_query``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested keys
@@ -364,9 +415,11 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:
-                https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                https://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options
                 Note that this is not a standard argument supported by pandas API, but could be
                 useful for handling large datasets.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
@@ -389,13 +442,15 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args = {}  # type: Dict[str, Any]
+        default_load_args: Dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}
             if load_args is not None
             else default_load_args
         )
+
+        self.metadata = metadata
 
         # load sql query from file
         if sql:
@@ -413,6 +468,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
+        if "mssql" in self._connection_str:
+            self.adapt_mssql_date_params()
 
     @classmethod
     def create_connection(cls, connection_str: str) -> None:
@@ -456,3 +513,26 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _save(self, data: None) -> NoReturn:
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
+
+    # For mssql only
+    def adapt_mssql_date_params(self) -> None:
+        """We need to change the format of datetime parameters.
+        MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
+        Here, we also accept plain dates.
+        `pyodbc` does not accept named parameters, they must be provided as a list."""
+        params = self._load_args.get("params", [])
+        if not isinstance(params, list):
+            raise DataSetError(
+                "Unrecognized `params` format. It can be only a `list`, "
+                f"got {type(params)!r}"
+            )
+        new_load_args = []
+        for value in params:
+            try:
+                as_date = dt.date.fromisoformat(value)
+                new_val = dt.datetime.combine(as_date, dt.time.min)
+                new_load_args.append(new_val.strftime("%Y-%m-%dT%H:%M:%S"))
+            except (TypeError, ValueError):
+                new_load_args.append(value)
+        if new_load_args:
+            self._load_args["params"] = new_load_args

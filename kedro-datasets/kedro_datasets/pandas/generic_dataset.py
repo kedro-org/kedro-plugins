@@ -81,8 +81,8 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -94,6 +94,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``GenericDataSet`` pointing to a concrete data file
         on a specific filesystem. The appropriate pandas load/save methods are
@@ -134,6 +135,8 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: Will be raised if at least less than one appropriate
@@ -153,6 +156,8 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -181,7 +186,6 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             )
 
     def _load(self) -> pd.DataFrame:
-
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -196,7 +200,6 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         )
 
     def _save(self, data: pd.DataFrame) -> None:
-
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

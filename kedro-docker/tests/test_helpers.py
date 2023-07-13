@@ -43,25 +43,25 @@ def test_make_container_name(args):
 class TestComposeDockerRunArgs:
     def test_args(self, tmp_path):
         """Test composing the arguments for `docker run` command"""
-        kwargs = dict(
-            host_root=str(tmp_path),
-            container_root="/home/kedro/projectname",
-            optional_args=[("-arg1", "projectname"), ("--arg4", "x4")],
-            required_args=[("-arg2", None), ("-arg3", "x2")],
-            user_args=["-arg1", "-arg2=y2", "-arg3", "y3"],
-        )
+        kwargs = {
+            "host_root": str(tmp_path),
+            "container_root": "/home/kedro/projectname",
+            "optional_args": [("-arg1", "projectname"), ("--arg4", "x4")],
+            "required_args": [("-arg2", None), ("-arg3", "x2")],
+            "user_args": ["-arg1", "-arg2=y2", "-arg3", "y3"],
+        }
         expected = ["-arg2", "-arg3", "x2", "--arg4", "x4"] + kwargs["user_args"]
         assert compose_docker_run_args(**kwargs) == expected
 
     def test_mount(self, tmp_path):
         """Test composing the arguments with volumes to mount"""
         host_root = tmp_path.resolve()
-        kwargs = dict(
-            host_root=str(host_root),
-            container_root="/home/kedro/projectname",
-            mount_volumes=("conf/local", "data", "logs"),
-            user_args=["-v", "y1"],
-        )
+        kwargs = {
+            "host_root": str(host_root),
+            "container_root": "/home/kedro/projectname",
+            "mount_volumes": ("conf/local", "data", "logs"),
+            "user_args": ["-v", "y1"],
+        }
         expected = []
         for _vol in kwargs["mount_volumes"]:
             _mount_vol = f"{host_root / _vol}:{kwargs['container_root']}/{_vol}"

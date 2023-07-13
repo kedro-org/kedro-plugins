@@ -63,8 +63,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -74,6 +74,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -93,6 +94,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
                 https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or
@@ -116,6 +119,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._url = url
         self._table = table
 
+        self.metadata = metadata
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -126,7 +131,6 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:
-
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:

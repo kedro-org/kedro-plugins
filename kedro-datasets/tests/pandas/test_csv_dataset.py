@@ -137,6 +137,49 @@ class TestCSVDataSet:
         assert "storage_options" not in ds._save_args
         assert "storage_options" not in ds._load_args
 
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, csv_data_set, dummy_dataframe, nrows, expected):
+        """Test _preview returns the correct data structure."""
+        csv_data_set.save(dummy_dataframe)
+        previewed = csv_data_set._preview(nrows=nrows)
+        assert previewed == expected
+
     def test_load_missing_file(self, csv_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set CSVDataSet\(.*\)"
@@ -318,7 +361,7 @@ class TestCSVDataSetVersioned:
             versioned_csv_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DataSetError, match=pattern):
             CSVDataSet(

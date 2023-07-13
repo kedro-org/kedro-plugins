@@ -11,6 +11,7 @@ from kedro_datasets.pandas import SQLQueryDataSet, SQLTableDataSet
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
+MSSQL_CONNECTION = "mssql+pyodbc://?odbc_connect=DRIVER%3DODBC+Driver+for+SQL"
 SQL_QUERY = "SELECT * FROM table_a"
 EXECUTION_OPTIONS = {"stream_results": True}
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
@@ -64,7 +65,7 @@ class TestSQLTableDataSet:
 
     @staticmethod
     def _assert_sqlalchemy_called_once(*args):
-        _callable = sqlalchemy.engine.Engine.table_names
+        _callable = sqlalchemy.engine.reflection.Inspector.has_table
         if args:
             _callable.assert_called_once_with(*args)
         else:
@@ -126,24 +127,30 @@ class TestSQLTableDataSet:
 
     def test_table_exists(self, mocker, table_data_set):
         """Test `exists` method invocation"""
-        mocker.patch("sqlalchemy.engine.Engine.table_names")
+        mocker.patch(
+            "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
+        )
         assert not table_data_set.exists()
-        self._assert_sqlalchemy_called_once()
+        self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
     @pytest.mark.parametrize(
         "table_data_set", [{"load_args": {"schema": "ingested"}}], indirect=True
     )
     def test_table_exists_schema(self, mocker, table_data_set):
         """Test `exists` method invocation with DB schema provided"""
-        mocker.patch("sqlalchemy.engine.Engine.table_names")
+        mocker.patch(
+            "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
+        )
         assert not table_data_set.exists()
-        self._assert_sqlalchemy_called_once("ingested")
+        self._assert_sqlalchemy_called_once(TABLE_NAME, "ingested")
 
     def test_table_exists_mocked(self, mocker, table_data_set):
         """Test `exists` method invocation with mocked list of tables"""
-        mocker.patch("sqlalchemy.engine.Engine.table_names", return_value=[TABLE_NAME])
+        mocker.patch(
+            "sqlalchemy.engine.reflection.Inspector.has_table", return_value=True
+        )
         assert table_data_set.exists()
-        self._assert_sqlalchemy_called_once()
+        self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
     def test_load_sql_params(self, mocker, table_data_set):
         """Test `load` method invocation"""
@@ -417,3 +424,56 @@ class TestSQLQueryDataSet:
         assert mock_engine.call_count == 2
         assert fourth.engines == first.engines
         assert len(first.engines) == 2
+
+    def test_adapt_mssql_date_params_called(self, mocker):
+        """Test that the adapt_mssql_date_params
+        function is called when mssql backend is used.
+        """
+        mock_adapt_mssql_date_params = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet.adapt_mssql_date_params"
+        )
+        mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        ds = SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
+        mock_engine.assert_called_once_with(MSSQL_CONNECTION)
+        assert mock_adapt_mssql_date_params.call_count == 1
+        assert len(ds.engines) == 1
+
+    def test_adapt_mssql_date_params(self, mocker):
+        """Test that the adapt_mssql_date_params
+        function transforms the params as expected, i.e.
+        making datetime date into the format %Y-%m-%dT%H:%M:%S
+        and ignoring the other values.
+        """
+        mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        load_args = {
+            "params": ["2023-01-01", "2023-01-01T20:26", "2023", "test", 1.0, 100]
+        }
+        ds = SQLQueryDataSet(
+            sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION}, load_args=load_args
+        )
+        assert ds._load_args["params"] == [
+            "2023-01-01T00:00:00",
+            "2023-01-01T20:26",
+            "2023",
+            "test",
+            1.0,
+            100,
+        ]
+
+    def test_adapt_mssql_date_params_wrong_input(self, mocker):
+        """Test that the adapt_mssql_date_params
+        function fails with the correct error message
+        when given a wrong input
+        """
+        mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        load_args = {"params": {"value": 1000}}
+        pattern = (
+            "Unrecognized `params` format. It can be only a `list`, "
+            "got <class 'dict'>"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            SQLQueryDataSet(
+                sql=SQL_QUERY,
+                credentials={"con": MSSQL_CONNECTION},
+                load_args=load_args,
+            )

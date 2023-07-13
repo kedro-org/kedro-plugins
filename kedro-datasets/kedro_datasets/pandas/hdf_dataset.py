@@ -56,8 +56,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     # _lock is a class attribute that will be shared across all the instances.
     # It is used to make dataset safe for threads.
     _lock = Lock()
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -69,6 +69,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -100,6 +101,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set `wb` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -112,6 +115,8 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

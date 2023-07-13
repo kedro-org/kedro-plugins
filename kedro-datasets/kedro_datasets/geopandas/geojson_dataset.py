@@ -44,7 +44,7 @@ class GeoJSONDataSet(
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}
 
     # pylint: disable=too-many-arguments
@@ -56,6 +56,7 @@ class GeoJSONDataSet(
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GeoJSONDataSet`` pointing to a concrete GeoJSON file
         on a specific filesystem fsspec.
@@ -85,6 +86,8 @@ class GeoJSONDataSet(
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = copy.deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -96,6 +99,8 @@ class GeoJSONDataSet(
             _fs_args.setdefault("auto_mkdir", True)
 
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

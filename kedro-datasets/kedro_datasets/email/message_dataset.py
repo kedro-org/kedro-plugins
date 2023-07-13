@@ -20,9 +20,7 @@ from kedro.io.core import (
 )
 
 
-class EmailMessageDataSet(
-    AbstractVersionedDataSet[Message, Message]
-):  # pylint: disable=too-many-instance-attributes
+class EmailMessageDataSet(AbstractVersionedDataSet[Message, Message]):
     """``EmailMessageDataSet`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
     ``email`` package in the standard library to manage email messages.
@@ -52,8 +50,8 @@ class EmailMessageDataSet(
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -64,6 +62,7 @@ class EmailMessageDataSet(
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``EmailMessageDataSet`` pointing to a concrete text file
         on a specific filesystem.
@@ -103,6 +102,8 @@ class EmailMessageDataSet(
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -115,6 +116,8 @@ class EmailMessageDataSet(
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

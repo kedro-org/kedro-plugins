@@ -152,7 +152,7 @@ class TestDeltaTableDataSet:
         """Test write mode not supported."""
         pattern = "Write mode unsupported is not supported"
         with pytest.raises(DataSetError, match=pattern):
-          DeltaTableDataSet(filepath, save_args={"mode": "unsupported"})
+            DeltaTableDataSet(filepath, save_args={"mode": "unsupported"})
 
     def test_metadata(self, deltatable_data_set_from_path, dummy_df):
         """Test metadata property exists and return a metadata object."""

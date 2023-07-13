@@ -128,7 +128,8 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
 
         self._invalidate_cache()
 
-    def _get_format(self, file_path: str):
+    @staticmethod
+    def _get_format(file_path: PurePosixPath):
         ext = file_path.suffix.lower()
         if ext not in Image.EXTENSION:
             Image.init()

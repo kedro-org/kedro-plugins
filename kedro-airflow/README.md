@@ -55,3 +55,11 @@ You can use the additional command line argument `--jinja-file` (alias `-j`) to 
 ```bash
 kedro airflow create --jinja-file=./custom/template.j2
 ```
+
+#### What if I want to use a different Airflow Operator?
+
+Which Airflow Operator to use depends on the environment your project is running in.
+You can set the operator to use by providing a custom template.
+See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
+The [rich offering](https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/index.html) of operators means that the `kedro-airflow` plugin is providing templates for specific operators.
+The default template provided by `kedro-airflow` uses the `BaseOperator`.

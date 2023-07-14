@@ -13,7 +13,7 @@ license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.17.5",
     "python-slugify>=4.0",
-    "semver~=2.10",  # Needs to be at least 2.10.0 to get VersionInfo.match
+    "semver>=2.10",  # Needs to be at least 2.10.0 to make use of `VersionInfo.match`.
 ]
 dynamic = ["readme", "version"]
 

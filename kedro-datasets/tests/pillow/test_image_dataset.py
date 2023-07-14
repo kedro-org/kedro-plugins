@@ -110,6 +110,21 @@ class TestImageDataSet:
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    @pytest.mark.parametrize(
+        "image_filepath , expected_extension",
+        [
+            ("s3://bucket/file.png", "PNG"),
+            ("file:///tmp/test.jpg", "JPEG"),
+            ("/tmp/test.pdf", "PDF"),
+            ("https://example.com/file.whatever", None),
+        ],
+    )
+    def test_get_format(self, image_filepath, expected_extension):
+        """Unit test for pillow.ImageDataSet._get_format() fn"""
+        data_set = ImageDataSet(image_filepath)
+        ext = data_set._get_format(Path(image_filepath))
+        assert expected_extension == ext
+
 
 class TestImageDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):

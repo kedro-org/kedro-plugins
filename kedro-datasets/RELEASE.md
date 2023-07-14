@@ -1,11 +1,16 @@
 # Upcoming Release:
 
 ## Major features and improvements
+* Added automatic inference of file format for `pillow.ImageDataSet` to be passed to `save()`
 
 ## Bug fixes and other changes
+* Migrated `PartitionedDataSet` and `IncrementalDataSet` from main repository to kedro-datasets.
 
 ## Community contributions
-* Migrated `PartitionedDataSet` and `IncrementalDataSet` from main repository to kedro-datasets.
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Daniel-Falk](https://github.com/daniel-falk)
+
 
 # Release 1.4.2
 ## Bug fixes and other changes

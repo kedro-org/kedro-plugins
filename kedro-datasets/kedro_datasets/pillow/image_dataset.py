@@ -119,12 +119,21 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
             return Image.open(fs_file).copy()
 
     def _save(self, data: Image.Image) -> None:
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = self._get_save_path()
 
-        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            data.save(fs_file, **self._save_args)
+        with self._fs.open(
+            get_filepath_str(save_path, self._protocol), **self._fs_open_args_save
+        ) as fs_file:
+            data.save(fs_file, format=self._get_format(save_path), **self._save_args)
 
         self._invalidate_cache()
+
+    @staticmethod
+    def _get_format(file_path: PurePosixPath):
+        ext = file_path.suffix.lower()
+        if ext not in Image.EXTENSION:
+            Image.init()
+        return Image.EXTENSION.get(ext)
 
     def _exists(self) -> bool:
         try:

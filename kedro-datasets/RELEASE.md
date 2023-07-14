@@ -1,10 +1,14 @@
 # Upcoming Release:
 
 ## Major features and improvements
+* Added automatic inference of file format for `pillow.ImageDataSet` to be passed to `save()`
 
 ## Bug fixes and other changes
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Daniel-Falk](https://github.com/daniel-falk)
 
 # Release 1.4.2
 ## Bug fixes and other changes

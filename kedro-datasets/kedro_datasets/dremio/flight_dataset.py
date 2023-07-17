@@ -1,23 +1,28 @@
+""""
+A module for reading Dremio Flight data.This module provides a class,
+`FlightDataset`, that can be used to read Dremio Flight data."""
 import copy
-from pathlib import Path, PurePosixPath
-import fsspec
-from pandas import DataFrame, concat 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    get_filepath_str,
-    get_protocol_and_path,
-)
-from typing import Any, Dict, NoReturn, Optional
-from pyarrow import flight
+from typing import Any, Dict, List, NoReturn
 
-def process_con(uri, tls=False, user=None, password=None):
+import fsspec
+from kedro.io.core import AbstractDataSet, DataSetError, get_protocol_and_path
+from pandas import DataFrame, concat
+from pyarrow import flight
+from pyarrow.flight import FlightServerError, FlightUnauthenticatedError
+
+
+def process_con(
+    uri: str,
+    tls: bool = False,
+    username: str or None = None,
+    password: str or None = None,
+) -> Dict[str : str or None]:
     """
     Extracts hostname, protocol, user and passworrd from URI
 
     Parameters
     ----------
-    uri: str or None
+    uri: str
         Connection string in the form username:password@hostname:port
     tls: boolean
         Whether TLS is enabled
@@ -26,69 +31,203 @@ def process_con(uri, tls=False, user=None, password=None):
     password: str or None
         Password if not supplied as part of the URI
     """
-    if '://' in uri:
-        protocol, uri = uri.split('://')
+    if "://" in uri:
+        protocol, uri = uri.split("://")
     else:
-        protocol = 'grpc+tls' if tls else 'grpc+tcp'
-    if '@' in uri:
-        if user or password:
+        protocol = "grpc+tls" if tls else "grpc+tcp"
+    if "@" in uri:
+        if username or password:
             raise ValueError(
                 "Dremio URI must not include username and password "
                 "if they were supplied explicitly."
             )
-        userinfo, hostname = uri.split('@')
-        user, password = userinfo.split(':')
-    elif not (user and password):
+        userinfo, hostname = uri.split("@")
+        username, password = userinfo.split(":")
+    elif not (username and password):
         raise ValueError(
             "Flight URI must include username and password "
             "or they must be provided explicitly."
         )
     else:
         hostname = uri
-    return protocol, hostname, user, password
+
+    return {
+        "protocol": protocol,
+        "hostname": hostname,
+        "username": username,
+        "password": password,
+    }
+
 
 class HttpClientAuthHandler(flight.ClientAuthHandler):
+    """
+    A client auth handler that uses HTTP Basic Auth to authenticate with a server.
+
+    Args:
+        username: The username to use for authentication.
+        password: The password to use for authentication.
+
+    Methods:
+        authenticate: Called to authenticate with the server.
+        get_token: Returns the token that was received from the server.
+
+    Example:
+        >>> handler = HttpClientAuthHandler("username", "password")
+        >>> handler.authenticate(outgoing, incoming)
+        >>> token = handler.get_token()
+    """
 
     def __init__(self, username, password):
         super(flight.ClientAuthHandler, self).__init__()
         self.basic_auth = flight.BasicAuth(username, password)
         self.token = None
 
-    def authenticate(self, outgoing, incoming):
+    def authenticate(
+        self,
+        outgoing: Any,
+        incoming: Any,
+    ) -> None:
+        """
+        Called to authenticate with the server.
+
+        Args:
+            outgoing: The outgoing stream.
+            incoming: The incoming stream.
+        """
         auth = self.basic_auth.serialize()
         outgoing.write(auth)
         self.token = incoming.read()
 
-    def get_token(self):
+    def get_token(self) -> bytes:
+        """
+        Returns the token that was received from the server.
+
+        Returns:
+            The token.
+        """
         return self.token
 
 
 class ClientMiddleware(flight.ClientMiddleware):
+    """
+    A middleware that extracts the authorization header from an RPC response and sets it as
+    the call credential for future RPCs.
+
+    Args:
+        factory: The factory that created this middleware instance.
+
+    Methods:
+        received_headers: Called after an RPC is received.
+
+    Example:
+        >>> middleware = ClientMiddleware(factory)
+        >>> middleware.received_headers(headers)
+    """
+
     def __init__(self, factory):
         self.factory = factory
 
-    def received_headers(self, headers):
-        auth_header_key = 'authorization'
+    def received_headers(self, headers: Any):
+        """
+        Called after an RPC is received.
+
+        Args:
+            headers: The RPC response headers.
+
+        """
+        auth_header_key = "authorization"
         authorization_header = []
         for key in headers:
-          if key.lower() == auth_header_key:
-            authorization_header = headers.get(auth_header_key)
-        self.factory.set_call_credential([
-            b'authorization', authorization_header[0].encode("utf-8")])
+            if key.lower() == auth_header_key:
+                authorization_header = headers.get(auth_header_key)
+        self.factory.set_call_credential(
+            [b"authorization", authorization_header[0].encode("utf-8")]
+        )
 
 
 class ClientMiddlewareFactory(flight.ClientMiddlewareFactory):
-    def __init__(self):
+    """
+    A factory for new middleware instances.
+
+    Args:
+        call_credential: A list of call credentials.
+
+    Methods:
+        start_call: Called at the start of an RPC.
+        set_call_credential: Sets the call credential.
+
+    Example:
+        >>> factory = ClientMiddlewareFactory()
+        >>> factory.set_call_credential(['credential1', 'credential2'])
+        >>> middleware = factory.start_call(None)
+    """
+
+    def __init__(self) -> None:
         self.call_credential = []
 
-    def start_call(self, info):
+    def start_call(self) -> ClientMiddleware:
+        """
+        Called at the start of an RPC.
+
+        Returns:
+            A ClientMiddleware instance.
+        """
         return ClientMiddleware(self)
 
-    def set_call_credential(self, call_credential):
+    def set_call_credential(self, call_credential: List[bytes]) -> None:
+        """
+        Sets the call credential.
+
+        Args:
+            call_credential: A list of call credentials.
+        """
         self.call_credential = call_credential
 
- 
-class DremioFlightDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+
+class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
+    """``DremioFlightDataset`` loads data from a py arrow flight.
+    Since it uses ``pyarrow.flight`` internally,behind the scenes,
+    when instantiating ``DremioFlightDataset`` one needs to pass a compatible connection
+    string either in ``credentials`` (see the example code snippet below) or in
+    ``load_args`.
+
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        shuttles_table_dataset:
+          type: pandas.DremioFlightDataset
+          credentials: flight_credentials
+          table_name: shuttles
+          load_args:
+            schema: dwschema
+          save_args:
+            schema: dwschema
+            if_exists: replace
+
+    Sample database credentials entry in ``credentials.yml``:
+
+    .. code-block:: yaml
+
+        flight_credentials:
+          con: grpc+tls://{username}:{password}@localhost:{port}
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    ::
+        >>> from kedro_datasets.dremio import DremioFlightDataset
+        >>> credentials = {
+        >>>     "con": "postgresql://scott:tiger@localhost/test"
+        >>> }
+        >>> data_set = DremioFlightDataset(sql="select * from dual",
+        >>>                            credentials=credentials)
+        >>> data = data_set.load()
+
+    """
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         sql: str = None,
@@ -96,8 +235,6 @@ class DremioFlightDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
-        execution_options: Optional[Dict[str, Any]] = None,
-        metadata: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``DremioFlightDataset``.
 
@@ -123,14 +260,6 @@ class DremioFlightDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
-            execution_options: A dictionary with non-SQL advanced options for the connection to
-                be applied to the underlying engine. To find all supported execution
-                options, see here:
-                https://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options
-                Note that this is not a standard argument supported by pandas API, but could be
-                useful for handling large datasets.
-            metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
@@ -165,60 +294,67 @@ class DremioFlightDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
             else default_load_args
         )
 
-        self.metadata = metadata
-
         if sql:
             self._load_args["sql"] = sql
             self._filepath = None
         else:
             _fs_args = copy.deepcopy(fs_args) or {}
             _fs_credentials = _fs_args.pop("credentials", {})
-            protocol, path = get_protocol_and_path(str(filepath))
+            self._protocol, self._filepath = get_protocol_and_path(str(filepath))
 
-            self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
-            self._filepath = path
-        self._execution_options = execution_options or {}
 
-        self._flight_con = credentials["con"]
-        self._protocol, self._hostname, self._user, self._password = process_con(
-            self._flight_con, tls=self._load_args["tls"]
-        )
+        self._flight_con = process_con(credentials["con"], tls=self._load_args["tls"])
 
         if self._load_args["cert"] is not None and self._load_args["tls"]:
             with open(self._load_args["cert"], "rb") as root_certs:
                 self._certs = root_certs.read()
         elif self._load_args["tls"]:
-            raise ValueError('Trusted certificates must be provided to establish a TLS connection')
+            raise ValueError(
+                "Trusted certificates must be provided to establish a TLS connection"
+            )
         else:
             self._certs = None
 
     def _get_reader(self):
         client_auth_middleware = ClientMiddlewareFactory()
-        connection_args = {'middleware': [client_auth_middleware]}
+        connection_args = {"middleware": [client_auth_middleware]}
         if self._load_args["tls"]:
             connection_args["tls_root_certs"] = self._certs
         client = flight.FlightClient(
-            f'{self._protocol}://{self._hostname}',
-            **connection_args
+            f"{self._protocol}://{self._flight_con['hostname']}", **connection_args
         )
-        auth_options = flight.FlightCallOptions(timeout=self._connect_timeout)
+        auth_options = flight.FlightCallOptions(
+            timeout=self._load_args["connect_timeout"]
+        )
         try:
-            bearer_token = client.authenticate_basic_token(self._user, self._password)
+            bearer_token = client.authenticate_basic_token(
+                self._flight_con["username"], self._flight_con["password"]
+            )
             headers = [bearer_token]
-        except Exception as e:
-            if self._tls:
-                raise e
-            handler = HttpClientAuthHandler(self._user, self._password)
+        except (
+            FlightUnauthenticatedError,
+            FlightServerError,
+            ConnectionError,
+            TimeoutError,
+        ):
+            if self._load_args["tls"]:
+                raise
+            handler = HttpClientAuthHandler(
+                self._flight_con["username"], self._flight_con["password"]
+            )
             client.authenticate(handler, options=auth_options)
             headers = []
-        flight_desc = flight.FlightDescriptor.for_command(self._sql_expr)
-        options = flight.FlightCallOptions(headers=headers, timeout=self._request_timeout)
+        flight_desc = flight.FlightDescriptor.for_command(self._load_args["sql"])
+        options = flight.FlightCallOptions(
+            headers=headers, timeout=self._load_args["request_timeout"]
+        )
         flight_info = client.get_flight_info(flight_desc, options)
         reader = client.do_get(flight_info.endpoints[0].ticket, options)
         return reader
-    
-    def _get_chunks(self, reader: flight.FlightStreamReader) -> DataFrame:
+
+    @staticmethod
+    def _get_chunks(reader: flight.FlightStreamReader) -> DataFrame:
         dataframe = DataFrame()
         while True:
             try:

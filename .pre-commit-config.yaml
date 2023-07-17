@@ -122,8 +122,15 @@ repos:
         name: "Sort imports"
         language: system
         types: [file, python]
-        files: ^kedro-(telemetry|docker|datasets|airflow)/
+        files: ^kedro-(docker|datasets|airflow)/
         entry: isort
+
+      - id: isort-kedro-telemetry
+          name: "Sort imports"
+          language: system
+          types: [ file, python ]
+          files: ^kedro-telemetry/
+          entry: isort
 
       - id: black
         name: "Black"

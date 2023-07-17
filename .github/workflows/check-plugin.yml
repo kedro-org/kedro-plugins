@@ -101,11 +101,11 @@ jobs:
           pre-commit run debug-statements --all-files
           pre-commit run requirements-txt-fixer --all-files
           pre-commit run flake8 --all-files
-          pre-commit run isort --all-files
-          pre-commit run black --all-files
-          pre-commit run secret_scan --all-files
-          pre-commit run bandit --all-files
-          pre-commit run pylint-${{inputs.plugin}} --all-files
+          pre-commit run isort --all-files --hook-stage manual
+          pre-commit run black --all-files --hook-stage manual
+          pre-commit run secret_scan --all-files --hook-stage manual
+          pre-commit run bandit --all-files --hook-stage manual
+          pre-commit run pylint-${{inputs.plugin}} --all-files --hook-stage manual
 
 
   e2e-tests:

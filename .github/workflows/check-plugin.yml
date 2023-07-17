@@ -102,7 +102,6 @@ jobs:
           pre-commit run requirements-txt-fixer
           pre-commit run flake8
           pre-commit run isort
-          pre-commit run isort-${{inputs.plugin}}
           pre-commit run black
           pre-commit run secret_scan
           pre-commit run bandit

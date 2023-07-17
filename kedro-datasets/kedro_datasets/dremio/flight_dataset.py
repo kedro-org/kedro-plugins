@@ -16,21 +16,29 @@ def process_con(
     tls: bool = False,
     username: str or None = None,
     password: str or None = None,
-) -> Dict[str : str or None]:
+) -> Dict[str, str or None]:
     """
     Extracts hostname, protocol, user and passworrd from URI
 
     Parameters
     ----------
     uri: str
-        Connection string in the form username:password@hostname:port
-    tls: boolean
-        Whether TLS is enabled
-    username: str or None
-        Username if not supplied as part of the URI
-    password: str or None
-        Password if not supplied as part of the URI
+            Connection string in the form grpc+tls://username:password@hostname:port
+        tls: boolean
+            Whether TLS is enabled
+        username: str or None
+            Username if not supplied as part of the URI
+        password: str or None
+            Password if not supplied as part of the URI
+
+    Returns
+    -------
+    Dict[str, str or None]
+        Dictionary containing the hostname, protocol ,port, username and password
     """
+    if not uri:
+        raise ValueError("Dremio URI can not be empty")
+
     if "://" in uri:
         protocol, uri = uri.split("://")
     else:
@@ -41,7 +49,7 @@ def process_con(
                 "Dremio URI must not include username and password "
                 "if they were supplied explicitly."
             )
-        userinfo, hostname = uri.split("@")
+        userinfo, hostinfo = uri.split("@")
         username, password = userinfo.split(":")
     elif not (username and password):
         raise ValueError(
@@ -49,11 +57,14 @@ def process_con(
             "or they must be provided explicitly."
         )
     else:
-        hostname = uri
+        hostinfo = uri
+
+    hostname, port = hostinfo.split(":") if ":" in hostinfo else (hostinfo, None)
 
     return {
         "protocol": protocol,
         "hostname": hostname,
+        "port": port,
         "username": username,
         "password": password,
     }
@@ -184,10 +195,10 @@ class ClientMiddlewareFactory(flight.ClientMiddlewareFactory):
         self.call_credential = call_credential
 
 
-class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
-    """``DremioFlightDataset`` loads data from a py arrow flight.
+class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
+    """``DremioFlightDataSet`` loads data from a py arrow flight.
     Since it uses ``pyarrow.flight`` internally,behind the scenes,
-    when instantiating ``DremioFlightDataset`` one needs to pass a compatible connection
+    when instantiating ``DremioFlightDataSet`` one needs to pass a compatible connection
     string either in ``credentials`` (see the example code snippet below) or in
     ``load_args`.
 
@@ -198,7 +209,7 @@ class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
     .. code-block:: yaml
 
         shuttles_table_dataset:
-          type: pandas.DremioFlightDataset
+          type: pandas.DremioFlightDataSet
           credentials: flight_credentials
           table_name: shuttles
           load_args:
@@ -218,11 +229,11 @@ class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
-        >>> from kedro_datasets.dremio import DremioFlightDataset
+        >>> from kedro_datasets.dremio import DremioFlightDataSet
         >>> credentials = {
         >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
-        >>> data_set = DremioFlightDataset(sql="select * from dual",
+        >>> data_set = DremioFlightDataSet(sql="select * from dual",
         >>>                            credentials=credentials)
         >>> data = data_set.load()
 
@@ -236,7 +247,7 @@ class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
     ) -> None:
-        """Creates a new ``DremioFlightDataset``.
+        """Creates a new ``DremioFlightDataSet``.
 
         Args:
             sql: The sql query statement.
@@ -370,10 +381,10 @@ class DremioFlightDataset(AbstractDataSet[DataFrame, DataFrame]):
         return self._get_reader().read_pandas()
 
     def _save(self, _: None) -> NoReturn:
-        raise DataSetError("'save' is not supported on DremioFlightDataset")
+        raise DataSetError("'save' is not supported on DremioFlightDataSet")
 
     def _exists(self) -> NoReturn:
-        raise DataSetError("'exists' is not supported on DremioFlightDataset")
+        raise DataSetError("'exists' is not supported on DremioFlightDataSet")
 
     def _describe(self):
         return self._get_reader().schema

@@ -86,6 +86,24 @@ class ConstantFlightServer(FlightServerBase):
         table = self.table_factories[ticket.ticket]()
         return flight.RecordBatchStream(table, options=self.options)
 
+    def get_flight_info(self, _, descriptor):
+        return flight.FlightInfo(
+            pa.schema([("SELECT * FROM users", pa.int32())]),
+            descriptor,
+            [
+                flight.FlightEndpoint(
+                    b"SELECT * FROM users",
+                    [flight.Location.for_grpc_tcp("localhost", 5005)],
+                ),
+            ],
+            -1,
+            -1,
+        )
+
+    def get_schema(self, context, descriptor):
+        info = self.get_flight_info(context, descriptor)
+        return flight.SchemaResult(info.schema)
+
 
 class TestProcessCon:
     def test_process_con_with_username_and_password(self, default_dremio_host):
@@ -229,7 +247,7 @@ class TestDremioFlightDataSet:
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )
-            df = dataset.load()
+            df = dataset._load()
             assert df.shape[0] > 0
 
     def test_save_not_supported(self):
@@ -245,7 +263,7 @@ class TestDremioFlightDataSet:
         with ConstantFlightServer() as server:
             credentials = {"con": f"username:password@localhost:{server.port}"}
             dataset = DremioFlightDataSet(
-                sql="SELECT * FROM users", credentials=credentials
+                sql=b"SELECT * FROM users", credentials=credentials
             )
             with pytest.raises(DataSetError):
                 dataset._exists()
@@ -256,5 +274,6 @@ class TestDremioFlightDataSet:
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )
-            schema = dataset._describe()
-            assert schema is not None
+            info = dataset._describe()
+            assert info.total_records == -1
+            assert info.total_bytes == -1

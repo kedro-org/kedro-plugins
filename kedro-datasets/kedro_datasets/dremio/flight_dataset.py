@@ -357,7 +357,7 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             handler = HttpClientAuthHandler(
                 self._flight_con["username"], self._flight_con["password"]
             )
-            client.authenticate(handler, options=auth_options)
+            # client.authenticate(handler, options=auth_options)
             headers = []
         flight_desc = flight.FlightDescriptor.for_command(self._load_args["sql"])
         options = flight.FlightCallOptions(
@@ -381,7 +381,19 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         return dataframe
 
     def _load(self) -> DataFrame:
-        return self._get_reader().read_pandas()
+        _hostname = self._flight_con.get("hostname", None)
+
+        if self._flight_con.get("port", None):
+            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
+
+        with flight.FlightClient(
+            f"{self._flight_con['protocol']}://{_hostname}"
+        ) as client:
+            flight_desc = flight.FlightDescriptor.for_command(self._load_args["sql"])
+            options = flight.FlightCallOptions()
+            flight_info = client.get_flight_info(flight_desc, options)
+            reader = client.do_get(flight_info.endpoints[0].ticket, options)
+            return reader.read_pandas()
 
     def _save(self, _: None) -> NoReturn:
         raise DataSetError("'save' is not supported on DremioFlightDataSet")
@@ -390,4 +402,14 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         raise DataSetError("'exists' is not supported on DremioFlightDataSet")
 
     def _describe(self):
-        return self._get_reader().schema
+        _hostname = self._flight_con.get("hostname", None)
+
+        if self._flight_con.get("port", None):
+            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
+
+        with flight.FlightClient(
+            f"{self._flight_con['protocol']}://{_hostname}"
+        ) as client:
+            return client.get_flight_info(
+                flight.FlightDescriptor.for_command(self._load_args["sql"])
+            )

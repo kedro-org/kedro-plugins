@@ -1,5 +1,6 @@
 import io
 
+import pyarrow as pa
 import pytest
 from kedro.io.core import DataSetError
 
@@ -10,6 +11,13 @@ from kedro_datasets.dremio.flight_dataset import (
     HttpClientAuthHandler,
     process_con,
 )
+
+try:
+    from pyarrow import flight
+    from pyarrow.flight import FlightServerBase
+except ImportError:
+    flight = None
+    FlightServerBase = object
 
 
 @pytest.fixture
@@ -22,9 +30,61 @@ def default_dremio_host():
     return "localhost"
 
 
-@pytest.fixture
-def flight_credentials():
-    return {"con": "grpc://username:password@hostname:8888"}
+def simple_ints_table():
+    data = [pa.array([-10, -5, 0, 5, 10])]
+    return pa.Table.from_arrays(data, names=["some_ints"])
+
+
+def simple_dicts_table():
+    dict_values = pa.array(["foo", "baz", "quux"], type=pa.utf8())
+    data = [
+        pa.chunked_array(
+            [
+                pa.DictionaryArray.from_arrays([1, 0, None], dict_values),
+                pa.DictionaryArray.from_arrays([2, 1], dict_values),
+            ]
+        )
+    ]
+    return pa.Table.from_arrays(data, names=["some_dicts"])
+
+
+def multiple_column_table():
+    return pa.Table.from_arrays(
+        [pa.array(["foo", "bar", "baz", "qux"]), pa.array([1, 2, 3, 4])],
+        names=["a", "b"],
+    )
+
+
+class ConstantFlightServer(FlightServerBase):
+    """A Flight server that always returns the same data.
+
+    See ARROW-4796: this server implementation will segfault if Flight
+    does not properly hold a reference to the Table object.
+    """
+
+    CRITERIA = b"the expected criteria"
+
+    def __init__(self, location=None, options=None, **kwargs):
+        super().__init__(location, **kwargs)
+        # Ticket -> Table
+        self.table_factories = {
+            b"ints": simple_ints_table,
+            b"dicts": simple_dicts_table,
+            b"multi": multiple_column_table,
+        }
+        self.options = options
+
+    def list_flights(self, _, criteria):
+        if criteria == self.CRITERIA:
+            yield flight.FlightInfo(
+                pa.schema([]), flight.FlightDescriptor.for_path("/foo"), [], -1, -1
+            )
+
+    def do_get(self, _, ticket):
+        # Return a fresh table, so that Flight is the only one keeping a
+        # reference.
+        table = self.table_factories[ticket.ticket]()
+        return flight.RecordBatchStream(table, options=self.options)
 
 
 class TestProcessCon:
@@ -148,41 +208,53 @@ class TestClientMiddlewareFactory:
 
 
 class TestDremioFlightDataSet:
-    def test_init_with_sql(self, flight_credentials):
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM users", credentials=flight_credentials
-        )
-        assert dataset._load_args["sql"] == "SELECT * FROM users"
+    def test_init_with_sql(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            assert dataset._load_args["sql"] == "SELECT * FROM users"
 
-    def test_init_with_filepath(self, flight_credentials):
-        filepath = "/path/to/file.sql"
-        dataset = DremioFlightDataSet(filepath=filepath, credentials=flight_credentials)
-        assert dataset._filepath == filepath
+    def test_init_with_filepath(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            filepath = "/path/to/file.sql"
+            dataset = DremioFlightDataSet(filepath=filepath, credentials=credentials)
+            assert dataset._filepath == filepath
 
-    def test_load(self, flight_credentials):
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM users", credentials=flight_credentials
-        )
-        df = dataset.load()
-        assert df.shape[0] > 0
+    def test_load(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            df = dataset.load()
+            assert df.shape[0] > 0
 
-    def test_save_not_supported(self, flight_credentials):
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM users", credentials=flight_credentials
-        )
-        with pytest.raises(DataSetError):
-            dataset.save(data=None)
+    def test_save_not_supported(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            with pytest.raises(DataSetError):
+                dataset.save(data=None)
 
-    def test_exists_not_supported(self, flight_credentials):
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM users", credentials=flight_credentials
-        )
-        with pytest.raises(DataSetError):
-            dataset.exists()
+    def test_exists_not_supported(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            with pytest.raises(DataSetError):
+                dataset._exists()
 
-    def test_describe(self, flight_credentials):
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM users", credentials=flight_credentials
-        )
-        schema = dataset._describe()
-        assert schema is not None
+    def test_describe(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            schema = dataset._describe()
+            assert schema is not None

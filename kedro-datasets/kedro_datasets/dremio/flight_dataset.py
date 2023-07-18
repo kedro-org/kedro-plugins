@@ -2,11 +2,17 @@
 A module for reading Dremio Flight data.This module provides a class,
 `FlightDataset`, that can be used to read Dremio Flight data."""
 import copy
-from typing import Any, Dict, List, NoReturn
+from pathlib import PurePosixPath
+from typing import Any, Dict, List, NoReturn, Tuple
 
 import fsspec
-from kedro.io.core import AbstractDataSet, DataSetError, get_protocol_and_path
-from pandas import DataFrame, concat
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
+from pandas import DataFrame
 from pyarrow import flight
 from pyarrow.flight import FlightServerError, FlightUnauthenticatedError
 
@@ -37,6 +43,7 @@ def process_con(
         protocol, uri = uri.split("://")
     else:
         protocol = "grpc+tls" if tls else "grpc+tcp"
+
     if "@" in uri:
         if username or password:
             raise ValueError(
@@ -45,11 +52,6 @@ def process_con(
             )
         userinfo, hostinfo = uri.split("@")
         username, password = userinfo.split(":")
-    elif not (username and password):
-        raise ValueError(
-            "Flight URI must include username and password "
-            "or they must be provided explicitly."
-        )
     else:
         hostinfo = uri
 
@@ -325,22 +327,34 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         else:
             self._certs = None
 
-    def _get_reader(self):
-        client_auth_middleware = ClientMiddlewareFactory()
-        connection_args = {"middleware": [client_auth_middleware]}
+    def _get_hostname(self) -> Tuple[str, bool]:
+        hostname = self._flight_con.get("hostname", None)
+        if self._flight_con.get("port", None):
+            hostname = f"{hostname}:{self._flight_con.get('port', None)}"
+        autheticate = self._flight_con.get("username", None) and self._flight_con.get(
+            "password", None
+        )
+        print(self._flight_con.get("username", None))
+        print("____________________________________________________")
+        return hostname, autheticate
+
+    def _get_client(self) -> Tuple[flight.FlightClient, bool]:
+        hostname, authenticate = self._get_hostname()
+        connection_args = {}
         if self._load_args.get("tls", False):
             connection_args["tls_root_certs"] = self._certs
-        _hostname = self._flight_con.get("hostname", None)
-
-        if self._flight_con.get("port", None):
-            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
-
+        if authenticate:
+            client_auth_middleware = ClientMiddlewareFactory()
+            connection_args["middleware"] = [client_auth_middleware]
         client = flight.FlightClient(
-            f"{self._flight_con['protocol']}://{_hostname}", **connection_args
+            f"{self._flight_con['protocol']}://{hostname}", **connection_args
         )
-        auth_options = flight.FlightCallOptions(
-            timeout=self._load_args["connect_timeout"]
-        )
+        return client, authenticate
+
+    def _load_authenticated(
+        self, load_args: Dict[str, Any], client: flight.FlightClient
+    ) -> DataFrame:
+        auth_options = flight.FlightCallOptions(timeout=load_args["connect_timeout"])
         try:
             bearer_token = client.authenticate_basic_token(
                 self._flight_con["username"], self._flight_con["password"]
@@ -352,48 +366,37 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             ConnectionError,
             TimeoutError,
         ):
-            if self._load_args.get("tls", False):
+            if load_args.get("tls", False):
                 raise
             handler = HttpClientAuthHandler(
                 self._flight_con["username"], self._flight_con["password"]
             )
-            # client.authenticate(handler, options=auth_options)
+            client.authenticate(handler, options=auth_options)
             headers = []
-        flight_desc = flight.FlightDescriptor.for_command(self._load_args["sql"])
+        flight_desc = flight.FlightDescriptor.for_command(load_args["sql"])
         options = flight.FlightCallOptions(
-            headers=headers, timeout=self._load_args["request_timeout"]
+            headers=headers, timeout=load_args["request_timeout"]
         )
         flight_info = client.get_flight_info(flight_desc, options)
         reader = client.do_get(flight_info.endpoints[0].ticket, options)
-        return reader
-
-    @staticmethod
-    def _get_chunks(reader: flight.FlightStreamReader) -> DataFrame:
-        dataframe = DataFrame()
-        while True:
-            try:
-                flight_batch = reader.read_chunk()
-                record_batch = flight_batch.data
-                data_to_pandas = record_batch.to_pandas()
-                dataframe = concat([dataframe, data_to_pandas])
-            except StopIteration:
-                break
-        return dataframe
+        return reader.read_pandas()
 
     def _load(self) -> DataFrame:
-        _hostname = self._flight_con.get("hostname", None)
+        load_args = copy.deepcopy(self._load_args)
+        if self._filepath:
+            load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
+            with self._fs.open(load_path, mode="r") as fs_file:
+                load_args["sql"] = fs_file.read()
+        client, authenticate = self._get_client()
 
-        if self._flight_con.get("port", None):
-            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
+        if authenticate:
+            return self._load_authenticated(load_args, client)
 
-        with flight.FlightClient(
-            f"{self._flight_con['protocol']}://{_hostname}"
-        ) as client:
-            flight_desc = flight.FlightDescriptor.for_command(self._load_args["sql"])
-            options = flight.FlightCallOptions()
-            flight_info = client.get_flight_info(flight_desc, options)
-            reader = client.do_get(flight_info.endpoints[0].ticket, options)
-            return reader.read_pandas()
+        flight_desc = flight.FlightDescriptor.for_command(load_args["sql"])
+        options = flight.FlightCallOptions()
+        flight_info = client.get_flight_info(flight_desc, options)
+        reader = client.do_get(flight_info.endpoints[0].ticket, options)
+        return reader.read_pandas()
 
     def _save(self, _: None) -> NoReturn:
         raise DataSetError("'save' is not supported on DremioFlightDataSet")
@@ -402,14 +405,8 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         raise DataSetError("'exists' is not supported on DremioFlightDataSet")
 
     def _describe(self):
-        _hostname = self._flight_con.get("hostname", None)
+        client, _ = self._get_client()
 
-        if self._flight_con.get("port", None):
-            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
-
-        with flight.FlightClient(
-            f"{self._flight_con['protocol']}://{_hostname}"
-        ) as client:
-            return client.get_flight_info(
-                flight.FlightDescriptor.for_command(self._load_args["sql"])
-            )
+        return client.get_flight_info(
+            flight.FlightDescriptor.for_command(self._load_args["sql"])
+        )

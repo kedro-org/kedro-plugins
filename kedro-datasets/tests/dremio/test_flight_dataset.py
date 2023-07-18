@@ -3,6 +3,8 @@ import io
 import pyarrow as pa
 import pytest
 from kedro.io.core import DataSetError
+from pyarrow import flight
+from pyarrow.flight import FlightServerBase
 
 from kedro_datasets.dremio import DremioFlightDataSet
 from kedro_datasets.dremio.flight_dataset import (
@@ -11,13 +13,6 @@ from kedro_datasets.dremio.flight_dataset import (
     HttpClientAuthHandler,
     process_con,
 )
-
-try:
-    from pyarrow import flight
-    from pyarrow.flight import FlightServerBase
-except ImportError:
-    flight = None
-    FlightServerBase = object
 
 
 @pytest.fixture
@@ -88,11 +83,31 @@ class ConstantFlightServer(FlightServerBase):
 
     def get_flight_info(self, _, descriptor):
         return flight.FlightInfo(
-            pa.schema([("SELECT * FROM users", pa.int32())]),
+            pa.schema([("a", pa.int32())]),
             descriptor,
             [
+                flight.FlightEndpoint(b"ints", ["grpc://test"]),
                 flight.FlightEndpoint(
-                    b"SELECT * FROM users",
+                    b"",
+                    [flight.Location.for_grpc_tcp("localhost", 5005)],
+                ),
+            ],
+            -1,
+            -1,
+        )
+
+
+class GetInfoFlightServer(FlightServerBase):
+    """A Flight server that tests FlightDataset._describe."""
+
+    def get_flight_info(self, _, descriptor):
+        return flight.FlightInfo(
+            pa.schema([("a", pa.int32())]),
+            descriptor,
+            [
+                flight.FlightEndpoint(b"", ["grpc://test"]),
+                flight.FlightEndpoint(
+                    b"",
                     [flight.Location.for_grpc_tcp("localhost", 5005)],
                 ),
             ],
@@ -155,10 +170,10 @@ class TestProcessCon:
             process_con(uri, username=username, password=password)
 
     def test_process_con_without_username_and_password(self, default_dremio_host):
-        # pylint: disable=C0301
-        pattern = "Flight URI must include username and password or they must be provided explicitly."
-        with pytest.raises(ValueError, match=pattern):
-            process_con(default_dremio_host)
+        result = process_con(default_dremio_host)
+        assert result["hostname"] == default_dremio_host
+        assert result["username"] is None
+        assert result["password"] is None
 
     def test_process_no_uri(self):
         pattern = "Dremio URI can not be empty"
@@ -243,7 +258,7 @@ class TestDremioFlightDataSet:
 
     def test_load(self):
         with ConstantFlightServer() as server:
-            credentials = {"con": f"username:password@localhost:{server.port}"}
+            credentials = {"con": f"localhost:{server.port}"}
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )
@@ -262,15 +277,13 @@ class TestDremioFlightDataSet:
     def test_exists_not_supported(self):
         with ConstantFlightServer() as server:
             credentials = {"con": f"username:password@localhost:{server.port}"}
-            dataset = DremioFlightDataSet(
-                sql=b"SELECT * FROM users", credentials=credentials
-            )
+            dataset = DremioFlightDataSet(sql=b"ints", credentials=credentials)
             with pytest.raises(DataSetError):
                 dataset._exists()
 
     def test_describe(self):
-        with ConstantFlightServer() as server:
-            credentials = {"con": f"username:password@localhost:{server.port}"}
+        with GetInfoFlightServer() as server:
+            credentials = {"con": f"localhost:{server.port}"}
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )

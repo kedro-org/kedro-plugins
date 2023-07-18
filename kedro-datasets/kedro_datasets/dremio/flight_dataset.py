@@ -20,20 +20,14 @@ def process_con(
     """
     Extracts hostname, protocol, user and passworrd from URI
 
-    Parameters
-    ----------
-    uri: str
-            Connection string in the form grpc+tls://username:password@hostname:port
-        tls: boolean
-            Whether TLS is enabled
-        username: str or None
-            Username if not supplied as part of the URI
-        password: str or None
-            Password if not supplied as part of the URI
+    Args:
+        uri: Connection string in the form
+            grpc+tls://username:password@hostname:port
+        tls: Whether TLS is enabled
+        username: Username if not supplied as part of the URI
+        password: Password if not supplied as part of the URI
 
-    Returns
-    -------
-    Dict[str, str or None]
+    Returns:
         Dictionary containing the hostname, protocol ,port, username and password
     """
     if not uri:
@@ -135,10 +129,10 @@ class ClientMiddleware(flight.ClientMiddleware):
         >>> middleware.received_headers(headers)
     """
 
-    def __init__(self, factory):
+    def __init__(self, factory: flight.ClientMiddlewareFactory):
         self.factory = factory
 
-    def received_headers(self, headers: Any):
+    def received_headers(self, headers: Dict[str, Any]):
         """
         Called after an RPC is received.
 
@@ -147,13 +141,15 @@ class ClientMiddleware(flight.ClientMiddleware):
 
         """
         auth_header_key = "authorization"
-        authorization_header = []
+        authorization_headers = []
         for key in headers:
             if key.lower() == auth_header_key:
-                authorization_header = headers.get(auth_header_key)
-        self.factory.set_call_credential(
-            [b"authorization", authorization_header[0].encode("utf-8")]
-        )
+                authorization_headers = headers.get(auth_header_key)
+
+        if len(authorization_headers) > 0:
+            self.factory.set_call_credential(
+                [b"authorization", authorization_headers[0].encode("utf-8")]
+            )
 
 
 class ClientMiddlewareFactory(flight.ClientMiddlewareFactory):
@@ -315,12 +311,14 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
 
-        self._flight_con = process_con(credentials["con"], tls=self._load_args["tls"])
+        self._flight_con = process_con(
+            credentials["con"], tls=self._load_args.get("tls", False)
+        )
 
-        if self._load_args["cert"] is not None and self._load_args["tls"]:
-            with open(self._load_args["cert"], "rb") as root_certs:
+        if self._load_args.get("cert", None) and self._load_args.get("tls", False):
+            with open(self._load_args.get("cert", None), "rb") as root_certs:
                 self._certs = root_certs.read()
-        elif self._load_args["tls"]:
+        elif self._load_args.get("tls", False):
             raise ValueError(
                 "Trusted certificates must be provided to establish a TLS connection"
             )
@@ -330,10 +328,15 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
     def _get_reader(self):
         client_auth_middleware = ClientMiddlewareFactory()
         connection_args = {"middleware": [client_auth_middleware]}
-        if self._load_args["tls"]:
+        if self._load_args.get("tls", False):
             connection_args["tls_root_certs"] = self._certs
+        _hostname = self._flight_con.get("hostname", None)
+
+        if self._flight_con.get("port", None):
+            _hostname = f"{_hostname}:{self._flight_con.get('port', None)}"
+
         client = flight.FlightClient(
-            f"{self._protocol}://{self._flight_con['hostname']}", **connection_args
+            f"{self._flight_con['protocol']}://{_hostname}", **connection_args
         )
         auth_options = flight.FlightCallOptions(
             timeout=self._load_args["connect_timeout"]
@@ -349,7 +352,7 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             ConnectionError,
             TimeoutError,
         ):
-            if self._load_args["tls"]:
+            if self._load_args.get("tls", False):
                 raise
             handler = HttpClientAuthHandler(
                 self._flight_con["username"], self._flight_con["password"]

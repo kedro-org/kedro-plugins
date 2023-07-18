@@ -1,14 +1,30 @@
 import io
 
 import pytest
+from kedro.io.core import DataSetError
 
 from kedro_datasets.dremio import DremioFlightDataSet
-from kedro_datasets.dremio.flight_dataset import HttpClientAuthHandler, process_con
+from kedro_datasets.dremio.flight_dataset import (
+    ClientMiddleware,
+    ClientMiddlewareFactory,
+    HttpClientAuthHandler,
+    process_con,
+)
+
+
+@pytest.fixture
+def filepath_sql(tmp_path):
+    return (tmp_path / "test.sql").as_posix()
 
 
 @pytest.fixture
 def default_dremio_host():
     return "localhost"
+
+
+@pytest.fixture
+def flight_credentials():
+    return {"con": "grpc://username:password@hostname:8888"}
 
 
 class TestProcessCon:
@@ -99,6 +115,74 @@ class TestHttpClientAuthHandler:
         assert token
 
 
+class TestClientMiddleware:
+    def test_received_headers(self):
+        factory = ClientMiddlewareFactory()
+        middleware = ClientMiddleware(factory)
+        headers = {"authorization": ["Bearer my-token"]}
+        middleware.received_headers(headers)
+        assert middleware.factory.call_credential == [
+            b"authorization",
+            b"Bearer my-token",
+        ]
+
+    def test_received_headers_no_authorization(self):
+        factory = ClientMiddlewareFactory()
+        middleware = ClientMiddleware(factory)
+        headers = {}
+        middleware.received_headers(headers)
+        assert middleware.factory.call_credential == []
+
+
+class TestClientMiddlewareFactory:
+    def test_start_call(self):
+        factory = ClientMiddlewareFactory()
+        factory.set_call_credential([b"credential1", b"credential2"])
+        middleware = factory.start_call()
+        assert middleware.factory.call_credential == [b"credential1", b"credential2"]
+
+    def test_set_call_credential(self):
+        factory = ClientMiddlewareFactory()
+        factory.set_call_credential([b"credential1", b"credential2"])
+        assert factory.call_credential == [b"credential1", b"credential2"]
+
+
 class TestDremioFlightDataSet:
-    def test_1(self):
-        ...
+    def test_init_with_sql(self, flight_credentials):
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM users", credentials=flight_credentials
+        )
+        assert dataset._load_args["sql"] == "SELECT * FROM users"
+
+    def test_init_with_filepath(self, flight_credentials):
+        filepath = "/path/to/file.sql"
+        dataset = DremioFlightDataSet(filepath=filepath, credentials=flight_credentials)
+        assert dataset._filepath == filepath
+
+    def test_load(self, flight_credentials):
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM users", credentials=flight_credentials
+        )
+        df = dataset.load()
+        assert df.shape[0] > 0
+
+    def test_save_not_supported(self, flight_credentials):
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM users", credentials=flight_credentials
+        )
+        with pytest.raises(DataSetError):
+            dataset.save(data=None)
+
+    def test_exists_not_supported(self, flight_credentials):
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM users", credentials=flight_credentials
+        )
+        with pytest.raises(DataSetError):
+            dataset.exists()
+
+    def test_describe(self, flight_credentials):
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM users", credentials=flight_credentials
+        )
+        schema = dataset._describe()
+        assert schema is not None

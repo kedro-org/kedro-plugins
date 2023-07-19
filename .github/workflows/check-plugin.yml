@@ -93,7 +93,6 @@ jobs:
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
 
-
   e2e-tests:
     if: inputs.plugin != 'kedro-datasets'
     defaults:

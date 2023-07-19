@@ -118,18 +118,57 @@ repos:
         stages: [manual]
         entry: pylint --disable=unnecessary-pass,E0401 kedro-telemetry/kedro_telemetry
 
-      - id: isort
+      - id: isort-kedro-datasets
         name: "Sort imports"
         language: system
-        types: [file, python]
-        files: ^kedro-(telemetry|docker|datasets|airflow)/
+        types: [ file, python ]
+        files: ^kedro-datasets/
         entry: isort
 
-      - id: black
+      - id: isort-kedro-docker
+        name: "Sort imports"
+        language: system
+        types: [ file, python ]
+        files: ^kedro-docker/
+        entry: isort
+
+      - id: isort-kedro-airflow
+        name: "Sort imports"
+        language: system
+        types: [ file, python ]
+        files: ^kedro-airflow/
+        entry: isort
+
+      - id: isort-kedro-telemetry
+        name: "Sort imports"
+        language: system
+        types: [ file, python ]
+        files: ^kedro-telemetry/
+        entry: isort
+
+      - id: black-kedro-datasets
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro-telemetry/kedro_telemetry kedro-telemetry/tests kedro-docker/kedro_docker kedro-docker/features kedro-docker/tests kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests kedro-airflow/kedro_airflow kedro-airflow/features kedro-airflow/tests
+        entry: black kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests
+
+      - id: black-kedro-docker
+        name: "Black"
+        language: system
+        pass_filenames: false
+        entry: black kedro-docker/kedro_docker kedro-docker/features kedro-docker/tests
+
+      - id: black-kedro-airflow
+        name: "Black"
+        language: system
+        pass_filenames: false
+        entry: black kedro-airflow/kedro_airflow kedro-airflow/features kedro-airflow/tests
+
+      - id: black-kedro-telemetry
+        name: "Black"
+        language: system
+        pass_filenames: false
+        entry: black kedro-telemetry/kedro_telemetry kedro-telemetry/tests
 
       - id: secret_scan
         name: "Secret scan"

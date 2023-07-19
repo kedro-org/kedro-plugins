@@ -91,21 +91,7 @@ jobs:
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
       - name: Run linter
-        run: |
-          pre-commit run trailing-whitespace --all-files
-          pre-commit run end-of-file-fixer --all-files
-          pre-commit run check-yaml --all-files
-          pre-commit run check-added-large-files --all-files
-          pre-commit run check-case-conflict --all-files
-          pre-commit run check-merge-conflict --all-files
-          pre-commit run debug-statements --all-files
-          pre-commit run requirements-txt-fixer --all-files
-          pre-commit run flake8 --all-files
-          pre-commit run isort --all-files --hook-stage manual
-          pre-commit run black --all-files --hook-stage manual
-          pre-commit run secret_scan --all-files --hook-stage manual
-          pre-commit run bandit --all-files --hook-stage manual
-          pre-commit run pylint-${{inputs.plugin}} --all-files --hook-stage manual
+        run: make plugin=${{ inputs.plugin }} lint
 
 
   e2e-tests:

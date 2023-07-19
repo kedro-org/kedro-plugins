@@ -88,7 +88,6 @@ jobs:
             pip freeze
       - name: Install pre-commit hooks
         run: |
-            cd ${{ inputs.plugin }}
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
       - name: Run linter

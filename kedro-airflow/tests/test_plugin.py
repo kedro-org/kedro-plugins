@@ -4,7 +4,6 @@ import pytest
 from kedro.framework.project import pipelines
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-
 from kedro_airflow.plugin import commands
 
 

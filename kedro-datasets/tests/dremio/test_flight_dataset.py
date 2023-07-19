@@ -245,7 +245,7 @@ class TestClientMiddlewareFactory:
     def test_start_call(self):
         factory = ClientMiddlewareFactory()
         factory.set_call_credential([b"credential1", b"credential2"])
-        middleware = factory.start_call()
+        middleware = factory.start_call(None)
         assert middleware.factory.call_credential == [b"credential1", b"credential2"]
 
     def test_set_call_credential(self):
@@ -279,9 +279,16 @@ class TestDremioFlightDataSet:
             df = dataset._load()
             assert df.shape[0] > 0
 
+    #:TODO
     def test_load_authenticate(self):
+        credentials = {"con": "test_username:test_password123@localhost:32010"}
+        dataset = DremioFlightDataSet(
+            sql="SELECT * FROM example", credentials=credentials
+        )
+        df = dataset._load()
+        assert df.shape[0] > 0
         with ConstantFlightServer() as server:
-            # credentials = {"con": f"username:password@localhost:{server.port}"}
+            # credentials = {"con": f"test_username:test_password123@localhost:9047"}
             credentials = {"con": f"localhost:{server.port}"}
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
@@ -289,6 +296,7 @@ class TestDremioFlightDataSet:
             df = dataset._load()
             assert df.shape[0] > 0
 
+    #:TODO
     def test_load_tls_certs(self, tmp_path):
         certs_dir = tmp_path / "certs"
         certs_dir.mkdir()

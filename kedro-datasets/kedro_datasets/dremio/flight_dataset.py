@@ -14,7 +14,11 @@ from kedro.io.core import (
 )
 from pandas import DataFrame
 from pyarrow import flight
-from pyarrow.flight import FlightServerError, FlightUnauthenticatedError
+from pyarrow.flight import (
+    FlightServerError,
+    FlightUnauthenticatedError,
+    FlightUnavailableError,
+)
 
 
 def process_con(
@@ -174,7 +178,7 @@ class ClientMiddlewareFactory(flight.ClientMiddlewareFactory):
     def __init__(self) -> None:
         self.call_credential = []
 
-    def start_call(self) -> ClientMiddleware:
+    def start_call(self, info) -> ClientMiddleware:
         """
         Called at the start of an RPC.
 
@@ -356,14 +360,17 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
     def _load_authenticated(
         self, load_args: Dict[str, Any], client: flight.FlightClient
     ) -> DataFrame:
-        auth_options = flight.FlightCallOptions(timeout=load_args["connect_timeout"])
+        auth_options = flight.FlightCallOptions(
+            timeout=load_args.get("connect_timeout")
+        )
         try:
             bearer_token = client.authenticate_basic_token(
-                self._flight_con["username"], self._flight_con["password"]
+                self._flight_con["username"], self._flight_con["password"], auth_options
             )
             headers = [bearer_token]
         except (
             FlightUnauthenticatedError,
+            FlightUnavailableError,
             FlightServerError,
             ConnectionError,
             TimeoutError,

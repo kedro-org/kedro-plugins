@@ -375,13 +375,12 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             ConnectionError,
             TimeoutError,
         ):
-            if load_args.get("tls", False):
-                raise
             handler = HttpClientAuthHandler(
                 self._flight_con["username"], self._flight_con["password"]
             )
             client.authenticate(handler, options=auth_options)
             headers = []
+
         flight_desc = flight.FlightDescriptor.for_command(load_args["sql"])
         options = flight.FlightCallOptions(
             headers=headers, timeout=load_args.get("request_timeout", 9000)

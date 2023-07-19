@@ -1,10 +1,16 @@
+import base64
 import io
 
 import pyarrow as pa
 import pytest
 from kedro.io.core import DataSetError
 from pyarrow import flight
-from pyarrow.flight import FlightServerBase, ServerAuthHandler
+from pyarrow.flight import (
+    FlightServerBase,
+    ServerAuthHandler,
+    ServerMiddleware,
+    ServerMiddlewareFactory,
+)
 
 from kedro_datasets.dremio import DremioFlightDataSet
 from kedro_datasets.dremio.flight_dataset import (
@@ -50,18 +56,88 @@ def multiple_column_table():
     )
 
 
+class HttpBasicServerAuthHandler(ServerAuthHandler):
+    """An example implementation of HTTP basic authentication."""
+
+    def __init__(self, creds):
+        super().__init__()
+        self.creds = creds
+
+    def authenticate(self, outgoing, incoming):
+        buf = incoming.read()
+        auth = flight.BasicAuth.deserialize(buf)
+        if auth.username not in self.creds:
+            raise flight.FlightUnauthenticatedError("unknown user")
+        if self.creds[auth.username] != auth.password:
+            raise flight.FlightUnauthenticatedError("wrong password")
+        outgoing.write(auth.username)
+
+    def is_valid(self, token):
+        if not token:
+            raise flight.FlightUnauthenticatedError("token not provided")
+        if token not in self.creds:
+            raise flight.FlightUnauthenticatedError("unknown user")
+        return token
+
+
+basic_auth_handler = HttpBasicServerAuthHandler(
+    creds={
+        b"username": b"password",
+    }
+)
+
+
 class NoopAuthHandler(ServerAuthHandler):
     """A no-op auth handler."""
 
-    def authenticate(self, _, __):
+    def authenticate(self, outgoing, incoming):
         """Do nothing."""
 
-    def is_valid(self, _):
+    def is_valid(self, token):
         """
         Returning an empty string.
         Returning None causes Type error.
         """
         return ""
+
+
+no_op_auth_handler = NoopAuthHandler()
+
+
+class HeaderAuthServerMiddleware(ServerMiddleware):
+    """A ServerMiddleware that transports incoming username and password."""
+
+    def __init__(self, token):
+        self.token = token
+
+    def sending_headers(self):
+        return {"authorization": "Bearer " + self.token}
+
+
+class HeaderAuthServerMiddlewareFactory(ServerMiddlewareFactory):
+    """Validates incoming username and password."""
+
+    def start_call(self, info, headers):
+        auth_header = headers.get("authorization")
+
+        values = auth_header[0].split(" ")
+        token = ""
+        error_message = "Invalid credentials"
+
+        if values[0] == "Basic":
+            decoded = base64.b64decode(values[1])
+            pair = decoded.decode("utf-8").split(":")
+            if not (pair[0] == "username" and pair[1] == "password"):
+                raise flight.FlightUnauthenticatedError(error_message)
+            token = "token1234"
+        elif values[0] == "Bearer":
+            token = values[1]
+            if not token == "token1234":
+                raise flight.FlightUnauthenticatedError(error_message)
+        else:
+            raise flight.FlightUnauthenticatedError(f"{error_message}{values}")
+
+        return HeaderAuthServerMiddleware(token)
 
 
 class ConstantFlightServer(FlightServerBase):
@@ -109,6 +185,18 @@ class ConstantFlightServer(FlightServerBase):
             -1,
             -1,
         )
+
+
+class HeaderAuthFlightServer(ConstantFlightServer):
+    """A Flight server that tests with basic token authentication."""
+
+    def do_action(self, context, action):
+        middleware = context.get_middleware("auth")
+        if middleware:
+            auth_header = "authorization"
+            values = auth_header.split(" ")
+            return [values[1].encode("utf-8")]
+        raise flight.FlightUnauthenticatedError("No token auth middleware found.")
 
 
 class GetInfoFlightServer(FlightServerBase):
@@ -279,17 +367,30 @@ class TestDremioFlightDataSet:
             df = dataset._load()
             assert df.shape[0] > 0
 
-    #:TODO
-    def test_load_authenticate(self):
-        credentials = {"con": "test_username:test_password123@localhost:32010"}
-        dataset = DremioFlightDataSet(
-            sql="SELECT * FROM example", credentials=credentials
-        )
-        df = dataset._load()
-        assert df.shape[0] > 0
+    def test_load_filepath(self, tmp_path):
         with ConstantFlightServer() as server:
-            # credentials = {"con": f"test_username:test_password123@localhost:9047"}
             credentials = {"con": f"localhost:{server.port}"}
+            filepath = tmp_path / "file.sql"
+            filepath.write_text("b'ints'")
+            dataset = DremioFlightDataSet(filepath=filepath, credentials=credentials)
+            df = dataset._load()
+            assert df.shape[0] > 0
+
+    def test_load_authenticate(self):
+        with ConstantFlightServer(auth_handler=basic_auth_handler) as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            df = dataset._load()
+            assert df.shape[0] > 0
+
+    def test_load_basic_authenticate(self):
+        with HeaderAuthFlightServer(
+            auth_handler=no_op_auth_handler,
+            middleware={"auth": HeaderAuthServerMiddlewareFactory()},
+        ) as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )
@@ -322,12 +423,13 @@ class TestDremioFlightDataSet:
 
     def test_save_not_supported(self):
         with ConstantFlightServer() as server:
-            credentials = {"con": f"username:password@localhost:{server.port}"}
+            credentials = {"con": f"localhost:{server.port}"}
             dataset = DremioFlightDataSet(
                 sql="SELECT * FROM users", credentials=credentials
             )
-            with pytest.raises(DataSetError):
-                dataset.save(data=None)
+            pattern = "'save' is not supported on DremioFlightDataSet"
+            with pytest.raises(DataSetError, match=pattern):
+                dataset.save(data="")
 
     def test_exists_not_supported(self):
         with ConstantFlightServer() as server:

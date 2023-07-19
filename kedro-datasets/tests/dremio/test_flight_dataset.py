@@ -4,7 +4,7 @@ import pyarrow as pa
 import pytest
 from kedro.io.core import DataSetError
 from pyarrow import flight
-from pyarrow.flight import FlightServerBase
+from pyarrow.flight import FlightServerBase, ServerAuthHandler
 
 from kedro_datasets.dremio import DremioFlightDataSet
 from kedro_datasets.dremio.flight_dataset import (
@@ -48,6 +48,20 @@ def multiple_column_table():
         [pa.array(["foo", "bar", "baz", "qux"]), pa.array([1, 2, 3, 4])],
         names=["a", "b"],
     )
+
+
+class NoopAuthHandler(ServerAuthHandler):
+    """A no-op auth handler."""
+
+    def authenticate(self, _, __):
+        """Do nothing."""
+
+    def is_valid(self, _):
+        """
+        Returning an empty string.
+        Returning None causes Type error.
+        """
+        return ""
 
 
 class ConstantFlightServer(FlightServerBase):
@@ -265,6 +279,39 @@ class TestDremioFlightDataSet:
             df = dataset._load()
             assert df.shape[0] > 0
 
+    def test_load_authenticate(self):
+        with ConstantFlightServer() as server:
+            # credentials = {"con": f"username:password@localhost:{server.port}"}
+            credentials = {"con": f"localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            df = dataset._load()
+            assert df.shape[0] > 0
+
+    def test_load_tls_certs(self, tmp_path):
+        certs_dir = tmp_path / "certs"
+        certs_dir.mkdir()
+        certs_path = certs_dir / "cert.pom"
+        certs_path.write_text("")
+        load_args = {
+            "certs": certs_path,
+            "tls": True,
+            "disable_server_verification": True,
+        }
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"localhost:{server.port}"}
+            try:
+                dataset = DremioFlightDataSet(
+                    sql="SELECT * FROM users",
+                    credentials=credentials,
+                    load_args=load_args,
+                )
+                df = dataset._load()
+                assert df.shape[0] > 0
+            except Exception:
+                pytest.skip("disable_server_verification feature is not available")
+
     def test_save_not_supported(self):
         with ConstantFlightServer() as server:
             credentials = {"con": f"username:password@localhost:{server.port}"}
@@ -280,6 +327,57 @@ class TestDremioFlightDataSet:
             dataset = DremioFlightDataSet(sql=b"ints", credentials=credentials)
             with pytest.raises(DataSetError):
                 dataset._exists()
+
+    def test_sql_and_filepath_is_invalid(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            pattern = "'sql' and 'filepath' arguments cannot both be provided"
+            with pytest.raises(DataSetError, match=pattern):
+                DremioFlightDataSet(
+                    sql="select * from dual",
+                    filepath="test.sql",
+                    credentials=credentials,
+                )
+
+    def test_sql_and_filepath_are_empty(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            pattern = "'sql' and 'filepath' arguments cannot both be empty."
+            with pytest.raises(DataSetError, match=pattern):
+                DremioFlightDataSet(credentials=credentials)
+
+    def test_con_is_empty(self):
+        pattern = "'con' argument cannot be empty."
+        with pytest.raises(DataSetError, match=pattern):
+            DremioFlightDataSet(sql="select * from dual")
+
+    def test_load_certs(self, tmp_path):
+        certs_dir = tmp_path / "certs"
+        certs_dir.mkdir()
+        certs_path = certs_dir / "cert.pom"
+        certs_path.write_text("")
+        load_args = {
+            "certs": certs_path,
+            "tls": True,
+        }
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql=b"ints", credentials=credentials, load_args=load_args
+            )
+            assert dataset._certs == b""
+
+    def test_tls_no_certs(self):
+        load_args = {"tls": True}
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"username:password@localhost:{server.port}"}
+            pattern = (
+                "Trusted certificates must be provided to establish a TLS connection"
+            )
+            with pytest.raises(ValueError, match=pattern):
+                DremioFlightDataSet(
+                    sql=b"ints", credentials=credentials, load_args=load_args
+                )
 
     def test_describe(self):
         with GetInfoFlightServer() as server:

@@ -317,8 +317,8 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             credentials["con"], tls=self._load_args.get("tls", False)
         )
 
-        if self._load_args.get("cert", None) and self._load_args.get("tls", False):
-            with open(self._load_args.get("cert", None), "rb") as root_certs:
+        if self._load_args.get("certs", None) and self._load_args.get("tls", False):
+            with open(self._load_args.get("certs", None), "rb") as root_certs:
                 self._certs = root_certs.read()
         elif self._load_args.get("tls", False):
             raise ValueError(
@@ -334,8 +334,6 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         autheticate = self._flight_con.get("username", None) and self._flight_con.get(
             "password", None
         )
-        print(self._flight_con.get("username", None))
-        print("____________________________________________________")
         return hostname, autheticate
 
     def _get_client(self) -> Tuple[flight.FlightClient, bool]:
@@ -343,6 +341,10 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         connection_args = {}
         if self._load_args.get("tls", False):
             connection_args["tls_root_certs"] = self._certs
+        if self._load_args.get("disable_server_verification", False):
+            connection_args["disable_server_verification"] = self._load_args.get(
+                "disable_server_verification", False
+            )
         if authenticate:
             client_auth_middleware = ClientMiddlewareFactory()
             connection_args["middleware"] = [client_auth_middleware]
@@ -375,7 +377,7 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             headers = []
         flight_desc = flight.FlightDescriptor.for_command(load_args["sql"])
         options = flight.FlightCallOptions(
-            headers=headers, timeout=load_args["request_timeout"]
+            headers=headers, timeout=load_args.get("request_timeout", 9000)
         )
         flight_info = client.get_flight_info(flight_desc, options)
         reader = client.do_get(flight_info.endpoints[0].ticket, options)

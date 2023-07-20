@@ -509,7 +509,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
 
     # For mssql only

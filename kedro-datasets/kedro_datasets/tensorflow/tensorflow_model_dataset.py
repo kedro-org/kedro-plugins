@@ -17,6 +17,7 @@ from kedro.io.core import (
 )
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
+UNUSED_VAR = 1
 
 
 class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):

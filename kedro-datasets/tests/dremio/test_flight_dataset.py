@@ -5,11 +5,12 @@ import pyarrow as pa
 import pytest
 from kedro.io.core import DataSetError
 from pyarrow import flight
-from pyarrow.flight import (
-    FlightServerBase,
-    ServerAuthHandler,
-    ServerMiddleware,
-    ServerMiddlewareFactory,
+from pyarrow.flight import FlightServerBase, ServerMiddlewareFactory
+from pyarrow.tests.test_flight import (
+    GetInfoFlightServer,
+    HeaderAuthServerMiddleware,
+    HttpBasicServerAuthHandler,
+    NoopAuthHandler,
 )
 
 from kedro_datasets.dremio import DremioFlightDataSet
@@ -56,30 +57,6 @@ def multiple_column_table():
     )
 
 
-class HttpBasicServerAuthHandler(ServerAuthHandler):
-    """An example implementation of HTTP basic authentication."""
-
-    def __init__(self, creds):
-        super().__init__()
-        self.creds = creds
-
-    def authenticate(self, outgoing, incoming):
-        buf = incoming.read()
-        auth = flight.BasicAuth.deserialize(buf)
-        if auth.username not in self.creds:
-            raise flight.FlightUnauthenticatedError("unknown user")
-        if self.creds[auth.username] != auth.password:
-            raise flight.FlightUnauthenticatedError("wrong password")
-        outgoing.write(auth.username)
-
-    def is_valid(self, token):
-        if not token:
-            raise flight.FlightUnauthenticatedError("token not provided")
-        if token not in self.creds:
-            raise flight.FlightUnauthenticatedError("unknown user")
-        return token
-
-
 basic_auth_handler = HttpBasicServerAuthHandler(
     creds={
         b"username": b"password",
@@ -87,31 +64,7 @@ basic_auth_handler = HttpBasicServerAuthHandler(
 )
 
 
-class NoopAuthHandler(ServerAuthHandler):
-    """A no-op auth handler."""
-
-    def authenticate(self, outgoing, incoming):
-        """Do nothing."""
-
-    def is_valid(self, token):
-        """
-        Returning an empty string.
-        Returning None causes Type error.
-        """
-        return ""
-
-
 no_op_auth_handler = NoopAuthHandler()
-
-
-class HeaderAuthServerMiddleware(ServerMiddleware):
-    """A ServerMiddleware that transports incoming username and password."""
-
-    def __init__(self, token):
-        self.token = token
-
-    def sending_headers(self):
-        return {"authorization": "Bearer " + self.token}
 
 
 class HeaderAuthServerMiddlewareFactory(ServerMiddlewareFactory):
@@ -197,29 +150,6 @@ class HeaderAuthFlightServer(ConstantFlightServer):
             values = auth_header.split(" ")
             return [values[1].encode("utf-8")]
         raise flight.FlightUnauthenticatedError("No token auth middleware found.")
-
-
-class GetInfoFlightServer(FlightServerBase):
-    """A Flight server that tests FlightDataset._describe."""
-
-    def get_flight_info(self, _, descriptor):
-        return flight.FlightInfo(
-            pa.schema([("a", pa.int32())]),
-            descriptor,
-            [
-                flight.FlightEndpoint(b"", ["grpc://test"]),
-                flight.FlightEndpoint(
-                    b"",
-                    [flight.Location.for_grpc_tcp("localhost", 5005)],
-                ),
-            ],
-            -1,
-            -1,
-        )
-
-    def get_schema(self, context, descriptor):
-        info = self.get_flight_info(context, descriptor)
-        return flight.SchemaResult(info.schema)
 
 
 class TestProcessCon:

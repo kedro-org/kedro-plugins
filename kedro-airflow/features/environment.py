@@ -50,8 +50,7 @@ def before_scenario(context, scenario):
 
     # pip install us
     call([context.python, "-m", "pip", "install", "-U", "pip", "pip-tools"])
-    call([context.pip, "install", "-r", "test_requirements.txt"])
-    call([context.pip, "install", "."])
+    call([context.pip, "install", ".[test]"])
 
     context.temp_dir = Path(tempfile.mkdtemp())
 

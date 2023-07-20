@@ -14,7 +14,6 @@ repos:
       - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
       - id: check-merge-conflict # Check for files that contain merge conflict strings.
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-      - id: requirements-txt-fixer # Sorts entries in requirements.txt
       - id: flake8
         files: ^(kedro-datasets/kedro_datasets/|kedro-airflow/kedro_airflow/|kedro-docker/kedro_docker/|kedro-telemetry/kedro_telemetry/)
         args:

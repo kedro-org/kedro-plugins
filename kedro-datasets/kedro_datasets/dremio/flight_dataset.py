@@ -12,7 +12,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from pandas import DataFrame
+from pandas import DataFrame, concat
 from pyarrow import flight
 from pyarrow.flight import (
     FlightServerError,
@@ -197,7 +197,9 @@ class ClientMiddlewareFactory(flight.ClientMiddlewareFactory):
         self.call_credential = call_credential
 
 
-class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
+class DremioFlightDataSet(
+    AbstractDataSet[None, DataFrame or flight.FlightStreamReader]
+):
     """``DremioFlightDataSet`` loads data from a py arrow flight.
     Since it uses ``pyarrow.flight`` internally,behind the scenes,
     when instantiating ``DremioFlightDataSet`` one needs to pass a compatible connection
@@ -299,6 +301,7 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
             "certs": None,
             "tls": False,
             "connect_timeout": None,
+            "return_pandas": True,
         }
 
         self._load_args = (
@@ -357,9 +360,23 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         )
         return client, authenticate
 
+    @staticmethod
+    def _get_chunks(reader: flight.FlightStreamReader) -> DataFrame:
+        dataframe = DataFrame()
+        while True:
+            try:
+                flight_batch = reader.read_chunk()
+                record_batch = flight_batch.data
+                data_to_pandas = record_batch.to_pandas()
+                dataframe = concat([dataframe, data_to_pandas])
+            except StopIteration:
+                break
+
+        return dataframe
+
     def _load_authenticated(
         self, load_args: Dict[str, Any], client: flight.FlightClient
-    ) -> DataFrame:
+    ) -> DataFrame or flight.FlightStreamReader:
         auth_options = flight.FlightCallOptions(
             timeout=load_args.get("connect_timeout")
         )
@@ -387,9 +404,13 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         )
         flight_info = client.get_flight_info(flight_desc, options)
         reader = client.do_get(flight_info.endpoints[0].ticket, options)
-        return reader.read_pandas()
+        return (
+            self._get_chunks(reader)
+            if self._load_args.get("return_pandas", True)
+            else reader
+        )
 
-    def _load(self) -> DataFrame:
+    def _load(self) -> DataFrame or flight.FlightStreamReader:
         load_args = copy.deepcopy(self._load_args)
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
@@ -404,7 +425,11 @@ class DremioFlightDataSet(AbstractDataSet[DataFrame, DataFrame]):
         options = flight.FlightCallOptions()
         flight_info = client.get_flight_info(flight_desc, options)
         reader = client.do_get(flight_info.endpoints[0].ticket, options)
-        return reader.read_pandas()
+        return (
+            self._get_chunks(reader)
+            if self._load_args.get("return_pandas", True)
+            else reader
+        )
 
     def _save(self, _: None) -> NoReturn:
         raise DataSetError("'save' is not supported on DremioFlightDataSet")

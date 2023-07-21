@@ -428,3 +428,16 @@ class TestDremioFlightDataSet:
             info = dataset._describe()
             assert info.total_records == -1
             assert info.total_bytes == -1
+
+    # @pytest.mark.skip("Disabled for uni testing")
+    # Nead to setup dremio docker by adding user below, creating samples 
+    # namespace and adding dataset
+    # Sample code https://github.com/jaysnm/dremio-arrow/blob/main/scripts/bootstrap.py
+    def test_load_dremio_docker(self):
+        credentials = {"con": "username:pass123456@localhost:32010"}
+        dataset = DremioFlightDataSet(
+            sql='SELECT * FROM Samples."samples.dremio.com"."Dremio University"."employees.parquet"',
+            credentials=credentials,
+        )
+        df = dataset._load()
+        assert df.shape[0] > 0

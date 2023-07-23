@@ -1,5 +1,4 @@
 """``AbstractDataSet`` implementations that produce pandas DataFrames."""
-
 from typing import Any
 
 import lazy_loader as lazy
@@ -18,7 +17,6 @@ ParquetDataSet: Any
 SQLQueryDataSet: Any
 SQLTableDataSet: Any
 XMLDataSet: Any
-
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

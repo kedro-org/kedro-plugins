@@ -12,12 +12,13 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
 )
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 
 class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
@@ -316,5 +317,5 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
         raise DataSetError("'save' is not supported on GBQQueryDataSet")

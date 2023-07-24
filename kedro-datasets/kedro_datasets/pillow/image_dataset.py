@@ -6,14 +6,11 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from PIL import Image
+
+from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
+from .._io import DatasetError as DataSetError
 
 
 class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):

@@ -8,6 +8,10 @@ from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
+
+# TODO: Replace these imports by the appropriate ones from kedro_datasets._io
+# to avoid deprecation warnings for users,
+# see https://github.com/kedro-org/kedro-plugins/pull/255
 from kedro.io.core import (
     AbstractVersionedDataSet,
     DataSetError,

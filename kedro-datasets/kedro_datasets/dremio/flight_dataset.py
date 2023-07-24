@@ -267,12 +267,9 @@ class DremioFlightDataSet(
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
-            load_args: Provided to underlying pandas ``read_sql_query``
-                function along with the connection string.
-                To find all supported arguments, see here:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
-                To find all supported connection string formats, see here:
-                https://docs.sqlalchemy.org/core/engines.html#database-urls
+            load_args: Provided to underlying pyarrow.FlightClinet client constructor/init
+                method. For more on all available arguments for FlightClient:
+                https://arrow.apache.org/docs/python/generated/pyarrow.flight.FlightClient.html
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested keys
@@ -285,6 +282,7 @@ class DremioFlightDataSet(
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
         """
+        self._client = None
         if sql and filepath:
             raise DataSetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
@@ -374,6 +372,9 @@ class DremioFlightDataSet(
         client = flight.FlightClient(
             f"{self._flight_con['protocol']}://{hostname}", **connection_args
         )
+
+        self._client = client
+
         return client, authenticate
 
     @staticmethod
@@ -413,6 +414,9 @@ class DremioFlightDataSet(
             )
             client.authenticate(handler, options=auth_options)
             headers = []
+
+        headers.append((b"routing_tag", b"test-routing-tag"))
+        headers.append((b"routing_queue", b"Low Cost User Queries"))
 
         flight_desc = flight.FlightDescriptor.for_command(load_args["sql"])
         options = flight.FlightCallOptions(
@@ -459,3 +463,10 @@ class DremioFlightDataSet(
         return client.get_flight_info(
             flight.FlightDescriptor.for_command(self._load_args["sql"])
         )
+
+    def close(self) -> None:
+        """
+        Closes the client and disconnect.
+        """
+        if self._client:
+            self._client.close()

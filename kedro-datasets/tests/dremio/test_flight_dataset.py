@@ -442,6 +442,16 @@ class TestDremioFlightDataSet:
             assert info.total_records == -1
             assert info.total_bytes == -1
 
+    def test_client_close(self):
+        with ConstantFlightServer() as server:
+            credentials = {"con": f"localhost:{server.port}"}
+            dataset = DremioFlightDataSet(
+                sql="SELECT * FROM users", credentials=credentials
+            )
+            dataset.close()
+            dataset._load()
+            dataset.close()
+
     @pytest.mark.skip("Disabled for uni testing")
     # Nead to setup dremio docker by adding user below, creating samples
     # namespace and adding dataset

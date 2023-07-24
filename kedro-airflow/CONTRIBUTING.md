@@ -77,7 +77,7 @@ We use a branching model that helps us keep track of branches in a logical, cons
 To run E2E tests you need to install the test requirements which includes `behave`, do this using the following command:
 
 ```bash
-pip install -r test_requirements.txt
+pip install ".[test]"
 ```
 
 ### Running checks locally

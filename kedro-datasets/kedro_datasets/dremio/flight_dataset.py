@@ -21,25 +21,29 @@ from pyarrow.flight import (
 )
 
 
-def process_con(
-    uri: str,
-    tls: bool = False,
-    username: str or None = None,
-    password: str or None = None,
-) -> Dict[str, str or None]:
+def process_credentials(credentials: Dict[str, str or None]) -> Dict[str, str or None]:
     """
-    Extracts hostname, protocol, user and passworrd from URI
+    Extracts thostname, protocol, username, password, tls and disable_server_verification
+    from credentials dictionary
 
     Args:
-        uri: Connection string in the form
-            grpc+tls://username:password@hostname:port
-        tls: Whether TLS is enabled
-        username: Username if not supplied as part of the URI
-        password: Password if not supplied as part of the URI
+        credentials: Dictionary of kedro dataset credentials
 
     Returns:
-        Dictionary containing the hostname, protocol ,port, username and password
+        Dictionary containing the hostname, protocol, port, username, password,
+        tls and disable_server_verification
     """
+    if credentials is None:
+        raise ValueError("Credentials dict can not be empty")
+
+    uri, username, password, tls, disable_server_verification = (
+        credentials.get("con"),
+        credentials.get("username"),
+        credentials.get("password"),
+        credentials.get("tls"),
+        credentials.get("disable_server_verification"),
+    )
+
     if not uri:
         raise ValueError("Dremio URI can not be empty")
 
@@ -67,6 +71,8 @@ def process_con(
         "port": port,
         "username": username,
         "password": password,
+        "disable_server_verification": disable_server_verification,
+        "tls": tls,
     }
 
 
@@ -298,8 +304,6 @@ class DremioFlightDataSet(
             )
 
         default_load_args: Dict[str, Any] = {
-            "certs": None,
-            "tls": False,
             "connect_timeout": None,
             "return_pandas": True,
         }
@@ -320,14 +324,26 @@ class DremioFlightDataSet(
 
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
 
-        self._flight_con = process_con(
-            credentials["con"], tls=self._load_args.get("tls", False)
+        default_credentials: Dict[str, Any] = {
+            "certs": None,
+            "tls": False,
+            "disable_server_verification": False,
+            "username": None,
+            "password": None,
+        }
+
+        _credentials = (
+            {**default_credentials, **copy.deepcopy(credentials)}
+            if credentials is not None
+            else default_credentials
         )
 
-        if self._load_args.get("certs", None) and self._load_args.get("tls", False):
-            with open(self._load_args.get("certs", None), "rb") as root_certs:
+        self._flight_con = process_credentials(credentials)
+
+        if _credentials.get("certs", None) and _credentials.get("tls", False):
+            with open(_credentials.get("certs", None), "rb") as root_certs:
                 self._certs = root_certs.read()
-        elif self._load_args.get("tls", False):
+        elif _credentials.get("tls", False):
             raise ValueError(
                 "Trusted certificates must be provided to establish a TLS connection"
             )
@@ -346,10 +362,10 @@ class DremioFlightDataSet(
     def _get_client(self) -> Tuple[flight.FlightClient, bool]:
         hostname, authenticate = self._get_hostname()
         connection_args = {}
-        if self._load_args.get("tls", False):
+        if self._flight_con.get("tls", False):
             connection_args["tls_root_certs"] = self._certs
-        if self._load_args.get("disable_server_verification", False):
-            connection_args["disable_server_verification"] = self._load_args.get(
+        if self._flight_con.get("disable_server_verification", False):
+            connection_args["disable_server_verification"] = self._flight_con.get(
                 "disable_server_verification", False
             )
         if authenticate:

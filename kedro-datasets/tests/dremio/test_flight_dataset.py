@@ -18,7 +18,7 @@ from kedro_datasets.dremio.flight_dataset import (
     ClientMiddleware,
     ClientMiddlewareFactory,
     HttpClientAuthHandler,
-    process_con,
+    process_credentials,
 )
 
 
@@ -70,7 +70,7 @@ no_op_auth_handler = NoopAuthHandler()
 class HeaderAuthServerMiddlewareFactory(ServerMiddlewareFactory):
     """Validates incoming username and password."""
 
-    def start_call(self, info, headers):
+    def start_call(self, _, headers):
         auth_header = headers.get("authorization")
 
         values = auth_header[0].split(" ")
@@ -143,7 +143,7 @@ class ConstantFlightServer(FlightServerBase):
 class HeaderAuthFlightServer(ConstantFlightServer):
     """A Flight server that tests with basic token authentication."""
 
-    def do_action(self, context, action):
+    def do_action(self, context, _):
         middleware = context.get_middleware("auth")
         if middleware:
             auth_header = "authorization"
@@ -153,66 +153,82 @@ class HeaderAuthFlightServer(ConstantFlightServer):
 
 
 class TestProcessCon:
-    def test_process_con_with_username_and_password(self, default_dremio_host):
-        uri = f"username:password@{default_dremio_host}:port"
-        result = process_con(uri)
+    def test_credentials_con_with_username_and_password(self, default_dremio_host):
+        credentials = {"con": f"username:password@{default_dremio_host}:port"}
+        result = process_credentials(credentials)
         assert result["protocol"] == "grpc+tcp"
         assert result["hostname"] == default_dremio_host
         assert result["username"] == "username"
         assert result["password"] == "password"
 
-    def test_process_con_with_username_and_password_and_protocal(
+    def test_credentials_con_with_username_and_password_and_protocal(
         self, default_dremio_host
     ):
-        uri = f"grpc://username:password@{default_dremio_host}:port"
-        result = process_con(uri)
+        credentials = {"con": f"grpc://username:password@{default_dremio_host}:port"}
+        result = process_credentials(credentials)
         assert result["protocol"] == "grpc"
         assert result["hostname"] == default_dremio_host
         assert result["username"] == "username"
         assert result["password"] == "password"
 
-    def test_process_con_with_username_and_password_and_tls(self, default_dremio_host):
-        uri = f"username:password@{default_dremio_host}:port"
-        result = process_con(uri, tls=True)
+    def test_credentials_con_with_username_and_password_and_tls(
+        self, default_dremio_host
+    ):
+        credentials = {
+            "con": f"username:password@{default_dremio_host}:port",
+            "tls": True,
+        }
+        result = process_credentials(credentials)
         assert result["protocol"] == "grpc+tls"
         assert result["hostname"] == default_dremio_host
         assert result["username"] == "username"
         assert result["password"] == "password"
 
-    def test_process_con_with_username_and_password_provided_explicitly(
+    def test_credentials_con_with_username_and_password_provided_explicitly(
         self, default_dremio_host
     ):
-        username = "username"
-        password = "password"
-        result = process_con(default_dremio_host, username=username, password=password)
+        credentials = {
+            "con": default_dremio_host,
+            "username": "username",
+            "password": "password",
+        }
+
+        result = process_credentials(credentials)
         assert result["protocol"] == "grpc+tcp"
         assert result["hostname"] == default_dremio_host
-        assert result["username"] == username
-        assert result["password"] == password
+        assert result["username"] == credentials["username"]
+        assert result["password"] == credentials["password"]
 
-    def test_process_con_with_credentials_provided_explicitly_duplicate(
+    def test_credentials_con_with_credentials_provided_explicitly_duplicate(
         self, default_dremio_host
     ):
-        uri = f"username:password@{default_dremio_host}:port"
-        username = "username"
-        password = "password"
+        credentials = {
+            "con": f"username:password@{default_dremio_host}:port",
+            "username": "username",
+            "password": "password",
+        }
         # pylint: disable=C0301
         pattern = "Dremio URI must not include username and password if they were supplied explicitly"
         with pytest.raises(ValueError, match=pattern):
-            process_con(uri, username=username, password=password)
+            process_credentials(credentials)
 
-    def test_process_con_without_username_and_password(self, default_dremio_host):
-        result = process_con(default_dremio_host)
+    def test_credentials_con_without_username_and_password(self, default_dremio_host):
+        result = process_credentials({"con": default_dremio_host})
         assert result["hostname"] == default_dremio_host
         assert result["username"] is None
         assert result["password"] is None
 
-    def test_process_no_uri(self):
+    def test_credentials_no_dictionary(self):
+        pattern = "Credentials dict can not be empty"
+        with pytest.raises(ValueError, match=pattern):
+            process_credentials(None)
+
+    def test_credentials_no_uri(self):
         pattern = "Dremio URI can not be empty"
         with pytest.raises(ValueError, match=pattern):
-            process_con(None)
+            process_credentials({"con": None})
         with pytest.raises(ValueError, match=pattern):
-            process_con("")
+            process_credentials({"con": ""})
 
 
 class TestHttpClientAuthHandler:
@@ -333,18 +349,17 @@ class TestDremioFlightDataSet:
         certs_dir.mkdir()
         certs_path = certs_dir / "cert.pom"
         certs_path.write_text("")
-        load_args = {
-            "certs": certs_path,
-            "tls": True,
-            "disable_server_verification": True,
-        }
         with ConstantFlightServer() as server:
-            credentials = {"con": f"localhost:{server.port}"}
+            credentials = {
+                "con": f"localhost:{server.port}",
+                "tls": True,
+                "certs": certs_path,
+                "disable_server_verification": True,
+            }
             try:
                 dataset = DremioFlightDataSet(
                     sql="SELECT * FROM users",
                     credentials=credentials,
-                    load_args=load_args,
                 )
                 df = dataset._load()
                 assert df.shape[0] > 0
@@ -396,28 +411,26 @@ class TestDremioFlightDataSet:
         certs_dir.mkdir()
         certs_path = certs_dir / "cert.pom"
         certs_path.write_text("")
-        load_args = {
-            "certs": certs_path,
-            "tls": True,
-        }
         with ConstantFlightServer() as server:
-            credentials = {"con": f"username:password@localhost:{server.port}"}
-            dataset = DremioFlightDataSet(
-                sql=b"ints", credentials=credentials, load_args=load_args
-            )
+            credentials = {
+                "con": f"username:password@localhost:{server.port}",
+                "certs": certs_path,
+                "tls": True,
+            }
+            dataset = DremioFlightDataSet(sql=b"ints", credentials=credentials)
             assert dataset._certs == b""
 
     def test_tls_no_certs(self):
-        load_args = {"tls": True}
         with ConstantFlightServer() as server:
-            credentials = {"con": f"username:password@localhost:{server.port}"}
+            credentials = {
+                "con": f"username:password@localhost:{server.port}",
+                "tls": True,
+            }
             pattern = (
                 "Trusted certificates must be provided to establish a TLS connection"
             )
             with pytest.raises(ValueError, match=pattern):
-                DremioFlightDataSet(
-                    sql=b"ints", credentials=credentials, load_args=load_args
-                )
+                DremioFlightDataSet(sql=b"ints", credentials=credentials)
 
     def test_describe(self):
         with GetInfoFlightServer() as server:
@@ -429,8 +442,8 @@ class TestDremioFlightDataSet:
             assert info.total_records == -1
             assert info.total_bytes == -1
 
-    # @pytest.mark.skip("Disabled for uni testing")
-    # Nead to setup dremio docker by adding user below, creating samples 
+    @pytest.mark.skip("Disabled for uni testing")
+    # Nead to setup dremio docker by adding user below, creating samples
     # namespace and adding dataset
     # Sample code https://github.com/jaysnm/dremio-arrow/blob/main/scripts/bootstrap.py
     def test_load_dremio_docker(self):

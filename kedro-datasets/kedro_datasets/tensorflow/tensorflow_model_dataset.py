@@ -8,10 +8,17 @@ from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+# TODO: Replace these imports by the appropriate ones from kedro_datasets._io
+# to avoid deprecation warnings for users,
+# see https://github.com/kedro-org/kedro-plugins/pull/255
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 

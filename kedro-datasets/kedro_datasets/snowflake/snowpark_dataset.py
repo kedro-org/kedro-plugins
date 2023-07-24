@@ -5,7 +5,9 @@ from copy import deepcopy
 from typing import Any, Dict
 
 import snowflake.snowpark as sp
-from kedro.io.core import AbstractDataSet, DataSetError
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 logger = logging.getLogger(__name__)
 

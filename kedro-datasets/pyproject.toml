@@ -244,7 +244,8 @@ unsafe-load-any-extension = false
 disable = [
   "ungrouped-imports",
   "duplicate-code",
-  "too-many-instance-attributes"
+  "too-many-instance-attributes",
+  "too-few-public-methods",  # https://github.com/pylint-dev/pylint/issues/8865
 ]
 enable = ["useless-suppression"]
 

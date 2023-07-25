@@ -154,9 +154,8 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
-    # using Any because of Sphinx but it should be
-    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+
+    engines: Dict[str, Engine] = {}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -220,7 +219,6 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         self._save_args["name"] = table_name
 
         self._connection_str = credentials["con"]
-        self.create_connection(self._connection_str)
 
         self.metadata = metadata
 

@@ -270,7 +270,7 @@ min-public-methods = 1
 fail_under = 100
 show_missing = true
 omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
 addopts = """

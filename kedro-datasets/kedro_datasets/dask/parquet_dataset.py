@@ -7,7 +7,9 @@ from typing import Any, Dict
 import dask.dataframe as dd
 import fsspec
 import triad
-from kedro.io.core import AbstractDataSet, get_protocol_and_path
+from kedro.io.core import get_protocol_and_path
+
+from .._io import AbstractDataset as AbstractDataSet
 
 
 class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):

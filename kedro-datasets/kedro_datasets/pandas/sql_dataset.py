@@ -8,14 +8,12 @@ from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 
@@ -511,7 +509,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
         raise DataSetError("'save' is not supported on SQLQueryDataSet")
 
     # For mssql only

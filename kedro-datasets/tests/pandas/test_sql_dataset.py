@@ -94,7 +94,9 @@ class TestSQLTableDataSet:
             side_effect=ImportError("No module named 'mysqldb'"),
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+            SQLTableDataSet(
+                table_name=TABLE_NAME, credentials={"con": CONNECTION}
+            ).exists()
 
     def test_unknown_sql(self):
         """Check the error when unknown sql dialect is provided;
@@ -103,7 +105,9 @@ class TestSQLTableDataSet:
         """
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR})
+            SQLTableDataSet(
+                table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR}
+            ).exists()
 
     def test_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -114,7 +118,9 @@ class TestSQLTableDataSet:
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+            SQLTableDataSet(
+                table_name=TABLE_NAME, credentials={"con": CONNECTION}
+            ).exists()
 
     def test_str_representation_table(self, table_data_set):
         """Test the data set instance string representation"""
@@ -202,6 +208,7 @@ class TestSQLTableDataSetSingleConnection:
         kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
 
         first = SQLTableDataSet(**kwargs)
+        assert not first.exists()  # Do something to create the `Engine`
         unique_connection = first.engines[CONNECTION]
         datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
 
@@ -223,12 +230,18 @@ class TestSQLTableDataSetSingleConnection:
         (but different tables, for example) only create a connection once.
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        mock_inspector = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.inspect"
+        ).return_value
+        mock_inspector.has_table.return_value = False
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         second = SQLTableDataSet(
             table_name="other_table", credentials={"con": CONNECTION}
         )
+        assert not second.exists()  # Do something to fetch the `Engine`
         assert len(second.engines) == 1
         assert len(first.engines) == 1
 
@@ -239,11 +252,17 @@ class TestSQLTableDataSetSingleConnection:
         only create one connection per db.
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        mock_inspector = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.inspect"
+        ).return_value
+        mock_inspector.has_table.return_value = False
         first = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         second_con = f"other_{CONNECTION}"
         second = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": second_con})
+        assert not second.exists()  # Do something to create the `Engine`
         assert len(second.engines) == 2
         assert len(first.engines) == 2
 

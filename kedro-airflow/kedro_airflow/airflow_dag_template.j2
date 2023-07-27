@@ -1,6 +1,6 @@
+from __future__ import annotations
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Union
 
 from airflow import DAG
 from airflow.models import BaseOperator
@@ -17,7 +17,7 @@ class KedroOperator(BaseOperator):
         package_name: str,
         pipeline_name: str,
         node_name: str,
-        project_path: Union[str, Path],
+        project_path: str | Path,
         env: str,
         *args, **kwargs
     ) -> None:

@@ -19,7 +19,15 @@ from kedro_airflow.plugin import commands
 )
 def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metadata):
     """Check the generation and validity of a simple Airflow DAG."""
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = (
+        Path.cwd()
+        / "airflow_dags"
+        / (
+            f"{dag_name}_dag.py"
+            if pipeline_name == "__default__"
+            else f"{dag_name}_{pipeline_name}_dag.py"
+        )
+    )
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -43,7 +51,6 @@ def test_airflow_config_params(
 ):  # pylint: disable=too-many-statements
     """Check if config variables are picked up"""
     dag_name = "hello_world"
-    pipeline_name = "__default__"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -52,7 +59,7 @@ def test_airflow_config_params(
     # default
     default_content = "hello"
     command = ["airflow", "create", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -63,7 +70,7 @@ def test_airflow_config_params(
     # "--params"
     expected_content = "testme"
     command = ["airflow", "create", "--params", "owner=testme", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -76,7 +83,7 @@ def test_airflow_config_params(
     file_name = Path.cwd() / "conf" / "base" / "airflow.yml"
     _create_kedro_airflow_yml(file_name, {"default": {"owner": expected_content}})
     command = ["airflow", "create", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -90,7 +97,7 @@ def test_airflow_config_params(
     file_name = Path.cwd() / "conf" / "base" / "airflow" / "default.yml"
     _create_kedro_airflow_yml(file_name, {"default": {"owner": expected_content}})
     command = ["airflow", "create", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -103,7 +110,7 @@ def test_airflow_config_params(
     file_name = Path.cwd() / "conf" / "base" / "random.yml"
     _create_kedro_airflow_yml(file_name, {"default": {"owner": expected_content}})
     command = ["airflow", "create", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -115,7 +122,7 @@ def test_airflow_config_params(
     file_name = Path.cwd() / "conf" / "base" / "scheduler.yml"
     _create_kedro_airflow_yml(file_name, {"default": {"owner": expected_content}})
     command = ["airflow", "create", "-j", template_name]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
     assert result.exit_code == 0, (result.exit_code, result.stdout)
     assert dag_file.exists()
@@ -128,7 +135,7 @@ def test_airflow_config_params(
     file_name = Path.cwd() / "conf" / "local" / "airflow.yml"
     _create_kedro_airflow_yml(file_name, {"default": {"owner": expected_content}})
     command = ["airflow", "create", "-j", template_name, "-e", "local"]
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -159,7 +166,6 @@ def _create_kedro_airflow_jinja_template(path: Path, name: str, content: str):
 def test_custom_template_exists(cli_runner, metadata):
     """Test execution with different dir and filename for Jinja2 Template"""
     dag_name = "hello_world"
-    pipeline_name = "__default__"
     template_name = "custom_template.j2"
     command = ["airflow", "create", "-j", template_name]
     content = "print('my custom dag')"
@@ -168,7 +174,7 @@ def test_custom_template_exists(cli_runner, metadata):
 
     _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
 
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -195,12 +201,11 @@ def _kedro_create_env(project_root: Path):
 def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     """Test the `env` parameter"""
     dag_name = "hello_world"
-    pipeline_name = "__default__"
     command = ["airflow", "create", "--env", "remote"]
 
     _kedro_create_env(Path.cwd())
 
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_{pipeline_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)

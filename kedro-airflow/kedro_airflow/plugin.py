@@ -113,7 +113,11 @@ def create(
     template = jinja_env.get_template(jinja_file.name)
 
     package_name = metadata.package_name
-    dag_filename = f"{package_name}_{pipeline_name}_dag.py"
+    dag_filename = (
+        f"{package_name}_dag.py"
+        if pipeline_name == "__default__"
+        else f"{package_name}_{pipeline_name}_dag.py"
+    )
 
     target_path = Path(target_path)
     target_path = target_path / dag_filename

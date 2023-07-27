@@ -58,7 +58,9 @@ kedro airflow create --jinja-file=./custom/template.j2
 
 #### How can I pass arguments to the Airflow DAGs dynamically?
 
-`kedro-airflow` picks up configuration from `airflow.yml` files. The [parameters](https://docs.kedro.org/en/stable/configuration/parameters.html) are read by Kedro.
+`kedro-airflow` picks up configuration from `airflow.yml` in `conf/base` or `conf/local` of your Kedro project.
+Or it could be in a folder starting with `airflow`.
+The [parameters](https://docs.kedro.org/en/stable/configuration/parameters.html) are read by Kedro.
 Arguments can be specified globally, or per pipeline:
 
 ```yaml
@@ -89,6 +91,21 @@ kedro airflow create --params "schedule_interval='@weekly'"
 ```
 
 These variables are passed to the Jinja2 template.
+
+### What if I want to use a configuration pattern other than `airflow*` and `airflow**`?
+
+In order to configure the `OmegaConfigLoader`, update the `settings.py` file in your Kedro project.
+For instance, if you would like to use the name `scheduler`, then change the fle as follows:
+
+```python
+from kedro.config import OmegaConfigLoader
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}
+}
+```
+
+Follow Kedro's official documentation, to see how to add templating, custom resolvers etc. (https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader)[https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader]
 
 #### What if I want to pass different arguments?
 

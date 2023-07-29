@@ -1,8 +1,12 @@
 """``AbstractDataSet`` implementation to load/save data from/to a svmlight/
 libsvm sparse data file."""
-__all__ = ["SVMLightDataSet"]
+from typing import Any
 
-from contextlib import suppress
+import lazy_loader as lazy
 
-with suppress(ImportError):
-    from .svmlight_dataset import SVMLightDataSet
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+SVMLightDataSet: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"svmlight_dataset": ["SVMLightDataSet"]}
+)

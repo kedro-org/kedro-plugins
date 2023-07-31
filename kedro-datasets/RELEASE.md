@@ -1,4 +1,4 @@
-# Upcoming Release:
+# Release 1.5.0
 
 ## Major features and improvements
 * Implemented lazy loading of dataset subpackages and classes.

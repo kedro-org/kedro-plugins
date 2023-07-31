@@ -1,8 +1,11 @@
 """Provides I/O modules using dask dataframe."""
+from typing import Any
 
-__all__ = ["ParquetDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+ParquetDataSet: Any
 
-with suppress(ImportError):
-    from .parquet_dataset import ParquetDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"parquet_dataset": ["ParquetDataSet"]}
+)

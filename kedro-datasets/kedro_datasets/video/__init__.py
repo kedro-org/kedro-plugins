@@ -1,5 +1,11 @@
 """Dataset implementation to load/save data from/to a video file."""
+from typing import Any
 
-__all__ = ["VideoDataSet"]
+import lazy_loader as lazy
 
-from .video_dataset import VideoDataSet
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+VideoDataSet: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"video_dataset": ["VideoDataSet"]}
+)

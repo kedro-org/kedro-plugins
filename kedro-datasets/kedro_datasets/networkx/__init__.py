@@ -1,15 +1,19 @@
-"""``AbstractDataSet`` implementation to save and load NetworkX graphs in JSON
-, GraphML and GML formats using ``NetworkX``."""
+"""``AbstractDataSet`` implementation to save and load NetworkX graphs in JSON,
+GraphML and GML formats using ``NetworkX``."""
+from typing import Any
 
-__all__ = ["GMLDataSet", "GraphMLDataSet", "JSONDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+GMLDataSet: Any
+GraphMLDataSet: Any
+JSONDataSet: Any
 
-with suppress(ImportError):
-    from .gml_dataset import GMLDataSet
-
-with suppress(ImportError):
-    from .graphml_dataset import GraphMLDataSet
-
-with suppress(ImportError):
-    from .json_dataset import JSONDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "gml_dataset": ["GMLDataSet"],
+        "graphml_dataset": ["GraphMLDataSet"],
+        "json_dataset": ["JSONDataSet"],
+    },
+)

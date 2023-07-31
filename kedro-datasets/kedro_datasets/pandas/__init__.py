@@ -1,42 +1,36 @@
 """``AbstractDataSet`` implementations that produce pandas DataFrames."""
+from typing import Any
 
-__all__ = [
-    "CSVDataSet",
-    "DeltaTableDataSet",
-    "ExcelDataSet",
-    "FeatherDataSet",
-    "GBQTableDataSet",
-    "GBQQueryDataSet",
-    "HDFDataSet",
-    "JSONDataSet",
-    "ParquetDataSet",
-    "SQLQueryDataSet",
-    "SQLTableDataSet",
-    "XMLDataSet",
-    "GenericDataSet",
-]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+CSVDataSet: Any
+DeltaTableDataSet: Any
+ExcelDataSet: Any
+FeatherDataSet: Any
+GBQQueryDataSet: Any
+GBQTableDataSet: Any
+GenericDataSet: Any
+HDFDataSet: Any
+JSONDataSet: Any
+ParquetDataSet: Any
+SQLQueryDataSet: Any
+SQLTableDataSet: Any
+XMLDataSet: Any
 
-with suppress(ImportError):
-    from .csv_dataset import CSVDataSet
-with suppress(ImportError):
-    from .deltatable_dataset import DeltaTableDataSet
-with suppress(ImportError):
-    from .excel_dataset import ExcelDataSet
-with suppress(ImportError):
-    from .feather_dataset import FeatherDataSet
-with suppress(ImportError):
-    from .gbq_dataset import GBQQueryDataSet, GBQTableDataSet
-with suppress(ImportError):
-    from .hdf_dataset import HDFDataSet
-with suppress(ImportError):
-    from .json_dataset import JSONDataSet
-with suppress(ImportError):
-    from .parquet_dataset import ParquetDataSet
-with suppress(ImportError):
-    from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
-with suppress(ImportError):
-    from .xml_dataset import XMLDataSet
-with suppress(ImportError):
-    from .generic_dataset import GenericDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "csv_dataset": ["CSVDataSet"],
+        "deltatable_dataset": ["DeltaTableDataSet"],
+        "excel_dataset": ["ExcelDataSet"],
+        "feather_dataset": ["FeatherDataSet"],
+        "gbq_dataset": ["GBQQueryDataSet", "GBQTableDataSet"],
+        "generic_dataset": ["GenericDataSet"],
+        "hdf_dataset": ["HDFDataSet"],
+        "json_dataset": ["JSONDataSet"],
+        "parquet_dataset": ["ParquetDataSet"],
+        "sql_dataset": ["SQLQueryDataSet", "SQLTableDataSet"],
+        "xml_dataset": ["XMLDataSet"],
+    },
+)

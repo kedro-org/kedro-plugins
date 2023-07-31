@@ -22,6 +22,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Daniel-Falk](https://github.com/daniel-falk)
 * [afaqueahmad7117](https://github.com/afaqueahmad7117)
+* [everdark](https://github.com/everdark)
 
 # Release 1.4.2
 ## Bug fixes and other changes

@@ -11,7 +11,7 @@
 * Implemented lazy loading of dataset subpackages and classes.
     * Suppose that SQLAlchemy, a Python SQL toolkit, is installed in your Python environment. With this change, the SQLAlchemy library will not be loaded (for `pandas.SQLQueryDataSet` or `pandas.SQLTableDataSet`) if you load a different pandas dataset (e.g. `pandas.CSVDataSet`).
 * Added automatic inference of file format for `pillow.ImageDataSet` to be passed to `save()`.
-* Added `DeltaTableDataSet`.
+* Added `pandas.DeltaTableDataSet`. 
 
 ## Bug fixes and other changes
 * Improved error messages for missing dataset dependencies.

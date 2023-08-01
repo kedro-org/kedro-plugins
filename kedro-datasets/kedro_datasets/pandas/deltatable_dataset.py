@@ -25,50 +25,51 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
 
     .. code-block:: yaml
 
-        boats_filesystem:
-          type: pandas.DeltaTableDataSet
-          filepath: data/01_raw/boats
-          credentials: dev_creds
-          load_args:
-            version: 7
-          save_args:
-            mode: overwrite
+      boats_filesystem:
+        type: pandas.DeltaTableDataSet
+        filepath: data/01_raw/boats
+        credentials: dev_creds
+        load_args:
+          version: 7
+        save_args:
+          mode: overwrite
 
-        boats_databricks_unity_catalog:
-          type: pandas.DeltaTableDataSet
-          credentials: dev_creds
-          catalog_type: UNITY
-          database: simple_database
-          table: simple_table
-          save_args:
-            mode: overwrite
+      boats_databricks_unity_catalog:
+        type: pandas.DeltaTableDataSet
+        credentials: dev_creds
+        catalog_type: UNITY
+        database: simple_database
+        table: simple_table
+        save_args:
+          mode: overwrite
 
-        trucks_aws_glue_catalog:
-          type: pandas.DeltaTableDataSet
-          credentials: dev_creds
-          catalog_type: AWS
-          catalog_name: main
-          database: db_schema
-          table: db_table
-          save_args:
-            mode: overwrite
+      trucks_aws_glue_catalog:
+        type: pandas.DeltaTableDataSet
+        credentials: dev_creds
+        catalog_type: AWS
+        catalog_name: main
+        database: db_schema
+        table: db_table
+        save_args:
+          mode: overwrite
 
     Example usage for the `Python API`_:
-    ::
 
-        >>> from kedro_datasets.pandas import DeltaTableDataSet
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]})
-        >>> data_set = DeltaTableDataSet(filepath="test")
-        >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
-        >>>
-        >>> new_data = pd.DataFrame({'col1': [7, 8], 'col2': [9, 10], 'col3': [11, 12]})
-        >>> data_set.save(new_data)
-        >>> data_set.get_loaded_version()
+    .. code-block:: python
+
+      from kedro_datasets.pandas import DeltaTableDataSet
+      import pandas as pd
+
+      data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]})
+      data_set = DeltaTableDataSet(filepath="test")
+
+      data_set.save(data)
+      reloaded = data_set.load()
+      assert data.equals(reloaded)
+
+      new_data = pd.DataFrame({'col1': [7, 8], 'col2': [9, 10], 'col3': [11, 12]})
+      data_set.save(new_data)
+      data_set.get_loaded_version()
 
     """
 

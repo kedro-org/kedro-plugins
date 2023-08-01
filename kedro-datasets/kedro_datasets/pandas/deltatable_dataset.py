@@ -21,8 +21,10 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
     mode=overwrite together with partition_filters. This will remove all files within the
     matching partition and insert your data as new files.
 
-    Example usage for the `YAML API`_:
-
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    
     .. code-block:: yaml
 
         boats_filesystem:

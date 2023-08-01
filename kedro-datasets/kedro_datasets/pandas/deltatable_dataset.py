@@ -181,7 +181,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
         4. The list of partition_columns.
         5. The created_time of the table
         6. A map of table configuration. This includes fields such as delta.appendOnly,
-            which if true indicates the table is not meant to have data deleted from it.
+        which if true indicates the table is not meant to have data deleted from it.
 
         Returns: Metadata object containing the above metadata attributes.
         """

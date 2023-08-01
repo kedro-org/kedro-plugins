@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementation to load/save data from/to a YAML file."""
+from typing import Any
 
-__all__ = ["YAMLDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+YAMLDataSet: Any
 
-with suppress(ImportError):
-    from .yaml_dataset import YAMLDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"yaml_dataset": ["YAMLDataSet"]}
+)

@@ -8,10 +8,10 @@ from typing import Dict, NoReturn
 
 from kedro.io.core import DataSetError, get_filepath_str
 
-from kedro_datasets.json import JSONDataSet
+from kedro_datasets.json import json_dataset
 
 
-class MetricsDataSet(JSONDataSet):
+class MetricsDataSet(json_dataset.JSONDataSet):
     """``MetricsDataSet`` saves data to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file. The
     ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is write-only,

@@ -187,7 +187,7 @@ class TestManagedTableDataSet:
         assert unity_ds._table.full_table_location() == "`default`.`test`"
 
         with pytest.raises(TypeError):
-            ManagedTableDataSet()
+            ManagedTableDataSet()  # pylint: disable=no-value-for-parameter
 
     def test_describe(self):
         unity_ds = ManagedTableDataSet(table="test")

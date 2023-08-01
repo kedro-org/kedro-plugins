@@ -95,8 +95,8 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
         Args:
             filepath (str): Filepath to a delta lake file with the following accepted protocol:
                 ``S3``:
-                `s3://<bucket>/<path>`
-                `s3a://<bucket>/<path>`
+                    `s3://<bucket>/<path>`
+                    `s3a://<bucket>/<path>`
                 ``Azure``:
                     `az://<container>/<path>`
                     `adl://<container>/<path>`

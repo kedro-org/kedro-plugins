@@ -56,19 +56,19 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
     Example usage for the `Python API`_:
     ::
 
-        >>> from kedro_datasets.pandas import DeltaTableDataSet
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]})
-        >>> data_set = DeltaTableDataSet(filepath="test")
-        >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
-        >>>
-        >>> new_data = pd.DataFrame({'col1': [7, 8], 'col2': [9, 10], 'col3': [11, 12]})
-        >>> data_set.save(new_data)
-        >>> data_set.get_loaded_version()
+    >>> from kedro_datasets.pandas import DeltaTableDataSet
+    >>> import pandas as pd
+    >>>
+    >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]})
+    >>> data_set = DeltaTableDataSet(filepath="test")
+    >>>
+    >>> data_set.save(data)
+    >>> reloaded = data_set.load()
+    >>> assert data.equals(reloaded)
+    >>>
+    >>> new_data = pd.DataFrame({'col1': [7, 8], 'col2': [9, 10], 'col3': [11, 12]})
+    >>> data_set.save(new_data)
+    >>> data_set.get_loaded_version()
 
     """
 

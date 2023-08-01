@@ -1,4 +1,6 @@
-# Upcoming release 0.6.0
+# Upcoming Release
+
+# Release 0.6.0
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Migrate all project metadata to static `pyproject.toml`.
 * Configure DAG kwargs via `airflow.yml`.

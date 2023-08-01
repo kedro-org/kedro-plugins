@@ -5,6 +5,11 @@
 
 ## Community contributions
 
+# Release 1.5.1:
+
+## Bug fixes and other changes
+* Fixed problematic docstrings in `pandas.DeltaTableDataSet` causing Read the Docs builds on Kedro to fail.
+
 # Release 1.5.0
 
 ## Major features and improvements
@@ -41,6 +46,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Bug fixes and other changes
 * Fixed problematic docstrings of `APIDataSet`.
+
 # Release 1.3.0:
 
 ## Major features and improvements

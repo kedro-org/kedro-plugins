@@ -100,7 +100,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
             table (str, optional): the name of the table.
             load_args (Dict[str, Any], optional): Additional options for loading file(s)
             save_args (Dict[str, Any], optional): Additional saving options for saving into
-            credentials (Dict[str, Any], optional): Credentials required to get access 
+            credentials (Dict[str, Any], optional): Credentials required to get access
         Raises:
             DataSetError: Invalid configuration supplied (through DeltaTableDataSet validation)
         """
@@ -181,8 +181,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
         4. The list of partition_columns.
         5. The created_time of the table
         6. A map of table configuration. This includes fields such as delta.appendOnly,
-        which if true indicates the table is not meant to have data deleted from it.
-
+        
         Returns: Metadata object containing the above metadata attributes.
         """
         return self._delta_table.metadata()

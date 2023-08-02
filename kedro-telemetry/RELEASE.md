@@ -1,4 +1,6 @@
 # Upcoming release
+
+# Release 0.2.5
 * Migrate all project metadata to static `pyproject.toml`.
 
 # Release 0.2.4

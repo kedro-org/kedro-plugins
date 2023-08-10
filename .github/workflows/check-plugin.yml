@@ -120,6 +120,7 @@ jobs:
         run: |
             cd ${{ inputs.plugin }}
             pip install ".[docs]"
+            pip install ".[test]"
       - name: RTD build for kedro-datasets
         run: |
           make rtd

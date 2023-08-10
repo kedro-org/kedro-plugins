@@ -63,7 +63,6 @@ napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-html_static_path = ["_static"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -201,36 +200,32 @@ here = Path(__file__).parent.absolute()
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
 
-# html_extra_path used to define a path to robots.txt which is used by webcrawlers
-# to ignore or allow certain links.
-html_extra_path = [str(here / "robots.txt")]
-
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
 
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
-linkcheck_ignore = [
-    "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
-    "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
-    "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
-    "https://console.aws.amazon.com/batch/home#/jobs",
-    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
-    "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
-    "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
-    "https://eternallybored.org/misc/wget/",
-    "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
-    "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
-    # "anchor not found" but it's a valid selector for code examples
-    "https://docs.delta.io/latest/delta-update.html#language-python",
-    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
-    "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
-    "https://opensource.org/license/apache2-0-php/",
-    "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
-    "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html",
-    "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors"
-]
+# linkcheck_ignore = [
+#     "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
+#     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
+#     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
+#     "https://console.aws.amazon.com/batch/home#/jobs",
+#     "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
+#     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
+#     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
+#     "https://eternallybored.org/misc/wget/",
+#     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+#     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
+#     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
+#     # "anchor not found" but it's a valid selector for code examples
+#     "https://docs.delta.io/latest/delta-update.html#language-python",
+#     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+#     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
+#     "https://opensource.org/license/apache2-0-php/",
+#     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
+#     "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html",
+#     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors"
+# ]
 
 # retry before render a link broken (fix for "too many requests")
 linkcheck_retries = 5
@@ -517,11 +512,6 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
-    app.add_css_file("css/qb1-sphinx-rtd.css")
-    # fix a bug with table wraps in Read the Docs Sphinx theme:
-    # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
-    app.add_css_file("css/theme-overrides.css")
-
 
 # (regex, restructuredText link replacement, object) list
 replacements = []
@@ -549,10 +539,3 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99
 
 myst_heading_anchors = 5
 
-# https://github.com/kedro-org/kedro/issues/1772
-mermaid_output_format = "png"
-# https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
-# https://github.com/mermaid-js/mermaid-cli/issues/544
-mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
-# https://github.com/kedro-org/kedro/issues/2451
-mermaid_version = mermaid_init_js = ""

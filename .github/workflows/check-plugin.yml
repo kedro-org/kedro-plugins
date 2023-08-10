@@ -106,7 +106,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-            cd kedro-datasets
+            cd ${{ inputs.plugin }}
             pip install ".[docs]"
       - name: RTD build for kedro-datasets
         run: |

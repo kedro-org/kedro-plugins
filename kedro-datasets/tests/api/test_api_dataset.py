@@ -2,6 +2,7 @@
 import base64
 import json
 import socket
+from typing import Any
 
 import pytest
 import requests
@@ -23,7 +24,7 @@ TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 TEST_METHOD = "GET"
 TEST_HEADERS = {"key": "value"}
 
-TEST_SAVE_DATA = [json.dumps({"key1": "info1", "key2": "info2"})]
+TEST_SAVE_DATA = [{"key1": "info1", "key2": "info2"}]
 
 
 class TestAPIDataSet:
@@ -272,12 +273,22 @@ class TestAPIDataSet:
             api_data_set.load()
 
     @pytest.mark.parametrize("method", POSSIBLE_METHODS)
-    def test_successful_save(self, requests_mock, method):
+    @pytest.mark.parametrize(
+        "data",
+        [TEST_SAVE_DATA, json.dumps(TEST_SAVE_DATA)],
+        ids=["data_as_dict", "data_as_json_string"],
+    )
+    def test_successful_save(self, requests_mock, method, data):
         """
         When we want to save some data on a server
         Given an APIDataSet class
-        Then check we get a response
+        Then check that the response is OK and the sent data is in the correct form.
         """
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            """Callback that sends back the json."""
+            return request.json()
+
         if method in ["PUT", "POST"]:
             api_data_set = APIDataSet(
                 url=TEST_URL,
@@ -289,10 +300,12 @@ class TestAPIDataSet:
                 TEST_URL_WITH_PARAMS,
                 headers=TEST_HEADERS,
                 status_code=requests.codes.ok,
+                json=json_callback,
             )
-            response = api_data_set._save(TEST_SAVE_DATA)
-
+            response = api_data_set._save(data)
             assert isinstance(response, requests.Response)
+            assert response.json() == TEST_SAVE_DATA
+
         elif method == "GET":
             api_data_set = APIDataSet(
                 url=TEST_URL,
@@ -315,6 +328,11 @@ class TestAPIDataSet:
         Given an APIDataSet class
         Then check we get a response
         """
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            """Callback that sends back the json."""
+            return request.json()
+
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=save_methods,
@@ -324,17 +342,20 @@ class TestAPIDataSet:
             save_methods,
             TEST_URL,
             headers=TEST_HEADERS,
-            text=json.dumps(TEST_JSON_RESPONSE_DATA),
+            json=json_callback,
         )
         response_list = api_data_set._save(TEST_SAVE_DATA)
-
         assert isinstance(response_list, requests.Response)
+        # check that the data was sent in the correct format
+        assert response_list.json() == TEST_SAVE_DATA
 
         response_dict = api_data_set._save({"item1": "key1"})
         assert isinstance(response_dict, requests.Response)
+        assert response_dict.json() == {"item1": "key1"}
 
         response_json = api_data_set._save(TEST_SAVE_DATA[0])
         assert isinstance(response_json, requests.Response)
+        assert response_json.json() == TEST_SAVE_DATA[0]
 
     @pytest.mark.parametrize("save_methods", SAVE_METHODS)
     def test_save_http_error(self, requests_mock, save_methods):

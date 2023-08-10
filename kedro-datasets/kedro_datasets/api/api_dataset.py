@@ -207,9 +207,9 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
     def _execute_save_request(self, json_data: Any) -> requests.Response:
         try:
-            json_.loads(json_data)
+            self._request_args["json"] = json_.loads(json_data)
         except TypeError:
-            self._request_args["json"] = json_.dumps(json_data)
+            self._request_args["json"] = json_data
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()

@@ -98,9 +98,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
         run: |

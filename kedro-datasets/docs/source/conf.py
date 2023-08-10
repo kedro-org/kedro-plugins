@@ -21,7 +21,6 @@ from inspect import getmembers, isclass, isfunction
 from pathlib import Path
 
 from click import secho, style
-
 from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -50,7 +49,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
-    "sphinxcontrib.mermaid",
     "myst_parser",
     "notfound.extension",
 ]
@@ -93,90 +91,22 @@ exclude_patterns = [
 
 type_targets = {
     "py:class": (
-        "object",
-        "bool",
-        "int",
-        "float",
-        "str",
-        "tuple",
-        "Any",
-        "Dict",
-        "dict",
-        "list",
-        "set",
-        "typing.Dict",
-        "typing.Iterable",
-        "typing.List",
-        "typing.Tuple",
-        "typing.Type",
-        "typing.Set",
-        "kedro.config.config.ConfigLoader",
         "kedro.io.core.AbstractDataSet",
         "kedro.io.AbstractDataSet",
-        "kedro.io.core.AbstractVersionedDataSet",
-        "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
-        "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.memory_dataset.MemoryDataSet",
-        "kedro.io.partitioned_dataset.PartitionedDataSet",
-        "kedro.pipeline.pipeline.Pipeline",
-        "kedro.runner.runner.AbstractRunner",
-        "kedro.runner.parallel_runner._SharedMemoryDataSet",
-        "kedro.runner.parallel_runner._SharedMemoryDataset",
-        "kedro.framework.context.context.KedroContext",
-        "kedro.framework.startup.ProjectMetadata",
-        "abc.ABC",
-        "Path",
-        "pathlib.Path",
-        "PurePosixPath",
-        "pathlib.PurePosixPath",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
-        "Exception",
-        "CONF_SOURCE",
-        "integer -- return number of occurrences of value",
-        "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
-        "kedro_datasets.pandas.json_dataset.JSONDataSet",
-        "pluggy._manager.PluginManager",
-        "PluginManager",
-        "_DI",
-        "_DO",
         "deltalake.table.Metadata",
-        # The statements below were added after subclassing UserDict in AbstractConfigLoader.
-        "None.  Remove all items from D.",
-        "a shallow copy of D",
-        "a set-like object providing a view on D's items",
-        "a set-like object providing a view on D's keys",
-        "v, remove specified key and return the corresponding value.",
-        "None.  Update D from dict/iterable E and F.",
-        "an object providing a view on D's values",
-        "(k, v), remove and return some (key, value) pair",
-        "D.get(k,d), also set D[k]=d if k not in D",
-        "None.  Update D from mapping/iterable E and F.",
         "DataCatalog"
     ),
     "py:data": (
         "typing.Any",
-        "typing.Callable",
         "typing.Union",
         "typing.Optional",
         "typing.Tuple",
     ),
     "py:exc": (
-        "ValueError",
-        "BadConfigException",
-        "MissingConfigException",
         "DataSetError",
-        "ImportError",
-        "KedroCliError",
-        "Exception",
-        "TypeError",
-        "SyntaxError",
-        "CircularDependencyError",
-        "OutputNotUniqueError",
-        "ConfirmNotUniqueError",
-        "ParserError",
         "DatasetError",
     ),
 }
@@ -202,30 +132,6 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
-
-# some of these complain that the sections don't exist (which is not true),
-# too many requests, or forbidden URL
-# linkcheck_ignore = [
-#     "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
-#     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
-#     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
-#     "https://console.aws.amazon.com/batch/home#/jobs",
-#     "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
-#     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
-#     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
-#     "https://eternallybored.org/misc/wget/",
-#     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-#     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
-#     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
-#     # "anchor not found" but it's a valid selector for code examples
-#     "https://docs.delta.io/latest/delta-update.html#language-python",
-#     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
-#     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
-#     "https://opensource.org/license/apache2-0-php/",
-#     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
-#     "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html",
-#     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors"
-# ]
 
 # retry before render a link broken (fix for "too many requests")
 linkcheck_retries = 5
@@ -538,4 +444,3 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
-

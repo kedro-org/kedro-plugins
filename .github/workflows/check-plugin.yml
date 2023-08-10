@@ -94,11 +94,15 @@ jobs:
         run: make plugin=${{ inputs.plugin }} lint
 
   RTD-build:
-    if: inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
+    if: inputs.plugin == 'kedro-datasets'
     defaults:
       run:
         shell: bash
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest]
+        python-version: [ "3.10" ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install dependencies
         run: |

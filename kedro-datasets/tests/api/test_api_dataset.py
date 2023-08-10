@@ -285,7 +285,9 @@ class TestAPIDataSet:
         Then check that the response is OK and the sent data is in the correct form.
         """
 
-        def json_callback(request: requests.Request, context: Any) -> dict:
+        def json_callback(
+            request: requests.Request, context: Any  # pylint: disable=unused-argument
+        ) -> dict:
             """Callback that sends back the json."""
             return request.json()
 
@@ -329,7 +331,9 @@ class TestAPIDataSet:
         Then check we get a response
         """
 
-        def json_callback(request: requests.Request, context: Any) -> dict:
+        def json_callback(
+            request: requests.Request, context: Any  # pylint: disable=unused-argument
+        ) -> dict:
             """Callback that sends back the json."""
             return request.json()
 

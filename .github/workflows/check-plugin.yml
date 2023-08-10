@@ -61,6 +61,10 @@ jobs:
         if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version != '3.10'
         run: |
           make test-no-spark
+      - name: RTD build for kedro-datasets
+        if: inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
+        run: |
+          make rtd
 
   lint:
     defaults:

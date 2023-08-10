@@ -61,10 +61,6 @@ jobs:
         if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version != '3.10'
         run: |
           make test-no-spark
-      - name: RTD build for kedro-datasets
-        if: inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
-        run: |
-          make rtd
 
   lint:
     defaults:
@@ -96,6 +92,23 @@ jobs:
             pre-commit install --hook-type pre-push
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
+
+  RTD-build:
+    if: inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    steps:
+      - name: Install dependencies
+        run: |
+            cd kedro-datasets
+            pip install ".[docs]"
+      - name: RTD build for kedro-datasets
+        run: |
+          make rtd
 
   e2e-tests:
     if: inputs.plugin != 'kedro-datasets'

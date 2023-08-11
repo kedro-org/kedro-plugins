@@ -62,15 +62,12 @@ jobs:
       - id: set-matrix
         run: |
           if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
-            echo '["3.7", "3.8", "3.9", "3.10", "3.11"]' > python_versions.json
+            MATRIX='["3.7", "3.8", "3.9", "3.10", "3.11"]'
           else
-            echo '["3.7", "3.8", "3.9", "3.10"]' > python_versions.json
+            MATRIX='["3.7", "3.8", "3.9", "3.10"]'
           fi
-          echo "PYTHON_VERSIONS=$(cat python_versions.json)" >> $GITHUB_ENV
-
-      - name: Output matrix for next job
-        id: output-matrix
-        run: echo "::set-output name=matrix::$(cat python_versions.json)"
+          echo "MATRIX=${MATRIX}" >> $GITHUB_ENV
+          echo "::set-output name=matrix::${MATRIX}"
 
   lint:
     defaults:

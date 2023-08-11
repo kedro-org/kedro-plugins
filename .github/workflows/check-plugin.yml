@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -53,14 +53,19 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
-      - name: Run unit tests for Windows / kedro-datasets / no spark sequential
-        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
+
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
         run: |
-          make test-no-spark-sequential
-      - name: Run unit tests for Windows / kedro-datasets / no spark parallel
-        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version != '3.10'
-        run: |
-          make test-no-spark
+          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+            echo "::set-output name=matrix::[\"3.7\", \"3.8\", \"3.9\", \"3.10\", \"3.11\"]"
+          else
+            echo "::set-output name=matrix::[\"3.7\", \"3.8\", \"3.9\", \"3.10\"]"
+          fi
 
   lint:
     defaults:
@@ -101,7 +106,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code

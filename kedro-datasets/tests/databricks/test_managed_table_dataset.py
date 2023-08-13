@@ -315,9 +315,7 @@ class TestManagedTableDataSet:
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_schema_pandas(
-        self,
-        subset_pandas_df: pd.DataFrame,
-        subset_expected_df: DataFrame,
+        self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
     ):
         unity_ds = ManagedTableDataSet(
             database="test",

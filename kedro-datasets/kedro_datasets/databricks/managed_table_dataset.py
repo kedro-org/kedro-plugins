@@ -370,7 +370,8 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         """
         if self._table.write_mode is None:
             raise DataSetError(
-                "'save' can not be use in read-only mode. Change 'write_mode' to overwrite, upsert or append."
+                "'save' can not be used in read-only mode. "
+                "Change 'write_mode' to overwrite, upsert or append."
             )
         # filter columns specified in schema and match their ordering
         if self._table.schema():

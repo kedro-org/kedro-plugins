@@ -195,7 +195,7 @@ class TestManagedTableDataSet:
             "catalog": None,
             "database": "default",
             "table": "test",
-            "write_mode": "overwrite",
+            "write_mode": None,
             "dataframe_type": "spark",
             "primary_key": None,
             "version": "None",
@@ -282,11 +282,8 @@ class TestManagedTableDataSet:
 
     def test_save_default(self, sample_spark_df: DataFrame):
         unity_ds = ManagedTableDataSet(database="test", table="test_save")
-        unity_ds.save(sample_spark_df)
-        saved_table = unity_ds.load()
-        assert (
-            unity_ds._exists() and sample_spark_df.exceptAll(saved_table).count() == 0
-        )
+        with pytest.raises(DataSetError):
+            unity_ds.save(sample_spark_df)
 
     def test_save_schema_spark(
         self, subset_spark_df: DataFrame, subset_expected_df: DataFrame
@@ -311,13 +308,16 @@ class TestManagedTableDataSet:
                 ],
                 "type": "struct",
             },
+            write_mode="overwrite",
         )
         unity_ds.save(subset_spark_df)
         saved_table = unity_ds.load()
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_schema_pandas(
-        self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
+        self,
+        subset_pandas_df: pd.DataFrame,
+        subset_expected_df: DataFrame,
     ):
         unity_ds = ManagedTableDataSet(
             database="test",
@@ -339,6 +339,7 @@ class TestManagedTableDataSet:
                 ],
                 "type": "struct",
             },
+            write_mode="overwrite",
             dataframe_type="pandas",
         )
         unity_ds.save(subset_pandas_df)
@@ -352,7 +353,9 @@ class TestManagedTableDataSet:
     def test_save_overwrite(
         self, sample_spark_df: DataFrame, append_spark_df: DataFrame
     ):
-        unity_ds = ManagedTableDataSet(database="test", table="test_save")
+        unity_ds = ManagedTableDataSet(
+            database="test", table="test_save", write_mode="overwrite"
+        )
         unity_ds.save(sample_spark_df)
         unity_ds.save(append_spark_df)
 
@@ -433,7 +436,9 @@ class TestManagedTableDataSet:
             unity_ds.save(mismatched_upsert_spark_df)
 
     def test_load_spark(self, sample_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(database="test", table="test_load_spark")
+        unity_ds = ManagedTableDataSet(
+            database="test", table="test_load_spark", write_mode="overwrite"
+        )
         unity_ds.save(sample_spark_df)
 
         delta_ds = ManagedTableDataSet(database="test", table="test_load_spark")
@@ -445,7 +450,9 @@ class TestManagedTableDataSet:
         )
 
     def test_load_spark_no_version(self, sample_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(database="test", table="test_load_spark")
+        unity_ds = ManagedTableDataSet(
+            database="test", table="test_load_spark", write_mode="overwrite"
+        )
         unity_ds.save(sample_spark_df)
 
         delta_ds = ManagedTableDataSet(
@@ -470,7 +477,10 @@ class TestManagedTableDataSet:
 
     def test_load_pandas(self, sample_pandas_df: pd.DataFrame):
         unity_ds = ManagedTableDataSet(
-            database="test", table="test_load_pandas", dataframe_type="pandas"
+            database="test",
+            table="test_load_pandas",
+            dataframe_type="pandas",
+            write_mode="overwrite",
         )
         unity_ds.save(sample_pandas_df)
 

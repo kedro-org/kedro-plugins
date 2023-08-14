@@ -25,7 +25,7 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "kedro"
+project = "kedro-datasets"
 author = "kedro"
 
 # The short X.Y version.
@@ -139,7 +139,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -216,12 +216,6 @@ todo_include_todos = False
 
 # -- Kedro specific configuration -----------------------------------------
 KEDRO_MODULES = [
-    "kedro.io",
-    "kedro.pipeline",
-    "kedro.runner",
-    "kedro.config",
-    "kedro.extras.datasets",
-    "kedro.extras.logging",
     "kedro_datasets",
 ]
 

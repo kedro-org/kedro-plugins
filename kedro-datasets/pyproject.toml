@@ -25,10 +25,7 @@ plotly-base = ["plotly>=4.8.0, <6.0"]
 polars-base = ["polars~=0.17.0"]
 s3fs-base = ["s3fs>=0.3.0, <0.5"]
 spark-base = ["pyspark>=2.2, <4.0"]
-"spark.DeltaTableDataSet" = [
-  "kedro-datasets[spark-base,hdfs-base,s3fs-base]",
-  "delta-spark>=1.0, <3.0"
-]
+
 
 # Datasets dependencies
 api = ["kedro-datasets[api.APIDataSet]"]
@@ -123,7 +120,11 @@ snowflake = ["kedro-datasets[snowflake.SnowparkTableDataSet]"]
 ]
 
 spark = [
-  "kedro-datasets[spark.SparkDataSet,spark.SparkHiveDataSet,spark.SparkJDBCDataSet,spark.DeltaTableDataSet]"
+  "kedro-datasets[spark.DeltaTableDataSet,spark.SparkDataSet,spark.SparkHiveDataSet,spark.SparkJDBCDataSet]"
+]
+"spark.DeltaTableDataSet" = [
+  "kedro-datasets[spark-base,hdfs-base,s3fs-base]",
+  "delta-spark>=1.0, <3.0"
 ]
 "spark.SparkDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 "spark.SparkHiveDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]

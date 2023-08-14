@@ -2,6 +2,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Made `databricks.ManagedTableDataSet` read-only by default.
+    * The user needs to specify `write_mode` to allow `save` on the data set. 
 
 ## Community contributions
 

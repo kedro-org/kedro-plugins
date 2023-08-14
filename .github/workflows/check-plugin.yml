@@ -9,6 +9,7 @@ on:
 jobs:
 
   setup-matrix:
+  # kedro-datasets is only plugin that supports python 3.11
     runs-on: ubuntu-latest
     outputs:
       python-versions: ${{ steps.set-matrix.outputs.matrix }}

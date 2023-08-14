@@ -17,7 +17,7 @@ dependencies = [
 dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
-
+# Base dependencies
 delta-base = ["delta-spark~=1.2.1"]
 hdfs-base = ["hdfs>=2.5.8, <3.0"]
 pandas-base = ["pandas>=1.3, <3.0"]
@@ -30,6 +30,7 @@ spark-base = ["pyspark>=2.2, <4.0"]
   "delta-spark>=1.0, <3.0"
 ]
 
+# Datasets dependencies
 api = ["kedro-datasets[api.APIDataSet]"]
 "api.APIDataSet" = ["requests~=2.20"]
 biosequence = ["kedro-datasets[biosequence.BioSequenceDataSet]"]

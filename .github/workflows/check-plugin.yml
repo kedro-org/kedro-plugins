@@ -45,10 +45,6 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{matrix.python-version}}
-      - name: Activate conda environment
-        run: |
-          source $(conda info --base)/etc/profile.d/conda.sh
-          conda activate base
       - name: Cache python packages for Linux
         if: matrix.os == 'ubuntu-latest'
         uses: actions/cache@v3

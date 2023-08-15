@@ -63,8 +63,6 @@ jobs:
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
-      - name: Install System Dependencies
-        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev gfortran
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}

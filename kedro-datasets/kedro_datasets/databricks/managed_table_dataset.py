@@ -218,10 +218,11 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
              Defaults to None.
             database: the name of the database.
              (also referred to as schema). Defaults to "default".
-            write_mode: the mode to write the data into the table.
+            write_mode: the mode to write the data into the table. If not 
+             present, the data set is read-only.
              Options are:["overwrite", "append", "upsert"].
              "upsert" mode requires primary_key field to be populated.
-             Defaults to "overwrite".
+             Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
              Defaults to "spark".
             primary_key: the primary key of the table.

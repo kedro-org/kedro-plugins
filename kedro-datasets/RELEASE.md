@@ -2,6 +2,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed an issue on `api.APIDataSet` where the sent data was doubly converted to json
+  string (once by us and once by the `requests` library).
 
 ## Community contributions
 # Release 1.5.2:

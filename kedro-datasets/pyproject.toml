@@ -28,27 +28,35 @@ spark-base = ["pyspark>=2.2, <4.0"]
 # Datasets dependencies
 api = ["kedro-datasets[api.APIDataSet]"]
 "api.APIDataSet" = ["requests~=2.20"]
+"api-apidataset" = ["requests~=2.20"]
 
 biosequence = ["kedro-datasets[biosequence.BioSequenceDataSet]"]
 "biosequence.BioSequenceDataSet" = ["biopython~=1.73"]
+"biosequence-biosequencedataset" = ["biopython~=1.73"]
 
 dask = ["kedro-datasets[dask.ParquetDataSet]"]
 "dask.ParquetDataSet" = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+"dask-parquetdataset" = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 
 databricks = ["kedro-datasets[databricks.ManagedTableDataSet]"]
 "databricks.ManagedTableDataSet" = ["kedro-datasets[spark-base,pandas-base]", "delta-spark~=1.2.1"]
+"databricks-managedtabledataset" = ["kedro-datasets[spark-base,pandas-base]", "delta-spark~=1.2.1"]
 
 geopandas = ["kedro-datasets[geopandas.GeoJSONDataSet]"]
 "geopandas.GeoJSONDataSet" = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+"geopandas-geojsondataset" = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 
 holoviews = ["kedro-datasets[holoviews.HoloviewsWriter]"]
 "holoviews.HoloviewsWriter" = ["holoviews~=1.13.0"]
+"holoviews-holoviewswriter" = ["holoviews~=1.13.0"]
 
 matplotlib = ["kedro-datasets[matplotlib.MatplotlibWriter]"]
 "matplotlib.MatplotlibWriter" = ["matplotlib>=3.0.3, <4.0"]
+"matplotlib-matplotlibwriter" = ["matplotlib>=3.0.3, <4.0"]
 
 networkx = ["kedro-datasets[networkx.NetworkXDataSet]"]
 "networkx.NetworkXDataSet" = ["networkx~=2.4"]
+"networkx-networkxdataset" = ["networkx~=2.4"]
 
 pandas = [
   """kedro-datasets[\
@@ -68,15 +76,28 @@ pandas = [
   ]"""
 ]
 "pandas.CSVDataSet" = ["kedro-datasets[pandas-base]"]
+"pandas-csvdataset" = ["kedro-datasets[pandas-base]"]
 "pandas.ExcelDataSet" = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
+"pandas-exceldataset" = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 "pandas.DeltaTableDataSet" = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
+"pandas-deltatabledataset" = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 "pandas.FeatherDataSet" = ["kedro-datasets[pandas-base]"]
+"pandas-featherdataset" = ["kedro-datasets[pandas-base]"]
 "pandas.GenericDataSet" = ["kedro-datasets[pandas-base]"]
+"pandas-genericdataset" = ["kedro-datasets[pandas-base]"]
 "pandas.GBQTableDataSet" = [
   "kedro-datasets[pandas-base]",
   "pandas-gbq>=0.12.0, <0.18.0"
 ]
+"pandas-gbqtabledataset" = [
+  "kedro-datasets[pandas-base]",
+  "pandas-gbq>=0.12.0, <0.18.0"
+]
 "pandas.GBQQueryDataSet" = [
+  "kedro-datasets[pandas-base]",
+  "pandas-gbq>=0.12.0, <0.18.0"
+]
+"pandas-gbqquerydataset" = [
   "kedro-datasets[pandas-base]",
   "pandas-gbq>=0.12.0, <0.18.0"
 ]
@@ -85,34 +106,58 @@ pandas = [
   "tables~=3.6.0; platform_system == 'Windows'",
   "tables~=3.6; platform_system != 'Windows'"
 ]
+"pandas-hdfdataset" = [
+  "kedro-datasets[pandas-base]",
+  "tables~=3.6.0; platform_system == 'Windows'",
+  "tables~=3.6; platform_system != 'Windows'"
+]
 "pandas.JSONDataSet" = ["kedro-datasets[pandas-base]"]
+"pandas-jsondataset" = ["kedro-datasets[pandas-base]"]
 "pandas.ParquetDataSet" = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
+"pandas-parquetdataset" = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
 "pandas.SQLTableDataSet" = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
+"pandas-sqltabledataset" = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
 "pandas.SQLQueryDataSet" = [
   "kedro-datasets[pandas-base]",
   "SQLAlchemy>=1.4, <3.0",
   "pyodbc~=4.0"
 ]
+"pandas-sqlquerydataset" = [
+  "kedro-datasets[pandas-base]",
+  "SQLAlchemy>=1.4, <3.0",
+  "pyodbc~=4.0"
+]
 "pandas.XMLDataSet" = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
+"pandas-xmldataset" = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
 
 pickle = ["kedro-datasets[pickle.PickleDataSet]"]
 "pickle.PickleDataSet" = ["compress-pickle[lz4]~=2.1.0"]
+"pickle-pickledataset" = ["compress-pickle[lz4]~=2.1.0"]
 
 pillow = ["kedro-datasets[pillow.ImageDataSet]"]
 "pillow.ImageDataSet" = ["Pillow~=9.0"]
+"pillow-imagedataset" = ["Pillow~=9.0"]
 
 plotly = ["kedro-datasets[plotly.PlotlyDataSet,plotly.JSONDataSet]"]
 "plotly.JSONDataSet" = ["kedro-datasets[plotly-base]"]
+"plotly-jsondataset" = ["kedro-datasets[plotly-base]"]
 "plotly.PlotlyDataSet" = ["kedro-datasets[pandas-base,plotly-base]"]
+"plotly-plotlydataset" = ["kedro-datasets[pandas-base,plotly-base]"]
 
 polars = ["kedro-datasets[polars.CSVDataSet]"]
 "polars.CSVDataSet" = ["polars~=0.17.0"]
+"polars-csvdataset" = ["polars~=0.17.0"]
 
 redis = ["kedro-datasets[redis.PickleDataSet]"]
 "redis.PickleDataSet" = ["redis~=4.1"]
+"redis-pickledataset" = ["redis~=4.1"]
 
 snowflake = ["kedro-datasets[snowflake.SnowparkTableDataSet]"]
 "snowflake.SnowparkTableDataSet" = [
+  "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
+  "pyarrow~=8.0"
+]
+"snowflake-snowparktabledataset" = [
   "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
   "pyarrow~=8.0"
 ]
@@ -124,12 +169,21 @@ spark = [
   "kedro-datasets[spark-base,hdfs-base,s3fs-base]",
   "delta-spark>=1.0, <3.0"
 ]
+"spark-deltatabledataset" = [
+  "kedro-datasets[spark-base,hdfs-base,s3fs-base]",
+  "delta-spark>=1.0, <3.0"
+]
+
 "spark.SparkDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+"spark-sparkdataset" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 "spark.SparkHiveDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+"spark-sparkhivedataset" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 "spark.SparkJDBCDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+"spark-sparkjdbcdataset" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 
 svmlight = ["kedro-datasets[svmlight.SVMLightDataSet]"]
 "svmlight.SVMLightDataSet" = ["scikit-learn~=1.0.2", "scipy~=1.7.3"]
+"svmlight-svmlightdataset" = ["scikit-learn~=1.0.2", "scipy~=1.7.3"]
 
 tensorflow = ["kedro-datasets[tensorflow.TensorFlowModelDataSet]"]
 "tensorflow.TensorFlowModelDataSet" = [
@@ -139,12 +193,21 @@ tensorflow = ["kedro-datasets[tensorflow.TensorFlowModelDataSet]"]
   # https://developer.apple.com/metal/tensorflow-plugin/
   "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'"
 ]
+"tensorflow-tensorflowmodeldataset" = [
+  # currently only TensorFlow V2 supported for saving and loading.
+  # V1 requires HDF5 and serialises differently
+  "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+  # https://developer.apple.com/metal/tensorflow-plugin/
+  "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'"
+]
 
 video = ["kedro-datasets[video.VideoDataSet]"]
 "video.VideoDataSet" = ["opencv-python~=4.5.5.64"]
+"video-videodataset" = ["opencv-python~=4.5.5.64"]
 
 yaml = ["kedro-datasets[yaml.YAMLDataSet]"]
 "yaml.YAMLDataSet" = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
+"yaml-yamldataset" = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 
 all = [
   """kedro-datasets[\

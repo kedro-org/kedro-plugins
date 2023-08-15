@@ -6,6 +6,10 @@
   string (once by us and once by the `requests` library).
 
 ## Community contributions
+# Release 1.5.2:
+
+## Bug fixes and other changes
+* Fixed problematic `kedro-datasets` optional dependencies.
 
 # Release 1.5.1:
 

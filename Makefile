@@ -60,3 +60,6 @@ test-no-spark-sequential:
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
 	cd kedro-datasets && pytest tests --no-cov --numprocesses 1 --dist loadfile -m snowflake
+
+rtd:
+	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

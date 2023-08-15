@@ -14,6 +14,14 @@ There are quite a few ways to contribute to Kedro, sich as answering questions a
 
 Take a look at some of our [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
 
+## Which plugin contributions are likely to be accepted?
+
+Dataset contributions to the [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) plugin are the most frequently accepted, since they do not require any changes to the framework itself. 
+
+However, we do not discourage contributions to any of the other [Kedro-Plugins](https://github.com/kedro-org/kedro-plugins) or the framework or `Kedro-Viz`. As a guide, contributions based on existing issues from the Kedro team, or issues that the team has deemed useful, are most likely to be accepted. Any contributions that affect fundamental changes to the Kedro Framework would require discussion first. In this case, we recommend opening an issue instead of a pull request.
+
+Make sure to check out the contributing guides for [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-docker/CONTRIBUTING.md) and [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/CONTRIBUTING.md) if you intend to contribute to those specific plugins.
+
 ## Join the Technical Steering Committee
 Kedro is an incubating project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space.
 

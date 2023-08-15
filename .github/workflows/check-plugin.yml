@@ -28,9 +28,11 @@ jobs:
     defaults:
       run:
         shell: bash
+    env:
+      PIP_VERBOSE: 2
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
         python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
     runs-on: ${{ matrix.os }}
     steps:

@@ -21,9 +21,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
     mode=overwrite together with partition_filters. This will remove all files within the
     matching partition and insert your data as new files.
 
-    Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the `YAML API`_:
 
     .. code-block:: yaml
 
@@ -55,9 +53,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
           save_args:
             mode: overwrite
 
-    Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    Example usage for the `Python API`_:
     ::
 
         >>> from kedro_datasets.pandas import DeltaTableDataSet
@@ -98,34 +94,38 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
 
         Args:
             filepath (str): Filepath to a delta lake file with the following accepted protocol:
-                ``S3``: `s3://<bucket>/<path>`, `s3a://<bucket>/<path>`
-                ``Azure``: `az://<container>/<path>`, `adl://<container>/<path>`,
-                `abfs://<container>/<path>`
-                ``GCS``: `gs://<bucket>/<path>`
+                ``S3``:
+                    `s3://<bucket>/<path>`
+                    `s3a://<bucket>/<path>`
+                ``Azure``:
+                    `az://<container>/<path>`
+                    `adl://<container>/<path>`
+                    `abfs://<container>/<path>`
+                ``GCS``:
+                    `gs://<bucket>/<path>`
                 If any of the prefix above is not provided, `file` protocol (local filesystem)
                 will be used.
-            catalog_type (DataCatalog, Optional): `AWS` or `UNITY` if filepath is not provided.
+            catalog_type (DataCatalog, optional): `AWS` or `UNITY` if filepath is not provided.
                 Defaults to None.
-            catalog_name (str, Optional): the name of catalog in AWS Glue or Databricks Unity.
+            catalog_name (str, optional): the name of catalog in AWS Glue or Databricks Unity.
                 Defaults to None.
-            database (str, Optional): the name of the database (also referred to as schema).
+            database (str, optional): the name of the database (also referred to as schema).
                 Defaults to None.
-            table (str, Optional): the name of the table.
-            load_args (Dict[str, Any], Optional): Additional options for loading file(s)
+            table (str, optional): the name of the table.
+            load_args (Dict[str, Any], optional): Additional options for loading file(s)
                 into DeltaTableDataSet. `load_args` accepts `version` to load the appropriate
-                version when loading from a filesystem.
-            save_args (Dict[str, Any], Optional): Additional saving options for saving into
+                 version when loading from a filesystem.
+            save_args (Dict[str, Any], optional): Additional saving options for saving into
                 Delta lake. Here you can find all available arguments:
                 https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables
-            credentials (Dict[str, Any], Optional): Credentials required to get access to
+            credentials (Dict[str, Any], optional): Credentials required to get access to
                 the underlying filesystem. E.g. for ``GCSFileSystem`` it should look like
                 `{"token": None}`.
-            fs_args (Dict[str, Any], Optional): Extra arguments to pass into underlying
+            fs_args (Dict[str, Any], optional): Extra arguments to pass into underlying
                 filesystem class constructor.
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         Raises:
             DataSetError: Invalid configuration supplied (through DeltaTableDataSet validation)
-
         """
         self._filepath = filepath
         self._catalog_type = catalog_type
@@ -204,7 +204,7 @@ class DeltaTableDataSet(AbstractDataSet):  # pylint:disable=too-many-instance-at
         4. The list of partition_columns.
         5. The created_time of the table
         6. A map of table configuration. This includes fields such as delta.appendOnly,
-        which if true indicates the table is not meant to have data deleted from it.
+            which if true indicates the table is not meant to have data deleted from it.
 
         Returns: Metadata object containing the above metadata attributes.
         """

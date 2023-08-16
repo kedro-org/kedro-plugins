@@ -168,11 +168,16 @@ class TestSparkStreamingDataSet:
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file
         spark_data_set = SparkStreamingDataSet(filepath="")
-        mocker.patch.object(
-            spark_data_set,
-            "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
-        )
 
+        if SPARK_VERSION.match(">=3.4.0"):
+            mocker.patch.object(
+                spark_data_set, "_get_spark", side_effect=AnalysisException("Other Exception")
+            )
+        else:
+            mocker.patch.object(
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()

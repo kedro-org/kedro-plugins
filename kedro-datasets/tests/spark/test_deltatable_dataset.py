@@ -82,7 +82,6 @@ class TestDeltaTableDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             delta_ds.exists()
 
-
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async):
         """Test ParallelRunner with SparkDataSet fails."""

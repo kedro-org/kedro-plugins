@@ -80,7 +80,7 @@ def test_save_args(mocker, spark_jdbc_args_save_load):
 
 def test_except_bad_credentials(mocker, spark_jdbc_args_credentials_with_none_password):
     pattern = r"Credential property 'password' cannot be None(.+)"
-    with pytest.raises(DatasetError, match=pattern):
+    with pytest.raises(DataSetError, match=pattern):
         mock_data = mocker.Mock()
         data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials_with_none_password)
         data_set.save(mock_data)

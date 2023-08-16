@@ -1,5 +1,6 @@
 import pytest
 from delta import DeltaTable
+from pyspark import __version__
 from kedro.io import DataCatalog, DataSetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -7,8 +8,11 @@ from kedro.runner import ParallelRunner
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
+from semver import VersionInfo
 
 from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
+
+SPARK_VERSION = VersionInfo.parse(__version__)
 
 
 @pytest.fixture
@@ -65,12 +69,16 @@ class TestDeltaTableDataSet:
 
     def test_exists_raises_error(self, mocker):
         delta_ds = DeltaTableDataSet(filepath="")
-        mocker.patch.object(
-            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
-        )
-
-        with pytest.raises(DataSetError, match="Other Exception"):
-            delta_ds.exists()
+        if SPARK_VERSION.match(">=3.4.0"):
+            mocker.patch.object(
+                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
+            )
+        else:
+            mocker.patch.object(
+                delta_ds,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async):

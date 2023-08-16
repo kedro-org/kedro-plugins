@@ -28,8 +28,6 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      PIP_VERBOSE: 2
     strategy:
       matrix:
         os: [ ubuntu-latest ]

@@ -419,6 +419,8 @@ class TestSparkDataSet:
                 "_get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
+        with pytest.raises(DataSetError, match="Other Exception"):
+            spark_data_set.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):

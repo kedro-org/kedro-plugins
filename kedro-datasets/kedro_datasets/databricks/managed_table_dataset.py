@@ -29,7 +29,7 @@ class ManagedTable:
     database: str
     catalog: Optional[str]
     table: str
-    write_mode: str
+    write_mode: Union[str, None]
     dataframe_type: str
     primary_key: Optional[str]
     owner_group: str
@@ -82,7 +82,10 @@ class ManagedTable:
         Raises:
             DataSetError: If an invalid `write_mode` is passed.
         """
-        if self.write_mode not in self._VALID_WRITE_MODES:
+        if (
+            self.write_mode is not None
+            and self.write_mode not in self._VALID_WRITE_MODES
+        ):
             valid_modes = ", ".join(self._VALID_WRITE_MODES)
             raise DataSetError(
                 f"Invalid `write_mode` provided: {self.write_mode}. "
@@ -196,7 +199,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         table: str,
         catalog: str = None,
         database: str = "default",
-        write_mode: str = "overwrite",
+        write_mode: Union[str, None] = None,
         dataframe_type: str = "spark",
         primary_key: Optional[Union[str, List[str]]] = None,
         version: Version = None,
@@ -215,10 +218,11 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
              Defaults to None.
             database: the name of the database.
              (also referred to as schema). Defaults to "default".
-            write_mode: the mode to write the data into the table.
+            write_mode: the mode to write the data into the table. If not
+             present, the data set is read-only.
              Options are:["overwrite", "append", "upsert"].
              "upsert" mode requires primary_key field to be populated.
-             Defaults to "overwrite".
+             Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
              Defaults to "spark".
             primary_key: the primary key of the table.
@@ -365,6 +369,11 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         Args:
             data (Any): Spark or pandas dataframe to save to the table location
         """
+        if self._table.write_mode is None:
+            raise DataSetError(
+                "'save' can not be used in read-only mode. "
+                "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
+            )
         # filter columns specified in schema and match their ordering
         if self._table.schema():
             cols = self._table.schema().fieldNames()

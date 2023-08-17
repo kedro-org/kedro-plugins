@@ -1,6 +1,6 @@
 # Introduction
 
-We welcome any and all contributions to Kedro, at whatever level you can manage. Here are a few suggestions, but you are welcome to suggest anything else that you think improves the community for us all!
+We welcome any and all contributions to Kedro, at whatever level you can manage. Here are a few suggestions, and you are welcome to suggest anything else that you think improves the community for us all!
 
 ## Join the community
 

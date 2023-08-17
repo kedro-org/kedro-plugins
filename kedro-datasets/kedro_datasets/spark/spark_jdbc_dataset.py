@@ -3,8 +3,10 @@
 from copy import deepcopy
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import DataFrame, SparkSession
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 __all__ = ["SparkJDBCDataSet"]
 

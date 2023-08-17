@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementations that produce pandas DataFrames."""
+from typing import Any
 
-__all__ = ["CSVDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+CSVDataSet: Any
 
-with suppress(ImportError):
-    from .csv_dataset import CSVDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"csv_dataset": ["CSVDataSet"]}
+)

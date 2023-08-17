@@ -1,22 +1,22 @@
 """Provides I/O modules for Apache Spark."""
+from typing import Any
 
-__all__ = [
-    "SparkDataSet",
-    "SparkHiveDataSet",
-    "SparkJDBCDataSet",
-    "DeltaTableDataSet",
-    "SparkStreamingDataSet",
-]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+DeltaTableDataSet: Any
+SparkDataSet: Any
+SparkHiveDataSet: Any
+SparkJDBCDataSet: Any
+SparkStreamingDataSet: Any
 
-with suppress(ImportError):
-    from .spark_dataset import SparkDataSet
-with suppress(ImportError):
-    from .spark_hive_dataset import SparkHiveDataSet
-with suppress(ImportError):
-    from .spark_jdbc_dataset import SparkJDBCDataSet
-with suppress(ImportError):
-    from .deltatable_dataset import DeltaTableDataSet
-with suppress(ImportError):
-    from .spark_streaming_dataset import SparkStreamingDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "deltatable_dataset": ["DeltaTableDataSet"],
+        "spark_dataset": ["SparkDataSet"],
+        "spark_hive_dataset": ["SparkHiveDataSet"],
+        "spark_jdbc_dataset": ["SparkJDBCDataSet"],
+        "spark_streaming_dataset": ["SparkStreamingDataSet"],
+    },
+)

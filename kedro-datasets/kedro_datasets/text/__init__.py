@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementation to load/save data from/to a text file."""
+from typing import Any
 
-__all__ = ["TextDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+TextDataSet: Any
 
-with suppress(ImportError):
-    from .text_dataset import TextDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"text_dataset": ["TextDataSet"]}
+)

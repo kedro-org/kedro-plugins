@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Telemetry"
-requires-python = ">=3.7, <3.11"
+requires-python = ">=3.7"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro~=0.18.0",
@@ -20,6 +20,23 @@ dynamic = ["readme", "version"]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry"
 Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-telemetry/README.md"
 Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.optional-dependencies]
+test = [
+    "bandit>=1.6.2, <2.0",
+    "behave",
+    "black~=22.0",
+    "flake8",
+    "isort>=4.3.21, <5.0",
+    "pre-commit>=1.17.0, <2.0",
+    "pylint>=2.5.2, <3.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist[psutil]~=2.2.1",
+    "trufflehog>=2.1.0, <3.0",
+    "wheel"
+]
 
 [project.entry-points."kedro.cli_hooks"]
 kedro-telemetry = "kedro_telemetry.plugin:cli_hooks"

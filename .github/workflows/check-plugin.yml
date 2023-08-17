@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
+          pip install ".[test]"
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
@@ -84,15 +84,42 @@ jobs:
         run: |
             cd ${{ inputs.plugin }}
             pip install git+https://github.com/kedro-org/kedro@main
-            pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
+            pip install ".[test]"
             pip freeze
       - name: Install pre-commit hooks
         run: |
-            cd ${{ inputs.plugin }}
             pre-commit install --install-hooks
             pre-commit install --hook-type pre-push
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
+
+  RTD-build:
+    if: inputs.plugin == 'kedro-datasets'
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-ubuntu-latest-python-"3.8"
+          restore-keys: ${{inputs.plugin}}
+      - name: Install dependencies
+        run: |
+            cd ${{ inputs.plugin }}
+            pip install ".[docs]"
+            pip install ".[test]"
+      - name: RTD build for kedro-datasets
+        run: |
+          make rtd
 
   e2e-tests:
     if: inputs.plugin != 'kedro-datasets'
@@ -121,7 +148,7 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pip install git+https://github.com/kedro-org/kedro@main
-          pip install . -r test_requirements.txt  # TODO(deepyaman): Define `test` extra and `pip install .[test]`
+          pip install ".[test]"
       - name: pip freeze
         run: pip freeze
       - name: Run end to end tests

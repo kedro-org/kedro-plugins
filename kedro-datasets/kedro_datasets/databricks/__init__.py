@@ -1,8 +1,11 @@
 """Provides interface to Unity Catalog Tables."""
+from typing import Any
 
-__all__ = ["ManagedTableDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+ManagedTableDataSet: Any
 
-with suppress(ImportError):
-    from .managed_table_dataset import ManagedTableDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"managed_table_dataset": ["ManagedTableDataSet"]}
+)

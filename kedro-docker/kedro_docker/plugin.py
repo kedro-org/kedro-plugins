@@ -169,9 +169,9 @@ def docker_init(spark):
     help="Optional arguments to be passed to `docker build` command"
 )
 @click.pass_context
-def docker_build(
+def docker_build(  # noqa: PLR0913
     ctx, uid, gid, spark, base_image, image, docker_args
-):  # pylint: disable=too-many-arguments
+):
     """Build a Docker image for the project."""
     uid, gid = get_uid_gid(uid, gid)
     project_path = Path.cwd()

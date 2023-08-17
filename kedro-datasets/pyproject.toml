@@ -122,7 +122,7 @@ spark = [
 ]
 "spark.DeltaTableDataSet" = [
   "kedro-datasets[spark-base,hdfs-base,s3fs-base]",
-  "delta-spark>=1.0, <3.0"
+  "delta-spark"
 ]
 "spark.SparkDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 "spark.SparkHiveDataSet" = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
@@ -181,7 +181,7 @@ test = [
   "compress-pickle[lz4]~=1.2.0",
   "coverage[toml]",
   "dask[complete]",
-  "delta-spark>=1.2.1; python_version >= '3.11'",
+  "delta-spark>=2.4; python_version >= '3.11'",
   "delta-spark~=1.2.1; python_version < '3.11'",
   "deltalake>=0.10.0",
   # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
@@ -220,7 +220,7 @@ test = [
   "pyodbc~=4.0.35",
   "pyproj~=3.0",
   "pyspark>=2.2, <3.4; python_version < '3.11'",
-  "pyspark>=2.2; python_version >= '3.11'",
+  "pyspark>=3.4; python_version >= '3.11'",
   "pytest-cov~=3.0",
   "pytest-mock>=1.7.1, <2.0",
   "pytest-xdist[psutil]~=2.2.1",

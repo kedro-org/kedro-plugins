@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+    rev: v4.4.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -14,14 +14,50 @@ repos:
       - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
       - id: check-merge-conflict # Check for files that contain merge conflict strings.
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-      - id: flake8
-        files: ^(kedro-datasets/kedro_datasets/|kedro-airflow/kedro_airflow/|kedro-docker/kedro_docker/|kedro-telemetry/kedro_telemetry/)
-        args:
-          - "--max-line-length=88"
-          - "--max-complexity=18"
-          - "--select=B,C,E,F,W,T4,B9"
-          - "--ignore=E203,E266,E501,W503"
-        exclude: "^kedro_airflow/dag_template.py|^template.py"
+      # - id: flake8
+        # files: ^(kedro-datasets/kedro_datasets/|kedro-airflow/kedro_airflow/|kedro-docker/kedro_docker/|kedro-telemetry/kedro_telemetry/)
+        # args:
+        #   - "--max-line-length=88"
+        #   - "--max-complexity=18"
+        #   - "--select=B,C,E,F,W,T4,B9"
+        #   - "--ignore=E203,E266,E501,W503"
+        # exclude: "^kedro_airflow/dag_template.py|^template.py"
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.0.277
+    hooks:
+      - id: ruff
+        name: "ruff on kedro-telemetry"
+        args: [".", "--fix", "--exit-non-zero-on-fix"]
+        exclude: "^kedro/templates/|^features/steps/test_starter/"
+
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   # Ruff version.
+  #   rev: v0.0.277
+  #   hooks:
+  #     - id: ruff
+  #       name: "ruff on kedro-datasets
+  #       args: ["--fix", "--exit-non-zero-on-fix"]
+  #       exclude: "^kedro/templates/|^features/steps/test_starter/"
+
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   # Ruff version.
+  #   rev: v0.0.277
+  #   hooks:
+  #     - id: ruff
+  #       name: "ruff on kedro-docker"
+  #       args: ["--fix", "--exit-non-zero-on-fix"]
+  #       exclude: "^kedro/templates/|^features/steps/test_starter/"
+
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   # Ruff version.
+  #   rev: v0.0.277
+  #   hooks:
+  #     - id: ruff
+  #       name: "ruff on kedro-airflow"
+  #       args: ["--fix", "--exit-non-zero-on-fix"]
+  #       exclude: "^kedro/templates/|^features/steps/test_starter/"
 
   - repo: local
     hooks:

@@ -30,6 +30,7 @@ HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+OK = 200
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +210,7 @@ def _send_heap_event(
         resp = requests.post(
             url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
-        if resp.status_code != 200:
+        if resp.status_code != OK:
             logger.warning(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
                 resp.status_code,

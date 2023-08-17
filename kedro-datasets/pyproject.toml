@@ -36,7 +36,7 @@ dask = ["kedro-datasets[dask.ParquetDataSet]"]
 "dask.ParquetDataSet" = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 
 databricks = ["kedro-datasets[databricks.ManagedTableDataSet]"]
-"databricks.ManagedTableDataSet" = ["kedro-datasets[spark-base,pandas-base]", "delta-spark~=1.2.1"]
+"databricks.ManagedTableDataSet" = ["kedro-datasets[spark-base,pandas-base]", "delta-spark"]
 
 geopandas = ["kedro-datasets[geopandas.GeoJSONDataSet]"]
 "geopandas.GeoJSONDataSet" = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]

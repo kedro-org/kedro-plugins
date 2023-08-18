@@ -30,7 +30,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [ windows-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
     runs-on: ${{ matrix.os }}
     steps:

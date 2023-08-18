@@ -414,7 +414,7 @@ class TestSparkDataSet:
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
-            mocker.patch.object(  # pylint: disable=expression-not-assigned
+            mocker.patch.object(
                 spark_data_set,
                 "_get_spark",
                 side_effect=AnalysisException("Other Exception", []),

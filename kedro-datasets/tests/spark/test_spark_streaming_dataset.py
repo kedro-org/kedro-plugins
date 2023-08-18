@@ -19,6 +19,7 @@ AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 SPARK_VERSION = VersionInfo.parse(__version__)
 
+
 def sample_schema(schema_path):
     """read the schema file from json path"""
     with open(schema_path, encoding="utf-8") as f:
@@ -174,7 +175,9 @@ class TestSparkStreamingDataSet:
 
         if SPARK_VERSION.match(">=3.4.0"):
             mocker.patch.object(
-                spark_data_set, "_get_spark", side_effect=AnalysisException("Other Exception")
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch.object(

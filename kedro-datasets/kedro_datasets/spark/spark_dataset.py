@@ -37,8 +37,7 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    MIN_SPLIT_SIZE = 2
-    if len(split_) == MIN_SPLIT_SIZE:
+    if len(split_) == 2:
         return split_[0] + "://", split_[1]
     return "", split_[0]
 

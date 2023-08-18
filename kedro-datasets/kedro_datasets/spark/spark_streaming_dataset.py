@@ -153,7 +153,10 @@ class SparkStreamingDataSet(AbstractDataSet):
             message = (
                 exception.desc if hasattr(exception, "desc") else exception.message
             )
-            if "Path does not exist:" in message or "is not a Streaming data" in message:
+            if (
+                "Path does not exist:" in message
+                or "is not a Streaming data" in message
+            ):
                 return False
             raise
         return True

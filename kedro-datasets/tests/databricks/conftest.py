@@ -4,8 +4,8 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-import importlib_metadata as importlib_metadata
-
+# importlib_metadata needs backport for python 3.8 and older
+import importlib_metadata as importlib_metadata  # pylint: disable=useless-import-alias
 import pytest
 from pyspark.sql import SparkSession
 

@@ -76,6 +76,7 @@ tensorflow_require = {
         "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ]
 }
+video_require = {"video.VideoDataSet": ["opencv-python~=4.5.5.64"]}
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {

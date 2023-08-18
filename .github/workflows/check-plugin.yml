@@ -30,7 +30,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ windows-latest ]
         python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
     runs-on: ${{ matrix.os }}
     steps:
@@ -56,6 +56,9 @@ jobs:
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
+      - name: Add MSBuild to PATH
+        if: inputs.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}

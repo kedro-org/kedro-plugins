@@ -15,12 +15,12 @@ We also curate a [GitHub repo that lists content created by the Kedro community]
 ## Contribute to the project
 
 There are quite a few ways to contribute to Kedro, such as answering questions about Kedro to help others, fixing a typo on the documentation, reporting a bug, reviewing pull requests or adding a feature.
-
+ls
 Take a look at some of our [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
 
 ## Which plugin contributions are likely to be accepted?
 
-Dataset contributions to the [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) plugin are the most frequently accepted, since they do not require any changes to the framework itself. 
+Dataset contributions to the [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) plugin are the most frequently accepted, since they do not require any changes to the framework itself.
 
 However, we accept contributions to any of the other [Kedro-Plugins](https://github.com/kedro-org/kedro-plugins) or the framework or `Kedro-Viz`. As a guide, contributions based on existing issues from the Kedro team, or issues that the team has deemed useful, are most likely to be accepted. Any contributions that affect fundamental changes to the Kedro Framework would require discussion first. In this case, we recommend opening an issue instead of a pull request.
 

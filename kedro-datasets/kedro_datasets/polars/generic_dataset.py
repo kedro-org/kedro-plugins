@@ -17,20 +17,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-ACCEPTED_WRITE_FILE_FORMATS = [
-    "csv",
-    "ipc",
-    "parquet",
-    "json",
-    "ndjson",
-    "avro",
-]
-# always a superset of ACCEPTED_WRITE_FILE_FORMATS
-ACCEPTED_READ_FILE_FORMATS = ACCEPTED_WRITE_FILE_FORMATS + [
-    "excel",
-    "delta",
-]
-
 
 # pylint: disable=too-many-instance-attributes
 class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
@@ -159,7 +145,10 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _load(self) -> pl.DataFrame:  # pylint: disable= inconsistent-return-statements
-        if self._file_format not in ACCEPTED_READ_FILE_FORMATS:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_method = getattr(pl, f"read_{self._file_format}", None)
+
+        if not load_method:
             raise DataSetError(
                 f"Unable to retrieve 'polars.read_{self._file_format}' method, please"
                 " ensure that your "
@@ -167,17 +156,15 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " API"
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
-
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        load_method = getattr(pl, f"read_{self._file_format}", None)
-        if load_method:
+        else:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
 
     def _save(self, data: pl.DataFrame) -> None:
-        if (
-            self._file_format not in ACCEPTED_WRITE_FILE_FORMATS
-        ):
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_method = getattr(data, f"write_{self._file_format}", None)
+
+        if not save_method:
             raise DataSetError(
                 f"Unable to retrieve 'polars.DataFrame.write_{self._file_format}' "
                 "method, please "
@@ -185,11 +172,7 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " per the Polars API "
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
-
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        save_method = getattr(data, f"write_{self._file_format}", None)
-
-        if save_method:
+        else:
             buf = BytesIO()
             save_method(file=buf, **self._save_args)
             with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

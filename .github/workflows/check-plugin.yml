@@ -40,11 +40,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{matrix.python-version}}
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          python-version: ${{matrix.python-version}}
       - name: Cache python packages for Linux
         if: matrix.os == 'ubuntu-latest'
         uses: actions/cache@v3
@@ -61,8 +56,6 @@ jobs:
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
-      - name: Install pytables
-        run: conda install -c conda-forge pytables -y
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}

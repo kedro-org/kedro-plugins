@@ -17,8 +17,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-ACCEPTED_WRITE_MODES = ["overwrite", "ignore"]
-
 ACCEPTED_WRITE_FILE_FORMATS = [
     "csv",
     "ipc",
@@ -76,7 +74,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         self,
         filepath: str,
         file_format: str,
-        write_mode: str = "overwrite",
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
@@ -102,11 +99,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 `polars.DataFrame.write_csv` methods will be identified. An error will
                 be raised unless
                 at least one matching `read_{file_format}` or `write_{file_format}`.
-            write_mode: String which determines the behaviour of the dataset,
-                defaults to "overwrite".
-                Accepted values are "overwrite" and "ignore", use "ignore" when you want
-                to read
-                fileformat that polars does not provide write support for.
             load_args: polars options for loading files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/io.html
@@ -165,20 +157,8 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         _fs_open_args_save.setdefault("mode", "wb")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
-        self._write_mode = write_mode
-        self._assert_write_mode()
 
-    def _assert_write_mode(self) -> None:
-        """Check that the write mode is supported."""
-        if self._write_mode not in ("overwrite", "ignore"):
-            raise DataSetError(
-                f"Write mode `{self._write_mode}` is not supported. "
-                "Allowed values are: overwrite, ignore."
-            )
-
-    def _ensure_file_system_target(self) -> None:
-        """Check if format is supported by file system target"""
-
+    def _load(self) -> pl.DataFrame:  # pylint: disable= inconsistent-return-statements
         if self._file_format not in ACCEPTED_READ_FILE_FORMATS:
             raise DataSetError(
                 f"Unable to retrieve 'polars.read_{self._file_format}' method, please"
@@ -188,10 +168,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
 
-    def _load(self) -> pl.DataFrame:  # pylint: disable= inconsistent-return-statements
-
-        self._ensure_file_system_target()
-
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
         if load_method:
@@ -200,14 +176,8 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
 
     def _save(self, data: pl.DataFrame) -> None:
         if (
-            self._write_mode == "overwrite"
-            and self._file_format not in ACCEPTED_WRITE_FILE_FORMATS
+            self._file_format not in ACCEPTED_WRITE_FILE_FORMATS
         ):
-            if self._file_format in ACCEPTED_READ_FILE_FORMATS:
-                raise DataSetError(
-                    f"This file format is read-only: '{self._file_format}' "
-                    f"If you want only to read, change write_mode to 'ignore'"
-                )
             raise DataSetError(
                 f"Unable to retrieve 'polars.DataFrame.write_{self._file_format}' "
                 "method, please "
@@ -215,9 +185,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " per the Polars API "
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
-        if self._write_mode == "ignore":
-            raise DataSetError(f"Write mode '{self._write_mode}' is read-only.")
-        self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = getattr(data, f"write_{self._file_format}", None)
@@ -241,7 +208,6 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         return {
             "file_format": self._file_format,
             "filepath": self._filepath,
-            "write_mode": self._write_mode,
             "protocol": self._protocol,
             "load_args": self._load_args,
             "save_args": self._save_args,

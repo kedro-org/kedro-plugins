@@ -86,7 +86,6 @@ def parquet_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_parquet):
     return GenericDataSet(
         filepath=filepath_parquet.as_posix(),
         file_format="parquet",
-        write_mode="ignore",
         load_args={"low_memory": True},
     )
 
@@ -99,7 +98,6 @@ def excel_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_excel):
     return GenericDataSet(
         filepath=filepath_excel.as_posix(),
         file_format="excel",
-        write_mode="ignore",
     )
 
 
@@ -109,31 +107,15 @@ def excel_data_set_overwrite(dummy_dataframe: pl.DataFrame, filepath_excel):
     pd_df.to_excel(filepath_excel, index=False)
 
     return GenericDataSet(
-        filepath=filepath_excel.as_posix(), file_format="excel", write_mode="overwrite"
+        filepath=filepath_excel.as_posix(),
+        file_format="excel",
     )
 
 
 class TestGenericExcelDataSet:
-    def test_assert_write_mode(self):
-        pattern = (
-            "Write mode `test` is not supported. "
-            "Allowed values are: overwrite, ignore."
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            GenericDataSet(
-                filepath="test.xlsx",
-                file_format="excel",
-                write_mode="test",
-            )
-
     def test_load(self, excel_data_set_ignore):
         df = excel_data_set_ignore.load()
         assert df.shape == (2, 3)
-
-    def test_save_fail_write_mode(self, excel_data_set_ignore, dummy_dataframe):
-        pattern = "Write mode 'ignore' is read-only"
-        with pytest.raises(DataSetError, match=pattern):
-            excel_data_set_ignore.save(dummy_dataframe)
 
     def test_save_fail_format(self, excel_data_set_overwrite, dummy_dataframe):
         pattern = (
@@ -163,7 +145,6 @@ class TestGenericExcelDataSet:
             filepath=filepath,
             file_format="excel",
             credentials=credentials,
-            write_mode="ignore",
         )
         assert isinstance(data_set._fs, instance_type)
 

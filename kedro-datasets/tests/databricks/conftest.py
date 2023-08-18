@@ -4,12 +4,12 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-import importlib.metadata
+import importlib_metadata as importlib_metadata
 
 import pytest
 from pyspark.sql import SparkSession
 
-DELTA_VERSION  = importlib.metadata.version("delta-spark")
+DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 
 @pytest.fixture(scope="class", autouse=True)

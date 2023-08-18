@@ -57,7 +57,7 @@ jobs:
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
       - name: Add MSBuild to PATH
-        if: inputs.os == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |

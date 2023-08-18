@@ -165,10 +165,10 @@ extras_require["test"] = [
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
-    "matplotlib>=3.5, <3.6; python_version == '3.10'",
+    "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
     "moto==1.3.7; python_version < '3.10'",
-    "moto==3.0.4; python_version == '3.10'",
+    "moto==3.0.4; python_version >= '3.10'",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -192,8 +192,9 @@ extras_require["test"] = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
-    "scikit-learn~=1.0.2",
+    "scikit-learn~=1.0.2, <2",
     "scipy~=1.7.3",
+    "semver",
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "SQLAlchemy>=1.4, <3.0",
     # The `Inspector.has_table()` method replaces the `Engine.has_table()` method in version 1.4.

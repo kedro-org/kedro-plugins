@@ -2,10 +2,14 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+
+# Release 1.5.3:
+## Bug fixes and other changes
 * Made `databricks.ManagedTableDataSet` read-only by default.
     * The user needs to specify `write_mode` to allow `save` on the data set.
 * Fixed an issue on `api.APIDataSet` where the sent data was doubly converted to json
   string (once by us and once by the `requests` library).
+* Fixed problematic `kedro-datasets` optional dependencies, revert to `setup.py`
 
 ## Community contributions
 # Release 1.5.2:

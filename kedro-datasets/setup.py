@@ -158,7 +158,7 @@ extras_require["test"] = [
     "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
-    "holoviews~=1.13.0",
+    "holoviews>=1.13.0",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.1.0",

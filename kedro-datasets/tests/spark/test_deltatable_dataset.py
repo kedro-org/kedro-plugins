@@ -8,11 +8,11 @@ from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
-from semver import VersionInfo
+from packaging.version import Version
 
 from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
 
-SPARK_VERSION = VersionInfo.parse(__version__)
+SPARK_VERSION = Version(__version__)
 
 
 @pytest.fixture

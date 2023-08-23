@@ -24,7 +24,7 @@ from pyspark.sql.types import (
     StructType,
 )
 from pyspark.sql.utils import AnalysisException
-from semver import VersionInfo
+from packaging.version import Version
 
 from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro_datasets.pickle import PickleDataSet
@@ -59,7 +59,7 @@ HDFS_FOLDER_STRUCTURE = [
     (HDFS_PREFIX + "/2019-02-01T00.00.00.000Z", [], ["other_file"]),
 ]
 
-SPARK_VERSION = VersionInfo.parse(__version__)
+SPARK_VERSION = Version(__version__)
 
 
 @pytest.fixture

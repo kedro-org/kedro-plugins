@@ -72,13 +72,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Determine Python version for linting
-          id: get-python-version
-          run: |
-            if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
-              echo "version=3.11" >> $GITHUB_OUTPUT
-            else
-              echo "version=3.8" >> $GITHUB_OUTPUT
-            fi
+        id: get-python-version
+        run: |
+          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+            echo "version=3.11" >> $GITHUB_OUTPUT
+          else
+            echo "version=3.8" >> $GITHUB_OUTPUT
+          fi
       - name: Set up Python
         uses: actions/setup-python@v3
         with:

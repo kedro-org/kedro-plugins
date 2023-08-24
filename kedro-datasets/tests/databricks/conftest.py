@@ -4,15 +4,19 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
+# importlib_metadata needs backport for python 3.8 and older
+import importlib_metadata as importlib_metadata  # pylint: disable=useless-import-alias
 import pytest
 from pyspark.sql import SparkSession
+
+DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 
 @pytest.fixture(scope="class", autouse=True)
 def spark_session():
     spark = (
         SparkSession.builder.appName("test")
-        .config("spark.jars.packages", "io.delta:delta-core_2.12:1.2.1")
+        .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",

@@ -173,7 +173,7 @@ class TestSparkStreamingDataSet:
         # AnalysisExceptions clearly indicating a missing file
         spark_data_set = SparkStreamingDataSet(filepath="")
 
-        if SPARK_VERSION.match(">=3.4.0"):
+        if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch.object(
                 spark_data_set,
                 "_get_spark",

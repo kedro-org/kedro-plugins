@@ -5,44 +5,42 @@ on:
     inputs:
       plugin:
         type: string
-      python-versions:
-        type: array
+      os:
+        type: string
+      python-version:
+        type: string
 
 jobs:
   unit-tests:
     defaults:
       run:
         shell: bash
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest ]
-        python-version: ${{ inputs.python-versions }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python ${{matrix.python-version}}
+      - name: Set up Python ${{input.python-version}}
         uses: actions/setup-python@v3
         with:
-          python-version: ${{matrix.python-version}}
+          python-version: ${{input.python-version}}
       - name: Cache python packages for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: input.os == 'ubuntu-latest'
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          key: ${{inputs.plugin}}-${{input.os}}-python-${{input.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Cache python packages for Windows
-        if: matrix.os == 'windows-latest'
+        if: input.os == 'windows-latest'
         uses: actions/cache@v3
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          key: ${{inputs.plugin}}-${{input.os}}-python-${{input.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
       - name: Add MSBuild to PATH
-        if: matrix.os == 'windows-latest'
+        if: input.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
@@ -51,15 +49,15 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
-        if: matrix.os != 'windows-latest'
+        if: input.os != 'windows-latest'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
-        if: matrix.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        if: input.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
-        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        if: input.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           make test-no-spark
 

@@ -21,7 +21,12 @@ on:
 
 jobs:
   datasets-test:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/check-plugin.yml
     with:
       plugin: kedro-datasets
-      python-versions: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}

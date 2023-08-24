@@ -10,7 +10,6 @@ on:
 
 jobs:
   unit-tests:
-    needs: setup-matrix
     defaults:
       run:
         shell: bash

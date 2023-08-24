@@ -1,5 +1,7 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Added support for Python 3.11.
 
 ## Bug fixes and other changes
 

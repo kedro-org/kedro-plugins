@@ -4,7 +4,7 @@ from setuptools import setup
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
 PANDAS = "pandas>=1.3, <3.0"
-SPARK = "pyspark>=2.2, <4.0"
+SPARK = "pyspark>=2.2, <3.4"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 POLARS = "polars~=0.17.0"
@@ -139,24 +139,26 @@ extras_require["docs"] = [
     "Jinja2<3.1.0",
 ]
 extras_require["test"] = [
-    "adlfs>=2021.7.1, <=2022.2",
+    "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
+    "adlfs~=2023.1; python_version >= '3.8'",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "biopython~=1.73",
     "blacken-docs==1.9.2",
     "black~=22.0",
-    "compress-pickle[lz4]~=1.2.0",
+    "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]",
-    "delta-spark~=1.2.1",
-    # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
+    "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "delta-spark~=1.2.1; python_version < '3.11'",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "gcsfs>=2021.4, <=2022.1",
+    "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
+    "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
-    "holoviews~=1.13.0",
+    "holoviews>=1.13.0",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.1.0",
@@ -165,25 +167,27 @@ extras_require["test"] = [
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
-    "matplotlib>=3.5, <3.6; python_version == '3.10'",
+    "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
     "moto==1.3.7; python_version < '3.10'",
-    "moto==3.0.4; python_version == '3.10'",
+    "moto==4.1.12; python_version >= '3.10'",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
-    "pandas-gbq>=0.12.0, <0.18.0",
-    "pandas>=1.3, <2",  # 1.3 for read_xml/to_xml, <2 for compatibility with Spark < 3.4
+    "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+    "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    "pandas~=1.3  # 1.3 for read_xml/to_xml",
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars~=0.15.13",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "psutil==5.8.0",
-    "pyarrow~=8.0",
+    "pyarrow>=1.0; python_version < '3.11'",
+    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pylint>=2.5.2, <3.0",
     "pyodbc~=4.0.35",
     "pyproj~=3.0",
-    "pyspark>=2.2, <4.0",
+    "pyspark>=2.2, <3.4; python_version < '3.11'",
+    "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
@@ -192,12 +196,14 @@ extras_require["test"] = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
-    "scikit-learn~=1.0.2",
-    "scipy~=1.7.3",
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
-    "SQLAlchemy>=1.4, <3.0",
-    # The `Inspector.has_table()` method replaces the `Engine.has_table()` method in version 1.4.
-    "tables~=3.7",
+    "scikit-learn>=1.0.2,<2",
+    "scipy>=1.7.3",
+    "packaging",
+    "SQLAlchemy~=1.2",
+    "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
+    "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
+    "tables~=3.6; platform_system != 'Windows'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",

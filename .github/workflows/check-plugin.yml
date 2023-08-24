@@ -7,14 +7,31 @@ on:
         type: string
 
 jobs:
+
+  setup-matrix:
+  # kedro-datasets is the only plugin that supports python 3.11
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+            MATRIX='["3.7", "3.8", "3.9", "3.10", "3.11"]'
+          else
+            MATRIX='["3.7", "3.8", "3.9", "3.10"]'
+          fi
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
   unit-tests:
+    needs: setup-matrix
     defaults:
       run:
         shell: bash
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -39,6 +56,9 @@ jobs:
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
+      - name: Add MSBuild to PATH
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
@@ -53,12 +73,8 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
-      - name: Run unit tests for Windows / kedro-datasets / no spark sequential
-        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
-        run: |
-          make test-no-spark-sequential
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
-        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version != '3.10'
+        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           make test-no-spark
 
@@ -70,10 +86,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python 3.8
+        # kedro-datasets is the only plugin that supports python 3.11
+      - name: Determine Python version for linting
+        id: get-python-version
+        run: |
+          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+            echo "version=3.11" >> $GITHUB_OUTPUT
+          else
+            echo "version=3.8" >> $GITHUB_OUTPUT
+          fi
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: ${{ steps.get-python-version.outputs.version }}
       - name: Cache python packages
         uses: actions/cache@v3
         with:

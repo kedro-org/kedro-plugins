@@ -19,28 +19,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python ${{input.python-version}}
+      - name: Set up Python ${{inputs.python-version}}
         uses: actions/setup-python@v3
         with:
-          python-version: ${{input.python-version}}
+          python-version: ${{inputs.python-version}}
       - name: Cache python packages for Linux
-        if: input.os == 'ubuntu-latest'
+        if: inputs.os == 'ubuntu-latest'
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{inputs.plugin}}-${{input.os}}-python-${{input.python-version}}
+          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Cache python packages for Windows
-        if: input.os == 'windows-latest'
+        if: inputs.os == 'windows-latest'
         uses: actions/cache@v3
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{inputs.plugin}}-${{input.os}}-python-${{input.python-version}}
+          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
       - name: Add MSBuild to PATH
-        if: input.os == 'windows-latest'
+        if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
@@ -49,15 +49,15 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
-        if: input.os != 'windows-latest'
+        if: inputs.os != 'windows-latest'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
-        if: input.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
-        if: input.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           make test-no-spark
 

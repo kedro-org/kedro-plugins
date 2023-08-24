@@ -411,7 +411,7 @@ class TestSparkDataSet:
             mocker.patch.object(
                 spark_data_set,
                 "_get_spark",
-                side_effect=AnalysisException("Other Exception", []),
+                side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch.object(

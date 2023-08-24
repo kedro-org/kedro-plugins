@@ -71,7 +71,7 @@ class TestDeltaTableDataSet:
         delta_ds = DeltaTableDataSet(filepath="")
         if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch.object(
-                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
+                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
             )
         else:
             mocker.patch.object(

@@ -5,24 +5,10 @@ on:
     inputs:
       plugin:
         type: string
+      python-versions:
+        type: array
 
 jobs:
-
-  setup-matrix:
-  # kedro-datasets is only plugin that supports python 3.11
-    runs-on: ubuntu-latest
-    outputs:
-      python-versions: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
-            MATRIX='["3.7", "3.8", "3.9", "3.10", "3.11"]'
-          else
-            MATRIX='["3.7", "3.8", "3.9", "3.10"]'
-          fi
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
-
   unit-tests:
     needs: setup-matrix
     defaults:
@@ -31,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
+        python-version: ${{ inputs.python-versions }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -126,15 +112,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python 3.8
+      - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.11"
       - name: Cache python packages
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{inputs.plugin}}-ubuntu-latest-python-"3.8"
+          key: ${{inputs.plugin}}-ubuntu-latest-python-"3.11"
           restore-keys: ${{inputs.plugin}}
       - name: Install dependencies
         run: |

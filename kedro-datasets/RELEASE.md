@@ -1,9 +1,12 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 1.6.0:
 
 ## Major features and improvements
 * Added support for Python 3.11.
-
-## Bug fixes and other changes
 
 # Release 1.5.3:
 ## Bug fixes and other changes

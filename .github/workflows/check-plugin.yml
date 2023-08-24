@@ -5,42 +5,59 @@ on:
     inputs:
       plugin:
         type: string
-      os:
-        type: string
-      python-version:
-        type: string
 
 jobs:
+
+  setup-matrix:
+  # kedro-datasets is only plugin that supports python 3.11
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+            MATRIX='["3.7", "3.8", "3.9", "3.10", "3.11"]'
+          else
+            MATRIX='["3.7", "3.8", "3.9", "3.10"]'
+          fi
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
   unit-tests:
+    needs: setup-matrix
     defaults:
       run:
         shell: bash
-    runs-on: ${{ inputs.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: ${{fromJson(needs.setup-matrix.outputs.python-versions)}}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python ${{inputs.python-version}}
+      - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v3
         with:
-          python-version: ${{inputs.python-version}}
+          python-version: ${{matrix.python-version}}
       - name: Cache python packages for Linux
-        if: inputs.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Cache python packages for Windows
-        if: inputs.os == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         uses: actions/cache@v3
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
           restore-keys: ${{inputs.plugin}}
       - name: Install Kedro
         run: pip install git+https://github.com/kedro-org/kedro@main
       - name: Add MSBuild to PATH
-        if: inputs.os == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
@@ -49,15 +66,15 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
-        if: inputs.os != 'windows-latest'
+        if: matrix.os != 'windows-latest'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
-        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        if: matrix.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
-        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           make test-no-spark
 
@@ -70,13 +87,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Determine Python version for linting
-        id: get-python-version
-        run: |
-          if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
-            echo "version=3.11" >> $GITHUB_OUTPUT
-          else
-            echo "version=3.8" >> $GITHUB_OUTPUT
-          fi
+          id: get-python-version
+          run: |
+            if [[ "${{ inputs.plugin }}" == "kedro-datasets" ]]; then
+              echo "version=3.11" >> $GITHUB_OUTPUT
+            else
+              echo "version=3.8" >> $GITHUB_OUTPUT
+            fi
       - name: Set up Python
         uses: actions/setup-python@v3
         with:

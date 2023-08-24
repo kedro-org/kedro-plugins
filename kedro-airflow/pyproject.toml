@@ -24,7 +24,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<3.0",
+    "apache-airflow<2.7.0", # TODO: Temporary fix, make kedro-airflow compatible with new version of airflow
     "bandit>=1.6.2, <2.0",
     "behave",
     "black~=22.0",

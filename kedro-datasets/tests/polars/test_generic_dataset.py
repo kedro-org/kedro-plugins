@@ -91,18 +91,7 @@ def parquet_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_parquet):
 
 
 @pytest.fixture
-def excel_data_set_ignore(dummy_dataframe: pl.DataFrame, filepath_excel):
-    pd_df = dummy_dataframe.to_pandas()
-    pd_df.to_excel(filepath_excel, index=False)
-
-    return GenericDataSet(
-        filepath=filepath_excel.as_posix(),
-        file_format="excel",
-    )
-
-
-@pytest.fixture
-def excel_data_set_overwrite(dummy_dataframe: pl.DataFrame, filepath_excel):
+def excel_data_set(dummy_dataframe: pl.DataFrame, filepath_excel):
     pd_df = dummy_dataframe.to_pandas()
     pd_df.to_excel(filepath_excel, index=False)
 
@@ -113,17 +102,14 @@ def excel_data_set_overwrite(dummy_dataframe: pl.DataFrame, filepath_excel):
 
 
 class TestGenericExcelDataSet:
-    def test_load(self, excel_data_set_ignore):
-        df = excel_data_set_ignore.load()
+    def test_load(self, excel_data_set):
+        df = excel_data_set.load()
         assert df.shape == (2, 3)
 
-    def test_save_fail_format(self, excel_data_set_overwrite, dummy_dataframe):
-        pattern = (
-            "This file format is read-only: 'excel' "
-            "If you want only to read, change write_mode to 'ignore'"
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            excel_data_set_overwrite.save(dummy_dataframe)
+    def test_save_and_load(self, excel_data_set, dummy_dataframe):
+        excel_data_set.save(dummy_dataframe)
+        reloaded_df = excel_data_set.load()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
 
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",

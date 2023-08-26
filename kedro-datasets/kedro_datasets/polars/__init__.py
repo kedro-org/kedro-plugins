@@ -7,5 +7,6 @@ import lazy_loader as lazy
 CSVDataSet: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"csv_dataset": ["CSVDataSet"], "generic_dataset": ["GenericDataSet"]}
+    __name__,
+    submod_attrs={"csv_dataset": ["CSVDataSet"], "generic_dataset": ["GenericDataSet"]},
 )

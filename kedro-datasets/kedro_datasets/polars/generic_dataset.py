@@ -156,9 +156,8 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " API"
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
-        else:
-            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-                return load_method(fs_file, **self._load_args)
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            return load_method(fs_file, **self._load_args)
 
     def _save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
@@ -172,12 +171,11 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 " per the Polars API "
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
-        else:
-            buf = BytesIO()
-            save_method(file=buf, **self._save_args)
-            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                fs_file.write(buf.getvalue())
-                self._invalidate_cache()
+        buf = BytesIO()
+        save_method(file=buf, **self._save_args)
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            fs_file.write(buf.getvalue())
+            self._invalidate_cache()
 
     def _exists(self) -> bool:
         try:

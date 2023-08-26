@@ -2,10 +2,13 @@
 and returns them into either as string or json Dict.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+from typing import Any
 
-__all__ = ["APIDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+APIDataSet: Any
 
-with suppress(ImportError):
-    from .api_dataset import APIDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"api_dataset": ["APIDataSet"]}
+)

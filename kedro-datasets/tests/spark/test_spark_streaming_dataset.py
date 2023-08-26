@@ -4,6 +4,8 @@ import boto3
 import pytest
 from kedro.io.core import DataSetError
 from moto import mock_s3
+from packaging.version import Version
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
@@ -14,6 +16,8 @@ from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
 SCHEMA_FILE_NAME = "schema.json"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+
+SPARK_VERSION = Version(__version__)
 
 
 def sample_schema(schema_path):
@@ -168,11 +172,18 @@ class TestSparkStreamingDataSet:
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file
         spark_data_set = SparkStreamingDataSet(filepath="")
-        mocker.patch.object(
-            spark_data_set,
-            "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
-        )
 
+        if SPARK_VERSION >= Version("3.4.0"):
+            mocker.patch.object(
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception"),
+            )
+        else:
+            mocker.patch.object(
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()

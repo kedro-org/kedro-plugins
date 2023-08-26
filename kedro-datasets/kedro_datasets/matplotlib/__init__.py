@@ -1,8 +1,10 @@
 """``AbstractDataSet`` implementation to save matplotlib objects as image files."""
+from typing import Any
 
-__all__ = ["MatplotlibWriter"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+MatplotlibWriter: Any
 
-with suppress(ImportError):
-    from .matplotlib_writer import MatplotlibWriter
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"matplotlib_writer": ["MatplotlibWriter"]}
+)

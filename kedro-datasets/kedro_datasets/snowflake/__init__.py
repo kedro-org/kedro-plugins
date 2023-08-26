@@ -1,8 +1,11 @@
 """Provides I/O modules for Snowflake."""
+from typing import Any
 
-__all__ = ["SnowparkTableDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+SnowparkTableDataSet: Any
 
-with suppress(ImportError):
-    from .snowpark_dataset import SnowparkTableDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"snowpark_dataset": ["SnowparkTableDataSet"]}
+)

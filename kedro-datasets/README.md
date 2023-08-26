@@ -27,7 +27,7 @@ These data connectors are supported with the APIs of `pandas`, `spark`, `network
 
 [The Data Catalog](https://kedro.readthedocs.io/en/stable/data/data_catalog.html) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
 
-Here is a full list of [supported data connectors and APIs](https://kedro.readthedocs.io/en/stable/kedro.datasets.html).
+Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/en/stable/kedro_datasets.html).
 
 ## How can I create my own `AbstractDataSet` implementation?
 

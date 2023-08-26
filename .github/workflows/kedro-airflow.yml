@@ -15,6 +15,9 @@ on:
       - "kedro-datasets/**"
       - "kedro-docker/**"
       - "kedro-telemetry/**"
+  schedule:
+    # Run every day at midnight (UTC time)
+    - cron: '0 0 * * *'
 
 jobs:
   airflow-test:

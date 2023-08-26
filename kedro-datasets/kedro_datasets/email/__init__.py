@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementations for managing email messages."""
+from typing import Any
 
-__all__ = ["EmailMessageDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+EmailMessageDataSet: Any
 
-with suppress(ImportError):
-    from .message_dataset import EmailMessageDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"message_dataset": ["EmailMessageDataSet"]}
+)

@@ -5,9 +5,11 @@ import pickle
 from copy import deepcopy
 from typing import Any, Dict, List
 
-from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 
 # pylint:disable=too-many-instance-attributes

@@ -13,17 +13,14 @@ from warnings import warn
 
 import fsspec
 from hdfs import HdfsError, InsecureClient
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
+
+from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
+from .._io import DatasetError as DataSetError
 
 logger = logging.getLogger(__name__)
 
@@ -409,10 +406,9 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Delta table" in exception.desc
-            ):
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = exception.desc if hasattr(exception, "desc") else str(exception)
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
         return True

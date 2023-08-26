@@ -5,11 +5,13 @@ from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn
 
 from delta.tables import DeltaTable
-from kedro.io.core import AbstractDataSet, DataSetError
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 
 class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
@@ -96,7 +98,9 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         try:
             self._get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = exception.desc if hasattr(exception, "desc") else str(exception)
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
 

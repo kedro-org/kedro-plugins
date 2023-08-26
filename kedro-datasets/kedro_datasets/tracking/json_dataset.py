@@ -6,10 +6,10 @@ from typing import NoReturn
 
 from kedro.io.core import DataSetError
 
-from kedro_datasets.json import JSONDataSet as JDS
+from kedro_datasets.json import json_dataset
 
 
-class JSONDataSet(JDS):
+class JSONDataSet(json_dataset.JSONDataSet):
     """``JSONDataSet`` saves data to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
     The ``JSONDataSet`` is part of Kedro Experiment Tracking.

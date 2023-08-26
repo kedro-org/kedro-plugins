@@ -14,7 +14,7 @@ install-pip-setuptools:
 	python -m pip install -U pip setuptools wheel
 
 lint:
-	cd $(plugin) && pre-commit run -a --hook-stage manual
+	pre-commit run trailing-whitespace --all-files && pre-commit run end-of-file-fixer --all-files && pre-commit run check-yaml --all-files && pre-commit run check-added-large-files --all-files && pre-commit run check-case-conflict --all-files && pre-commit run check-merge-conflict --all-files && pre-commit run debug-statements --all-files && pre-commit run flake8 --all-files && pre-commit run isort-$(plugin) --all-files --hook-stage manual && pre-commit run black-$(plugin) --all-files --hook-stage manual && pre-commit run secret_scan --all-files --hook-stage manual && pre-commit run bandit --all-files --hook-stage manual && pre-commit run pylint-$(plugin) --all-files --hook-stage manual && pre-commit run pylint-$(plugin)-features --all-files --hook-stage manual && pre-commit run pylint-$(plugin)-tests --all-files --hook-stage manual
 
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
@@ -35,7 +35,7 @@ clean:
 	find . -regex ".*\.egg-info" -exec rm -rf {} +;\
 
 install-test-requirements:
-	cd $(plugin) && pip install -r test_requirements.txt
+	cd $(plugin) && pip install ".[test]"
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks
@@ -60,3 +60,6 @@ test-no-spark-sequential:
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
 	cd kedro-datasets && pytest tests --no-cov --numprocesses 1 --dist loadfile -m snowflake
+
+rtd:
+	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

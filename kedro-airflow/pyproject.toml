@@ -13,7 +13,7 @@ license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.17.5",
     "python-slugify>=4.0",
-    "semver~=2.10",  # Needs to be at least 2.10.0 to get VersionInfo.match
+    "semver>=2.10",  # Needs to be at least 2.10.0 to make use of `VersionInfo.match`.
 ]
 dynamic = ["readme", "version"]
 
@@ -21,6 +21,23 @@ dynamic = ["readme", "version"]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow"
 Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/README.md"
 Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.optional-dependencies]
+test = [
+    "apache-airflow<2.7.0", # TODO: Temporary fix, make kedro-airflow compatible with new version of airflow
+    "bandit>=1.6.2, <2.0",
+    "behave",
+    "black~=22.0",
+    "flake8",
+    "pre-commit>=1.17.0, <2.0",
+    "pylint>=2.5.2, <3.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist",
+    "trufflehog>=2.1.0, <3.0",
+    "wheel"
+]
 
 [project.entry-points."kedro.project_commands"]
 airflow = "kedro_airflow.plugin:commands"

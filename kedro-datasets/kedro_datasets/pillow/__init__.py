@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementation to load/save image data."""
+from typing import Any
 
-__all__ = ["ImageDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+ImageDataSet: Any
 
-with suppress(ImportError):
-    from .image_dataset import ImageDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"image_dataset": ["ImageDataSet"]}
+)

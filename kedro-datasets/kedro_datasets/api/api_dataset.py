@@ -6,9 +6,11 @@ from copy import deepcopy
 from typing import Any, Dict, List, Tuple, Union
 
 import requests
-from kedro.io.core import AbstractDataSet, DataSetError
 from requests import Session, sessions
 from requests.auth import AuthBase
+
+from .._io import AbstractDataset as AbstractDataSet
+from .._io import DatasetError as DataSetError
 
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
@@ -205,9 +207,9 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
     def _execute_save_request(self, json_data: Any) -> requests.Response:
         try:
-            json_.loads(json_data)
+            self._request_args["json"] = json_.loads(json_data)
         except TypeError:
-            self._request_args["json"] = json_.dumps(json_data)
+            self._request_args["json"] = json_data
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()

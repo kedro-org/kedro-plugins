@@ -1,8 +1,11 @@
 """``AbstractDataSet`` implementation to load/save data from/to a redis db."""
+from typing import Any
 
-__all__ = ["PickleDataSet"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+PickleDataSet: Any
 
-with suppress(ImportError):
-    from .redis_dataset import PickleDataSet
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"redis_dataset": ["PickleDataSet"]}
+)

@@ -3,7 +3,6 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
@@ -12,6 +11,8 @@ from kedro_datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
+
+from .._io import AbstractDataset as AbstractDataSet
 
 
 class SparkStreamingDataSet(AbstractDataSet):
@@ -148,9 +149,11 @@ class SparkStreamingDataSet(AbstractDataSet):
                 load_path, self._file_format
             )
         except AnalysisException as exception:
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = exception.desc if hasattr(exception, "desc") else str(exception)
             if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Streaming data" in exception.desc
+                "Path does not exist:" in message
+                or "is not a Streaming data" in message
             ):
                 return False
             raise

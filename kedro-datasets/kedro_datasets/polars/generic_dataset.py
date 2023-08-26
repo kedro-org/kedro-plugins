@@ -172,7 +172,7 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
         buf = BytesIO()
-        save_method(file=buf, **self._save_args)
+        save_method(buf, **self._save_args)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             fs_file.write(buf.getvalue())
             self._invalidate_cache()

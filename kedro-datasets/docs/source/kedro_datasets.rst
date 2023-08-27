@@ -36,6 +36,8 @@ kedro_datasets
    kedro_datasets.pandas.SQLQueryDataSet
    kedro_datasets.pandas.SQLTableDataSet
    kedro_datasets.pandas.XMLDataSet
+   kedro_datasets.partitions.IncrementalDataset
+   kedro_datasets.partitions.PartitionedDataset
    kedro_datasets.pickle.PickleDataSet
    kedro_datasets.pillow.ImageDataSet
    kedro_datasets.plotly.JSONDataSet

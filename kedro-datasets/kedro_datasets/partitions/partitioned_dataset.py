@@ -1,4 +1,4 @@
-"""``PartitionedDataSet`` loads and saves partitioned file-like data using the
+"""``PartitionedDataset`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
 from __future__ import annotations
@@ -14,8 +14,8 @@ from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataSet,
-    DataSetError,
+    AbstractDataset,
+    DatasetError,
     parse_dataset_definition,
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
@@ -28,9 +28,9 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], Any]]]):
+class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], Any]]]):
     # pylint: disable=too-many-instance-attributes,protected-access
-    """``PartitionedDataSet`` loads and saves partitioned file-like data using the
+    """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
@@ -45,7 +45,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
     .. code-block:: yaml
 
         station_data:
-          type: PartitionedDataSet
+          type: PartitionedDataset
           path: data/03_primary/station_data
           dataset:
             type: pandas.CSVDataset
@@ -62,7 +62,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
     ::
 
         >>> import pandas as pd
-        >>> from kedro_datasets.partitions import PartitionedDataSet
+        >>> from kedro_datasets.partitions import PartitionedDataset
         >>>
         >>> # Create a fake pandas dataframe with 10 rows of data
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
@@ -74,7 +74,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
             }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
-        >>> data_set = PartitionedDataSet(
+        >>> data_set = PartitionedDataset(
                 path="df_with_partition",
                 dataset="pandas.CSVDataset",
                 filename_suffix=".csv"
@@ -99,13 +99,13 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
     ::
 
         >>> import pandas as pd
-        >>> from kedro_datasets.partitions import PartitionedDataSet
+        >>> from kedro_datasets.partitions import PartitionedDataset
         >>>
         >>> # these credentials will be passed to both 'fsspec.filesystem()' call
         >>> # and the dataset initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = PartitionedDataSet(
+        >>> data_set = PartitionedDataset(
                 path="s3://bucket-name/path/to/folder",
                 dataset="pandas.CSVDataset",
                 credentials=credentials
@@ -130,7 +130,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | Dict[str, Any],
+        dataset: str | type[AbstractDataset] | Dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
@@ -139,7 +139,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
         overwrite: bool = False,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PartitionedDataSet``.
+        """Creates a new instance of ``PartitionedDataset``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -149,11 +149,11 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
                 ``fsspec.implementations.local.LocalFileSystem`` will be used.
                 **Note:** Some concrete implementations are bundled with ``fsspec``,
                 while others (like ``s3`` or ``gcs``) must be installed separately
-                prior to usage of the ``PartitionedDataSet``.
+                prior to usage of the ``PartitionedDataset``.
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -180,7 +180,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the underlying dataset.
         """
         # pylint: disable=import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons
@@ -197,7 +197,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
         if VERSION_KEY in self._dataset_config:
-            raise DataSetError(
+            raise DatasetError(
                 f"'{self.__class__.__name__}' does not support versioning of the "
                 f"underlying dataset. Please remove '{VERSIONED_FLAG_KEY}' flag from "
                 f"the dataset definition."
@@ -288,7 +288,7 @@ class PartitionedDataSet(AbstractDataSet[Dict[str, Any], Dict[str, Callable[[], 
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError(f"No partitions found in '{self._path}'")
+            raise DatasetError(f"No partitions found in '{self._path}'")
 
         return partitions
 

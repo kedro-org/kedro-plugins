@@ -15,17 +15,17 @@ from cachetools import cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataSet,
-    DataSetError,
+    AbstractDataset,
+    DatasetError,
     parse_dataset_definition,
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
-from .partitioned_dataset import KEY_PROPAGATION_WARNING, PartitionedDataSet
+from .partitioned_dataset import KEY_PROPAGATION_WARNING, PartitionedDataset
 
 
-class IncrementalDataSet(PartitionedDataSet):
+class IncrementalDataset(PartitionedDataset):
     """``IncrementalDataset`` inherits from ``PartitionedDataset``, which loads
     and saves partitioned file-like data using the underlying dataset
     definition. For filesystem level operations it uses `fsspec`:
@@ -37,7 +37,7 @@ class IncrementalDataSet(PartitionedDataSet):
     Example:
     ::
 
-        >>> from kedro_datasets.partitions import IncrementalDataSet
+        >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
         >>> # these credentials will be passed to:
         >>> # a) 'fsspec.filesystem()' call,
@@ -45,7 +45,7 @@ class IncrementalDataSet(PartitionedDataSet):
         >>> # c) the checkpoint initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = IncrementalDataSet(
+        >>> data_set = IncrementalDataset(
         >>>     path="s3://bucket-name/path/to/folder",
         >>>     dataset="pandas.CSVDataset",
         >>>     credentials=credentials
@@ -68,7 +68,7 @@ class IncrementalDataSet(PartitionedDataSet):
     def __init__(
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | Dict[str, Any],
+        dataset: str | type[AbstractDataset] | Dict[str, Any],
         checkpoint: str | Dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -77,7 +77,7 @@ class IncrementalDataSet(PartitionedDataSet):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``IncrementalDataSet``.
+        """Creates a new instance of ``IncrementalDataset``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -91,7 +91,7 @@ class IncrementalDataSet(PartitionedDataSet):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -125,7 +125,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the underlying dataset.
         """
 
         super().__init__(
@@ -156,7 +156,7 @@ class IncrementalDataSet(PartitionedDataSet):
         checkpoint_config = checkpoint_config or {}
 
         for key in {VERSION_KEY, VERSIONED_FLAG_KEY} & checkpoint_config.keys():
-            raise DataSetError(
+            raise DatasetError(
                 f"'{self.__class__.__name__}' does not support versioning of the "
                 f"checkpoint. Please remove '{key}' key from the checkpoint definition."
             )
@@ -206,7 +206,7 @@ class IncrementalDataSet(PartitionedDataSet):
         )
 
     @property
-    def _checkpoint(self) -> AbstractDataSet:
+    def _checkpoint(self) -> AbstractDataset:
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 
@@ -215,7 +215,7 @@ class IncrementalDataSet(PartitionedDataSet):
             return self._force_checkpoint
         try:
             return self._checkpoint.load()
-        except DataSetError:
+        except DatasetError:
             return None
 
     def _load(self) -> Dict[str, Callable[[], Any]]:

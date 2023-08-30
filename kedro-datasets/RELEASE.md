@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `polars.GenericDataSet`, a `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust.
+
 ## Bug fixes and other changes
 ## Community contributions
 

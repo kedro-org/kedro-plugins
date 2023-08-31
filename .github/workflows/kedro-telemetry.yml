@@ -1,6 +1,7 @@
 name: Run checks on Kedro-Telemetry
 
 on:
+  workflow_call:
   push:
     branches:
       - main
@@ -20,7 +21,31 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  telemetry-test:
-    uses: ./.github/workflows/check-plugin.yml
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    uses: ./.github/workflows/reusable/unit-tests.yml
     with:
       plugin: kedro-telemetry
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+
+  lint:
+    uses: ./.github/workflows/reusable/lint.yml
+    with:
+      plugin: kedro-telemetry
+      os: ubuntu-latest
+      python-version: "3.8"
+
+  e2e-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    uses: ./.github/workflows/reusable/e2e-tests.yml
+    with:
+      plugin: kedro-telemetry
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}

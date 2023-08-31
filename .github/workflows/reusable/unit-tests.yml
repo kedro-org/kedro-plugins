@@ -1,0 +1,63 @@
+name: Run unit tests
+
+on:
+  workflow_call:
+    inputs:
+      plugin:
+        type: string
+      os:
+        type: string
+      python-version:
+        type: string
+
+jobs:
+
+  unit-tests:
+    runs-on: ${{ inputs.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{inputs.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{inputs.python-version}}
+      - name: Cache python packages for Linux
+        if: inputs.os == 'ubuntu-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Cache python packages for Windows
+        if: inputs.os == 'windows-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Install Kedro
+        run: pip install git+https://github.com/kedro-org/kedro@main
+      - name: Add MSBuild to PATH
+        if: inputs.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v1
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install ".[test]"
+      - name: pip freeze
+        run: pip freeze
+      - name: Run unit tests for Linux / all plugins
+        if: inputs.os != 'windows-latest'
+        run: make plugin=${{ inputs.plugin }} test
+      - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
+        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        run: |
+          cd ${{ inputs.plugin }}
+          pytest tests
+      - name: Run unit tests for Windows / kedro-datasets / no spark parallel
+        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        run: |
+          make test-no-spark

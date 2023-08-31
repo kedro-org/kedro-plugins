@@ -34,7 +34,7 @@ jobs:
   test:
     needs: check-version
     if: ${{ needs.check-version.outputs.new_release == 'true' }}
-    uses: ./.github/workflows/check-plugin.yml
+    uses: ./.github/workflows/${{ steps.version_check.outputs.package_name }}.yml
     with:
       plugin: ${{ needs.check-version.outputs.package_name }}
 

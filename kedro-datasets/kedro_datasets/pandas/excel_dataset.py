@@ -53,8 +53,8 @@ class ExcelDataSet(
           filepath: data/01_raw/shuttles.xlsx
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
     ::
 
         >>> from kedro_datasets.pandas import ExcelDataSet
@@ -86,8 +86,8 @@ class ExcelDataSet(
             sheet_name: [Sheet1, Sheet2, Sheet3]
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_
     for a multi-sheet Excel file:
     ::
 

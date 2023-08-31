@@ -33,8 +33,8 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
           filepath: data/02_intermediate/data.parquet
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
     ::
 
         >>> from pyspark.sql import SparkSession

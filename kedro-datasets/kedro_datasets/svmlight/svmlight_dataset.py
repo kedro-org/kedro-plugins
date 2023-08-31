@@ -40,9 +40,8 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
     libsvm command line programs.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
 
     .. code-block:: yaml
 
@@ -66,9 +65,8 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
             zero_based: False
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
-    advanced_data_catalog_usage.html>`_:
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
     ::
 
         >>> from kedro_datasets.svmlight import SVMLightDataSet

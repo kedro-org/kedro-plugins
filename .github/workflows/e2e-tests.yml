@@ -9,7 +9,7 @@ on:
         type: string
       python-version:
         type: string
-        
+
 jobs:
   e2e-tests:
     defaults:

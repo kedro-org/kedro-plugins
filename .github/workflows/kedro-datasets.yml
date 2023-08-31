@@ -52,11 +52,11 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{inputs.plugin}}-ubuntu-latest-python-"3.8"
-          restore-keys: ${{inputs.plugin}}
+          key: kedro-datasets-ubuntu-latest-python-"3.8"
+          restore-keys: kedro-datasets
       - name: Install dependencies
         run: |
-          cd ${{ inputs.plugin }}
+          cd kedro-datasets
           pip install ".[docs]"
           pip install ".[test]"
       - name: RTD build for kedro-datasets

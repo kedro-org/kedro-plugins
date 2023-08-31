@@ -102,8 +102,8 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     symmetric.
 
     Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -125,8 +125,8 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
           con: postgresql://scott:tiger@localhost/test
 
     Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro_datasets.pandas import SQLTableDataSet
@@ -279,8 +279,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
 
     Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -310,8 +310,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
           con: postgresql://scott:tiger@localhost/test
 
     Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro_datasets.pandas import SQLQueryDataSet

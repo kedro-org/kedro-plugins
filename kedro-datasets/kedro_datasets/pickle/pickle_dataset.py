@@ -22,8 +22,8 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     supports all allowed options for loading and saving pickle files.
 
     Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -41,8 +41,8 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
             compress: lz4
 
     Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro_datasets.pickle import PickleDataSet

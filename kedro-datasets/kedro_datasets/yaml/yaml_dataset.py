@@ -18,8 +18,8 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
     filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 
     Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -28,8 +28,8 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
           filepath: cars.yaml
 
     Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro_datasets.yaml import YAMLDataSet

@@ -18,8 +18,8 @@ class MetricsDataSet(json_dataset.JSONDataSet):
     it is versioned by default and only takes metrics of numeric values.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
 
     .. code-block:: yaml
 

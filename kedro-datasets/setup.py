@@ -7,7 +7,7 @@ PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <3.4"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
-POLARS = "polars~=0.18.0"
+POLARS = "polars>=0.18.0"
 DELTA = "delta-spark~=1.2.1"
 
 
@@ -185,7 +185,7 @@ extras_require["test"] = [
     "pandas~=1.3  # 1.3 for read_xml/to_xml",
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
-    "polars[xlsx2csv, deltalake]~=0.18.0",
+    "polars[xlsx2csv, deltalake]~=0.19.0",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors

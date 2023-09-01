@@ -71,8 +71,9 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         fs_args: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``GenericDataSet`` pointing to a concrete data file
-        on a specific filesystem. The appropriate polars load/save methods are
-        dynamically identified by string matching on a best effort basis.
+        on a specific filesystem. The appropriate polars load/save methods are dynamically
+        identified by string matching on a best effort basis.
+
         Args:
             filepath: Filepath in POSIX format to a file prefixed with a protocol like
                 `s3://`.
@@ -80,16 +81,15 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
                 will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Key assumption: The first argument of either load/save method points to
-                a filepath/buffer/io type location. There are some read/write targets
-                such as 'clipboard' or 'records' that will fail since they do not take a
-                filepath like argument.
-            file_format: String which is used to match the appropriate load/save method
-                on a best effort basis. For example if 'csv' is passed the
-                `polars.read_csv` and
+                a filepath/buffer/io type location. There are some read/write targets such
+                as 'clipboard' or 'records' that will fail since they do not take a filepath
+                like argument.
+            file_format: String which is used to match the appropriate load/save method on a
+                best effort basis. For example if 'csv' is passed, the `polars.read_csv` and
                 `polars.DataFrame.write_csv` methods will be identified. An error will
-                be raised unless
-                at least one matching `read_{file_format}` or `write_{file_format}`.
-            load_args: polars options for loading files.
+                be raised unless there is at least one matching `read_<file_format>`
+                or `write_<file_format>`.
+            load_args: Polars options for loading CSV files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/io.html
                 All defaults are preserved.
@@ -104,16 +104,12 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
-                to pass to the filesystem's `open` method through nested keys
-                `open_args_load` and `open_args_save`.
-                Here you can find all available arguments for `open`:
-                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
-            DataSetError: Will be raised if at least less than one appropriate
-                read or write methods are identified.
+            DataSetError: Will be raised if at least less than one appropriate read or write
+                methods are identified.
         """
 
         self._file_format = file_format.lower()

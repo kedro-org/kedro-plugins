@@ -41,7 +41,7 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -66,7 +66,7 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro_datasets.svmlight import SVMLightDataSet

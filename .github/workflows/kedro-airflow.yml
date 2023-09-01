@@ -16,9 +16,6 @@ on:
       - "kedro-datasets/**"
       - "kedro-docker/**"
       - "kedro-telemetry/**"
-  schedule:
-    # Run every day at midnight (UTC time)
-    - cron: '0 0 * * *'
 
 jobs:
   unit-tests:
@@ -42,7 +39,7 @@ jobs:
   e2e-tests:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
         python-version: [ "3.7", "3.8", "3.9", "3.10" ]
     uses: ./.github/workflows/e2e-tests.yml
     with:

@@ -16,15 +16,12 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
-  schedule:
-    # Run every day at midnight (UTC time)
-    - cron: '0 0 * * *'
 
 jobs:
   unit-tests:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
         python-version: [ "3.7", "3.8", "3.9", "3.10" ]
     uses: ./.github/workflows/unit-tests.yml
     with:

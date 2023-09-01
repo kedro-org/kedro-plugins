@@ -39,10 +39,9 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         >>>   save_args:
         >>>     compression: "snappy"
 
-    Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    Example using Python API:
     ::
+
         >>> from kedro_datasets.polars import GenericDataSet
         >>> import polars as pl
         >>>

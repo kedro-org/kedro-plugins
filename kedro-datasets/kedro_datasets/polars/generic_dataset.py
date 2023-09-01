@@ -23,18 +23,21 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     """`polars.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to dynamically select the
     appropriate type of read/write target on a best effort basis.
-    Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Example adding a catalog entry with
+    `YAML API
+    <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
+
     .. code-block:: yaml
-        cars:
-          type: polars.GenericDataSet
-          file_format: parquet
-          filepath: s3://data/01_raw/company/cars.parquet
-          load_args:
-            low_memory: True
-          save_args:
-            compression: "snappy"
+
+        >>> cars:
+        >>>   type: polars.GenericDataSet
+        >>>   file_format: parquet
+        >>>   filepath: s3://data/01_raw/company/cars.parquet
+        >>>   load_args:
+        >>>     low_memory: True
+        >>>   save_args:
+        >>>     compression: "snappy"
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\

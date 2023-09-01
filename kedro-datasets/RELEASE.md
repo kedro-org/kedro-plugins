@@ -9,7 +9,7 @@
 
 ## Bug fixes and other changes
 * Fixed broken links in docstrings.
-* Revert pyspark support to 3.4+.
+* Reverted PySpark pin to <4.0.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

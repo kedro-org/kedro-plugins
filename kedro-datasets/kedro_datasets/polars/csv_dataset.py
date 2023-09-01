@@ -28,8 +28,8 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
 
     Example adding a catalog entry with
     `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html#data-catalog-yaml-examples>`_:
 
     .. code-block:: yaml
 

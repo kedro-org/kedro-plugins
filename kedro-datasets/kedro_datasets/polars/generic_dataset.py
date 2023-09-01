@@ -20,9 +20,10 @@ from kedro.io.core import (
 
 # pylint: disable=too-many-instance-attributes
 class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
-    """`polars.GenericDataSet` loads/saves data from/to a data file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses polars to dynamically select the
-    appropriate type of read/write target on a best effort basis.
+    """``polars.GenericDataSet`` loads/saves data from/to a data file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
+    appropriate type of read/write on a best effort basis.
+
     Example adding a catalog entry with
     `YAML API
     <https://docs.kedro.org/en/stable/data/\
@@ -52,6 +53,7 @@ class GenericDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.frame_equal(reloaded)
+
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]

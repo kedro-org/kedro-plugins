@@ -1,4 +1,4 @@
-name: Run checks on Kedro-Datasets
+name: Run checks on kedro-datasets
 
 on:
   workflow_call:

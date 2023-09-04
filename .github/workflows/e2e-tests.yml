@@ -1,4 +1,4 @@
-name: Running e2e tests
+name: Run e2e tests
 
 on:
   workflow_call:

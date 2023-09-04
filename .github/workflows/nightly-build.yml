@@ -1,0 +1,92 @@
+name: Run nightly tests on all plugins
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at midnight (UTC time)
+    - cron: '0 0 * * *'
+
+jobs:
+  airflow-test:
+    uses: ./.github/workflows/kedro-airflow.yml
+
+  datasets-test:
+    uses: ./.github/workflows/kedro-datasets.yml
+
+  docker-test:
+    uses: ./.github/workflows/kedro-docker.yml
+
+  telemetry-test:
+    uses: ./.github/workflows/kedro-telemetry.yml
+
+  notify-airflow:
+    permissions:
+      issues: write
+    name: Notify failed build for airflow
+    needs: airflow-test
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "airflow nightly build"
+          title-template: "`kedro-airflow`: Nightly build failure"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false
+
+  notify-datasets:
+    permissions:
+      issues: write
+    name: Notify failed build for datasets
+    needs: datasets-test
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "datasets nightly build"
+          title-template: "`kedro-datasets`: Nightly build failure"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false
+
+  notify-docker:
+    permissions:
+      issues: write
+    name: Notify failed build for docker
+    needs: docker-test
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "docker nightly build"
+          title-template: "`kedro-docker`: Nightly build failure"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false
+
+  notify-telemetry:
+    permissions:
+      issues: write
+    name: Notify failed build for telemetry
+    needs: telemetry-test
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "telemetry nightly build"
+          title-template: "`kedro-telemetry`: Nightly build failure"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false

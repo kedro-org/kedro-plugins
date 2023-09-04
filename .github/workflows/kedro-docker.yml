@@ -1,6 +1,7 @@
-name: Run checks on Kedro-Docker
+name: Run checks on kedro-docker
 
 on:
+  workflow_call:
   push:
     branches:
       - main
@@ -15,12 +16,33 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-telemetry/**"
-  schedule:
-    # Run every day at midnight (UTC time)
-    - cron: '0 0 * * *'
 
 jobs:
-  docker-test:
-    uses: ./.github/workflows/check-plugin.yml
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-docker
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+    with:
+      plugin: kedro-docker
+      os: ubuntu-latest
+      python-version: "3.8"
+
+  e2e-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      plugin: kedro-docker
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}

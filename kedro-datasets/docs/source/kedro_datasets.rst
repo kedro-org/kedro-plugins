@@ -12,6 +12,7 @@ kedro_datasets
    :template: autosummary/class.rst
 
    kedro_datasets.api.APIDataSet
+   kedro_datasets.api.APIDataset
    kedro_datasets.biosequence.BioSequenceDataSet
    kedro_datasets.dask.ParquetDataSet
    kedro_datasets.databricks.ManagedTableDataSet

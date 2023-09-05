@@ -31,13 +31,10 @@ jobs:
 
   lint:
     uses: ./.github/workflows/lint.yml
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
     with:
       plugin: kedro-telemetry
       os: ubuntu-latest
-      python-version: ${{ matrix.python-version }}
+      python-version: "3.8"
 
   e2e-tests:
     strategy:

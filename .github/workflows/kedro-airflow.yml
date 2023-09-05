@@ -34,7 +34,7 @@ jobs:
     with:
       plugin: kedro-airflow
       os: ubuntu-latest
-      python-version: "3.11"
+      python-version: "3.8"
 
   e2e-tests:
     strategy:

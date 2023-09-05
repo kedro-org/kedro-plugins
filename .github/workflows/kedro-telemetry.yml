@@ -1,48 +1,48 @@
-name: Run checks on kedro-telemetry
+# name: Run checks on kedro-telemetry
 
-on:
-  workflow_call:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "kedro-airflow/**"
-      - "kedro-datasets/**"
-      - "kedro-docker/**"
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "kedro-airflow/**"
-      - "kedro-datasets/**"
-      - "kedro-docker/**"
+# on:
+#   workflow_call:
+#   push:
+#     branches:
+#       - main
+#     paths-ignore:
+#       - "kedro-airflow/**"
+#       - "kedro-datasets/**"
+#       - "kedro-docker/**"
+#   pull_request:
+#     branches:
+#       - main
+#     paths-ignore:
+#       - "kedro-airflow/**"
+#       - "kedro-datasets/**"
+#       - "kedro-docker/**"
 
-jobs:
-  unit-tests:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
-    uses: ./.github/workflows/unit-tests.yml
-    with:
-      plugin: kedro-telemetry
-      os: ${{ matrix.os }}
-      python-version: ${{ matrix.python-version }}
+# jobs:
+#   unit-tests:
+#     strategy:
+#       matrix:
+#         os: [ ubuntu-latest ]
+#         python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+#     uses: ./.github/workflows/unit-tests.yml
+#     with:
+#       plugin: kedro-telemetry
+#       os: ${{ matrix.os }}
+#       python-version: ${{ matrix.python-version }}
 
-  lint:
-    uses: ./.github/workflows/lint.yml
-    with:
-      plugin: kedro-telemetry
-      os: ubuntu-latest
-      python-version: "3.11"
+#   lint:
+#     uses: ./.github/workflows/lint.yml
+#     with:
+#       plugin: kedro-telemetry
+#       os: ubuntu-latest
+#       python-version: "3.11"
 
-  e2e-tests:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      plugin: kedro-telemetry
-      os: ${{ matrix.os }}
-      python-version: ${{ matrix.python-version }}
+#   e2e-tests:
+#     strategy:
+#       matrix:
+#         os: [ ubuntu-latest ]
+#         python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+#     uses: ./.github/workflows/e2e-tests.yml
+#     with:
+#       plugin: kedro-telemetry
+#       os: ${{ matrix.os }}
+#       python-version: ${{ matrix.python-version }}

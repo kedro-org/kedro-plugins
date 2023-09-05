@@ -14,6 +14,7 @@ kedro_datasets
    kedro_datasets.api.APIDataSet
    kedro_datasets.api.APIDataset
    kedro_datasets.biosequence.BioSequenceDataSet
+   kedro_datasets.biosequence.BioSequenceDataset
    kedro_datasets.dask.ParquetDataSet
    kedro_datasets.databricks.ManagedTableDataSet
    kedro_datasets.email.EmailMessageDataSet

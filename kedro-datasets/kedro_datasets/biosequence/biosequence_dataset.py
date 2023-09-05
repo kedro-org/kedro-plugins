@@ -1,6 +1,7 @@
-"""BioSequenceDataSet loads and saves data to/from bio-sequence objects to
+"""BioSequenceDataset loads and saves data to/from bio-sequence objects to
 file.
 """
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict, List
@@ -9,29 +10,29 @@ import fsspec
 from Bio import SeqIO
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractDataset as AbstractDataSet
+from kedro_datasets._io import AbstractDataset
 
 
-class BioSequenceDataSet(AbstractDataSet[List, List]):
-    r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
+class BioSequenceDataset(AbstractDataset[List, List]):
+    r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
     Example:
     ::
 
-        >>> from kedro_datasets.biosequence import BioSequenceDataSet
+        >>> from kedro_datasets.biosequence import BioSequenceDataset
         >>> from io import StringIO
         >>> from Bio import SeqIO
         >>>
         >>> data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
         >>> raw_data = []
         >>> for record in SeqIO.parse(StringIO(data), "fasta"):
-        >>>     raw_data.append(record)
+        ...     raw_data.append(record)
         >>>
-        >>> data_set = BioSequenceDataSet(filepath="ls_orchid.fasta",
-        >>>                               load_args={"format": "fasta"},
-        >>>                               save_args={"format": "fasta"})
-        >>> data_set.save(raw_data)
-        >>> sequence_list = data_set.load()
+        >>> dataset = BioSequenceDataset(filepath="ls_orchid.fasta",
+        ...                              load_args={"format": "fasta"},
+        ...                              save_args={"format": "fasta"})
+        >>> dataset.save(raw_data)
+        >>> sequence_list = dataset.load()
         >>>
         >>> assert raw_data[0].id == sequence_list[0].id
         >>> assert raw_data[0].seq == sequence_list[0].seq
@@ -52,7 +53,7 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
         metadata: Dict[str, Any] = None,
     ) -> None:
         """
-        Creates a new instance of ``BioSequenceDataSet`` pointing
+        Creates a new instance of ``BioSequenceDataset`` pointing
         to a concrete filepath.
 
         Args:
@@ -137,3 +138,21 @@ class BioSequenceDataSet(AbstractDataSet[List, List]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "BioSequenceDataSet": BioSequenceDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

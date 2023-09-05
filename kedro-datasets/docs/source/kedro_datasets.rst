@@ -18,6 +18,7 @@ kedro_datasets
    kedro_datasets.dask.ParquetDataSet
    kedro_datasets.dask.ParquetDataset
    kedro_datasets.databricks.ManagedTableDataSet
+   kedro_datasets.databricks.ManagedTableDataset
    kedro_datasets.email.EmailMessageDataSet
    kedro_datasets.geopandas.GeoJSONDataSet
    kedro_datasets.holoviews.HoloviewsWriter

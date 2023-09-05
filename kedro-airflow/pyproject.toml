@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
-requires-python = ">=3.7"
+requires-python = ">=3.7, <3.11"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.17.5",

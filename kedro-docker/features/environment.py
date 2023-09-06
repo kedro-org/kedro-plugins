@@ -42,6 +42,7 @@ def before_all(context):
             # Temporarily pin pip to fix https://github.com/jazzband/pip-tools/issues/1503
             # This can be removed when Kedro 0.17.6 is released, because pip-tools is upgraded
             # for that version.
+            # Why is this still here??
             "pip>=20.0,<21.3",
             "setuptools>=38.0",
             "wheel",

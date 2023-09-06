@@ -45,6 +45,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           cd ${{ inputs.plugin }}
           pip install ".[test]"
       - name: pip freeze

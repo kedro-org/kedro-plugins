@@ -9,6 +9,7 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
+    paths: "kedro-telemetry/**"
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
+    paths: "kedro-telemetry/**"
 
 jobs:
   unit-tests:

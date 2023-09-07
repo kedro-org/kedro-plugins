@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
-requires-python = ">=3.7"
+requires-python = ">=3.7, <3.11"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.17.5",
@@ -25,7 +25,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 [project.optional-dependencies]
 test = [
     "apache-airflow<2.7.0", # TODO: Temporary fix, make kedro-airflow compatible with new version of airflow
-    "bandit",
+    "bandit>=1.6.2, <2.0",
     "behave",
     "black~=22.0",
     "flake8",

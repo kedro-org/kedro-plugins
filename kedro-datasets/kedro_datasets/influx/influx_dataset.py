@@ -3,6 +3,7 @@
 Currently supported influxdb versions: 2.x
 """
 
+import copy
 import hashlib
 import json
 import logging
@@ -56,15 +57,18 @@ class InfluxQueryDataset(AbstractDataset):
           url: localhost:8086
           token: my_token_key
           org: my_org_hash
-
     """
 
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
     clients: Dict[str, InfluxDBClient] = {}
 
     def __init__(
         self,
         credentials: Dict[str, Any],
         query: str,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
     ):
         """Creates a new ``InfluxDBClient`` instance.
 
@@ -97,6 +101,13 @@ class InfluxQueryDataset(AbstractDataset):
 
         self.create_connection(self._credentials)
 
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
     @classmethod
     def create_connection(cls, credentials: Dict[str, Any]) -> None:
         con_hash = dict_hash(credentials)
@@ -110,7 +121,10 @@ class InfluxQueryDataset(AbstractDataset):
             logger.debug("Created InfluxDB client.")
 
     def _load(self) -> pd.DataFrame:
-        """Loads data from an influx query as a pandas dataframe.
+        """Loads data from an influx query as a pandas dataframe using the
+        ``query_data_frame`` method of the ``query_api`` from ``InfluxDBClient``.
+
+        If ``load_args`` are provided they are passed to the ``query_data_frame``.
 
         Returns:
             Data from the influx query as a dataframe. If the query returns
@@ -122,7 +136,11 @@ class InfluxQueryDataset(AbstractDataset):
 
         try:
             logger.debug(f"Loading data from InfluxDB with query: {self._query}")
-            result = self.clients[con_hash].query_api().query_data_frame(self._query)
+            result = (
+                self.clients[con_hash]
+                .query_api()
+                .query_data_frame(self._query, **self._load_args)
+            )
             if isinstance(result, list):
                 logger.warning(
                     f"Querie returned more than one result. Returning first result."
@@ -138,7 +156,9 @@ class InfluxQueryDataset(AbstractDataset):
         self, data: pd.DataFrame, bucket: str, measurement: str, columns: List[str]
     ) -> None:
         """Saves selected columns of a dataframe to the specified bucket and
-        measurement using the ``write_api`` of the ``InfluxDBClient``.
+        measurement using the ``write`` method of ``write_api`` from ``InfluxDBClient``.
+
+        If ``save_args`` are provided they are passed to the ``write`` method.
 
         Args:
             data: Dataframe to save.
@@ -161,6 +181,7 @@ class InfluxQueryDataset(AbstractDataset):
                 record=data,
                 data_frame_measurement_name=measurement,
                 data_frame_tag_columns=columns,
+                **self._save_args,
             )
         except Exception as ex:
             raise DatasetError(f"Failed to save data to InfluxDB.\n{ex}")

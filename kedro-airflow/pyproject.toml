@@ -29,6 +29,7 @@ test = [
     "behave",
     "black~=22.0",
     "flake8",
+    "kedro-datasets",
     "pre-commit>=1.17.0, <2.0",
     "pylint>=2.5.2, <3.0",
     "pytest",

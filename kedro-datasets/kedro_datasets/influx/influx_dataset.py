@@ -7,7 +7,7 @@ import copy
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from influxdb_client import InfluxDBClient
 import pandas as pd
@@ -29,12 +29,15 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
     return dhash.hexdigest()
 
 
-class InfluxQueryDataset(AbstractDataset):
+class InfluxQueryDataset(
+    AbstractDataset[pd.DataFrame, Union[pd.DataFrame, List[pd.DataFrame]]]
+):
     """`ÌnfluxQueryDataset`` loads and saves data from/to an InfluxDB running
     server version 2.x.
     
     Data loading is done by executing a provided query. If the query returns
-    mutiple results, only the first result is returned and a warning is logged.
+    mutiple results, a list of dataframes is returned and the user notified via
+    a log info.
 
     When writing data, the dataset expects a dataframe with a DatetimeIndex.
 
@@ -120,7 +123,7 @@ class InfluxQueryDataset(AbstractDataset):
             )
             logger.debug("Created InfluxDB client.")
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         """Loads data from an influx query as a pandas dataframe using the
         ``query_data_frame`` method of the ``query_api`` from ``InfluxDBClient``.
 
@@ -128,8 +131,7 @@ class InfluxQueryDataset(AbstractDataset):
 
         Returns:
             Data from the influx query as a dataframe. If the query returns
-            mutiple results, only the first result is returned and a warning is
-            logged.
+            mutiple results, a list of dataframes is returned.
         """
 
         con_hash = dict_hash(self._credentials)
@@ -142,10 +144,9 @@ class InfluxQueryDataset(AbstractDataset):
                 .query_data_frame(self._query, **self._load_args)
             )
             if isinstance(result, list):
-                logger.warning(
+                logger.info(
                     f"Querie returned more than one result. Returning first result."
                 )
-                return result[0]
             return result
         except Exception as ex:
             raise DatasetError(
@@ -153,9 +154,9 @@ class InfluxQueryDataset(AbstractDataset):
             )
 
     def _save(
-        self, data: pd.DataFrame, bucket: str, measurement: str, columns: List[str]
+        self, data: pd.DataFrame, bucket: str, measurement: str, tags: List[str] = None
     ) -> None:
-        """Saves selected columns of a dataframe to the specified bucket and
+        """Saves dataframe to the specified bucket and
         measurement using the ``write`` method of ``write_api`` from ``InfluxDBClient``.
 
         If ``save_args`` are provided they are passed to the ``write`` method.
@@ -164,7 +165,7 @@ class InfluxQueryDataset(AbstractDataset):
             data: Dataframe to save.
             bucket: Bucket to save the data to.
             measurement: Measurement to save the data to.
-            columns: Columns to save.
+            tags: Columns to use as tags, remainings are used as fields.
 
         Raises:
             DatasetError: When the dataframe does not have a DatetimeIndex or
@@ -180,7 +181,7 @@ class InfluxQueryDataset(AbstractDataset):
                 org=self._org,
                 record=data,
                 data_frame_measurement_name=measurement,
-                data_frame_tag_columns=columns,
+                data_frame_tag_columns=tags,
                 **self._save_args,
             )
         except Exception as ex:

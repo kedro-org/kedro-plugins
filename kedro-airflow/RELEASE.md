@@ -1,4 +1,5 @@
 # Upcoming Release
+* Added support for Python 3.11
 
 # Release 0.6.0
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.

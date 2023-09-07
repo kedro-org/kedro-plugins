@@ -9,7 +9,6 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
-
   pull_request:
     branches:
       - main
@@ -17,7 +16,6 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
-
 
 jobs:
   unit-tests:

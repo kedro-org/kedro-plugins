@@ -153,19 +153,12 @@ class InfluxQueryDataset(
                 f"Failed to load data from InfluxDB with query: {self._query}.\n{ex}"
             )
 
-    def _save(
-        self, data: pd.DataFrame, bucket: str, measurement: str, tags: List[str] = None
-    ) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         """Saves dataframe to the specified bucket and
         measurement using the ``write`` method of ``write_api`` from ``InfluxDBClient``.
 
-        If ``save_args`` are provided they are passed to the ``write`` method.
-
         Args:
             data: Dataframe to save.
-            bucket: Bucket to save the data to.
-            measurement: Measurement to save the data to.
-            tags: Columns to use as tags, remainings are used as fields.
 
         Raises:
             DatasetError: When the dataframe does not have a DatetimeIndex or
@@ -174,14 +167,13 @@ class InfluxQueryDataset(
         if not is_datetime64_any_dtype(data.index):
             raise DatasetError("DataFrame needs a DatetimeIndex.")
 
+        save_args = copy.deepcopy(self._save_args)
+
         con_hash = dict_hash(self._credentials)
         try:
             self.clients[con_hash].write_api().write(
-                bucket=bucket,
                 org=self._org,
                 record=data,
-                data_frame_measurement_name=measurement,
-                data_frame_tag_columns=tags,
                 **self._save_args,
             )
         except Exception as ex:

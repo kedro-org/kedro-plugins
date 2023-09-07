@@ -5,19 +5,17 @@ on:
   push:
     branches:
       - main
-    paths: "kedro-datasets/**"
-#    paths-ignore:
-#      - "kedro-airflow/**"
-#      - "kedro-docker/**"
-#      - "kedro-telemetry/**"
+    paths-ignore:
+      - "kedro-airflow/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
   pull_request:
     branches:
       - main
-    paths: "kedro-datasets/**"
-#    paths-ignore:
-#      - "kedro-airflow/**"
-#      - "kedro-docker/**"
-#      - "kedro-telemetry/**"
+    paths-ignore:
+      - "kedro-airflow/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
 
 jobs:
   unit-tests:

@@ -5,26 +5,24 @@ on:
   push:
     branches:
       - main
-    paths: "kedro-airflow/**" # Revert
-#    paths-ignore:
-#      - "kedro-datasets/**"
-#      - "kedro-docker/**"
-#      - "kedro-telemetry/**"
+    paths-ignore:
+      - "kedro-datasets/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
   pull_request:
     branches:
       - main
-    paths: "kedro-airflow/**"  # Revert
-#    paths-ignore:
-#      - "kedro-datasets/**"
-#      - "kedro-docker/**"
-#      - "kedro-telemetry/**"
+    paths-ignore:
+      - "kedro-datasets/**"
+      - "kedro-docker/**"
+      - "kedro-telemetry/**"
 
 jobs:
   unit-tests:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.8", "3.10", "3.11" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-airflow
@@ -42,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ "3.9", "3.10", "3.11" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/e2e-tests.yml
     with:
       plugin: kedro-airflow

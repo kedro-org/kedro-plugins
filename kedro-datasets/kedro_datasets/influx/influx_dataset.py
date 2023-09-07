@@ -154,8 +154,7 @@ class InfluxQueryDataset(
             )
 
     def _save(self, data: pd.DataFrame) -> None:
-        """Saves dataframe to the specified bucket and
-        measurement using the ``write`` method of ``write_api`` from ``InfluxDBClient``.
+        """Saves dataframe using the ``write`` method of ``write_api`` from ``InfluxDBClient``.
 
         Args:
             data: Dataframe to save.
@@ -163,6 +162,21 @@ class InfluxQueryDataset(
         Raises:
             DatasetError: When the dataframe does not have a DatetimeIndex or
             when writing back to the database fails.
+
+        Example usage for the
+        `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog_yaml_examples.html>`_:
+
+        .. code-block:: yaml
+
+            influx_dataset:
+              type: influx.InfluxQueryDataset
+              credentials: db_credentials
+              save_args:
+                bucket: my_bucket
+                data_frame_measurement_name: my_measurement
+                data_frame_tag_columns: [tag1, tag2]
+
         """
         if not is_datetime64_any_dtype(data.index):
             raise DatasetError("DataFrame needs a DatetimeIndex.")

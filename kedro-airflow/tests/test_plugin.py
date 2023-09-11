@@ -226,3 +226,42 @@ def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):
         "kedro.framework.cli.utils.KedroCliError: Pipeline de not found."
         in result.stdout
     )
+
+
+def test_create_airflow_all_dags(cli_runner, metadata):
+    command = ["airflow", "create", "--all"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+    print(result.stdout)
+
+    for dag_name, pipeline_name in [
+        ("hello_world", "__default__"),
+        ("hello_world", "ds"),
+    ]:
+        dag_file = (
+            Path.cwd()
+            / "airflow_dags"
+            / (
+                f"{dag_name}_dag.py"
+                if pipeline_name == "__default__"
+                else f"{dag_name}_{pipeline_name}_dag.py"
+            )
+        )
+        assert dag_file.exists()
+
+        expected_airflow_dag = 'tasks["node0"] >> tasks["node1"]'
+        with dag_file.open(encoding="utf-8") as f:
+            dag_code = [line.strip() for line in f.read().splitlines()]
+        assert expected_airflow_dag in dag_code
+        dag_file.unlink()
+
+
+def test_create_airflow_all_and_pipeline(cli_runner, metadata):
+    command = ["airflow", "create", "--all", "-p", "ds"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 2
+    assert (
+        "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
+        in result.stdout
+    )

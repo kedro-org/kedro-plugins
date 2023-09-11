@@ -34,18 +34,31 @@ kedro_datasets
    kedro_datasets.networkx.JSONDataSet
    kedro_datasets.networkx.JSONDataset
    kedro_datasets.pandas.CSVDataSet
+   kedro_datasets.pandas.CSVDataset
    kedro_datasets.pandas.DeltaTableDataSet
+   kedro_datasets.pandas.DeltaTableDataset
    kedro_datasets.pandas.ExcelDataSet
+   kedro_datasets.pandas.ExcelDataset
    kedro_datasets.pandas.FeatherDataSet
+   kedro_datasets.pandas.FeatherDataset
    kedro_datasets.pandas.GBQQueryDataSet
+   kedro_datasets.pandas.GBQQueryDataset
    kedro_datasets.pandas.GBQTableDataSet
+   kedro_datasets.pandas.GBQTableDataset
    kedro_datasets.pandas.GenericDataSet
+   kedro_datasets.pandas.GenericDataset
    kedro_datasets.pandas.HDFDataSet
+   kedro_datasets.pandas.HDFDataset
    kedro_datasets.pandas.JSONDataSet
+   kedro_datasets.pandas.JSONDataset
    kedro_datasets.pandas.ParquetDataSet
+   kedro_datasets.pandas.ParquetDataset
    kedro_datasets.pandas.SQLQueryDataSet
+   kedro_datasets.pandas.SQLQueryDataset
    kedro_datasets.pandas.SQLTableDataSet
+   kedro_datasets.pandas.SQLTableDataset
    kedro_datasets.pandas.XMLDataSet
+   kedro_datasets.pandas.XMLDataset
    kedro_datasets.pickle.PickleDataSet
    kedro_datasets.pillow.ImageDataSet
    kedro_datasets.plotly.JSONDataSet

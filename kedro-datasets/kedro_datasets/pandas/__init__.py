@@ -37,7 +37,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "csv_dataset": ["CSVDataSet", "CSVDataset"],
-        "deltatable_dataset": ["DeltaTableDataSet", "DeltaTableDatset"],
+        "deltatable_dataset": ["DeltaTableDataSet", "DeltaTableDataset"],
         "excel_dataset": ["ExcelDataSet", "ExcelDataset"],
         "feather_dataset": ["FeatherDataSet", "FeatherDataset"],
         "gbq_dataset": [

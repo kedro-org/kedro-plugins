@@ -480,6 +480,17 @@ class TestSparkDataSet:
         SparkDataSet(filepath=filepath)
         assert expected_message in caplog.text
 
+    def test_dbfs_prefix_warning_databricks_s3(self, monkeypatch, caplog):
+        # test that warning is not raised when not on Databricks
+        filepath = "s3://my_project/data/02_intermediate/processed_data"
+        expected_message = (
+            "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+            f"filepath is a known source of error. You must add this prefix to {filepath}."
+        )
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
+        SparkDataSet(filepath=filepath)
+        assert expected_message not in caplog.text
+
 
 class TestSparkDataSetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):

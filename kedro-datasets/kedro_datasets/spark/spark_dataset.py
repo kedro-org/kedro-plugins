@@ -24,6 +24,8 @@ from .._io import DatasetError as DataSetError
 
 logger = logging.getLogger(__name__)
 
+CLOUD_PROTOCOLS = ("s3://", "s3a://", "s3n://")
+
 
 def _parse_glob_pattern(pattern: str) -> str:
     special = ("*", "?", "[")
@@ -283,7 +285,11 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         glob_function = None
         self.metadata = metadata
 
-        if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
+        if (
+            not filepath.startswith("/dbfs/")
+            and fs_prefix not in CLOUD_PROTOCOLS
+            and _deployed_on_databricks()
+        ):
             logger.warning(
                 "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",

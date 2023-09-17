@@ -60,6 +60,7 @@ kedro_datasets
    kedro_datasets.pandas.XMLDataSet
    kedro_datasets.pandas.XMLDataset
    kedro_datasets.pickle.PickleDataSet
+   kedro_datasets.pickle.PickleDataset
    kedro_datasets.pillow.ImageDataSet
    kedro_datasets.plotly.JSONDataSet
    kedro_datasets.plotly.PlotlyDataSet

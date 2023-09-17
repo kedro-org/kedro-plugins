@@ -1,9 +1,10 @@
-"""``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
+"""``PickleDataset`` loads/saves data from/to a Pickle file using an underlying
 filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
 the specified backend library passed in (defaults to the ``pickle`` library), so it
 supports all allowed options for loading and saving pickle files.
 """
 import importlib
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -11,12 +12,11 @@ from typing import Any, Dict
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
-    """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
+class PickleDataset(AbstractVersionedDataset[Any, Any]):
+    """``PickleDataset`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
@@ -28,12 +28,12 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     .. code-block:: yaml
 
         test_model: # simple example without compression
-          type: pickle.PickleDataSet
+          type: pickle.PickleDataset
           filepath: data/07_model_output/test_model.pkl
           backend: pickle
 
         final_model: # example with load and save args
-          type: pickle.PickleDataSet
+          type: pickle.PickleDataset
           filepath: s3://your_bucket/final_model.pkl.lz4
           backend: joblib
           credentials: s3_credentials
@@ -45,23 +45,23 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pickle import PickleDataSet
+        >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        ...                      'col3': [5, 6]})
         >>>
-        >>> data_set = PickleDataSet(filepath="test.pkl", backend="pickle")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = PickleDataset(filepath="test.pkl", backend="pickle")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
-        >>>                          backend="compress_pickle",
-        >>>                          load_args={"compression":"lz4"},
-        >>>                          save_args={"compression":"lz4"})
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = PickleDataset(filepath="test.pickle.lz4",
+        ...                         backend="compress_pickle",
+        ...                         load_args={"compression":"lz4"},
+        ...                         save_args={"compression":"lz4"})
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
     """
 
@@ -80,8 +80,8 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
-        file on a specific filesystem. ``PickleDataSet`` supports custom backends to
+        """Creates a new instance of ``PickleDataset`` pointing to a concrete Pickle
+        file on a specific filesystem. ``PickleDataset`` supports custom backends to
         serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
@@ -218,7 +218,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 imported_backend = importlib.import_module(self._backend)
                 imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
-                raise DataSetError(
+                raise DatasetError(
                     f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
@@ -227,7 +227,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -240,3 +240,21 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "PickleDataSet": PickleDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

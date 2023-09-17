@@ -1,3 +1,4 @@
+import importlib
 from pathlib import PurePosixPath
 
 import pandas as pd
@@ -6,13 +7,14 @@ from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER
 from plotly import graph_objects
 from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.plotly import PlotlyDataSet
+from kedro_datasets._io import DatasetError
+from kedro_datasets.plotly import PlotlyDataset
+from kedro_datasets.plotly.plotly_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -21,8 +23,8 @@ def filepath_json(tmp_path):
 
 
 @pytest.fixture
-def plotly_data_set(filepath_json, load_args, save_args, fs_args, plotly_args):
-    return PlotlyDataSet(
+def plotly_dataset(filepath_json, load_args, save_args, fs_args, plotly_args):
+    return PlotlyDataset(
         filepath=filepath_json,
         load_args=load_args,
         save_args=save_args,
@@ -45,27 +47,36 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
-class TestPlotlyDataSet:
-    def test_save_and_load(self, plotly_data_set, dummy_dataframe):
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.plotly", "kedro_datasets.plotly.plotly_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestPlotlyDataset:
+    def test_save_and_load(self, plotly_dataset, dummy_dataframe):
         """Test saving and reloading the data set."""
-        plotly_data_set.save(dummy_dataframe)
-        reloaded = plotly_data_set.load()
+        plotly_dataset.save(dummy_dataframe)
+        reloaded = plotly_dataset.load()
         assert isinstance(reloaded, graph_objects.Figure)
         assert "Test" in str(reloaded["layout"]["title"])
         assert isinstance(reloaded["data"][0], Scatter)
 
-    def test_exists(self, plotly_data_set, dummy_dataframe):
+    def test_exists(self, plotly_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not plotly_data_set.exists()
-        plotly_data_set.save(dummy_dataframe)
-        assert plotly_data_set.exists()
+        assert not plotly_dataset.exists()
+        plotly_dataset.save(dummy_dataframe)
+        assert plotly_dataset.exists()
 
-    def test_load_missing_file(self, plotly_data_set):
+    def test_load_missing_file(self, plotly_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PlotlyDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
-            plotly_data_set.load()
+        pattern = r"Failed while loading data from data set PlotlyDataset\(.*\)"
+        with pytest.raises(DatasetError, match=pattern):
+            plotly_dataset.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",
@@ -83,26 +94,26 @@ class TestPlotlyDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials, plotly_args):
-        data_set = PlotlyDataSet(
+        dataset = PlotlyDataset(
             filepath=filepath, credentials=credentials, plotly_args=plotly_args
         )
-        assert isinstance(data_set._fs, instance_type)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker, plotly_args):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.json"
-        data_set = PlotlyDataSet(filepath=filepath, plotly_args=plotly_args)
-        data_set.release()
+        dataset = PlotlyDataset(filepath=filepath, plotly_args=plotly_args)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_fail_if_invalid_plotly_args_provided(self):
         plotly_args = []
         filepath = "test.json"
-        data_set = PlotlyDataSet(filepath=filepath, plotly_args=plotly_args)
-        with pytest.raises(DataSetError):
-            data_set.save(dummy_dataframe)
+        dataset = PlotlyDataset(filepath=filepath, plotly_args=plotly_args)
+        with pytest.raises(DatasetError):
+            dataset.save(dummy_dataframe)

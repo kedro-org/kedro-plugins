@@ -64,7 +64,9 @@ kedro_datasets
    kedro_datasets.pillow.ImageDataSet
    kedro_datasets.pillow.ImageDataset
    kedro_datasets.plotly.JSONDataSet
+   kedro_datasets.plotly.JSONDataset
    kedro_datasets.plotly.PlotlyDataSet
+   kedro_datasets.plotly.PlotlyDataset
    kedro_datasets.polars.CSVDataSet
    kedro_datasets.polars.GenericDataSet
    kedro_datasets.redis.PickleDataSet

@@ -92,6 +92,8 @@ kedro_datasets
    kedro_datasets.text.TextDataSet
    kedro_datasets.text.TextDataset
    kedro_datasets.tracking.JSONDataSet
+   kedro_datasets.tracking.JSONDataset
    kedro_datasets.tracking.MetricsDataSet
+   kedro_datasets.tracking.MetricsDataset
    kedro_datasets.video.VideoDataSet
    kedro_datasets.yaml.YAMLDataSet

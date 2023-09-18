@@ -90,6 +90,7 @@ kedro_datasets
    kedro_datasets.tensorflow.TensorFlowModelDataSet
    kedro_datasets.tensorflow.TensorFlowModelDataset
    kedro_datasets.text.TextDataSet
+   kedro_datasets.text.TextDataset
    kedro_datasets.tracking.JSONDataSet
    kedro_datasets.tracking.MetricsDataSet
    kedro_datasets.video.VideoDataSet

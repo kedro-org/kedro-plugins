@@ -1,9 +1,10 @@
-"""``AbstractVersionedDataSet`` implementation to access Spark dataframes using
-``pyspark``
+"""``AbstractVersionedDataset`` implementation to access Spark dataframes using
+``pyspark``.
 """
 import json
 import logging
 import os
+import warnings
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -19,8 +20,7 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ def _deployed_on_databricks() -> bool:
 
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
-    and ``hdfs_glob`` methods required by ``SparkDataSet``"""
+    and ``hdfs_glob`` methods required by ``SparkDataset``"""
 
     def hdfs_exists(self, hdfs_path: str) -> bool:
         """Determines whether given ``hdfs_path`` exists in HDFS.
@@ -162,8 +162,8 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
-    """``SparkDataSet`` loads and saves Spark dataframes.
+class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
+    """``SparkDataset`` loads and saves Spark dataframes.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -172,7 +172,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     .. code-block:: yaml
 
         weather:
-          type: spark.SparkDataSet
+          type: spark.SparkDataset
           filepath: s3a://your_bucket/data/01_raw/weather/*
           file_format: csv
           load_args:
@@ -183,7 +183,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             header: True
 
         weather_with_schema:
-          type: spark.SparkDataSet
+          type: spark.SparkDataset
           filepath: s3a://your_bucket/data/01_raw/weather/*
           file_format: csv
           load_args:
@@ -195,7 +195,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             header: True
 
         weather_cleaned:
-          type: spark.SparkDataSet
+          type: spark.SparkDataset
           filepath: data/02_intermediate/data.parquet
           file_format: parquet
 
@@ -206,21 +206,21 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import (StructField, StringType,
-        >>>                                IntegerType, StructType)
+        ...                                IntegerType, StructType)
         >>>
-        >>> from kedro_datasets.spark import SparkDataSet
+        >>> from kedro_datasets.spark import SparkDataset
         >>>
         >>> schema = StructType([StructField("name", StringType(), True),
-        >>>                      StructField("age", IntegerType(), True)])
+        ...                      StructField("age", IntegerType(), True)])
         >>>
         >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate()\
-        >>>                        .createDataFrame(data, schema)
+        ...                        .createDataFrame(data, schema)
         >>>
-        >>> data_set = SparkDataSet(filepath="test_data")
-        >>> data_set.save(spark_df)
-        >>> reloaded = data_set.load()
+        >>> dataset = SparkDataset(filepath="test_data")
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
         >>>
         >>> reloaded.take(4)
     """
@@ -243,7 +243,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         credentials: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``SparkDataSet``.
+        """Creates a new instance of ``SparkDataset``.
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
@@ -285,7 +285,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
             logger.warning(
-                "Using SparkDataSet on Databricks without the `/dbfs/` prefix in the "
+                "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",
                 filepath,
             )
@@ -352,7 +352,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
         filepath = schema.get("filepath")
         if not filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "Schema load argument does not specify a 'filepath' attribute. Please"
                 "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
@@ -368,7 +368,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
-                raise DataSetError(
+                raise DatasetError(
                     f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
                     f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
@@ -421,8 +421,26 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             and self._file_format == "delta"
             and write_mode not in supported_modes
         ):
-            raise DataSetError(
+            raise DatasetError(
                 f"It is not possible to perform 'save()' for file format 'delta' "
-                f"with mode '{write_mode}' on 'SparkDataSet'. "
-                f"Please use 'spark.DeltaTableDataSet' instead."
+                f"with mode '{write_mode}' on 'SparkDataset'. "
+                f"Please use 'spark.DeltaTableDataset' instead."
             )
+
+
+_DEPRECATED_CLASSES = {
+    "SparkDataSet": SparkDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,18 +1,15 @@
-"""SparkJDBCDataSet to load and save a PySpark DataFrame via JDBC."""
-
+"""SparkJDBCDataset to load and save a PySpark DataFrame via JDBC."""
+import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from .._io import AbstractDataset as AbstractDataSet
-from .._io import DatasetError as DataSetError
-
-__all__ = ["SparkJDBCDataSet"]
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
-    """``SparkJDBCDataSet`` loads data from a database table accessible
+class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
+    """``SparkJDBCDataset`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
@@ -25,7 +22,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     .. code-block:: yaml
 
         weather:
-          type: spark.SparkJDBCDataSet
+          type: spark.SparkJDBCDataset
           table: weather_table
           url: jdbc:postgresql://localhost/test
           credentials: db_credentials
@@ -42,24 +39,24 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     ::
 
         >>> import pandas as pd
-        >>> from kedro_datasets import SparkJBDCDataSet
+        >>> from kedro_datasets import SparkJBDCDataset
         >>> from pyspark.sql import SparkSession
         >>>
         >>> spark = SparkSession.builder.getOrCreate()
         >>> data = spark.createDataFrame(pd.DataFrame({'col1': [1, 2],
-        >>>                                            'col2': [4, 5],
-        >>>                                            'col3': [5, 6]}))
+        ...                                            'col2': [4, 5],
+        ...                                            'col3': [5, 6]}))
         >>> url = 'jdbc:postgresql://localhost/test'
         >>> table = 'table_a'
         >>> connection_properties = {'driver': 'org.postgresql.Driver'}
-        >>> data_set = SparkJDBCDataSet(
-        >>>     url=url, table=table, credentials={'user': 'scott',
-        >>>                                        'password': 'tiger'},
-        >>>     load_args={'properties': connection_properties},
-        >>>     save_args={'properties': connection_properties})
+        >>> dataset = SparkJDBCDataset(
+        ...     url=url, table=table, credentials={'user': 'scott',
+        ...                                        'password': 'tiger'},
+        ...     load_args={'properties': connection_properties},
+        ...     save_args={'properties': connection_properties})
         >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.toPandas().equals(reloaded.toPandas())
 
@@ -78,7 +75,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         save_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new ``SparkJDBCDataSet``.
+        """Creates a new ``SparkJDBCDataset``.
 
         Args:
             url: A JDBC URL of the form ``jdbc:subprotocol:subname``.
@@ -100,19 +97,19 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: When either ``url`` or ``table`` is empty or
+            DatasetError: When either ``url`` or ``table`` is empty or
                 when a property is provided with a None value.
         """
 
         if not url:
-            raise DataSetError(
+            raise DatasetError(
                 "'url' argument cannot be empty. Please "
                 "provide a JDBC URL of the form "
                 "'jdbc:subprotocol:subname'."
             )
 
         if not table:
-            raise DataSetError(
+            raise DatasetError(
                 "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
                 "data to."
@@ -136,7 +133,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
-                    raise DataSetError(
+                    raise DatasetError(
                         f"Credential property '{cred_key}' cannot be None. "
                         f"Please provide a value."
                     )
@@ -178,3 +175,21 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     def _save(self, data: DataFrame) -> None:
         return data.write.jdbc(self._url, self._table, **self._save_args)
+
+
+_DEPRECATED_CLASSES = {
+    "SparkJDBCDataSet": SparkJDBCDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

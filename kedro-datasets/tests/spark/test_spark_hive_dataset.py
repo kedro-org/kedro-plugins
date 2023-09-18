@@ -1,16 +1,18 @@
 import gc
+import importlib
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from kedro.io import DataSetError
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from kedro_datasets.spark import SparkHiveDataSet
+from kedro_datasets._io import DatasetError
+from kedro_datasets.spark import SparkHiveDataset
+from kedro_datasets.spark.spark_hive_dataset import _DEPRECATED_CLASSES
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -132,19 +134,28 @@ def _generate_spark_df_upsert_expected():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
 
 
-class TestSparkHiveDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_hive_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestSparkHiveDataset:
     def test_cant_pickle(self):
         import pickle  # pylint: disable=import-outside-toplevel
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(
-                SparkHiveDataSet(
+                SparkHiveDataset(
                     database="default_1", table="table_1", write_mode="overwrite"
                 )
             )
 
     def test_read_existing_table(self):
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1", table="table_1", write_mode="overwrite", save_args={}
         )
         assert_df_equal(_generate_spark_df_one(), dataset.load())
@@ -153,7 +164,7 @@ class TestSparkHiveDataSet:
         spark_session.sql(
             "create table default_1.test_overwrite_empty_table (name string, age integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_overwrite_empty_table",
             write_mode="overwrite",
@@ -165,7 +176,7 @@ class TestSparkHiveDataSet:
         spark_session.sql(
             "create table default_1.test_overwrite_full_table (name string, age integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_overwrite_full_table",
             write_mode="overwrite",
@@ -178,7 +189,7 @@ class TestSparkHiveDataSet:
         spark_session.sql(
             "create table default_1.test_insert_not_empty_table (name string, age integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_insert_not_empty_table",
             write_mode="append",
@@ -192,15 +203,15 @@ class TestSparkHiveDataSet:
     def test_upsert_config_err(self):
         # no pk provided should prompt config error
         with pytest.raises(
-            DataSetError, match="'table_pk' must be set to utilise 'upsert' read mode"
+            DatasetError, match="'table_pk' must be set to utilise 'upsert' read mode"
         ):
-            SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
+            SparkHiveDataset(database="default_1", table="table_1", write_mode="upsert")
 
     def test_upsert_empty_table(self, spark_session):
         spark_session.sql(
             "create table default_1.test_upsert_empty_table (name string, age integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_upsert_empty_table",
             write_mode="upsert",
@@ -215,7 +226,7 @@ class TestSparkHiveDataSet:
         spark_session.sql(
             "create table default_1.test_upsert_not_empty_table (name string, age integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_upsert_not_empty_table",
             write_mode="upsert",
@@ -231,14 +242,14 @@ class TestSparkHiveDataSet:
 
     def test_invalid_pk_provided(self):
         _test_columns = ["column_doesnt_exist"]
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="table_1",
             write_mode="upsert",
             table_pk=_test_columns,
         )
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=re.escape(
                 f"Columns {str(_test_columns)} selected as primary key(s) "
                 f"not found in table default_1.table_1",
@@ -252,8 +263,8 @@ class TestSparkHiveDataSet:
             "'write_mode' must be one of: "
             "append, error, errorifexists, upsert, overwrite"
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
-            SparkHiveDataSet(
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            SparkHiveDataset(
                 database="default_1",
                 table="table_1",
                 write_mode="not_a_write_mode",
@@ -265,13 +276,13 @@ class TestSparkHiveDataSet:
             "create table default_1.test_invalid_schema_insert "
             "(name string, additional_column_on_hive integer)"
         ).take(1)
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1",
             table="test_invalid_schema_insert",
             write_mode="append",
         )
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=r"Dataset does not match hive table schema\.\n"
             r"Present on insert only: \[\('age', 'int'\)\]\n"
             r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]",
@@ -279,7 +290,7 @@ class TestSparkHiveDataSet:
             dataset.save(_generate_spark_df_one())
 
     def test_insert_to_non_existent_table(self):
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1", table="table_not_yet_created", write_mode="append"
         )
         dataset.save(_generate_spark_df_one())
@@ -288,19 +299,19 @@ class TestSparkHiveDataSet:
         )
 
     def test_read_from_non_existent_table(self):
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1", table="table_doesnt_exist", write_mode="append"
         )
         with pytest.raises(
-            DataSetError,
-            match=r"Failed while loading data from data set SparkHiveDataSet"
+            DatasetError,
+            match=r"Failed while loading data from data set SparkHiveDataset"
             r"|table_doesnt_exist"
             r"|UnresolvedRelation",
         ):
             dataset.load()
 
     def test_save_delta_format(self, mocker):
-        dataset = SparkHiveDataSet(
+        dataset = SparkHiveDataset(
             database="default_1", table="delta_table", save_args={"format": "delta"}
         )
         mocked_save = mocker.patch("pyspark.sql.DataFrameWriter.saveAsTable")

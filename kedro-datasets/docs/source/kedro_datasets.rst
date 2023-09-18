@@ -76,10 +76,15 @@ kedro_datasets
    kedro_datasets.snowflake.SnowparkTableDataSet
    kedro_datasets.snowflake.SnowparkTableDataset
    kedro_datasets.spark.DeltaTableDataSet
+   kedro_datasets.spark.DeltaTableDataset
    kedro_datasets.spark.SparkDataSet
+   kedro_datasets.spark.SparkDataset
    kedro_datasets.spark.SparkHiveDataSet
+   kedro_datasets.spark.SparkHiveDataset
    kedro_datasets.spark.SparkJDBCDataSet
+   kedro_datasets.spark.SparkJDBCDataset
    kedro_datasets.spark.SparkStreamingDataSet
+   kedro_datasets.spark.SparkStreamingDataset
    kedro_datasets.svmlight.SVMLightDataSet
    kedro_datasets.tensorflow.TensorFlowModelDataSet
    kedro_datasets.text.TextDataSet

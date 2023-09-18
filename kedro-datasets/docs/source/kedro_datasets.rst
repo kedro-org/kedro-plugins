@@ -96,4 +96,5 @@ kedro_datasets
    kedro_datasets.tracking.MetricsDataSet
    kedro_datasets.tracking.MetricsDataset
    kedro_datasets.video.VideoDataSet
+   kedro_datasets.video.VideoDataset
    kedro_datasets.yaml.YAMLDataSet

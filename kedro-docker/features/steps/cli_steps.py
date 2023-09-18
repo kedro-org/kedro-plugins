@@ -198,8 +198,12 @@ def exec_kedro_command(context, command):
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
     reqs_path = Path("src", "requirements.txt")
+    with open(str(context.root_project_dir / "src" / "constraint.txt"), "w") as f:
+        f.write(
+            "traitlets<5.10.0"
+        )  # Temporary fix https://github.com/microsoft/azuredatastudio/issues/24436
     res = run(
-        [context.pip, "install", "-r", str(reqs_path)],
+        [context.pip, "install", "-r", str(reqs_path), "-c", "src/constraint.txt"],
         env=context.env,
         cwd=str(context.root_project_dir),
     )

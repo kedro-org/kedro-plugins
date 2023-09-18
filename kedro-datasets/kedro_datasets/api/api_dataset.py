@@ -33,8 +33,10 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             agg_level_desc: STATE,
             year: 2000
 
-    Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_: ::
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+    ::
 
         >>> from kedro_datasets.api import APIDataset
         >>>
@@ -56,7 +58,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> data = dataset.load()
 
     ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
-    methods. ::
+    methods.
+    ::
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>

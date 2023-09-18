@@ -14,7 +14,12 @@ from warnings import warn
 
 import fsspec
 from hdfs import HdfsError, InsecureClient
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    CLOUD_PROTOCOLS,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
@@ -284,7 +289,11 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         glob_function = None
         self.metadata = metadata
 
-        if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
+        if (
+            not filepath.startswith("/dbfs/")
+            and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
+            and _deployed_on_databricks()
+        ):
             logger.warning(
                 "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",

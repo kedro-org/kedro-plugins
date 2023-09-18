@@ -1,6 +1,8 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
+
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
 
 # Release 1.7.1

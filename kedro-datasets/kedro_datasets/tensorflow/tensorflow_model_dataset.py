@@ -205,4 +205,6 @@ def __getattr__(name):
             stacklevel=2,
         )
         return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+    raise AttributeError(  # pragma: no cover
+        f"module {repr(__name__)} has no attribute {repr(name)}"
+    )

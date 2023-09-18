@@ -9,7 +9,7 @@ def run(
     cmd: Union[str, Sequence],
     split: bool = True,
     print_output: bool = False,
-    **kwargs: str
+    **kwargs: str,
 ) -> subprocess.CompletedProcess:
     """
     Args:

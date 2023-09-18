@@ -98,3 +98,4 @@ kedro_datasets
    kedro_datasets.video.VideoDataSet
    kedro_datasets.video.VideoDataset
    kedro_datasets.yaml.YAMLDataSet
+   kedro_datasets.yaml.YAMLDataset

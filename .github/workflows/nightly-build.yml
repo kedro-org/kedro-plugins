@@ -24,7 +24,7 @@ jobs:
       issues: write
     name: Notify failed build for airflow
     needs: airflow-test
-    if: failure()
+    if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1
@@ -42,7 +42,7 @@ jobs:
       issues: write
     name: Notify failed build for datasets
     needs: datasets-test
-    if: failure()
+    if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1
@@ -60,7 +60,7 @@ jobs:
       issues: write
     name: Notify failed build for docker
     needs: docker-test
-    if: failure()
+    if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1
@@ -78,7 +78,7 @@ jobs:
       issues: write
     name: Notify failed build for telemetry
     needs: telemetry-test
-    if: failure()
+    if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1

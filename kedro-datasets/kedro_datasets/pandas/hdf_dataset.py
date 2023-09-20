@@ -1,6 +1,7 @@
-"""``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
+"""``HDFDataset`` loads/saves data from/to a hdf file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 """
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from threading import Lock
@@ -10,14 +11,13 @@ import fsspec
 import pandas as pd
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 HDFSTORE_DRIVER = "H5FD_CORE"
 
 
-class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
-    """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
+class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
+    """``HDFDataset`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
     Example usage for the
@@ -27,7 +27,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     .. code-block:: yaml
 
         hdf_dataset:
-          type: pandas.HDFDataSet
+          type: pandas.HDFDataset
           filepath: s3://my_bucket/raw/sensor_reading.h5
           credentials: aws_s3_creds
           key: data
@@ -37,15 +37,15 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pandas import HDFDataSet
+        >>> from kedro_datasets.pandas import HDFDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        ...                      'col3': [5, 6]})
         >>>
-        >>> data_set = HDFDataSet(filepath="test.h5", key='data')
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = HDFDataset(filepath="test.h5", key='data')
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """
@@ -68,7 +68,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
+        """Creates a new instance of ``HDFDataset`` pointing to a concrete hdf file
         on a specific filesystem.
 
         Args:
@@ -152,7 +152,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             binary_data = fs_file.read()
 
-        with HDFDataSet._lock:
+        with HDFDataset._lock:
             # Set driver_core_backing_store to False to disable saving
             # contents of the in-memory h5file to disk
             with pd.HDFStore(
@@ -168,7 +168,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with HDFDataSet._lock:
+        with HDFDataset._lock:
             with pd.HDFStore(
                 "in-memory-save-file",
                 mode="w",
@@ -188,7 +188,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -201,3 +201,21 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "HDFDataSet": HDFDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

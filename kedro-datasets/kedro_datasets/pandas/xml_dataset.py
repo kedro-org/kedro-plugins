@@ -1,7 +1,8 @@
-"""``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+"""``XMLDataset`` loads/saves data from/to a XML file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 """
 import logging
+import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -16,14 +17,13 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
 
-class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
-    """``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
+    """``XMLDataset`` loads/saves data from/to a XML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
     Example usage for the
@@ -31,15 +31,15 @@ class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pandas import XMLDataSet
+        >>> from kedro_datasets.pandas import XMLDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        ...                      'col3': [5, 6]})
         >>>
-        >>> data_set = XMLDataSet(filepath="test.xml")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = XMLDataset(filepath="test.xml")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """
@@ -58,7 +58,7 @@ class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``XMLDataSet`` pointing to a concrete XML file
+        """Creates a new instance of ``XMLDataset`` pointing to a concrete XML file
         on a specific filesystem.
 
         Args:
@@ -159,7 +159,7 @@ class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -172,3 +172,21 @@ class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "XMLDataSet": XMLDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

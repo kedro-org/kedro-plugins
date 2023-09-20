@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to save matplotlib objects as image files."""
+"""``AbstractDataset`` implementation to save matplotlib objects as image files."""
 from typing import Any
 
 import lazy_loader as lazy

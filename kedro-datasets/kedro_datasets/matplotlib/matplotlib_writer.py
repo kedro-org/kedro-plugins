@@ -11,12 +11,11 @@ import fsspec
 import matplotlib.pyplot as plt
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
     ]
 ):
@@ -46,8 +45,8 @@ class MatplotlibWriter(
         >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3])
         >>> plot_writer = MatplotlibWriter(
-        >>>     filepath="data/08_reporting/output_plot.png"
-        >>> )
+        ...     filepath="data/08_reporting/output_plot.png"
+        ... )
         >>> plt.close()
         >>> plot_writer.save(fig)
 
@@ -60,9 +59,9 @@ class MatplotlibWriter(
         >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3])
         >>> pdf_plot_writer = MatplotlibWriter(
-        >>>     filepath="data/08_reporting/output_plot.pdf",
-        >>>     save_args={"format": "pdf"},
-        >>> )
+        ...     filepath="data/08_reporting/output_plot.pdf",
+        ...     save_args={"format": "pdf"},
+        ... )
         >>> plt.close()
         >>> pdf_plot_writer.save(fig)
 
@@ -74,13 +73,13 @@ class MatplotlibWriter(
         >>>
         >>> plots_dict = {}
         >>> for colour in ["blue", "green", "red"]:
-        >>>     plots_dict[f"{colour}.png"] = plt.figure()
-        >>>     plt.plot([1, 2, 3], color=colour)
-        >>>
+        ...     plots_dict[f"{colour}.png"] = plt.figure()
+        ...     plt.plot([1, 2, 3], color=colour)
+        ...
         >>> plt.close("all")
         >>> dict_plot_writer = MatplotlibWriter(
-        >>>     filepath="data/08_reporting/plots"
-        >>> )
+        ...     filepath="data/08_reporting/plots"
+        ... )
         >>> dict_plot_writer.save(plots_dict)
 
     Example saving multiple plots in a folder, using a list:
@@ -91,12 +90,13 @@ class MatplotlibWriter(
         >>>
         >>> plots_list = []
         >>> for i in range(5):
-        >>>     plots_list.append(plt.figure())
-        >>>     plt.plot([i, i + 1, i + 2])
+        ...     plots_list.append(plt.figure())
+        ...     plt.plot([i, i + 1, i + 2])
+        ...
         >>> plt.close("all")
         >>> list_plot_writer = MatplotlibWriter(
-        >>>     filepath="data/08_reporting/plots"
-        >>> )
+        ...     filepath="data/08_reporting/plots"
+        ... )
         >>> list_plot_writer.save(plots_list)
 
     """
@@ -187,7 +187,7 @@ class MatplotlibWriter(
         }
 
     def _load(self) -> NoReturn:
-        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

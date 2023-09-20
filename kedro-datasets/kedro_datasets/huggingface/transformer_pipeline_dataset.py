@@ -35,7 +35,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
         return pipeline(self._task, model=self._model_name, **self._pipeline_kwargs)
 
     def _save(self, pipeline: Pipeline) -> None:
-        raise NotImplementedError("Not yet")
+        raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, Any]:
         return {

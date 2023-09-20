@@ -106,7 +106,7 @@ extras_require = {
     "databricks": _collect_requirements(databricks_require),
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
-    "huggingdace": _collect_requirements(huggingface_require),
+    "huggingface": _collect_requirements(huggingface_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),

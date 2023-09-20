@@ -1,6 +1,6 @@
-"""``ParquetDataSet`` is a data set used to load and save data to parquet files using Dask
+"""``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
-
+import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
@@ -9,11 +9,11 @@ import fsspec
 import triad
 from kedro.io.core import get_protocol_and_path
 
-from .._io import AbstractDataset as AbstractDataSet
+from kedro_datasets._io import AbstractDataset
 
 
-class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
-    """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
+class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
+    """``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
@@ -24,7 +24,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     .. code-block:: yaml
 
         cars:
-          type: dask.ParquetDataSet
+          type: dask.ParquetDataset
           filepath: s3://bucket_name/path/to/folder
           save_args:
             compression: GZIP
@@ -38,26 +38,26 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro.extras.datasets.dask import ParquetDataSet
+        >>> from kedro.extras.datasets.dask import ParquetDataset
         >>> import pandas as pd
         >>> import dask.dataframe as dd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [[5, 6], [7, 8]]})
+        ...                      'col3': [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
-        >>> data_set = ParquetDataSet(
-        >>>     filepath="s3://bucket_name/path/to/folder",
-        >>>     credentials={
-        >>>         'client_kwargs':{
-        >>>             'aws_access_key_id': 'YOUR_KEY',
-        >>>             'aws_secret_access_key': 'YOUR SECRET',
-        >>>         }
-        >>>     },
-        >>>     save_args={"compression": "GZIP"}
-        >>> )
-        >>> data_set.save(ddf)
-        >>> reloaded = data_set.load()
+        >>> dataset = ParquetDataset(
+        ...     filepath="s3://bucket_name/path/to/folder",
+        ...     credentials={
+        ...         'client_kwargs':{
+        ...             'aws_access_key_id': 'YOUR_KEY',
+        ...             'aws_secret_access_key': 'YOUR SECRET',
+        ...         }
+        ...     },
+        ...     save_args={"compression": "GZIP"}
+        ... )
+        >>> dataset.save(ddf)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert ddf.compute().equals(reloaded.compute())
 
@@ -71,7 +71,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     .. code-block:: yaml
 
         parquet_dataset:
-          type: dask.ParquetDataSet
+          type: dask.ParquetDataset
           filepath: "s3://bucket_name/path/to/folder"
           credentials:
             client_kwargs:
@@ -98,7 +98,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ParquetDataSet`` pointing to concrete
+        """Creates a new instance of ``ParquetDataset`` pointing to concrete
         parquet files.
 
         Args:
@@ -210,3 +210,21 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(self._filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "ParquetDataSet": ParquetDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

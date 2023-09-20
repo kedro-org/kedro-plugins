@@ -1,15 +1,19 @@
 import datetime
+import importlib
 import os
 
 import pytest
-from kedro.io import DataSetError
+
+from kedro_datasets._io import DatasetError
 
 try:
     import snowflake.snowpark as sp
 
-    from kedro_datasets.snowflake import SnowparkTableDataSet as spds
+    from kedro_datasets.snowflake import SnowparkTableDataset as spds
+    from kedro_datasets.snowflake.snowpark_dataset import _DEPRECATED_CLASSES
 except ImportError:
-    pass  # this is only for test discovery to succeed on Python <> 3.8
+    # this is only for test discovery to succeed on Python <> 3.8
+    _DEPRECATED_CLASSES = ["SnowparkTableDataSet"]
 
 
 def get_connection():
@@ -24,7 +28,7 @@ def get_connection():
     if not (
         account and warehouse and database and role and user and schema and password
     ):
-        raise DataSetError(
+        raise DatasetError(
             "Snowflake connection environment variables provided not in full"
         )
 
@@ -136,7 +140,18 @@ def sf_session():
     sf_session.close()
 
 
-class TestSnowparkTableDataSet:
+@pytest.mark.parametrize(
+    "module_name",
+    ["kedro_datasets.snowflake", "kedro_datasets.snowflake.snowpark_dataset"],
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+@pytest.mark.snowflake
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestSnowparkTableDataset:
     @pytest.mark.snowflake
     def test_save(self, sample_sp_df, sf_session):
         sp_df = spds(table_name="KEDRO_PYTEST_TESTSAVE", credentials=get_connection())
@@ -153,7 +168,7 @@ class TestSnowparkTableDataSet:
 
         # Ignoring dtypes as ex. age can be int8 vs int64 and pandas.compare
         # fails on that
-        assert df_equals_ignore_dtype(sample_sp_df, sp_df) is True
+        assert df_equals_ignore_dtype(sample_sp_df, sp_df)
 
     @pytest.mark.snowflake
     def test_exists(self, sf_session):
@@ -162,5 +177,5 @@ class TestSnowparkTableDataSet:
         df_ne = spds(
             table_name="KEDRO_PYTEST_TESTNEXISTS", credentials=get_connection()
         )
-        assert df_e._exists() is True
-        assert df_ne._exists() is False
+        assert df_e._exists()
+        assert not df_ne._exists()

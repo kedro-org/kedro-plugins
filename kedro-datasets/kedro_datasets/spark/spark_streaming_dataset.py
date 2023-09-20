@@ -1,4 +1,5 @@
-"""SparkStreamingDataSet to load and save a PySpark Streaming DataFrame."""
+"""SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -6,17 +7,16 @@ from typing import Any, Dict
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
+from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
-    SparkDataSet,
+    SparkDataset,
     _split_filepath,
     _strip_dbfs_prefix,
 )
 
-from .._io import AbstractDataset as AbstractDataSet
 
-
-class SparkStreamingDataSet(AbstractDataSet):
-    """``SparkStreamingDataSet`` loads data to Spark Streaming Dataframe objects.
+class SparkStreamingDataset(AbstractDataset):
+    """``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -25,7 +25,7 @@ class SparkStreamingDataSet(AbstractDataSet):
     .. code-block:: yaml
 
         raw.new_inventory:
-          type: spark.SparkStreamingDataSet
+          type: spark.SparkStreamingDataset
           filepath: data/01_raw/stream/inventory/
           file_format: json
           save_args:
@@ -47,7 +47,7 @@ class SparkStreamingDataSet(AbstractDataSet):
         save_args: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of SparkStreamingDataSet.
+        """Creates a new instance of SparkStreamingDataset.
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
@@ -92,7 +92,7 @@ class SparkStreamingDataSet(AbstractDataSet):
         self._schema = self._load_args.pop("schema", None)
         if self._schema is not None:
             if isinstance(self._schema, dict):
-                self._schema = SparkDataSet._load_schema_from_file(self._schema)
+                self._schema = SparkDataset._load_schema_from_file(self._schema)
 
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes attributes of the dataset."""
@@ -158,3 +158,21 @@ class SparkStreamingDataSet(AbstractDataSet):
                 return False
             raise
         return True
+
+
+_DEPRECATED_CLASSES = {
+    "SparkStreamingDataSet": SparkStreamingDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

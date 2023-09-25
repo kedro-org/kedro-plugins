@@ -1,19 +1,24 @@
+import importlib
 import json
 
 import boto3
 import pytest
-from kedro.io.core import DataSetError
 from moto import mock_s3
+from packaging.version import Version
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark.spark_dataset import SparkDataSet
-from kedro_datasets.spark.spark_streaming_dataset import SparkStreamingDataSet
+from kedro_datasets._io import DatasetError
+from kedro_datasets.spark import SparkDataset, SparkStreamingDataset
+from kedro_datasets.spark.spark_streaming_dataset import _DEPRECATED_CLASSES
 
 SCHEMA_FILE_NAME = "schema.json"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+
+SPARK_VERSION = Version(__version__)
 
 
 def sample_schema(schema_path):
@@ -22,7 +27,7 @@ def sample_schema(schema_path):
         try:
             return StructType.fromJson(json.loads(f.read()))
         except Exception as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"Contents of 'schema.filepath' ({schema_path}) are invalid. "
                 f"Schema is required for streaming data load, Please provide a valid schema_path."
             ) from exc
@@ -85,17 +90,27 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
     return mocked_s3_bucket
 
 
-class TestSparkStreamingDataSet:
+@pytest.mark.parametrize(
+    "module_name",
+    ["kedro_datasets.spark", "kedro_datasets.spark.spark_streaming_dataset"],
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestSparkStreamingDataset:
     def test_load(self, tmp_path, sample_spark_streaming_df):
         filepath = (tmp_path / "test_streams").as_posix()
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
-        spark_json_ds = SparkDataSet(
+        spark_json_ds = SparkDataset(
             filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
-        streaming_ds = SparkStreamingDataSet(
+        streaming_ds = SparkStreamingDataset(
             filepath=filepath,
             file_format="json",
             load_args={"schema": {"filepath": schema_path}},
@@ -111,12 +126,12 @@ class TestSparkStreamingDataSet:
         filepath = (tmp_path / "test_streams").as_posix()
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
-        spark_json_ds = SparkDataSet(
+        spark_json_ds = SparkDataset(
             filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
-        streaming_ds = SparkStreamingDataSet(
+        streaming_ds = SparkStreamingDataset(
             filepath=filepath,
             file_format="json",
             load_args={
@@ -138,7 +153,7 @@ class TestSparkStreamingDataSet:
         checkpoint_path = (tmp_path / "checkpoint").as_posix()
 
         # Save the sample json file to temp_path for creating dataframe
-        spark_json_ds = SparkDataSet(
+        spark_json_ds = SparkDataset(
             filepath=filepath_json,
             file_format="json",
             save_args=[{"mode", "overwrite"}],
@@ -146,14 +161,14 @@ class TestSparkStreamingDataSet:
         spark_json_ds.save(sample_spark_streaming_df)
 
         # Load the json file as the streaming dataframe
-        loaded_with_streaming = SparkStreamingDataSet(
+        loaded_with_streaming = SparkStreamingDataset(
             filepath=filepath_json,
             file_format="json",
             load_args={"schema": {"filepath": schema_path}},
         ).load()
 
         # Append json streams to filepath_output with specified schema path
-        streaming_ds = SparkStreamingDataSet(
+        streaming_ds = SparkStreamingDataset(
             filepath=filepath_output,
             file_format="json",
             load_args={"schema": {"filepath": schema_path}},
@@ -167,12 +182,19 @@ class TestSparkStreamingDataSet:
     def test_exists_raises_error(self, mocker):
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file
-        spark_data_set = SparkStreamingDataSet(filepath="")
-        mocker.patch.object(
-            spark_data_set,
-            "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
-        )
+        spark_dataset = SparkStreamingDataset(filepath="")
 
-        with pytest.raises(DataSetError, match="Other Exception"):
-            spark_data_set.exists()
+        if SPARK_VERSION >= Version("3.4.0"):
+            mocker.patch.object(
+                spark_dataset,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception"),
+            )
+        else:
+            mocker.patch.object(
+                spark_dataset,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
+        with pytest.raises(DatasetError, match="Other Exception"):
+            spark_dataset.exists()

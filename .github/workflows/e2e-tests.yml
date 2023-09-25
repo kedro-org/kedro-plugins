@@ -1,0 +1,43 @@
+name: Run e2e tests
+
+on:
+  workflow_call:
+    inputs:
+      plugin:
+        type: string
+      os:
+        type: string
+      python-version:
+        type: string
+
+jobs:
+  e2e-tests:
+    defaults:
+      run:
+        shell: bash
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{inputs.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{inputs.python-version}}
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-${{inputs.os}}-python-${{inputs.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main
+          pip install ".[test]"
+      - name: pip freeze
+        run: pip freeze
+      - name: Run end to end tests
+        # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`
+        # isn't supported on Github Actions. See https://github.com/actions/runner/issues/241
+        shell: 'script -q -e -c "bash {0}"'
+        run: make plugin=${{ inputs.plugin }} e2e-tests

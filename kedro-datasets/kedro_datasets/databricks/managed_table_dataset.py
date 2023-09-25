@@ -1,27 +1,25 @@
-"""``ManagedTableDataSet`` implementation to access managed delta tables
+"""``ManagedTableDataset`` implementation to access managed delta tables
 in Databricks.
 """
 import logging
 import re
+import warnings
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    VersionNotFoundError,
-)
+from kedro.io.core import Version, VersionNotFoundError
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
+
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class ManagedTable:  # pylint: disable=too-many-instance-attributes
+class ManagedTable:
     """Stores the definition of a managed table"""
 
     # regex for tables, catalogs and schemas
@@ -31,7 +29,7 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
     database: str
     catalog: Optional[str]
     table: str
-    write_mode: str
+    write_mode: Union[str, None]
     dataframe_type: str
     primary_key: Optional[str]
     owner_group: str
@@ -41,9 +39,9 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
     def __post_init__(self):
         """Run validation methods if declared.
         The validation method can be a simple check
-        that raises DataSetError.
+        that raises DatasetError.
         The validation is performed by calling a function named:
-            `validate_<field_name>(self, value) -> raises DataSetError`
+            `validate_<field_name>(self, value) -> raises DatasetError`
         """
         for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
             method = getattr(self, f"_validate_{name}", None)
@@ -54,39 +52,42 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         """Validates table name
 
         Raises:
-            DataSetError: If the table name does not conform to naming constraints.
+            DatasetError: If the table name does not conform to naming constraints.
         """
         if not re.fullmatch(self._NAMING_REGEX, self.table):
-            raise DataSetError("table does not conform to naming")
+            raise DatasetError("table does not conform to naming")
 
     def _validate_database(self):
         """Validates database name
 
         Raises:
-            DataSetError: If the dataset name does not conform to naming constraints.
+            DatasetError: If the dataset name does not conform to naming constraints.
         """
         if not re.fullmatch(self._NAMING_REGEX, self.database):
-            raise DataSetError("database does not conform to naming")
+            raise DatasetError("database does not conform to naming")
 
     def _validate_catalog(self):
         """Validates catalog name
 
         Raises:
-            DataSetError: If the catalog name does not conform to naming constraints.
+            DatasetError: If the catalog name does not conform to naming constraints.
         """
         if self.catalog:
             if not re.fullmatch(self._NAMING_REGEX, self.catalog):
-                raise DataSetError("catalog does not conform to naming")
+                raise DatasetError("catalog does not conform to naming")
 
     def _validate_write_mode(self):
         """Validates the write mode
 
         Raises:
-            DataSetError: If an invalid `write_mode` is passed.
+            DatasetError: If an invalid `write_mode` is passed.
         """
-        if self.write_mode not in self._VALID_WRITE_MODES:
+        if (
+            self.write_mode is not None
+            and self.write_mode not in self._VALID_WRITE_MODES
+        ):
             valid_modes = ", ".join(self._VALID_WRITE_MODES)
-            raise DataSetError(
+            raise DatasetError(
                 f"Invalid `write_mode` provided: {self.write_mode}. "
                 f"`write_mode` must be one of: {valid_modes}"
             )
@@ -95,21 +96,21 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
         """Validates the dataframe type
 
         Raises:
-            DataSetError: If an invalid `dataframe_type` is passed
+            DatasetError: If an invalid `dataframe_type` is passed
         """
         if self.dataframe_type not in self._VALID_DATAFRAME_TYPES:
             valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)
-            raise DataSetError(f"`dataframe_type` must be one of {valid_types}")
+            raise DatasetError(f"`dataframe_type` must be one of {valid_types}")
 
     def _validate_primary_key(self):
         """Validates the primary key of the table
 
         Raises:
-            DataSetError: If no `primary_key` is specified.
+            DatasetError: If no `primary_key` is specified.
         """
         if self.primary_key is None or len(self.primary_key) == 0:
             if self.write_mode == "upsert":
-                raise DataSetError(
+                raise DatasetError(
                     f"`primary_key` must be provided for"
                     f"`write_mode` {self.write_mode}"
                 )
@@ -138,53 +139,54 @@ class ManagedTable:  # pylint: disable=too-many-instance-attributes
             if self.json_schema is not None:
                 schema = StructType.fromJson(self.json_schema)
         except (KeyError, ValueError) as exc:
-            raise DataSetError(exc) from exc
+            raise DatasetError(exc) from exc
         return schema
 
 
-class ManagedTableDataSet(AbstractVersionedDataSet):
-    """``ManagedTableDataSet`` loads and saves data into managed delta tables on Databricks.
-        Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
-        When saving data, you can specify one of three modes: overwrite(default), append,
-        or upsert. Upsert requires you to specify the primary_column parameter which
-        will be used as part of the join condition. This dataset works best with
-        the databricks kedro starter. That starter comes with hooks that allow this
-        dataset to function properly. Follow the instructions in that starter to
-        setup your project for this dataset.
+class ManagedTableDataset(AbstractVersionedDataset):
+    """``ManagedTableDataset`` loads and saves data into managed delta tables on Databricks.
+    Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
+    When saving data, you can specify one of three modes: overwrite(default), append,
+    or upsert. Upsert requires you to specify the primary_column parameter which
+    will be used as part of the join condition. This dataset works best with
+    the databricks kedro starter. That starter comes with hooks that allow this
+    dataset to function properly. Follow the instructions in that starter to
+    setup your project for this dataset.
 
-        Example usage for the
-        `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
-        .. code-block:: yaml
+    .. code-block:: yaml
 
-            names_and_ages@spark:
-              type: databricks.ManagedTableDataSet
-              table: names_and_ages
+        names_and_ages@spark:
+          type: databricks.ManagedTableDataset
+          table: names_and_ages
 
-            names_and_ages@pandas:
-              type: databricks.ManagedTableDataSet
-              table: names_and_ages
-              dataframe_type: pandas
+        names_and_ages@pandas:
+          type: databricks.ManagedTableDataset
+          table: names_and_ages
+          dataframe_type: pandas
 
-        Example usage for the
-        `Python API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
-        .. code-block:: python
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
 
-            from pyspark.sql import SparkSession
-            from pyspark.sql.types import (StructField, StringType,
-                                            IntegerType, StructType)
-            from kedro_datasets.databricks import ManagedTableDataSet
-            schema = StructType([StructField("name", StringType(), True),
-                                 StructField("age", IntegerType(), True)])
-            data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
-            spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-            data_set = ManagedTableDataSet(table="names_and_ages")
-            data_set.save(spark_df)
-            reloaded = data_set.load()
-            reloaded.take(4)
-        """
+    .. code-block:: python
+
+        from pyspark.sql import SparkSession
+        from pyspark.sql.types import (StructField, StringType,
+                                       IntegerType, StructType)
+        from kedro_datasets.databricks import ManagedTableDataset
+        schema = StructType([StructField("name", StringType(), True),
+                             StructField("age", IntegerType(), True)])
+        data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        dataset = ManagedTableDataset(table="names_and_ages")
+        dataset.save(spark_df)
+        reloaded = dataset.load()
+        reloaded.take(4)
+    """
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
@@ -197,7 +199,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         table: str,
         catalog: str = None,
         database: str = "default",
-        write_mode: str = "overwrite",
+        write_mode: Union[str, None] = None,
         dataframe_type: str = "spark",
         primary_key: Optional[Union[str, List[str]]] = None,
         version: Version = None,
@@ -208,35 +210,36 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         partition_columns: List[str] = None,
         owner_group: str = None,
     ) -> None:
-        """Creates a new instance of ``ManagedTableDataSet``
+        """Creates a new instance of ``ManagedTableDataset``.
 
         Args:
-            table (str): the name of the table
-            catalog (str, optional): the name of the catalog in Unity.
-             Defaults to None.
-            database (str, optional): the name of the database.
-             (also referred to as schema). Defaults to "default".
-            write_mode (str, optional): the mode to write the data into the table.
-             Options are:["overwrite", "append", "upsert"].
-             "upsert" mode requires primary_key field to be populated.
-             Defaults to "overwrite".
-            dataframe_type (str, optional): "pandas" or "spark" dataframe.
-             Defaults to "spark".
-            primary_key (Union[str, List[str]], optional): the primary key of the table.
-             Can be in the form of a list. Defaults to None.
-            version (Version, optional): kedro.io.core.Version instance to load the data.
-             Defaults to None.
-            schema (Dict[str, Any], optional): the schema of the table in JSON form.
-             Dataframes will be truncated to match the schema if provided.
-             Used by the hooks to create the table if the schema is provided
-             Defaults to None.
-            partition_columns (List[str], optional): the columns to use for partitioning the table.
-             Used by the hooks. Defaults to None.
-            owner_group (str, optional): if table access control is enabled in your workspace,
-             specifying owner_group will transfer ownership of the table and database to
-             this owner. All databases should have the same owner_group. Defaults to None.
+            table: the name of the table
+            catalog: the name of the catalog in Unity.
+                Defaults to None.
+            database: the name of the database.
+                (also referred to as schema). Defaults to "default".
+            write_mode: the mode to write the data into the table. If not
+                present, the data set is read-only.
+                Options are:["overwrite", "append", "upsert"].
+                "upsert" mode requires primary_key field to be populated.
+                Defaults to None.
+            dataframe_type: "pandas" or "spark" dataframe.
+                Defaults to "spark".
+            primary_key: the primary key of the table.
+                Can be in the form of a list. Defaults to None.
+            version: kedro.io.core.Version instance to load the data.
+                Defaults to None.
+            schema: the schema of the table in JSON form.
+                Dataframes will be truncated to match the schema if provided.
+                Used by the hooks to create the table if the schema is provided
+                Defaults to None.
+            partition_columns: the columns to use for partitioning the table.
+                Used by the hooks. Defaults to None.
+            owner_group: if table access control is enabled in your workspace,
+                specifying owner_group will transfer ownership of the table and database to
+                this owner. All databases should have the same owner_group. Defaults to None.
         Raises:
-            DataSetError: Invalid configuration supplied (through ManagedTable validation)
+            DatasetError: Invalid configuration supplied (through ManagedTable validation)
         """
 
         self._table = ManagedTable(
@@ -329,7 +332,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             update_columns = update_data.columns
 
             if set(update_columns) != set(base_columns):
-                raise DataSetError(
+                raise DatasetError(
                     f"Upsert requires tables to have identical columns. "
                     f"Delta table {self._table.full_table_location()} "
                     f"has columns: {base_columns}, whereas "
@@ -366,6 +369,11 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         Args:
             data (Any): Spark or pandas dataframe to save to the table location
         """
+        if self._table.write_mode is None:
+            raise DatasetError(
+                "'save' can not be used in read-only mode. "
+                "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
+            )
         # filter columns specified in schema and match their ordering
         if self._table.schema():
             cols = self._table.schema().fieldNames()
@@ -386,7 +394,7 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
             self._save_append(data)
 
     def _describe(self) -> Dict[str, str]:
-        """Returns a description of the instance of ManagedTableDataSet
+        """Returns a description of the instance of ManagedTableDataset
 
         Returns:
             Dict[str, str]: Dict with the details of the dataset
@@ -430,3 +438,21 @@ class ManagedTableDataSet(AbstractVersionedDataSet):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+
+
+_DEPRECATED_CLASSES = {
+    "ManagedTableDataSet": ManagedTableDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

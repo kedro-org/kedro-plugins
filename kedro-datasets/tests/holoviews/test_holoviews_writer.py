@@ -7,10 +7,11 @@ from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError, Version
+from kedro.io import Version
 from kedro.io.core import PROTOCOL_DELIMITER
 from s3fs.core import S3FileSystem
 
+from kedro_datasets._io import DatasetError
 from kedro_datasets.holoviews import HoloviewsWriter
 
 
@@ -69,7 +70,7 @@ class TestHoloviewsWriter:
 
     def test_load_fail(self, hv_writer):
         pattern = r"Loading not supported for 'HoloviewsWriter'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             hv_writer.load()
 
     def test_exists(self, dummy_hv_object, hv_writer):
@@ -80,11 +81,11 @@ class TestHoloviewsWriter:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.png"
-        data_set = HoloviewsWriter(filepath=filepath)
-        assert data_set._version_cache.currsize == 0  # no cache if unversioned
-        data_set.release()
+        dataset = HoloviewsWriter(filepath=filepath)
+        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert data_set._version_cache.currsize == 0
+        assert dataset._version_cache.currsize == 0
 
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "fmt": "svg"}], indirect=True)
     def test_save_extra_params(self, hv_writer, save_args):
@@ -108,13 +109,13 @@ class TestHoloviewsWriter:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):
-        data_set = HoloviewsWriter(filepath=filepath, credentials=credentials)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = HoloviewsWriter(filepath=filepath, credentials=credentials)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
 
 @pytest.mark.skipif(
@@ -145,7 +146,7 @@ class TestHoloviewsWriterVersioned:
             r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
     @pytest.mark.parametrize(
@@ -167,9 +168,9 @@ class TestHoloviewsWriterVersioned:
             versioned_hv_writer.save(dummy_hv_object)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             HoloviewsWriter(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
@@ -179,7 +180,7 @@ class TestHoloviewsWriterVersioned:
         pattern = (
             rf"Loading not supported for '{versioned_hv_writer.__class__.__name__}'"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.load()
 
     def test_exists(self, versioned_hv_writer, dummy_hv_object):
@@ -211,7 +212,7 @@ class TestHoloviewsWriterVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_hv_writer._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
         # Remove non-versioned dataset and try again

@@ -1,7 +1,8 @@
-"""``EmailMessageDataSet`` loads/saves an email message from/to a file
+"""``EmailMessageDataset`` loads/saves an email message from/to a file
 using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 ``email`` package in the standard library to manage email messages.
 """
+import warnings
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
@@ -11,30 +12,24 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class EmailMessageDataSet(
-    AbstractVersionedDataSet[Message, Message]
-):  # pylint: disable=too-many-instance-attributes
-    """``EmailMessageDataSet`` loads/saves an email message from/to a file
+class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
+    """``EmailMessageDataset`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
     ``email`` package in the standard library to manage email messages.
 
-    Note that ``EmailMessageDataSet`` doesn't handle sending email messages.
+    Note that ``EmailMessageDataset`` doesn't handle sending email messages.
 
     Example:
     ::
 
         >>> from email.message import EmailMessage
         >>>
-        >>> from kedro_datasets.email import EmailMessageDataSet
+        >>> from kedro_datasets.email import EmailMessageDataset
         >>>
         >>> string_to_write = "what would you do if you were invisable for one day????"
         >>>
@@ -45,9 +40,9 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> data_set = EmailMessageDataSet(filepath="test")
-        >>> data_set.save(msg)
-        >>> reloaded = data_set.load()
+        >>> dataset = EmailMessageDataset(filepath="test")
+        >>> dataset.save(msg)
+        >>> reloaded = dataset.load()
         >>> assert msg.__dict__ == reloaded.__dict__
 
     """
@@ -66,7 +61,7 @@ class EmailMessageDataSet(
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``EmailMessageDataSet`` pointing to a concrete text file
+        """Creates a new instance of ``EmailMessageDataset`` pointing to a concrete text file
         on a specific filesystem.
 
         Args:
@@ -173,7 +168,7 @@ class EmailMessageDataSet(
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -186,3 +181,21 @@ class EmailMessageDataSet(
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "EmailMessageDataSet": EmailMessageDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

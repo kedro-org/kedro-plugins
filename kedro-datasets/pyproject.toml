@@ -8,10 +8,11 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
-requires-python = ">=3.7, <3.11"
+requires-python = ">=3.7"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.16",
+    "lazy_loader",
 ]
 dynamic = ["readme", "version", "optional-dependencies"]
 
@@ -39,22 +40,31 @@ load-plugins = [
 ]
 extension-pkg-whitelist = "cv2"
 unsafe-load-any-extension = false
+
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "duplicate-code"
+    "duplicate-code",
+    "too-many-instance-attributes",
+    "too-few-public-methods",  # https://github.com/pylint-dev/pylint/issues/8865
 ]
 enable = ["useless-suppression"]
+
 [tool.pylint.refactoring]
 max-nested-blocks = 5
+
 [tool.pylint.format]
-indent-after-paren=4
-indent-string="    "
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines='^\s*(# )?<?https?://\S+>?$'
+indent-after-paren = 4
+indent-string = "    "
+
 [tool.pylint.miscellaneous]
 notes = [
     "FIXME",
     "XXX"
 ]
+
 [tool.pylint.design]
 min-public-methods = 1
 
@@ -65,7 +75,7 @@ omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
-addopts="""
+addopts = """
 --cov-report xml:coverage.xml \
 --cov-report term-missing \
 --cov kedro_datasets \

@@ -5,10 +5,11 @@ import boto3
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
-from kedro.io import DataSetError, Version
+from kedro.io import Version
 from moto import mock_s3
 from s3fs import S3FileSystem
 
+from kedro_datasets._io import DatasetError
 from kedro_datasets.matplotlib import MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
@@ -234,7 +235,7 @@ class TestMatplotlibWriter:
 
     def test_load_fail(self, plot_writer):
         pattern = r"Loading not supported for 'MatplotlibWriter'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             plot_writer.load()
 
     @pytest.mark.usefixtures("s3fs_cleanup")
@@ -251,8 +252,8 @@ class TestMatplotlibWriter:
 
     def test_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
-        data_set = MatplotlibWriter(filepath=FULL_PATH)
-        data_set.release()
+        dataset = MatplotlibWriter(filepath=FULL_PATH)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
 
 
@@ -280,7 +281,7 @@ class TestMatplotlibWriterVersioned:
             r"Save path \'.+\' for MatplotlibWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
 
     def test_ineffective_overwrite(self, load_version, save_version):
@@ -316,9 +317,9 @@ class TestMatplotlibWriterVersioned:
             versioned_plot_writer.save(mock_single_plot)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             MatplotlibWriter(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
@@ -328,7 +329,7 @@ class TestMatplotlibWriterVersioned:
         pattern = (
             rf"Loading not supported for '{versioned_plot_writer.__class__.__name__}'"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.load()
 
     def test_exists(self, versioned_plot_writer, mock_single_plot):
@@ -397,7 +398,7 @@ class TestMatplotlibWriterVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_plot_writer._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
 
         # Remove non-versioned dataset and try again

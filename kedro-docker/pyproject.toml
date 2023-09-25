@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Docker makes it easy to package Kedro projects with Docker."
-requires-python = ">=3.7, <3.11"
+requires-python = ">=3.7"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "anyconfig~=0.10.0",  # not directly required, pinned by Snyk to avoid a vulnerability
@@ -21,6 +21,25 @@ dynamic = ["readme", "version"]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker"
 Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-docker/README.md"
 Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.optional-dependencies]
+test = [
+    "bandit",
+    "behave",
+    "black~=22.0",
+    "docker",
+    "flake8>=3.5, <4.0",
+    "pre-commit>=1.17.0, <2.0",
+    "psutil",
+    "pylint>=2.4.4, <3.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist[psutil]~=2.2.1",
+    "PyYAML>=5.1, <7.0",
+    "trufflehog>=2.0.99, <3.0",
+    "wheel==0.32.2"
+]
 
 [project.entry-points."kedro.project_commands"]
 docker = "kedro_docker.plugin:commands"

@@ -1,7 +1,8 @@
-"""``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
+"""``JSONDataset`` loads/saves data from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the JSON file.
 """
 import logging
+import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -11,51 +12,51 @@ import fsspec
 import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+
 logger = logging.getLogger(__name__)
 
 
-class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
-    """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
+class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
+    """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         clickstream_dataset:
-          type: pandas.JSONDataSet
+          type: pandas.JSONDataset
           filepath: abfs://landing_area/primary/click_stream.json
           credentials: abfs_creds
 
         json_dataset:
-          type: pandas.JSONDataSet
+          type: pandas.JSONDataset
           filepath: data/01_raw/Video_Games.json
           load_args:
             lines: True
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pandas import JSONDataSet
+        >>> from kedro_datasets.pandas import JSONDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        ...                      'col3': [5, 6]})
         >>>
-        >>> data_set = JSONDataSet(filepath="test.json")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = JSONDataset(filepath="test.json")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """
@@ -74,7 +75,7 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
+        """Creates a new instance of ``JSONDataset`` pointing to a concrete JSON file
         on a specific filesystem.
 
         Args:
@@ -174,7 +175,7 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -187,3 +188,21 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "JSONDataSet": JSONDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

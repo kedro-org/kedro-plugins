@@ -1,8 +1,8 @@
-"""``GBQTableDataSet`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
+"""``GBQTableDataset`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
 to read and write from/to BigQuery table.
 """
-
 import copy
+import warnings
 from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn, Union
 
@@ -12,28 +12,26 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
 )
 
+from kedro_datasets._io import AbstractDataset, DatasetError
 
-class GBQTableDataSet(
-    AbstractDataSet[None, pd.DataFrame]
-):  # pylint:disable=too-many-instance-attributes
-    """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
+
+class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
+    """``GBQTableDataset`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         vehicles:
-          type: pandas.GBQTableDataSet
+          type: pandas.GBQTableDataset
           dataset: big_query_dataset
           table_name: big_query_table
           project: my-project
@@ -45,20 +43,20 @@ class GBQTableDataSet(
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pandas import GBQTableDataSet
+        >>> from kedro_datasets.pandas import GBQTableDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = GBQTableDataSet('dataset',
+        >>> dataset = GBQTableDataset('dataset',
         >>>                            'table_name',
         >>>                            project='my-project')
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 
@@ -78,7 +76,7 @@ class GBQTableDataSet(
         save_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``GBQTableDataSet``.
+        """Creates a new instance of ``GBQTableDataset``.
 
         Args:
             dataset: Google BigQuery dataset.
@@ -103,7 +101,7 @@ class GBQTableDataSet(
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: When ``load_args['location']`` and ``save_args['location']``
+            DatasetError: When ``load_args['location']`` and ``save_args['location']``
                 are different.
         """
         # Handle default load and save arguments
@@ -170,7 +168,7 @@ class GBQTableDataSet(
         load_location = self._load_args.get("location")
 
         if save_location != load_location:
-            raise DataSetError(
+            raise DatasetError(
                 """"load_args['location']" is different from "save_args['location']". """
                 "The 'location' defines where BigQuery data is stored, therefore has "
                 "to be the same for save and load args. "
@@ -178,10 +176,8 @@ class GBQTableDataSet(
             )
 
 
-class GBQQueryDataSet(
-    AbstractDataSet[None, pd.DataFrame]
-):  # pylint:disable=too-many-instance-attributes
-    """``GBQQueryDataSet`` loads data from a provided SQL query from Google
+class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
+    """``GBQQueryDataset`` loads data from a provided SQL query from Google
     BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
@@ -191,7 +187,7 @@ class GBQQueryDataSet(
     .. code-block:: yaml
 
         >>> vehicles:
-        >>>   type: pandas.GBQQueryDataSet
+        >>>   type: pandas.GBQQueryDataset
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   project: my-project
         >>>   credentials: gbq-creds
@@ -202,13 +198,13 @@ class GBQQueryDataSet(
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.pandas import GBQQueryDataSet
+        >>> from kedro_datasets.pandas import GBQQueryDataset
         >>>
         >>> sql = "SELECT * FROM dataset_1.table_a"
         >>>
-        >>> data_set = GBQQueryDataSet(sql, project='my-project')
+        >>> dataset = GBQQueryDataset(sql, project='my-project')
         >>>
-        >>> sql_data = data_set.load()
+        >>> sql_data = dataset.load()
         >>>
     """
 
@@ -225,7 +221,7 @@ class GBQQueryDataSet(
         filepath: str = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``GBQQueryDataSet``.
+        """Creates a new instance of ``GBQQueryDataset``.
 
         Args:
             sql: The sql query statement.
@@ -249,17 +245,17 @@ class GBQQueryDataSet(
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: When ``sql`` and ``filepath`` parameters are either both empty
+            DatasetError: When ``sql`` and ``filepath`` parameters are either both empty
                 or both provided, as well as when the `save()` method is invoked.
         """
         if sql and filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
@@ -320,5 +316,24 @@ class GBQQueryDataSet(
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:
-        raise DataSetError("'save' is not supported on GBQQueryDataSet")
+    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
+        raise DatasetError("'save' is not supported on GBQQueryDataset")
+
+
+_DEPRECATED_CLASSES = {
+    "GBQTableDataSet": GBQTableDataset,
+    "GBQQueryDataSet": GBQQueryDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

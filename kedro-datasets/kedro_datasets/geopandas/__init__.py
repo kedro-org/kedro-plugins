@@ -1,8 +1,14 @@
-"""``GeoJSONLocalDataset`` is an ``AbstractVersionedDataSet`` to save and load GeoJSON files.
-"""
-__all__ = ["GeoJSONDataSet"]
+"""``GeoJSONDataset`` is an ``AbstractVersionedDataset`` to save and load GeoJSON files."""
+from __future__ import annotations
 
-from contextlib import suppress
+from typing import Any
 
-with suppress(ImportError):
-    from .geojson_dataset import GeoJSONDataSet
+import lazy_loader as lazy
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+GeoJSONDataSet: type[GeoJSONDataset]
+GeoJSONDataset: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"geojson_dataset": ["GeoJSONDataSet", "GeoJSONDataset"]}
+)

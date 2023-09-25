@@ -1,35 +1,32 @@
-"""``JSONDataSet`` loads and saves graphs to a JSON file using an underlying
-filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to create JSON data.
+"""``JSONDataset`` loads and saves graphs to a JSON file using an underlying
+filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.
 """
-
 import json
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
 import networkx
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+
+from kedro_datasets._io import AbstractVersionedDataset
 
 
-class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
-    """NetworkX ``JSONDataSet`` loads and saves graphs to a JSON file using an
-    underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
+class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
+    """NetworkX ``JSONDataset`` loads and saves graphs to a JSON file using an
+    underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to
     create JSON data.
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
     Example:
     ::
 
-        >>> from kedro_datasets.networkx import JSONDataSet
+        >>> from kedro_datasets.networkx import JSONDataset
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = JSONDataSet(filepath="test.json")
+        >>> graph_dataset = JSONDataset(filepath="test.json")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)
@@ -50,7 +47,7 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``JSONDataSet``.
+        """Creates a new instance of ``JSONDataset``.
 
         Args:
             filepath: Filepath in POSIX format to the NetworkX graph JSON file.
@@ -148,3 +145,21 @@ class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "JSONDataSet": JSONDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,39 +1,61 @@
-"""``AbstractDataSet`` implementations that produce pandas DataFrames."""
+"""``AbstractDataset`` implementations that produce pandas DataFrames."""
+from __future__ import annotations
 
-__all__ = [
-    "CSVDataSet",
-    "ExcelDataSet",
-    "FeatherDataSet",
-    "GBQTableDataSet",
-    "GBQQueryDataSet",
-    "HDFDataSet",
-    "JSONDataSet",
-    "ParquetDataSet",
-    "SQLQueryDataSet",
-    "SQLTableDataSet",
-    "XMLDataSet",
-    "GenericDataSet",
-]
+from typing import Any
 
-from contextlib import suppress
+import lazy_loader as lazy
 
-with suppress(ImportError):
-    from .csv_dataset import CSVDataSet
-with suppress(ImportError):
-    from .excel_dataset import ExcelDataSet
-with suppress(ImportError):
-    from .feather_dataset import FeatherDataSet
-with suppress(ImportError):
-    from .gbq_dataset import GBQQueryDataSet, GBQTableDataSet
-with suppress(ImportError):
-    from .hdf_dataset import HDFDataSet
-with suppress(ImportError):
-    from .json_dataset import JSONDataSet
-with suppress(ImportError):
-    from .parquet_dataset import ParquetDataSet
-with suppress(ImportError):
-    from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
-with suppress(ImportError):
-    from .xml_dataset import XMLDataSet
-with suppress(ImportError):
-    from .generic_dataset import GenericDataSet
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+CSVDataSet: type[CSVDataset]
+CSVDataset: Any
+DeltaTableDataSet: type[DeltaTableDataset]
+DeltaTableDataset: Any
+ExcelDataSet: type[ExcelDataset]
+ExcelDataset: Any
+FeatherDataSet: type[FeatherDataset]
+FeatherDataset: Any
+GBQQueryDataSet: type[GBQQueryDataset]
+GBQQueryDataset: Any
+GBQTableDataSet: type[GBQTableDataset]
+GBQTableDataset: Any
+GenericDataSet: type[GenericDataset]
+GenericDataset: Any
+HDFDataSet: type[HDFDataset]
+HDFDataset: Any
+JSONDataSet: type[JSONDataset]
+JSONDataset: Any
+ParquetDataSet: type[ParquetDataset]
+ParquetDataset: Any
+SQLQueryDataSet: type[SQLQueryDataset]
+SQLQueryDataset: Any
+SQLTableDataSet: type[SQLTableDataset]
+SQLTableDataset: Any
+XMLDataSet: type[XMLDataset]
+XMLDataset: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={
+        "csv_dataset": ["CSVDataSet", "CSVDataset"],
+        "deltatable_dataset": ["DeltaTableDataSet", "DeltaTableDataset"],
+        "excel_dataset": ["ExcelDataSet", "ExcelDataset"],
+        "feather_dataset": ["FeatherDataSet", "FeatherDataset"],
+        "gbq_dataset": [
+            "GBQQueryDataSet",
+            "GBQQueryDataset",
+            "GBQTableDataSet",
+            "GBQTableDataset",
+        ],
+        "generic_dataset": ["GenericDataSet", "GenericDataset"],
+        "hdf_dataset": ["HDFDataSet", "HDFDataset"],
+        "json_dataset": ["JSONDataSet", "JSONDataset"],
+        "parquet_dataset": ["ParquetDataSet", "ParquetDataset"],
+        "sql_dataset": [
+            "SQLQueryDataSet",
+            "SQLQueryDataset",
+            "SQLTableDataSet",
+            "SQLTableDataset",
+        ],
+        "xml_dataset": ["XMLDataSet", "XMLDataset"],
+    },
+)

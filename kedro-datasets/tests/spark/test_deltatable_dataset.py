@@ -1,14 +1,22 @@
+import importlib
+
 import pytest
 from delta import DeltaTable
-from kedro.io import DataCatalog, DataSetError
+from kedro.io import DataCatalog
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
+from packaging.version import Version
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark import DeltaTableDataSet, SparkDataSet
+from kedro_datasets._io import DatasetError
+from kedro_datasets.spark import DeltaTableDataset, SparkDataset
+from kedro_datasets.spark.deltatable_dataset import _DEPRECATED_CLASSES
+
+SPARK_VERSION = Version(__version__)
 
 
 @pytest.fixture
@@ -25,15 +33,24 @@ def sample_spark_df():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 
 
-class TestDeltaTableDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.deltatable_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestDeltaTableDataset:
     def test_load(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
-        spark_delta_ds = SparkDataSet(filepath=filepath, file_format="delta")
+        spark_delta_ds = SparkDataset(filepath=filepath, file_format="delta")
         spark_delta_ds.save(sample_spark_df)
         loaded_with_spark = spark_delta_ds.load()
         assert loaded_with_spark.exceptAll(sample_spark_df).count() == 0
 
-        delta_ds = DeltaTableDataSet(filepath=filepath)
+        delta_ds = DeltaTableDataset(filepath=filepath)
         delta_table = delta_ds.load()
 
         assert isinstance(delta_table, DeltaTable)
@@ -42,11 +59,11 @@ class TestDeltaTableDataSet:
 
     def test_save(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
-        delta_ds = DeltaTableDataSet(filepath=filepath)
+        delta_ds = DeltaTableDataset(filepath=filepath)
         assert not delta_ds.exists()
 
-        pattern = "DeltaTableDataSet is a read only dataset type"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = "DeltaTableDataset is a read only dataset type"
+        with pytest.raises(DatasetError, match=pattern):
             delta_ds.save(sample_spark_df)
 
         # check that indeed nothing is written
@@ -54,33 +71,39 @@ class TestDeltaTableDataSet:
 
     def test_exists(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
-        delta_ds = DeltaTableDataSet(filepath=filepath)
+        delta_ds = DeltaTableDataset(filepath=filepath)
 
         assert not delta_ds.exists()
 
-        spark_delta_ds = SparkDataSet(filepath=filepath, file_format="delta")
+        spark_delta_ds = SparkDataset(filepath=filepath, file_format="delta")
         spark_delta_ds.save(sample_spark_df)
 
         assert delta_ds.exists()
 
     def test_exists_raises_error(self, mocker):
-        delta_ds = DeltaTableDataSet(filepath="")
-        mocker.patch.object(
-            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
-        )
-
-        with pytest.raises(DataSetError, match="Other Exception"):
+        delta_ds = DeltaTableDataset(filepath="")
+        if SPARK_VERSION >= Version("3.4.0"):
+            mocker.patch.object(
+                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
+            )
+        else:
+            mocker.patch.object(
+                delta_ds,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
+        with pytest.raises(DatasetError, match="Other Exception"):
             delta_ds.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async):
-        """Test ParallelRunner with SparkDataSet fails."""
+        """Test ParallelRunner with SparkDataset fails."""
 
         def no_output(x):
             _ = x + 1  # pragma: no cover
 
-        delta_ds = DeltaTableDataSet(filepath="")
-        catalog = DataCatalog(data_sets={"delta_in": delta_ds})
+        delta_ds = DeltaTableDataset(filepath="")
+        catalog = DataCatalog({"delta_in": delta_ds})
         pipeline = modular_pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following data sets cannot be used with "

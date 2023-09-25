@@ -1,28 +1,25 @@
-"""GeoJSONDataSet loads and saves data to a local geojson file. The
+"""GeoJSONDataset loads and saves data to a local geojson file. The
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
 import copy
+import warnings
 from pathlib import PurePosixPath
 from typing import Any, Dict, Union
 
 import fsspec
 import geopandas as gpd
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class GeoJSONDataSet(
-    AbstractVersionedDataSet[
+class GeoJSONDataset(
+    AbstractVersionedDataset[
         gpd.GeoDataFrame, Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]
     ]
 ):
-    """``GeoJSONDataSet`` loads/saves data to a GeoJSON file using an underlying filesystem
+    """``GeoJSONDataset`` loads/saves data to a GeoJSON file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all
     allowed geopandas (pandas) options for loading and saving GeoJSON files.
@@ -32,13 +29,13 @@ class GeoJSONDataSet(
 
         >>> import geopandas as gpd
         >>> from shapely.geometry import Point
-        >>> from kedro_datasets.geopandas import GeoJSONDataSet
+        >>> from kedro_datasets.geopandas import GeoJSONDataset
         >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
-        >>> data_set = GeoJSONDataSet(filepath="test.geojson", save_args=None)
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        ...                          'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
+        >>> dataset = GeoJSONDataset(filepath="test.geojson", save_args=None)
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 
@@ -58,7 +55,7 @@ class GeoJSONDataSet(
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``GeoJSONDataSet`` pointing to a concrete GeoJSON file
+        """Creates a new instance of ``GeoJSONDataset`` pointing to a concrete GeoJSON file
         on a specific filesystem fsspec.
 
         Args:
@@ -135,7 +132,7 @@ class GeoJSONDataSet(
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
         return self._fs.exists(load_path)
 
@@ -155,3 +152,21 @@ class GeoJSONDataSet(
         """Invalidate underlying filesystem cache."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "GeoJSONDataSet": GeoJSONDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

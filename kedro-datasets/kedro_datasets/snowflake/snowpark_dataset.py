@@ -1,30 +1,30 @@
-"""``AbstractDataSet`` implementation to access Snowflake using Snowpark dataframes
+"""``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
 """
 import logging
+import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
 import snowflake.snowpark as sp
-from kedro.io.core import AbstractDataSet, DataSetError
+
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
 
-class SnowparkTableDataSet(
-    AbstractDataSet
-):  # pylint:disable=too-many-instance-attributes
-    """``SnowparkTableDataSet`` loads and saves Snowpark dataframes.
+class SnowparkTableDataset(AbstractDataset):
+    """``SnowparkTableDataset`` loads and saves Snowpark dataframes.
 
     As of Mar-2023, the snowpark connector only works with Python 3.8.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         weather:
-          type: kedro_datasets.snowflake.SnowparkTableDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataset
           table_name: "weather_data"
           database: "meteorology"
           schema: "observations"
@@ -50,7 +50,7 @@ class SnowparkTableDataSet(
     .. code-block:: yaml
 
         weather:
-          type: kedro_datasets.snowflake.SnowparkTableDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataset
           table_name: "weather_data"
           database: "meteorology"
           schema: "observations"
@@ -61,7 +61,7 @@ class SnowparkTableDataSet(
             table_type: ''
 
         polygons:
-          type: kedro_datasets.snowflake.SnowparkTableDataSet
+          type: kedro_datasets.snowflake.SnowparkTableDataset
           table_name: "geopolygons"
           credentials: snowflake_client
           schema: "geodata"
@@ -112,7 +112,7 @@ class SnowparkTableDataSet(
         credentials: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``SnowparkTableDataSet``.
+        """Creates a new instance of ``SnowparkTableDataset``.
 
         Args:
             table_name: The table name to load or save data to.
@@ -136,21 +136,21 @@ class SnowparkTableDataSet(
         """
 
         if not table_name:
-            raise DataSetError("'table_name' argument cannot be empty.")
+            raise DatasetError("'table_name' argument cannot be empty.")
 
         if not credentials:
-            raise DataSetError("'credentials' argument cannot be empty.")
+            raise DatasetError("'credentials' argument cannot be empty.")
 
         if not database:
             if not ("database" in credentials and credentials["database"]):
-                raise DataSetError(
+                raise DatasetError(
                     "'database' must be provided by credentials or dataset."
                 )
             database = credentials["database"]
 
         if not schema:
             if not ("schema" in credentials and credentials["schema"]):
-                raise DataSetError(
+                raise DatasetError(
                     "'schema' must be provided by credentials or dataset."
                 )
             schema = credentials["schema"]
@@ -185,7 +185,7 @@ class SnowparkTableDataSet(
     @staticmethod
     def _get_session(connection_parameters) -> sp.Session:
         """Given a connection string, create singleton connection
-        to be used across all instances of `SnowparkTableDataSet` that
+        to be used across all instances of `SnowparkTableDataset` that
         need to connect to the same source.
         connection_parameters is a dictionary of any values
         supported by snowflake python connector:
@@ -242,3 +242,21 @@ class SnowparkTableDataSet(
             )
         ).collect()
         return rows[0][0] == 1
+
+
+_DEPRECATED_CLASSES = {
+    "SnowparkTableDataSet": SnowparkTableDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,14 +1,16 @@
+import importlib
 import json
 from pathlib import Path, PurePosixPath
 
 import pytest
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.tracking import MetricsDataSet
+from kedro_datasets._io import DatasetError
+from kedro_datasets.tracking import MetricsDataset
+from kedro_datasets.tracking.metrics_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -18,12 +20,12 @@ def filepath_json(tmp_path):
 
 @pytest.fixture
 def metrics_dataset(filepath_json, save_args, fs_args):
-    return MetricsDataSet(filepath=filepath_json, save_args=save_args, fs_args=fs_args)
+    return MetricsDataset(filepath=filepath_json, save_args=save_args, fs_args=fs_args)
 
 
 @pytest.fixture
 def explicit_versioned_metrics_dataset(filepath_json, load_version, save_version):
-    return MetricsDataSet(
+    return MetricsDataset(
         filepath=filepath_json, version=Version(load_version, save_version)
     )
 
@@ -33,7 +35,17 @@ def dummy_data():
     return {"col1": 1, "col2": 2, "col3": 3}
 
 
-class TestMetricsDataSet:
+@pytest.mark.parametrize(
+    "module_name",
+    ["kedro_datasets.tracking", "kedro_datasets.tracking.metrics_dataset"],
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestMetricsDataset:
     def test_save_data(
         self,
         dummy_data,
@@ -42,7 +54,7 @@ class TestMetricsDataSet:
         save_version,
     ):
         """Test saving and reloading the data set."""
-        metrics_dataset = MetricsDataSet(
+        metrics_dataset = MetricsDataset(
             filepath=filepath_json, version=Version(None, save_version)
         )
         metrics_dataset.save(dummy_data)
@@ -68,8 +80,8 @@ class TestMetricsDataSet:
 
     def test_load_fail(self, metrics_dataset, dummy_data):
         metrics_dataset.save(dummy_data)
-        pattern = r"Loading not supported for 'MetricsDataSet'"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Loading not supported for 'MetricsDataset'"
+        with pytest.raises(DatasetError, match=pattern):
             metrics_dataset.load()
 
     def test_exists(self, metrics_dataset, dummy_data):
@@ -106,36 +118,36 @@ class TestMetricsDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = MetricsDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = MetricsDataset(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.json"
-        data_set = MetricsDataSet(filepath=filepath)
-        data_set.release()
+        dataset = MetricsDataset(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_fail_on_saving_non_numeric_value(self, metrics_dataset):
         data = {"col1": 1, "col2": 2, "col3": "hello"}
 
-        pattern = "The MetricsDataSet expects only numeric values."
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = "The MetricsDataset expects only numeric values."
+        with pytest.raises(DatasetError, match=pattern):
             metrics_dataset.save(data)
 
     def test_not_version_str_repr(self):
         """Test that version is not in string representation of the class instance."""
         filepath = "test.json"
-        ds = MetricsDataSet(filepath=filepath)
+        ds = MetricsDataset(filepath=filepath)
 
         assert filepath in str(ds)
         assert "version" not in str(ds)
-        assert "MetricsDataSet" in str(ds)
+        assert "MetricsDataset" in str(ds)
         assert "protocol" in str(ds)
         # Default save_args
         assert "save_args={'indent': 2}" in str(ds)
@@ -143,14 +155,14 @@ class TestMetricsDataSet:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance."""
         filepath = "test.json"
-        ds_versioned = MetricsDataSet(
+        ds_versioned = MetricsDataset(
             filepath=filepath, version=Version(load_version, save_version)
         )
 
         assert filepath in str(ds_versioned)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
-        assert "MetricsDataSet" in str(ds_versioned)
+        assert "MetricsDataset" in str(ds_versioned)
         assert "protocol" in str(ds_versioned)
         # Default save_args
         assert "save_args={'indent': 2}" in str(ds_versioned)
@@ -160,10 +172,10 @@ class TestMetricsDataSet:
         corresponding json file for a given save version already exists."""
         explicit_versioned_metrics_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for MetricsDataSet\(.+\) must "
+            r"Save path \'.+\' for MetricsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             explicit_versioned_metrics_dataset.save(dummy_data)
 
     @pytest.mark.parametrize(
@@ -180,15 +192,15 @@ class TestMetricsDataSet:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MetricsDataSet\(.+\)"
+            r"MetricsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             explicit_versioned_metrics_dataset.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
-            MetricsDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            MetricsDataset(
                 filepath="https://example.com/file.json", version=Version(None, None)
             )

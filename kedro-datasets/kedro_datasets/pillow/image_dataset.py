@@ -1,34 +1,31 @@
-"""``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+"""``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from PIL import Image
 
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
-class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
-    """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+
+class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
+    """``ImageDataset`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pillow import ImageDataSet
+        >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> data_set = ImageDataSet(filepath="test.png")
-        >>> image = data_set.load()
+        >>> dataset = ImageDataset(filepath="test.png")
+        >>> image = dataset.load()
         >>> image.show()
 
     """
@@ -45,7 +42,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ImageDataSet`` pointing to a concrete image file
+        """Creates a new instance of ``ImageDataset`` pointing to a concrete image file
         on a specific filesystem.
 
         Args:
@@ -119,17 +116,26 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
             return Image.open(fs_file).copy()
 
     def _save(self, data: Image.Image) -> None:
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = self._get_save_path()
 
-        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            data.save(fs_file, **self._save_args)
+        with self._fs.open(
+            get_filepath_str(save_path, self._protocol), **self._fs_open_args_save
+        ) as fs_file:
+            data.save(fs_file, format=self._get_format(save_path), **self._save_args)
 
         self._invalidate_cache()
+
+    @staticmethod
+    def _get_format(file_path: PurePosixPath):
+        ext = file_path.suffix.lower()
+        if ext not in Image.EXTENSION:
+            Image.init()
+        return Image.EXTENSION.get(ext)
 
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -142,3 +148,21 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "ImageDataSet": ImageDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

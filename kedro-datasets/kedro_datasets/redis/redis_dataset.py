@@ -63,6 +63,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         key: str,
         backend: str = "pickle",
         load_args: Dict[str, Any] = None,

@@ -64,6 +64,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,

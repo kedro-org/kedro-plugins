@@ -274,7 +274,7 @@ class TestTensorFlowModelDataset:
     @pytest.mark.parametrize("fs_args", [{"storage_option": "value"}])
     def test_fs_args(self, fs_args, mocker, tensorflow_model_dataset):
         fs_mock = mocker.patch("fsspec.filesystem")
-        tensorflow_model_dataset("test.tf", fs_args=fs_args)
+        tensorflow_model_dataset(filepath="test.tf", fs_args=fs_args)
 
         fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
 

@@ -70,6 +70,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,

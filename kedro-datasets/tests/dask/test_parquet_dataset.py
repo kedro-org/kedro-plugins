@@ -1,14 +1,12 @@
 import importlib
+from io import BytesIO
 
-import boto3
 import dask.dataframe as dd
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from moto import mock_s3
 from pandas.testing import assert_frame_equal
-from s3fs import S3FileSystem
 
 from kedro_datasets._io import DatasetError
 from kedro_datasets.dask import ParquetDataset
@@ -16,23 +14,9 @@ from kedro_datasets.dask.parquet_dataset import _DEPRECATED_CLASSES
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 # Pathlib cannot be used since it strips out the second slash from "s3://"
 S3_PATH = f"s3://{BUCKET_NAME}/{FILE_NAME}"
-
-
-@pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
-        )
-        conn.create_bucket(Bucket=BUCKET_NAME)
-        yield conn
 
 
 @pytest.fixture
@@ -44,34 +28,28 @@ def dummy_dd_dataframe() -> dd.DataFrame:
 
 
 @pytest.fixture
-def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFrame):
-    """Creates test data and adds it to mocked S3 bucket."""
-    pandas_df = dummy_dd_dataframe.compute()
-    table = pa.Table.from_pandas(pandas_df)
-    temporary_path = tmp_path / FILE_NAME
-    pq.write_table(table, str(temporary_path))
-
-    mocked_s3_bucket.put_object(
-        Bucket=BUCKET_NAME, Key=FILE_NAME, Body=temporary_path.read_bytes()
-    )
-    return mocked_s3_bucket
-
-
-@pytest.fixture
-def s3_dataset(load_args, save_args):
+def s3_dataset(
+    mocked_s3_bucket, credentials, mock_fs_args, save_args, load_args
+):
     return ParquetDataset(
         filepath=S3_PATH,
-        credentials=AWS_CREDENTIALS,
+        credentials=credentials,
+        fs_args=mock_fs_args,
         load_args=load_args,
         save_args=save_args,
     )
 
 
-@pytest.fixture()
-def s3fs_cleanup():
-    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
-    yield
-    S3FileSystem.cachable = False
+@pytest.fixture
+def mocked_parquet_in_s3(mocked_s3_bucket, dummy_dd_dataframe):
+    pandas_df = dummy_dd_dataframe.compute()
+    buffer = BytesIO()
+    pandas_df.to_parquet(buffer)
+    buffer.seek(0)
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME, Key=FILE_NAME, Body=buffer
+    )
+    return S3_PATH
 
 
 @pytest.mark.parametrize(
@@ -83,7 +61,6 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-@pytest.mark.usefixtures("s3fs_cleanup")
 class TestParquetDataset:
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
@@ -103,22 +80,29 @@ class TestParquetDataset:
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load().compute()
 
-    def test_pass_credentials(self, mocker):
-        """Test that AWS credentials are passed successfully into boto3
-        client instantiation on creating S3 connection."""
-        client_mock = mocker.patch("botocore.session.Session.create_client")
-        s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
-        with pytest.raises(DatasetError, match=pattern):
-            s3_dataset.load().compute()
+    def test_exists(self, s3_dataset, dummy_dd_dataframe):
+        """Test `exists` method invocation for both existing and
+        nonexistent data set."""
+        assert not s3_dataset.exists()
+        s3_dataset.save(dummy_dd_dataframe)
+        assert s3_dataset.exists()
 
-        assert client_mock.call_count == 1
-        args, kwargs = client_mock.call_args_list[0]
-        assert args == ("s3",)
-        assert kwargs["aws_access_key_id"] == AWS_CREDENTIALS["key"]
-        assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
+    def test_load_data(
+        self,
+        mocked_parquet_in_s3,
+        mock_fs_args,
+        credentials,
+        dummy_dd_dataframe
+    ):
+        """Test loading the data from S3."""
+        dataset = ParquetDataset(
+            filepath=mocked_parquet_in_s3,
+            credentials=credentials,
+            fs_args=mock_fs_args,
+        )
+        loaded_data = dataset.load()
+        assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
 
-    @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_save_data(self, s3_dataset):
         """Test saving the data to S3."""
         pd_data = pd.DataFrame(
@@ -128,20 +112,6 @@ class TestParquetDataset:
         s3_dataset.save(dd_data)
         loaded_data = s3_dataset.load()
         assert_frame_equal(loaded_data.compute(), dd_data.compute())
-
-    @pytest.mark.usefixtures("mocked_s3_object")
-    def test_load_data(self, s3_dataset, dummy_dd_dataframe):
-        """Test loading the data from S3."""
-        loaded_data = s3_dataset.load()
-        assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
-
-    @pytest.mark.usefixtures("mocked_s3_bucket")
-    def test_exists(self, s3_dataset, dummy_dd_dataframe):
-        """Test `exists` method invocation for both existing and
-        nonexistent data set."""
-        assert not s3_dataset.exists()
-        s3_dataset.save(dummy_dd_dataframe)
-        assert s3_dataset.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""

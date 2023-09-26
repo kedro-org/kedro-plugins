@@ -105,6 +105,7 @@ class SnowparkTableDataset(AbstractDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table_name: str,
         schema: str = None,
         database: str = None,

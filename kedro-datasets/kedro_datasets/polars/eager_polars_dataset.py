@@ -56,6 +56,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str,
         load_args: Dict[str, Any] = None,

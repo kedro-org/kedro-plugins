@@ -38,6 +38,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,

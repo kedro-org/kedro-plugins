@@ -52,6 +52,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         save_args: Dict[str, Any] = None,
         version: Version = None,

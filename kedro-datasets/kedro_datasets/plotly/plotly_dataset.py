@@ -70,6 +70,7 @@ class PlotlyDataset(JSONDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         plotly_args: Dict[str, Any],
         load_args: Dict[str, Any] = None,
@@ -115,7 +116,14 @@ class PlotlyDataset(JSONDataset):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
+        super().__init__(
+            filepath=filepath,
+            load_args=load_args,
+            save_args=save_args,
+            version=version,
+            credentials=credentials,
+            fs_args=fs_args,
+        )
         self._plotly_args = plotly_args
 
         _fs_args = deepcopy(fs_args) or {}

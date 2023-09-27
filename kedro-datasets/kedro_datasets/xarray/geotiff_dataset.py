@@ -26,7 +26,6 @@ class GeoTiffDataset(AbstractVersionedDataSet):
         Args:
             filepath: Filepath in POSIX format to a geotiff file.
                 The prefix should be any protocol supported by ``fsspec``.
-                Note: `http(s)` doesn't support versioning.
             load_args: rioxarray options for loading geotiff files.
                 Here you can find all available arguments:
                 https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray-open-rasterio

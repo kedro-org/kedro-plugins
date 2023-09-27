@@ -24,8 +24,8 @@ kedro_datasets
    kedro_datasets.geopandas.GeoJSONDataSet
    kedro_datasets.geopandas.GeoJSONDataset
    kedro_datasets.geopandas.GeoJSONDataset
-   kedro_datasets.geotiff.GeoTiffDataset
-   kedro_datasets.geotiff.GeoTiffDataset
+   kedro_datasets.xarray.GeoTiffDataset
+   kedro_datasets.xarray.GeoTiffDataset
    kedro_datasets.holoviews.HoloviewsWriter
    kedro_datasets.json.JSONDataSet
    kedro_datasets.json.JSONDataset

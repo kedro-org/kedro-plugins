@@ -64,12 +64,12 @@ class GeoTiffDataset(AbstractVersionedDataSet):
 
     def _load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
-        return rxr.open_rasterio(load_path)
+        return rxr.open_rasterio(load_path, **self._load_args)
 
     def _save(self, data: xarray.DataArray) -> None:
         save_path = self._get_save_path()
         if self._filepath.suffix in [".tif", ".tiff"]:
-            data.to_raster(save_path.as_posix())
+            data.to_raster(save_path.as_posix(), **self._save_args)
         else:
             raise ValueError("expecting .tif or .tiff file suffix")
 

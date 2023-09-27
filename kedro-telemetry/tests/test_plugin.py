@@ -9,8 +9,6 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-from pytest import fixture
-
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
@@ -18,9 +16,11 @@ from kedro_telemetry.plugin import (
     _check_for_telemetry_consent,
     _confirm_consent,
 )
+from pytest import fixture
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
+
 
 @fixture
 def fake_metadata(tmp_path):
@@ -376,7 +376,7 @@ class TestKedroTelemetryProjectHooks:
         # The 1st call is the Project Hook without CLI
         assert mocked_heap_call.call_args_list[0] == expected_call
 
-    def test_after_context_created_with_kedro_run( # noqa: PLR0913
+    def test_after_context_created_with_kedro_run(  # noqa: PLR0913
         self,
         mocker,
         fake_context,

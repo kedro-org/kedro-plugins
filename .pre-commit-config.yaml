@@ -23,6 +23,16 @@ repos:
           - "--ignore=E203,E266,E501,W503"
         exclude: "^kedro_airflow/dag_template.py|^template.py"
 
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.0.277
+    hooks:
+      - id: ruff
+        name: "ruff on kedro-telemetry"
+        args: [ "--fix", "--exit-non-zero-on-fix" ]
+        files: ^kedro-telemetry/kedro_telemetry/
+        exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
+
   - repo: local
     hooks:
       # pylint quick checks
@@ -50,15 +60,6 @@ repos:
         types: [file, python]
         files: ^kedro-docker/kedro_docker/
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
-        entry: pylint --disable=unnecessary-pass
-        stages: [commit]
-
-      - id: pylint-quick-kedro-telemetry
-        name: "Quick PyLint on kedro_telemetry/*"
-        language: system
-        types: [file, python]
-        files: ^kedro-telemetry/kedro_telemetry/
-        exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
         entry: pylint --disable=unnecessary-pass
         stages: [commit]
 
@@ -136,29 +137,6 @@ repos:
         stages: [manual]
         entry: pylint --disable=missing-docstring,redefined-outer-name,invalid-name,protected-access,too-many-arguments kedro-docker/tests
 
-      - id: pylint-kedro-telemetry
-        name: "PyLint on kedro_telemetry/*"
-        language: system
-        files: ^kedro-telemetry/kedro_telemetry/.*\.py$
-        exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=unnecessary-pass,E0401 kedro-telemetry/kedro_telemetry
-
-      - id: pylint-kedro-telemetry-features
-        name: "PyLint on kedro-docker features/*"
-        language: system
-        stages: [ manual ]
-        entry: echo 'Not needed to run for this directory'
-        files: .*
-
-      - id: pylint-kedro-telemetry-tests
-        name: "PyLint on kedro-telemetry tests/*"
-        language: system
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-telemetry/tests
-
       - id: isort-kedro-datasets
         name: "Sort imports"
         language: system
@@ -178,13 +156,6 @@ repos:
         language: system
         types: [ file, python ]
         files: ^kedro-airflow/
-        entry: isort
-
-      - id: isort-kedro-telemetry
-        name: "Sort imports"
-        language: system
-        types: [ file, python ]
-        files: ^kedro-telemetry/
         entry: isort
 
       - id: black-kedro-datasets

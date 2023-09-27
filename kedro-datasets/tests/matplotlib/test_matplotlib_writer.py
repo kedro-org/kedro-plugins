@@ -88,11 +88,9 @@ class TestMatplotlibWriter:
 
         mock_single_plot.savefig(str(actual_filepath))
 
-        body_stream = (
-            mocked_s3_bucket
-            .get_object(Bucket=BUCKET_NAME, Key=KEY_PATH)["Body"]
-            .read()
-        )
+        body_stream = mocked_s3_bucket.get_object(Bucket=BUCKET_NAME, Key=KEY_PATH)[
+            "Body"
+        ].read()
 
         assert actual_filepath.read_bytes() == body_stream
         assert plot_writer._fs_open_args_save == {"mode": "wb"}
@@ -110,11 +108,9 @@ class TestMatplotlibWriter:
             mock_list_plot[index].savefig(str(actual_filepath))
             _key_path = f"{KEY_PATH}/{index}.png"
 
-            body_stream = (
-                mocked_s3_bucket
-                .get_object(Bucket=BUCKET_NAME, Key=_key_path)["Body"]
-                .read()
-            )
+            body_stream = mocked_s3_bucket.get_object(
+                Bucket=BUCKET_NAME, Key=_key_path
+            )["Body"].read()
 
             assert actual_filepath.read_bytes() == body_stream
 
@@ -130,11 +126,9 @@ class TestMatplotlibWriter:
 
             _key_path = f"{KEY_PATH}/{colour}"
 
-            body_stream = (
-                mocked_s3_bucket
-                .get_object(Bucket=BUCKET_NAME, Key=_key_path)["Body"]
-                .read()
-            )
+            body_stream = mocked_s3_bucket.get_object(
+                Bucket=BUCKET_NAME, Key=_key_path
+            )["Body"].read()
 
             assert actual_filepath.read_bytes() == body_stream
 
@@ -160,7 +154,14 @@ class TestMatplotlibWriter:
         assert {f"{KEY_PATH}/{colour}" for colour in COLOUR_LIST} <= saved_plots
         assert len(saved_plots) == expected_num_plots
 
-    def test_fs_args(self, tmp_path, credentials, mock_single_plot, mocked_encrypted_s3_bucket, mock_fs_args):
+    def test_fs_args(
+        self,
+        tmp_path,
+        credentials,
+        mock_single_plot,
+        mocked_encrypted_s3_bucket,
+        mock_fs_args,
+    ):
         """Test writing to encrypted bucket."""
         # update fs_args from fixture
         mock_fs_args["s3_additional_kwargs"] = {"ServerSideEncryption": "AES256"}
@@ -175,11 +176,9 @@ class TestMatplotlibWriter:
         actual_filepath = tmp_path / "locally_saved.png"
         mock_single_plot.savefig(str(actual_filepath))
 
-        body_stream = (
-            mocked_encrypted_s3_bucket
-            .get_object(Bucket=BUCKET_NAME, Key=KEY_PATH)["Body"]
-            .read()
-        )
+        body_stream = mocked_encrypted_s3_bucket.get_object(
+            Bucket=BUCKET_NAME, Key=KEY_PATH
+        )["Body"].read()
         assert actual_filepath.read_bytes() == body_stream
 
     @pytest.mark.parametrize(

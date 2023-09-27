@@ -7,10 +7,10 @@ https://docs.pytest.org/en/latest/fixture.html
 import json
 import os
 
+import requests
 from kedro.io.core import generate_timestamp
 from moto.moto_server.threaded_moto_server import ThreadedMotoServer
 from pytest import fixture
-import requests
 
 BUCKET_NAME = "test_bucket"
 IP_ADDRESS = "127.0.0.1"
@@ -63,6 +63,7 @@ def credentials():
         "secret": "fake_secret_key",
     }
 
+
 @fixture(scope="session")
 def moto_server():
     # This fixture is module-scoped, meaning that we can re-use the MotoServer across all tests
@@ -90,10 +91,7 @@ def _get_boto3_client():
 
     # NB: we use the sync botocore client for setup
     session = Session()
-    return session.create_client(
-        service_name="s3",
-        endpoint_url=ENDPOINT_URI
-    )
+    return session.create_client(service_name="s3", endpoint_url=ENDPOINT_URI)
 
 
 @fixture

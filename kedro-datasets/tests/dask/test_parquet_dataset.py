@@ -28,9 +28,7 @@ def dummy_dd_dataframe() -> dd.DataFrame:
 
 
 @pytest.fixture
-def s3_dataset(
-    mocked_s3_bucket, credentials, mock_fs_args, save_args, load_args
-):
+def s3_dataset(mocked_s3_bucket, credentials, mock_fs_args, save_args, load_args):
     return ParquetDataset(
         filepath=S3_PATH,
         credentials=credentials,
@@ -46,9 +44,7 @@ def mocked_parquet_in_s3(mocked_s3_bucket, dummy_dd_dataframe):
     buffer = BytesIO()
     pandas_df.to_parquet(buffer)
     buffer.seek(0)
-    mocked_s3_bucket.put_object(
-        Bucket=BUCKET_NAME, Key=FILE_NAME, Body=buffer
-    )
+    mocked_s3_bucket.put_object(Bucket=BUCKET_NAME, Key=FILE_NAME, Body=buffer)
     return S3_PATH
 
 
@@ -88,11 +84,7 @@ class TestParquetDataset:
         assert s3_dataset.exists()
 
     def test_load_data(
-        self,
-        mocked_parquet_in_s3,
-        mock_fs_args,
-        credentials,
-        dummy_dd_dataframe
+        self, mocked_parquet_in_s3, mock_fs_args, credentials, dummy_dd_dataframe
     ):
         """Test loading the data from S3."""
         dataset = ParquetDataset(

@@ -1,8 +1,6 @@
 import importlib
 
-import boto3
 import pytest
-from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 
 from kedro_datasets._io import DatasetError
@@ -16,7 +14,6 @@ from kedro_datasets.video.video_dataset import (
 S3_BUCKET_NAME = "test_bucket"
 S3_KEY_PATH = "video"
 S3_FULL_PATH = f"s3://{S3_BUCKET_NAME}/{S3_KEY_PATH}/"
-AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 
 @pytest.fixture
@@ -37,20 +34,6 @@ def empty_dataset_mp4(tmp_filepath_mp4):
 @pytest.fixture
 def empty_dataset_avi(tmp_filepath_avi):
     return VideoDataset(filepath=tmp_filepath_avi)
-
-
-@pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            region_name="us-east-1",
-            aws_access_key_id=AWS_CREDENTIALS["key"],
-            aws_secret_access_key=AWS_CREDENTIALS["secret"],
-        )
-        conn.create_bucket(Bucket=S3_BUCKET_NAME)
-        yield conn
 
 
 @pytest.mark.parametrize(
@@ -139,21 +122,26 @@ class TestVideoDataset:
         with pytest.raises(DatasetError, match=pattern):
             empty_dataset_mp4.load()
 
-    def test_save_s3(self, mp4_object, mocked_s3_bucket, tmp_path):
+    def test_save_s3(
+        self, mp4_object, mocked_s3_bucket, mock_fs_args, credentials, tmp_path
+    ):
         """Test to save a VideoDataset to S3 storage"""
         video_name = "video.mp4"
 
         dataset = VideoDataset(
-            filepath=S3_FULL_PATH + video_name, credentials=AWS_CREDENTIALS
+            filepath=S3_FULL_PATH + video_name,
+            fs_args=mock_fs_args,
+            credentials=credentials,
         )
         dataset.save(mp4_object)
 
+        body_stream = mocked_s3_bucket.get_object(
+            Bucket=S3_BUCKET_NAME, Key=f"{S3_KEY_PATH}/{video_name}"
+        )["Body"].read()
         tmp_file = tmp_path / video_name
-        mocked_s3_bucket.download_file(
-            Bucket=S3_BUCKET_NAME,
-            Key=S3_KEY_PATH + "/" + video_name,
-            Filename=str(tmp_file),
-        )
+        with open(tmp_file, "wb") as file:
+            file.write(body_stream)
+
         reloaded_video = FileVideo(str(tmp_file))
         assert_videos_equal(reloaded_video, mp4_object)
 

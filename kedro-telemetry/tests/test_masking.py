@@ -7,6 +7,7 @@ import pytest
 from kedro import __version__ as kedro_version
 from kedro.framework.cli.cli import KedroCLI, cli
 from kedro.framework.startup import ProjectMetadata
+
 from kedro_telemetry.masking import (
     MASK,
     _get_cli_structure,

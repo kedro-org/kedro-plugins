@@ -35,15 +35,6 @@ repos:
         entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass
         stages: [commit]
 
-      - id: pylint-quick-kedro-airflow
-        name: "Quick PyLint on kedro_airflow/*"
-        language: system
-        types: [file, python]
-        files: ^kedro-airflow/kedro_airflow/
-        exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
-        entry: pylint --disable=unnecessary-pass
-        stages: [commit]
-
       - id: pylint-quick-kedro-docker
         name: "Quick PyLint on kedro_docker/*"
         language: system
@@ -81,28 +72,14 @@ repos:
         stages: [manual]
         entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,E0401 kedro-datasets/tests
 
-      - id: pylint-kedro-airflow
-        name: "PyLint on kedro_airflow/*"
+      - id: ruff-kedro-airflow
+        name: "Ruff on kedro_airflow/*"
         language: system
-        files: ^kedro-airflow/kedro_airflow/.*\.py$
+        files: ^kedro-airflow/kedro_airflow/
         exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
         pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=unnecessary-pass,E0401 kedro-airflow/kedro_airflow
-
-      - id: pylint-kedro-airflow-features
-        name: "PyLint on kedro-airflow features/*"
-        language: system
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=missing-docstring,no-name-in-module kedro-airflow/features
-
-      - id: pylint-kedro-airflow-tests
-        name: "PyLint on kedro-airflow tests/*"
-        language: system
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments kedro-airflow/tests
+        stages: [ manual ]
+        entry: ruff kedro-airflow --fix --exit-non-zero-on-fix
 
       - id: pylint-kedro-docker
         name: "PyLint on kedro_docker/*"
@@ -148,13 +125,6 @@ repos:
         language: system
         types: [ file, python ]
         files: ^kedro-docker/
-        entry: isort
-
-      - id: isort-kedro-airflow
-        name: "Sort imports"
-        language: system
-        types: [ file, python ]
-        files: ^kedro-airflow/
         entry: isort
 
       - id: black-kedro-datasets

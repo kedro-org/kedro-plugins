@@ -42,7 +42,7 @@ CONFIG_LOADER_ARGS = {{
 
 
 @fixture(scope="session")
-def kedro_project(cli_runner):  # pylint: disable=unused-argument
+def kedro_project(cli_runner):
     tmp_path = Path().cwd()
     # From `kedro-mlflow.tests.conftest.py`
     config = {
@@ -98,7 +98,7 @@ def register_pipelines():
 
 
 @fixture(scope="session")
-def metadata(kedro_project):  # pylint: disable=unused-argument
+def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
     project_path = kedro_project
     return ProjectMetadata(

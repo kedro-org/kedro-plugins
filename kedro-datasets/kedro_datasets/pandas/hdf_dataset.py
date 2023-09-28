@@ -59,6 +59,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         key: str,
         load_args: Dict[str, Any] = None,

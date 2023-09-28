@@ -11,7 +11,6 @@ from kedro.io import Version
 from kedro.io.core import PROTOCOL_DELIMITER
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.holoviews import HoloviewsWriter
 

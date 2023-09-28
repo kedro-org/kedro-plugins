@@ -44,17 +44,15 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import GBQTableDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GBQTableDataset('dataset',
-        >>>                            'table_name',
-        >>>                            project='my-project')
+        >>> dataset = GBQTableDataset("dataset", "table_name", project="my-project")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>
@@ -196,13 +194,14 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
 
     Example using Python API:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import GBQQueryDataset
         >>>
         >>> sql = "SELECT * FROM dataset_1.table_a"
         >>>
-        >>> dataset = GBQQueryDataset(sql, project='my-project')
+        >>> dataset = GBQQueryDataset(sql, project="my-project")
         >>>
         >>> sql_data = dataset.load()
         >>>

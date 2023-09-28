@@ -63,15 +63,15 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import GenericDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GenericDataset(filepath="test.csv", file_format='csv')
+        >>> dataset = GenericDataset(filepath="test.csv", file_format="csv")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)

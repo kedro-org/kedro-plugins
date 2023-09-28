@@ -34,18 +34,19 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import (StructField, StringType,
-        ...                                IntegerType, StructType)
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
         >>>
         >>> from kedro.extras.datasets.spark import DeltaTableDataset, SparkDataset
         >>>
-        >>> schema = StructType([StructField("name", StringType(), True),
-        ...                      StructField("age", IntegerType(), True)])
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
         >>>
-        >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>

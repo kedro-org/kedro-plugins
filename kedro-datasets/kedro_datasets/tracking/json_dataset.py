@@ -29,11 +29,12 @@ class JSONDataset(json_dataset.JSONDataset):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.tracking import JSONDataset
         >>>
-        >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
+        >>> data = {"col1": 1, "col2": 0.23, "col3": 0.002}
         >>>
         >>> dataset = JSONDataset(filepath="test.json")
         >>> dataset.save(data)

@@ -30,11 +30,12 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.yaml import YAMLDataset
         >>>
-        >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
+        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
         >>>
         >>> dataset = YAMLDataset(filepath="test.yaml")
         >>> dataset.save(data)

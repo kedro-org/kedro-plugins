@@ -20,7 +20,8 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pillow import ImageDataset
         >>>

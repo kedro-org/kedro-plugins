@@ -25,7 +25,8 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
     Note that ``EmailMessageDataset`` doesn't handle sending email messages.
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> from email.message import EmailMessage
         >>>

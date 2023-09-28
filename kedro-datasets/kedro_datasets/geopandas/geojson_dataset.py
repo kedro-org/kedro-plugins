@@ -25,14 +25,17 @@ class GeoJSONDataset(
     allowed geopandas (pandas) options for loading and saving GeoJSON files.
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> import geopandas as gpd
         >>> from shapely.geometry import Point
         >>> from kedro_datasets.geopandas import GeoJSONDataset
         >>>
-        >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                          'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
+        >>> data = gpd.GeoDataFrame(
+        ...     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
+        ...     geometry=[Point(1, 1), Point(2, 4)],
+        ... )
         >>> dataset = GeoJSONDataset(filepath="test.geojson", save_args=None)
         >>> dataset.save(data)
         >>> reloaded = dataset.load()

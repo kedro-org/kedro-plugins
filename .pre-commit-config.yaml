@@ -23,6 +23,15 @@ repos:
           - "--ignore=E203,E266,E501,W503"
         exclude: "^kedro_airflow/dag_template.py|^template.py"
 
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.16.0
+    hooks:
+    - id: blacken-docs
+      args:
+        - "--rst-literal-blocks"
+      additional_dependencies:
+        - black==22.12.0
+
   - repo: local
     hooks:
       # pylint quick checks

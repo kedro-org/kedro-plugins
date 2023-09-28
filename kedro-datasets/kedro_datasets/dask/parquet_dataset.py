@@ -36,25 +36,25 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro.extras.datasets.dask import ParquetDataset
         >>> import pandas as pd
         >>> import dask.dataframe as dd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [[5, 6], [7, 8]]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> dataset = ParquetDataset(
         ...     filepath="s3://bucket_name/path/to/folder",
         ...     credentials={
-        ...         'client_kwargs':{
-        ...             'aws_access_key_id': 'YOUR_KEY',
-        ...             'aws_secret_access_key': 'YOUR SECRET',
+        ...         "client_kwargs": {
+        ...             "aws_access_key_id": "YOUR_KEY",
+        ...             "aws_secret_access_key": "YOUR SECRET",
         ...         }
         ...     },
-        ...     save_args={"compression": "GZIP"}
+        ...     save_args={"compression": "GZIP"},
         ... )
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()

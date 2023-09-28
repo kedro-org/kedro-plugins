@@ -155,6 +155,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table_name: str,
         credentials: dict[str, Any],
         load_args: dict[str, Any] = None,

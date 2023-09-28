@@ -43,7 +43,7 @@ class ManagedTable:
         The validation is performed by calling a function named:
             `validate_<field_name>(self, value) -> raises DatasetError`
         """
-        for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
+        for name in self.__dataclass_fields__.keys():
             method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()

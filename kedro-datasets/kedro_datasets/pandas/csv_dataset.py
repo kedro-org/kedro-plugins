@@ -197,7 +197,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def _preview(self, nrows: int = 40) -> Dict:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")

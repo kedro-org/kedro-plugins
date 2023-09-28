@@ -314,7 +314,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")
 
 

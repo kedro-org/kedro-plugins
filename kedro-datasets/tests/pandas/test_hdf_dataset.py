@@ -144,7 +144,7 @@ class TestHDFDataset:
 
         hdf_dataset.save(dummy_dataframe)
         calls = [
-            mocker.call.__enter__(),  # pylint: disable=unnecessary-dunder-call
+            mocker.call.__enter__(),
             mocker.call.__exit__(None, None, None),
         ]
         mocked_lock.assert_has_calls(calls)

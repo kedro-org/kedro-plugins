@@ -12,7 +12,6 @@ from pyspark.sql.functions import col, lit, row_number
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-# pylint:disable=too-many-instance-attributes
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     """``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -210,7 +209,6 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        # noqa # pylint:disable=protected-access
         return (
             self._get_spark()
             ._jsparkSession.catalog()

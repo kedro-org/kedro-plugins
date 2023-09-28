@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 import importlib
 import re
 import sys
@@ -182,7 +181,6 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-# pylint: disable=too-many-public-methods
 class TestSparkDataset:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()

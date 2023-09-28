@@ -189,7 +189,6 @@ extras_require["test"] = [
     "pre-commit>=2.9.2, <3.0", # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.5.2, <3.0",
     "pyodbc~=4.0.35",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",

@@ -80,12 +80,12 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
         return dbutils
 
     try:
-        from pyspark.dbutils import DBUtils  # pylint: disable=import-outside-toplevel
+        from pyspark.dbutils import DBUtils
 
         dbutils = DBUtils(spark)
     except ImportError:
         try:
-            import IPython  # pylint: disable=import-outside-toplevel
+            import IPython
         except ImportError:
             pass
         else:
@@ -111,7 +111,7 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
     try:
         dbutils.fs.ls(file)
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         return False
 
 

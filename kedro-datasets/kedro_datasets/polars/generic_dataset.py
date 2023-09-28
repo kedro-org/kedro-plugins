@@ -15,7 +15,6 @@ from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-# pylint: disable=too-many-instance-attributes
 class GenericDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """``polars.GenericDataset`` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
@@ -138,7 +137,7 @@ class GenericDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> pl.DataFrame:  # pylint: disable= inconsistent-return-statements
+    def _load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
 

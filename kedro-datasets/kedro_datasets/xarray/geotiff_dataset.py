@@ -16,10 +16,13 @@ from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
 class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    def __init__(self, filepath: str,
+    def __init__(
+        self,
+        filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        version: Version = None):
+        version: Version = None,
+    ):
         """Creates a new instance of ``GeoTiffDataset`` pointing to a concrete
         tiff or tif file with geospatial data.
 

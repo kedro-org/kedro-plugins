@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-import rioxarray
+import xarray as xr
 from kedro.io.core import Version
 
 from kedro_datasets.xarray import GeoTiffDataset
@@ -26,7 +26,7 @@ def versioned_geotiff_dataset(
     )
 
 
-def test_save_and_load(self, geotiff_dataset, cog_file_path):
+def test_save_and_load(geotiff_dataset):
     """Test saving and reloading the data set."""
     loaded_tiff = geotiff_dataset.load()
-    assert type(loaded_tiff) == rioxarray.raster_dataset.RasterArray
+    assert isinstance(loaded_tiff, xr.DataArray)

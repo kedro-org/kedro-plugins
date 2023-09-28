@@ -10,6 +10,7 @@ from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
 
 from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 
 # pylint:disable=too-many-instance-attributes
@@ -136,20 +137,6 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "format": self._format,
         }
 
-    @staticmethod
-    def _get_spark() -> SparkSession:
-        """
-        This method should only be used to get an existing SparkSession
-        with valid Hive configuration.
-        Configuration for Hive is read from hive-site.xml on the classpath.
-        It supports running both SQL and HiveQL commands.
-        Additionally, if users are leveraging the `upsert` functionality,
-        then a `checkpoint` directory must be set, e.g. using
-        `spark.sparkContext.setCheckpointDir("/path/to/dir")`
-        """
-        _spark = SparkSession.builder.getOrCreate()
-        return _spark
-
     def _create_hive_table(self, data: DataFrame, mode: str = None):
         _mode: str = mode or self._write_mode
         data.write.saveAsTable(
@@ -160,7 +147,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         )
 
     def _load(self) -> DataFrame:
-        return self._get_spark().read.table(self._full_table_address)
+        return _get_spark().read.table(self._full_table_address)
 
     def _save(self, data: DataFrame) -> None:
         self._validate_save(data)
@@ -213,7 +200,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     def _exists(self) -> bool:
         # noqa # pylint:disable=protected-access
         return (
-            self._get_spark()
+            _get_spark()
             ._jsparkSession.catalog()
             .tableExists(self._database, self._table)
         )

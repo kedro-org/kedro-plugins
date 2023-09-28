@@ -24,6 +24,28 @@ from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
+def _get_spark() -> Any:
+    """
+    Returns the SparkSession, we need this wrapper because the SparkSession
+    is retrieved differently in databricks-connect vs a Notebook in web UI
+    """
+    # When in databricks-connect pyspark version is equal to DBR version
+    # instead of the actual pyspark version
+    pyspark_major_version = int(pyspark.__version__.split(".")[0])
+    if pyspark_major_version >= 13:
+        # In this case we are in a databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
+        # remote session, and therefore spark is initialized differently
+
+        from databricks.connect import DatabricksSession
+
+        spark = DatabricksSession.builder.getOrCreate()
+    else:
+        # For sessions in Notebook web UI or previous versions on databricks-connect
+        # we get spark normally
+        spark = SparkSession.builder.getOrCreate()
+
+    return spark
+
 
 def _parse_glob_pattern(pattern: str) -> str:
     special = ("*", "?", "[")
@@ -314,7 +336,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         elif filepath.startswith("/dbfs/"):
             # dbfs add prefix to Spark path by default
             # See https://github.com/kedro-org/kedro-plugins/issues/117
-            dbutils = _get_dbutils(self._get_spark())
+            dbutils = _get_dbutils(_get_spark())
             if dbutils:
                 glob_function = partial(_dbfs_glob, dbutils=dbutils)
                 exists_function = partial(_dbfs_exists, dbutils=dbutils)
@@ -382,13 +404,11 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
             "version": self._version,
         }
 
-    @staticmethod
-    def _get_spark():
-        return SparkSession.builder.getOrCreate()
+
 
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
-        read_obj = self._get_spark().read
+        read_obj = _get_spark().read
 
         # Pass schema if defined
         if self._schema:
@@ -404,7 +424,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
-            self._get_spark().read.load(load_path, self._file_format)
+            _get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
             # `AnalysisException.desc` is deprecated with pyspark >= 3.4
             message = exception.desc if hasattr(exception, "desc") else str(exception)

@@ -10,7 +10,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets._io import AbstractDataset, DatasetError
-from kedro_datasets.spark.spark_dataset import _split_filepath, _strip_dbfs_prefix
+from kedro_datasets.spark.spark_dataset import _get_spark, _split_filepath, _strip_dbfs_prefix
 
 
 class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
@@ -80,13 +80,9 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         self._filepath = PurePosixPath(filepath)
         self.metadata = metadata
 
-    @staticmethod
-    def _get_spark():
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)
-        return DeltaTable.forPath(self._get_spark(), load_path)
+        return DeltaTable.forPath(_get_spark(), load_path)
 
     def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
@@ -95,7 +91,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            self._get_spark().read.load(path=load_path, format="delta")
+            _get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
             # `AnalysisException.desc` is deprecated with pyspark >= 3.4
             message = exception.desc if hasattr(exception, "desc") else str(exception)

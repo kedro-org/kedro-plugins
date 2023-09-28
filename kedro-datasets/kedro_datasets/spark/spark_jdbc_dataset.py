@@ -6,6 +6,7 @@ from typing import Any, Dict
 from pyspark.sql import DataFrame, SparkSession
 
 from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 
 class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
@@ -166,12 +167,8 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             "save_args": save_args,
         }
 
-    @staticmethod
-    def _get_spark():  # pragma: no cover
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> DataFrame:
-        return self._get_spark().read.jdbc(self._url, self._table, **self._load_args)
+        return _get_spark().read.jdbc(self._url, self._table, **self._load_args)
 
     def _save(self, data: DataFrame) -> None:
         return data.write.jdbc(self._url, self._table, **self._save_args)

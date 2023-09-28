@@ -68,7 +68,7 @@ def test_deprecation(module_name, class_name):
 class TestVideoDataset:
     def test_load_mp4(self, filepath_mp4, mp4_object):
         """Loading a mp4 dataset should create a FileVideo"""
-        ds = VideoDataset(filepath_mp4)
+        ds = VideoDataset(filepath=filepath_mp4)
         loaded_video = ds.load()
         assert_videos_equal(loaded_video, mp4_object)
 
@@ -195,7 +195,7 @@ class TestVideoDataset:
         """
         video_name = f"video.{suffix}"
         video = SequenceVideo(color_video._frames, 25, fourcc)
-        ds = VideoDataset(video_name, fourcc=None)
+        ds = VideoDataset(filepath=video_name, fourcc=None)
         ds.save(video)
         # We also need to verify that the correct codec was used
         # since OpenCV silently (with a warning in the log) fall backs to

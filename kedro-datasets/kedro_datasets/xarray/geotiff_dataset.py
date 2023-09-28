@@ -21,7 +21,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         save_args: Dict[str, Any] = None,
         version: Version = None):
         """Creates a new instance of ``GeoTiffDataset`` pointing to a concrete
-        *.tiff or *.tif file with geospatial data.
+        tiff or tif file with geospatial data.
 
         Args:
             filepath: Filepath in POSIX format to a geotiff file.

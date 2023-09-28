@@ -29,7 +29,7 @@ test = [
     "behave",
     "black~=22.0",
     "kedro-datasets",
-    "pre-commit~=3.4.0",
+    "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",
     "pytest-mock",

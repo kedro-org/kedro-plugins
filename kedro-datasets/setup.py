@@ -186,7 +186,7 @@ extras_require["test"] = [
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
-    "pre-commit~=3.4.0",
+    "pre-commit>=2.9.2, <3.0", # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=4.0.35",

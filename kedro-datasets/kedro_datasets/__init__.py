@@ -3,6 +3,8 @@
 __all__ = ["KedroDeprecationWarning"]
 __version__ = "1.7.0"
 
+import warnings
+
 try:
     # Custom `KedroDeprecationWarning` class was added in Kedro 0.18.14.
     from kedro import KedroDeprecationWarning
@@ -10,3 +12,6 @@ except ImportError:
 
     class KedroDeprecationWarning(DeprecationWarning):
         """Custom class for warnings about deprecated Kedro features."""
+
+
+warnings.filterwarnings("default", category=KedroDeprecationWarning)

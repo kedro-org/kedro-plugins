@@ -16,6 +16,7 @@ import numpy as np
 import PIL.Image
 from kedro.io.core import get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 
 
@@ -377,7 +378,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

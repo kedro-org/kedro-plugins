@@ -11,6 +11,7 @@ from pandas.testing import assert_frame_equal
 from pyarrow.fs import FSSpecHandler, PyFileSystem
 from s3fs.core import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import ParquetDataset
 from kedro_datasets.pandas.parquet_dataset import _DEPRECATED_CLASSES
@@ -50,7 +51,9 @@ def dummy_dataframe():
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

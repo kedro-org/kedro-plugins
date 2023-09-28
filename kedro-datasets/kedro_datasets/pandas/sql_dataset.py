@@ -12,6 +12,7 @@ from kedro.io.core import get_filepath_str, get_protocol_and_path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
@@ -548,7 +549,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

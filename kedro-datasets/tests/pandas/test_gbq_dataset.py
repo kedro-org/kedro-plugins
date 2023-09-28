@@ -6,6 +6,7 @@ import pytest
 from google.cloud.exceptions import NotFound
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import GBQQueryDataset, GBQTableDataset
 from kedro_datasets.pandas.gbq_dataset import _DEPRECATED_CLASSES
@@ -75,7 +76,9 @@ def gbq_sql_file_dataset(
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

@@ -1,5 +1,9 @@
 # Upcoming Release
+
 ## Major features and improvements
+
+* Added xarray.GeoTiffDataset to handle GeoTIFF files.
+
 ## Bug fixes and other changes
 ## Community contributions
 

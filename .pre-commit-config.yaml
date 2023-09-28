@@ -23,16 +23,6 @@ repos:
           - "--ignore=E203,E266,E501,W503"
         exclude: "^kedro_airflow/dag_template.py|^template.py"
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
-    rev: v0.0.277
-    hooks:
-      - id: ruff
-        name: "ruff on kedro-telemetry"
-        args: [ "--fix", "--exit-non-zero-on-fix" ]
-        files: ^kedro-telemetry/kedro_telemetry/
-        exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
-
   - repo: local
     hooks:
       # pylint quick checks
@@ -136,6 +126,15 @@ repos:
         pass_filenames: false
         stages: [manual]
         entry: pylint --disable=missing-docstring,redefined-outer-name,invalid-name,protected-access,too-many-arguments kedro-docker/tests
+
+      - id: ruff-kedro-telemetry
+        name: "Ruff on kedro_telemetry/*"
+        language: system
+        files: ^kedro-telemetry/kedro_telemetry/
+        exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
+        pass_filenames: false
+        stages: [manual]
+        entry: ruff kedro-telemetry --fix --exit-non-zero-on-fix
 
       - id: isort-kedro-datasets
         name: "Sort imports"

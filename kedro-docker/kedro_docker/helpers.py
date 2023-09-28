@@ -57,8 +57,7 @@ def _list_docker_volumes(host_root: str, container_root: str, volumes: Sequence[
         yield "-v", str(hpath) + ":" + str(cpath)
 
 
-# pylint: disable=too-many-arguments
-def compose_docker_run_args(
+def compose_docker_run_args(  # noqa: PLR0913
     host_root: str = None,
     container_root: str = None,
     mount_volumes: Sequence[str] = None,

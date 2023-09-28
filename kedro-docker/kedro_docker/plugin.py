@@ -1,5 +1,4 @@
 """ Kedro plugin for packaging a project with Docker """
-# pylint: disable=unused-argument
 import shlex
 import subprocess
 from pathlib import Path
@@ -88,7 +87,7 @@ def _make_docker_args_option(**kwargs):
 
 
 @click.group(name="Kedro-Docker")
-def commands():  # pylint: disable=missing-function-docstring
+def commands():
     pass
 
 
@@ -125,7 +124,7 @@ def docker_init(spark):
     if KEDRO_VERSION.match(">=0.17.0"):
         verbose = KedroCliError.VERBOSE_ERROR
     else:
-        from kedro.framework.cli.cli import (  # noqa # pylint:disable=import-outside-toplevel, no-name-in-module
+        from kedro.framework.cli.cli import (
             _VERBOSE as verbose,
         )
 
@@ -169,9 +168,7 @@ def docker_init(spark):
     help="Optional arguments to be passed to `docker build` command"
 )
 @click.pass_context
-def docker_build(
-    ctx, uid, gid, spark, base_image, image, docker_args
-):  # pylint: disable=too-many-arguments
+def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):  # noqa: PLR0913
     """Build a Docker image for the project."""
     uid, gid = get_uid_gid(uid, gid)
     project_path = Path.cwd()

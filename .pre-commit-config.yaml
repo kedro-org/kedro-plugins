@@ -35,15 +35,6 @@ repos:
         entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass
         stages: [commit]
 
-      - id: pylint-quick-kedro-docker
-        name: "Quick PyLint on kedro_docker/*"
-        language: system
-        types: [file, python]
-        files: ^kedro-docker/kedro_docker/
-        exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
-        entry: pylint --disable=unnecessary-pass
-        stages: [commit]
-
       # pylint full checks
       - id: pylint-kedro-datasets
         name: "PyLint on kedro_datasets/*"
@@ -81,28 +72,14 @@ repos:
         stages: [ manual ]
         entry: ruff kedro-airflow --fix --exit-non-zero-on-fix
 
-      - id: pylint-kedro-docker
-        name: "PyLint on kedro_docker/*"
+      - id: ruff-kedro-docker
+        name: "Ruff on kedro_docker/*"
         language: system
-        files: ^kedro-docker/kedro_docker/.*\.py$
+        files: ^kedro-docker/kedro_docker/
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
         pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=unnecessary-pass,E0401 kedro-docker/kedro_docker
-
-      - id: pylint-kedro-docker-features
-        name: "PyLint on kedro-docker features/*"
-        language: system
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=missing-docstring,no-name-in-module kedro-docker/features
-
-      - id: pylint-kedro-docker-tests
-        name: "PyLint on kedro-docker tests/*"
-        language: system
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --disable=missing-docstring,redefined-outer-name,invalid-name,protected-access,too-many-arguments kedro-docker/tests
+        stages: [ manual ]
+        entry: ruff kedro-docker --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-telemetry
         name: "Ruff on kedro_telemetry/*"
@@ -118,13 +95,6 @@ repos:
         language: system
         types: [ file, python ]
         files: ^kedro-datasets/
-        entry: isort
-
-      - id: isort-kedro-docker
-        name: "Sort imports"
-        language: system
-        types: [ file, python ]
-        files: ^kedro-docker/
         entry: isort
 
       - id: black-kedro-datasets

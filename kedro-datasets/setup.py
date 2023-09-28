@@ -204,7 +204,7 @@ extras_require["test"] = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
-    "rioxarray~=0.15.0",
+    "rioxarray~=0.14.0",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "scikit-learn>=1.0.2,<2",

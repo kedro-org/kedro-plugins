@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html)
+
 ## Bug fixes and other changes
 ## Community contributions
 

@@ -26,7 +26,7 @@ test = [
     "bandit>=1.6.2, <2.0",
     "behave",
     "black~=22.0",
-    "pre-commit>=1.17.0, <2.0",
+    "pre-commit~=3.4.0",
     "pytest",
     "pytest-cov",
     "pytest-mock",

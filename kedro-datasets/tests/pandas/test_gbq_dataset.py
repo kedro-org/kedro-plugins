@@ -86,7 +86,7 @@ class TestGBQDataset:
             "exists",
         ]
 
-        dataset = GBQTableDataset(DATASET, TABLE_NAME)
+        dataset = GBQTableDataset(dataset=DATASET, table_name=TABLE_NAME)
         assert not dataset.exists()
         assert dataset.exists()
 

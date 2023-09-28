@@ -36,6 +36,7 @@ test = [
     "pytest-xdist[psutil]~=2.2.1",
     "PyYAML>=5.1, <7.0",
     "trufflehog>=2.0.99, <3.0",
+    "ruff~=0.0.290",
     "wheel==0.32.2"
 ]
 

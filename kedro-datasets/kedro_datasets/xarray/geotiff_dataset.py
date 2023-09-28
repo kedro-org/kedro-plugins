@@ -16,6 +16,8 @@ from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
 class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
+    """``GeoTiffDataset``  loads and saves geotiff files and reads them as xarray
+    DataArrays. """
     def __init__(
         self,
         filepath: str,

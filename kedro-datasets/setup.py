@@ -83,6 +83,7 @@ tensorflow_require = {
     ]
 }
 video_require = {"video.VideoDataSet": ["opencv-python~=4.5.5.64"]}
+xarray_require = {"xarray.GeoTIFFDataSet": ["rioxarray>=0.15.0"]}
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {
@@ -104,6 +105,7 @@ extras_require = {
     "spark": _collect_requirements(spark_require),
     "svmlight": _collect_requirements(svmlight_require),
     "tensorflow": _collect_requirements(tensorflow_require),
+    "xarray": _collect_requirements(xarray_require),
     "video": _collect_requirements(video_require),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
@@ -124,6 +126,7 @@ extras_require = {
     **svmlight_require,
     **tensorflow_require,
     **video_require,
+    **xarray_require,
     **yaml_require,
 }
 
@@ -201,6 +204,7 @@ extras_require["test"] = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
+    "rioxarray~=0.15.0",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "scikit-learn>=1.0.2,<2",

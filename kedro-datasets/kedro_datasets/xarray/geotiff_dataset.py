@@ -15,7 +15,7 @@ from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class GeoTiffDataset(AbstractVersionedDataSet):
+class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     def __init__(self, filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,

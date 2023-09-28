@@ -84,7 +84,7 @@ class DeltaTableDataset(AbstractDataset):  # pylint:disable=too-many-instance-at
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: Optional[str] = None,
         catalog_type: Optional[DataCatalog] = None,

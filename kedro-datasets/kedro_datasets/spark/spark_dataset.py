@@ -37,7 +37,7 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:
+    if len(split_) == 2:  # noqa: PLR2004
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -233,7 +233,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments disable=too-many-locals
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",

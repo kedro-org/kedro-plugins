@@ -91,9 +91,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         "timeout": 60,
         "chunk_size": 100,
     }
-    # pylint: disable=too-many-arguments
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         method: str = "GET",

@@ -60,8 +60,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"save_format": "tf"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -130,12 +129,12 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     def _load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tmp_path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(tmp_path) / TEMPORARY_H5_FILE)
                 self._fs.copy(load_path, path)
             else:
-                self._fs.get(load_path, path, recursive=True)
+                self._fs.get(load_path, tmp_path, recursive=True)
 
             # Pass the local temporary directory/file path to keras.load_model
             device_name = self._load_args.pop("tf_device", None)
@@ -149,9 +148,9 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     def _save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tmp_path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(tmp_path) / TEMPORARY_H5_FILE)
 
             tf.keras.models.save_model(data, path, **self._save_args)
 

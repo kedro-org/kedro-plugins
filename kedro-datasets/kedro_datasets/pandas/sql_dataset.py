@@ -153,8 +153,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table_name: str,
         credentials: Dict[str, Any],
@@ -376,7 +375,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         credentials: Dict[str, Any] = None,

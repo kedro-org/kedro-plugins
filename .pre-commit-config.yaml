@@ -25,43 +25,14 @@ repos:
 
   - repo: local
     hooks:
-      # pylint quick checks
-      - id: pylint-quick-kedro-datasets
-        name: "Quick PyLint on kedro_datasets/*"
+      - id: ruff-kedro-datasets
+        name: "Ruff on kedro_datasets/*"
         language: system
-        types: [file, python]
         files: ^kedro-datasets/kedro_datasets/
         exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
-        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass
-        stages: [commit]
-
-      # pylint full checks
-      - id: pylint-kedro-datasets
-        name: "PyLint on kedro_datasets/*"
-        language: system
-        files: ^kedro-datasets/kedro_datasets/.*\.py$
-        exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
         pass_filenames: false
-        stages: [manual]
-        entry: pylint --rcfile kedro-datasets/pyproject.toml --disable=unnecessary-pass,E0401 kedro-datasets/kedro_datasets
-
-      - id: pylint-kedro-datasets-features
-        name: "PyLint on kedro-datasets features/*"
-        language: system
-        files: ^kedro-datasets/features/.*\.py$
-        exclude: ^(?!kedro-datasets/features/).*\.py$
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,no-name-in-module,E0401 kedro-datasets/features
-
-      - id: pylint-kedro-datasets-tests
-        name: "PyLint on kedro-datasets tests/*"
-        language: system
-        files: ^kedro-datasets/tests/.*\.py$
-        exclude: ^(?!kedro-datasets/tests/).*\.py$
-        pass_filenames: false
-        stages: [manual]
-        entry: pylint --rcfile kedro-datasets/pyproject.toml  --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,E0401 kedro-datasets/tests
+        stages: [ manual ]
+        entry: ruff kedro-datasets --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-airflow
         name: "Ruff on kedro_airflow/*"
@@ -89,13 +60,6 @@ repos:
         pass_filenames: false
         stages: [manual]
         entry: ruff kedro-telemetry --fix --exit-non-zero-on-fix
-
-      - id: isort-kedro-datasets
-        name: "Sort imports"
-        language: system
-        types: [ file, python ]
-        files: ^kedro-datasets/
-        entry: isort
 
       - id: black-kedro-datasets
         name: "Black"

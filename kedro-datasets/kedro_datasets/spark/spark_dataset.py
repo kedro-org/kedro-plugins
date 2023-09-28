@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 import fsspec
+import pyspark
 from hdfs import HdfsError, InsecureClient
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from pyspark.sql import DataFrame, SparkSession

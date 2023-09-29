@@ -1,4 +1,4 @@
-"""``NetCDFDataset`` is an ``AbstractVersionedDataset`` to save and load NetCDF files."""
+"""``NetCDFDataset`` is an ``AbstractDataset`` to save and load NetCDF files."""
 from __future__ import annotations
 
 from typing import Any

@@ -32,7 +32,7 @@ class NetCDFDataSet(AbstractDataset):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        # credentials: Dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``NetcdfDataSet`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -64,7 +64,7 @@ class NetCDFDataSet(AbstractDataset):
 
         """
         self._fs_args = deepcopy(fs_args) or {}
-        # self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
@@ -72,8 +72,7 @@ class NetCDFDataSet(AbstractDataset):
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
 
-        # self._storage_options = {**self._credentials, **self._fs_args}
-        self._storage_options = {**self._fs_args}
+        self._storage_options = {**self._credentials, **self._fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         # Handle default load and save arguments

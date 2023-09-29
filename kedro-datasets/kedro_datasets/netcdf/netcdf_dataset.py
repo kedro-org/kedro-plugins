@@ -1,4 +1,5 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict
@@ -6,14 +7,16 @@ from typing import Any, Dict
 import fsspec
 import xarray as xr
 from kedro.io.core import (
-    AbstractVersionedDataset,
+    AbstractDataset,
     DataSetError,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+log = logging.getLogger(__name__)
 
-class NetCDFDataSet(AbstractVersionedDataset):
+
+class NetCDFDataSet(AbstractDataset):
     """``NetCDFDataSet`` loads/saves data from/to a NetCDF file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
     """
@@ -29,8 +32,8 @@ class NetCDFDataSet(AbstractVersionedDataset):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-    ) -> None:
+        # credentials: Dict[str, Any] = None,
+    ):
         """Creates a new instance of ``NetcdfDataSet`` pointing to a concrete NetCDF
         file on a specific filesystem
 
@@ -61,16 +64,16 @@ class NetCDFDataSet(AbstractVersionedDataset):
 
         """
         self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
-
+        # self._credentials = deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
-        self._temppath = Path(temppath) / Path(path).parent
+        self._temppath = Path(temppath)
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
 
-        self._storage_options = {**self._credentials, **self._fs_args}
+        # self._storage_options = {**self._credentials, **self._fs_args}
+        self._storage_options = {**self._fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         # Handle default load and save arguments
@@ -83,14 +86,25 @@ class NetCDFDataSet(AbstractVersionedDataset):
 
     def _load(self) -> xr.Dataset:
         load_path = get_filepath_str(self._filepath, self._protocol)
-        # TODO: Add in get/put with tempfile path if loadpath not local filesystem.
+
+        # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
+        # It's assumed this would happen on a remote filesystem. Kerchunk could be
+        # implemented here in the future for direct remote reading.
+        if self._protocol != "file":
+            log.info("Syncing remote to local storage.")
+            # TODO: Figure out how to generalize this for different remote storage types
+            load_path = "s3://" + load_path
+            # TODO: Add recursive=True for multiple files.
+            self._fs.get(load_path, str(self._temppath) + "/")
+            load_path = f"{self._temppath}/{self._filepath.stem}.nc"
+
         if "*" in str(load_path):
             data = xr.open_mfdataset(str(load_path), **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)
         return data
 
-    def _save(self, data: xr.Dataset) -> None:
+    def _save(self, data: xr.Dataset):
         save_path = get_filepath_str(self._filepath, self._protocol)
 
         if Path(save_path).is_dir():
@@ -121,7 +135,11 @@ class NetCDFDataSet(AbstractVersionedDataset):
 
         return self._fs.exists(load_path)
 
-    def _invalidate_cache(self) -> None:
+    def _invalidate_cache(self):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def __del__(self):
+        """Cleanup temporary directory"""
+        self._temppath.unlink(missing_ok=True)

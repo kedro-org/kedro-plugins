@@ -6,14 +6,14 @@ from typing import Any, Dict
 import fsspec
 import xarray as xr
 from kedro.io.core import (
-    AbstractDataSet,
+    AbstractVersionedDataset,
     DataSetError,
     get_filepath_str,
     get_protocol_and_path,
 )
 
 
-class NetCDFDataSet(AbstractDataSet):
+class NetCDFDataSet(AbstractVersionedDataset):
     """``NetCDFDataSet`` loads/saves data from/to a NetCDF file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
     """
@@ -21,6 +21,7 @@ class NetCDFDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

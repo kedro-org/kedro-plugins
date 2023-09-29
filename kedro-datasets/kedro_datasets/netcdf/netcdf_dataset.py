@@ -28,6 +28,7 @@ class NetCDFDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``NetcdfDataSet`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -54,19 +55,22 @@ class NetCDFDataSet(AbstractDataSet):
             fs_args: Extra arguments to pass into underlying filesystem class
                 constructor (e.g. `{"cache_regions": "us-east-1"}` for
                 ``s3fs.S3FileSystem``).
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
 
         """
         self._fs_args = deepcopy(fs_args) or {}
+        self._credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
         self._temppath = Path(temppath) / Path(path).parent
-
         self._protocol = protocol
-        self._storage_options = {**self._fs_args}
-        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
         self._filepath = PurePosixPath(path)
+
+        self._storage_options = {**self._credentials, **self._fs_args}
+        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -78,6 +82,7 @@ class NetCDFDataSet(AbstractDataSet):
 
     def _load(self) -> xr.Dataset:
         load_path = get_filepath_str(self._filepath, self._protocol)
+        # TODO: Add in get/put with tempfile path if loadpath not local filesystem.
         if "*" in str(load_path):
             data = xr.open_mfdataset(str(load_path), **self._load_args)
         else:

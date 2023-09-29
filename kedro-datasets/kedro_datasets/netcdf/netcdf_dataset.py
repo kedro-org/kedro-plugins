@@ -61,7 +61,6 @@ class NetCDFDataSet(AbstractDataset):
                 ``s3fs.S3FileSystem``).
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
-
         """
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
@@ -92,12 +91,18 @@ class NetCDFDataSet(AbstractDataset):
     def _load(self) -> xr.Dataset:
         load_path = get_filepath_str(self._filepath, self._protocol)
 
+        is_multifile = True if "*" in str(load_path) else False
+
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
         if self._protocol != "file":
             log.info("Syncing remote NetCDF file to local storage.")
+
             # `get_filepath_str` drops remote protocol prefix.
             load_path = self._protocol + "://" + load_path
+            if is_multifile:
+                load_path = sorted(self._fs.glob(load_path))
+
             # TODO: Add recursive=True for multiple files.
             self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{self._filepath.stem}.nc"

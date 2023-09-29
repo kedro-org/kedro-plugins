@@ -28,7 +28,7 @@ class NetCDFDataSet(AbstractDataset):
     def __init__(
         self,
         filepath: str,
-        temppath: str,
+        temppath: str,  # TODO: Make optional for remote protocols
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
@@ -88,20 +88,20 @@ class NetCDFDataSet(AbstractDataset):
         load_path = get_filepath_str(self._filepath, self._protocol)
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
-        # It's assumed this would happen on a remote filesystem. Kerchunk could be
-        # implemented here in the future for direct remote reading.
+        # Kerchunk could be implemented here in the future for direct remote reading.
         if self._protocol != "file":
-            log.info("Syncing remote to local storage.")
-            # TODO: Figure out how to generalize this for different remote storage types
-            load_path = "s3://" + load_path
+            log.info("Syncing remote NetCDF file to local storage.")
+            # `get_filepath_str` drops remote protocol prefix.
+            load_path = self._protocol + "://" + load_path
             # TODO: Add recursive=True for multiple files.
-            self._fs.get(load_path, str(self._temppath) + "/")
+            self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{self._filepath.stem}.nc"
 
         if "*" in str(load_path):
             data = xr.open_mfdataset(str(load_path), **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)
+
         return data
 
     def _save(self, data: xr.Dataset):

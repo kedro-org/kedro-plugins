@@ -65,6 +65,7 @@ class TestPickleDataset:
             ("pickle", None, None),
             ("joblib", None, None),
             ("dill", None, None),
+            ("cloudpickle", None, None),
             ("compress_pickle", {"compression": "lz4"}, {"compression": "lz4"}),
         ],
         indirect=True,

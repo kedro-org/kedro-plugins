@@ -96,7 +96,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
                 compress_pickle.loads:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.loads
                 cloudpickle.loads:
-                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py#L463
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
@@ -105,7 +105,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
                 compress_pickle.dumps:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dumps
                 cloudpickle.dumps:
-                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py#L463                
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py                
                 All defaults are preserved.
             credentials: Credentials required to get access to the redis server.
                 E.g. `{"password": None}`.

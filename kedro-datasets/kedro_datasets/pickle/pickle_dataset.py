@@ -109,7 +109,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
                 compress_pickle.load:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 cloudpickle.load:
-                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py#L472
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
@@ -119,7 +119,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
                 compress_pickle.dump:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 cloudpickle.dump:
-                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py#L470
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py
                 All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

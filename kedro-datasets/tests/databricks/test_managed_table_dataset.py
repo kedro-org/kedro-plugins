@@ -186,7 +186,6 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-# pylint: disable=too-many-public-methods
 class TestManagedTableDataset:
     def test_full_table(self):
         unity_ds = ManagedTableDataset(catalog="test", database="test", table="test")

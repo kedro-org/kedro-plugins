@@ -37,8 +37,7 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

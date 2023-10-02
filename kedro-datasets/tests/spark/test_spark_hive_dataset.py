@@ -53,8 +53,8 @@ def spark_session():
         pass
 
     # remove the cached JVM vars
-    SparkContext._jvm = None  # pylint: disable=protected-access
-    SparkContext._gateway = None  # pylint: disable=protected-access
+    SparkContext._jvm = None
+    SparkContext._gateway = None
 
     # py4j doesn't shutdown properly so kill the actual JVM process
     for obj in gc.get_objects():
@@ -148,7 +148,7 @@ def test_deprecation(module_name, class_name):
 
 class TestSparkHiveDataset:
     def test_cant_pickle(self):
-        import pickle  # pylint: disable=import-outside-toplevel
+        import pickle
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(

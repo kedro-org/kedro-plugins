@@ -15,7 +15,7 @@ from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-class DeltaTableDataset(AbstractDataset):  # pylint:disable=too-many-instance-attributes
+class DeltaTableDataset(AbstractDataset):
     """``DeltaTableDataset`` loads/saves delta tables from/to a filesystem (e.g.: local,
     S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
     load and save using a pandas dataframe. When saving data, you can specify one of two
@@ -85,7 +85,7 @@ class DeltaTableDataset(AbstractDataset):  # pylint:disable=too-many-instance-at
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: Optional[str] = None,
         catalog_type: Optional[DataCatalog] = None,

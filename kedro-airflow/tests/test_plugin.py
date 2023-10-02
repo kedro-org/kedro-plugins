@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 import yaml
+
 from kedro_airflow.plugin import commands
 
 
@@ -46,9 +47,7 @@ def _create_kedro_airflow_yml(file_name: Path, content: dict[str, Any]):
         yaml.dump(content, fp)
 
 
-def test_airflow_config_params(
-    cli_runner, metadata
-):  # pylint: disable=too-many-statements
+def test_airflow_config_params(cli_runner, metadata):
     """Check if config variables are picked up"""
     dag_name = "hello_world"
     template_name = "airflow_params.j2"

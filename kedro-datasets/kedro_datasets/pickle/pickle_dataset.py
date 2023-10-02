@@ -69,8 +69,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments,too-many-locals
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         backend: str = "pickle",

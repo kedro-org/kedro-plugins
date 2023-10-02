@@ -29,9 +29,7 @@ def mock_bigquery_client(mocker):
 
 
 @pytest.fixture
-def gbq_dataset(
-    load_args, save_args, mock_bigquery_client
-):  # pylint: disable=unused-argument
+def gbq_dataset(load_args, save_args, mock_bigquery_client):
     return GBQTableDataset(
         dataset=DATASET,
         table_name=TABLE_NAME,
@@ -43,7 +41,7 @@ def gbq_dataset(
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_dataset(load_args, mock_bigquery_client):  # pylint: disable=unused-argument
+def gbq_sql_dataset(load_args, mock_bigquery_client):
     return GBQQueryDataset(
         sql=SQL_QUERY,
         project=PROJECT,
@@ -60,9 +58,7 @@ def sql_file(tmp_path: PosixPath):
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_file_dataset(
-    load_args, sql_file, mock_bigquery_client
-):  # pylint: disable=unused-argument
+def gbq_sql_file_dataset(load_args, sql_file, mock_bigquery_client):
     return GBQQueryDataset(
         filepath=sql_file,
         project=PROJECT,

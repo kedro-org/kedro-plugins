@@ -89,8 +89,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

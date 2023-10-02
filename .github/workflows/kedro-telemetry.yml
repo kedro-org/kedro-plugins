@@ -34,7 +34,7 @@ jobs:
     with:
       plugin: kedro-telemetry
       os: ubuntu-latest
-      python-version: "3.8"
+      python-version: "3.11"
 
   e2e-tests:
     strategy:

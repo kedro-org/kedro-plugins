@@ -1,4 +1,3 @@
-# pylint: disable=no-member
 import importlib
 from pathlib import PosixPath
 from unittest.mock import ANY

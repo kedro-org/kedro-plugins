@@ -103,7 +103,7 @@ class SnowparkTableDataset(AbstractDataset):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         table_name: str,
         schema: str = None,

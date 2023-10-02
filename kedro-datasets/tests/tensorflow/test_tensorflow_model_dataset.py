@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 import importlib
 from pathlib import PurePosixPath
 
@@ -126,7 +125,6 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
             self.dense1 = tf.keras.layers.Dense(4, activation=tf.nn.relu)
             self.dense2 = tf.keras.layers.Dense(5, activation=tf.nn.softmax)
 
-        # pylint: disable=unused-argument
         def call(self, inputs, training=None, mask=None):  # pragma: no cover
             x = self.dense1(inputs)
             return self.dense2(x)
@@ -316,7 +314,7 @@ class TestTensorFlowModelDatasetVersioned:
         dummy_x_test,
         load_version,
         save_version,
-    ):  # pylint: disable=unused-argument
+    ):
         """Test saving and reloading the versioned data set."""
 
         predictions = dummy_tf_base_model.predict(dummy_x_test)

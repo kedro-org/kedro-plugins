@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 import importlib
 import re
 import sys
@@ -185,7 +184,6 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-# pylint: disable=too-many-public-methods
 class TestSparkDataset:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()
@@ -540,8 +538,8 @@ class TestSparkDatasetVersionedLocal:
         )
 
         pattern = (
-            r"Save version '{ev.save}' did not match load version "
-            r"'{ev.load}' for SparkDataset\(.+\)".format(ev=exact_version)
+            rf"Save version '{exact_version.save}' did not match load version "
+            rf"'{exact_version.load}' for SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -581,7 +579,7 @@ class TestSparkDatasetVersionedLocal:
     sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"
 )
 class TestSparkDatasetVersionedDBFS:
-    def test_load_latest(  # pylint: disable=too-many-arguments
+    def test_load_latest(
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
@@ -608,7 +606,7 @@ class TestSparkDatasetVersionedDBFS:
 
         assert reloaded.exceptAll(sample_spark_df).count() == 0
 
-    def test_save(  # pylint: disable=too-many-arguments
+    def test_save(
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
@@ -621,7 +619,7 @@ class TestSparkDatasetVersionedDBFS:
         )
         assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
-    def test_exists(  # pylint: disable=too-many-arguments
+    def test_exists(
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
@@ -753,9 +751,7 @@ class TestSparkDatasetVersionedS3:
 
         versioned_dataset_s3.load()
 
-        mocked_glob.assert_called_once_with(
-            "{b}/{f}/*/{f}".format(b=BUCKET_NAME, f=FILENAME)
-        )
+        mocked_glob.assert_called_once_with(f"{BUCKET_NAME}/{FILENAME}/*/{FILENAME}")
         get_spark.return_value.read.load.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(
                 b=BUCKET_NAME, f=FILENAME, v="mocked_version"
@@ -774,7 +770,7 @@ class TestSparkDatasetVersionedS3:
         ds_s3.load()
 
         get_spark.return_value.read.load.assert_called_once_with(
-            "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=ts), "parquet"
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
     def test_save(self, versioned_dataset_s3, version, mocker):
@@ -788,7 +784,7 @@ class TestSparkDatasetVersionedS3:
 
         versioned_dataset_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
-            "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=version.save),
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             "parquet",
         )
 
@@ -802,15 +798,13 @@ class TestSparkDatasetVersionedS3:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version '{ev.save}' did not match load version "
-            r"'{ev.load}' for SparkDataset\(.+\)".format(ev=exact_version)
+            rf"Save version '{exact_version.save}' did not match load version "
+            rf"'{exact_version.load}' for SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
-            "s3a://{b}/{f}/{v}/{f}".format(
-                b=BUCKET_NAME, f=FILENAME, v=exact_version.save
-            ),
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{exact_version.save}/{FILENAME}",
             "parquet",
         )
 
@@ -886,7 +880,7 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs.load()
 
         get_spark.return_value.read.load.assert_called_once_with(
-            "hdfs://{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, f=FILENAME, v=ts),
+            f"hdfs://{FOLDER_NAME}/{FILENAME}/{ts}/{FILENAME}",
             "parquet",
         )
 
@@ -908,13 +902,11 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs.save(mocked_spark_df)
 
         hdfs_status.assert_called_once_with(
-            "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
+            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             strict=False,
         )
         mocked_spark_df.write.save.assert_called_once_with(
-            "hdfs://{fn}/{f}/{v}/{f}".format(
-                fn=FOLDER_NAME, v=version.save, f=FILENAME
-            ),
+            f"hdfs://{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             "parquet",
         )
 
@@ -927,16 +919,14 @@ class TestSparkDatasetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version '{ev.save}' did not match load version "
-            r"'{ev.load}' for SparkDataset\(.+\)".format(ev=exact_version)
+            rf"Save version '{exact_version.save}' did not match load version "
+            rf"'{exact_version.load}' for SparkDataset\(.+\)"
         )
 
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
-            "hdfs://{fn}/{f}/{sv}/{f}".format(
-                fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save
-            ),
+            f"hdfs://{FOLDER_NAME}/{FILENAME}/{exact_version.save}/{FILENAME}",
             "parquet",
         )
 
@@ -958,7 +948,7 @@ class TestSparkDatasetVersionedHdfs:
             versioned_hdfs.save(mocked_spark_df)
 
         hdfs_status.assert_called_once_with(
-            "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
+            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             strict=False,
         )
         mocked_spark_df.write.save.assert_not_called()

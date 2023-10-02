@@ -57,8 +57,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         key: str,
@@ -178,7 +177,6 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 **self._save_args,
             ) as store:
                 store.put(self._key, data, format="table")
-                # pylint: disable=protected-access
                 binary_data = store._handle.get_file_image()
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

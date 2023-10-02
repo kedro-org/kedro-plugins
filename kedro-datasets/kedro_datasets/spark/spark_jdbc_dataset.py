@@ -66,8 +66,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         table: str,

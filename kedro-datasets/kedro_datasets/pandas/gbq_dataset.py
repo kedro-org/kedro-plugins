@@ -66,8 +66,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         dataset: str,
         table_name: str,
@@ -211,8 +210,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         project: str = None,
@@ -317,7 +315,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")
 
 

@@ -264,8 +264,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fourcc: Optional[str] = "mp4v",

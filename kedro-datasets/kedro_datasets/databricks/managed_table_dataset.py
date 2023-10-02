@@ -43,7 +43,7 @@ class ManagedTable:
         The validation is performed by calling a function named:
             `validate_<field_name>(self, value) -> raises DatasetError`
         """
-        for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
+        for name in self.__dataclass_fields__.keys():
             method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()
@@ -194,7 +194,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # noqa: PLR0913
         self,
         table: str,
         catalog: str = None,
@@ -383,9 +383,8 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
             else:
                 data = data.select(*cols)
-        else:
-            if self._table.dataframe_type == "pandas":
-                data = self._get_spark().createDataFrame(data)
+        elif self._table.dataframe_type == "pandas":
+            data = self._get_spark().createDataFrame(data)
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":

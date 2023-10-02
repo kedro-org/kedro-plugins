@@ -42,8 +42,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         version: Version = None,

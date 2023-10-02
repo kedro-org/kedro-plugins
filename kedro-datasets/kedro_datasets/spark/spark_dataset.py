@@ -37,7 +37,7 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:
+    if len(split_) == 2:  # noqa: PLR2004
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -80,12 +80,12 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
         return dbutils
 
     try:
-        from pyspark.dbutils import DBUtils  # pylint: disable=import-outside-toplevel
+        from pyspark.dbutils import DBUtils
 
         dbutils = DBUtils(spark)
     except ImportError:
         try:
-            import IPython  # pylint: disable=import-outside-toplevel
+            import IPython
         except ImportError:
             pass
         else:
@@ -111,7 +111,7 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
     try:
         dbutils.fs.ls(file)
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         return False
 
 
@@ -233,7 +233,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments disable=too-many-locals
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",

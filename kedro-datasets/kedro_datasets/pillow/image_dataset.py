@@ -32,8 +32,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,

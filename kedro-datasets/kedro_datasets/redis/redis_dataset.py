@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 import redis
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -202,7 +203,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

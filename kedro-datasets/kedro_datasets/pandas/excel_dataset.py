@@ -109,8 +109,7 @@ class ExcelDataset(
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         engine: str = "openpyxl",
@@ -232,7 +231,6 @@ class ExcelDataset(
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(output, **self._writer_args) as writer:
             if isinstance(data, dict):
                 for sheet_name, sheet_data in data.items():
@@ -267,7 +265,7 @@ class ExcelDataset(
     def _preview(self, nrows: int = 40) -> Dict:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")

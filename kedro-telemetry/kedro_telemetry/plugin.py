@@ -42,7 +42,7 @@ def _get_hashed_username():
     try:
         username = getpass.getuser()
         return _hash(username)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:
         logger.warning(
             "Something went wrong with getting the username. Exception: %s",
             exc,
@@ -52,8 +52,6 @@ def _get_hashed_username():
 
 class KedroTelemetryCLIHooks:
     """Hook to send CLI command data to Heap"""
-
-    # pylint: disable=too-few-public-methods
 
     @cli_hook_impl
     def before_command_run(
@@ -101,7 +99,7 @@ class KedroTelemetryCLIHooks:
                 identity=hashed_username,
                 properties=generic_properties,
             )
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logger.warning(
                 "Something went wrong in hook implementation to send command run data to Heap. "
                 "Exception: %s",
@@ -109,7 +107,7 @@ class KedroTelemetryCLIHooks:
             )
 
 
-class KedroTelemetryProjectHooks:  # pylint: disable=too-few-public-methods
+class KedroTelemetryProjectHooks:
     """Hook to send project statistics data to Heap"""
 
     @hook_impl
@@ -209,7 +207,7 @@ def _send_heap_event(
         resp = requests.post(
             url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
-        if resp.status_code != 200:
+        if resp.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
                 resp.status_code,
@@ -261,7 +259,7 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             )
             yaml.dump({"consent": False}, telemetry_file)
             return False
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:
         logger.warning(
             "Failed to confirm consent. No data was sent to Heap. Exception: %s",
             exc,

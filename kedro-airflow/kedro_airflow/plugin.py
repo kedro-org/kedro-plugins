@@ -22,7 +22,7 @@ If not set, the '__default__' pipeline is used."""
 
 
 @click.group(name="Kedro-Airflow")
-def commands():  # pylint: disable=missing-function-docstring
+def commands():
     pass
 
 
@@ -88,14 +88,14 @@ def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
     callback=_split_params,
 )
 @click.pass_obj
-def create(
+def create(  # noqa: PLR0913
     metadata: ProjectMetadata,
     pipeline_name,
     env,
     target_path,
     jinja_file,
     params,
-):  # pylint: disable=too-many-locals,too-many-arguments
+):
     """Create an Airflow DAG for a project"""
     project_path = Path.cwd().resolve()
     bootstrap_project(project_path)

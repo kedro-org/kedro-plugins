@@ -189,10 +189,9 @@ extras_require["test"] = [
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
-    "pre-commit>=2.9.2, <3.0", # The hook `mypy` requires pre-commit version 2.9.2.
+    "pre-commit>=2.9.2",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.5.2, <3.0",
     "pyodbc~=4.0.35",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
@@ -205,6 +204,7 @@ extras_require["test"] = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "rioxarray>=0.9.0",
+    "ruff~=0.0.290",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "scikit-learn>=1.0.2,<2",

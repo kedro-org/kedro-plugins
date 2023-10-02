@@ -3,6 +3,7 @@
 __all__ = ["KedroDeprecationWarning"]
 __version__ = "1.7.0"
 
+import sys
 import warnings
 
 try:
@@ -14,4 +15,5 @@ except ImportError:
         """Custom class for warnings about deprecated Kedro features."""
 
 
-warnings.filterwarnings("default", category=KedroDeprecationWarning)
+if not sys.warnoptions:
+    warnings.simplefilter("default", KedroDeprecationWarning)

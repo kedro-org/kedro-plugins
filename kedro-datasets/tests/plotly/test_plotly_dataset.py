@@ -12,6 +12,7 @@ from plotly import graph_objects
 from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.plotly import PlotlyDataset
 from kedro_datasets.plotly.plotly_dataset import _DEPRECATED_CLASSES
@@ -52,7 +53,9 @@ def dummy_dataframe():
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

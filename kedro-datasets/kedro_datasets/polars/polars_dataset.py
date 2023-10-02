@@ -1,4 +1,4 @@
-"""``PolarsDataSet`` loads/saves data from/to a data file using an underlying
+"""``PolarsDataset`` loads/saves data from/to a data file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
@@ -19,18 +19,15 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-ACCEPTED_FILE_FORMATS = [
-    "csv",
-    "parquet"
-]
+ACCEPTED_FILE_FORMATS = ["csv", "parquet"]
 
 PolarsFrame = Union[pl.LazyFrame, pl.DataFrame]
 
 logger = logging.getLogger(__name__)
 
 
-class PolarsDataSet(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
-    """``ParquetDataSet`` loads/saves data from/to a data file using an
+class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
+    """``PolarsDataset`` loads/saves data from/to a data file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses polars to handle
     the type of read/write target.
 
@@ -42,7 +39,7 @@ class PolarsDataSet(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
     .. code-block:: yaml
 
         >>> cars:
-        >>>   type: polars.PolarsDataSet
+        >>>   type: polars.PolarsDataset
         >>>   filepath: data/01_raw/company/cars.csv
         >>>   load_args:
         >>>     sep: ","
@@ -52,20 +49,20 @@ class PolarsDataSet(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
                 null_value: "somenullstring"
         >>>
         >>> motorbikes:
-        >>>   type: polars.PolarsDataSet
+        >>>   type: polars.PolarsDataset
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
 
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.polars import PolarsDataSet
+        >>> from kedro_datasets.polars import PolarsDataset
         >>> import polars as pl
         >>>
         >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = PolarsDataSet(filepath="test.csv")
+        >>> data_set = PolarsDataset(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.frame_equal(reloaded)
@@ -87,7 +84,7 @@ class PolarsDataSet(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         fs_args: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Creates a new instance of ``PolarsDataSet`` pointing to a concrete
+        """Creates a new instance of ``PolarsDataset`` pointing to a concrete
         data file on a specific filesystem.
 
         Args:
@@ -255,3 +252,20 @@ class PolarsDataSet(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+_DEPRECATED_CLASSES = {
+    "PolarsDataSet": PolarsDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

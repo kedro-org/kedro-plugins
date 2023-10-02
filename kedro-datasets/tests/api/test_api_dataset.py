@@ -8,6 +8,7 @@ import pytest
 import requests
 from requests.auth import HTTPBasicAuth
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.api import APIDataset
 from kedro_datasets.api.api_dataset import _DEPRECATED_CLASSES
@@ -33,7 +34,9 @@ TEST_SAVE_DATA = [{"key1": "info1", "key2": "info2"}]
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

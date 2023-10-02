@@ -4,7 +4,6 @@ from io import BytesIO
 import dask.dataframe as dd
 import pandas as pd
 import pyarrow as pa
-import pyarrow.parquet as pq
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -28,7 +27,9 @@ def dummy_dd_dataframe() -> dd.DataFrame:
 
 
 @pytest.fixture
-def s3_dataset(mocked_s3_bucket, credentials, mock_fs_args, save_args, load_args):
+def s3_dataset(
+    mocked_s3_bucket, credentials, mock_fs_args, save_args, load_args
+):  # pylint: disable=unused-argument
     return ParquetDataset(
         filepath=S3_PATH,
         credentials=credentials,

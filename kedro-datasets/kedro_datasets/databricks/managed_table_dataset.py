@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from kedro.io.core import Version, VersionNotFoundError
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 

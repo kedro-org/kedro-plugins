@@ -25,23 +25,22 @@ from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
+
 def _get_spark() -> Any:
     """
     Returns the SparkSession, we need this wrapper because the SparkSession
     is retrieved differently in databricks-connect vs a Notebook in web UI
     """
-    # When in databricks-connect pyspark version is equal to DBR version
-    # instead of the actual pyspark version
-    pyspark_major_version = int(pyspark.__version__.split(".")[0])
-    if pyspark_major_version >= 13:
-        # In this case we are in a databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
-        # remote session, and therefore spark is initialized differently
-
+    try:
+        # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
+        # the remote session is instantiated using the databricks module 
+        # If the databricks-connect module is installed, we use a remote session 
         from databricks.connect import DatabricksSession
 
         spark = DatabricksSession.builder.getOrCreate()
-    else:
-        # For sessions in Notebook web UI or previous versions on databricks-connect
+
+    except ImportError:
+        # For "normal" spak sessions that don't use databricks-connect
         # we get spark normally
         spark = SparkSession.builder.getOrCreate()
 
@@ -404,8 +403,6 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
             "save_args": self._save_args,
             "version": self._version,
         }
-
-
 
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))

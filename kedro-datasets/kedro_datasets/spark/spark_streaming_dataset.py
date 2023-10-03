@@ -4,7 +4,7 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets._io import AbstractDataset

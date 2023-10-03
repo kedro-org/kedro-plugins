@@ -6,7 +6,7 @@ import warnings
 from copy import deepcopy
 from typing import Any, Dict, List
 
-from pyspark.sql import DataFrame, SparkSession, Window
+from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
 from kedro_datasets._io import AbstractDataset, DatasetError

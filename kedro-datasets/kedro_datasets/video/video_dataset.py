@@ -16,6 +16,7 @@ import numpy as np
 import PIL.Image
 from kedro.io.core import get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 
 
@@ -264,8 +265,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
@@ -377,7 +377,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

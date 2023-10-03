@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
@@ -66,8 +67,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         table: str,
@@ -185,7 +185,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

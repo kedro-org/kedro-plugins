@@ -84,20 +84,20 @@ pip install ".[test]"
 
 All checks run by our CI / CD pipeline can be run locally on your computer.
 
-#### PEP-8 Standards (`isort`, `pylint` and `flake8`)
+#### Linting (`ruff` and `black`)
 
 ```bash
-make lint
+make plugin=kedro-docker lint
 ```
 
 #### Unit tests, 100% coverage (`pytest`, `pytest-cov`)
 
 ```bash
-make test
+make plugin=kedro-docker test
 ```
 
 #### End-to-end tests (`behave`)
 
 ```bash
-make e2e-tests
+make plugin=kedro-docker  e2e-tests
 ```

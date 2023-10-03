@@ -7,6 +7,7 @@ from typing import Any, Dict
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
     SparkDataset,
@@ -168,7 +169,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

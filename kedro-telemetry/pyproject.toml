@@ -26,15 +26,13 @@ test = [
     "bandit>=1.6.2, <2.0",
     "behave",
     "black~=22.0",
-    "flake8",
-    "isort>=4.3.21, <5.0",
-    "pre-commit>=1.17.0, <2.0",
-    "pylint>=2.5.2, <3.0",
+    "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]~=2.2.1",
     "trufflehog>=2.1.0, <3.0",
+    "ruff~=0.0.290",
     "wheel"
 ]
 
@@ -53,10 +51,19 @@ zip-safe = false
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro_telemetry.__version__"}
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 88
-known_first_party = "kedro_telemetry"
+[tool.ruff]
+line-length = 88
+show-fixes = true
+select = [
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
+    "T201", # Print Statement
+]
+ignore = ["E501"]  # Black takes care of line-too-long
+
+[tool.ruff.isort]
+known-first-party = ["kedro_telemetry"]

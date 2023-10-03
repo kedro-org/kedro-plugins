@@ -1,5 +1,3 @@
-# pylint: disable=protected-access
-
 """Testing module for CLI tools"""
 import shutil
 from collections import namedtuple

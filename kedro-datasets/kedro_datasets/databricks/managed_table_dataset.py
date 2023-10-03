@@ -13,6 +13,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
@@ -44,7 +45,7 @@ class ManagedTable:
         The validation is performed by calling a function named:
             `validate_<field_name>(self, value) -> raises DatasetError`
         """
-        for name in self.__dataclass_fields__.keys():  # pylint: disable=no-member
+        for name in self.__dataclass_fields__.keys():
             method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()
@@ -195,7 +196,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # noqa: PLR0913
         self,
         table: str,
         catalog: str = None,
@@ -380,9 +381,8 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
             else:
                 data = data.select(*cols)
-        else:
-            if self._table.dataframe_type == "pandas":
-                data = _get_spark().createDataFrame(data)
+        elif self._table.dataframe_type == "pandas":
+            data = _get_spark().createDataFrame(data)
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":
@@ -448,7 +448,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

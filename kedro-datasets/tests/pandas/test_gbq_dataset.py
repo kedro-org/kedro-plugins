@@ -6,6 +6,7 @@ import pytest
 from google.cloud.exceptions import NotFound
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import GBQQueryDataset, GBQTableDataset
 from kedro_datasets.pandas.gbq_dataset import _DEPRECATED_CLASSES
@@ -28,9 +29,7 @@ def mock_bigquery_client(mocker):
 
 
 @pytest.fixture
-def gbq_dataset(
-    load_args, save_args, mock_bigquery_client
-):  # pylint: disable=unused-argument
+def gbq_dataset(load_args, save_args, mock_bigquery_client):
     return GBQTableDataset(
         dataset=DATASET,
         table_name=TABLE_NAME,
@@ -42,7 +41,7 @@ def gbq_dataset(
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_dataset(load_args, mock_bigquery_client):  # pylint: disable=unused-argument
+def gbq_sql_dataset(load_args, mock_bigquery_client):
     return GBQQueryDataset(
         sql=SQL_QUERY,
         project=PROJECT,
@@ -59,9 +58,7 @@ def sql_file(tmp_path: PosixPath):
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_file_dataset(
-    load_args, sql_file, mock_bigquery_client
-):  # pylint: disable=unused-argument
+def gbq_sql_file_dataset(load_args, sql_file, mock_bigquery_client):
     return GBQQueryDataset(
         filepath=sql_file,
         project=PROJECT,
@@ -75,7 +72,9 @@ def gbq_sql_file_dataset(
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

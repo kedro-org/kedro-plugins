@@ -25,7 +25,7 @@ ALL_ARG_HELP = """Convert all registered pipelines at once."""
 
 
 @click.group(name="Kedro-Airflow")
-def commands():  # pylint: disable=missing-function-docstring
+def commands():
     pass
 
 
@@ -103,7 +103,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     callback=_split_params,
 )
 @click.pass_obj
-def create(
+def create(  # noqa: PLR0913
     metadata: ProjectMetadata,
     pipeline_names,
     env,
@@ -111,7 +111,7 @@ def create(
     jinja_file,
     params,
     convert_all: bool,
-):  # pylint: disable=too-many-locals,too-many-arguments
+):
     """Create an Airflow DAG for a project"""
     if convert_all and pipeline_names != ("__default__",):
         raise click.BadParameter(

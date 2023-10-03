@@ -22,8 +22,6 @@ from kedro_telemetry.plugin import (
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
 
-# pylint: disable=too-few-public-methods
-
 
 @fixture
 def fake_metadata(tmp_path):
@@ -379,7 +377,7 @@ class TestKedroTelemetryProjectHooks:
         # The 1st call is the Project Hook without CLI
         assert mocked_heap_call.call_args_list[0] == expected_call
 
-    def test_after_context_created_with_kedro_run(
+    def test_after_context_created_with_kedro_run(  # noqa: PLR0913
         self,
         mocker,
         fake_context,

@@ -9,10 +9,10 @@ from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-# pylint:disable=too-many-instance-attributes
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     """``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -67,8 +67,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint:disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         database: str,
         table: str,
@@ -211,7 +210,6 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        # noqa # pylint:disable=protected-access
         return (
             self._get_spark()
             ._jsparkSession.catalog()
@@ -236,7 +234,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

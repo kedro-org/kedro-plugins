@@ -4,6 +4,7 @@ import os
 
 import pytest
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 
 try:
@@ -147,7 +148,9 @@ def sf_session():
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 @pytest.mark.snowflake
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

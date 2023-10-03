@@ -11,6 +11,6 @@ __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "hugging_face_dataset": ["HFDataset"],
-        "transformer_pipeline_dataset": "HFTransformerPipelineDataset",
+        "transformer_pipeline_dataset": ["HFTransformerPipelineDataset"],
     },
 )

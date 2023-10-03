@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 import importlib
 from pathlib import PurePosixPath
 
@@ -10,6 +9,7 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 
 
@@ -125,7 +125,6 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
             self.dense1 = tf.keras.layers.Dense(4, activation=tf.nn.relu)
             self.dense2 = tf.keras.layers.Dense(5, activation=tf.nn.softmax)
 
-        # pylint: disable=unused-argument
         def call(self, inputs, training=None, mask=None):  # pragma: no cover
             x = self.dense1(inputs)
             return self.dense2(x)
@@ -142,7 +141,9 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
 )
 @pytest.mark.parametrize("class_name", ["TensorFlowModelDataSet"])
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 
@@ -313,7 +314,7 @@ class TestTensorFlowModelDatasetVersioned:
         dummy_x_test,
         load_version,
         save_version,
-    ):  # pylint: disable=unused-argument
+    ):
         """Test saving and reloading the versioned data set."""
 
         predictions = dummy_tf_base_model.predict(dummy_x_test)

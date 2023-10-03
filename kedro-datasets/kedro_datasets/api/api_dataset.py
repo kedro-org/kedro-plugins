@@ -10,6 +10,7 @@ import requests
 from requests import Session, sessions
 from requests.auth import AuthBase
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -91,9 +92,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         "timeout": 60,
         "chunk_size": 100,
     }
-    # pylint: disable=too-many-arguments
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         method: str = "GET",
@@ -249,7 +249,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

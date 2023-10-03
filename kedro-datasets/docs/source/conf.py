@@ -370,8 +370,8 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
         print(
             style(
                 "Failed to check for class name mentions that can be "
-                "converted to reStructuredText links in docstring of {}. "
-                "Error is: \n{}".format(name, str(e)),
+                f"converted to reStructuredText links in docstring of {name}. "
+                f"Error is: \n{str(e)}",
                 fg="red",
             )
         )
@@ -430,7 +430,7 @@ except Exception as e:
         style(
             "Failed to create list of (regex, reStructuredText link "
             "replacement) for class names and method names in docstrings. "
-            "Error is: \n{}".format(str(e)),
+            f"Error is: \n{str(e)}",
             fg="red",
         )
     )

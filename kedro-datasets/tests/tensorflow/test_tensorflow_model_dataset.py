@@ -10,6 +10,7 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 
 if sys.platform == "win32":
@@ -147,7 +148,9 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
 )
 @pytest.mark.parametrize("class_name", ["TensorFlowModelDataSet"])
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

@@ -26,6 +26,7 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
@@ -177,7 +178,9 @@ class FileInfo:
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

@@ -1,4 +1,5 @@
 import importlib
+import sys
 from pathlib import PurePosixPath
 
 import numpy as np
@@ -11,6 +12,12 @@ from s3fs import S3FileSystem
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
+
+if sys.platform == "win32":
+    pytest.skip(
+        "TensorFlow tests have become inexplicably flaky in Windows CI",
+        allow_module_level=True,
+    )
 
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from cachetools import cachedmethod
 from kedro.io.core import (
@@ -64,18 +64,17 @@ class IncrementalDataset(PartitionedDataset):
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
-        dataset: str | type[AbstractDataset] | Dict[str, Any],
-        checkpoint: str | Dict[str, Any] | None = None,
+        dataset: str | type[AbstractDataset] | dict[str, Any],
+        checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``IncrementalDataset``.
 
@@ -148,8 +147,8 @@ class IncrementalDataset(PartitionedDataset):
         self._comparison_func = comparison_func
 
     def _parse_checkpoint_config(
-        self, checkpoint_config: str | Dict[str, Any] | None
-    ) -> Dict[str, Any]:
+        self, checkpoint_config: str | dict[str, Any] | None
+    ) -> dict[str, Any]:
         checkpoint_config = deepcopy(checkpoint_config)
         if isinstance(checkpoint_config, str):
             checkpoint_config = {"force_checkpoint": checkpoint_config}
@@ -182,10 +181,8 @@ class IncrementalDataset(PartitionedDataset):
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
         checkpoint = self._read_checkpoint()
-        checkpoint_path = (
-            self._filesystem._strip_protocol(  # pylint: disable=protected-access
-                self._checkpoint_config[self._filepath_arg]
-            )
+        checkpoint_path = self._filesystem._strip_protocol(
+            self._checkpoint_config[self._filepath_arg]
         )
 
         def _is_valid_partition(partition) -> bool:
@@ -218,8 +215,8 @@ class IncrementalDataset(PartitionedDataset):
         except DatasetError:
             return None
 
-    def _load(self) -> Dict[str, Callable[[], Any]]:
-        partitions: Dict[str, Any] = {}
+    def _load(self) -> dict[str, Callable[[], Any]]:
+        partitions: dict[str, Any] = {}
 
         for partition in self._list_partitions():
             partition_id = self._path_to_partition(partition)

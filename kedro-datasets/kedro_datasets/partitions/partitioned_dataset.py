@@ -29,7 +29,6 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], Any]]]):
-    # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
@@ -127,17 +126,17 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
 
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
-        dataset: str | type[AbstractDataset] | Dict[str, Any],
+        dataset: str | type[AbstractDataset] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         overwrite: bool = False,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
 
@@ -182,7 +181,6 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        # pylint: disable=import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons
 
         super().__init__()
@@ -276,7 +274,7 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
             path = path[: -len(self._filename_suffix)]
         return path
 
-    def _load(self) -> Dict[str, Callable[[], Any]]:
+    def _load(self) -> dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():
@@ -292,7 +290,7 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
 
         return partitions
 
-    def _save(self, data: Dict[str, Any]) -> None:
+    def _save(self, data: dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
@@ -303,11 +301,11 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             if callable(partition_data):
-                partition_data = partition_data()
+                partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         clean_dataset_config = (
             {k: v for k, v in self._dataset_config.items() if k != CREDENTIALS_KEY}
             if isinstance(self._dataset_config, dict)

@@ -1,7 +1,8 @@
-"""``APIDataSet`` loads the data from HTTP(S) APIs.
+"""``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 import json as json_  # make pylint happy
+import warnings
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple, Union
 
@@ -9,21 +10,21 @@ import requests
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-from .._io import AbstractDataset as AbstractDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-class APIDataSet(AbstractDataSet[None, requests.Response]):
-    """``APIDataSet`` loads/saves data from/to HTTP(S) APIs.
+class APIDataset(AbstractDataset[None, requests.Response]):
+    """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         usda:
-          type: api.APIDataSet
+          type: api.APIDataset
           url: https://quickstats.nass.usda.gov
           params:
             key: SOME_TOKEN,
@@ -33,39 +34,42 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             agg_level_desc: STATE,
             year: 2000
 
-    Example usage for the `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_: ::
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+    ::
 
-        >>> from kedro_datasets.api import APIDataSet
+        >>> from kedro_datasets.api import APIDataset
         >>>
         >>>
-        >>> data_set = APIDataSet(
-        >>>     url="https://quickstats.nass.usda.gov",
-        >>>     load_args={
-        >>>         "params": {
-        >>>             "key": "SOME_TOKEN",
-        >>>             "format": "JSON",
-        >>>             "commodity_desc": "CORN",
-        >>>             "statisticcat_des": "YIELD",
-        >>>             "agg_level_desc": "STATE",
-        >>>             "year": 2000
-        >>>         }
-        >>>     },
-        >>>     credentials=("username", "password")
-        >>> )
-        >>> data = data_set.load()
+        >>> dataset = APIDataset(
+        ...     url="https://quickstats.nass.usda.gov",
+        ...     load_args={
+        ...         "params": {
+        ...             "key": "SOME_TOKEN",
+        ...             "format": "JSON",
+        ...             "commodity_desc": "CORN",
+        ...             "statisticcat_des": "YIELD",
+        ...             "agg_level_desc": "STATE",
+        ...             "year": 2000
+        ...         }
+        ...     },
+        ...     credentials=("username", "password")
+        ... )
+        >>> data = dataset.load()
 
-    ``APIDataSet`` can also be used to save output on a remote server using HTTP(S)
-    methods. ::
+    ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
+    methods.
+    ::
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
-
-        >>> data_set = APIDataSet(
-                method = "POST",
-                url = "url_of_remote_server",
-                save_args = {"chunk_size":1}
-        )
-        >>> data_set.save(example_table)
+        >>>
+        >>> dataset = APIDataset(
+        ...     method = "POST",
+        ...     url = "url_of_remote_server",
+        ...     save_args = {"chunk_size":1}
+        ... )
+        >>> dataset.save(example_table)
 
     On initialisation, we can specify all the necessary parameters in the save args
     dictionary. The default HTTP(S) method is POST but PUT is also supported. Two
@@ -74,7 +78,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     used if the input of save method is a list. It will divide the request into chunks
     of size `chunk_size`. For example, here we will send two requests each containing
     one row of our example DataFrame.
-    If the data passed to the save method is not a list, ``APIDataSet`` will check if it
+    If the data passed to the save method is not a list, ``APIDataset`` will check if it
     can be loaded as JSON. If true, it will send the data unchanged in a single request.
     Otherwise, the ``_save`` method will try to dump the data in JSON format and execute
     the request.
@@ -88,9 +92,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         "timeout": 60,
         "chunk_size": 100,
     }
-    # pylint: disable=too-many-arguments
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         method: str = "GET",
@@ -99,7 +102,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
+        """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
         Args:
             url: The API URL endpoint.
@@ -179,9 +182,9 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             response = session.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
-            raise DataSetError("Failed to fetch data", exc) from exc
+            raise DatasetError("Failed to fetch data", exc) from exc
         except OSError as exc:
-            raise DataSetError("Failed to connect to the remote server") from exc
+            raise DatasetError("Failed to connect to the remote server") from exc
 
         return response
 
@@ -190,7 +193,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             with sessions.Session() as session:
                 return self._execute_request(session)
 
-        raise DataSetError("Only GET method is supported for load")
+        raise DatasetError("Only GET method is supported for load")
 
     def _execute_save_with_chunks(
         self,
@@ -214,10 +217,10 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             response = requests.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
-            raise DataSetError("Failed to send data", exc) from exc
+            raise DatasetError("Failed to send data", exc) from exc
 
         except OSError as exc:
-            raise DataSetError("Failed to connect to the remote server") from exc
+            raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
     def _save(self, data: Any) -> requests.Response:
@@ -227,9 +230,27 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
 
             return self._execute_save_request(json_data=data)
 
-        raise DataSetError("Use PUT or POST methods for save")
+        raise DatasetError("Use PUT or POST methods for save")
 
     def _exists(self) -> bool:
         with sessions.Session() as session:
             response = self._execute_request(session)
         return response.ok
+
+
+_DEPRECATED_CLASSES = {
+    "APIDataSet": APIDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

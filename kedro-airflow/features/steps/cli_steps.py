@@ -2,6 +2,7 @@
 
 import yaml
 from behave import given, then, when
+
 from features.steps.sh_run import run
 
 OK_EXIT_CODE = 0
@@ -85,9 +86,9 @@ def prepare_catalog(context):
 def install_kedro(context, version):
     """Execute Kedro command and check the status."""
     if version == "latest":
-        cmd = [context.pip, "install", "-U", "kedro[pandas]"]
+        cmd = [context.pip, "install", "-U", "kedro-datasets[PANDAS]"]
     else:
-        cmd = [context.pip, "install", f"kedro[pandas]=={version}"]
+        cmd = [context.pip, "install", f"kedro-datasets[PANDAS]=={version}"]
     res = run(cmd, env=context.env)
 
     if res.returncode != OK_EXIT_CODE:

@@ -1,11 +1,14 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a text file."""
+"""``AbstractDataset`` implementation to load/save data from/to a text file."""
+from __future__ import annotations
+
 from typing import Any
 
 import lazy_loader as lazy
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-TextDataSet: Any
+TextDataSet: type[TextDataset]
+TextDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"text_dataset": ["TextDataSet"]}
+    __name__, submod_attrs={"text_dataset": ["TextDataSet", "TextDataset"]}
 )

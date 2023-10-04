@@ -1,10 +1,15 @@
+import importlib
+
 import pandas as pd
 import pytest
-from kedro.io.core import DataSetError, Version, VersionNotFoundError
+from kedro.io.core import Version, VersionNotFoundError
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from kedro_datasets.databricks import ManagedTableDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.databricks import ManagedTableDataset
+from kedro_datasets.databricks.managed_table_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -169,28 +174,39 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
     return spark_session.createDataFrame(data, schema)
 
 
-# pylint: disable=too-many-public-methods
-class TestManagedTableDataSet:
+@pytest.mark.parametrize(
+    "module_name",
+    ["kedro_datasets.databricks", "kedro_datasets.databricks.managed_table_dataset"],
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestManagedTableDataset:
     def test_full_table(self):
-        unity_ds = ManagedTableDataSet(catalog="test", database="test", table="test")
+        unity_ds = ManagedTableDataset(catalog="test", database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test`.`test`.`test`"
 
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             catalog="test-test", database="test", table="test"
         )
         assert unity_ds._table.full_table_location() == "`test-test`.`test`.`test`"
 
-        unity_ds = ManagedTableDataSet(database="test", table="test")
+        unity_ds = ManagedTableDataset(database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test`.`test`"
 
-        unity_ds = ManagedTableDataSet(table="test")
+        unity_ds = ManagedTableDataset(table="test")
         assert unity_ds._table.full_table_location() == "`default`.`test`"
 
         with pytest.raises(TypeError):
-            ManagedTableDataSet()
+            ManagedTableDataset()
 
     def test_describe(self):
-        unity_ds = ManagedTableDataSet(table="test")
+        unity_ds = ManagedTableDataset(table="test")
         assert unity_ds._describe() == {
             "catalog": None,
             "database": "default",
@@ -204,31 +220,31 @@ class TestManagedTableDataSet:
         }
 
     def test_invalid_write_mode(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="test", write_mode="invalid")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="test", write_mode="invalid")
 
     def test_dataframe_type(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="test", dataframe_type="invalid")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="test", dataframe_type="invalid")
 
     def test_missing_primary_key_upsert(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="test", write_mode="upsert")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="test", write_mode="upsert")
 
     def test_invalid_table_name(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="invalid!")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="invalid!")
 
     def test_invalid_database(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="test", database="invalid!")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="test", database="invalid!")
 
     def test_invalid_catalog(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(table="test", catalog="invalid!")
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(table="test", catalog="invalid!")
 
     def test_schema(self):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             table="test",
             schema={
                 "fields": [
@@ -257,8 +273,8 @@ class TestManagedTableDataSet:
         assert unity_ds._table.schema() == expected_schema
 
     def test_invalid_schema(self):
-        with pytest.raises(DataSetError):
-            ManagedTableDataSet(
+        with pytest.raises(DatasetError):
+            ManagedTableDataset(
                 table="test",
                 schema={
                     "fields": [
@@ -271,24 +287,24 @@ class TestManagedTableDataSet:
             )._table.schema()
 
     def test_catalog_exists(self):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             catalog="test", database="invalid", table="test_not_there"
         )
         assert not unity_ds._exists()
 
     def test_table_does_not_exist(self):
-        unity_ds = ManagedTableDataSet(database="invalid", table="test_not_there")
+        unity_ds = ManagedTableDataset(database="invalid", table="test_not_there")
         assert not unity_ds._exists()
 
     def test_save_default(self, sample_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(database="test", table="test_save")
-        with pytest.raises(DataSetError):
+        unity_ds = ManagedTableDataset(database="test", table="test_save")
+        with pytest.raises(DatasetError):
             unity_ds.save(sample_spark_df)
 
     def test_save_schema_spark(
         self, subset_spark_df: DataFrame, subset_expected_df: DataFrame
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_save_spark_schema",
             schema={
@@ -317,7 +333,7 @@ class TestManagedTableDataSet:
     def test_save_schema_pandas(
         self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_save_pd_schema",
             schema={
@@ -341,7 +357,7 @@ class TestManagedTableDataSet:
             dataframe_type="pandas",
         )
         unity_ds.save(subset_pandas_df)
-        saved_ds = ManagedTableDataSet(
+        saved_ds = ManagedTableDataset(
             database="test",
             table="test_save_pd_schema",
         )
@@ -351,7 +367,7 @@ class TestManagedTableDataSet:
     def test_save_overwrite(
         self, sample_spark_df: DataFrame, append_spark_df: DataFrame
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test", table="test_save", write_mode="overwrite"
         )
         unity_ds.save(sample_spark_df)
@@ -367,7 +383,7 @@ class TestManagedTableDataSet:
         append_spark_df: DataFrame,
         expected_append_spark_df: DataFrame,
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test", table="test_save_append", write_mode="append"
         )
         unity_ds.save(sample_spark_df)
@@ -383,7 +399,7 @@ class TestManagedTableDataSet:
         upsert_spark_df: DataFrame,
         expected_upsert_spark_df: DataFrame,
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_save_upsert",
             write_mode="upsert",
@@ -402,7 +418,7 @@ class TestManagedTableDataSet:
         upsert_spark_df: DataFrame,
         expected_upsert_multiple_primary_spark_df: DataFrame,
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_save_upsert_multiple",
             write_mode="upsert",
@@ -423,23 +439,23 @@ class TestManagedTableDataSet:
         sample_spark_df: DataFrame,
         mismatched_upsert_spark_df: DataFrame,
     ):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_save_upsert_mismatch",
             write_mode="upsert",
             primary_key="name",
         )
         unity_ds.save(sample_spark_df)
-        with pytest.raises(DataSetError):
+        with pytest.raises(DatasetError):
             unity_ds.save(mismatched_upsert_spark_df)
 
     def test_load_spark(self, sample_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test", table="test_load_spark", write_mode="overwrite"
         )
         unity_ds.save(sample_spark_df)
 
-        delta_ds = ManagedTableDataSet(database="test", table="test_load_spark")
+        delta_ds = ManagedTableDataset(database="test", table="test_load_spark")
         delta_table = delta_ds.load()
 
         assert (
@@ -448,25 +464,25 @@ class TestManagedTableDataSet:
         )
 
     def test_load_spark_no_version(self, sample_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test", table="test_load_spark", write_mode="overwrite"
         )
         unity_ds.save(sample_spark_df)
 
-        delta_ds = ManagedTableDataSet(
+        delta_ds = ManagedTableDataset(
             database="test", table="test_load_spark", version=Version(2, None)
         )
         with pytest.raises(VersionNotFoundError):
             _ = delta_ds.load()
 
     def test_load_version(self, sample_spark_df: DataFrame, append_spark_df: DataFrame):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test", table="test_load_version", write_mode="append"
         )
         unity_ds.save(sample_spark_df)
         unity_ds.save(append_spark_df)
 
-        loaded_ds = ManagedTableDataSet(
+        loaded_ds = ManagedTableDataset(
             database="test", table="test_load_version", version=Version(0, None)
         )
         loaded_df = loaded_ds.load()
@@ -474,7 +490,7 @@ class TestManagedTableDataSet:
         assert loaded_df.exceptAll(sample_spark_df).count() == 0
 
     def test_load_pandas(self, sample_pandas_df: pd.DataFrame):
-        unity_ds = ManagedTableDataSet(
+        unity_ds = ManagedTableDataset(
             database="test",
             table="test_load_pandas",
             dataframe_type="pandas",
@@ -482,7 +498,7 @@ class TestManagedTableDataSet:
         )
         unity_ds.save(sample_pandas_df)
 
-        pandas_ds = ManagedTableDataSet(
+        pandas_ds = ManagedTableDataset(
             database="test", table="test_load_pandas", dataframe_type="pandas"
         )
         pandas_df = pandas_ds.load().sort_values("name", ignore_index=True)

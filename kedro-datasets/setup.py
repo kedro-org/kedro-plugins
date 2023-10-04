@@ -4,10 +4,10 @@ from setuptools import setup
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
 PANDAS = "pandas>=1.3, <3.0"
-SPARK = "pyspark>=2.2, <3.4"
+SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
-POLARS = "polars~=0.17.0"
+POLARS = "polars>=0.18.0"
 DELTA = "delta-spark~=1.2.1"
 
 
@@ -52,7 +52,13 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-polars_require = {"polars.CSVDataSet": [POLARS]}
+polars_require = {
+    "polars.CSVDataSet": [POLARS],
+    "polars.GenericDataSet":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+}
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataSet": [
@@ -179,11 +185,10 @@ extras_require["test"] = [
     "pandas~=1.3  # 1.3 for read_xml/to_xml",
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
-    "polars~=0.15.13",
-    "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
+    "polars[xlsx2csv, deltalake]~=0.18.0",
+    "pre-commit>=2.9.2",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.5.2, <3.0",
     "pyodbc~=4.0.35",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
@@ -195,6 +200,7 @@ extras_require["test"] = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
+    "ruff~=0.0.290",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "scikit-learn>=1.0.2,<2",

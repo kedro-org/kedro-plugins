@@ -1,38 +1,38 @@
-"""``PickleDataSet`` loads/saves data from/to a Redis database. The underlying
+"""``PickleDataset`` loads/saves data from/to a Redis database. The underlying
 functionality is supported by the redis library, so it supports all allowed
 options for instantiating the redis app ``from_url`` and setting a value."""
-
 import importlib
 import os
+import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
 import redis
 
-from .._io import AbstractDataset as AbstractDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 
-class PickleDataSet(AbstractDataSet[Any, Any]):
-    """``PickleDataSet`` loads/saves data from/to a Redis database. The
+class PickleDataset(AbstractDataset[Any, Any]):
+    """``PickleDataset`` loads/saves data from/to a Redis database. The
     underlying functionality is supported by the redis library, so it supports
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         my_python_object: # simple example
-          type: redis.PickleDataSet
+          type: redis.PickleDataset
           key: my_object
           from_url_args:
             url: redis://127.0.0.1:6379
 
         final_python_object: # example with save args
-          type: redis.PickleDataSet
+          type: redis.PickleDataset
           key: my_final_object
           from_url_args:
             url: redis://127.0.0.1:6379
@@ -42,16 +42,16 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.redis import PickleDataSet
+        >>> from kedro_datasets.redis import PickleDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                       'col3': [5, 6]})
+        ...                       'col3': [5, 6]})
         >>>
-        >>> my_data = PickleDataSet(key="my_data")
+        >>> my_data = PickleDataset(key="my_data")
         >>> my_data.save(data)
         >>> reloaded = my_data.load()
         >>> assert data.equals(reloaded)
@@ -61,8 +61,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         key: str,
         backend: str = "pickle",
@@ -72,7 +71,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         redis_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PickleDataSet``. This loads/saves data from/to
+        """Creates a new instance of ``PickleDataset``. This loads/saves data from/to
         a Redis database while deserialising/serialising. Supports custom backends to
         serialise/deserialise objects.
 
@@ -165,7 +164,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     # accepted by pickle.loads.
     def _load(self) -> Any:
         if not self.exists():
-            raise DataSetError(f"The provided key {self._key} does not exists.")
+            raise DatasetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
         return imported_backend.loads(  # type: ignore
             self._redis_db.get(self._key), **self._load_args
@@ -180,7 +179,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
                 **self._redis_set_args,
             )
         except Exception as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"{data.__class__} was not serialised due to: {exc}"
             ) from exc
 
@@ -188,6 +187,24 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         try:
             return bool(self._redis_db.exists(self._key))
         except Exception as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"The existence of key {self._key} could not be established due to: {exc}"
             ) from exc
+
+
+_DEPRECATED_CLASSES = {
+    "PickleDataSet": PickleDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

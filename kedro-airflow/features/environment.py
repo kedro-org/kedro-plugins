@@ -11,7 +11,6 @@ from features.steps.util import create_new_venv
 
 
 def before_scenario(context, scenario):
-    # pylint: disable=unused-argument
     """Environment preparation before other cli tests are run.
     Installs kedro by running pip in the top level directory.
     """
@@ -56,7 +55,6 @@ def before_scenario(context, scenario):
 
 
 def after_scenario(context, scenario):
-    # pylint: disable=unused-argument
     rmtree(str(context.temp_dir))
     rmtree(str(context.venv_dir))
 

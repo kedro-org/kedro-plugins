@@ -1,6 +1,7 @@
-"""``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+"""``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -9,31 +10,30 @@ import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from PIL import Image
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
-    """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
+    """``ImageDataset`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.pillow import ImageDataSet
+        >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> data_set = ImageDataSet(filepath="test.png")
-        >>> image = data_set.load()
+        >>> dataset = ImageDataset(filepath="test.png")
+        >>> image = dataset.load()
         >>> image.show()
 
     """
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,
@@ -42,7 +42,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ImageDataSet`` pointing to a concrete image file
+        """Creates a new instance of ``ImageDataset`` pointing to a concrete image file
         on a specific filesystem.
 
         Args:
@@ -135,7 +135,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -148,3 +148,21 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "ImageDataSet": ImageDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

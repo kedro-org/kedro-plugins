@@ -1,5 +1,4 @@
-"""Tests ``PickleDataSet``."""
-
+"""Tests ``PickleDataset``."""
 import importlib
 import pickle
 
@@ -7,10 +6,12 @@ import numpy as np
 import pandas as pd
 import pytest
 import redis
-from kedro.io import DataSetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets.redis import PickleDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.redis import PickleDataset
+from kedro_datasets.redis.redis_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture(params=["pickle"])
@@ -49,7 +50,7 @@ def pickle_data_set(mocker, key, backend, load_args, save_args, redis_args):
     mocker.patch(
         "redis.StrictRedis.from_url", return_value=redis.Redis.from_url("redis://")
     )
-    return PickleDataSet(
+    return PickleDataset(
         key=key,
         backend=backend,
         load_args=load_args,
@@ -58,7 +59,18 @@ def pickle_data_set(mocker, key, backend, load_args, save_args, redis_args):
     )
 
 
-class TestPickleDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.redis", "kedro_datasets.redis.redis_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestPickleDataset:
     @pytest.mark.parametrize(
         "key,backend,load_args,save_args",
         [
@@ -105,7 +117,7 @@ class TestPickleDataSet:
     def test_exists_raises_error(self, pickle_data_set):
         """Check the error when trying to assert existence with no redis server."""
         pattern = r"The existence of key "
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.exists()
 
     @pytest.mark.parametrize(
@@ -130,14 +142,14 @@ class TestPickleDataSet:
         """Check the error when trying to load missing file."""
         pattern = r"The provided key "
         mocker.patch("redis.StrictRedis.exists", return_value=False)
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.load()
 
     def test_unserialisable_data(self, pickle_data_set, dummy_object, mocker):
         mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
         pattern = r".+ was not serialised due to:.*"
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.save(dummy_object)
 
     def test_invalid_backend(self, mocker):
@@ -150,7 +162,7 @@ class TestPickleDataSet:
             return_value=object,
         )
         with pytest.raises(ValueError, match=pattern):
-            PickleDataSet(key="key", backend="invalid")
+            PickleDataset(key="key", backend="invalid")
 
     def test_no_backend(self, mocker):
         pattern = (
@@ -162,4 +174,4 @@ class TestPickleDataSet:
             side_effect=ImportError,
         )
         with pytest.raises(ImportError, match=pattern):
-            PickleDataSet("key", backend="fake.backend.does.not.exist")
+            PickleDataset("key", backend="fake.backend.does.not.exist")

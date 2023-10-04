@@ -1,7 +1,22 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+## Upcoming deprecations for Kedro-Datasets 2.0.0
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
+
 ## Community contributions
+
+# Release 1.7.0:
+## Major features and improvements
+* Added `polars.GenericDataSet`, a `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust.
+
+## Bug fixes and other changes
+* Fixed broken links in docstrings.
+* Reverted PySpark pin to <4.0.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Walber Moreira](https://github.com/wmoreiraa)
 
 # Release 1.6.0:
 

@@ -1,15 +1,18 @@
+import importlib
 from pathlib import Path, PurePosixPath
 from time import sleep
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
-from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 from PIL import Image, ImageChops
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.pillow import ImageDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.pillow import ImageDataset
+from kedro_datasets.pillow.image_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -19,12 +22,12 @@ def filepath_png(tmp_path):
 
 @pytest.fixture
 def image_dataset(filepath_png, save_args, fs_args):
-    return ImageDataSet(filepath=filepath_png, save_args=save_args, fs_args=fs_args)
+    return ImageDataset(filepath=filepath_png, save_args=save_args, fs_args=fs_args)
 
 
 @pytest.fixture
 def versioned_image_dataset(filepath_png, load_version, save_version):
-    return ImageDataSet(
+    return ImageDataset(
         filepath=filepath_png, version=Version(load_version, save_version)
     )
 
@@ -40,7 +43,18 @@ def images_equal(image_1, image_2):
     return not diff.getbbox()
 
 
-class TestImageDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.pillow", "kedro_datasets.pillow.image_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestImageDataset:
     def test_save_and_load(self, image_dataset, image_object):
         """Test saving and reloading the data set."""
         image_dataset.save(image_object)
@@ -81,8 +95,8 @@ class TestImageDataSet:
 
     def test_load_missing_file(self, image_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ImageDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Failed while loading data from data set ImageDataset\(.*\)"
+        with pytest.raises(DatasetError, match=pattern):
             image_dataset.load()
 
     @pytest.mark.parametrize(
@@ -95,19 +109,19 @@ class TestImageDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = ImageDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = ImageDataset(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.png"
-        data_set = ImageDataSet(filepath=filepath)
-        data_set.release()
+        dataset = ImageDataset(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     @pytest.mark.parametrize(
@@ -120,19 +134,19 @@ class TestImageDataSet:
         ],
     )
     def test_get_format(self, image_filepath, expected_extension):
-        """Unit test for pillow.ImageDataSet._get_format() fn"""
-        data_set = ImageDataSet(image_filepath)
-        ext = data_set._get_format(Path(image_filepath))
+        """Unit test for pillow.ImageDataset._get_format() fn"""
+        dataset = ImageDataset(image_filepath)
+        ext = dataset._get_format(Path(image_filepath))
         assert expected_extension == ext
 
 
-class TestImageDataSetVersioned:
+class TestImageDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
         filepath = "/tmp/test.png"
-        ds = ImageDataSet(filepath=filepath)
-        ds_versioned = ImageDataSet(
+        ds = ImageDataset(filepath=filepath)
+        ds_versioned = ImageDataset(
             filepath=filepath, version=Version(load_version, save_version)
         )
         assert filepath in str(ds)
@@ -141,8 +155,8 @@ class TestImageDataSetVersioned:
         assert "version" not in str(ds)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
-        assert "ImageDataSet" in str(ds_versioned)
-        assert "ImageDataSet" in str(ds)
+        assert "ImageDataset" in str(ds_versioned)
+        assert "ImageDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
@@ -164,22 +178,22 @@ class TestImageDataSetVersioned:
         sleep(0.5)
         # force-drop a newer version into the same location
         v_new = generate_timestamp()
-        ImageDataSet(filepath=filepath_png, version=Version(v_new, v_new)).save(
+        ImageDataset(filepath=filepath_png, version=Version(v_new, v_new)).save(
             image_object
         )
 
         v2 = versioned_image_dataset.resolve_load_version()
 
         assert v2 == v1  # v2 should not be v_new!
-        ds_new = ImageDataSet(filepath=filepath_png, version=Version(None, None))
+        ds_new = ImageDataset(filepath=filepath_png, version=Version(None, None))
         assert (
             ds_new.resolve_load_version() == v_new
         )  # new version is discoverable by a new instance
 
     def test_no_versions(self, versioned_image_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ImageDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Did not find any versions for ImageDataset\(.+\)"
+        with pytest.raises(DatasetError, match=pattern):
             versioned_image_dataset.load()
 
     def test_exists(self, versioned_image_dataset, image_object):
@@ -193,10 +207,10 @@ class TestImageDataSetVersioned:
         corresponding image file for a given save version already exists."""
         versioned_image_dataset.save(image_object)
         pattern = (
-            r"Save path \'.+\' for ImageDataSet\(.+\) must "
+            r"Save path \'.+\' for ImageDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_image_dataset.save(image_object)
 
     @pytest.mark.parametrize(
@@ -212,7 +226,7 @@ class TestImageDataSetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for ImageDataSet\(.+\)"
+            rf"'{load_version}' for ImageDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_image_dataset.save(image_object)
@@ -220,8 +234,8 @@ class TestImageDataSetVersioned:
     def test_http_filesystem_no_versioning(self):
         pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
-            ImageDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            ImageDataset(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
 
@@ -237,7 +251,7 @@ class TestImageDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_image_dataset._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_image_dataset.save(image_object)
 
         # Remove non-versioned dataset and try again

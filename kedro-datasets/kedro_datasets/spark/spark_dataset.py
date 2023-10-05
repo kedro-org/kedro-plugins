@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 
 def _get_spark() -> Any:
     """
-    Returns the SparkSession, we need this wrapper because the SparkSession
-    is retrieved differently in databricks-connect vs a Notebook in web UI
+    Returns the SparkSession. In case databricks-connect is available we use it for
+    extended configuration mechanisms and notebook compatibility,
+    otherwise we use classic pyspark.
     """
     try:
         # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)

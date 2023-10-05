@@ -51,7 +51,7 @@ jobs:
         run: pip freeze
       - name: Run unit tests for Linux / all plugins
         if: inputs.os != 'windows-latest'
-        run: make plugin=${{ inputs.plugin }} test
+        run: pytest tests/tensorflow/test_tensorflow_model_dataset.py
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |

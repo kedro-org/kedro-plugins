@@ -1,7 +1,5 @@
 # Upcoming Release
 ## Major features and improvements
-* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets`.
-
 ## Bug fixes and other changes
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
 * Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.

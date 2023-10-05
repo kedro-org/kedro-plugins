@@ -60,7 +60,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         """
-        protocol, path = get_protocol_and_path(filepath)
+        protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol)
         self._format = "GEOTIFF"
@@ -85,11 +85,9 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         return rxr.open_rasterio(load_path, **self._load_args)
 
     def _save(self, data: xarray.DataArray) -> None:
-        save_path = self._get_save_path()
-        if self._filepath.suffix in [".tif", ".tiff"]:
-            data.rio.to_raster(save_path.as_posix(), **self._save_args)
-        else:
-            raise ValueError("expecting .tif or .tiff file suffix")
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        data.rio.to_raster(save_path, **self._save_args)
+        self._fs.invalidate_cache(save_path)
 
     def _exists(self) -> bool:
         try:
@@ -106,3 +104,8 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             "save_args": self._save_args,
             "version": self._version,
         }
+
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)

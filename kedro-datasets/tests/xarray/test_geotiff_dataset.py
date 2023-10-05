@@ -46,11 +46,17 @@ def test_load(cog_geotiff_dataset):
     assert loaded_tiff.shape == (1,500,500)
     assert loaded_tiff.dims == ('band', 'y', 'x')
 
+def test_exists(geotiff_dataset, cog_xarray):
+        """Test `exists` method invocation for both existing and
+        nonexistent data set."""
+        assert not geotiff_dataset.exists()
+        geotiff_dataset.save(cog_xarray)
+        assert geotiff_dataset.exists()
 
 def test_save_and_load(geotiff_dataset, cog_xarray):
     """Test saving and reloading the data set."""
     geotiff_dataset.save(cog_xarray)
     reloaded = geotiff_dataset.load()
     assert reloaded.shape == cog_xarray.shape
-    assert reloaded.dims == cog_xarray.dimsts
+    assert reloaded.dims == cog_xarray.dims
     assert reloaded.equals(cog_xarray)

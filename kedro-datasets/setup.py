@@ -37,7 +37,8 @@ pandas_require = {
     "pandas.HDFDataSet": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6; platform_system != 'Windows'",
+        "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
+        "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
@@ -213,7 +214,8 @@ extras_require["test"] = [
     "SQLAlchemy~=1.2",
     "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
     "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6; platform_system != 'Windows'",
+    "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
+    "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",

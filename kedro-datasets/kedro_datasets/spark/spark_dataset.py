@@ -42,7 +42,7 @@ def _get_spark() -> Any:
         spark = DatabricksSession.builder.getOrCreate()
 
     except ImportError:
-        # For "normal" spak sessions that don't use databricks-connect
+        # For "normal" spark sessions that don't use databricks-connect
         # we get spark normally
         spark = SparkSession.builder.getOrCreate()
 

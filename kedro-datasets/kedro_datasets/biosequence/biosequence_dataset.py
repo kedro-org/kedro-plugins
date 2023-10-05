@@ -140,9 +140,7 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "BioSequenceDataSet": BioSequenceDataset,
-}
+_DEPRECATED_CLASSES = {"BioSequenceDataSet": BioSequenceDataset}
 
 
 def __getattr__(name):

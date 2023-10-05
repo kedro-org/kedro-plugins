@@ -257,11 +257,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         self._version = version
 
-        super().__init__(
-            filepath=None,
-            version=version,
-            exists_function=self._exists,
-        )
+        super().__init__(filepath=None, version=version, exists_function=self._exists)
 
     @staticmethod
     def _get_spark() -> SparkSession:
@@ -440,9 +436,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             return False
 
 
-_DEPRECATED_CLASSES = {
-    "ManagedTableDataSet": ManagedTableDataset,
-}
+_DEPRECATED_CLASSES = {"ManagedTableDataSet": ManagedTableDataset}
 
 
 def __getattr__(name):

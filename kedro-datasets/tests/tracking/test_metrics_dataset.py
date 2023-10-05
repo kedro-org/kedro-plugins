@@ -49,13 +49,7 @@ def test_deprecation(module_name, class_name):
 
 
 class TestMetricsDataset:
-    def test_save_data(
-        self,
-        dummy_data,
-        tmp_path,
-        filepath_json,
-        save_version,
-    ):
+    def test_save_data(self, dummy_data, tmp_path, filepath_json, save_version):
         """Test saving and reloading the data set."""
         metrics_dataset = MetricsDataset(
             filepath=filepath_json, version=Version(None, save_version)

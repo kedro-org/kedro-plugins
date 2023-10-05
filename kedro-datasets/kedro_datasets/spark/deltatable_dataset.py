@@ -110,9 +110,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         return {"filepath": str(self._filepath), "fs_prefix": self._fs_prefix}
 
 
-_DEPRECATED_CLASSES = {
-    "DeltaTableDataSet": DeltaTableDataset,
-}
+_DEPRECATED_CLASSES = {"DeltaTableDataSet": DeltaTableDataset}
 
 
 def __getattr__(name):

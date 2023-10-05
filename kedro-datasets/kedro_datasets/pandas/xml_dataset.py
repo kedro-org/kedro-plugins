@@ -174,9 +174,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "XMLDataSet": XMLDataset,
-}
+_DEPRECATED_CLASSES = {"XMLDataSet": XMLDataset}
 
 
 def __getattr__(name):

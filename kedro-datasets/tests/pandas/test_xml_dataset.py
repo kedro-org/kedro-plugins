@@ -25,10 +25,7 @@ def filepath_xml(tmp_path):
 @pytest.fixture
 def xml_dataset(filepath_xml, load_args, save_args, fs_args):
     return XMLDataset(
-        filepath=filepath_xml,
-        load_args=load_args,
-        save_args=save_args,
-        fs_args=fs_args,
+        filepath=filepath_xml, load_args=load_args, save_args=save_args, fs_args=fs_args
     )
 
 

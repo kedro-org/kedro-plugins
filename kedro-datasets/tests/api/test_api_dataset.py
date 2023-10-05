@@ -45,8 +45,7 @@ class TestAPIDataset:
     def test_request_method(self, requests_mock, method):
         if method in ["OPTIONS", "HEAD", "PATCH", "DELETE"]:
             with pytest.raises(
-                ValueError,
-                match="Only GET, POST and PUT methods are supported",
+                ValueError, match="Only GET, POST and PUT methods are supported"
             ):
                 APIDataset(url=TEST_URL, method=method)
 
@@ -66,10 +65,7 @@ class TestAPIDataset:
 
     @pytest.mark.parametrize(
         "parameters_in, url_postfix",
-        [
-            ({"param": "value"}, "?param=value"),
-            (bytes("a=1", "latin-1"), "?a=1"),
-        ],
+        [({"param": "value"}, "?param=value"), (bytes("a=1", "latin-1"), "?a=1")],
     )
     def test_params_in_request(self, requests_mock, parameters_in, url_postfix):
         api_dataset = APIDataset(
@@ -85,9 +81,7 @@ class TestAPIDataset:
 
     def test_json_in_request(self, requests_mock):
         api_dataset = APIDataset(
-            url=TEST_URL,
-            method=TEST_METHOD,
-            load_args={"json": TEST_JSON_REQUEST_DATA},
+            url=TEST_URL, method=TEST_METHOD, load_args={"json": TEST_JSON_REQUEST_DATA}
         )
         requests_mock.register_uri(TEST_METHOD, TEST_URL)
 
@@ -142,11 +136,7 @@ class TestAPIDataset:
     )
     def test_auth_sequence(self, requests_mock, auth_kwarg):
         api_dataset = APIDataset(url=TEST_URL, method=TEST_METHOD, **auth_kwarg)
-        requests_mock.register_uri(
-            TEST_METHOD,
-            TEST_URL,
-            text=TEST_TEXT_RESPONSE_DATA,
-        )
+        requests_mock.register_uri(TEST_METHOD, TEST_URL, text=TEST_TEXT_RESPONSE_DATA)
 
         response = api_dataset.load()
         assert isinstance(response, requests.Response)
@@ -156,12 +146,7 @@ class TestAPIDataset:
         assert response.text == TEST_TEXT_RESPONSE_DATA
 
     @pytest.mark.parametrize(
-        "timeout_in, timeout_out",
-        [
-            (1, 1),
-            ((1, 2), (1, 2)),
-            ([1, 2], (1, 2)),
-        ],
+        "timeout_in, timeout_out", [(1, 1), ((1, 2), (1, 2)), ([1, 2], (1, 2))]
     )
     def test_api_timeout(self, requests_mock, timeout_in, timeout_out):
         api_dataset = APIDataset(
@@ -193,10 +178,7 @@ class TestAPIDataset:
             method=TEST_METHOD,
             load_args={"proxies": {"ftp": "ftp://127.0.0.1:3000"}},
         )
-        requests_mock.register_uri(
-            TEST_METHOD,
-            "ftp://example.com/api/test",
-        )
+        requests_mock.register_uri(TEST_METHOD, "ftp://example.com/api/test")
 
         response = api_dataset.load()
         assert response.request.proxies.get("ftp") == "ftp://127.0.0.1:3000"
@@ -329,8 +311,7 @@ class TestAPIDataset:
                 api_dataset._save(TEST_SAVE_DATA)
         else:
             with pytest.raises(
-                ValueError,
-                match="Only GET, POST and PUT methods are supported",
+                ValueError, match="Only GET, POST and PUT methods are supported"
             ):
                 APIDataset(url=TEST_URL, method=method)
 
@@ -352,10 +333,7 @@ class TestAPIDataset:
             save_args={"json": TEST_JSON_RESPONSE_DATA, "headers": TEST_HEADERS},
         )
         requests_mock.register_uri(
-            save_methods,
-            TEST_URL,
-            headers=TEST_HEADERS,
-            json=json_callback,
+            save_methods, TEST_URL, headers=TEST_HEADERS, json=json_callback
         )
         response_list = api_dataset._save(TEST_SAVE_DATA)
         assert isinstance(response_list, requests.Response)

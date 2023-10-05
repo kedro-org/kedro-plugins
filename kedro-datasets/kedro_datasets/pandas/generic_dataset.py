@@ -242,9 +242,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "GenericDataSet": GenericDataset,
-}
+_DEPRECATED_CLASSES = {"GenericDataSet": GenericDataset}
 
 
 def __getattr__(name):

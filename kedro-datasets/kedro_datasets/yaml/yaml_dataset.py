@@ -153,9 +153,7 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "YAMLDataSet": YAMLDataset,
-}
+_DEPRECATED_CLASSES = {"YAMLDataSet": YAMLDataset}
 
 
 def __getattr__(name):

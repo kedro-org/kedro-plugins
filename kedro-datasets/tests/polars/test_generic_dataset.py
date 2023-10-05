@@ -67,10 +67,7 @@ def versioned_parquet_dataset(filepath_parquet, load_version, save_version):
 
 @pytest.fixture
 def csv_dataset(filepath_csv):
-    return GenericDataset(
-        filepath=filepath_csv.as_posix(),
-        file_format="csv",
-    )
+    return GenericDataset(filepath=filepath_csv.as_posix(), file_format="csv")
 
 
 @pytest.fixture
@@ -99,10 +96,7 @@ def excel_dataset(dummy_dataframe: pl.DataFrame, filepath_excel):
     pd_df = dummy_dataframe.to_pandas()
     pd_df.to_excel(filepath_excel, index=False)
 
-    return GenericDataset(
-        filepath=filepath_excel.as_posix(),
-        file_format="excel",
-    )
+    return GenericDataset(filepath=filepath_excel.as_posix(), file_format="excel")
 
 
 @pytest.mark.parametrize(
@@ -143,9 +137,7 @@ class TestGenericExcelDataset:
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):
         dataset = GenericDataset(
-            filepath=filepath,
-            file_format="excel",
-            credentials=credentials,
+            filepath=filepath, file_format="excel", credentials=credentials
         )
         assert isinstance(dataset._fs, instance_type)
 

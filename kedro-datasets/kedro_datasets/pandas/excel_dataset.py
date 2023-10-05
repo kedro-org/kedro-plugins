@@ -272,9 +272,7 @@ class ExcelDataset(
         return data.to_dict(orient="split")
 
 
-_DEPRECATED_CLASSES = {
-    "ExcelDataSet": ExcelDataset,
-}
+_DEPRECATED_CLASSES = {"ExcelDataSet": ExcelDataset}
 
 
 def __getattr__(name):

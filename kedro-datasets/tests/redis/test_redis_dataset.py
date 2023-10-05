@@ -81,12 +81,7 @@ class TestPickleDataset:
         indirect=True,
     )
     def test_save_and_load(
-        self,
-        pickle_data_set,
-        mocker,
-        dummy_object,
-        serialised_dummy_object,
-        key,
+        self, pickle_data_set, mocker, dummy_object, serialised_dummy_object, key
     ):
         """Test saving and reloading the data set."""
         set_mocker = mocker.patch("redis.StrictRedis.set")
@@ -96,10 +91,7 @@ class TestPickleDataset:
         pickle_data_set.save(dummy_object)
         mocker.patch("redis.StrictRedis.exists", return_value=True)
         loaded_dummy_object = pickle_data_set.load()
-        set_mocker.assert_called_once_with(
-            key,
-            serialised_dummy_object,
-        )
+        set_mocker.assert_called_once_with(key, serialised_dummy_object)
         get_mocker.assert_called_once_with(key)
         assert_frame_equal(loaded_dummy_object, dummy_object)
 

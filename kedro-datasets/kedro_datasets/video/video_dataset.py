@@ -130,10 +130,7 @@ class SequenceVideo(AbstractVideo):
     """A video object read from an indexable sequence of frames"""
 
     def __init__(
-        self,
-        frames: Sequence[PIL.Image.Image],
-        fps: float,
-        fourcc: str = "mp4v",
+        self, frames: Sequence[PIL.Image.Image], fps: float, fourcc: str = "mp4v"
     ) -> None:
         self._n_frames = len(frames)
         self._frames = frames
@@ -366,9 +363,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         return self._fs.exists(self._filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "VideoDataSet": VideoDataset,
-}
+_DEPRECATED_CLASSES = {"VideoDataSet": VideoDataset}
 
 
 def __getattr__(name):

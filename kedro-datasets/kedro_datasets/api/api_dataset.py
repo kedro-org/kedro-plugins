@@ -196,8 +196,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         raise DatasetError("Only GET method is supported for load")
 
     def _execute_save_with_chunks(
-        self,
-        json_data: List[Dict[str, Any]],
+        self, json_data: List[Dict[str, Any]]
     ) -> requests.Response:
         chunk_size = self._chunk_size
         n_chunks = len(json_data) // chunk_size + 1
@@ -238,9 +237,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         return response.ok
 
 
-_DEPRECATED_CLASSES = {
-    "APIDataSet": APIDataset,
-}
+_DEPRECATED_CLASSES = {"APIDataSet": APIDataset}
 
 
 def __getattr__(name):

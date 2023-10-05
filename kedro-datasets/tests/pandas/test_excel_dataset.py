@@ -138,14 +138,7 @@ class TestExcelDataset:
     @pytest.mark.parametrize(
         "nrows,expected",
         [
-            (
-                0,
-                {
-                    "index": [],
-                    "columns": ["col1", "col2", "col3"],
-                    "data": [],
-                },
-            ),
+            (0, {"index": [], "columns": ["col1", "col2", "col3"], "data": []}),
             (
                 1,
                 {

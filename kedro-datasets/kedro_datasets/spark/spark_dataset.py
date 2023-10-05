@@ -429,9 +429,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
             )
 
 
-_DEPRECATED_CLASSES = {
-    "SparkDataSet": SparkDataset,
-}
+_DEPRECATED_CLASSES = {"SparkDataSet": SparkDataset}
 
 
 def __getattr__(name):

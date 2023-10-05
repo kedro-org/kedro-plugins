@@ -310,9 +310,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 load_args["query"] = fs_file.read()
 
         return pd.read_gbq(
-            project_id=self._project_id,
-            credentials=self._credentials,
-            **load_args,
+            project_id=self._project_id, credentials=self._credentials, **load_args
         )
 
     def _save(self, data: None) -> NoReturn:

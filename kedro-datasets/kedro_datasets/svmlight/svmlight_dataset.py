@@ -192,9 +192,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "SVMLightDataSet": SVMLightDataset,
-}
+_DEPRECATED_CLASSES = {"SVMLightDataSet": SVMLightDataset}
 
 
 def __getattr__(name):

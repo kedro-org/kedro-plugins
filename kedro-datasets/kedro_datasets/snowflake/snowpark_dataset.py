@@ -212,21 +212,13 @@ class SnowparkTableDataset(AbstractDataset):
         return session
 
     def _load(self) -> sp.DataFrame:
-        table_name = [
-            self._database,
-            self._schema,
-            self._table_name,
-        ]
+        table_name = [self._database, self._schema, self._table_name]
 
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
     def _save(self, data: sp.DataFrame) -> None:
-        table_name = [
-            self._database,
-            self._schema,
-            self._table_name,
-        ]
+        table_name = [self._database, self._schema, self._table_name]
 
         data.write.save_as_table(table_name, **self._save_args)
 
@@ -245,9 +237,7 @@ class SnowparkTableDataset(AbstractDataset):
         return rows[0][0] == 1
 
 
-_DEPRECATED_CLASSES = {
-    "SnowparkTableDataSet": SnowparkTableDataset,
-}
+_DEPRECATED_CLASSES = {"SnowparkTableDataSet": SnowparkTableDataset}
 
 
 def __getattr__(name):

@@ -43,10 +43,7 @@ def gbq_dataset(load_args, save_args, mock_bigquery_client):
 @pytest.fixture(params=[{}])
 def gbq_sql_dataset(load_args, mock_bigquery_client):
     return GBQQueryDataset(
-        sql=SQL_QUERY,
-        project=PROJECT,
-        credentials=None,
-        load_args=load_args,
+        sql=SQL_QUERY, project=PROJECT, credentials=None, load_args=load_args
     )
 
 
@@ -60,10 +57,7 @@ def sql_file(tmp_path: PosixPath):
 @pytest.fixture(params=[{}])
 def gbq_sql_file_dataset(load_args, sql_file, mock_bigquery_client):
     return GBQQueryDataset(
-        filepath=sql_file,
-        project=PROJECT,
-        credentials=None,
-        load_args=load_args,
+        filepath=sql_file, project=PROJECT, credentials=None, load_args=load_args
     )
 
 
@@ -240,9 +234,7 @@ class TestGBQQueryDataset:
         mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
         dataset = GBQQueryDataset(
-            sql=SQL_QUERY,
-            credentials=credentials,
-            project=PROJECT,
+            sql=SQL_QUERY, credentials=credentials, project=PROJECT
         )
 
         assert dataset._credentials == credentials_obj

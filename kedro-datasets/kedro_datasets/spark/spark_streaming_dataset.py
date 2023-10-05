@@ -161,9 +161,7 @@ class SparkStreamingDataset(AbstractDataset):
         return True
 
 
-_DEPRECATED_CLASSES = {
-    "SparkStreamingDataSet": SparkStreamingDataset,
-}
+_DEPRECATED_CLASSES = {"SparkStreamingDataSet": SparkStreamingDataset}
 
 
 def __getattr__(name):

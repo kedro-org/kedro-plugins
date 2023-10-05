@@ -255,7 +255,7 @@ class TestSparkHiveDataset:
             DatasetError,
             match=re.escape(
                 f"Columns {str(_test_columns)} selected as primary key(s) "
-                f"not found in table default_1.table_1",
+                f"not found in table default_1.table_1"
             ),
         ):
             dataset.save(_generate_spark_df_one())

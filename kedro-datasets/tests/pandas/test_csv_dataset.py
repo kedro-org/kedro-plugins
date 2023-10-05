@@ -81,9 +81,7 @@ def mocked_dataframe():
 @pytest.fixture
 def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe):
     mocked_s3_bucket.put_object(
-        Bucket=BUCKET_NAME,
-        Key=FILE_NAME,
-        Body=mocked_dataframe.to_csv(index=False),
+        Bucket=BUCKET_NAME, Key=FILE_NAME, Body=mocked_dataframe.to_csv(index=False)
     )
     return f"s3://{BUCKET_NAME}/{FILE_NAME}"
 
@@ -154,14 +152,7 @@ class TestCSVDataset:
     @pytest.mark.parametrize(
         "nrows,expected",
         [
-            (
-                0,
-                {
-                    "index": [],
-                    "columns": ["col1", "col2", "col3"],
-                    "data": [],
-                },
-            ),
+            (0, {"index": [], "columns": ["col1", "col2", "col3"], "data": []}),
             (
                 1,
                 {

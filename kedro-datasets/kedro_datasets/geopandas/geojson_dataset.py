@@ -154,9 +154,7 @@ class GeoJSONDataset(
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "GeoJSONDataSet": GeoJSONDataset,
-}
+_DEPRECATED_CLASSES = {"GeoJSONDataSet": GeoJSONDataset}
 
 
 def __getattr__(name):

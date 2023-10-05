@@ -204,9 +204,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         return data.to_dict(orient="split")
 
 
-_DEPRECATED_CLASSES = {
-    "CSVDataSet": CSVDataset,
-}
+_DEPRECATED_CLASSES = {"CSVDataSet": CSVDataset}
 
 
 def __getattr__(name):

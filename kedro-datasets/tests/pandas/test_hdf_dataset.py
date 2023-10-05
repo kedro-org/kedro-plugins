@@ -146,10 +146,7 @@ class TestHDFDataset:
         mocked_lock.assert_not_called()
 
         hdf_dataset.save(dummy_dataframe)
-        calls = [
-            mocker.call.__enter__(),
-            mocker.call.__exit__(None, None, None),
-        ]
+        calls = [mocker.call.__enter__(), mocker.call.__exit__(None, None, None)]
         mocked_lock.assert_has_calls(calls)
 
         mocked_lock.reset_mock()

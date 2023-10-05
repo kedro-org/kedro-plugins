@@ -183,9 +183,7 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "EmailMessageDataSet": EmailMessageDataset,
-}
+_DEPRECATED_CLASSES = {"EmailMessageDataSet": EmailMessageDataset}
 
 
 def __getattr__(name):

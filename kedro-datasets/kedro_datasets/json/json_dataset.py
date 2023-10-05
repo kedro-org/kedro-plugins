@@ -157,9 +157,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "JSONDataSet": JSONDataset,
-}
+_DEPRECATED_CLASSES = {"JSONDataSet": JSONDataset}
 
 
 def __getattr__(name):

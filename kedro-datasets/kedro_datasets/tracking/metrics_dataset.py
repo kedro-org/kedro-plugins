@@ -68,9 +68,7 @@ class MetricsDataset(json_dataset.JSONDataset):
         self._invalidate_cache()
 
 
-_DEPRECATED_CLASSES = {
-    "MetricsDataSet": MetricsDataset,
-}
+_DEPRECATED_CLASSES = {"MetricsDataSet": MetricsDataset}
 
 
 def __getattr__(name):

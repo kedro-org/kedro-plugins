@@ -142,9 +142,7 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "GMLDataSet": GMLDataset,
-}
+_DEPRECATED_CLASSES = {"GMLDataSet": GMLDataset}
 
 
 def __getattr__(name):

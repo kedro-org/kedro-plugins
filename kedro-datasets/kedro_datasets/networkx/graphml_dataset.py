@@ -140,9 +140,7 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "GraphMLDataSet": GraphMLDataset,
-}
+_DEPRECATED_CLASSES = {"GraphMLDataSet": GraphMLDataset}
 
 
 def __getattr__(name):

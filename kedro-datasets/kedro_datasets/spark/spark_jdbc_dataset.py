@@ -177,9 +177,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         return data.write.jdbc(self._url, self._table, **self._save_args)
 
 
-_DEPRECATED_CLASSES = {
-    "SparkJDBCDataSet": SparkJDBCDataset,
-}
+_DEPRECATED_CLASSES = {"SparkJDBCDataSet": SparkJDBCDataset}
 
 
 def __getattr__(name):

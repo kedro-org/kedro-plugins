@@ -32,9 +32,7 @@ def filepath_graphml(tmp_path):
 @pytest.fixture
 def graphml_dataset(filepath_graphml):
     return GraphMLDataset(
-        filepath=filepath_graphml,
-        load_args={"node_type": int},
-        save_args={},
+        filepath=filepath_graphml, load_args={"node_type": int}, save_args={}
     )
 
 

@@ -142,13 +142,7 @@ def expected_upsert_spark_df(spark_session: SparkSession):
         ]
     )
 
-    data = [
-        ("Alex", 32),
-        ("Bob", 12),
-        ("Clarke", 65),
-        ("Dave", 29),
-        ("Evan", 23),
-    ]
+    data = [("Alex", 32), ("Bob", 12), ("Clarke", 65), ("Dave", 29), ("Evan", 23)]
 
     return spark_session.createDataFrame(data, schema)
 
@@ -276,14 +270,7 @@ class TestManagedTableDataset:
         with pytest.raises(DatasetError):
             ManagedTableDataset(
                 table="test",
-                schema={
-                    "fields": [
-                        {
-                            "invalid": "schema",
-                        }
-                    ],
-                    "type": "struct",
-                },
+                schema={"fields": [{"invalid": "schema"}], "type": "struct"},
             )._table.schema()
 
     def test_catalog_exists(self):
@@ -357,10 +344,7 @@ class TestManagedTableDataset:
             dataframe_type="pandas",
         )
         unity_ds.save(subset_pandas_df)
-        saved_ds = ManagedTableDataset(
-            database="test",
-            table="test_save_pd_schema",
-        )
+        saved_ds = ManagedTableDataset(database="test", table="test_save_pd_schema")
         saved_table = saved_ds.load()
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
@@ -435,9 +419,7 @@ class TestManagedTableDataset:
         )
 
     def test_save_upsert_mismatched_columns(
-        self,
-        sample_spark_df: DataFrame,
-        mismatched_upsert_spark_df: DataFrame,
+        self, sample_spark_df: DataFrame, mismatched_upsert_spark_df: DataFrame
     ):
         unity_ds = ManagedTableDataset(
             database="test",

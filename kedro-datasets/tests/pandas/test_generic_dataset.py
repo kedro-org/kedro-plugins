@@ -82,9 +82,7 @@ def versioned_csv_dataset(filepath_csv, load_version, save_version):
 @pytest.fixture
 def csv_dataset(filepath_csv):
     return GenericDataset(
-        filepath=filepath_csv.as_posix(),
-        file_format="csv",
-        save_args={"index": False},
+        filepath=filepath_csv.as_posix(), file_format="csv", save_args={"index": False}
     )
 
 
@@ -370,14 +368,7 @@ class TestBadGenericDataset:
             ds.save(pd.DataFrame([1]))
 
     @pytest.mark.parametrize(
-        "file_format",
-        [
-            "clipboard",
-            "sql_table",
-            "sql",
-            "numpy",
-            "records",
-        ],
+        "file_format", ["clipboard", "sql_table", "sql", "numpy", "records"]
     )
     def test_generic_no_filepaths(self, file_format):
         error = (

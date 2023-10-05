@@ -150,9 +150,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "ImageDataSet": ImageDataset,
-}
+_DEPRECATED_CLASSES = {"ImageDataSet": ImageDataset}
 
 
 def __getattr__(name):

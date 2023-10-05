@@ -202,9 +202,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "HDFDataSet": HDFDataset,
-}
+_DEPRECATED_CLASSES = {"HDFDataSet": HDFDataset}
 
 
 def __getattr__(name):

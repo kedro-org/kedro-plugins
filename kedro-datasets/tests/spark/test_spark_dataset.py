@@ -668,8 +668,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
-            return_value=None,
+            "kedro_datasets.spark.spark_dataset._get_dbutils", return_value=None
         )
 
         dataset = SparkDataset(filepath="/dbfs/tmp/data")
@@ -679,8 +678,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_ds_init_dbutils_available(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
-            return_value="mock",
+            "kedro_datasets.spark.spark_dataset._get_dbutils", return_value="mock"
         )
 
         dataset = SparkDataset(filepath="/dbfs/tmp/data")
@@ -762,8 +760,7 @@ class TestSparkDatasetVersionedS3:
     def test_load_exact(self, mocker):
         ts = generate_timestamp()
         ds_s3 = SparkDataset(
-            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
-            version=Version(ts, None),
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=Version(ts, None)
         )
         get_spark = mocker.patch.object(ds_s3, "_get_spark")
 
@@ -784,8 +781,7 @@ class TestSparkDatasetVersionedS3:
 
         versioned_dataset_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
-            f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
-            "parquet",
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}", "parquet"
         )
 
     def test_save_version_warning(self, mocker):
@@ -804,8 +800,7 @@ class TestSparkDatasetVersionedS3:
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
-            f"s3a://{BUCKET_NAME}/{FILENAME}/{exact_version.save}/{FILENAME}",
-            "parquet",
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{exact_version.save}/{FILENAME}", "parquet"
         )
 
     def test_prevent_overwrite(self, mocker, versioned_dataset_s3):
@@ -880,8 +875,7 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs.load()
 
         get_spark.return_value.read.load.assert_called_once_with(
-            f"hdfs://{FOLDER_NAME}/{FILENAME}/{ts}/{FILENAME}",
-            "parquet",
+            f"hdfs://{FOLDER_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
     def test_save(self, mocker, version):
@@ -902,12 +896,10 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs.save(mocked_spark_df)
 
         hdfs_status.assert_called_once_with(
-            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
-            strict=False,
+            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}", strict=False
         )
         mocked_spark_df.write.save.assert_called_once_with(
-            f"hdfs://{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
-            "parquet",
+            f"hdfs://{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}", "parquet"
         )
 
     def test_save_version_warning(self, mocker):
@@ -948,8 +940,7 @@ class TestSparkDatasetVersionedHdfs:
             versioned_hdfs.save(mocked_spark_df)
 
         hdfs_status.assert_called_once_with(
-            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}",
-            strict=False,
+            f"{FOLDER_NAME}/{FILENAME}/{version.save}/{FILENAME}", strict=False
         )
         mocked_spark_df.write.save.assert_not_called()
 

@@ -124,17 +124,12 @@ def docker_init(spark):
     if KEDRO_VERSION.match(">=0.17.0"):
         verbose = KedroCliError.VERBOSE_ERROR
     else:
-        from kedro.framework.cli.cli import (
-            _VERBOSE as verbose,
-        )
+        from kedro.framework.cli.cli import _VERBOSE as verbose
 
     docker_file_version = "spark" if spark else "simple"
     docker_file = f"Dockerfile.{docker_file_version}"
     copy_template_files(
-        project_path,
-        template_path,
-        [docker_file, ".dockerignore", ".dive-ci"],
-        verbose,
+        project_path, template_path, [docker_file, ".dockerignore", ".dive-ci"], verbose
     )
 
 

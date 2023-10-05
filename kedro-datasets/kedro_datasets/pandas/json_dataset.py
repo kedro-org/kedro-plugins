@@ -190,9 +190,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "JSONDataSet": JSONDataset,
-}
+_DEPRECATED_CLASSES = {"JSONDataSet": JSONDataset}
 
 
 def __getattr__(name):

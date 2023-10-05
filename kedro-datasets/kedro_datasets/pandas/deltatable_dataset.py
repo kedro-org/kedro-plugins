@@ -229,10 +229,7 @@ class DeltaTableDataset(AbstractDataset):
         if self.is_empty_dir:
             # first time creation of delta table
             write_deltalake(
-                self._filepath,
-                data,
-                storage_options=self.fs_args,
-                **self._save_args,
+                self._filepath, data, storage_options=self.fs_args, **self._save_args
             )
             self.is_empty_dir = False
             self._delta_table = DeltaTable(
@@ -242,10 +239,7 @@ class DeltaTableDataset(AbstractDataset):
             )
         else:
             write_deltalake(
-                self._delta_table,
-                data,
-                storage_options=self.fs_args,
-                **self._save_args,
+                self._delta_table, data, storage_options=self.fs_args, **self._save_args
             )
 
     def _describe(self) -> Dict[str, Any]:
@@ -261,9 +255,7 @@ class DeltaTableDataset(AbstractDataset):
         }
 
 
-_DEPRECATED_CLASSES = {
-    "DeltaTableDataSet": DeltaTableDataset,
-}
+_DEPRECATED_CLASSES = {"DeltaTableDataSet": DeltaTableDataset}
 
 
 def __getattr__(name):

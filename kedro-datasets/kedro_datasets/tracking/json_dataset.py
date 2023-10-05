@@ -47,9 +47,7 @@ class JSONDataset(json_dataset.JSONDataset):
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
 
-_DEPRECATED_CLASSES = {
-    "JSONDataSet": JSONDataset,
-}
+_DEPRECATED_CLASSES = {"JSONDataSet": JSONDataset}
 
 
 def __getattr__(name):

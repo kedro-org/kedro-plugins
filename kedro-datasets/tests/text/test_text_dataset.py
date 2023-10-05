@@ -178,11 +178,7 @@ class TestTextDatasetVersioned:
                 filepath="https://example.com/file.txt", version=Version(None, None)
             )
 
-    def test_versioning_existing_dataset(
-        self,
-        txt_dataset,
-        versioned_txt_dataset,
-    ):
+    def test_versioning_existing_dataset(self, txt_dataset, versioned_txt_dataset):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
         txt_dataset.save(STRING)

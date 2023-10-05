@@ -174,11 +174,7 @@ class TestJSONDataset:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self,
-        explicit_versioned_json_dataset,
-        load_version,
-        save_version,
-        dummy_data,
+        self, explicit_versioned_json_dataset, load_version, save_version, dummy_data
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""

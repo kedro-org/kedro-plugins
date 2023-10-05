@@ -223,9 +223,7 @@ class TestParquetDataset:
             assert isinstance(field, pa.DataType)
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": "c1:[int64],c2:int64"}],
-        indirect=True,
+        "save_args", [{"schema": "c1:[int64],c2:int64"}], indirect=True
     )
     def test_save_extra_params_schema_str_schema_fields(self, s3_dataset, save_args):
         """Test setting the schema as string pyarrow schema (list of fields)

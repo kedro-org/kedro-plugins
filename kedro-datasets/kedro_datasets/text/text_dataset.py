@@ -141,9 +141,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "TextDataSet": TextDataset,
-}
+_DEPRECATED_CLASSES = {"TextDataSet": TextDataset}
 
 
 def __getattr__(name):

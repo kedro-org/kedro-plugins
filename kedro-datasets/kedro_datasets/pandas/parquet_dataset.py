@@ -216,9 +216,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "ParquetDataSet": ParquetDataset,
-}
+_DEPRECATED_CLASSES = {"ParquetDataSet": ParquetDataset}
 
 
 def __getattr__(name):

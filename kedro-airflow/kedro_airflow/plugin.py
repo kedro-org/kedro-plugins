@@ -89,12 +89,7 @@ def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
 )
 @click.pass_obj
 def create(  # noqa: PLR0913
-    metadata: ProjectMetadata,
-    pipeline_name,
-    env,
-    target_path,
-    jinja_file,
-    params,
+    metadata: ProjectMetadata, pipeline_name, env, target_path, jinja_file, params
 ):
     """Create an Airflow DAG for a project"""
     project_path = Path.cwd().resolve()
@@ -148,8 +143,7 @@ def create(  # noqa: PLR0913
     secho(str(target_path))
     secho("This file should be copied to your Airflow DAG folder.", fg="yellow")
     secho(
-        "The Airflow configuration can be customized by editing this file.",
-        fg="green",
+        "The Airflow configuration can be customized by editing this file.", fg="green"
     )
     secho("")
     secho(

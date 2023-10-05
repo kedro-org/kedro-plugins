@@ -152,10 +152,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     def _create_hive_table(self, data: DataFrame, mode: str = None):
         _mode: str = mode or self._write_mode
         data.write.saveAsTable(
-            self._full_table_address,
-            mode=_mode,
-            format=self._format,
-            **self._save_args,
+            self._full_table_address, mode=_mode, format=self._format, **self._save_args
         )
 
     def _load(self) -> DataFrame:
@@ -223,9 +220,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         )
 
 
-_DEPRECATED_CLASSES = {
-    "SparkHiveDataSet": SparkHiveDataset,
-}
+_DEPRECATED_CLASSES = {"SparkHiveDataSet": SparkHiveDataset}
 
 
 def __getattr__(name):

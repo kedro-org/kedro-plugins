@@ -44,8 +44,7 @@ def _get_hashed_username():
         return _hash(username)
     except Exception as exc:
         logger.warning(
-            "Something went wrong with getting the username. Exception: %s",
-            exc,
+            "Something went wrong with getting the username. Exception: %s", exc
         )
         return ""
 
@@ -73,7 +72,7 @@ class KedroTelemetryCLIHooks:
             if not consent:
                 logger.debug(
                     "Kedro-Telemetry is installed, but you have opted out of "
-                    "sharing usage analytics so none will be collected.",
+                    "sharing usage analytics so none will be collected."
                 )
                 return
 
@@ -117,7 +116,7 @@ class KedroTelemetryProjectHooks:
         if not consent:
             logger.debug(
                 "Kedro-Telemetry is installed, but you have opted out of "
-                "sharing usage analytics so none will be collected.",
+                "sharing usage analytics so none will be collected."
             )
             return
 
@@ -152,10 +151,7 @@ def _get_project_properties(hashed_username: str) -> Dict:
     }
 
 
-def _format_user_cli_data(
-    properties: dict,
-    command_args: List[str],
-):
+def _format_user_cli_data(properties: dict, command_args: List[str]):
     """Add format CLI command data to send to Heap."""
     cli_properties = properties.copy()
     cli_properties["command"] = (
@@ -261,8 +257,7 @@ def _confirm_consent(telemetry_file_path: Path) -> bool:
             return False
     except Exception as exc:
         logger.warning(
-            "Failed to confirm consent. No data was sent to Heap. Exception: %s",
-            exc,
+            "Failed to confirm consent. No data was sent to Heap. Exception: %s", exc
         )
         return False
 

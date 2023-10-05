@@ -59,7 +59,7 @@ def fake_default_pipeline():
         [
             node(identity, ["input"], ["intermediate"], name="node0"),
             node(identity, ["intermediate"], ["output"], name="node1"),
-        ],
+        ]
     )
     return mock_default_pipeline
 
@@ -67,9 +67,7 @@ def fake_default_pipeline():
 @fixture
 def fake_sub_pipeline():
     mock_sub_pipeline = modular_pipeline(
-        [
-            node(identity, ["input"], ["intermediate"], name="node0"),
-        ],
+        [node(identity, ["input"], ["intermediate"], name="node0")]
     )
     return mock_sub_pipeline
 
@@ -100,10 +98,7 @@ class TestKedroTelemetryCLIHooks:
             "os": sys.platform,
             "command": "kedro --version",
         }
-        generic_properties = {
-            **expected_properties,
-            "main_command": "--version",
-        }
+        generic_properties = {**expected_properties, "main_command": "--version"}
 
         expected_calls = [
             mocker.call(
@@ -140,10 +135,7 @@ class TestKedroTelemetryCLIHooks:
             "os": sys.platform,
             "command": "kedro",
         }
-        generic_properties = {
-            "main_command": "kedro",
-            **expected_properties,
-        }
+        generic_properties = {"main_command": "kedro", **expected_properties}
 
         expected_calls = [
             mocker.call(
@@ -209,10 +201,7 @@ class TestKedroTelemetryCLIHooks:
             "python_version": sys.version,
             "os": sys.platform,
         }
-        generic_properties = {
-            "main_command": "--version",
-            **expected_properties,
-        }
+        generic_properties = {"main_command": "--version", **expected_properties}
 
         expected_calls = [
             mocker.call(
@@ -221,9 +210,7 @@ class TestKedroTelemetryCLIHooks:
                 properties=expected_properties,
             ),
             mocker.call(
-                event_name="CLI command",
-                identity="",
-                properties=generic_properties,
+                event_name="CLI command", identity="", properties=generic_properties
             ),
         ]
         assert mocked_heap_call.call_args_list == expected_calls
@@ -329,11 +316,7 @@ class TestKedroTelemetryCLIHooks:
 
 class TestKedroTelemetryProjectHooks:
     def test_after_context_created_without_kedro_run(
-        self,
-        mocker,
-        fake_context,
-        fake_default_pipeline,
-        fake_sub_pipeline,
+        self, mocker, fake_context, fake_default_pipeline, fake_sub_pipeline
     ):
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}

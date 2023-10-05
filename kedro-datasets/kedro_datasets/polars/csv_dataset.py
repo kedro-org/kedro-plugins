@@ -197,9 +197,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "CSVDataSet": CSVDataset,
-}
+_DEPRECATED_CLASSES = {"CSVDataSet": CSVDataset}
 
 
 def __getattr__(name):

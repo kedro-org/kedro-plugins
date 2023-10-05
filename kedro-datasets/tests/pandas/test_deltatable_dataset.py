@@ -24,10 +24,7 @@ def dummy_df():
 @pytest.fixture
 def deltatable_dataset_from_path(filepath, load_args, save_args, fs_args):
     return DeltaTableDataset(
-        filepath=filepath,
-        load_args=load_args,
-        save_args=save_args,
-        fs_args=fs_args,
+        filepath=filepath, load_args=load_args, save_args=save_args, fs_args=fs_args
     )
 
 

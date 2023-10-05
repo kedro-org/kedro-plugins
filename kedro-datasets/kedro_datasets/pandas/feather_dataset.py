@@ -192,9 +192,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "FeatherDataSet": FeatherDataset,
-}
+_DEPRECATED_CLASSES = {"FeatherDataSet": FeatherDataset}
 
 
 def __getattr__(name):

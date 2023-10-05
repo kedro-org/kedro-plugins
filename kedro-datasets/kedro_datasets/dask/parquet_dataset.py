@@ -212,9 +212,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         return file_system.exists(self._filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "ParquetDataSet": ParquetDataset,
-}
+_DEPRECATED_CLASSES = {"ParquetDataSet": ParquetDataset}
 
 
 def __getattr__(name):

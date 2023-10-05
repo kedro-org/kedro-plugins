@@ -143,9 +143,7 @@ class PlotlyDataset(JSONDataset):
         return fig
 
 
-_DEPRECATED_CLASSES = {
-    "PlotlyDataSet": PlotlyDataset,
-}
+_DEPRECATED_CLASSES = {"PlotlyDataSet": PlotlyDataset}
 
 
 def __getattr__(name):

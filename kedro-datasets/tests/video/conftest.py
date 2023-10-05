@@ -35,8 +35,7 @@ def purple_frame():
 @pytest.fixture
 def color_video(red_frame, green_frame, blue_frame, yellow_frame, purple_frame):
     return SequenceVideo(
-        [red_frame, green_frame, blue_frame, yellow_frame, purple_frame],
-        fps=TEST_FPS,
+        [red_frame, green_frame, blue_frame, yellow_frame, purple_frame], fps=TEST_FPS
     )
 
 
@@ -49,11 +48,7 @@ def color_video_generator(
     def generator():
         yield from sequence
 
-    return GeneratorVideo(
-        generator(),
-        length=len(sequence),
-        fps=TEST_FPS,
-    )
+    return GeneratorVideo(generator(), length=len(sequence), fps=TEST_FPS)
 
 
 @pytest.fixture

@@ -82,11 +82,7 @@ def mocked_dataframe():
 def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe: pl.DataFrame):
     binarycsv = mocked_dataframe.write_csv()[:-1]
 
-    mocked_s3_bucket.put_object(
-        Bucket=BUCKET_NAME,
-        Key=FILE_NAME,
-        Body=binarycsv,
-    )
+    mocked_s3_bucket.put_object(Bucket=BUCKET_NAME, Key=FILE_NAME, Body=binarycsv)
 
     return f"s3://{BUCKET_NAME}/{FILE_NAME}"
 

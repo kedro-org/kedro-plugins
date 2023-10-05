@@ -192,9 +192,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             ) from exc
 
 
-_DEPRECATED_CLASSES = {
-    "PickleDataSet": PickleDataset,
-}
+_DEPRECATED_CLASSES = {"PickleDataSet": PickleDataset}
 
 
 def __getattr__(name):

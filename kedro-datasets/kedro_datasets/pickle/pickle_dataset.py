@@ -242,9 +242,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         self._fs.invalidate_cache(filepath)
 
 
-_DEPRECATED_CLASSES = {
-    "PickleDataSet": PickleDataset,
-}
+_DEPRECATED_CLASSES = {"PickleDataSet": PickleDataset}
 
 
 def __getattr__(name):

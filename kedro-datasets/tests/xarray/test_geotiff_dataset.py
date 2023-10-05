@@ -9,7 +9,7 @@ from kedro_datasets.xarray import GeoTiffDataset
 
 @pytest.fixture
 def cog_file_path() -> str:
-    cog_file_path = Path(__file__).parent / "data" / "avalanches.tif"
+    cog_file_path = Path(__file__).parent / "cog.tif"
     return cog_file_path.as_posix()
 
 
@@ -31,6 +31,3 @@ def test_save_and_load(geotiff_dataset):
     """Test saving and reloading the data set."""
     loaded_tiff = geotiff_dataset.load()
     assert isinstance(loaded_tiff, xr.DataArray)
-
-def test_the_test():
-    assert True

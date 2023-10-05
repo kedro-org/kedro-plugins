@@ -38,7 +38,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
             include_optimizer: False
           credentials: tf_creds
 
-    Example usage for the
+    Example usage for th
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
     ::

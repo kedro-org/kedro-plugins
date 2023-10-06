@@ -84,11 +84,10 @@ def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List
                     output.append(arg_part)
                 elif arg_part:
                     output.append(MASK)
-        else:
-            if arg in vocabulary:
-                output.append(arg)
-            elif arg:
-                output.append(MASK)
+        elif arg in vocabulary:
+            output.append(arg)
+        elif arg:
+            output.append(MASK)
     return output
 
 

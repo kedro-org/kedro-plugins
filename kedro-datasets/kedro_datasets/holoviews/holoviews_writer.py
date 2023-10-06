@@ -36,8 +36,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"fmt": "png"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

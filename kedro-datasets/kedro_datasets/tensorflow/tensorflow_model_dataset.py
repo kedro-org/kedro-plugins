@@ -11,6 +11,7 @@ import fsspec
 import tensorflow as tf
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
@@ -61,8 +62,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"save_format": "tf"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -133,7 +133,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
                 self._fs.copy(load_path, path)
             else:
                 self._fs.get(load_path, path, recursive=True)
@@ -152,7 +152,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
 
             tf.keras.models.save_model(data, path, **self._save_args)
 
@@ -202,7 +202,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

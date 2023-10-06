@@ -17,6 +17,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -109,8 +110,7 @@ class ExcelDataset(
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         engine: str = "openpyxl",
@@ -232,7 +232,6 @@ class ExcelDataset(
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(output, **self._writer_args) as writer:
             if isinstance(data, dict):
                 for sheet_name, sheet_data in data.items():
@@ -267,7 +266,7 @@ class ExcelDataset(
     def _preview(self, nrows: int = 40) -> Dict:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")
@@ -284,7 +283,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

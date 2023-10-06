@@ -17,6 +17,7 @@ from kedro.io.core import (
     validate_on_forbidden_chars,
 )
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -63,8 +64,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         dataset: str,
         table_name: str,
@@ -209,8 +209,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         project: str = None,
@@ -315,7 +314,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")
 
 
@@ -331,7 +330,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

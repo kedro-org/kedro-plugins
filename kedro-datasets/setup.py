@@ -37,7 +37,8 @@ pandas_require = {
     "pandas.HDFDataSet": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6; platform_system != 'Windows'",
+        "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
+        "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
@@ -186,10 +187,9 @@ extras_require["test"] = [
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
-    "pre-commit>=2.9.2, <3.0", # The hook `mypy` requires pre-commit version 2.9.2.
+    "pre-commit>=2.9.2",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.5.2, <3.0",
     "pyodbc~=4.0.35",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
@@ -201,6 +201,7 @@ extras_require["test"] = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
+    "ruff~=0.0.290",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
     "scikit-learn>=1.0.2,<2",
@@ -209,7 +210,8 @@ extras_require["test"] = [
     "SQLAlchemy~=1.2",
     "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
     "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6; platform_system != 'Windows'",
+    "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
+    "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",

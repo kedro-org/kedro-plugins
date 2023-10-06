@@ -4,6 +4,9 @@
 
 ## Bug fixes and other changes
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [PtrBld](https://github.com/PtrBld)
 
 # Release 1.7.1
 ## Bug fixes and other changes

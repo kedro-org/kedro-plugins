@@ -61,7 +61,7 @@ class IncrementalDataset(PartitionedDataset):
         >>> data_set.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataSet"
+    DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     def __init__(  # noqa: PLR0913

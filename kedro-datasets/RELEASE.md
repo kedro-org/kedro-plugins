@@ -1,6 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
-* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets`.
+* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
 
 ## Bug fixes and other changes
 ## Upcoming deprecations for Kedro-Datasets 2.0.0

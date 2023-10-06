@@ -14,10 +14,10 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
 from kedro_datasets.partitions import IncrementalDataset
-from kedro_datasets.pickle import PickleDataSet
-from kedro_datasets.text import TextDataSet
+from kedro_datasets.pickle import PickleDataset
+from kedro_datasets.text import TextDataset
 
-DATASET = "kedro_datasets.pandas.csv_dataset.CSVDataSet"
+DATASET = "kedro_datasets.pandas.csv_dataset.CSVDataset"
 
 
 @pytest.fixture
@@ -227,8 +227,8 @@ class TestIncrementalDatasetLocal:
     @pytest.mark.parametrize(
         "checkpoint_config,expected_checkpoint_class",
         [
-            (None, TextDataSet),
-            ({"type": "kedro_datasets.pickle.PickleDataSet"}, PickleDataSet),
+            (None, TextDataset),
+            ({"type": "kedro_datasets.pickle.PickleDataset"}, PickleDataset),
             (
                 {"type": "tests.partitions.test_incremental_dataset.DummyDataset"},
                 DummyDataset,
@@ -480,7 +480,7 @@ class TestPartitionedDatasetS3:
         checkpoint_path = (
             f"{mocked_csvs_in_s3}/{IncrementalDataset.DEFAULT_CHECKPOINT_FILENAME}"
         )
-        checkpoint_value = TextDataSet(checkpoint_path).load()
+        checkpoint_value = TextDataset(checkpoint_path).load()
         assert checkpoint_value == "p04/data.csv"
 
         pds = IncrementalDataset(

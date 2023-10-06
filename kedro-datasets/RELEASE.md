@@ -6,6 +6,12 @@
 
 ## Bug fixes and other changes
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
+
+# Release 1.7.1
+## Bug fixes and other changes
+* Pin `tables` version on `kedro-datasets` for Python < 3.8.
+
+## Upcoming deprecations for Kedro-Datasets 2.0.0
 * Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
 
 ## Community contributions

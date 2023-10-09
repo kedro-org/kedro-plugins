@@ -6,7 +6,7 @@ import datetime as dt
 import re
 import warnings
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Dict, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import fsspec
 import pandas as pd
@@ -38,7 +38,7 @@ A module/driver is missing when connecting to your SQL server. SQLDataset
 """
 
 
-def _find_known_drivers(module_import_error: ImportError) -> Optional[str]:
+def _find_known_drivers(module_import_error: ImportError) -> str | None:
     """Looks up known keywords in a ``ModuleNotFoundError`` so that it can
     provide better guideline for the user.
 
@@ -153,18 +153,18 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
-    engines: Dict[str, Engine] = {}
+    engines: dict[str, Engine] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         table_name: str,
-        credentials: Dict[str, Any],
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any],
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataset``.
 
@@ -245,7 +245,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         """The ``Engine`` object for the dataset's connection string."""
         return self.create_connection(self._connection_str)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         save_args = copy.deepcopy(self._save_args)
         del load_args["table_name"]
@@ -377,17 +377,17 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
               date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
-    engines: Dict[str, Engine] = {}
+    engines: dict[str, Engine] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
-        execution_options: Optional[Dict[str, Any]] = None,
-        metadata: Dict[str, Any] = None,
+        execution_options: dict[str, Any] | None = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -443,7 +443,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args: Dict[str, Any] = {}
+        default_load_args: dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -495,7 +495,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         """The ``Engine`` object for the dataset's connection string."""
         return self.create_connection(self._connection_str)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         return {
             "sql": str(load_args.pop("sql", None)),

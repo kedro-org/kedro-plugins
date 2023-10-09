@@ -343,7 +343,7 @@ class TestSQLQueryDataSet:
             "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_invalid_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -354,7 +354,7 @@ class TestSQLQueryDataSet:
         )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -365,7 +365,7 @@ class TestSQLQueryDataSet:
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_sql(self):
         """Check the error when unknown SQL dialect is provided

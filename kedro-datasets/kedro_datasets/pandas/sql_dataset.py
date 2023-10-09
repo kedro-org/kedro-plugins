@@ -376,9 +376,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>         date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
-    # using Any because of Sphinx but it should be
-    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: Dict[str, Engine] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -474,22 +472,27 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> None:
+    def create_connection(cls, connection_str: str) -> Engine:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataSet` that
         need to connect to the same source.
         """
-        if connection_str in cls.engines:
-            return
+        if connection_str not in cls.engines:
+            try:
+                engine = create_engine(connection_str)
+            except ImportError as import_error:
+                raise _get_missing_module_error(import_error) from import_error
+            except NoSuchModuleError as exc:
+                raise _get_sql_alchemy_missing_error() from exc
 
-        try:
-            engine = create_engine(connection_str)
-        except ImportError as import_error:
-            raise _get_missing_module_error(import_error) from import_error
-        except NoSuchModuleError as exc:
-            raise _get_sql_alchemy_missing_error() from exc
+            cls.engines[connection_str] = engine
 
-        cls.engines[connection_str] = engine
+        return cls.engines[connection_str]
+
+    @property
+    def engine(self):
+        """The ``Engine`` object for the dataset's connection string."""
+        return self.create_connection(self._connection_str)
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -502,16 +505,15 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[self._connection_str].execution_options(
-            **self._execution_options
-        )  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["sql"] = fs_file.read()
 
-        return pd.read_sql_query(con=engine, **load_args)
+        return pd.read_sql_query(
+            con=self.engine.execution_options(**self._execution_options), **load_args
+        )
 
     def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
         raise DataSetError("'save' is not supported on SQLQueryDataSet")

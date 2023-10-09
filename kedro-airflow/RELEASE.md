@@ -1,7 +1,5 @@
 # Upcoming Release
 * Added support for Python 3.11
-
-# Release 0.6.1
 * Added the `--all` CLI argument to `kedro-airflow` to convert registered all pipelines at once.
 * Simplify the output of the `kedro airflow create` command.
 

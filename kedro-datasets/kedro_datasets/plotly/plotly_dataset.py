@@ -1,7 +1,8 @@
-"""``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
+"""``PlotlyDataset`` generates a plot from a pandas DataFrame and saves it to a JSON
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
+import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
@@ -10,25 +11,26 @@ import plotly.express as px
 from kedro.io.core import Version
 from plotly import graph_objects as go
 
-from .json_dataset import JSONDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets.plotly.json_dataset import JSONDataset
 
 
-class PlotlyDataSet(JSONDataSet):
-    """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
+class PlotlyDataset(JSONDataset):
+    """``PlotlyDataset`` generates a plot from a pandas DataFrame and saves it to a JSON
     file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
     plotly figure.
 
-    ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
+    ``PlotlyDataset`` is a convenience wrapper for ``plotly.JSONDataset``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         bar_plot:
-          type: plotly.PlotlyDataSet
+          type: plotly.PlotlyDataset
           filepath: data/08_reporting/bar_plot.json
           plotly_args:
             type: bar
@@ -43,30 +45,29 @@ class PlotlyDataSet(JSONDataSet):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.plotly import PlotlyDataSet
+        >>> from kedro_datasets.plotly import PlotlyDataset
         >>> import plotly.express as px
         >>> import pandas as pd
         >>>
         >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=('x1', 'x2'))
         >>>
-        >>> data_set = PlotlyDataSet(
-        >>>     filepath='scatter_plot.json',
-        >>>     plotly_args={
-        >>>         'type': 'scatter',
-        >>>         'fig': {'x': 'x1', 'y': 'x2'},
-        >>>     }
-        >>> )
-        >>> data_set.save(df_data)
-        >>> reloaded = data_set.load()
+        >>> dataset = PlotlyDataset(
+        ...     filepath='scatter_plot.json',
+        ...     plotly_args={
+        ...         'type': 'scatter',
+        ...         'fig': {'x': 'x1', 'y': 'x2'},
+        ...     }
+        ... )
+        >>> dataset.save(df_data)
+        >>> reloaded = dataset.load()
         >>> assert px.scatter(df_data, x='x1', y='x2') == reloaded
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         plotly_args: Dict[str, Any],
@@ -77,7 +78,7 @@ class PlotlyDataSet(JSONDataSet):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PlotlyDataSet`` pointing to a concrete JSON file
+        """Creates a new instance of ``PlotlyDataset`` pointing to a concrete JSON file
         on a specific filesystem.
 
         Args:
@@ -140,3 +141,21 @@ class PlotlyDataSet(JSONDataSet):
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
+
+
+_DEPRECATED_CLASSES = {
+    "PlotlyDataSet": PlotlyDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

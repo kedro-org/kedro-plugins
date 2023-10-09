@@ -10,14 +10,13 @@ import fsspec
 import holoviews as hv
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 # HoloViews to be passed in `hv.save()`
 HoloViews = TypeVar("HoloViews")
 
 
-class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
+class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 
@@ -36,8 +35,7 @@ class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"fmt": "png"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,
@@ -108,7 +106,7 @@ class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
         }
 
     def _load(self) -> NoReturn:
-        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()

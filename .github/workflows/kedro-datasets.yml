@@ -1,6 +1,7 @@
-name: Run checks on Kedro-Datasets
+name: Run checks on kedro-datasets
 
 on:
+  workflow_call:
   push:
     branches:
       - main
@@ -17,7 +18,44 @@ on:
       - "kedro-telemetry/**"
 
 jobs:
-  datasets-test:
-    uses: ./.github/workflows/check-plugin.yml
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+    uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-datasets
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+    with:
+      plugin: kedro-datasets
+      os: ubuntu-latest
+      python-version: "3.11"
+
+  RTD-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: kedro-datasets-ubuntu-latest-python-"3.8"
+          restore-keys: kedro-datasets
+      - name: Install dependencies
+        run: |
+          cd kedro-datasets
+          pip install ".[docs]"
+          pip install ".[test]"
+      - name: RTD build for kedro-datasets
+        run: |
+          make rtd

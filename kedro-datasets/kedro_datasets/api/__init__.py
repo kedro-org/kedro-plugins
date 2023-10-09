@@ -1,11 +1,17 @@
-"""``APIDataSet`` loads the data from HTTP(S) APIs
+"""``APIDataset`` loads the data from HTTP(S) APIs
 and returns them into either as string or json Dict.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+from __future__ import annotations
 
-__all__ = ["APIDataSet"]
+from typing import Any
 
-from contextlib import suppress
+import lazy_loader as lazy
 
-with suppress(ImportError):
-    from .api_dataset import APIDataSet
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+APIDataSet: type[APIDataset]
+APIDataset: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"api_dataset": ["APIDataSet", "APIDataset"]}
+)

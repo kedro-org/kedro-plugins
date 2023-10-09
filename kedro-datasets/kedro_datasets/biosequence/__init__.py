@@ -1,8 +1,15 @@
-"""``AbstractDataSet`` implementation to read/write from/to a sequence file."""
+"""``AbstractDataset`` implementation to read/write from/to a sequence file."""
+from __future__ import annotations
 
-__all__ = ["BioSequenceDataSet"]
+from typing import Any
 
-from contextlib import suppress
+import lazy_loader as lazy
 
-with suppress(ImportError):
-    from .biosequence_dataset import BioSequenceDataSet
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+BioSequenceDataSet: type[BioSequenceDataset]
+BioSequenceDataset: Any
+
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__,
+    submod_attrs={"biosequence_dataset": ["BioSequenceDataSet", "BioSequenceDataset"]},
+)

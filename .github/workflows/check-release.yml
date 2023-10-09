@@ -31,16 +31,33 @@ jobs:
       package_name: ${{ steps.version_check.outputs.package_name }}
       package_version: ${{ steps.version_check.outputs.package_version }}
 
-  test:
+  airflow-test:
     needs: check-version
-    if: ${{ needs.check-version.outputs.new_release == 'true' }}
-    uses: ./.github/workflows/check-plugin.yml
-    with:
-      plugin: ${{ needs.check-version.outputs.package_name }}
+    if: ${{ needs.check-version.outputs.new_release == 'true' &&  needs.check-version.outputs.package_name == 'kedro-airflow' }}
+    uses: ./.github/workflows/kedro-airflow.yml
+
+  datasets-test:
+    needs: check-version
+    if: ${{ needs.check-version.outputs.new_release == 'true'  &&  needs.check-version.outputs.package_name == 'kedro-datasets' }}
+    uses: ./.github/workflows/kedro-datasets.yml
+
+  docker-test:
+    needs: check-version
+    if: ${{ needs.check-version.outputs.new_release == 'true'  &&  needs.check-version.outputs.package_name == 'kedro-docker' }}
+    uses: ./.github/workflows/kedro-docker.yml
+
+  telemetry-test:
+    needs: check-version
+    if: ${{ needs.check-version.outputs.new_release == 'true'  &&  needs.check-version.outputs.package_name == 'kedro-telemetry' }}
+    uses: ./.github/workflows/kedro-telemetry.yml
 
   build-publish:
-    needs: [check-version, test]
-    if: ${{ needs.check-version.outputs.new_release == 'true' }}
+    needs: [ check-version, airflow-test, docker-test, datasets-test, telemetry-test ]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.check-version.outputs.new_release == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

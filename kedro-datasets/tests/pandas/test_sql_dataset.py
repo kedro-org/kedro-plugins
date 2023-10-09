@@ -1,13 +1,15 @@
-# pylint: disable=no-member
+import importlib
 from pathlib import PosixPath
 from unittest.mock import ANY
 
 import pandas as pd
 import pytest
 import sqlalchemy
-from kedro.io import DataSetError
 
-from kedro_datasets.pandas import SQLQueryDataSet, SQLTableDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
+from kedro_datasets.pandas.sql_dataset import _DEPRECATED_CLASSES
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
@@ -23,8 +25,8 @@ ERROR_PREFIX = (
 @pytest.fixture(autouse=True)
 def cleanup_engines():
     yield
-    SQLTableDataSet.engines = {}
-    SQLQueryDataSet.engines = {}
+    SQLTableDataset.engines = {}
+    SQLQueryDataset.engines = {}
 
 
 @pytest.fixture
@@ -40,27 +42,38 @@ def sql_file(tmp_path: PosixPath):
 
 
 @pytest.fixture(params=[{}])
-def table_data_set(request):
+def table_dataset(request):
     kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
-    return SQLTableDataSet(**kwargs)
+    return SQLTableDataset(**kwargs)
 
 
 @pytest.fixture(params=[{}])
-def query_data_set(request):
+def query_dataset(request):
     kwargs = {"sql": SQL_QUERY, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
-    return SQLQueryDataSet(**kwargs)
+    return SQLQueryDataset(**kwargs)
 
 
 @pytest.fixture(params=[{}])
-def query_file_data_set(request, sql_file):
+def query_file_dataset(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
-    return SQLQueryDataSet(**kwargs)
+    return SQLQueryDataset(**kwargs)
 
 
-class TestSQLTableDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.sql_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestSQLTableDataset:
     _unknown_conn = "mysql+unknown_module://scott:tiger@localhost/foo"
 
     @staticmethod
@@ -74,8 +87,8 @@ class TestSQLTableDataSet:
     def test_empty_table_name(self):
         """Check the error when instantiating with an empty table"""
         pattern = r"'table\_name' argument cannot be empty\."
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name="", credentials={"con": CONNECTION})
+        with pytest.raises(DatasetError, match=pattern):
+            SQLTableDataset(table_name="", credentials={"con": CONNECTION})
 
     def test_empty_connection(self):
         """Check the error when instantiating with an empty
@@ -84,8 +97,8 @@ class TestSQLTableDataSet:
             r"'con' argument cannot be empty\. "
             r"Please provide a SQLAlchemy connection string\."
         )
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": ""})
+        with pytest.raises(DatasetError, match=pattern):
+            SQLTableDataset(table_name=TABLE_NAME, credentials={"con": ""})
 
     def test_driver_missing(self, mocker):
         """Check the error when the sql driver is missing"""
@@ -93,8 +106,8 @@ class TestSQLTableDataSet:
             "kedro_datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'mysqldb'"),
         )
-        with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLTableDataSet(
+        with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
+            SQLTableDataset(
                 table_name=TABLE_NAME, credentials={"con": CONNECTION}
             ).exists()
 
@@ -104,8 +117,8 @@ class TestSQLTableDataSet:
         than on load or save operation.
         """
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            SQLTableDataset(
                 table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR}
             ).exists()
 
@@ -117,100 +130,100 @@ class TestSQLTableDataSet:
             side_effect=ImportError("No module named 'unknown_module'"),
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            SQLTableDataset(
                 table_name=TABLE_NAME, credentials={"con": CONNECTION}
             ).exists()
 
-    def test_str_representation_table(self, table_data_set):
+    def test_str_representation_table(self, table_dataset):
         """Test the data set instance string representation"""
-        str_repr = str(table_data_set)
+        str_repr = str(table_dataset)
         assert (
-            "SQLTableDataSet(load_args={}, save_args={'index': False}, "
+            "SQLTableDataset(load_args={}, save_args={'index': False}, "
             f"table_name={TABLE_NAME})" in str_repr
         )
         assert CONNECTION not in str(str_repr)
 
-    def test_table_exists(self, mocker, table_data_set):
+    def test_table_exists(self, mocker, table_dataset):
         """Test `exists` method invocation"""
         mocker.patch(
             "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
         )
-        assert not table_data_set.exists()
+        assert not table_dataset.exists()
         self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"load_args": {"schema": "ingested"}}], indirect=True
+        "table_dataset", [{"load_args": {"schema": "ingested"}}], indirect=True
     )
-    def test_table_exists_schema(self, mocker, table_data_set):
+    def test_table_exists_schema(self, mocker, table_dataset):
         """Test `exists` method invocation with DB schema provided"""
         mocker.patch(
             "sqlalchemy.engine.reflection.Inspector.has_table", return_value=False
         )
-        assert not table_data_set.exists()
+        assert not table_dataset.exists()
         self._assert_sqlalchemy_called_once(TABLE_NAME, "ingested")
 
-    def test_table_exists_mocked(self, mocker, table_data_set):
+    def test_table_exists_mocked(self, mocker, table_dataset):
         """Test `exists` method invocation with mocked list of tables"""
         mocker.patch(
             "sqlalchemy.engine.reflection.Inspector.has_table", return_value=True
         )
-        assert table_data_set.exists()
+        assert table_dataset.exists()
         self._assert_sqlalchemy_called_once(TABLE_NAME, None)
 
-    def test_load_sql_params(self, mocker, table_data_set):
+    def test_load_sql_params(self, mocker, table_dataset):
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_table")
-        table_data_set.load()
+        table_dataset.load()
         pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engines[CONNECTION]
+            table_name=TABLE_NAME, con=table_dataset.engines[CONNECTION]
         )
 
-    def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_default_index(self, mocker, table_dataset, dummy_dataframe):
         """Test `save` method invocation"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
         )
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": {"index": True}}], indirect=True
+        "table_dataset", [{"save_args": {"index": True}}], indirect=True
     )
-    def test_save_overwrite_index(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_overwrite_index(self, mocker, table_dataset, dummy_dataframe):
         """Test writing DataFrame index as a column"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=True
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=True
         )
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": {"name": "TABLE_B"}}], indirect=True
+        "table_dataset", [{"save_args": {"name": "TABLE_B"}}], indirect=True
     )
     def test_save_ignore_table_name_override(
-        self, mocker, table_data_set, dummy_dataframe
+        self, mocker, table_dataset, dummy_dataframe
     ):
         """Test that putting the table name is `save_args` does not have any
         effect"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
         )
 
 
-class TestSQLTableDataSetSingleConnection:
+class TestSQLTableDatasetSingleConnection:
     def test_single_connection(self, dummy_dataframe, mocker):
         """Test to make sure multiple instances use the same connection object."""
         mocker.patch("pandas.read_sql_table")
         dummy_to_sql = mocker.patch.object(dummy_dataframe, "to_sql")
         kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
 
-        first = SQLTableDataSet(**kwargs)
+        first = SQLTableDataset(**kwargs)
         assert not first.exists()  # Do something to create the `Engine`
         unique_connection = first.engines[CONNECTION]
-        datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
+        datasets = [SQLTableDataset(**kwargs) for _ in range(10)]
 
         for ds in datasets:
             ds.save(dummy_dataframe)
@@ -234,11 +247,11 @@ class TestSQLTableDataSetSingleConnection:
             "kedro_datasets.pandas.sql_dataset.inspect"
         ).return_value
         mock_inspector.has_table.return_value = False
-        first = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        first = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
         assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
-        second = SQLTableDataSet(
+        second = SQLTableDataset(
             table_name="other_table", credentials={"con": CONNECTION}
         )
         assert not second.exists()  # Do something to fetch the `Engine`
@@ -256,12 +269,12 @@ class TestSQLTableDataSetSingleConnection:
             "kedro_datasets.pandas.sql_dataset.inspect"
         ).return_value
         mock_inspector.has_table.return_value = False
-        first = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        first = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
         assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         second_con = f"other_{CONNECTION}"
-        second = SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": second_con})
+        second = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": second_con})
         assert not second.exists()  # Do something to create the `Engine`
         assert len(second.engines) == 2
         assert len(first.engines) == 2
@@ -270,15 +283,15 @@ class TestSQLTableDataSetSingleConnection:
         assert mock_engine.call_args_list == expected_calls
 
 
-class TestSQLQueryDataSet:
+class TestSQLQueryDataset:
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query or file"""
         pattern = (
             r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql="", filepath="", credentials={"con": CONNECTION})
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql="", filepath="", credentials={"con": CONNECTION})
 
     def test_empty_con_error(self):
         """Check the error when instantiating with empty connection string"""
@@ -286,22 +299,22 @@ class TestSQLQueryDataSet:
             r"'con' argument cannot be empty\. Please provide "
             r"a SQLAlchemy connection string"
         )
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": ""})
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": ""})
 
     @pytest.mark.parametrize(
-        "query_data_set, has_execution_options",
+        "query_dataset, has_execution_options",
         [
             ({"execution_options": EXECUTION_OPTIONS}, True),
             ({"execution_options": {}}, False),
             ({}, False),
         ],
-        indirect=["query_data_set"],
+        indirect=["query_dataset"],
     )
-    def test_load(self, mocker, query_data_set, has_execution_options):
+    def test_load(self, mocker, query_dataset, has_execution_options):
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
-        query_data_set.load()
+        query_dataset.load()
 
         # Check that data was loaded with the expected query, connection string and
         # execution options:
@@ -313,18 +326,18 @@ class TestSQLQueryDataSet:
             assert con_arg.get_execution_options() == EXECUTION_OPTIONS
 
     @pytest.mark.parametrize(
-        "query_file_data_set, has_execution_options",
+        "query_file_dataset, has_execution_options",
         [
             ({"execution_options": EXECUTION_OPTIONS}, True),
             ({"execution_options": {}}, False),
             ({}, False),
         ],
-        indirect=["query_file_data_set"],
+        indirect=["query_file_dataset"],
     )
-    def test_load_query_file(self, mocker, query_file_data_set, has_execution_options):
+    def test_load_query_file(self, mocker, query_file_dataset, has_execution_options):
         """Test `load` method with a query file"""
         mocker.patch("pandas.read_sql_query")
-        query_file_data_set.load()
+        query_file_dataset.load()
 
         # Check that data was loaded with the expected query, connection string and
         # execution options:
@@ -342,8 +355,8 @@ class TestSQLQueryDataSet:
         mocker.patch(
             "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
-        with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
+        with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_invalid_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -353,8 +366,8 @@ class TestSQLQueryDataSet:
             "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -364,37 +377,37 @@ class TestSQLQueryDataSet:
             "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_sql(self):
         """Check the error when unknown SQL dialect is provided
         in the connection string"""
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
 
-    def test_save_error(self, query_data_set, dummy_dataframe):
+    def test_save_error(self, query_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
-        pattern = r"'save' is not supported on SQLQueryDataSet"
-        with pytest.raises(DataSetError, match=pattern):
-            query_data_set.save(dummy_dataframe)
+        pattern = r"'save' is not supported on SQLQueryDataset"
+        with pytest.raises(DatasetError, match=pattern):
+            query_dataset.save(dummy_dataframe)
 
-    def test_str_representation_sql(self, query_data_set, sql_file):
+    def test_str_representation_sql(self, query_dataset, sql_file):
         """Test the data set instance string representation"""
-        str_repr = str(query_data_set)
+        str_repr = str(query_dataset)
         assert (
-            "SQLQueryDataSet(execution_options={}, filepath=None, "
+            "SQLQueryDataset(execution_options={}, filepath=None, "
             f"load_args={{}}, sql={SQL_QUERY})" in str_repr
         )
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr
 
-    def test_str_representation_filepath(self, query_file_data_set, sql_file):
+    def test_str_representation_filepath(self, query_file_dataset, sql_file):
         """Test the data set instance string representation with filepath arg."""
-        str_repr = str(query_file_data_set)
+        str_repr = str(query_file_dataset)
         assert (
-            f"SQLQueryDataSet(execution_options={{}}, filepath={str(sql_file)}, "
+            f"SQLQueryDataset(execution_options={{}}, filepath={str(sql_file)}, "
             "load_args={}, sql=None)" in str_repr
         )
         assert CONNECTION not in str_repr
@@ -406,27 +419,27 @@ class TestSQLQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(sql=SQL_QUERY, filepath=sql_file)
 
     def test_create_connection_only_once(self, mocker):
         """Test that two datasets that need to connect to the same db (but different
         tables and execution options, for example) only create a connection once.
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
-        first = SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        first = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
         assert len(first.engines) == 1
 
         # second engine has identical params to the first one
         # => no new engine should be created
-        second = SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        second = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
         mock_engine.assert_called_once_with(CONNECTION)
         assert second.engines == first.engines
         assert len(first.engines) == 1
 
         # third engine only differs by its query execution options
         # => no new engine should be created
-        third = SQLQueryDataSet(
+        third = SQLQueryDataset(
             sql="a different query",
             credentials={"con": CONNECTION},
             execution_options=EXECUTION_OPTIONS,
@@ -437,7 +450,7 @@ class TestSQLQueryDataSet:
 
         # fourth engine has a different connection string
         # => a new engine has to be created
-        fourth = SQLQueryDataSet(
+        fourth = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": "an other connection string"}
         )
         assert mock_engine.call_count == 2
@@ -449,10 +462,10 @@ class TestSQLQueryDataSet:
         function is called when mssql backend is used.
         """
         mock_adapt_mssql_date_params = mocker.patch(
-            "kedro_datasets.pandas.sql_dataset.SQLQueryDataSet.adapt_mssql_date_params"
+            "kedro_datasets.pandas.sql_dataset.SQLQueryDataset.adapt_mssql_date_params"
         )
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
-        ds = SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
+        ds = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
         mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1
@@ -467,7 +480,7 @@ class TestSQLQueryDataSet:
         load_args = {
             "params": ["2023-01-01", "2023-01-01T20:26", "2023", "test", 1.0, 100]
         }
-        ds = SQLQueryDataSet(
+        ds = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION}, load_args=load_args
         )
         assert ds._load_args["params"] == [
@@ -490,8 +503,8 @@ class TestSQLQueryDataSet:
             "Unrecognized `params` format. It can be only a `list`, "
             "got <class 'dict'>"
         )
-        with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            SQLQueryDataset(
                 sql=SQL_QUERY,
                 credentials={"con": MSSQL_CONNECTION},
                 load_args=load_args,

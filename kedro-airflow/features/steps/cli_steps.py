@@ -2,6 +2,7 @@
 
 import yaml
 from behave import given, then, when
+
 from features.steps.sh_run import run
 
 OK_EXIT_CODE = 0
@@ -85,9 +86,9 @@ def prepare_catalog(context):
 def install_kedro(context, version):
     """Execute Kedro command and check the status."""
     if version == "latest":
-        cmd = [context.pip, "install", "-U", "kedro[pandas]"]
+        cmd = [context.pip, "install", "-U", "kedro-datasets[PANDAS]"]
     else:
-        cmd = [context.pip, "install", "kedro[pandas]=={}".format(version)]
+        cmd = [context.pip, "install", f"kedro-datasets[PANDAS]=={version}"]
     res = run(cmd, env=context.env)
 
     if res.returncode != OK_EXIT_CODE:
@@ -121,7 +122,7 @@ def check_message_printed(context, msg):
     stdout = context.result.stdout
     assert msg in stdout, (
         "Expected the following message segment to be printed on stdout: "
-        "{exp_msg},\nbut got {actual_msg}".format(exp_msg=msg, actual_msg=stdout)
+        f"{msg},\nbut got {stdout}"
     )
 
 
@@ -187,6 +188,6 @@ def check_status_code(context):
     if context.result.returncode != OK_EXIT_CODE:
         print(context.result.stdout)
         print(context.result.stderr)
-        assert False, "Expected exit code {}" " but got {}".format(
-            OK_EXIT_CODE, context.result.returncode
+        raise AssertionError(
+            f"Expected exit code {OK_EXIT_CODE} but got {context.result.returncode}"
         )

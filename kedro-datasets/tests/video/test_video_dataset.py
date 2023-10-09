@@ -1,11 +1,18 @@
+import importlib
+
 import boto3
 import pytest
-from kedro.io import DataSetError
 from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 
-from kedro_datasets.video import VideoDataSet
-from kedro_datasets.video.video_dataset import FileVideo, SequenceVideo
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.video import VideoDataset
+from kedro_datasets.video.video_dataset import (
+    _DEPRECATED_CLASSES,
+    FileVideo,
+    SequenceVideo,
+)
 
 S3_BUCKET_NAME = "test_bucket"
 S3_KEY_PATH = "video"
@@ -25,12 +32,12 @@ def tmp_filepath_avi(tmp_path):
 
 @pytest.fixture
 def empty_dataset_mp4(tmp_filepath_mp4):
-    return VideoDataSet(filepath=tmp_filepath_mp4)
+    return VideoDataset(filepath=tmp_filepath_mp4)
 
 
 @pytest.fixture
 def empty_dataset_avi(tmp_filepath_avi):
-    return VideoDataSet(filepath=tmp_filepath_avi)
+    return VideoDataset(filepath=tmp_filepath_avi)
 
 
 @pytest.fixture
@@ -47,10 +54,21 @@ def mocked_s3_bucket():
         yield conn
 
 
-class TestVideoDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.video", "kedro_datasets.video.video_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestVideoDataset:
     def test_load_mp4(self, filepath_mp4, mp4_object):
         """Loading a mp4 dataset should create a FileVideo"""
-        ds = VideoDataSet(filepath_mp4)
+        ds = VideoDataset(filepath_mp4)
         loaded_video = ds.load()
         assert_videos_equal(loaded_video, mp4_object)
 
@@ -67,14 +85,14 @@ class TestVideoDataSet:
     def test_save_with_other_codec(self, tmp_filepath_mp4, mp4_object):
         """Test saving the video with another codec than default."""
         save_fourcc = "xvid"
-        ds = VideoDataSet(filepath=tmp_filepath_mp4, fourcc=save_fourcc)
+        ds = VideoDataset(filepath=tmp_filepath_mp4, fourcc=save_fourcc)
         ds.save(mp4_object)
         reloaded_video = ds.load()
         assert reloaded_video.fourcc == save_fourcc
 
     def test_save_with_derived_codec(self, tmp_filepath_mp4, color_video):
         """Test saving video by the codec specified in the video object"""
-        ds = VideoDataSet(filepath=tmp_filepath_mp4, fourcc=None)
+        ds = VideoDataset(filepath=tmp_filepath_mp4, fourcc=None)
         ds.save(color_video)
         reloaded_video = ds.load()
         assert reloaded_video.fourcc == color_video.fourcc
@@ -120,15 +138,15 @@ class TestVideoDataSet:
 
     def test_load_missing_file(self, empty_dataset_mp4):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set VideoDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Failed while loading data from data set VideoDataset\(.*\)"
+        with pytest.raises(DatasetError, match=pattern):
             empty_dataset_mp4.load()
 
     def test_save_s3(self, mp4_object, mocked_s3_bucket, tmp_path):
-        """Test to save a VideoDataSet to S3 storage"""
+        """Test to save a VideoDataset to S3 storage"""
         video_name = "video.mp4"
 
-        dataset = VideoDataSet(
+        dataset = VideoDataset(
             filepath=S3_FULL_PATH + video_name, credentials=AWS_CREDENTIALS
         )
         dataset.save(mp4_object)
@@ -177,7 +195,7 @@ class TestVideoDataSet:
         """
         video_name = f"video.{suffix}"
         video = SequenceVideo(color_video._frames, 25, fourcc)
-        ds = VideoDataSet(video_name, fourcc=None)
+        ds = VideoDataset(video_name, fourcc=None)
         ds.save(video)
         # We also need to verify that the correct codec was used
         # since OpenCV silently (with a warning in the log) fall backs to

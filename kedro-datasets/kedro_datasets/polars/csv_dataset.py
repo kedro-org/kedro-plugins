@@ -1,7 +1,8 @@
-"""``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
+"""``CSVDataset`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 """
 import logging
+import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -16,50 +17,50 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from .._io import AbstractVersionedDataset as AbstractVersionedDataSet
-from .._io import DatasetError as DataSetError
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
 
-class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
-    """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
+class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
+    """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: polars.CSVDataSet
-        >>>   filepath: data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     parse_dates: False
-        >>>   save_args:
-        >>>     has_header: False
-                null_value: "somenullstring"
-        >>>
-        >>> motorbikes:
-        >>>   type: polars.CSVDataSet
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        >>>   credentials: dev_s3
+        cars:
+          type: polars.CSVDataset
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            parse_dates: False
+          save_args:
+            has_header: False
+            null_value: "somenullstring"
 
-    Example using Python API:
+        motorbikes:
+          type: polars.CSVDataset
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.polars import CSVDataSet
+        >>> from kedro_datasets.polars import CSVDataset
         >>> import polars as pl
         >>>
         >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        ...                      'col3': [5, 6]})
         >>>
-        >>> data_set = CSVDataSet(filepath="test.csv")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = CSVDataset(filepath='test.csv')
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)
 
     """
@@ -67,8 +68,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {"rechunk": True}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -78,7 +78,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
+        """Creates a new instance of ``CSVDataset`` pointing to a concrete CSV file
         on a specific filesystem.
 
         Args:
@@ -182,7 +182,7 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -195,3 +195,21 @@ class CSVDataSet(AbstractVersionedDataSet[pl.DataFrame, pl.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "CSVDataSet": CSVDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

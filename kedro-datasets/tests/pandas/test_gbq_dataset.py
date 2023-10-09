@@ -1,12 +1,15 @@
+import importlib
 from pathlib import PosixPath
 
 import pandas as pd
 import pytest
 from google.cloud.exceptions import NotFound
-from kedro.io.core import DataSetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets.pandas import GBQQueryDataSet, GBQTableDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.pandas import GBQQueryDataset, GBQTableDataset
+from kedro_datasets.pandas.gbq_dataset import _DEPRECATED_CLASSES
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"
@@ -26,10 +29,8 @@ def mock_bigquery_client(mocker):
 
 
 @pytest.fixture
-def gbq_dataset(
-    load_args, save_args, mock_bigquery_client
-):  # pylint: disable=unused-argument
-    return GBQTableDataSet(
+def gbq_dataset(load_args, save_args, mock_bigquery_client):
+    return GBQTableDataset(
         dataset=DATASET,
         table_name=TABLE_NAME,
         project=PROJECT,
@@ -40,8 +41,8 @@ def gbq_dataset(
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_dataset(load_args, mock_bigquery_client):  # pylint: disable=unused-argument
-    return GBQQueryDataSet(
+def gbq_sql_dataset(load_args, mock_bigquery_client):
+    return GBQQueryDataset(
         sql=SQL_QUERY,
         project=PROJECT,
         credentials=None,
@@ -57,10 +58,8 @@ def sql_file(tmp_path: PosixPath):
 
 
 @pytest.fixture(params=[{}])
-def gbq_sql_file_dataset(
-    load_args, sql_file, mock_bigquery_client
-):  # pylint: disable=unused-argument
-    return GBQQueryDataSet(
+def gbq_sql_file_dataset(load_args, sql_file, mock_bigquery_client):
+    return GBQQueryDataset(
         filepath=sql_file,
         project=PROJECT,
         credentials=None,
@@ -68,7 +67,18 @@ def gbq_sql_file_dataset(
     )
 
 
-class TestGBQDataSet:
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.gbq_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
+class TestGBQDataset:
     def test_exists(self, mock_bigquery_client):
         """Test `exists` method invocation."""
         mock_bigquery_client.return_value.get_table.side_effect = [
@@ -76,9 +86,9 @@ class TestGBQDataSet:
             "exists",
         ]
 
-        data_set = GBQTableDataSet(DATASET, TABLE_NAME)
-        assert not data_set.exists()
-        assert data_set.exists()
+        dataset = GBQTableDataset(DATASET, TABLE_NAME)
+        assert not dataset.exists()
+        assert dataset.exists()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
@@ -98,10 +108,10 @@ class TestGBQDataSet:
 
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
-        pattern = r"Failed while loading data from data set GBQTableDataSet\(.*\)"
+        pattern = r"Failed while loading data from data set GBQTableDataset\(.*\)"
         mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
         mocked_read_gbq.side_effect = ValueError
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             gbq_dataset.load()
 
     @pytest.mark.parametrize("load_args", [{"location": "l1"}], indirect=True)
@@ -110,8 +120,8 @@ class TestGBQDataSet:
         """Check the error when initializing instance if save_args and load_args
         'location' are different."""
         pattern = r""""load_args\['location'\]" is different from "save_args\['location'\]"."""
-        with pytest.raises(DataSetError, match=pattern):
-            GBQTableDataSet(
+        with pytest.raises(DatasetError, match=pattern):
+            GBQTableDataset(
                 dataset=DATASET,
                 table_name=TABLE_NAME,
                 project=PROJECT,
@@ -125,7 +135,7 @@ class TestGBQDataSet:
     def test_str_representation(self, gbq_dataset, save_args, load_args):
         """Test string representation of the data set instance."""
         str_repr = str(gbq_dataset)
-        assert "GBQTableDataSet" in str_repr
+        assert "GBQTableDataset" in str_repr
         assert TABLE_NAME in str_repr
         assert DATASET in str_repr
         for k in save_args.keys():
@@ -176,8 +186,8 @@ class TestGBQDataSet:
     )
     def test_validation_of_dataset_and_table_name(self, dataset, table_name):
         pattern = "Neither white-space nor semicolon are allowed.*"
-        with pytest.raises(DataSetError, match=pattern):
-            GBQTableDataSet(dataset=dataset, table_name=table_name)
+        with pytest.raises(DatasetError, match=pattern):
+            GBQTableDataset(dataset=dataset, table_name=table_name)
 
     def test_credentials_propagation(self, mocker):
         credentials = {"token": "my_token"}
@@ -188,29 +198,29 @@ class TestGBQDataSet:
         )
         mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
-        data_set = GBQTableDataSet(
+        dataset = GBQTableDataset(
             dataset=DATASET,
             table_name=TABLE_NAME,
             credentials=credentials,
             project=PROJECT,
         )
 
-        assert data_set._credentials == credentials_obj
+        assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
         )
 
 
-class TestGBQQueryDataSet:
+class TestGBQQueryDataset:
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query or file"""
         pattern = (
             r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
-        with pytest.raises(DataSetError, match=pattern):
-            GBQQueryDataSet(sql="", filepath="", credentials=None)
+        with pytest.raises(DatasetError, match=pattern):
+            GBQQueryDataset(sql="", filepath="", credentials=None)
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
@@ -229,13 +239,13 @@ class TestGBQQueryDataSet:
         )
         mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
-        data_set = GBQQueryDataSet(
+        dataset = GBQQueryDataset(
             sql=SQL_QUERY,
             credentials=credentials,
             project=PROJECT,
         )
 
-        assert data_set._credentials == credentials_obj
+        assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
@@ -269,15 +279,15 @@ class TestGBQQueryDataSet:
 
     def test_save_error(self, gbq_sql_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
-        pattern = r"'save' is not supported on GBQQueryDataSet"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"'save' is not supported on GBQQueryDataset"
+        with pytest.raises(DatasetError, match=pattern):
             gbq_sql_dataset.save(dummy_dataframe)
 
     def test_str_representation_sql(self, gbq_sql_dataset, sql_file):
         """Test the data set instance string representation"""
         str_repr = str(gbq_sql_dataset)
         assert (
-            f"GBQQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            f"GBQQueryDataset(filepath=None, load_args={{}}, sql={SQL_QUERY})"
             in str_repr
         )
         assert sql_file not in str_repr
@@ -286,7 +296,7 @@ class TestGBQQueryDataSet:
         """Test the data set instance string representation with filepath arg."""
         str_repr = str(gbq_sql_file_dataset)
         assert (
-            f"GBQQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            f"GBQQueryDataset(filepath={str(sql_file)}, load_args={{}}, sql=None)"
             in str_repr
         )
         assert SQL_QUERY not in str_repr
@@ -297,5 +307,5 @@ class TestGBQQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
-        with pytest.raises(DataSetError, match=pattern):
-            GBQQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
+        with pytest.raises(DatasetError, match=pattern):
+            GBQQueryDataset(sql=SQL_QUERY, filepath=sql_file)

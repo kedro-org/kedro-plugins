@@ -1,9 +1,11 @@
-from unittest import mock
+import importlib
 
 import pytest
-from kedro.io import DataSetError
 
-from kedro_datasets.spark import SparkJDBCDataSet
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import DatasetError
+from kedro_datasets.spark import SparkJDBCDataset
+from kedro_datasets.spark.spark_jdbc_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -35,13 +37,24 @@ def spark_jdbc_args_save_load(spark_jdbc_args):
     return args
 
 
+@pytest.mark.parametrize(
+    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_jdbc_dataset"]
+)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
+        getattr(importlib.import_module(module_name), class_name)
+
+
 def test_missing_url():
     error_message = (
         "'url' argument cannot be empty. Please provide a JDBC"
         " URL of the form 'jdbc:subprotocol:subname'."
     )
-    with pytest.raises(DataSetError, match=error_message):
-        SparkJDBCDataSet(url=None, table="dummy_table")
+    with pytest.raises(DatasetError, match=error_message):
+        SparkJDBCDataset(url=None, table="dummy_table")
 
 
 def test_missing_table():
@@ -49,61 +62,56 @@ def test_missing_table():
         "'table' argument cannot be empty. Please provide"
         " the name of the table to load or save data to."
     )
-    with pytest.raises(DataSetError, match=error_message):
-        SparkJDBCDataSet(url="dummy_url", table=None)
+    with pytest.raises(DatasetError, match=error_message):
+        SparkJDBCDataset(url="dummy_url", table=None)
 
 
-def mock_save(arg_dict):
-    mock_data = mock.Mock()
-    data_set = SparkJDBCDataSet(**arg_dict)
-    data_set.save(mock_data)
-    return mock_data
+def test_save(mocker, spark_jdbc_args):
+    mock_data = mocker.Mock()
+    dataset = SparkJDBCDataset(**spark_jdbc_args)
+    dataset.save(mock_data)
+    mock_data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
-def test_save(spark_jdbc_args):
-    data = mock_save(spark_jdbc_args)
-    data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
-
-
-def test_save_credentials(spark_jdbc_args_credentials):
-    data = mock_save(spark_jdbc_args_credentials)
-    data.write.jdbc.assert_called_with(
+def test_save_credentials(mocker, spark_jdbc_args_credentials):
+    mock_data = mocker.Mock()
+    dataset = SparkJDBCDataset(**spark_jdbc_args_credentials)
+    dataset.save(mock_data)
+    mock_data.write.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
         properties={"user": "dummy_user", "password": "dummy_pw"},
     )
 
 
-def test_save_args(spark_jdbc_args_save_load):
-    data = mock_save(spark_jdbc_args_save_load)
-    data.write.jdbc.assert_called_with(
+def test_save_args(mocker, spark_jdbc_args_save_load):
+    mock_data = mocker.Mock()
+    dataset = SparkJDBCDataset(**spark_jdbc_args_save_load)
+    dataset.save(mock_data)
+    mock_data.write.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
 
 
-def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
+def test_except_bad_credentials(mocker, spark_jdbc_args_credentials_with_none_password):
     pattern = r"Credential property 'password' cannot be None(.+)"
-    with pytest.raises(DataSetError, match=pattern):
-        mock_save(spark_jdbc_args_credentials_with_none_password)
+    with pytest.raises(DatasetError, match=pattern):
+        mock_data = mocker.Mock()
+        dataset = SparkJDBCDataset(**spark_jdbc_args_credentials_with_none_password)
+        dataset.save(mock_data)
 
 
-@mock.patch("kedro_datasets.spark.spark_jdbc_dataset.SparkSession.builder.getOrCreate")
-def mock_load(mock_get_or_create, arg_dict):
-    spark = mock_get_or_create.return_value
-    data_set = SparkJDBCDataSet(**arg_dict)
-    data_set.load()
-    return spark
-
-
-def test_load(spark_jdbc_args):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args)
+def test_load(mocker, spark_jdbc_args):
+    spark = mocker.patch.object(SparkJDBCDataset, "_get_spark").return_value
+    dataset = SparkJDBCDataset(**spark_jdbc_args)
+    dataset.load()
     spark.read.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
-def test_load_credentials(spark_jdbc_args_credentials):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args_credentials)
+def test_load_credentials(mocker, spark_jdbc_args_credentials):
+    spark = mocker.patch.object(SparkJDBCDataset, "_get_spark").return_value
+    dataset = SparkJDBCDataset(**spark_jdbc_args_credentials)
+    dataset.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
@@ -111,9 +119,10 @@ def test_load_credentials(spark_jdbc_args_credentials):
     )
 
 
-def test_load_args(spark_jdbc_args_save_load):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args_save_load)
+def test_load_args(mocker, spark_jdbc_args_save_load):
+    spark = mocker.patch.object(SparkJDBCDataset, "_get_spark").return_value
+    dataset = SparkJDBCDataset(**spark_jdbc_args_save_load)
+    dataset.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )

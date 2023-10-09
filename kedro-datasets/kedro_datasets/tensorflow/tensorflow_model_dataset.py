@@ -1,41 +1,35 @@
-"""``TensorFlowModelDataSet`` is a data set implementation which can save and load
+"""``TensorFlowModelDataset`` is a dataset implementation which can save and load
 TensorFlow models.
 """
 import copy
 import tempfile
+import warnings
 from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-# TODO: Replace these imports by the appropriate ones from kedro_datasets._io
-# to avoid deprecation warnings for users,
-# see https://github.com/kedro-org/kedro-plugins/pull/255
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    DataSetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
 
-class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
-    """``TensorFlowModelDataSet`` loads and saves TensorFlow models.
+class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.Model]):
+    """``TensorFlowModelDataset`` loads and saves TensorFlow models.
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         tensorflow_model:
-          type: tensorflow.TensorFlowModelDataSet
+          type: tensorflow.TensorFlowModelDataset
           filepath: data/06_models/tensorflow_model.h5
           load_args:
             compile: False
@@ -46,19 +40,19 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
-        >>> from kedro_datasets.tensorflow import TensorFlowModelDataSet
+        >>> from kedro_datasets.tensorflow import TensorFlowModelDataset
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> data_set = TensorFlowModelDataSet("data/06_models/tensorflow_model.h5")
+        >>> dataset = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>
-        >>> data_set.save(model)
-        >>> loaded_model = data_set.load()
+        >>> dataset.save(model)
+        >>> loaded_model = dataset.load()
         >>> new_predictions = loaded_model.predict([...])
         >>> np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
@@ -67,8 +61,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"save_format": "tf"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -78,7 +71,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         fs_args: Dict[str, Any] = None,
         metadata: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``TensorFlowModelDataSet``.
+        """Creates a new instance of ``TensorFlowModelDataset``.
 
         Args:
             filepath: Filepath in POSIX format to a TensorFlow model directory prefixed with a
@@ -139,7 +132,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
                 self._fs.copy(load_path, path)
             else:
                 self._fs.get(load_path, path, recursive=True)
@@ -158,7 +151,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
 
             tf.keras.models.save_model(data, path, **self._save_args)
 
@@ -174,7 +167,7 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
         return self._fs.exists(load_path)
 
@@ -195,3 +188,23 @@ class TensorFlowModelDataSet(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+_DEPRECATED_CLASSES = {
+    "TensorFlowModelDataSet": TensorFlowModelDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro-Datasets 2.0.0",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(  # pragma: no cover
+        f"module {repr(__name__)} has no attribute {repr(name)}"
+    )

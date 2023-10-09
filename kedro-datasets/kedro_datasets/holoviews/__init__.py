@@ -1,8 +1,11 @@
-"""``AbstractDataSet`` implementation to save Holoviews objects as image files."""
+"""``AbstractDataset`` implementation to save Holoviews objects as image files."""
+from typing import Any
 
-__all__ = ["HoloviewsWriter"]
+import lazy_loader as lazy
 
-from contextlib import suppress
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+HoloviewsWriter: Any
 
-with suppress(ImportError):
-    from .holoviews_writer import HoloviewsWriter
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submod_attrs={"holoviews_writer": ["HoloviewsWriter"]}
+)

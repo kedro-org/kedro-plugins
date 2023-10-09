@@ -32,10 +32,12 @@ kedro airflow create
 
 This command will generate an Airflow DAG file located in the `airflow_dags/` directory in your project.
 You can pass a `--pipeline` flag to generate the DAG file for a specific Kedro pipeline and an `--env` flag to generate the DAG file for a specific Kedro environment.
+Passing `--all` will convert all registered Kedro pipelines to Airflow DAGs.
 
 ### Step 2: Copy the DAG file to the Airflow DAGs folder.
 
 For more information about the DAGs folder, please visit [Airflow documentation](https://airflow.apache.org/docs/stable/concepts.html#dags).
+The Airflow DAG configuration can be customized by editing this file.
 
 ### Step 3: Package and install the Kedro pipeline in the Airflow executor's environment
 
@@ -101,8 +103,9 @@ For instance, if you would like to use the name `scheduler`, then change the fil
 CONFIG_LOADER_ARGS = {
     "config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}
 }
+```
 
-Follow Kedro's official documentation, to see how to add templating, custom resolvers etc. (https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader)[https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader]
+Follow Kedro's [official documentation](https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader), to see how to add templating, custom resolvers etc.
 
 #### What if I want to pass different arguments?
 

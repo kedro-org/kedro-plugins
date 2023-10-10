@@ -127,19 +127,16 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import SQLTableDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
-        ...                      "col3": [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> table_name = "table_a"
-        >>> credentials = {
-        ...     "con": "postgresql://scott:tiger@localhost/test"
-        ... }
-        >>> data_set = SQLTableDataset(table_name=table_name,
-        ...                            credentials=credentials)
+        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
+        >>> data_set = SQLTableDataset(table_name=table_name, credentials=credentials)
         >>>
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
@@ -311,44 +308,48 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import SQLQueryDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
-        ...                      "col3": [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> sql = "SELECT * FROM table_a"
-        >>> credentials = {
-        ...     "con": "postgresql://scott:tiger@localhost/test"
-        ... }
-        >>> data_set = SQLQueryDataset(sql=sql,
-        ...                            credentials=credentials)
+        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
+        >>> data_set = SQLQueryDataset(sql=sql, credentials=credentials)
         >>>
         >>> sql_data = data_set.load()
 
     Example of usage for mssql:
-    ::
+
+    .. code-block:: pycon
 
 
-        >>> credentials = {"server": "localhost", "port": "1433",
-        ...                "database": "TestDB", "user": "SA",
-        ...                "password": "StrongPassword"}
+        >>> credentials = {
+        ...     "server": "localhost",
+        ...     "port": "1433",
+        ...     "database": "TestDB",
+        ...     "user": "SA",
+        ...     "password": "StrongPassword",
+        ... }
         >>> def _make_mssql_connection_str(
-        ...    server: str, port: str, database: str, user: str, password: str
+        ...     server: str, port: str, database: str, user: str, password: str
         ... ) -> str:
-        ...    import pyodbc  # noqa
-        ...    from sqlalchemy.engine import URL  # noqa
-        ...
-        ...    driver = pyodbc.drivers()[-1]
-        ...    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
-        ...                      f"ENCRYPT=yes;UID={user};PWD={password};"
-        ...                      f"TrustServerCertificate=yes;")
-        ...    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        ...     import pyodbc  # noqa
+        ...     from sqlalchemy.engine import URL  # noqa
+        ...     driver = pyodbc.drivers()[-1]
+        ...     connection_str = (
+        ...         f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+        ...         f"ENCRYPT=yes;UID={user};PWD={password};"
+        ...         f"TrustServerCertificate=yes;"
+        ...     )
+        ...     return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
         ...
         >>> connection_str = _make_mssql_connection_str(**credentials)
-        >>> data_set = SQLQueryDataset(credentials={"con": connection_str},
-        ...                            sql="SELECT TOP 5 * FROM TestTable;")
+        >>> data_set = SQLQueryDataset(
+        ...     credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
+        ... )
         >>> df = data_set.load()
 
     In addition, here is an example of a catalog with dates parsing:

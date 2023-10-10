@@ -203,21 +203,21 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import (StructField, StringType,
-        ...                                IntegerType, StructType)
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
         >>>
         >>> from kedro_datasets.spark import SparkDataset
         >>>
-        >>> schema = StructType([StructField("name", StringType(), True),
-        ...                      StructField("age", IntegerType(), True)])
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
         >>>
-        >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
-        >>> spark_df = SparkSession.builder.getOrCreate()\
-        ...                        .createDataFrame(data, schema)
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> dataset = SparkDataset(filepath="test_data")
         >>> dataset.save(spark_df)

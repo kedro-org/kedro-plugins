@@ -22,7 +22,8 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.networkx import JSONDataset
         >>> import networkx as nx

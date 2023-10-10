@@ -18,7 +18,8 @@ class BioSequenceDataset(AbstractDataset[List, List]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.biosequence import BioSequenceDataset
         >>> from io import StringIO
@@ -28,10 +29,13 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         >>> raw_data = []
         >>> for record in SeqIO.parse(StringIO(data), "fasta"):
         ...     raw_data.append(record)
+        ...
         >>>
-        >>> dataset = BioSequenceDataset(filepath="ls_orchid.fasta",
-        ...                              load_args={"format": "fasta"},
-        ...                              save_args={"format": "fasta"})
+        >>> dataset = BioSequenceDataset(
+        ...     filepath="ls_orchid.fasta",
+        ...     load_args={"format": "fasta"},
+        ...     save_args={"format": "fasta"},
+        ... )
         >>> dataset.save(raw_data)
         >>> sequence_list = dataset.load()
         >>>

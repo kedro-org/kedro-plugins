@@ -38,24 +38,27 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> import pandas as pd
         >>> from kedro_datasets import SparkJBDCDataset
         >>> from pyspark.sql import SparkSession
         >>>
         >>> spark = SparkSession.builder.getOrCreate()
-        >>> data = spark.createDataFrame(pd.DataFrame({'col1': [1, 2],
-        ...                                            'col2': [4, 5],
-        ...                                            'col3': [5, 6]}))
-        >>> url = 'jdbc:postgresql://localhost/test'
-        >>> table = 'table_a'
-        >>> connection_properties = {'driver': 'org.postgresql.Driver'}
+        >>> data = spark.createDataFrame(
+        ...     pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        ... )
+        >>> url = "jdbc:postgresql://localhost/test"
+        >>> table = "table_a"
+        >>> connection_properties = {"driver": "org.postgresql.Driver"}
         >>> dataset = SparkJDBCDataset(
-        ...     url=url, table=table, credentials={'user': 'scott',
-        ...                                        'password': 'tiger'},
-        ...     load_args={'properties': connection_properties},
-        ...     save_args={'properties': connection_properties})
+        ...     url=url,
+        ...     table=table,
+        ...     credentials={"user": "scott", "password": "tiger"},
+        ...     load_args={"properties": connection_properties},
+        ...     save_args={"properties": connection_properties},
+        ... )
         >>>
         >>> dataset.save(data)
         >>> reloaded = dataset.load()

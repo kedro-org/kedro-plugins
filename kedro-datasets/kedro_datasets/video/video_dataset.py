@@ -220,24 +220,26 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.video import VideoDataset
         >>> import numpy as np
         >>>
-        >>> video = VideoDataset(filepath='/video/file/path.mp4').load()
+        >>> video = VideoDataset(filepath="/video/file/path.mp4").load()
         >>> frame = video[0]
         >>> np.sum(np.asarray(frame))
 
 
     Example creating a video from numpy frames using Python API:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.video.video_dataset import VideoDataset, SequenceVideo
         >>> import numpy as np
         >>> from PIL import Image
         >>>
-        >>> frame = np.ones((640,480,3), dtype=np.uint8) * 255
+        >>> frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
         >>> imgs = []
         >>> for i in range(255):
         ...     imgs.append(Image.fromarray(frame))
@@ -248,14 +250,15 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
 
     Example creating a video from numpy frames using a generator and the Python API:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.video.video_dataset import VideoDataset, GeneratorVideo
         >>> import numpy as np
         >>> from PIL import Image
         >>>
         >>> def gen():
-        ...     frame = np.ones((640,480,3), dtype=np.uint8) * 255
+        ...     frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
         ...     for i in range(255):
         ...         yield Image.fromarray(frame)
         ...         frame -= 1

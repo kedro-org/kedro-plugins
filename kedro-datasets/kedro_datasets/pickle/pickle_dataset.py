@@ -44,23 +44,25 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = PickleDataset(filepath="test.pkl", backend="pickle")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> dataset = PickleDataset(filepath="test.pickle.lz4",
-        ...                         backend="compress_pickle",
-        ...                         load_args={"compression":"lz4"},
-        ...                         save_args={"compression":"lz4"})
+        >>> dataset = PickleDataset(
+        ...     filepath="test.pickle.lz4",
+        ...     backend="compress_pickle",
+        ...     load_args={"compression": "lz4"},
+        ...     save_args={"compression": "lz4"},
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
@@ -108,6 +110,8 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
                 dill.load: https://dill.readthedocs.io/en/latest/index.html#dill.load
                 compress_pickle.load:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
+                cloudpickle.load:
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
@@ -116,6 +120,8 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
                 dill.dump: https://dill.readthedocs.io/en/latest/index.html#dill.dump
                 compress_pickle.dump:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
+                cloudpickle.dump:
+                https://github.com/cloudpipe/cloudpickle/blob/0f330b6afe55313fc1efc090a7d350f5ad5c9317/tests/cloudpickle_test.py
                 All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

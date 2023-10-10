@@ -18,7 +18,10 @@ from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from slugify import slugify
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
-If not set, the '__default__' pipeline is used."""
+If not set, the '__default__' pipeline is used. This argument supports
+passing multiple values using `--pipeline [p1] --pipeline [p2]`.
+Use the `--all` flag to convert all registered pipelines at once."""
+ALL_ARG_HELP = """Convert all registered pipelines at once."""
 
 
 @click.group(name="Kedro-Airflow")
@@ -32,7 +35,7 @@ def airflow_commands():
     pass
 
 
-def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
+def _load_config(context: KedroContext) -> dict[str, Any]:
     # Set the default pattern for `airflow` if not provided in `settings.py`
     if "airflow" not in context.config_loader.config_patterns.keys():
         context.config_loader.config_patterns.update(  # pragma: no cover
@@ -43,11 +46,13 @@ def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
 
     # Load the config
     try:
-        config_airflow = context.config_loader["airflow"]
+        return context.config_loader["airflow"]
     except MissingConfigException:
         # File does not exist
         return {}
 
+
+def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str):
     dag_config = {}
     # Load the default config if specified
     if "default" in config_airflow:
@@ -55,13 +60,23 @@ def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
     # Update with pipeline-specific config if present
     if pipeline_name in config_airflow:
         dag_config.update(config_airflow[pipeline_name])
+
+    # Update with params if provided
+    dag_config.update(params)
     return dag_config
 
 
 @airflow_commands.command()
 @click.option(
-    "-p", "--pipeline", "pipeline_name", default="__default__", help=PIPELINE_ARG_HELP
+    "-p",
+    "--pipeline",
+    "--pipelines",
+    "pipeline_names",
+    multiple=True,
+    default=("__default__",),
+    help=PIPELINE_ARG_HELP,
 )
+@click.option("--all", "convert_all", is_flag=True, help=ALL_ARG_HELP)
 @click.option("-e", "--env", default="local", help=ENV_HELP)
 @click.option(
     "-t",
@@ -90,21 +105,24 @@ def _load_config(context: KedroContext, pipeline_name: str) -> dict[str, Any]:
 @click.pass_obj
 def create(  # noqa: PLR0913
     metadata: ProjectMetadata,
-    pipeline_name,
+    pipeline_names,
     env,
     target_path,
     jinja_file,
     params,
+    convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
+    if convert_all and pipeline_names != ("__default__",):
+        raise click.BadParameter(
+            "The `--all` and `--pipeline` option are mutually exclusive."
+        )
+
     project_path = Path.cwd().resolve()
     bootstrap_project(project_path)
     with KedroSession.create(project_path=project_path, env=env) as session:
         context = session.load_context()
-        dag_config = _load_config(context, pipeline_name)
-
-        # Update with params if provided
-        dag_config.update(params)
+        config_airflow = _load_config(context)
 
     jinja_file = Path(jinja_file).resolve()
     loader = jinja2.FileSystemLoader(jinja_file.parent)
@@ -112,57 +130,52 @@ def create(  # noqa: PLR0913
     jinja_env.filters["slugify"] = slugify
     template = jinja_env.get_template(jinja_file.name)
 
+    dags_folder = Path(target_path)
+    # Ensure that the DAGs folder exists
+    dags_folder.mkdir(parents=True, exist_ok=True)
+    secho(f"Location of the Airflow DAG folder: {target_path!s}", fg="green")
+
     package_name = metadata.package_name
-    dag_filename = (
-        f"{package_name}_dag.py"
-        if pipeline_name == "__default__"
-        else f"{package_name}_{pipeline_name}_dag.py"
-    )
 
-    target_path = Path(target_path)
-    target_path = target_path / dag_filename
+    if convert_all:
+        # Convert all pipelines
+        conversion_pipelines = pipelines
+    else:
+        conversion_pipelines = {
+            pipeline_name: pipelines.get(pipeline_name)
+            for pipeline_name in pipeline_names
+        }
 
-    target_path.parent.mkdir(parents=True, exist_ok=True)
+    # Convert selected pipelines
+    for name, pipeline in conversion_pipelines.items():
+        dag_config = _get_pipeline_config(config_airflow, params, name)
 
-    pipeline = pipelines.get(pipeline_name)
-    if pipeline is None:
-        raise KedroCliError(f"Pipeline {pipeline_name} not found.")
+        if pipeline is None:
+            raise KedroCliError(f"Pipeline {name} not found.")
 
-    dependencies = defaultdict(list)
-    for node, parent_nodes in pipeline.node_dependencies.items():
-        for parent in parent_nodes:
-            dependencies[parent].append(node)
+        # Obtain the file name
+        dag_filename = dags_folder / (
+            f"{package_name}_dag.py"
+            if name == "__default__"
+            else f"{package_name}_{name}_dag.py"
+        )
 
-    template.stream(
-        dag_name=package_name,
-        dependencies=dependencies,
-        env=env,
-        pipeline_name=pipeline_name,
-        package_name=package_name,
-        pipeline=pipeline,
-        **dag_config,
-    ).dump(str(target_path))
+        dependencies = defaultdict(list)
+        for node, parent_nodes in pipeline.node_dependencies.items():
+            for parent in parent_nodes:
+                dependencies[parent].append(node)
 
-    secho("")
-    secho("An Airflow DAG has been generated in:", fg="green")
-    secho(str(target_path))
-    secho("This file should be copied to your Airflow DAG folder.", fg="yellow")
-    secho(
-        "The Airflow configuration can be customized by editing this file.",
-        fg="green",
-    )
-    secho("")
-    secho(
-        "This file also contains the path to the config directory, this directory will need to "
-        "be available to Airflow and any workers.",
-        fg="yellow",
-    )
-    secho("")
-    secho(
-        "Additionally all data sets must have an entry in the data catalog.",
-        fg="yellow",
-    )
-    secho(
-        "And all local paths in both the data catalog and log config must be absolute paths.",
-        fg="yellow",
-    )
+        template.stream(
+            dag_name=package_name,
+            dependencies=dependencies,
+            env=env,
+            pipeline_name=name,
+            package_name=package_name,
+            pipeline=pipeline,
+            **dag_config,
+        ).dump(str(dag_filename))
+
+        secho(
+            f"Converted pipeline `{name}` to Airflow DAG in the file `{dag_filename.name}`",
+            fg="green",
+        )

@@ -177,12 +177,13 @@ class ManagedTableDataset(AbstractVersionedDataset):
     .. code-block:: python
 
         from pyspark.sql import SparkSession
-        from pyspark.sql.types import (StructField, StringType,
-                                       IntegerType, StructType)
+        from pyspark.sql.types import StructField, StringType, IntegerType, StructType
         from kedro_datasets.databricks import ManagedTableDataset
-        schema = StructType([StructField("name", StringType(), True),
-                             StructField("age", IntegerType(), True)])
-        data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+
+        schema = StructType(
+            [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        )
+        data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         dataset = ManagedTableDataset(table="names_and_ages")
         dataset.save(spark_df)

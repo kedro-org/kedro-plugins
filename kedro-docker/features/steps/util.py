@@ -43,7 +43,7 @@ def wait_for(
     while time() <= end:
         try:
             retval = func(**kwargs)
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             if print_error:
                 print(err)
         else:

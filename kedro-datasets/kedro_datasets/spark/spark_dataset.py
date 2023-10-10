@@ -20,6 +20,7 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:
+    if len(split_) == 2:  # noqa: PLR2004
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -80,12 +81,12 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
         return dbutils
 
     try:
-        from pyspark.dbutils import DBUtils  # pylint: disable=import-outside-toplevel
+        from pyspark.dbutils import DBUtils
 
         dbutils = DBUtils(spark)
     except ImportError:
         try:
-            import IPython  # pylint: disable=import-outside-toplevel
+            import IPython
         except ImportError:
             pass
         else:
@@ -111,7 +112,7 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
     try:
         dbutils.fs.ls(file)
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         return False
 
 
@@ -202,21 +203,21 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import (StructField, StringType,
-        ...                                IntegerType, StructType)
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
         >>>
         >>> from kedro_datasets.spark import SparkDataset
         >>>
-        >>> schema = StructType([StructField("name", StringType(), True),
-        ...                      StructField("age", IntegerType(), True)])
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
         >>>
-        >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
-        >>> spark_df = SparkSession.builder.getOrCreate()\
-        ...                        .createDataFrame(data, schema)
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> dataset = SparkDataset(filepath="test_data")
         >>> dataset.save(spark_df)
@@ -233,7 +234,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments disable=too-many-locals
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",
@@ -439,7 +440,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

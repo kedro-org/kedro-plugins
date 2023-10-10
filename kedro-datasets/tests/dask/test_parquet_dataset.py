@@ -7,6 +7,7 @@ import pyarrow as pa
 import pytest
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.dask import ParquetDataset
 from kedro_datasets.dask.parquet_dataset import _DEPRECATED_CLASSES
@@ -54,7 +55,9 @@ def mocked_parquet_in_s3(mocked_s3_bucket, dummy_dd_dataframe):
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

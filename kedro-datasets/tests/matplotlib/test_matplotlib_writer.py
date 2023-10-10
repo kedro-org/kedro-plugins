@@ -27,7 +27,7 @@ def mock_single_plot():
 def mock_list_plot():
     plots_list = []
     colour = "red"
-    for index in range(5):  # pylint: disable=unused-variable
+    for index in range(5):
         plots_list.append(plt.figure())
         plt.plot([1, 2, 3], [4, 5, 6], color=colour)
     plt.close("all")
@@ -50,9 +50,7 @@ def overwrite(request):
 
 
 @pytest.fixture
-def plot_writer(
-    mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite
-):  # pylint: disable=unused-argument
+def plot_writer(mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite):
     return MatplotlibWriter(
         filepath=FULL_PATH,
         credentials=credentials,

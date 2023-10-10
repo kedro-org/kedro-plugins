@@ -153,6 +153,7 @@ extras_require["test"] = [
     "biopython~=1.73",
     "blacken-docs==1.9.2",
     "black~=22.0",
+    "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability

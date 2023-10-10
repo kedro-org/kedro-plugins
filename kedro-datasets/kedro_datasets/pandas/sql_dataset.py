@@ -155,8 +155,9 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
-
-    engines: dict[str, Engine] = {}
+    # using Any because of Sphinx but it should be
+    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
+    engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -377,7 +378,9 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
               date: "%Y-%m-%d %H:%M:%S.%f0 %z"
     """
 
-    engines: dict[str, Engine] = {}
+    # using Any because of Sphinx but it should be
+    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
+    engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,

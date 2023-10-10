@@ -21,7 +21,8 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     filesystem (e.g. local, S3, GCS).
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> import holoviews as hv
         >>> from kedro_datasets.holoviews import HoloviewsWriter

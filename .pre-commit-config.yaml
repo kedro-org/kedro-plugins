@@ -15,6 +15,15 @@ repos:
       - id: check-merge-conflict # Check for files that contain merge conflict strings.
       - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
 
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.16.0
+    hooks:
+    - id: blacken-docs
+      args:
+        - "--rst-literal-blocks"
+      additional_dependencies:
+        - black==22.12.0
+
   - repo: local
     hooks:
       - id: ruff-kedro-datasets

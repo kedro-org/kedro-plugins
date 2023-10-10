@@ -44,23 +44,25 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = PickleDataset(filepath="test.pkl", backend="pickle")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> dataset = PickleDataset(filepath="test.pickle.lz4",
-        ...                         backend="compress_pickle",
-        ...                         load_args={"compression":"lz4"},
-        ...                         save_args={"compression":"lz4"})
+        >>> dataset = PickleDataset(
+        ...     filepath="test.pickle.lz4",
+        ...     backend="compress_pickle",
+        ...     load_args={"compression": "lz4"},
+        ...     save_args={"compression": "lz4"},
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)

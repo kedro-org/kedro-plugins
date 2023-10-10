@@ -50,15 +50,15 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.polars import CSVDataset
         >>> import polars as pl
         >>>
-        >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = CSVDataset(filepath='test.csv')
+        >>> dataset = CSVDataset(filepath="test.csv")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)

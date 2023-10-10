@@ -76,6 +76,7 @@ class TestPickleDataset:
         [
             ("a", "pickle", None, None),
             (1, "dill", None, None),
+            (2, "cloudpickle", None, None),
             ("key", "compress_pickle", {"compression": "lz4"}, {"compression": "lz4"}),
         ],
         indirect=True,

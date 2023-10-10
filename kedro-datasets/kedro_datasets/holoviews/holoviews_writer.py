@@ -21,7 +21,8 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     filesystem (e.g. local, S3, GCS).
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> import holoviews as hv
         >>> from kedro_datasets.holoviews import HoloviewsWriter
@@ -35,8 +36,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"fmt": "png"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

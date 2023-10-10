@@ -10,6 +10,7 @@ import fsspec
 import yaml
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
@@ -30,11 +31,12 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.yaml import YAMLDataset
         >>>
-        >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
+        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
         >>>
         >>> dataset = YAMLDataset(filepath="test.yaml")
         >>> dataset.save(data)
@@ -45,8 +47,7 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"default_flow_style": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,
@@ -164,7 +165,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

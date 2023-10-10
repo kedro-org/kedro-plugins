@@ -12,6 +12,7 @@ from typing import Any, Dict
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
@@ -43,23 +44,25 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = PickleDataset(filepath="test.pkl", backend="pickle")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> dataset = PickleDataset(filepath="test.pickle.lz4",
-        ...                         backend="compress_pickle",
-        ...                         load_args={"compression":"lz4"},
-        ...                         save_args={"compression":"lz4"})
+        >>> dataset = PickleDataset(
+        ...     filepath="test.pickle.lz4",
+        ...     backend="compress_pickle",
+        ...     load_args={"compression": "lz4"},
+        ...     save_args={"compression": "lz4"},
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
@@ -68,8 +71,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments,too-many-locals
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         backend: str = "pickle",
@@ -257,7 +259,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

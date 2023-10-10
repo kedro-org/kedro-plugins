@@ -8,6 +8,7 @@ import pytest
 import redis
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.redis import PickleDataset
 from kedro_datasets.redis.redis_dataset import _DEPRECATED_CLASSES
@@ -63,7 +64,9 @@ def pickle_data_set(mocker, key, backend, load_args, save_args, redis_args):
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 
@@ -73,6 +76,7 @@ class TestPickleDataset:
         [
             ("a", "pickle", None, None),
             (1, "dill", None, None),
+            (2, "cloudpickle", None, None),
             ("key", "compress_pickle", {"compression": "lz4"}, {"compression": "lz4"}),
         ],
         indirect=True,

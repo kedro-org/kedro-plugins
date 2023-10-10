@@ -16,6 +16,7 @@ from moto import mock_s3
 from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.polars import CSVDataset
 from kedro_datasets.polars.csv_dataset import _DEPRECATED_CLASSES
@@ -95,7 +96,9 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe: pl.DataFrame):
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

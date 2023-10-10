@@ -13,6 +13,7 @@ from numpy import ndarray
 from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
@@ -67,7 +68,8 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.svmlight import SVMLightDataset
         >>> import numpy as np
@@ -86,8 +88,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -203,7 +204,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

@@ -375,7 +375,7 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
-class TestPartitionedDatasetS3:
+class TestIncrementalDatasetS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 

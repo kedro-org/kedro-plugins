@@ -17,9 +17,6 @@ from sqlalchemy.exc import NoSuchModuleError
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine.base import Engine
-
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
 KNOWN_PIP_INSTALL = {
@@ -224,7 +221,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> Engine:
+    def create_connection(cls, connection_str: str):
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
@@ -281,7 +278,6 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     It does not support save method so it is a read only data set.
     To save data to a SQL server use ``SQLTableDataset``.
-
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -476,7 +472,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> Engine:
+    def create_connection(cls, connection_str: str):
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.

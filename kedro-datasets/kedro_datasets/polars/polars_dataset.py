@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
 import logging
+import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path, PurePosixPath
@@ -72,8 +73,7 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
     DEFAULT_LOAD_ARGS: ClassVar[Dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[Dict[str, Any]] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         file_format: str,
@@ -252,6 +252,7 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
 
 _DEPRECATED_CLASSES = {
     "PolarsDataSet": PolarsDataset,

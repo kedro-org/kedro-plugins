@@ -6,7 +6,7 @@ import yaml
 from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from pytest import fixture
@@ -40,9 +40,9 @@ def fake_metadata(tmp_path):
 @fixture
 def fake_context(mocker):
     mock_context = mocker.Mock()
-    dummy_1 = MemoryDataSet()
-    dummy_2 = MemoryDataSet()
-    dummy_3 = MemoryDataSet()
+    dummy_1 = MemoryDataset()
+    dummy_2 = MemoryDataset()
+    dummy_3 = MemoryDataset()
     mock_context.catalog = DataCatalog(
         {"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3}
     )

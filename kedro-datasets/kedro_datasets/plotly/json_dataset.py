@@ -36,7 +36,8 @@ class JSONDataset(
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.plotly import JSONDataset
         >>> import plotly.express as px

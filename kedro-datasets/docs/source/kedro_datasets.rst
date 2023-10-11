@@ -59,6 +59,8 @@ kedro_datasets
    kedro_datasets.pandas.SQLTableDataset
    kedro_datasets.pandas.XMLDataSet
    kedro_datasets.pandas.XMLDataset
+   kedro_datasets.partitions.IncrementalDataset
+   kedro_datasets.partitions.PartitionedDataset
    kedro_datasets.pickle.PickleDataSet
    kedro_datasets.pickle.PickleDataset
    kedro_datasets.pillow.ImageDataSet

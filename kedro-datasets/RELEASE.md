@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 * Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+* Added `NetCDFDataSet` for loading and saving `*.nc` files.
 
 ## Bug fixes and other changes
 * Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.

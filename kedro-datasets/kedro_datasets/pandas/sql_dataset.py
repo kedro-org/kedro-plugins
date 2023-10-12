@@ -12,6 +12,7 @@ from kedro.io.core import get_filepath_str, get_protocol_and_path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
@@ -126,19 +127,16 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import SQLTableDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
-        ...                      "col3": [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> table_name = "table_a"
-        >>> credentials = {
-        ...     "con": "postgresql://scott:tiger@localhost/test"
-        ... }
-        >>> data_set = SQLTableDataset(table_name=table_name,
-        ...                            credentials=credentials)
+        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
+        >>> data_set = SQLTableDataset(table_name=table_name, credentials=credentials)
         >>>
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
@@ -153,8 +151,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table_name: str,
         credentials: Dict[str, Any],
@@ -311,44 +308,48 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import SQLQueryDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
-        ...                      "col3": [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> sql = "SELECT * FROM table_a"
-        >>> credentials = {
-        ...     "con": "postgresql://scott:tiger@localhost/test"
-        ... }
-        >>> data_set = SQLQueryDataset(sql=sql,
-        ...                            credentials=credentials)
+        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
+        >>> data_set = SQLQueryDataset(sql=sql, credentials=credentials)
         >>>
         >>> sql_data = data_set.load()
 
     Example of usage for mssql:
-    ::
+
+    .. code-block:: pycon
 
 
-        >>> credentials = {"server": "localhost", "port": "1433",
-        ...                "database": "TestDB", "user": "SA",
-        ...                "password": "StrongPassword"}
+        >>> credentials = {
+        ...     "server": "localhost",
+        ...     "port": "1433",
+        ...     "database": "TestDB",
+        ...     "user": "SA",
+        ...     "password": "StrongPassword",
+        ... }
         >>> def _make_mssql_connection_str(
-        ...    server: str, port: str, database: str, user: str, password: str
+        ...     server: str, port: str, database: str, user: str, password: str
         ... ) -> str:
-        ...    import pyodbc  # noqa
-        ...    from sqlalchemy.engine import URL  # noqa
-        ...
-        ...    driver = pyodbc.drivers()[-1]
-        ...    connection_str = (f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
-        ...                      f"ENCRYPT=yes;UID={user};PWD={password};"
-        ...                      f"TrustServerCertificate=yes;")
-        ...    return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        ...     import pyodbc  # noqa
+        ...     from sqlalchemy.engine import URL  # noqa
+        ...     driver = pyodbc.drivers()[-1]
+        ...     connection_str = (
+        ...         f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+        ...         f"ENCRYPT=yes;UID={user};PWD={password};"
+        ...         f"TrustServerCertificate=yes;"
+        ...     )
+        ...     return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
         ...
         >>> connection_str = _make_mssql_connection_str(**credentials)
-        >>> data_set = SQLQueryDataset(credentials={"con": connection_str},
-        ...                            sql="SELECT TOP 5 * FROM TestTable;")
+        >>> data_set = SQLQueryDataset(
+        ...     credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
+        ... )
         >>> df = data_set.load()
 
     In addition, here is an example of a catalog with dates parsing:
@@ -376,7 +377,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         credentials: Dict[str, Any] = None,
@@ -509,7 +510,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: None) -> NoReturn:  # pylint: disable=no-self-use
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on SQLQueryDataset")
 
     # For mssql only
@@ -548,7 +549,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

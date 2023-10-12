@@ -9,6 +9,7 @@ import fsspec
 import triad
 from kedro.io.core import get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 
 
@@ -36,25 +37,25 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro.extras.datasets.dask import ParquetDataset
         >>> import pandas as pd
         >>> import dask.dataframe as dd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [[5, 6], [7, 8]]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> dataset = ParquetDataset(
         ...     filepath="s3://bucket_name/path/to/folder",
         ...     credentials={
-        ...         'client_kwargs':{
-        ...             'aws_access_key_id': 'YOUR_KEY',
-        ...             'aws_secret_access_key': 'YOUR SECRET',
+        ...         "client_kwargs": {
+        ...             "aws_access_key_id": "YOUR_KEY",
+        ...             "aws_secret_access_key": "YOUR SECRET",
         ...         }
         ...     },
-        ...     save_args={"compression": "GZIP"}
+        ...     save_args={"compression": "GZIP"},
         ... )
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
@@ -88,8 +89,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -223,7 +223,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

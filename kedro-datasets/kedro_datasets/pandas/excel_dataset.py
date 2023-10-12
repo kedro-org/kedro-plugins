@@ -17,6 +17,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -55,13 +56,13 @@ class ExcelDataset(
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import ExcelDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = ExcelDataset(filepath="test.xlsx")
         >>> dataset.save(data)
@@ -89,16 +90,16 @@ class ExcelDataset(
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_
     for a multi-sheet Excel file:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import ExcelDataset
         >>> import pandas as pd
         >>>
-        >>> dataframe = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> dataframe = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
         >>> multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
-        >>> dataset = ExcelDataset(filepath="test.xlsx", load_args = {"sheet_name": None})
+        >>> dataset = ExcelDataset(filepath="test.xlsx", load_args={"sheet_name": None})
         >>> dataset.save(multiframe)
         >>> reloaded = dataset.load()
         >>> assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
@@ -109,8 +110,7 @@ class ExcelDataset(
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         engine: str = "openpyxl",
@@ -232,7 +232,6 @@ class ExcelDataset(
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(output, **self._writer_args) as writer:
             if isinstance(data, dict):
                 for sheet_name, sheet_data in data.items():
@@ -267,7 +266,7 @@ class ExcelDataset(
     def _preview(self, nrows: int = 40) -> Dict:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows  # pylint: disable=protected-access
+        dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")
@@ -284,7 +283,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

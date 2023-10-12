@@ -1,10 +1,10 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 import rioxarray
 import xarray as xr
 from kedro.io.core import Version
-
 from kedro_datasets._io import DatasetError
 from kedro_datasets.xarray import GeoTiffDataset
 
@@ -58,3 +58,18 @@ def test_save_and_load(geotiff_dataset, cog_xarray):
     assert reloaded.shape == cog_xarray.shape
     assert reloaded.dims == cog_xarray.dims
     assert reloaded.equals(cog_xarray)
+
+
+def test_example(tmp_path):
+    data = xr.DataArray(
+        np.random.randn(2, 3, 2),
+        dims=("band", "y", "x"),
+        coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
+    )
+    # Add spatial coordinates and CRS information
+    data = data.rio.write_crs("epsg:4326")
+    data = data.rio.set_spatial_dims("x", "y")
+    dataset = GeoTiffDataset(filepath=tmp_path.joinpath("test.tif").as_posix())
+    dataset.save(data)
+    reloaded = dataset.load()
+    xr.testing.assert_allclose(data, reloaded, rtol=1e-5)

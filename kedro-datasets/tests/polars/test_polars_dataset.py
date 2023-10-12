@@ -126,7 +126,7 @@ class TestPolarsDataSet:
 
     def test_load_missing_file(self, csv_data_set):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PolarsDataSet\(.*\)"
+        pattern = r"Failed while loading data from data set PolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_data_set.load()
 

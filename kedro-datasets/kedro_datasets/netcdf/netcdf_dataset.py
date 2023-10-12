@@ -64,17 +64,16 @@ class NetCDFDataSet(AbstractDataset):
         """
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
-        self._temppath = temppath
+        self._temppath = Path(temppath) if temppath is not None else None
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
         else:
-            if temppath is None:
+            if self._temppath is None:
                 raise ValueError(
                     "Need to set temppath in catalog if NetCDF file exists on remote "
                     + "filesystem"
                 )
-            self._temppath = Path(temppath)
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
 

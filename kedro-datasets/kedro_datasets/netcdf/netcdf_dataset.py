@@ -1,8 +1,8 @@
 """NetCDFDataSet loads and saves data to a local netcdf (.nc) file."""
 import logging
+import os
 from copy import deepcopy
 from glob import glob
-import os
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
@@ -26,8 +26,7 @@ class NetCDFDataSet(AbstractDataset):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa
         self,
         filepath: str,
         temppath: str = None,

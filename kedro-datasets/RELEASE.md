@@ -5,14 +5,14 @@
 * Added xarray.GeoTiffDataset to handle GeoTIFF files.
 
 ## Bug fixes and other changes
+* Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
 * Updated `PickleDataset` to explicitly mention `cloudpickle` support.
+
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [PtrBld](https://github.com/PtrBld)
-
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
+* [Alistair McKelvie](https://github.com/alamastor)
 * [Felix Wittmann](https://github.com/hfwittmann)
 
 # Release 1.7.1

@@ -10,9 +10,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [PtrBld](https://github.com/PtrBld)
-
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
+* [Alistair McKelvie](https://github.com/alamastor)
 * [Felix Wittmann](https://github.com/hfwittmann)
 
 # Release 1.7.1

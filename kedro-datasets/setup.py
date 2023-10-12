@@ -26,6 +26,7 @@ geopandas_require = {
 }
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+netcdf_require = {"netcdf.NetCDFDataSet": ["netcdf4>=1.6.4", "h5netcdf>=1.2.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
@@ -55,9 +56,11 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataSet": [POLARS],
-    "polars.GenericDataSet":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataSet": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
@@ -94,6 +97,7 @@ extras_require = {
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
     "matplotlib": _collect_requirements(matplotlib_require),
+    "netcdf": _collect_requirements(netcdf_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pickle": _collect_requirements(pickle_require),

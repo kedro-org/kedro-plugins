@@ -1,6 +1,8 @@
 """NetCDFDataSet loads and saves data to a local netcdf (.nc) file."""
 import logging
 from copy import deepcopy
+from glob import glob
+import os
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
@@ -102,7 +104,6 @@ class NetCDFDataSet(AbstractDataset):
             if is_multifile:
                 load_path = sorted(self._fs.glob(load_path))
 
-            # TODO: Add recursive=True for multiple files.
             self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{self._filepath.stem}.nc"
 
@@ -120,6 +121,9 @@ class NetCDFDataSet(AbstractDataset):
             raise DataSetError(
                 f"Saving {self.__class__.__name__} as a directory is not supported."
             )
+
+        if self._protocol != "file":
+            save_path = self._protocol + "://" + save_path
 
         bytes_buffer = data.to_netcdf(**self._save_args)
 
@@ -152,4 +156,7 @@ class NetCDFDataSet(AbstractDataset):
     def __del__(self):
         """Cleanup temporary directory"""
         if self._temppath is not None:
-            self._temppath.unlink(missing_ok=True)
+            temp_filepath = str(self._temppath) + "/" + self._filepath.stem
+            temp_files = glob(temp_filepath)
+            for file in temp_files:
+                os.remove(file)

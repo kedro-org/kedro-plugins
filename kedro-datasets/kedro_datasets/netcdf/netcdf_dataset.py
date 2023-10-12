@@ -64,6 +64,7 @@ class NetCDFDataSet(AbstractDataset):
         """
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
+        self._temppath = temppath
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
@@ -152,4 +153,5 @@ class NetCDFDataSet(AbstractDataset):
 
     def __del__(self):
         """Cleanup temporary directory"""
-        self._temppath.unlink(missing_ok=True)
+        if self._temppath is not None:
+            self._temppath.unlink(missing_ok=True)

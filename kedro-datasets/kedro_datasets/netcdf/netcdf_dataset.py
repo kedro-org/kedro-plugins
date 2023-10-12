@@ -123,6 +123,7 @@ class NetCDFDataSet(AbstractDataset):
             )
 
         if self._protocol != "file":
+            # `get_filepath_str` drops remote protocol prefix.
             save_path = self._protocol + "://" + save_path
 
         bytes_buffer = data.to_netcdf(**self._save_args)
@@ -156,7 +157,13 @@ class NetCDFDataSet(AbstractDataset):
     def __del__(self):
         """Cleanup temporary directory"""
         if self._temppath is not None:
+            logger.info("Deleting local temporary files.")
+            is_multifile = True if "*" in str(self._filepath.stem) else False
             temp_filepath = str(self._temppath) + "/" + self._filepath.stem
-            temp_files = glob(temp_filepath)
-            for file in temp_files:
-                os.remove(file)
+            if is_multifile:
+                temp_files = glob(temp_filepath)
+                for file in temp_files:
+                    os.remove(file)
+            else:
+                temp_filepath = temp_filepath + self._filepath.suffix
+                os.remove(temp_filepath)

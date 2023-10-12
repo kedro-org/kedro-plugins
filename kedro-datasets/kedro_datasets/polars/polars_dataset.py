@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 
 class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
     """``PolarsDataset`` loads/saves data from/to a data file using an
-    underlying filesystem (e.g.: local, S3, GCS). It uses polars to handle
-    the type of read/write target.
+    underlying filesystem (e.g.: local, S3, GCS). It uses Polars to handle
+    the type of read/write target. It uses lazy loading with Polars Lazy API, but it can
+    save both Lazy and Eager Polars DataFrames.
 
     Example adding a catalog entry with
     `YAML API
@@ -214,7 +215,6 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
                 f"'partition_cols'. Please use 'kedro.io.PartitionedDataset' instead."
             )
 
-        BytesIO()
         collected_data = None
         if isinstance(data, pl.LazyFrame):
             collected_data = data.collect()
@@ -252,21 +252,3 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "PolarsDataSet": PolarsDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

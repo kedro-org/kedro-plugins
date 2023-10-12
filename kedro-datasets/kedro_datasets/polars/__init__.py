@@ -10,7 +10,6 @@ CSVDataSet: type[CSVDataset]
 CSVDataset: Any
 GenericDataSet: type[GenericDataset]
 GenericDataset: Any
-PolarsDataSet: type[PolarsDataset]
 PolarsDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
@@ -18,6 +17,6 @@ __getattr__, __dir__, __all__ = lazy.attach(
     submod_attrs={
         "csv_dataset": ["CSVDataSet", "CSVDataset"],
         "generic_dataset": ["GenericDataSet", "GenericDataset"],
-        "polars_dataset": ["PolarsDataSet", "PolarsDataset"],
+        "polars_dataset": ["PolarsDataset"],
     },
 )

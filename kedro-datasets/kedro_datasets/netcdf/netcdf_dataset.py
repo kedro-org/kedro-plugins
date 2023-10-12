@@ -68,12 +68,11 @@ class NetCDFDataSet(AbstractDataset):
         protocol, path = get_protocol_and_path(filepath)
         if protocol == "file":
             self._fs_args.setdefault("auto_mkdir", True)
-        else:
-            if self._temppath is None:
-                raise ValueError(
-                    "Need to set temppath in catalog if NetCDF file exists on remote "
-                    + "filesystem"
-                )
+        elif protocol != "file" and self._temppath is None:
+            raise ValueError(
+                "Need to set temppath in catalog if NetCDF file exists on remote "
+                + "filesystem"
+            )
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
 

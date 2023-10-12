@@ -20,27 +20,27 @@ def init_airflow(context, home_dir):
 def prepare_old_catalog(context):
     config = {
         "example_train_x": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_train_x.pkl",
         },
         "example_train_y": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_train_y.pkl",
         },
         "example_test_x": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_test_x.pkl",
         },
         "example_test_y": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_test_y.pkl",
         },
         "example_model": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_model.pkl",
         },
         "example_predictions": {
-            "type": "PickleLocalDataSet",
+            "type": "PickleLocalDataset",
             "filepath": "data/02_intermediate/example_predictions.pkl",
         },
     }
@@ -53,27 +53,27 @@ def prepare_old_catalog(context):
 def prepare_catalog(context):
     config = {
         "example_train_x": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_train_x.pkl",
         },
         "example_train_y": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_train_y.pkl",
         },
         "example_test_x": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_test_x.pkl",
         },
         "example_test_y": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_test_y.pkl",
         },
         "example_model": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_model.pkl",
         },
         "example_predictions": {
-            "type": "pickle.PickleDataSet",
+            "type": "pickle.PickleDataset",
             "filepath": "data/02_intermediate/example_predictions.pkl",
         },
     }

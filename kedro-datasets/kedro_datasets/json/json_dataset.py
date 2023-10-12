@@ -34,11 +34,12 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.json import JSONDataset
         >>>
-        >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
+        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
         >>>
         >>> dataset = JSONDataset(filepath="test.json")
         >>> dataset.save(data)

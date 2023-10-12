@@ -1,9 +1,19 @@
 # Upcoming Release
 ## Major features and improvements
+* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+
 ## Bug fixes and other changes
 * Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
+* Updated `PickleDataset` to explicitly mention `cloudpickle` support.
 
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [PtrBld](https://github.com/PtrBld)
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Felix Wittmann](https://github.com/hfwittmann)
 
 # Release 1.7.1
 ## Bug fixes and other changes
@@ -11,8 +21,6 @@
 
 ## Upcoming deprecations for Kedro-Datasets 2.0.0
 * Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
-
-## Community contributions
 
 # Release 1.7.0:
 ## Major features and improvements

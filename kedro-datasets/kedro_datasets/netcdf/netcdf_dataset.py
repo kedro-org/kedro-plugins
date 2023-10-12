@@ -1,4 +1,4 @@
-"""NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+"""NetCDFDataSet loads and saves data to a local netcdf (.nc) file."""
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
@@ -13,7 +13,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class NetCDFDataSet(AbstractDataset):
@@ -34,7 +34,7 @@ class NetCDFDataSet(AbstractDataset):
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
     ):
-        """Creates a new instance of ``NetcdfDataSet`` pointing to a concrete NetCDF
+        """Creates a new instance of ``NetCDFDataSet`` pointing to a concrete NetCDF
         file on a specific filesystem
 
         Args:
@@ -96,7 +96,7 @@ class NetCDFDataSet(AbstractDataset):
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
         if self._protocol != "file":
-            log.info("Syncing remote NetCDF file to local storage.")
+            logger.info("Syncing remote NetCDF file to local storage.")
 
             # `get_filepath_str` drops remote protocol prefix.
             load_path = self._protocol + "://" + load_path

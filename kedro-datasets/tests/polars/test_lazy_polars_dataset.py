@@ -8,7 +8,7 @@ from kedro.io.core import PROTOCOL_DELIMITER
 from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.polars import PolarsDataset
+from kedro_datasets.polars import LazyPolarsDataset
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def filepath_pq(tmp_path):
 
 @pytest.fixture
 def csv_data_set(filepath_csv, load_args, save_args, fs_args):
-    return PolarsDataset(
+    return LazyPolarsDataset(
         filepath=filepath_csv,
         file_format="csv",
         load_args=load_args,
@@ -34,7 +34,7 @@ def csv_data_set(filepath_csv, load_args, save_args, fs_args):
 
 @pytest.fixture
 def pq_data_set(filepath_pq, load_args, save_args, fs_args):
-    return PolarsDataset(
+    return LazyPolarsDataset(
         filepath=filepath_pq,
         file_format="parquet",
         load_args=load_args,
@@ -48,12 +48,12 @@ def dummy_dataframe():
     return pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
-class TestPolarsDataset:
-    """Test class for PolarsDataset tests"""
+class TestLazyPolarsDataset:
+    """Test class for LazyPolarsDataset tests"""
 
     def test_save_and_csv_load(self, tmp_path, filepath_csv, dummy_dataframe):
         """Test saving and reloading the data set."""
-        data_set = PolarsDataset(filepath=filepath_csv, file_format="csv")
+        data_set = LazyPolarsDataset(filepath=filepath_csv, file_format="csv")
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded.collect())
@@ -64,7 +64,7 @@ class TestPolarsDataset:
 
     def test_save_and_parquet_load(self, tmp_path, filepath_pq, dummy_dataframe):
         """Test saving and reloading the data set."""
-        data_set = PolarsDataset(filepath=filepath_pq, file_format="parquet")
+        data_set = LazyPolarsDataset(filepath=filepath_pq, file_format="parquet")
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded.collect())
@@ -108,7 +108,7 @@ class TestPolarsDataset:
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
         filepath = str(tmp_path / "test.csv")
 
-        ds = PolarsDataset(
+        ds = LazyPolarsDataset(
             filepath=filepath,
             file_format="csv",
             load_args=load_args,
@@ -126,7 +126,7 @@ class TestPolarsDataset:
 
     def test_load_missing_file(self, csv_data_set):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PolarsDataset\(.*\)"
+        pattern = r"Failed while loading data from data set LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_data_set.load()
 
@@ -139,7 +139,7 @@ class TestPolarsDataset:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):
-        data_set = PolarsDataset(
+        data_set = LazyPolarsDataset(
             filepath=filepath, file_format="csv", credentials=credentials
         )
         assert isinstance(data_set._fs, instance_type)
@@ -152,7 +152,7 @@ class TestPolarsDataset:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
-        data_set = PolarsDataset(filepath=filepath, file_format="csv")
+        data_set = LazyPolarsDataset(filepath=filepath, file_format="csv")
         assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)

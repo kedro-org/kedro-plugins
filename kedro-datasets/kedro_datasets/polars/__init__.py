@@ -9,14 +9,19 @@ import lazy_loader as lazy
 CSVDataSet: type[CSVDataset]
 CSVDataset: Any
 GenericDataSet: type[GenericDataset]
-GenericDataset: Any
-PolarsDataset: Any
+GenericDataset: type[EagerPolarsDataset]
+EagerPolarsDataset: Any
+LazyPolarsDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "csv_dataset": ["CSVDataSet", "CSVDataset"],
-        "generic_dataset": ["GenericDataSet", "GenericDataset"],
-        "polars_dataset": ["PolarsDataset"],
+        "eager_polars_dataset": [
+            "EagerPolarsDataset",
+            "GenericDataSet",
+            "GenericDataset",
+        ],
+        "lazy_polars_dataset": ["LazyPolarsDataset"],
     },
 )

@@ -59,7 +59,7 @@ polars_require = {
     [
         POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
     ],
-    "polars.PolarsDataset":
+    "polars.LazyPolarsDataset":
     [
         POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
     ],

@@ -1,9 +1,8 @@
-"""``PolarsDataset`` loads/saves data from/to a data file using an underlying
+"""``LazyPolarsDataset`` loads/saves data from/to a data file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
 import logging
-import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path, PurePosixPath
@@ -27,8 +26,8 @@ PolarsFrame = Union[pl.LazyFrame, pl.DataFrame]
 logger = logging.getLogger(__name__)
 
 
-class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
-    """``PolarsDataset`` loads/saves data from/to a data file using an
+class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
+    """``LazyPolarsDataset`` loads/saves data from/to a data file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses Polars to handle
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can
     save both Lazy and Eager Polars DataFrames.
@@ -41,7 +40,7 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
     .. code-block:: yaml
 
         >>> cars:
-        >>>   type: polars.PolarsDataset
+        >>>   type: polars.LazyPolarsDataset
         >>>   filepath: data/01_raw/company/cars.csv
         >>>   load_args:
         >>>     sep: ","
@@ -51,20 +50,20 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
                 null_value: "somenullstring"
         >>>
         >>> motorbikes:
-        >>>   type: polars.PolarsDataset
+        >>>   type: polars.LazyPolarsDataset
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
 
     Example using Python API:
     ::
 
-        >>> from kedro_datasets.polars import PolarsDataset
+        >>> from kedro_datasets.polars import LazyPolarsDataset
         >>> import polars as pl
         >>>
         >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = PolarsDataset(filepath="test.csv")
+        >>> data_set = LazyPolarsDataset(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.frame_equal(reloaded)
@@ -85,7 +84,7 @@ class PolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         fs_args: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Creates a new instance of ``PolarsDataset`` pointing to a concrete
+        """Creates a new instance of ``LazyPolarsDataset`` pointing to a concrete
         data file on a specific filesystem.
 
         Args:

@@ -88,10 +88,11 @@ class NetCDFDataSet(AbstractDataset):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        # Determine if multiple NetCDF files are being loaded in.
+        self._is_multifile = True if "*" in str(self._filepath.stem) else False
+
     def _load(self) -> xr.Dataset:
         load_path = get_filepath_str(self._filepath, self._protocol)
-
-        is_multifile = True if "*" in str(load_path) else False
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
@@ -100,7 +101,7 @@ class NetCDFDataSet(AbstractDataset):
 
             # `get_filepath_str` drops remote protocol prefix.
             load_path = self._protocol + "://" + load_path
-            if is_multifile:
+            if self._is_multifile:
                 load_path = sorted(self._fs.glob(load_path))
 
             self._fs.get(load_path, f"{self._temppath}/")
@@ -146,7 +147,13 @@ class NetCDFDataSet(AbstractDataset):
         except DataSetError:
             return False
 
-        return self._fs.exists(load_path)
+        if self._is_multifile:
+            files = self._fs.glob(load_path)
+            exists = True if files else False
+        else:
+            exists = self._fs.exists(load_path)
+
+        return exists
 
     def _invalidate_cache(self):
         """Invalidate underlying filesystem caches."""
@@ -157,9 +164,8 @@ class NetCDFDataSet(AbstractDataset):
         """Cleanup temporary directory"""
         if self._temppath is not None:
             logger.info("Deleting local temporary files.")
-            is_multifile = True if "*" in str(self._filepath.stem) else False
             temp_filepath = str(self._temppath) + "/" + self._filepath.stem
-            if is_multifile:
+            if self._is_multifile:
                 temp_files = glob(temp_filepath)
                 for file in temp_files:
                     os.remove(file)

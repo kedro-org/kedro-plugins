@@ -115,23 +115,24 @@ class NetCDFDataSet(AbstractDataset):
         return data
 
     def _save(self, data: xr.Dataset):
-        save_path = get_filepath_str(self._filepath, self._protocol)
-
-        if Path(save_path).is_dir():
+        if self._is_multifile:
             raise DataSetError(
-                f"Saving {self.__class__.__name__} as a directory is not supported."
+                "Globbed multifile datasets with '*' in filepath cannot be saved. "
+                + "Create an alternate NetCDFDataset with a single .nc output file."
             )
+        else:
+            save_path = get_filepath_str(self._filepath, self._protocol)
 
-        if self._protocol != "file":
-            # `get_filepath_str` drops remote protocol prefix.
-            save_path = self._protocol + "://" + save_path
+            if self._protocol != "file":
+                # `get_filepath_str` drops remote protocol prefix.
+                save_path = self._protocol + "://" + save_path
 
-        bytes_buffer = data.to_netcdf(**self._save_args)
+            bytes_buffer = data.to_netcdf(**self._save_args)
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
-            fs_file.write(bytes_buffer)
+            with self._fs.open(save_path, mode="wb") as fs_file:
+                fs_file.write(bytes_buffer)
 
-        self._invalidate_cache()
+            self._invalidate_cache()
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -142,10 +143,7 @@ class NetCDFDataSet(AbstractDataset):
         )
 
     def _exists(self) -> bool:
-        try:
-            load_path = get_filepath_str(self._filepath, self._protocol)
-        except DataSetError:
-            return False
+        load_path = get_filepath_str(self._filepath, self._protocol)
 
         if self._is_multifile:
             files = self._fs.glob(load_path)
@@ -168,7 +166,13 @@ class NetCDFDataSet(AbstractDataset):
             if self._is_multifile:
                 temp_files = glob(temp_filepath)
                 for file in temp_files:
-                    os.remove(file)
+                    try:
+                        os.remove(file)
+                    except FileNotFoundError:
+                        pass
             else:
                 temp_filepath = temp_filepath + self._filepath.suffix
-                os.remove(temp_filepath)
+                try:
+                    os.remove(temp_filepath)
+                except FileNotFoundError:
+                    pass

@@ -21,6 +21,46 @@ logger = logging.getLogger(__name__)
 class NetCDFDataSet(AbstractDataset):
     """``NetCDFDataSet`` loads/saves data from/to a NetCDF file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
+
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
+
+    .. code-block:: yaml
+
+        single-file:
+          type: netcdf.NetCDFDataset
+          filepath: s3://bucket_name/path/to/folder/data.nc
+          save_args:
+            mode: a
+          load_args:
+            decode_times: False
+
+        multi-file:
+          type: netcdf.NetCDFDataset
+          filepath: s3://bucket_name/path/to/folder/data*.nc
+          load_args:
+            concat_dim: time
+            combine: nested
+            parallel: True
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: pycon
+
+        >>> from kedro.extras.datasets.netcdf import NetCDFDataSet
+        >>> import xarray as xr
+        >>> ds = xr.DataArray(
+        ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
+        ... ).to_dataset()
+        >>> dataset = NetCDFDataSet(
+        ...     filepath="path/to/folder",
+        ...     save_args={"mode": "w"},
+        ... )
+        >>> dataset.save(ds)
+        >>> reloaded = dataset.load()
     """
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}

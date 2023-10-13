@@ -14,7 +14,12 @@ from warnings import warn
 
 import fsspec
 from hdfs import HdfsError, InsecureClient
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    CLOUD_PROTOCOLS,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
@@ -203,21 +208,21 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import (StructField, StringType,
-        ...                                IntegerType, StructType)
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
         >>>
         >>> from kedro_datasets.spark import SparkDataset
         >>>
-        >>> schema = StructType([StructField("name", StringType(), True),
-        ...                      StructField("age", IntegerType(), True)])
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
         >>>
-        >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
-        >>> spark_df = SparkSession.builder.getOrCreate()\
-        ...                        .createDataFrame(data, schema)
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> dataset = SparkDataset(filepath="test_data")
         >>> dataset.save(spark_df)
@@ -284,7 +289,11 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         glob_function = None
         self.metadata = metadata
 
-        if not filepath.startswith("/dbfs/") and _deployed_on_databricks():
+        if (
+            not filepath.startswith("/dbfs/")
+            and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
+            and _deployed_on_databricks()
+        ):
             logger.warning(
                 "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",

@@ -43,13 +43,13 @@ class PickleDataset(AbstractDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.redis import PickleDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                       'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> my_data = PickleDataset(key="my_data")
         >>> my_data.save(data)
@@ -79,6 +79,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             * `pickle`
             * `dill`
             * `compress_pickle`
+            * `cloudpickle`
 
         Example backends that are incompatible:
             * `torch`
@@ -94,6 +95,8 @@ class PickleDataset(AbstractDataset[Any, Any]):
                 dill.loads: https://dill.readthedocs.io/en/latest/index.html#dill.loads
                 compress_pickle.loads:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.loads
+                cloudpickle.loads:
+                https://github.com/cloudpipe/cloudpickle/blob/master/tests/cloudpickle_test.py
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
@@ -101,6 +104,8 @@ class PickleDataset(AbstractDataset[Any, Any]):
                 dill.dumps: https://dill.readthedocs.io/en/latest/index.html#dill.dumps
                 compress_pickle.dumps:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dumps
+                cloudpickle.dumps:
+                https://github.com/cloudpipe/cloudpickle/blob/master/tests/cloudpickle_test.py
                 All defaults are preserved.
             credentials: Credentials required to get access to the redis server.
                 E.g. `{"password": None}`.

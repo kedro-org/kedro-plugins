@@ -36,15 +36,15 @@ class GenericDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
             compression: "snappy"
 
     Example using Python API:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.polars import GenericDataset
         >>> import polars as pl
         >>>
-        >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GenericDataset(filepath='test.parquet', file_format='parquet')
+        >>> dataset = GenericDataset(filepath="test.parquet", file_format="parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)

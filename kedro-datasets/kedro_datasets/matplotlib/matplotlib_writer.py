@@ -37,21 +37,21 @@ class MatplotlibWriter(
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
         >>>
         >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3])
-        >>> plot_writer = MatplotlibWriter(
-        ...     filepath="data/08_reporting/output_plot.png"
-        ... )
+        >>> plot_writer = MatplotlibWriter(filepath="data/08_reporting/output_plot.png")
         >>> plt.close()
         >>> plot_writer.save(fig)
 
     Example saving a plot as a PDF file:
-    ::
+
+    .. code-block:: pycon
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
@@ -66,7 +66,8 @@ class MatplotlibWriter(
         >>> pdf_plot_writer.save(fig)
 
     Example saving multiple plots in a folder, using a dictionary:
-    ::
+
+    .. code-block:: pycon
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
@@ -77,13 +78,12 @@ class MatplotlibWriter(
         ...     plt.plot([1, 2, 3], color=colour)
         ...
         >>> plt.close("all")
-        >>> dict_plot_writer = MatplotlibWriter(
-        ...     filepath="data/08_reporting/plots"
-        ... )
+        >>> dict_plot_writer = MatplotlibWriter(filepath="data/08_reporting/plots")
         >>> dict_plot_writer.save(plots_dict)
 
     Example saving multiple plots in a folder, using a list:
-    ::
+
+    .. code-block:: pycon
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
@@ -94,17 +94,14 @@ class MatplotlibWriter(
         ...     plt.plot([i, i + 1, i + 2])
         ...
         >>> plt.close("all")
-        >>> list_plot_writer = MatplotlibWriter(
-        ...     filepath="data/08_reporting/plots"
-        ... )
+        >>> list_plot_writer = MatplotlibWriter(filepath="data/08_reporting/plots")
         >>> list_plot_writer.save(plots_list)
 
     """
 
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

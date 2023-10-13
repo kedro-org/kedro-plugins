@@ -6,15 +6,13 @@ The following sections describe our vision and the contribution process.
 
 ## Code of conduct
 
-The Kedro team pledges to foster and maintain a welcoming and friendly community in all of our spaces. All members of our community are expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md) and we will do our best to enforce those principles and build a happy environment where everyone is treated with respect and dignity.
+The Kedro team pledges to foster and maintain a welcoming and friendly community in all of our spaces. All members of our community are expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md), and we will do our best to enforce those principles and build a happy environment where everyone is treated with respect and dignity.
 
 # Get started
 
 We use [GitHub Issues](https://github.com/kedro-org/kedro-plugins/issues) to keep track of known bugs. We keep a close eye on them and try to make it clear when we have an internal fix in progress. Before reporting a new issue, please do your best to ensure your problem hasn't already been reported. If so, it's often better to just leave a comment on an existing issue, rather than create a new one. Old issues also can often include helpful tips and solutions to common problems.
 
-If you are looking for help with your code, please consider posting a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro-docker). If you tag it `kedro-docker`, `kedro` and `python`, more people will see it and may be able to help. We are unable to provide individual support via email. In the interest of community engagement we also believe that help is much more valuable if it's shared publicly, so that more people can benefit from it.
-
-If you're over on Stack Overflow and want to boost your points, take a look at the `kedro-docker` tag and see if you can help others out by sharing your knowledge. It's another great way to contribute.
+If you are looking for help with your code, please consider posting a question on [our Slack organisation](https://slack.kedro.org/). You can post your questions to the `#questions` or the `#plugins-integrations` channel. Past questions and discussions from our Slack organisation are accessible on [Linen](https://linen-slack.kedro.org/). In the interest of community engagement we also believe that help is much more valuable if it's shared publicly, so that more people can benefit from it.
 
 If you have already checked the [existing issues](https://github.com/kedro-org/kedro-plugins/issues) on GitHub and are still convinced that you have found odd or erroneous behaviour then please file a [new issue](https://github.com/kedro-org/kedro-plugins/issues/new/choose). We have a template that helps you provide the necessary information we'll need in order to address your query.
 
@@ -22,11 +20,11 @@ If you have already checked the [existing issues](https://github.com/kedro-org/k
 
 ### Suggest a new feature
 
-If you have new ideas for Kedro-Docker functionality then please open a [GitHub issue](https://github.com/kedro-org/kedro-plugins/issues) with the label `Type: Enhancement`. Please describe in your own words the feature you would like to see, why you need it, and how it should work.
+If you have new ideas for Kedro-Docker functionality then please open a [GitHub issue](https://github.com/kedro-org/kedro-plugins/issues) with the label `enhancement`. Please describe in your own words the feature you would like to see, why you need it, and how it should work.
 
 ### Contribute a new feature
 
-If you're unsure where to begin contributing to Kedro-Docker, please start by looking through the `good first issues` and `Request: Help Wanted` on [GitHub](https://github.com/kedro-org/kedro-plugins/issues).
+If you're unsure where to begin contributing to Kedro-Docker, please start by looking through the `good first issue` and `help wanted` on [GitHub](https://github.com/kedro-org/kedro-plugins/issues).
 
 Typically, small contributions to Kedro-Docker are more preferable due to an easier review process, but we accept any new features if they prove to be essential for the functioning of the plugin or if we believe that they are used by most projects.
 
@@ -53,7 +51,7 @@ def count_truthy(elements: List[Any]) -> int:
     return sum(1 for elem in elements if elem)
 ```
 
-> *Note:* We only accept contributions under the [Apache 2.0](https://opensource.org/licenses/Apache-2.0) license and you should have permission to share the submitted code.
+> *Note:* We only accept contributions under the [Apache 2.0](https://opensource.org/licenses/Apache-2.0) license, and you should have permission to share the submitted code.
 
 ### Branching conventions
 
@@ -69,35 +67,38 @@ We use a branching model that helps us keep track of branches in a logical, cons
 ## Plugin contribution process
 
  1. Fork the project
- 2. Develop your contribution in a new branch and open a PR against the `master` branch
- 3. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below)
- 4. Update the PR according to the reviewer's comments
+ 2. Develop your contribution in a new branch.
+ 3. Make sure all your commits are signed off by using `-s` flag with `git commit`.
+ 4. Open a PR against the `main` branch and sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(docker)`.
+ 5. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below)
+ 6. Update the PR according to the reviewer's comments
 
 ## CI / CD and running checks locally
 To run E2E tests you need to install the test requirements which includes `behave`, do this using the following command:
 
 ```bash
-pip install ".[test]"
+make plugin=kedro-docker install-test-requirements
+make install-pre-commit
 ```
 
 ### Running checks locally
 
 All checks run by our CI / CD pipeline can be run locally on your computer.
 
-#### PEP-8 Standards (`isort`, `pylint` and `flake8`)
+#### Linting (`ruff` and `black`)
 
 ```bash
-make lint
+make plugin=kedro-docker lint
 ```
 
 #### Unit tests, 100% coverage (`pytest`, `pytest-cov`)
 
 ```bash
-make test
+make plugin=kedro-docker test
 ```
 
 #### End-to-end tests (`behave`)
 
 ```bash
-make e2e-tests
+make plugin=kedro-docker e2e-tests
 ```

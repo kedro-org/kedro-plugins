@@ -23,6 +23,7 @@ Supported file formats are:
 from kedro.framework.hooks import hook_impl
 from pyspark.sql import SparkSession
 
+
 class SparkStreamsHook:
     @hook_impl
     def after_pipeline_run(self) -> None:

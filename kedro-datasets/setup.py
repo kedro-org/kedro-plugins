@@ -223,6 +223,7 @@ extras_require["test"] = [
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
+    "xarray>=2023.9.0",
     "xlsxwriter~=1.0",
 ]
 

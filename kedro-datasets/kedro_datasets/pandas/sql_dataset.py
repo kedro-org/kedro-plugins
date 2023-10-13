@@ -6,7 +6,7 @@ import datetime as dt
 import re
 import warnings
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd

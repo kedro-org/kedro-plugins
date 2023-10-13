@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 * Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+* Delayed backend connection for `pandas.SQLTableDataset`, `pandas.SQLQueryDataset`, and `snowflake.SnowparkTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used.
 
 ## Bug fixes and other changes
 * Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.

@@ -235,6 +235,11 @@ class TestCLIMasking:
                 ["none", "of", "this", "should", "be", "seen", "except", "command_a"],
                 [MASK, MASK, MASK, MASK, MASK, MASK, MASK, "command_a"],
             ),
+            (
+                {"kedro": {"command_a": {"--param": "airflow"}}},
+                ["command_a", "--param", "airflow"],
+                ["command_a", "--param", MASK],
+            ),
         ],
     )
     def test_mask_kedro_cli(

@@ -78,14 +78,27 @@ def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List
     output = []
     vocabulary = _get_vocabulary(cli_struct)
     for arg in command_args:
+        # if it starts with - -> flag
         if arg.startswith("-"):
-            for arg_part in arg.split("="):
-                if arg_part in vocabulary:
-                    output.append(arg_part)
-                elif arg_part:
+            # if there is an equal sign we mask after the sign
+            if "=" in arg:
+                list_arg = arg.split("=")
+                if list_arg[0] in vocabulary:
+                    output.append(list_arg[0])
+                else:
+                    output.append(MASK)
+                # we mask what comes after equal sign
+                output.append(MASK)
+            else:
+                if arg in vocabulary:
+                    output.append(arg)
+                else:
                     output.append(MASK)
         elif arg in vocabulary:
-            output.append(arg)
+            if len(output) > 1 and output[-1].startswith("-"):
+                output.append(MASK)
+            else:
+                output.append(arg)
         elif arg:
             output.append(MASK)
     return output

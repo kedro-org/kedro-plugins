@@ -27,7 +27,7 @@ geopandas_require = {
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 netcdf_require = {
-    "netcdf.NetCDFDataSet": ["h5netcdf>=1.2.0", "netcdf4>=1.6.4", "xarray>=2023.1.0"]
+    "netcdf.NetCDFDataset": ["h5netcdf>=1.2.0", "netcdf4>=1.6.4", "xarray>=2023.1.0"]
 }
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {

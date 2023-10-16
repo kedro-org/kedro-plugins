@@ -6,7 +6,7 @@ from s3fs import S3FileSystem
 from xarray.testing import assert_equal
 
 from kedro_datasets._io import DatasetError
-from kedro_datasets.netcdf import NetCDFDataSet
+from kedro_datasets.netcdf import NetCDFDataset
 
 FILE_NAME = "test.nc"
 MULTIFILE_NAME = "test*.nc"
@@ -104,7 +104,7 @@ def mocked_s3_object_multi(
 @pytest.fixture
 def s3_dataset(load_args, save_args, tmp_path):
     """Sample NetCDF dataset pointing to mocked S3 bucket with single NetCDF file."""
-    return NetCDFDataSet(
+    return NetCDFDataset(
         filepath=S3_PATH,
         temppath=tmp_path,
         credentials=AWS_CREDENTIALS,
@@ -116,7 +116,7 @@ def s3_dataset(load_args, save_args, tmp_path):
 @pytest.fixture
 def s3_dataset_multi(save_args, tmp_path):
     """Sample NetCDF dataset pointing to mocked S3 bucket with multiple NetCDF files."""
-    return NetCDFDataSet(
+    return NetCDFDataset(
         filepath=S3_PATH_MULTIFILE,
         temppath=tmp_path,
         credentials=AWS_CREDENTIALS,
@@ -139,7 +139,7 @@ class TestNetCDFDataSet:
         path."""
         pattern = "Need to set temppath in catalog"
         with pytest.raises(ValueError, match=pattern):
-            NetCDFDataSet(
+            NetCDFDataset(
                 filepath=S3_PATH,
                 temppath=None,
             )
@@ -147,10 +147,10 @@ class TestNetCDFDataSet:
     @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials, tmp_path):
         """Test that error is raised if there are no AWS credentials."""
-        netcdf_dataset = NetCDFDataSet(
+        netcdf_dataset = NetCDFDataset(
             filepath=S3_PATH, temppath=tmp_path, credentials=bad_credentials
         )
-        pattern = r"Failed while loading data from data set NetCDFDataSet\(.+\)"
+        pattern = r"Failed while loading data from data set NetCDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             netcdf_dataset.load()
 
@@ -158,10 +158,10 @@ class TestNetCDFDataSet:
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
-        s3_dataset = NetCDFDataSet(
+        s3_dataset = NetCDFDataset(
             filepath=S3_PATH, temppath=tmp_path, credentials=AWS_CREDENTIALS
         )
-        pattern = r"Failed while loading data from data set NetCDFDataSet\(.+\)"
+        pattern = r"Failed while loading data from data set NetCDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset.load()
 
@@ -215,16 +215,16 @@ class TestNetCDFDataSet:
     def test_exists_multi_locally(self, tmp_path, dummy_xr_dataset):
         """Test `exists` method invocation for both existing and nonexistent set of
         multiple local NetCDF files."""
-        dataset = NetCDFDataSet(filepath=str(tmp_path / MULTIFILE_NAME))
+        dataset = NetCDFDataset(filepath=str(tmp_path / MULTIFILE_NAME))
         assert not dataset.exists()
-        NetCDFDataSet(filepath=str(tmp_path / "test1.nc")).save(dummy_xr_dataset)
-        NetCDFDataSet(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
+        NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(dummy_xr_dataset)
+        NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
         assert dataset.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_xr_dataset):
         """Test loading and saving the a NetCDF file locally."""
         file_path = str(tmp_path / "some" / "dir" / FILE_NAME)
-        dataset = NetCDFDataSet(filepath=file_path)
+        dataset = NetCDFDataset(filepath=file_path)
 
         assert not dataset.exists()
         dataset.save(dummy_xr_dataset)
@@ -237,15 +237,15 @@ class TestNetCDFDataSet:
     ):
         """Test loading multiple NetCDF files locally."""
         file_path = str(tmp_path / "some" / "dir" / MULTIFILE_NAME)
-        dataset = NetCDFDataSet(
+        dataset = NetCDFDataset(
             filepath=file_path, load_args={"concat_dim": "dummy", "combine": "nested"}
         )
 
         assert not dataset.exists()
-        NetCDFDataSet(filepath=str(tmp_path / "some" / "dir" / "test1.nc")).save(
+        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test1.nc")).save(
             dummy_xr_dataset
         )
-        NetCDFDataSet(filepath=str(tmp_path / "some" / "dir" / "test2.nc")).save(
+        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test2.nc")).save(
             dummy_xr_dataset
         )
         assert dataset.exists()

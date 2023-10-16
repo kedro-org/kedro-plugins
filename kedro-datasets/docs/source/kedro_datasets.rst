@@ -27,7 +27,7 @@ kedro_datasets
    kedro_datasets.json.JSONDataSet
    kedro_datasets.json.JSONDataset
    kedro_datasets.matplotlib.MatplotlibWriter
-   kedro_datasets.netcdf.NetCDFDataSet
+   kedro_datasets.netcdf.NetCDFDataset
    kedro_datasets.networkx.GMLDataSet
    kedro_datasets.networkx.GMLDataset
    kedro_datasets.networkx.GraphMLDataSet

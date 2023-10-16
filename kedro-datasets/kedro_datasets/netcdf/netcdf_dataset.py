@@ -1,4 +1,4 @@
-"""NetCDFDataSet loads and saves data to a local netcdf (.nc) file."""
+"""NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
 import logging
 import os
 from copy import deepcopy
@@ -10,7 +10,7 @@ import fsspec
 import xarray as xr
 from kedro.io.core import (
     AbstractDataset,
-    DataSetError,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
 )
@@ -18,8 +18,8 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class NetCDFDataSet(AbstractDataset):
-    """``NetCDFDataSet`` loads/saves data from/to a NetCDF file using an underlying
+class NetCDFDataset(AbstractDataset):
+    """``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
 
     Example usage for the
@@ -50,12 +50,12 @@ class NetCDFDataSet(AbstractDataset):
 
     .. code-block:: pycon
 
-        >>> from kedro.extras.datasets.netcdf import NetCDFDataSet
+        >>> from kedro_datasets.netcdf import NetCDFDataset
         >>> import xarray as xr
         >>> ds = xr.DataArray(
         ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
         ... ).to_dataset()
-        >>> dataset = NetCDFDataSet(
+        >>> dataset = NetCDFDataset(
         ...     filepath="path/to/folder",
         ...     save_args={"mode": "w"},
         ... )
@@ -75,7 +75,7 @@ class NetCDFDataSet(AbstractDataset):
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
     ):
-        """Creates a new instance of ``NetCDFDataSet`` pointing to a concrete NetCDF
+        """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem
 
         Args:
@@ -156,7 +156,7 @@ class NetCDFDataSet(AbstractDataset):
 
     def _save(self, data: xr.Dataset):
         if self._is_multifile:
-            raise DataSetError(
+            raise DatasetError(
                 "Globbed multifile datasets with '*' in filepath cannot be saved. "
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )

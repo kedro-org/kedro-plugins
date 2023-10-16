@@ -5,7 +5,7 @@ type of read/write target.
 import logging
 from copy import deepcopy
 from io import BytesIO
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any, ClassVar, Dict, Optional, Union
 
 import fsspec
@@ -136,10 +136,9 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         if self._file_format not in ACCEPTED_FILE_FORMATS:
             raise DatasetError(
                 f"'{self._file_format}' is not an accepted format "
-                "({ACCEPTED_FILE_FORMATS}) ensure that your "
-                "'file_format' parameter has been defined correctly as per the Polars"
-                " Lazy API"
-                " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+                f"({ACCEPTED_FILE_FORMATS}) ensure that your 'file_format' parameter "
+                "has been defined correctly as per the Polars API "
+                "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
 
         _fs_args = deepcopy(fs_args) or {}
@@ -197,22 +196,11 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
             return load_method(load_path, **self._load_args)
 
         # For object storage, we use pyarrow for I/O:
-        fsspec.filesystem("s3")
         dataset = ds.dataset(load_path, filesystem=self._fs, format=self._file_format)
         return pl.scan_pyarrow_dataset(dataset)
 
     def _save(self, data: Union[pl.DataFrame, pl.LazyFrame]) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        if Path(save_path).is_dir():
-            raise DatasetError(
-                f"Saving {self.__class__.__name__} to a directory is not supported."
-            )
-
-        if "partition_cols" in self._save_args:
-            raise DatasetError(
-                f"{self.__class__.__name__} does not support save argument "
-                f"'partition_cols'. Please use 'kedro.io.PartitionedDataset' instead."
-            )
 
         collected_data = None
         if isinstance(data, pl.LazyFrame):
@@ -220,6 +208,9 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         else:
             collected_data = data
 
+        # Note: polars does support writing partitioned parquet file
+        # it is leveraging Arrow to do so, see e.g.
+        # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
         save_method = getattr(collected_data, f"write_{self._file_format}", None)
         if save_method:
             buf = BytesIO()
@@ -227,7 +218,11 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
             with self._fs.open(save_path, mode="wb") as fs_file:
                 fs_file.write(buf.getvalue())
                 self._invalidate_cache()
-        else:
+        # How the LazyPolarsDataset logic is currently written with
+        # ACCEPTED_FILE_FORMATS and a check in the `__init__` method,
+        # this else loop is never reached, hence we exclude it from coverage report
+        # but leave it in for consistency between the Eager and Lazy classes
+        else:  # pragma: no cover
             raise DatasetError(
                 f"Unable to retrieve 'polars.DataFrame.write_{self._file_format}' "
                 "method, please ensure that your 'file_format' parameter has been "
@@ -238,7 +233,7 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
+        except DatasetError:  # pragma: no cover
             return False
 
         return self._fs.exists(load_path)

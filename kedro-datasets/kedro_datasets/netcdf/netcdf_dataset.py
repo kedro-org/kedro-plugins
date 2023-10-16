@@ -208,8 +208,8 @@ class NetCDFDataset(AbstractDataset):
                 for file in temp_files:
                     try:
                         os.remove(file)
-                    except FileNotFoundError:
-                        pass
+                    except FileNotFoundError:  # pragma: no cover
+                        pass  # pragma: no cover
             else:
                 temp_filepath = temp_filepath + self._filepath.suffix
                 try:

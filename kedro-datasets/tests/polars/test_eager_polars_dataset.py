@@ -117,7 +117,7 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-class TestGenericExcelDataset:
+class TestEagerExcelDataset:
     def test_load(self, excel_dataset):
         df = excel_dataset.load()
         assert df.shape == (2, 3)
@@ -165,7 +165,7 @@ class TestGenericExcelDataset:
         assert dataset._version_cache.currsize == 0
 
 
-class TestGenericParquetDatasetVersioned:
+class TestEagerParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore):
         df = parquet_dataset_ignore.load()
         assert df.shape == (2, 3)
@@ -255,7 +255,7 @@ class TestGenericParquetDatasetVersioned:
         assert ds_new.resolve_load_version() == second_load_version
 
 
-class TestGenericIPCDatasetVersioned:
+class TestEagerIPCDatasetVersioned:
     def test_save_and_load(self, versioned_ipc_dataset, dummy_dataframe):
         """Test saving and reloading the data set."""
         versioned_ipc_dataset.save(dummy_dataframe)
@@ -339,7 +339,7 @@ class TestGenericIPCDatasetVersioned:
         assert ds_new.resolve_load_version() == second_load_version
 
 
-class TestGenericCSVDatasetVersioned:
+class TestEagerCSVDatasetVersioned:
     def test_version_str_repr(self, filepath_csv, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""

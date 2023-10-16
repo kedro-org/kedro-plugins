@@ -30,7 +30,7 @@ netcdf_require = {
     "netcdf.NetCDFDataset": [
         "h5netcdf>=1.2.0",
         "netcdf4>=1.6.4",
-        "xarray<=0.20.2; python_version == '3.7'"
+        "xarray<=0.20.2; python_version == '3.7'",
         "xarray>=2023.1.0; python_version >= '3.8'",
     ]
 }

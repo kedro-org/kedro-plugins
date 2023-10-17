@@ -73,6 +73,7 @@ class NetCDFDataset(AbstractDataset):
         save_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -101,6 +102,8 @@ class NetCDFDataset(AbstractDataset):
                 ``s3fs.S3FileSystem``).
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
@@ -118,6 +121,8 @@ class NetCDFDataset(AbstractDataset):
 
         self._storage_options = {**self._credentials, **self._fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
+
+        self.metadata = metadata
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

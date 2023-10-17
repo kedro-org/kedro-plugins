@@ -1,6 +1,9 @@
 # Upcoming Release
 ## Major features and improvements
 * Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+* Added `polars.LazyPolarsDataset`, a `GenericDataSet` using [polars](https://www.pola.rs/)'s Lazy API.
+* Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflex the difference between the two dataset classes.
+* Added a deprecation warning when using `polars.GenericDataSet` or `polars.GenericDataset` that these have been renamed to `polars.EagerPolarsDataset`
 
 ## Bug fixes and other changes
 * Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.

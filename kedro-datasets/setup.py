@@ -59,9 +59,14 @@ polars_require = {
     [
         POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
     ],
-    "polars.LazyPolarsDataset":
+    "polars.EagerPolarsDataset":
     [
         POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+    "polars.LazyPolarsDataset":
+    [
+        # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
+        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
     ],
 }
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}

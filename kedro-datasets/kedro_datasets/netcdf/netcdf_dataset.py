@@ -1,6 +1,5 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
 import logging
-import os
 from copy import deepcopy
 from glob import glob
 from pathlib import Path, PurePosixPath
@@ -202,17 +201,17 @@ class NetCDFDataset(AbstractDataset):
         """Cleanup temporary directory"""
         if self._temppath is not None:
             logger.info("Deleting local temporary files.")
-            temp_filepath = str(self._temppath) + "/" + self._filepath.stem
+            temp_filepath = self._temppath / self._filepath.stem
             if self._is_multifile:
-                temp_files = glob(temp_filepath)
+                temp_files = glob(str(temp_filepath))
                 for file in temp_files:
                     try:
-                        os.remove(file)
+                        Path(file).unlink()
                     except FileNotFoundError:  # pragma: no cover
                         pass  # pragma: no cover
             else:
-                temp_filepath = temp_filepath + self._filepath.suffix
+                temp_filepath = str(temp_filepath) + self._filepath.suffix
                 try:
-                    os.remove(temp_filepath)
+                    Path(temp_filepath).unlink()
                 except FileNotFoundError:
                     pass

@@ -10,5 +10,5 @@ NetCDFDataset: type[NetCDFDataset]
 NetCDFDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"netcdf_dataset": ["NetCDFDataset", "NetCDFDataset"]}
+    __name__, submod_attrs={"netcdf_dataset": ["NetCDFDataset"]}
 )

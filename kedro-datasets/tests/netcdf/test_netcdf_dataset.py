@@ -133,7 +133,7 @@ def s3fs_cleanup():
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")
-class TestNetCDFDataSet:
+class TestNetCDFDataset:
     def test_temppath_error_raised(self):
         """Test that error is raised if S3 NetCDF file referenced without a temporary
         path."""

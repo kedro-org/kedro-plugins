@@ -8,7 +8,7 @@ import lazy_loader as lazy
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 CSVDataSet: type[CSVDataset]
 CSVDataset: Any
-GenericDataSet: type[GenericDataset]
+GenericDataSet: type[EagerPolarsDataset]
 GenericDataset: type[EagerPolarsDataset]
 EagerPolarsDataset: Any
 LazyPolarsDataset: Any

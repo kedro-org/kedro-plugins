@@ -468,7 +468,6 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self._filepath = path
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
-        self.create_connection(self._connection_str)
         if "mssql" in self._connection_str:
             self.adapt_mssql_date_params()
 

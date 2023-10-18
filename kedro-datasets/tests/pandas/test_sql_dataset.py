@@ -385,7 +385,7 @@ class TestSQLQueryDataset:
         in the connection string"""
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DatasetError, match=pattern):
-            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR}).load()
 
     def test_save_error(self, query_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
@@ -428,11 +428,13 @@ class TestSQLQueryDataset:
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         first = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        first.load()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         # second engine has identical params to the first one
         # => no new engine should be created
         second = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        second.load()  # Do something to fetch the `Engine`
         mock_engine.assert_called_once_with(CONNECTION)
         assert second.engines == first.engines
         assert len(first.engines) == 1
@@ -444,6 +446,7 @@ class TestSQLQueryDataset:
             credentials={"con": CONNECTION},
             execution_options=EXECUTION_OPTIONS,
         )
+        third.load()  # Do something to fetch the `Engine`
         assert mock_engine.call_count == 1
         assert third.engines == first.engines
         assert len(first.engines) == 1
@@ -453,6 +456,7 @@ class TestSQLQueryDataset:
         fourth = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": "an other connection string"}
         )
+        fourth.load()  # Do something to create the `Engine`
         assert mock_engine.call_count == 2
         assert fourth.engines == first.engines
         assert len(first.engines) == 2
@@ -466,6 +470,7 @@ class TestSQLQueryDataset:
         )
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         ds = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
+        ds.load()  # Do something to create the `Engine`
         mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1

@@ -423,15 +423,13 @@ class TestSparkDataset:
         # AnalysisExceptions clearly indicating a missing file
         spark_dataset = SparkDataset(filepath="")
         if SPARK_VERSION >= PackagingVersion("3.4.0"):
-            mocker.patch.object(
-                spark_dataset,
-                "_get_spark",
+            mocker.patch(
+                "kedro_datasets.spark.spark_dataset._get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
-            mocker.patch.object(
-                spark_dataset,
-                "_get_spark",
+            mocker.patch(
+                "kedro_datasets.spark.spark_dataset._get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):
@@ -742,7 +740,9 @@ class TestSparkDatasetVersionedS3:
             versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
-        get_spark = mocker.patch.object(versioned_dataset_s3, "_get_spark")
+        get_spark = mocker.patch(
+            "kedro_datasets.spark.spark_dataset._get_spark",
+        )
         mocked_glob = mocker.patch.object(versioned_dataset_s3, "_glob_function")
         mocked_glob.return_value = [
             "{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v="mocked_version")
@@ -765,8 +765,9 @@ class TestSparkDatasetVersionedS3:
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=Version(ts, None),
         )
-        get_spark = mocker.patch.object(ds_s3, "_get_spark")
-
+        get_spark = mocker.patch(
+            "kedro_datasets.spark.spark_dataset._get_spark",
+        )
         ds_s3.load()
 
         get_spark.return_value.read.load.assert_called_once_with(
@@ -858,7 +859,10 @@ class TestSparkDatasetVersionedHdfs:
         hdfs_walk.return_value = HDFS_FOLDER_STRUCTURE
 
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
-        get_spark = mocker.patch.object(versioned_hdfs, "_get_spark")
+
+        get_spark = mocker.patch(
+            "kedro_datasets.spark.spark_dataset._get_spark",
+        )
 
         versioned_hdfs.load()
 
@@ -875,7 +879,9 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs = SparkDataset(
             filepath=f"hdfs://{HDFS_PREFIX}", version=Version(ts, None)
         )
-        get_spark = mocker.patch.object(versioned_hdfs, "_get_spark")
+        get_spark = mocker.patch(
+            "kedro_datasets.spark.spark_dataset._get_spark",
+        )
 
         versioned_hdfs.load()
 

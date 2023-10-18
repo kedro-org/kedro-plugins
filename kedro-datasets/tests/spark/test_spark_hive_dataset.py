@@ -29,6 +29,7 @@ def spark_session():
                 .config(
                     "spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute()
                 )
+                .config("spark.sql.catalogImplementation", "hive")
                 .config(
                     "javax.jdo.option.ConnectionURL",
                     f"jdbc:derby:;"

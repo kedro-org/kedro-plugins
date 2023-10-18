@@ -6,12 +6,15 @@ from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn
 
 from delta.tables import DeltaTable
-from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
-from kedro_datasets.spark.spark_dataset import _get_spark, _split_filepath, _strip_dbfs_prefix
+from kedro_datasets.spark.spark_dataset import (
+    _get_spark,
+    _split_filepath,
+    _strip_dbfs_prefix,
+)
 
 
 class DeltaTableDataset(AbstractDataset[None, DeltaTable]):

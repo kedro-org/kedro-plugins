@@ -39,8 +39,8 @@ def _get_spark() -> Any:
     """
     try:
         # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
-        # the remote session is instantiated using the databricks module 
-        # If the databricks-connect module is installed, we use a remote session 
+        # the remote session is instantiated using the databricks module
+        # If the databricks-connect module is installed, we use a remote session
         from databricks.connect import DatabricksSession
 
         spark = DatabricksSession.builder.getOrCreate()

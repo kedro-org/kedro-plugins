@@ -1,13 +1,17 @@
 # Upcoming Release
 ## Major features and improvements
 * Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html)
+* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
 
 ## Bug fixes and other changes
+* Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
 * Updated `PickleDataset` to explicitly mention `cloudpickle` support.
-## Upcoming deprecations for Kedro-Datasets 2.0.0
 
+## Upcoming deprecations for Kedro-Datasets 2.0.0
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
+* [PtrBld](https://github.com/PtrBld)
+* [Alistair McKelvie](https://github.com/alamastor)
 * [Felix Wittmann](https://github.com/hfwittmann)
 
 # Release 1.7.1

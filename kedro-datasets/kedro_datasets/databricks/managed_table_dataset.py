@@ -349,9 +349,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            _get_spark().conf.set(
-                "fullTableAddress", self._table.full_table_location()
-            )
+            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
             _get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""

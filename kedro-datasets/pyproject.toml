@@ -31,7 +31,7 @@ version = {attr = "kedro_datasets.__version__"}
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["tests/*", "kedro_datasets/__init__.py", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*"]
+omit = ["tests/*", "kedro_datasets/__init__.py", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]

@@ -53,6 +53,7 @@ jobs:
           restore-keys: kedro-datasets
       - name: Install dependencies
         run: |
+          python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
           cd kedro-datasets
           pip install ".[docs]"
           pip install ".[test]"

@@ -172,7 +172,6 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self._session = self._get_session(self._connection_parameters)
 
         self.metadata = metadata
 
@@ -207,9 +206,13 @@ class SnowparkTableDataset(AbstractDataset):
             logger.debug("Trying to reuse active snowpark session...")
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
-            logger.debug("No active snowpark session found. Creating")
+            logger.debug("No active snowpark session found. Creating...")
             session = sp.Session.builder.configs(connection_parameters).create()
         return session
+
+    @property
+    def _session(self) -> sp.Session:
+        return self._get_session(self._connection_parameters)
 
     def _load(self) -> sp.DataFrame:
         table_name = [

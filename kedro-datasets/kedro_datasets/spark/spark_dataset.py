@@ -43,7 +43,8 @@ def _get_spark() -> Any:
         # If the databricks-connect module is installed, we use a remote session
         from databricks.connect import DatabricksSession
 
-        spark = DatabricksSession.builder.getOrCreate()
+        # We can't test this as there's no Databricks test env available
+        spark = DatabricksSession.builder.getOrCreate() # pragma: no cover
 
     except ImportError:
         # For "normal" spark sessions that don't use databricks-connect

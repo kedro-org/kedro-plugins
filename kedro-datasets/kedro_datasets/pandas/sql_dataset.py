@@ -218,27 +218,29 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str):
+    def create_connection(cls, connection_str: str) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
         """
-        if connection_str not in cls.engines:
-            try:
-                engine = create_engine(connection_str)
-            except ImportError as import_error:
-                raise _get_missing_module_error(import_error) from import_error
-            except NoSuchModuleError as exc:
-                raise _get_sql_alchemy_missing_error() from exc
+        try:
+            engine = create_engine(connection_str)
+        except ImportError as import_error:
+            raise _get_missing_module_error(import_error) from import_error
+        except NoSuchModuleError as exc:
+            raise _get_sql_alchemy_missing_error() from exc
 
-            cls.engines[connection_str] = engine
-
-        return cls.engines[connection_str]
+        cls.engines[connection_str] = engine
 
     @property
     def engine(self):
         """The ``Engine`` object for the dataset's connection string."""
-        return self.create_connection(self._connection_str)
+        cls = type(self)
+
+        if self._connection_str not in cls.engines:
+            self.create_connection(self._connection_str)
+
+        return cls.engines[self._connection_str]
 
     def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -472,27 +474,29 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str):
+    def create_connection(cls, connection_str: str) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.
         """
-        if connection_str not in cls.engines:
-            try:
-                engine = create_engine(connection_str)
-            except ImportError as import_error:
-                raise _get_missing_module_error(import_error) from import_error
-            except NoSuchModuleError as exc:
-                raise _get_sql_alchemy_missing_error() from exc
+        try:
+            engine = create_engine(connection_str)
+        except ImportError as import_error:
+            raise _get_missing_module_error(import_error) from import_error
+        except NoSuchModuleError as exc:
+            raise _get_sql_alchemy_missing_error() from exc
 
-            cls.engines[connection_str] = engine
-
-        return cls.engines[connection_str]
+        cls.engines[connection_str] = engine
 
     @property
     def engine(self):
         """The ``Engine`` object for the dataset's connection string."""
-        return self.create_connection(self._connection_str)
+        cls = type(self)
+
+        if self._connection_str not in cls.engines:
+            self.create_connection(self._connection_str)
+
+        return cls.engines[self._connection_str]
 
     def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)

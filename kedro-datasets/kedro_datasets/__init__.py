@@ -9,7 +9,7 @@ import warnings
 try:
     # Custom `KedroDeprecationWarning` class was added in Kedro 0.18.14.
     from kedro import KedroDeprecationWarning
-except ImportError:
+except ImportError:  # pragma: no cover
 
     class KedroDeprecationWarning(DeprecationWarning):
         """Custom class for warnings about deprecated Kedro features."""

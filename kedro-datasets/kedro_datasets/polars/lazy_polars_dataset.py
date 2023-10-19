@@ -194,7 +194,9 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
             return load_method(load_path, **self._load_args)
 
         # For object storage, we use pyarrow for I/O:
-        dataset = ds.dataset(load_path, filesystem=self._fs, format=self._file_format)
+        dataset = ds.dataset(
+            load_path, filesystem=self._fs, format=self._file_format, **self._load_args
+        )
         return pl.scan_pyarrow_dataset(dataset)
 
     def _save(self, data: Union[pl.DataFrame, pl.LazyFrame]) -> None:

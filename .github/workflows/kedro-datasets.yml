@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-datasets
@@ -53,6 +53,7 @@ jobs:
           restore-keys: kedro-datasets
       - name: Install dependencies
         run: |
+          python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
           cd kedro-datasets
           pip install ".[docs]"
           pip install ".[test]"

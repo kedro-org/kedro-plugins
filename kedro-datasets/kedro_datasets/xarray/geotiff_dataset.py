@@ -53,7 +53,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

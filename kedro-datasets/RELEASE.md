@@ -2,7 +2,7 @@
 ## Major features and improvements
 * Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
 * Added `polars.LazyPolarsDataset`, a `GenericDataSet` using [polars](https://www.pola.rs/)'s Lazy API.
-* Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflex the difference between the two dataset classes.
+* Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflect the difference between the two dataset classes.
 * Added a deprecation warning when using `polars.GenericDataSet` or `polars.GenericDataset` that these have been renamed to `polars.EagerPolarsDataset`
 * Delayed backend connection for `pandas.SQLTableDataset`, `pandas.SQLQueryDataset`, and `snowflake.SnowparkTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used.
 

@@ -46,12 +46,16 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
+          python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
           pip install ".[test]"
       - name: pip freeze
         run: pip freeze
-      - name: Run unit tests for Linux / all plugins
-        if: inputs.os != 'windows-latest'
+      - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
+        if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test
+      - name: Run unit tests for Linux / kedro-datasets
+        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        run: make dataset-tests
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |

@@ -10,6 +10,7 @@ import requests
 from requests import Session, sessions
 from requests.auth import AuthBase
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -36,7 +37,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.api import APIDataset
         >>>
@@ -50,23 +52,22 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...             "commodity_desc": "CORN",
         ...             "statisticcat_des": "YIELD",
         ...             "agg_level_desc": "STATE",
-        ...             "year": 2000
+        ...             "year": 2000,
         ...         }
         ...     },
-        ...     credentials=("username", "password")
+        ...     credentials=("username", "password"),
         ... )
         >>> data = dataset.load()
 
     ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
     methods.
-    ::
+
+    .. code-block:: pycon
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method = "POST",
-        ...     url = "url_of_remote_server",
-        ...     save_args = {"chunk_size":1}
+        ...     method="POST", url="url_of_remote_server", save_args={"chunk_size": 1}
         ... )
         >>> dataset.save(example_table)
 
@@ -91,9 +92,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         "timeout": 60,
         "chunk_size": 100,
     }
-    # pylint: disable=too-many-arguments
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         method: str = "GET",
@@ -249,7 +249,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

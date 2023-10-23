@@ -1,7 +1,28 @@
 # Upcoming Release
 ## Major features and improvements
+* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+* Added `polars.LazyPolarsDataset`, a `GenericDataSet` using [polars](https://www.pola.rs/)'s Lazy API.
+* Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflect the difference between the two dataset classes.
+* Added a deprecation warning when using `polars.GenericDataSet` or `polars.GenericDataset` that these have been renamed to `polars.EagerPolarsDataset`
+* Delayed backend connection for `pandas.SQLTableDataset`, `pandas.SQLQueryDataset`, and `snowflake.SnowparkTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used.
+
 ## Bug fixes and other changes
+* Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
+* Updated `PickleDataset` to explicitly mention `cloudpickle` support.
+
+## Upcoming deprecations for Kedro-Datasets 2.0.0
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [PtrBld](https://github.com/PtrBld)
+* [Alistair McKelvie](https://github.com/alamastor)
+* [Felix Wittmann](https://github.com/hfwittmann)
+
+# Release 1.7.1
+## Bug fixes and other changes
+* Pin `tables` version on `kedro-datasets` for Python < 3.8.
+
+## Upcoming deprecations for Kedro-Datasets 2.0.0
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
 
 # Release 1.7.0:
 ## Major features and improvements

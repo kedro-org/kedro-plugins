@@ -32,6 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
             cd ${{ inputs.plugin }}
+            python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
             pip install git+https://github.com/kedro-org/kedro@main
             pip install ".[test]"
             pip freeze

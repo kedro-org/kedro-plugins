@@ -10,6 +10,7 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkHiveDataset
 from kedro_datasets.spark.spark_hive_dataset import _DEPRECATED_CLASSES
@@ -28,6 +29,7 @@ def spark_session():
                 .config(
                     "spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute()
                 )
+                .config("spark.sql.catalogImplementation", "hive")
                 .config(
                     "javax.jdo.option.ConnectionURL",
                     f"jdbc:derby:;"
@@ -52,8 +54,8 @@ def spark_session():
         pass
 
     # remove the cached JVM vars
-    SparkContext._jvm = None  # pylint: disable=protected-access
-    SparkContext._gateway = None  # pylint: disable=protected-access
+    SparkContext._jvm = None
+    SparkContext._gateway = None
 
     # py4j doesn't shutdown properly so kill the actual JVM process
     for obj in gc.get_objects():
@@ -139,13 +141,15 @@ def _generate_spark_df_upsert_expected():
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkHiveDataset:
     def test_cant_pickle(self):
-        import pickle  # pylint: disable=import-outside-toplevel
+        import pickle
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(

@@ -1,4 +1,3 @@
-# pylint: disable=no-member
 import importlib
 from pathlib import PosixPath
 from unittest.mock import ANY
@@ -7,6 +6,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
 from kedro_datasets.pandas.sql_dataset import _DEPRECATED_CLASSES
@@ -67,7 +67,9 @@ def query_file_dataset(request, sql_file):
 )
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 
@@ -105,7 +107,9 @@ class TestSQLTableDataset:
             side_effect=ImportError("No module named 'mysqldb'"),
         )
         with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+            SQLTableDataset(
+                table_name=TABLE_NAME, credentials={"con": CONNECTION}
+            ).exists()
 
     def test_unknown_sql(self):
         """Check the error when unknown sql dialect is provided;
@@ -114,7 +118,9 @@ class TestSQLTableDataset:
         """
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DatasetError, match=pattern):
-            SQLTableDataset(table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR})
+            SQLTableDataset(
+                table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR}
+            ).exists()
 
     def test_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -125,7 +131,9 @@ class TestSQLTableDataset:
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DatasetError, match=pattern):
-            SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+            SQLTableDataset(
+                table_name=TABLE_NAME, credentials={"con": CONNECTION}
+            ).exists()
 
     def test_str_representation_table(self, table_dataset):
         """Test the data set instance string representation"""
@@ -213,6 +221,7 @@ class TestSQLTableDatasetSingleConnection:
         kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
 
         first = SQLTableDataset(**kwargs)
+        assert not first.exists()  # Do something to create the `Engine`
         unique_connection = first.engines[CONNECTION]
         datasets = [SQLTableDataset(**kwargs) for _ in range(10)]
 
@@ -234,12 +243,18 @@ class TestSQLTableDatasetSingleConnection:
         (but different tables, for example) only create a connection once.
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        mock_inspector = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.inspect"
+        ).return_value
+        mock_inspector.has_table.return_value = False
         first = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         second = SQLTableDataset(
             table_name="other_table", credentials={"con": CONNECTION}
         )
+        assert not second.exists()  # Do something to fetch the `Engine`
         assert len(second.engines) == 1
         assert len(first.engines) == 1
 
@@ -250,11 +265,17 @@ class TestSQLTableDatasetSingleConnection:
         only create one connection per db.
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
+        mock_inspector = mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.inspect"
+        ).return_value
+        mock_inspector.has_table.return_value = False
         first = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": CONNECTION})
+        assert not first.exists()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         second_con = f"other_{CONNECTION}"
         second = SQLTableDataset(table_name=TABLE_NAME, credentials={"con": second_con})
+        assert not second.exists()  # Do something to create the `Engine`
         assert len(second.engines) == 2
         assert len(first.engines) == 2
 
@@ -335,7 +356,7 @@ class TestSQLQueryDataset:
             "kedro_datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_invalid_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -346,7 +367,7 @@ class TestSQLQueryDataset:
         )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DatasetError, match=pattern):
-            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -357,14 +378,14 @@ class TestSQLQueryDataset:
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DatasetError, match=pattern):
-            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION}).load()
 
     def test_load_unknown_sql(self):
         """Check the error when unknown SQL dialect is provided
         in the connection string"""
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DatasetError, match=pattern):
-            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
+            SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR}).load()
 
     def test_save_error(self, query_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
@@ -407,11 +428,13 @@ class TestSQLQueryDataset:
         """
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         first = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        first.load()  # Do something to create the `Engine`
         assert len(first.engines) == 1
 
         # second engine has identical params to the first one
         # => no new engine should be created
         second = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": CONNECTION})
+        second.load()  # Do something to fetch the `Engine`
         mock_engine.assert_called_once_with(CONNECTION)
         assert second.engines == first.engines
         assert len(first.engines) == 1
@@ -423,6 +446,7 @@ class TestSQLQueryDataset:
             credentials={"con": CONNECTION},
             execution_options=EXECUTION_OPTIONS,
         )
+        third.load()  # Do something to fetch the `Engine`
         assert mock_engine.call_count == 1
         assert third.engines == first.engines
         assert len(first.engines) == 1
@@ -432,6 +456,7 @@ class TestSQLQueryDataset:
         fourth = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": "an other connection string"}
         )
+        fourth.load()  # Do something to create the `Engine`
         assert mock_engine.call_count == 2
         assert fourth.engines == first.engines
         assert len(first.engines) == 2
@@ -445,6 +470,7 @@ class TestSQLQueryDataset:
         )
         mock_engine = mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         ds = SQLQueryDataset(sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION})
+        ds.load()  # Do something to create the `Engine`
         mock_engine.assert_called_once_with(MSSQL_CONNECTION)
         assert mock_adapt_mssql_date_params.call_count == 1
         assert len(ds.engines) == 1

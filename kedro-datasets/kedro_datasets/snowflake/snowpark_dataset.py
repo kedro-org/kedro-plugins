@@ -7,6 +7,7 @@ from typing import Any, Dict
 
 import snowflake.snowpark as sp
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class SnowparkTableDataset(AbstractDataset):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         table_name: str,
         schema: str = None,
@@ -171,7 +172,6 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self._session = self._get_session(self._connection_parameters)
 
         self.metadata = metadata
 
@@ -206,9 +206,13 @@ class SnowparkTableDataset(AbstractDataset):
             logger.debug("Trying to reuse active snowpark session...")
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
-            logger.debug("No active snowpark session found. Creating")
+            logger.debug("No active snowpark session found. Creating...")
             session = sp.Session.builder.configs(connection_parameters).create()
         return session
+
+    @property
+    def _session(self) -> sp.Session:
+        return self._get_session(self._connection_parameters)
 
     def _load(self) -> sp.DataFrame:
         table_name = [
@@ -255,7 +259,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

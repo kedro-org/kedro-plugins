@@ -11,6 +11,7 @@ import fsspec
 import pandas as pd
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 HDFSTORE_DRIVER = "H5FD_CORE"
@@ -35,15 +36,15 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.pandas import HDFDataset
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        ...                      'col3': [5, 6]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = HDFDataset(filepath="test.h5", key='data')
+        >>> dataset = HDFDataset(filepath="test.h5", key="data")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
@@ -56,8 +57,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         key: str,
@@ -177,7 +177,6 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 **self._save_args,
             ) as store:
                 store.put(self._key, data, format="table")
-                # pylint: disable=protected-access
                 binary_data = store._handle.get_file_image()
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
@@ -214,7 +213,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

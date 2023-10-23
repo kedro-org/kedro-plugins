@@ -11,7 +11,8 @@ import plotly.express as px
 from kedro.io.core import Version
 from plotly import graph_objects as go
 
-from .json_dataset import JSONDataset
+from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets.plotly.json_dataset import JSONDataset
 
 
 class PlotlyDataset(JSONDataset):
@@ -45,29 +46,29 @@ class PlotlyDataset(JSONDataset):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.plotly import PlotlyDataset
         >>> import plotly.express as px
         >>> import pandas as pd
         >>>
-        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=('x1', 'x2'))
+        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
         >>>
         >>> dataset = PlotlyDataset(
-        ...     filepath='scatter_plot.json',
+        ...     filepath="scatter_plot.json",
         ...     plotly_args={
-        ...         'type': 'scatter',
-        ...         'fig': {'x': 'x1', 'y': 'x2'},
-        ...     }
+        ...         "type": "scatter",
+        ...         "fig": {"x": "x1", "y": "x2"},
+        ...     },
         ... )
         >>> dataset.save(df_data)
         >>> reloaded = dataset.load()
-        >>> assert px.scatter(df_data, x='x1', y='x2') == reloaded
+        >>> assert px.scatter(df_data, x="x1", y="x2") == reloaded
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         plotly_args: Dict[str, Any],
@@ -154,7 +155,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

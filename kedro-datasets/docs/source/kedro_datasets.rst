@@ -59,6 +59,8 @@ kedro_datasets
    kedro_datasets.pandas.SQLTableDataset
    kedro_datasets.pandas.XMLDataSet
    kedro_datasets.pandas.XMLDataset
+   kedro_datasets.partitions.IncrementalDataset
+   kedro_datasets.partitions.PartitionedDataset
    kedro_datasets.pickle.PickleDataSet
    kedro_datasets.pickle.PickleDataset
    kedro_datasets.pillow.ImageDataSet
@@ -71,6 +73,8 @@ kedro_datasets
    kedro_datasets.polars.CSVDataset
    kedro_datasets.polars.GenericDataSet
    kedro_datasets.polars.GenericDataset
+   kedro_datasets.polars.EagerPolarsDataset
+   kedro_datasets.polars.LazyPolarsDataset
    kedro_datasets.redis.PickleDataSet
    kedro_datasets.redis.PickleDataset
    kedro_datasets.snowflake.SnowparkTableDataSet

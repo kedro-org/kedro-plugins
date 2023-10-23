@@ -91,7 +91,6 @@ def after_all(context):
 
 
 def before_scenario(context, feature):
-    # pylint: disable=unused-argument
     context.temp_dir = Path(tempfile.mkdtemp())
 
 

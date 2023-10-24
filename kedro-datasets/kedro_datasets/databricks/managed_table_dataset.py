@@ -173,21 +173,22 @@ class ManagedTableDataset(AbstractVersionedDataset):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
 
-        from pyspark.sql import SparkSession
-        from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-        from kedro_datasets.databricks import ManagedTableDataset
-
-        schema = StructType(
-            [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
-        )
-        data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        dataset = ManagedTableDataset(table="names_and_ages")
-        dataset.save(spark_df)
-        reloaded = dataset.load()
-        reloaded.take(4)
+        >>> from pyspark.sql import SparkSession
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
+        >>>
+        >>> from kedro_datasets.databricks import ManagedTableDataset
+        >>>
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        >>> dataset = ManagedTableDataset(table="names_and_ages")
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
+        >>> reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

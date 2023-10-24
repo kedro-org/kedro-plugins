@@ -401,7 +401,6 @@ class TestLazyParquetDatasetVersioned:
 
 class TestBadLazyPolarsDataset:
     def test_bad_file_format_argument(self):
-
         pattern = (
             "'kedro' is not an accepted format "
             f"({ACCEPTED_FILE_FORMATS}) ensure that your 'file_format' parameter "

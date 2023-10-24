@@ -1,4 +1,6 @@
 # Upcoming release
+
+# Release 0.3.0
 * Added support for Python 3.11
 * Removed support for Python 3.7
 

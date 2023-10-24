@@ -63,9 +63,9 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
         >>>
         >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> data_set = LazyPolarsDataset(filepath="test.csv")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = LazyPolarsDataset(filepath="test.csv")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)
 
     """

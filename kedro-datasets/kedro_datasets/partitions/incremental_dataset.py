@@ -46,20 +46,20 @@ class IncrementalDataset(PartitionedDataset):
         >>> # c) the checkpoint initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = IncrementalDataset(
+        >>> dataset = IncrementalDataset(
         ...     path="s3://bucket-name/path/to/folder",
         ...     dataset="pandas.CSVDataset",
         ...     credentials=credentials,
         ... )
-        >>> loaded = data_set.load()  # loads all available partitions
+        >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>
-        >>> data_set.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = data_set.load()  # still loads all available partitions
+        >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
+        >>> reloaded = dataset.load()  # still loads all available partitions
         >>>
-        >>> data_set.release()  # clears load cache
+        >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
-        >>> data_set.load()
+        >>> dataset.load()
     """
 
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"

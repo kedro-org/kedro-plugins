@@ -100,7 +100,9 @@ In order to configure the config loader, update the `settings.py` file in your K
 For instance, if you would like to use the name `scheduler`, then change the file as follows:
 
 ```python
-CONFIG_LOADER_ARGS = {"config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}}
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}
+}
 ```
 
 Follow Kedro's [official documentation](https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader), to see how to add templating, custom resolvers etc.
@@ -128,13 +130,10 @@ In order to configure the `OmegaConfigLoader`, update the `settings.py` file in 
 
 ```python
 from kedro.config import OmegaConfigLoader
-
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 CONFIG_LOADER_ARGS = {
     # other args
-    "config_patterns": {  # configure the pattern for configuration files
-        "airflow": ["airflow*", "airflow/**"]
-    }
+    "config_patterns": {"airflow": ["airflow*", "airflow/**"]}  # configure the pattern for configuration files
 }
 ```
 

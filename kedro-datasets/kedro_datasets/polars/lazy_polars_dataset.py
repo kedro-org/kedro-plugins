@@ -12,7 +12,7 @@ import fsspec
 import polars as pl
 import pyarrow.dataset as ds
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -26,7 +26,7 @@ PolarsFrame = Union[pl.LazyFrame, pl.DataFrame]
 logger = logging.getLogger(__name__)
 
 
-class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
+class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
     """``LazyPolarsDataset`` loads/saves data from/to a data file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses Polars to handle
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can

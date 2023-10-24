@@ -136,7 +136,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
                 path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
                 self._fs.copy(load_path, path)
             else:
-                self._fs.get(load_path, path, recursive=True)
+                self._fs.get(load_path+"/", path, recursive=True)
 
             # Pass the local temporary directory/file path to keras.load_model
             device_name = self._load_args.pop("tf_device", None)

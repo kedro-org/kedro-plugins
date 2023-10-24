@@ -1,5 +1,10 @@
 # Upcoming Release
 ## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 1.8.0
+## Major features and improvements
 * Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
 * Added `polars.LazyPolarsDataset`, a `GenericDataSet` using [polars](https://www.pola.rs/)'s Lazy API.
 * Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflect the difference between the two dataset classes.
@@ -10,12 +15,12 @@
 * Fix erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
 * Updated `PickleDataset` to explicitly mention `cloudpickle` support.
 
-## Upcoming deprecations for Kedro-Datasets 2.0.0
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [PtrBld](https://github.com/PtrBld)
 * [Alistair McKelvie](https://github.com/alamastor)
 * [Felix Wittmann](https://github.com/hfwittmann)
+* [Matthias Roels](https://github.com/MatthiasRoels)
 
 # Release 1.7.1
 ## Bug fixes and other changes

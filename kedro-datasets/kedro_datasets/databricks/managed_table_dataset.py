@@ -177,7 +177,6 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-        >>>
         >>> from kedro_datasets.databricks import ManagedTableDataset
         >>>
         >>> schema = StructType(

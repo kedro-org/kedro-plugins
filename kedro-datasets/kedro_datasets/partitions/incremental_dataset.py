@@ -35,7 +35,8 @@ class IncrementalDataset(PartitionedDataset):
     subsequent pipeline run loads only new partitions past the checkpoint.
 
     Example:
-    ::
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
@@ -46,10 +47,10 @@ class IncrementalDataset(PartitionedDataset):
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
         >>> data_set = IncrementalDataset(
-        >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="pandas.CSVDataset",
-        >>>     credentials=credentials
-        >>> )
+        ...     path="s3://bucket-name/path/to/folder",
+        ...     dataset="pandas.CSVDataset",
+        ...     credentials=credentials,
+        ... )
         >>> loaded = data_set.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>

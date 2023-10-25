@@ -37,33 +37,35 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: polars.LazyPolarsDataset
-        >>>   filepath: data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     parse_dates: False
-        >>>   save_args:
-        >>>     has_header: False
-                null_value: "somenullstring"
-        >>>
-        >>> motorbikes:
-        >>>   type: polars.LazyPolarsDataset
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        >>>   credentials: dev_s3
+        cars:
+          type: polars.LazyPolarsDataset
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            parse_dates: False
+          save_args:
+            has_header: False
+            null_value: "somenullstring"
 
-    Example using Python API:
-    ::
+        motorbikes:
+          type: polars.LazyPolarsDataset
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.polars import LazyPolarsDataset
         >>> import polars as pl
         >>>
-        >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> data_set = LazyPolarsDataset(filepath="test.csv")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = LazyPolarsDataset(filepath="test.csv")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)
 
     """

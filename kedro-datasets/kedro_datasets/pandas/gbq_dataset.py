@@ -184,13 +184,13 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     .. code-block:: yaml
 
-        >>> vehicles:
-        >>>   type: pandas.GBQQueryDataset
-        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
-        >>>   project: my-project
-        >>>   credentials: gbq-creds
-        >>>   load_args:
-        >>>     reauth: True
+        vehicles:
+          type: pandas.GBQQueryDataset
+          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+          project: my-project
+          credentials: gbq-creds
+          load_args:
+            reauth: True
 
 
     Example using Python API:
@@ -204,7 +204,6 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         >>> dataset = GBQQueryDataset(sql, project="my-project")
         >>>
         >>> sql_data = dataset.load()
-        >>>
     """
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}

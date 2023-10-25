@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
+    "sphinxcontrib.jquery",
     "sphinx_copybutton",
     "myst_parser",
     "notfound.extension",

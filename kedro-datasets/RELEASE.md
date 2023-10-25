@@ -1,4 +1,6 @@
 # Upcoming Release
+* Removed support for Python 3.7
+
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Community contributions

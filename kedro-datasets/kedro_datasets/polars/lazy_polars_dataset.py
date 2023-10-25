@@ -12,7 +12,7 @@ import fsspec
 import polars as pl
 import pyarrow.dataset as ds
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -26,7 +26,7 @@ PolarsFrame = Union[pl.LazyFrame, pl.DataFrame]
 logger = logging.getLogger(__name__)
 
 
-class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
+class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
     """``LazyPolarsDataset`` loads/saves data from/to a data file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses Polars to handle
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can
@@ -37,33 +37,35 @@ class LazyPolarsDataset(AbstractVersionedDataSet[pl.LazyFrame, PolarsFrame]):
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: polars.LazyPolarsDataset
-        >>>   filepath: data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     parse_dates: False
-        >>>   save_args:
-        >>>     has_header: False
-                null_value: "somenullstring"
-        >>>
-        >>> motorbikes:
-        >>>   type: polars.LazyPolarsDataset
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        >>>   credentials: dev_s3
+        cars:
+          type: polars.LazyPolarsDataset
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            parse_dates: False
+          save_args:
+            has_header: False
+            null_value: "somenullstring"
 
-    Example using Python API:
-    ::
+        motorbikes:
+          type: polars.LazyPolarsDataset
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: pycon
 
         >>> from kedro_datasets.polars import LazyPolarsDataset
         >>> import polars as pl
         >>>
-        >>> data = pl.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> data_set = LazyPolarsDataset(filepath="test.csv")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = LazyPolarsDataset(filepath="test.csv")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)
 
     """

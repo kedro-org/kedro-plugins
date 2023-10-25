@@ -58,7 +58,8 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-    ::
+
+    .. code-block:: pycon
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -68,34 +69,33 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
         >>>
         >>> # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
         >>> dict_df = {
-                day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-                for day_of_month in df["DAY_OF_MONTH"]
-            }
+        ...     day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+        ...     for day_of_month in df["DAY_OF_MONTH"]
+        ... }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
-        >>> data_set = PartitionedDataset(
-                path="df_with_partition",
-                dataset="pandas.CSVDataset",
-                filename_suffix=".csv"
-            )
+        >>> dataset = PartitionedDataset(
+        ...     path="df_with_partition", dataset="pandas.CSVDataset", filename_suffix=".csv"
+        ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
-        >>> data_set.save(dict_df)
+        >>> dataset.save(dict_df)
         >>>
         >>> # This will create lazy load functions instead of loading data into memory immediately.
-        >>> loaded = data_set.load()
+        >>> loaded = dataset.load()
         >>>
         >>> # Load all the partitions
         >>> for partition_id, partition_load_func in loaded.items():
-                # The actual function that loads the data
-                partition_data = partition_load_func()
-        >>>
+        ...     # The actual function that loads the data
+        ...     partition_data = partition_load_func()
+        ...
         >>> # Add the processing logic for individual partition HERE
         >>> print(partition_data)
 
     You can also load multiple partitions from a remote storage and combine them
     like this:
-    ::
+
+    .. code-block:: pycon
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -104,25 +104,23 @@ class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], 
         >>> # and the dataset initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = PartitionedDataset(
-                path="s3://bucket-name/path/to/folder",
-                dataset="pandas.CSVDataset",
-                credentials=credentials
-            )
-        >>> loaded = data_set.load()
+        >>> dataset = PartitionedDataset(
+        ...     path="s3://bucket-name/path/to/folder",
+        ...     dataset="pandas.CSVDataset",
+        ...     credentials=credentials,
+        ... )
+        >>> loaded = dataset.load()
         >>> # assert isinstance(loaded, dict)
         >>>
         >>> combine_all = pd.DataFrame()
         >>>
         >>> for partition_id, partition_load_func in loaded.items():
-                partition_data = partition_load_func()
-                combine_all = pd.concat(
-                    [combine_all, partition_data], ignore_index=True, sort=True
-                )
-        >>>
+        ...     partition_data = partition_load_func()
+        ...     combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
+        ...
         >>> new_data = pd.DataFrame({"new": [1, 2]})
         >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
-        >>> data_set.save({"new/partition.csv": new_data})
+        >>> dataset.save({"new/partition.csv": new_data})
 
     """
 

@@ -40,9 +40,9 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
 
     .. code-block:: pycon
 
-        >>> from kedro.extras.datasets.dask import ParquetDataset
-        >>> import pandas as pd
         >>> import dask.dataframe as dd
+        >>> import pandas as pd
+        >>> from kedro_datasets.dask import ParquetDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)

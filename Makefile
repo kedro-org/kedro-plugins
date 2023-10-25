@@ -21,8 +21,9 @@ test:
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests:
-	cd kedro-datasets && pytest --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/tensorflow --ignore tests/databricks --ignore tests/tensorflow --doctest-modules --doctest-continue-on-failure
+	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/tensorflow
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
@@ -57,14 +58,17 @@ sign-off:
 
 # kedro-datasets related only
 test-no-spark:
-	cd kedro-datasets && pytest --no-cov --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/tensorflow --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile --doctest-modules --doctest-continue-on-failure
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
 
 test-no-spark-sequential:
-	cd kedro-datasets && pytest --no-cov --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/tensorflow --ignore tests/spark --ignore tests/databricks --doctest-modules --doctest-continue-on-failure
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
 
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
 	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure
 
 rtd:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

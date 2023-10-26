@@ -25,8 +25,8 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
 dataset-doctests:
+	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure \
-	  # TODO(deepyaman): Make as many docstring tests as possible runnable.
 	  --ignore kedro_datasets/api/api_dataset.py \
 	  --ignore kedro_datasets/dask/parquet_dataset.py \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \

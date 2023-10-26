@@ -1,7 +1,10 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fixed bug with loading models saved with `TensorFlowModelDataset`.
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Edouard59](https://github.com/Edouard59)
 
 # Release 1.8.0
 ## Major features and improvements

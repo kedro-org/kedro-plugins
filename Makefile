@@ -80,18 +80,16 @@ sign-off:
 	chmod +x .git/hooks/commit-msg
 
 # kedro-datasets related only
-test-no-spark:
+test-no-spark: dataset-doctests
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
-	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
 
-test-no-spark-sequential:
+test-no-spark-sequential: dataset-doctests
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
-	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
 
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
 	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
-	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
 rtd:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

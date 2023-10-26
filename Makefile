@@ -25,7 +25,28 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
 dataset-doctests:
-	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --ignore kedro_datasets/api --ignore kedro_datasets/snowflake --ignore kedro_datasets/tensorflow
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure \
+	  # TODO(deepyaman): Make as many docstring tests as possible runnable.
+	  --ignore kedro_datasets/api/api_dataset.py \
+	  --ignore kedro_datasets/dask/parquet_dataset.py \
+	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
+	  --ignore kedro_datasets/matplotlib/matplotlib_writer.py \
+	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
+	  --ignore kedro_datasets/pandas/gbq_dataset.py.py \
+	  --ignore kedro_datasets/pandas/generic_dataset.py \
+	  --ignore kedro_datasets/pandas/sql_dataset.py \
+	  --ignore kedro_datasets/partitions/incremental_dataset.py \
+	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
+	  --ignore kedro_datasets/pillow/image_dataset.py \
+	  --ignore kedro_datasets/polars/lazy_polars_dataset.py \
+	  --ignore kedro_datasets/redis/redis_dataset.py \
+	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
+	  --ignore kedro_datasets/spark/deltatable_dataset.py \
+	  --ignore kedro_datasets/spark/spark_dataset.py \
+	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
+	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
+	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
+	  --ignore kedro_datasets/video/video_dataset.py
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml

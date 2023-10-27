@@ -8,9 +8,9 @@ import lazy_loader as lazy
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 CSVDataSet: type[CSVDataset]
 CSVDataset: Any
+EagerPolarsDataset: Any
 GenericDataSet: type[EagerPolarsDataset]
 GenericDataset: type[EagerPolarsDataset]
-EagerPolarsDataset: Any
 LazyPolarsDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(

@@ -20,9 +20,33 @@ test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
-dataset-tests:
+dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
+
+dataset-doctests:
+	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
+	  --ignore kedro_datasets/api/api_dataset.py \
+	  --ignore kedro_datasets/dask/parquet_dataset.py \
+	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
+	  --ignore kedro_datasets/matplotlib/matplotlib_writer.py \
+	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
+	  --ignore kedro_datasets/pandas/gbq_dataset.py \
+	  --ignore kedro_datasets/pandas/generic_dataset.py \
+	  --ignore kedro_datasets/pandas/sql_dataset.py \
+	  --ignore kedro_datasets/partitions/incremental_dataset.py \
+	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
+	  --ignore kedro_datasets/pillow/image_dataset.py \
+	  --ignore kedro_datasets/polars/lazy_polars_dataset.py \
+	  --ignore kedro_datasets/redis/redis_dataset.py \
+	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
+	  --ignore kedro_datasets/spark/deltatable_dataset.py \
+	  --ignore kedro_datasets/spark/spark_dataset.py \
+	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
+	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
+	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
+	  --ignore kedro_datasets/video/video_dataset.py
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
@@ -56,15 +80,16 @@ sign-off:
 	chmod +x .git/hooks/commit-msg
 
 # kedro-datasets related only
-test-no-spark:
+test-no-spark: dataset-doctests
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
-test-no-spark-sequential:
+test-no-spark-sequential: dataset-doctests
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
 
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
-	cd kedro-datasets && pytest tests --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
 rtd:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

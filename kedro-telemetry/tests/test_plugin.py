@@ -40,13 +40,16 @@ def fake_metadata(tmp_path):
 @fixture
 def fake_context(mocker):
     mock_context = mocker.Mock()
+    return mock_context
+
+
+@fixture
+def fake_catalog():
     dummy_1 = MemoryDataset()
     dummy_2 = MemoryDataset()
     dummy_3 = MemoryDataset()
-    mock_context.catalog = DataCatalog(
-        {"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3}
-    )
-    return mock_context
+    catalog = DataCatalog({"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3})
+    return catalog
 
 
 def identity(arg):
@@ -332,6 +335,7 @@ class TestKedroTelemetryProjectHooks:
         self,
         mocker,
         fake_context,
+        fake_catalog,
         fake_default_pipeline,
         fake_sub_pipeline,
     ):
@@ -352,6 +356,7 @@ class TestKedroTelemetryProjectHooks:
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryProjectHooks()
         telemetry_hook.after_context_created(fake_context)
+        telemetry_hook.after_catalog_created(fake_catalog)
 
         project_properties = {
             "username": "hashed_username",
@@ -381,6 +386,7 @@ class TestKedroTelemetryProjectHooks:
         self,
         mocker,
         fake_context,
+        fake_catalog,
         fake_metadata,
         fake_default_pipeline,
         fake_sub_pipeline,
@@ -406,6 +412,7 @@ class TestKedroTelemetryProjectHooks:
         # Follow by project run
         telemetry_hook = KedroTelemetryProjectHooks()
         telemetry_hook.after_context_created(fake_context)
+        telemetry_hook.after_catalog_created(fake_catalog)
 
         project_properties = {
             "username": "hashed_username",

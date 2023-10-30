@@ -38,12 +38,6 @@ def fake_metadata(tmp_path):
 
 
 @fixture
-def fake_context(mocker):
-    mock_context = mocker.Mock()
-    return mock_context
-
-
-@fixture
 def fake_catalog():
     dummy_1 = MemoryDataset()
     dummy_2 = MemoryDataset()

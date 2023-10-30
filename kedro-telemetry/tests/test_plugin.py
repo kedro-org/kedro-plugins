@@ -334,11 +334,11 @@ class TestKedroTelemetryProjectHooks:
     def test_after_context_created_without_kedro_run(
         self,
         mocker,
-        fake_context,
         fake_catalog,
         fake_default_pipeline,
         fake_sub_pipeline,
     ):
+        fake_context = mocker.Mock()
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
@@ -385,12 +385,12 @@ class TestKedroTelemetryProjectHooks:
     def test_after_context_created_with_kedro_run(  # noqa: PLR0913
         self,
         mocker,
-        fake_context,
         fake_catalog,
         fake_metadata,
         fake_default_pipeline,
         fake_sub_pipeline,
     ):
+        fake_context = mocker.Mock()
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
@@ -438,7 +438,8 @@ class TestKedroTelemetryProjectHooks:
         # CLI hook makes the first 2 calls, the 3rd one is the Project hook
         assert mocked_heap_call.call_args_list[2] == expected_call
 
-    def test_after_context_created_no_consent_given(self, mocker, fake_context):
+    def test_after_context_created_no_consent_given(self, mocker):
+        fake_context = mocker.Mock()
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=False
         )

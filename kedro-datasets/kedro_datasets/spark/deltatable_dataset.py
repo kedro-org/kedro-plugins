@@ -41,10 +41,9 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
 
     .. code-block:: pycon
 
+        >>> from kedro_datasets.spark import DeltaTableDataset, SparkDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-        >>>
-        >>> from kedro.extras.datasets.spark import DeltaTableDataset, SparkDataset
         >>>
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]

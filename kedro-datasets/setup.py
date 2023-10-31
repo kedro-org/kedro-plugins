@@ -69,6 +69,15 @@ polars_require = {
         "xlsx2csv>=0.8.0",
         "deltalake >= 0.6.2",
     ],
+    "polars.EagerPolarsDataset":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+    "polars.LazyPolarsDataset":
+    [
+        # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
+        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
+    ],
 }
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 snowflake_require = {
@@ -157,8 +166,7 @@ extras_require["docs"] = [
     "Jinja2<3.1.0",
 ]
 extras_require["test"] = [
-    "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
-    "adlfs~=2023.1; python_version >= '3.8'",
+    "adlfs~=2023.1",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "biopython~=1.73",
@@ -173,8 +181,7 @@ extras_require["test"] = [
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
-    "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
+    "gcsfs>=2023.1, <2023.3",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
@@ -220,8 +227,7 @@ extras_require["test"] = [
     "scipy>=1.7.3",
     "packaging",
     "SQLAlchemy~=1.2",
-    "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
-    "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
+    "tables~=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
     "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
     "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",

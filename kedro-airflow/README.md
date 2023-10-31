@@ -1,7 +1,7 @@
 # Kedro-Airflow
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro-airflow/)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-airflow/)
 [![PyPI Version](https://badge.fury.io/py/kedro-airflow.svg)](https://pypi.org/project/kedro-airflow/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
@@ -100,9 +100,7 @@ In order to configure the config loader, update the `settings.py` file in your K
 For instance, if you would like to use the name `scheduler`, then change the file as follows:
 
 ```python
-CONFIG_LOADER_ARGS = {
-    "config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}
-}
+CONFIG_LOADER_ARGS = {"config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}}
 ```
 
 Follow Kedro's [official documentation](https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader), to see how to add templating, custom resolvers etc.
@@ -130,10 +128,13 @@ In order to configure the `OmegaConfigLoader`, update the `settings.py` file in 
 
 ```python
 from kedro.config import OmegaConfigLoader
+
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 CONFIG_LOADER_ARGS = {
     # other args
-    "config_patterns": {"airflow": ["airflow*", "airflow/**"]}  # configure the pattern for configuration files
+    "config_patterns": {  # configure the pattern for configuration files
+        "airflow": ["airflow*", "airflow/**"]
+    }
 }
 ```
 

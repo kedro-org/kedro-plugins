@@ -113,8 +113,11 @@ class KedroTelemetryProjectHooks:
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
-        consent = _check_for_telemetry_consent(context.project_path)
-        if not consent:
+        self.consent = _check_for_telemetry_consent(context.project_path)
+
+    @hook_impl
+    def after_catalog_created(self, catalog):
+        if not self.consent:
             logger.debug(
                 "Kedro-Telemetry is installed, but you have opted out of "
                 "sharing usage analytics so none will be collected.",
@@ -123,7 +126,6 @@ class KedroTelemetryProjectHooks:
 
         logger.debug("You have opted into product usage analytics.")
 
-        catalog = context.catalog
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
 

@@ -9,12 +9,13 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from kedro.io.core import Version, VersionNotFoundError
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
 
@@ -264,10 +265,6 @@ class ManagedTableDataset(AbstractVersionedDataset):
             exists_function=self._exists,
         )
 
-    @staticmethod
-    def _get_spark() -> SparkSession:
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> Union[DataFrame, pd.DataFrame]:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe)
@@ -283,7 +280,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         if self._version and self._version.load >= 0:
             try:
                 data = (
-                    self._get_spark()
+                    _get_spark()
                     .read.format("delta")
                     .option("versionAsOf", self._version.load)
                     .table(self._table.full_table_location())
@@ -291,7 +288,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             except Exception as exc:
                 raise VersionNotFoundError(self._version.load) from exc
         else:
-            data = self._get_spark().table(self._table.full_table_location())
+            data = _get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data
@@ -329,7 +326,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             update_data (DataFrame): the Spark dataframe to upsert
         """
         if self._exists():
-            base_data = self._get_spark().table(self._table.full_table_location())
+            base_data = _get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
 
@@ -352,13 +349,11 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            self._get_spark().conf.set(
-                "fullTableAddress", self._table.full_table_location()
-            )
-            self._get_spark().conf.set("whereExpr", where_expr)
+            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
+            _get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
-            self._get_spark().sql(upsert_sql)
+            _get_spark().sql(upsert_sql)
         else:
             self._save_append(update_data)
 
@@ -380,13 +375,13 @@ class ManagedTableDataset(AbstractVersionedDataset):
         if self._table.schema():
             cols = self._table.schema().fieldNames()
             if self._table.dataframe_type == "pandas":
-                data = self._get_spark().createDataFrame(
+                data = _get_spark().createDataFrame(
                     data.loc[:, cols], schema=self._table.schema()
                 )
             else:
                 data = data.select(*cols)
         elif self._table.dataframe_type == "pandas":
-            data = self._get_spark().createDataFrame(data)
+            data = _get_spark().createDataFrame(data)
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":
@@ -421,7 +416,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         """
         if self._table.catalog:
             try:
-                self._get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
+                _get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
             except (ParseException, AnalysisException) as exc:
                 logger.warning(
                     "catalog %s not found or unity not enabled. Error message: %s",
@@ -430,7 +425,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
         try:
             return (
-                self._get_spark()
+                _get_spark()
                 .sql(f"SHOW TABLES IN `{self._table.database}`")
                 .filter(f"tableName = '{self._table.table}'")
                 .count()

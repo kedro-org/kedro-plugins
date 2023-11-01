@@ -86,13 +86,13 @@ class TestDeltaTableDataset:
     def test_exists_raises_error(self, mocker):
         delta_ds = DeltaTableDataset(filepath="")
         if SPARK_VERSION >= Version("3.4.0"):
-            mocker.patch.object(
-                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
+            mocker.patch(
+                "kedro_datasets.spark.deltatable_dataset._get_spark",
+                side_effect=AnalysisException("Other Exception"),
             )
         else:
-            mocker.patch.object(
-                delta_ds,
-                "_get_spark",
+            mocker.patch(
+                "kedro_datasets.spark.deltatable_dataset._get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):

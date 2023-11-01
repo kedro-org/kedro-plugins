@@ -4,8 +4,9 @@
 See [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) for details.
 
 To work with multiple streaming nodes, 2 hooks are required for:
-    - Integrating Pyspark, see [Build a Kedro pipeline with PySpark](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for details
-    - Running streaming query without termination unless exception
+
+- Integrating PySpark, see [Build a Kedro pipeline with PySpark](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for details
+- Running streaming query without termination unless exception
 
 #### Supported file formats
 

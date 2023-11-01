@@ -4,13 +4,14 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
     SparkDataset,
+    _get_spark,
     _split_filepath,
     _strip_dbfs_prefix,
 )
@@ -104,10 +105,6 @@ class SparkStreamingDataset(AbstractDataset):
             "save_args": self._save_args,
         }
 
-    @staticmethod
-    def _get_spark():
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> DataFrame:
         """Loads data from filepath.
         If the connector type is kafka then no file_path is required, schema needs to be
@@ -117,7 +114,7 @@ class SparkStreamingDataset(AbstractDataset):
         """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         data_stream_reader = (
-            self._get_spark()
+            _get_spark()
             .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
@@ -146,7 +143,7 @@ class SparkStreamingDataset(AbstractDataset):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            self._get_spark().readStream.schema(self._schema).load(
+            _get_spark().readStream.schema(self._schema).load(
                 load_path, self._file_format
             )
         except AnalysisException as exception:

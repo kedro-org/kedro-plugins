@@ -153,14 +153,3 @@ You can set the operator to use by providing a custom template.
 See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 The [rich offering](https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/index.html) of operators means that the `kedro-airflow` plugin is providing templates for specific operators.
 The default template provided by `kedro-airflow` uses the `BaseOperator`.
-
-## Can I contribute?
-
-Yes! Want to help build Kedro-Airflow? Check out our guide to [contributing](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/CONTRIBUTING.md).
-
-## What licence do you use?
-
-Kedro-Airflow is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
-
-## Python version support policy
-* The [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-airflow`. This is not considered a breaking change.

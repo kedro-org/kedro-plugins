@@ -187,3 +187,6 @@ Yes! Want to help build Kedro-Docker? Check out our guide to [contributing](http
 ## What licence do you use?
 
 Kedro-Docker is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+* The [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-docker`. This is not considered a breaking change.

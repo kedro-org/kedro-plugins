@@ -1,13 +1,18 @@
 # Upcoming Release
-* Removed support for Python 3.7
 
 ## Major features and improvements
+* Removed support for Python 3.7
+* Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html)
+* Added `NetCDFDataset` for loading and saving `*.nc` files.
+
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
-* Added `NetCDFDataset` for loading and saving `*.nc` files.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Edouard59](https://github.com/Edouard59)
+* [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+* [Riley Brady](https://github.com/riley-brady)
 
 # Release 1.8.0
 ## Major features and improvements

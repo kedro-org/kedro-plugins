@@ -1,10 +1,12 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+from __future__ import annotations
+
 import copy
 import datetime as dt
 import re
 import warnings
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Optional
+from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
@@ -33,7 +35,7 @@ A module/driver is missing when connecting to your SQL server. SQLDataset
 """
 
 
-def _find_known_drivers(module_import_error: ImportError) -> Optional[str]:
+def _find_known_drivers(module_import_error: ImportError) -> str | None:
     """Looks up known keywords in a ``ModuleNotFoundError`` so that it can
     provide better guideline for the user.
 
@@ -145,19 +147,19 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         table_name: str,
-        credentials: Dict[str, Any],
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any],
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataset``.
 
@@ -212,7 +214,6 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self._save_args["name"] = table_name
 
         self._connection_str = credentials["con"]
-        self.create_connection(self._connection_str)
 
         self.metadata = metadata
 
@@ -222,9 +223,6 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
         """
-        if connection_str in cls.engines:
-            return
-
         try:
             engine = create_engine(connection_str)
         except ImportError as import_error:
@@ -234,7 +232,17 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
         cls.engines[connection_str] = engine
 
-    def _describe(self) -> Dict[str, Any]:
+    @property
+    def engine(self):
+        """The ``Engine`` object for the dataset's connection string."""
+        cls = type(self)
+
+        if self._connection_str not in cls.engines:
+            self.create_connection(self._connection_str)
+
+        return cls.engines[self._connection_str]
+
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         save_args = copy.deepcopy(self._save_args)
         del load_args["table_name"]
@@ -246,16 +254,13 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         }
 
     def _load(self) -> pd.DataFrame:
-        engine = self.engines[self._connection_str]  # type:ignore
-        return pd.read_sql_table(con=engine, **self._load_args)
+        return pd.read_sql_table(con=self.engine, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        engine = self.engines[self._connection_str]  # type: ignore
-        data.to_sql(con=engine, **self._save_args)
+        data.to_sql(con=self.engine, **self._save_args)
 
     def _exists(self) -> bool:
-        engine = self.engines[self._connection_str]  # type: ignore
-        insp = inspect(engine)
+        insp = inspect(self.engine)
         schema = self._load_args.get("schema", None)
         return insp.has_table(self._load_args["table_name"], schema)
 
@@ -272,7 +277,6 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     It does not support save method so it is a read only data set.
     To save data to a SQL server use ``SQLTableDataset``.
-
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -375,17 +379,17 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
-        execution_options: Optional[Dict[str, Any]] = None,
-        metadata: Dict[str, Any] = None,
+        execution_options: dict[str, Any] | None = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -441,7 +445,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args: Dict[str, Any] = {}
+        default_load_args: dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -466,7 +470,6 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self._filepath = path
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
-        self.create_connection(self._connection_str)
         if "mssql" in self._connection_str:
             self.adapt_mssql_date_params()
 
@@ -476,9 +479,6 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.
         """
-        if connection_str in cls.engines:
-            return
-
         try:
             engine = create_engine(connection_str)
         except ImportError as import_error:
@@ -488,7 +488,17 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         cls.engines[connection_str] = engine
 
-    def _describe(self) -> Dict[str, Any]:
+    @property
+    def engine(self):
+        """The ``Engine`` object for the dataset's connection string."""
+        cls = type(self)
+
+        if self._connection_str not in cls.engines:
+            self.create_connection(self._connection_str)
+
+        return cls.engines[self._connection_str]
+
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         return {
             "sql": str(load_args.pop("sql", None)),
@@ -499,16 +509,15 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[self._connection_str].execution_options(
-            **self._execution_options
-        )  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["sql"] = fs_file.read()
 
-        return pd.read_sql_query(con=engine, **load_args)
+        return pd.read_sql_query(
+            con=self.engine.execution_options(**self._execution_options), **load_args
+        )
 
     def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on SQLQueryDataset")

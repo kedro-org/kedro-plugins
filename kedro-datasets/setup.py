@@ -36,9 +36,8 @@ pandas_require = {
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
     "pandas.HDFDataSet": [
         PANDAS,
-        "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
-        "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
+        "tables~=3.6, <3.9; python_version<'3.9'",
+        "tables~=3.6; python_version>='3.9'",
     ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
@@ -55,18 +54,23 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataSet": [POLARS],
-    "polars.GenericDataSet":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataSet": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
-    "polars.EagerPolarsDataset":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.EagerPolarsDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
-    "polars.LazyPolarsDataset":
-    [
+    "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
-        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
+        POLARS,
+        "pyarrow>=4.0",
+        "deltalake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}

@@ -6,6 +6,7 @@
 
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
+* Removed Windows specific conditions in `pandas.HDFDataSet` extra dependencies
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -25,7 +25,7 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "kedro-datasets"
+project = "kedro"
 author = "kedro"
 
 # The short X.Y version.
@@ -52,6 +52,7 @@ extensions = [
     "sphinx_copybutton",
     "myst_parser",
     "notfound.extension",
+    "sphinxcontrib.jquery",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

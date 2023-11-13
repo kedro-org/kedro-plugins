@@ -5,7 +5,6 @@ from typing import Any
 from datasets import load_dataset
 from huggingface_hub import HfApi
 from kedro.io import AbstractVersionedDataset as AbstractVersionedDataSet
-from kedro.io import DatasetError as DataSetError
 
 
 class HFDataset(AbstractVersionedDataSet):
@@ -40,7 +39,7 @@ class HFDataset(AbstractVersionedDataSet):
         return load_dataset(self.dataset_name)
 
     def _save(self):
-        raise DataSetError("_save not implemented for HFDataset")
+        raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, Any]:
         api = HfApi()

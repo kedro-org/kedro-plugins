@@ -9,6 +9,30 @@ from kedro.io import DatasetError as DataSetError
 
 
 class HFDataset(AbstractVersionedDataSet):
+    """``HFDataset`` loads Hugging Face datasets
+    using the `datasets <https://pypi.org/project/datasets>`_ library.
+
+    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+
+    .. code-block:: yaml
+
+       yelp_reviews:
+         type: kedro_hf_datasets.HFDataset
+         dataset_name: yelp_review_full
+
+    Example usage for the :doc:`Python API <kedro:data/advanced_data_catalog_usage>`:
+
+    .. code-block:: pycon
+
+       >>> from kedro_datasets.huggingface import HFDataset
+       >>> dataset = HFDataset(dataset_name="yelp_review_full")
+       >>> yelp_review_full = dataset.load()
+       >>> assert "train" in yelp_review_full
+       >>> assert "test" in yelp_review_full
+       >>> assert len(yelp_review_full["train"]) == 650000
+
+    """
+
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 

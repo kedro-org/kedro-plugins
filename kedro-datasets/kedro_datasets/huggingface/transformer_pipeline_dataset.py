@@ -9,6 +9,38 @@ from transformers import Pipeline, pipeline
 
 
 class HFTransformerPipelineDataset(AbstractDataset):
+    """``HFTransformerPipelineDataset`` loads pretrained Hugging Face transformers
+    using the `transformers <https://pypi.org/project/transformers>`_ library.
+
+    Example usage for the
+    `YAML API <https://docs.kedro.org/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
+
+    .. code-block:: yaml
+
+       summarizer_model:
+         type: huggingface.HFTransformerPipelineDataset
+         task: summarization
+
+       fill_mask_model:
+         type: huggingface.HFTransformerPipelineDataset
+         task: fill-mask
+         model_name: Twitter/twhin-bert-base
+
+    Example usage for the
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+
+    .. code-block:: pycon
+
+       >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
+       >>> dataset = HFTransformerPipelineDataset(task="text-classification", model_name="papluca/xlm-roberta-base-language-detection")
+       >>> detector = dataset.load()
+       >>> assert detector("Ceci n'est pas une pipe")[0]["label"] == "fr"
+
+    """
+
     def __init__(
         self,
         task: str | None = None,

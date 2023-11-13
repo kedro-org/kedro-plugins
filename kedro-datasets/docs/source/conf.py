@@ -43,6 +43,7 @@ version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
@@ -90,6 +91,9 @@ exclude_patterns = [
     "kedro_docs_style_guide.md",
 ]
 
+intersphinx_mapping = {
+    "kedro": ("https://docs.kedro.org/en/stable/", None),
+}
 
 type_targets = {
     "py:class": (

@@ -20,6 +20,10 @@ kedro_datasets
    kedro_datasets.holoviews.HoloviewsWriter
    kedro_datasets.huggingface.HFDataset
    kedro_datasets.huggingface.HFTransformerPipelineDataset
+<<<<<<< HEAD:kedro-datasets/docs/source/api/kedro_datasets.rst
+=======
+   kedro_datasets.json.JSONDataSet
+>>>>>>> f59e930 (feat(datasets): Add Hugging Face datasets (#344)):kedro-datasets/docs/source/kedro_datasets.rst
    kedro_datasets.json.JSONDataset
    kedro_datasets.matlab.MatlabDataset
    kedro_datasets.matplotlib.MatplotlibWriter

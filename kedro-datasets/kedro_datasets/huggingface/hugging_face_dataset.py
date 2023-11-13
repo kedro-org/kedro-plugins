@@ -51,6 +51,6 @@ class HFDataset(AbstractVersionedDataSet):
         }
 
     @staticmethod
-    def fetch_datasets():
+    def list_datasets():
         api = HfApi()
         return list(api.list_datasets())

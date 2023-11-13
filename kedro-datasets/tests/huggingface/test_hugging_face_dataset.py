@@ -1,4 +1,5 @@
 import pytest
+from huggingface_hub import HfApi
 
 from kedro_datasets.huggingface import HFDataset
 
@@ -21,3 +22,12 @@ class TestHFDataset:
 
         mocked_load_dataset.assert_called_once_with(dataset_name)
         assert hf_ds is mocked_load_dataset.return_value
+
+    def test_list_datasets(self, mocker):
+        expected_datasets = ["dataset_1", "dataset_2"]
+        mocked_hf_list_datasets = mocker.patch.object(HfApi, "list_datasets")
+        mocked_hf_list_datasets.return_value = expected_datasets
+
+        datasets = HFDataset.list_datasets()
+
+        assert datasets == expected_datasets

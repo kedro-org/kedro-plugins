@@ -229,6 +229,10 @@ extras_require["test"] = [
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
     "xlsxwriter~=1.0",
+    # huggingface
+    "datasets",
+    "huggingface_hub",
+    "transformers",
 ]
 
 setup(

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typing as t
-from typing import Any
 from warnings import warn
 
 from kedro.io import AbstractDataset
@@ -64,7 +63,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
     def _save(self, pipeline: Pipeline) -> None:
         raise NotImplementedError("Not yet implemented")
 
-    def _describe(self) -> dict[str, Any]:
+    def _describe(self) -> dict[str, t.Any]:
         return {
             "task": self._task,
             "model_name": self._model_name,

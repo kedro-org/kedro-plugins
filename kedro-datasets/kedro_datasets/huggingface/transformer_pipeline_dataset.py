@@ -12,9 +12,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
     """``HFTransformerPipelineDataset`` loads pretrained Hugging Face transformers
     using the `transformers <https://pypi.org/project/transformers>`_ library.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
 
     .. code-block:: yaml
 
@@ -27,10 +25,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
          task: fill-mask
          model_name: Twitter/twhin-bert-base
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
+    Example usage for the :doc:`Python API <kedro:data/advanced_data_catalog_usage>`:
 
     .. code-block:: pycon
 

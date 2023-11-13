@@ -4,10 +4,10 @@ from typing import Any
 
 from datasets import load_dataset
 from huggingface_hub import HfApi
-from kedro.io import AbstractVersionedDataset as AbstractVersionedDataSet
+from kedro.io import AbstractVersionedDataset
 
 
-class HFDataset(AbstractVersionedDataSet):
+class HFDataset(AbstractVersionedDataset):
     """``HFDataset`` loads Hugging Face datasets
     using the `datasets <https://pypi.org/project/datasets>`_ library.
 

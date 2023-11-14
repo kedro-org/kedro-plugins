@@ -26,6 +26,7 @@ kedro_datasets
    kedro_datasets.holoviews.HoloviewsWriter
    kedro_datasets.json.JSONDataSet
    kedro_datasets.json.JSONDataset
+   kedro_datasets.matlab.MatlabDataset
    kedro_datasets.matplotlib.MatplotlibWriter
    kedro_datasets.networkx.GMLDataSet
    kedro_datasets.networkx.GMLDataset

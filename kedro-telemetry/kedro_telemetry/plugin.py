@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 import click
 import requests
 import yaml
+import toml
 from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
@@ -114,7 +115,8 @@ class KedroTelemetryProjectHooks:
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
         self.consent = _check_for_telemetry_consent(context.project_path)
-
+        self.project_path = context.project_path
+        
     @hook_impl
     def after_catalog_created(self, catalog):
         if not self.consent:
@@ -128,8 +130,17 @@ class KedroTelemetryProjectHooks:
 
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
+        
+        project_path = Path(self.project_path)
+        pyproject_path = project_path / "pyproject.toml"
+        
+        with open(pyproject_path, "r") as file:
+            pyproject_data = toml.load(file)
+            
+        add_ons_data = pyproject_data["tool"]["kedro"]["add_ons"]
 
         project_properties = _get_project_properties(hashed_username)
+        project_properties["add_ons"] = add_ons_data
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines

@@ -13,8 +13,8 @@ from typing import Any, Dict, List
 
 import click
 import requests
-import yaml
 import toml
+import yaml
 from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
@@ -79,9 +79,10 @@ class KedroTelemetryCLIHooks:
                 return
 
             logger.debug("You have opted into product usage analytics.")
-
             hashed_username = _get_hashed_username()
-            project_properties = _get_project_properties(hashed_username)
+            project_properties = _get_project_properties(
+                hashed_username, project_metadata.project_path
+            )
             cli_properties = _format_user_cli_data(
                 project_properties, masked_command_args
             )
@@ -116,7 +117,7 @@ class KedroTelemetryProjectHooks:
         """Hook implementation to send project statistics data to Heap"""
         self.consent = _check_for_telemetry_consent(context.project_path)
         self.project_path = context.project_path
-        
+
     @hook_impl
     def after_catalog_created(self, catalog):
         if not self.consent:
@@ -130,17 +131,8 @@ class KedroTelemetryProjectHooks:
 
         default_pipeline = pipelines.get("__default__")  # __default__
         hashed_username = _get_hashed_username()
-        
-        project_path = Path(self.project_path)
-        pyproject_path = project_path / "pyproject.toml"
-        
-        with open(pyproject_path, "r") as file:
-            pyproject_data = toml.load(file)
-            
-        add_ons_data = pyproject_data["tool"]["kedro"]["add_ons"]
 
-        project_properties = _get_project_properties(hashed_username)
-        project_properties["add_ons"] = add_ons_data
+        project_properties = _get_project_properties(hashed_username, self.project_path)
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines
@@ -152,10 +144,9 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _get_project_properties(hashed_username: str) -> Dict:
+def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
     hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
-
-    return {
+    properties = {
         "username": hashed_username,
         "package_name": hashed_package_name,
         "project_version": KEDRO_VERSION,
@@ -163,6 +154,17 @@ def _get_project_properties(hashed_username: str) -> Dict:
         "python_version": sys.version,
         "os": sys.platform,
     }
+    pyproject_path = Path(project_path) / "pyproject.toml"
+
+    with open(pyproject_path) as file:
+        pyproject_data = toml.load(file)
+
+    if (
+        "add_ons" in pyproject_data["tool"]["kedro"]
+    ):  # TODO: This needs to change to "tools"
+        properties["tools"] = pyproject_data["tool"]["kedro"]["add_ons"]
+
+    return properties
 
 
 def _format_user_cli_data(

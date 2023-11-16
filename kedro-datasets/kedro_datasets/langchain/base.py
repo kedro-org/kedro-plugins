@@ -1,0 +1,1 @@
+"""Defines an interface to common OpenAI models."""

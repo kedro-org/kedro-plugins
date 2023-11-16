@@ -1,5 +1,4 @@
-"""Defines a general interface to langchain model APIs."""
-
+"""Defines an interface to common OpenAI models."""
 
 from abc import abstractmethod
 from typing import Any, Dict, NoReturn, TypeVar, Generic

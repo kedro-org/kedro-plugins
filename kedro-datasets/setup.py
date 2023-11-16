@@ -29,6 +29,12 @@ huggingface_require = {
     "huggingface.HFDataset": ["datasets", "huggingface_hub"],
     "huggingface.HFTransformerPipelineDataset": ["transformers"],
 }
+langchain_require = {
+    "langchain.ChatOpenAIDataset": ["langchain[openai]"],
+    "langchain.OpenAIEmbeddingsDataset": ["langchain[openai]"],
+    # "langchain.ChatAnthropicDataset": ["langchain[anthropic]"],
+    # "langchain.CohereDataset": ["langchain[cohere]"],
+}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
@@ -127,6 +133,7 @@ extras_require = {
     **databricks_require,
     **geopandas_require,
     **holoviews_require,
+    **langchain_require,
     **matplotlib_require,
     **networkx_require,
     **pandas_require,
@@ -233,6 +240,7 @@ extras_require["test"] = [
     "datasets",
     "huggingface_hub",
     "transformers",
+    "langchain",
 ]
 
 setup(

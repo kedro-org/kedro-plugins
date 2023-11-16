@@ -22,7 +22,7 @@ If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
-
+FILENAME_ARG_NAME = """Name of the file to be generated. If not set, the package name will be used."""
 
 @click.group(name="Kedro-Airflow")
 def commands():
@@ -107,6 +107,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "--filename",
+    type=click.STRING,
+    help=FILENAME_ARG_NAME,
+    default=None,
+)
 @click.pass_obj
 def create(  # noqa: PLR0913
     metadata: ProjectMetadata,
@@ -115,6 +121,7 @@ def create(  # noqa: PLR0913
     target_path,
     jinja_file,
     params,
+    filename,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
@@ -142,6 +149,11 @@ def create(  # noqa: PLR0913
 
     package_name = metadata.package_name
 
+    if filename is None:
+        filename = package_name
+    elif filename.endswith(".py"):
+        filename = filename[:-3]
+
     if convert_all:
         # Convert all pipelines
         conversion_pipelines = pipelines
@@ -160,9 +172,9 @@ def create(  # noqa: PLR0913
 
         # Obtain the file name
         dag_filename = dags_folder / (
-            f"{package_name}_dag.py"
+            f"{filename}_dag.py"
             if name == "__default__"
-            else f"{package_name}_{name}_dag.py"
+            else f"{filename}_{name}_dag.py"
         )
 
         dependencies = defaultdict(list)

@@ -5,7 +5,6 @@ from typing import Any
 
 import lazy_loader as lazy
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 MatlabDataSet: type[MatlabDataset]
 MatlabDataset: Any
 

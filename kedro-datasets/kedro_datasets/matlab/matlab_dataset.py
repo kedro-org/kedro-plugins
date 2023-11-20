@@ -37,9 +37,9 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
-        >>> from kedro_datasets.matlab import Matlabdataset
+        >>> from kedro_datasets.matlab import MatlabDataset
         >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>> dataset = MatlabDataSet(filepath='/data/my_data.mat')
+        >>> dataset = MatlabDataset(filepath='/data/my_data.mat')
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data == reloaded
@@ -101,7 +101,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         if save_args is not None:
             self._save_args.update(save_args)
         
-        _fs_open_args_save.setdefault("mode"< "w")
+        _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
     

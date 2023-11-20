@@ -155,14 +155,14 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         "os": sys.platform,
     }
     pyproject_path = Path(project_path) / "pyproject.toml"
+    if pyproject_path.exists():
+        with open(pyproject_path) as file:
+            pyproject_data = toml.load(file)
 
-    with open(pyproject_path) as file:
-        pyproject_data = toml.load(file)
-
-    if (
-        "add_ons" in pyproject_data["tool"]["kedro"]
-    ):  # TODO: This needs to change to "tools"
-        properties["tools"] = pyproject_data["tool"]["kedro"]["add_ons"]
+        if (
+            "add_ons" in pyproject_data["tool"]["kedro"]
+        ):  # TODO: This needs to change to "tools"
+            properties["tools"] = pyproject_data["tool"]["kedro"]["add_ons"]
 
     return properties
 

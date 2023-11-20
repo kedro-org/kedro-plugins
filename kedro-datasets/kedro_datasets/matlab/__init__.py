@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementation to load/save data from/to a Pickle file."""
+"""``AbstractDataset`` implementation to load/save data from/to a Matlab file."""
 from __future__ import annotations
 
 from typing import Any

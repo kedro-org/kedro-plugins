@@ -1,7 +1,7 @@
 # Kedro-Airflow
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro-airflow/)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-airflow/)
 [![PyPI Version](https://badge.fury.io/py/kedro-airflow.svg)](https://pypi.org/project/kedro-airflow/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
@@ -42,7 +42,7 @@ The Airflow DAG configuration can be customized by editing this file.
 ### Step 3: Package and install the Kedro pipeline in the Airflow executor's environment
 
 After generating and deploying the DAG file, you will then need to package and install the Kedro pipeline into the Airflow executor's environment.
-Please visit the guide to [deploy Kedro as a Python package](https://kedro.readthedocs.io/en/stable/10_deployment/02_single_machine.html#package-based) for more details.
+Please visit the guide to [deploy Kedro as a Python package](https://docs.kedro.org/en/stable/deployment/single_machine.html#package-based) for more details.
 
 ### FAQ
 
@@ -100,9 +100,7 @@ In order to configure the config loader, update the `settings.py` file in your K
 For instance, if you would like to use the name `scheduler`, then change the file as follows:
 
 ```python
-CONFIG_LOADER_ARGS = {
-    "config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}
-}
+CONFIG_LOADER_ARGS = {"config_patterns": {"airflow": ["scheduler*", "scheduler/**"]}}
 ```
 
 Follow Kedro's [official documentation](https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#how-to-do-templating-with-the-omegaconfigloader), to see how to add templating, custom resolvers etc.
@@ -130,10 +128,13 @@ In order to configure the `OmegaConfigLoader`, update the `settings.py` file in 
 
 ```python
 from kedro.config import OmegaConfigLoader
+
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 CONFIG_LOADER_ARGS = {
     # other args
-    "config_patterns": {"airflow": ["airflow*", "airflow/**"]}  # configure the pattern for configuration files
+    "config_patterns": {  # configure the pattern for configuration files
+        "airflow": ["airflow*", "airflow/**"]
+    }
 }
 ```
 
@@ -152,3 +153,14 @@ You can set the operator to use by providing a custom template.
 See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 The [rich offering](https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/index.html) of operators means that the `kedro-airflow` plugin is providing templates for specific operators.
 The default template provided by `kedro-airflow` uses the `BaseOperator`.
+
+## Can I contribute?
+
+Yes! Want to help build Kedro-Airflow? Check out our guide to [contributing](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/CONTRIBUTING.md).
+
+## What licence do you use?
+
+Kedro-Airflow is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+* The [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-airflow`. This is not considered a breaking change.

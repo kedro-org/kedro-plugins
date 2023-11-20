@@ -46,6 +46,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
+          python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
           pip install ".[test]"
       - name: pip freeze
         run: pip freeze

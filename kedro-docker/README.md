@@ -1,6 +1,6 @@
 # Kedro-Docker
 
-[![Python Version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro-docker/)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-docker/)
 [![PyPI version](https://badge.fury.io/py/kedro-docker.svg)](https://pypi.org/project/kedro-docker/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
@@ -77,7 +77,7 @@ Options:
 * `--image` - optional Docker image tag. Defaults to the project directory name
 * `--docker-args` - optional string containing extra options for `docker build` command
 * `--with-spark` - optional flag to create an image additionally with Spark and Hadoop
-* `--base-image` - optional base Docker image. Default is Debian buster with the current environment Python version, e.g. `python:3.7-buster`
+* `--base-image` - optional base Docker image. Default is Debian buster with the current environment Python version, e.g. `python:3.8-buster`
 * `-h, --help` - show command help and exit.
 
 ### Run your project in a Docker environment
@@ -187,3 +187,6 @@ Yes! Want to help build Kedro-Docker? Check out our guide to [contributing](http
 ## What licence do you use?
 
 Kedro-Docker is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+* The [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-docker`. This is not considered a breaking change.

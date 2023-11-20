@@ -25,6 +25,10 @@ geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
+huggingface_require = {
+    "huggingface.HFDataset": ["datasets", "huggingface_hub"],
+    "huggingface.HFTransformerPipelineDataset": ["transformers"],
+}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
@@ -58,6 +62,15 @@ polars_require = {
     "polars.GenericDataSet":
     [
         POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+    "polars.EagerPolarsDataset":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    ],
+    "polars.LazyPolarsDataset":
+    [
+        # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
+        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
     ],
 }
 redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
@@ -93,6 +106,7 @@ extras_require = {
     "databricks": _collect_requirements(databricks_require),
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
+    "huggingface": _collect_requirements(huggingface_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
@@ -146,8 +160,7 @@ extras_require["docs"] = [
     "Jinja2<3.1.0",
 ]
 extras_require["test"] = [
-    "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
-    "adlfs~=2023.1; python_version >= '3.8'",
+    "adlfs~=2023.1",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "biopython~=1.73",
@@ -162,8 +175,7 @@ extras_require["test"] = [
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
-    "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
+    "gcsfs>=2023.1, <2023.3",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
@@ -209,8 +221,7 @@ extras_require["test"] = [
     "scipy>=1.7.3",
     "packaging",
     "SQLAlchemy~=1.2",
-    "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
-    "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
+    "tables~=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
     "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
     "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
@@ -218,6 +229,10 @@ extras_require["test"] = [
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
     "xlsxwriter~=1.0",
+    # huggingface
+    "datasets",
+    "huggingface_hub",
+    "transformers",
 ]
 
 setup(

@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.16",
@@ -31,8 +31,9 @@ version = {attr = "kedro_datasets.__version__"}
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+# temporarily ignore kedro_datasets/__init__.py in coverage report
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/databricks/*"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
 addopts = """

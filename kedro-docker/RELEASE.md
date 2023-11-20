@@ -1,12 +1,18 @@
 # Upcoming release
-* Migrate all project metadata to static `pyproject.toml`.
 
 ## Major features and improvements
-* Added support for Python 3.11
 
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+
+
+# Release 0.4.0
+* Migrate all project metadata to static `pyproject.toml`.
+* Removed support for Python 3.7
+
+## Major features and improvements
+* Added support for Python 3.11
 
 # Release 0.3.1
 ## Major features and improvements

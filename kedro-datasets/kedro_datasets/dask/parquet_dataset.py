@@ -59,7 +59,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         ... )
         >>>
         >>> dataset = ParquetDataset(
-        ...     filepath="path/to/folder",
+        ...     filepath=tmp_path / "path/to/folder",
         ...     save_args={
         ...         "compression": "GZIP",
         ...         "schema": schema,

@@ -3,15 +3,15 @@ filesystem ?(e.g.: local, S3, GCS)?. The underlying functionality is supported b
 the specified backend library passed in (defaults to the ``matlab`` library), so it
 supports all allowed options for loading and saving matlab files.
 """
-import numpy as np
 import warnings
 from copy import deepcopy
-from scipy import io
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
+import numpy as np
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from scipy import io
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
@@ -19,7 +19,7 @@ from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """`MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
-    
+
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
@@ -31,7 +31,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             fs_args:
                 project: my-project
             credentials: my_gcp_credentials
-    
+
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
@@ -46,7 +46,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"indent": 2}
     def __init__(    # noqa = PLR0913
-            self, 
+            self,
             filepath: str,
             save_args: Dict[str, Any]=None,
             version: Version =None,
@@ -81,7 +81,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _credentials = deepcopy(credentials) or {} 
+        _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
@@ -100,11 +100,11 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-        
+
         _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
-    
+
     def _describe(self) -> Dict[str, Any]:
         return {
             "filepath": self._filepath,
@@ -133,12 +133,17 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
         except DatasetError:
             return False
-        
+
         return self._fs.exists(load_path)
-    
+
     def _release(self) -> None:
         super()._release()
         self._invalidate_cache()
+
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs._invalidate_cache(filepath)
 
 _DEPRECATED_CLASSES = {
     "MatlabDataSet": MatlabDataset

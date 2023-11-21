@@ -51,6 +51,15 @@ def identity(arg):
 
 
 @fixture
+def fake_context():
+    class MockKedroContext:
+        # A dummy stand-in for KedroContext sufficient for this test
+        project_path = Path("")
+
+    return MockKedroContext()
+
+
+@fixture
 def fake_default_pipeline():
     mock_default_pipeline = modular_pipeline(
         [
@@ -325,14 +334,15 @@ class TestKedroTelemetryCLIHooks:
 
 
 class TestKedroTelemetryProjectHooks:
-    def test_after_context_created_without_kedro_run(
+    def test_after_context_created_without_kedro_run(  # noqa: PLR0913
         self,
         mocker,
         fake_catalog,
         fake_default_pipeline,
         fake_sub_pipeline,
+        fake_context,
     ):
-        fake_context = mocker.Mock()
+
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
@@ -346,6 +356,7 @@ class TestKedroTelemetryProjectHooks:
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocker.patch("kedro_telemetry.plugin.toml.load")
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryProjectHooks()
@@ -383,8 +394,8 @@ class TestKedroTelemetryProjectHooks:
         fake_metadata,
         fake_default_pipeline,
         fake_sub_pipeline,
+        fake_context,
     ):
-        fake_context = mocker.Mock()
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )

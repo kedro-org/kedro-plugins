@@ -10,7 +10,5 @@ ManagedTableDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
-    submod_attrs={
-        "managed_table_dataset": ["ManagedTableDataset"]
-    },
+    submod_attrs={"managed_table_dataset": ["ManagedTableDataset"]},
 )

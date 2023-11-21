@@ -10,7 +10,5 @@ TensorFlowModelDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
-    submod_attrs={
-        "tensorflow_model_dataset": ["TensorFlowModelDataset"]
-    },
+    submod_attrs={"tensorflow_model_dataset": ["TensorFlowModelDataset"]},
 )

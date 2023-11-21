@@ -1,5 +1,4 @@
 import gc
-import importlib
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -10,10 +9,8 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkHiveDataset
-from kedro_datasets.spark.spark_hive_dataset import _DEPRECATED_CLASSES
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -134,17 +131,6 @@ def _generate_spark_df_upsert_expected():
     )
     data = [("Alex", 99), ("Bob", 12), ("Clarke", 65), ("Dave", 29), ("Jeremy", 55)]
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_hive_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkHiveDataset:

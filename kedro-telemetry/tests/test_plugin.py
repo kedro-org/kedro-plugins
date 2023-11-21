@@ -409,6 +409,7 @@ class TestKedroTelemetryProjectHooks:
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocker.patch("kedro_telemetry.plugin.toml.load")
         # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]

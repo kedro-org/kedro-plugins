@@ -97,9 +97,7 @@ intersphinx_mapping = {
 
 type_targets = {
     "py:class": (
-        "kedro.io.core.AbstractDataSet",
         "kedro.io.core.AbstractDataset",
-        "kedro.io.AbstractDataSet",
         "kedro.io.AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
@@ -114,7 +112,6 @@ type_targets = {
         "typing.Tuple",
     ),
     "py:exc": (
-        "DataSetError",
         "DatasetError",
     ),
 }

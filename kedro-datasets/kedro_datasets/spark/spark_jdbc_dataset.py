@@ -2,9 +2,10 @@
 from copy import deepcopy
 from typing import Any, Dict
 
+from pyspark.sql import DataFrame
+
 from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
-from pyspark.sql import DataFrame
 
 
 class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):

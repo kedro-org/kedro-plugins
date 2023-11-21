@@ -146,7 +146,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     "module_name",
     ["kedro_datasets.tensorflow", "kedro_datasets.tensorflow.tensorflow_model_dataset"],
 )
-@pytest.mark.parametrize("class_name", ["TensorFlowModelDataSet"])
+@pytest.mark.parametrize("class_name", ["TensorFlowModelDataset"])
 def test_deprecation(module_name, class_name):
     with pytest.warns(
         KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"

@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 """
 import logging
-import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -17,7 +16,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)

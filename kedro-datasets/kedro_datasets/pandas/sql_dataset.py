@@ -10,9 +10,10 @@ from typing import Any, NoReturn
 import fsspec
 import pandas as pd
 from kedro.io.core import get_filepath_str, get_protocol_and_path
-from kedro_datasets._io import AbstractDataset, DatasetError
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
+
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 

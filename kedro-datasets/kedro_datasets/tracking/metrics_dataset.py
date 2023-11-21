@@ -7,6 +7,7 @@ import json
 from typing import Dict, NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
+
 from kedro_datasets.json import json_dataset
 
 

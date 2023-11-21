@@ -9,6 +9,7 @@ from typing import Any, Dict, Union
 import fsspec
 import geopandas as gpd
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 

@@ -8,8 +8,9 @@ from typing import Any, Dict
 import pandas as pd
 import plotly.express as px
 from kedro.io.core import Version
-from kedro_datasets.plotly.json_dataset import JSONDataset
 from plotly import graph_objects as go
+
+from kedro_datasets.plotly.json_dataset import JSONDataset
 
 
 class PlotlyDataset(JSONDataset):

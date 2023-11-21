@@ -1,20 +1,17 @@
 """``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``.
 """
-import warnings
 from pathlib import PurePosixPath
 from typing import Any, Dict, NoReturn
 
 from delta.tables import DeltaTable
-from pyspark.sql.utils import AnalysisException
-
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import (
     _get_spark,
     _split_filepath,
     _strip_dbfs_prefix,
 )
+from pyspark.sql.utils import AnalysisException
 
 
 class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
@@ -107,21 +104,3 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
 
     def _describe(self):
         return {"filepath": str(self._filepath), "fs_prefix": self._fs_prefix}
-
-
-_DEPRECATED_CLASSES = {
-    "DeltaTableDataSet": DeltaTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

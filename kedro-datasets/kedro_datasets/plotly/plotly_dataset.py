@@ -2,17 +2,14 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
-import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
 import pandas as pd
 import plotly.express as px
 from kedro.io.core import Version
-from plotly import graph_objects as go
-
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.plotly.json_dataset import JSONDataset
+from plotly import graph_objects as go
 
 
 class PlotlyDataset(JSONDataset):
@@ -142,21 +139,3 @@ class PlotlyDataset(JSONDataset):
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
-
-
-_DEPRECATED_CLASSES = {
-    "PlotlyDataSet": PlotlyDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

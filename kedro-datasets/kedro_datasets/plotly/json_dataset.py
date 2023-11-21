@@ -1,7 +1,6 @@
 """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict, Union
@@ -9,10 +8,8 @@ from typing import Any, Dict, Union
 import fsspec
 import plotly.io as pio
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-from plotly import graph_objects as go
-
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset
+from plotly import graph_objects as go
 
 
 class JSONDataset(
@@ -165,21 +162,3 @@ class JSONDataset(
     def _invalidate_cache(self) -> None:
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "JSONDataSet": JSONDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

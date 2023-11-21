@@ -39,7 +39,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     .. code-block:: pycon
         >>> from kedro_datasets.matlab import MatlabDataset
         >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>> dataset = MatlabDataset(filepath='/data/my_data.mat')
+        >>> dataset = MatlabDataset(filepath='my_data.mat')
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data == reloaded

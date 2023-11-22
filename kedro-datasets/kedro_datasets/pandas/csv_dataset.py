@@ -201,7 +201,10 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         dataset_copy._load_args["nrows"] = nrows
         data = dataset_copy.load()
 
-        return data.to_dict(orient="split")
+        return {
+        "type": "dataframe",
+        "content": data.to_dict(orient="split")
+        }
 
 
 _DEPRECATED_CLASSES = {

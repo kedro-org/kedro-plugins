@@ -231,3 +231,10 @@ class MatplotlibWriter(
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _preview(self) -> Dict:
+        data = self.load()  # Assuming this returns a plotly figure as a string
+        return {
+            "type": "image",
+            "content": data
+        }

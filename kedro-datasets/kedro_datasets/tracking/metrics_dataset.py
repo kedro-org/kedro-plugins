@@ -11,6 +11,7 @@ from kedro.io.core import DatasetError, get_filepath_str
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.json import json_dataset
+from typing import Any
 
 
 class MetricsDataset(json_dataset.JSONDataset):
@@ -67,6 +68,14 @@ class MetricsDataset(json_dataset.JSONDataset):
             json.dump(data, fs_file, **self._save_args)
 
         self._invalidate_cache()
+    
+    def _preview(self) -> Dict:
+        data = self.load()  # Assuming this returns a plotly figure as a string
+        return {
+            "type": "json",
+            "content": data
+        }
+
 
 
 _DEPRECATED_CLASSES = {

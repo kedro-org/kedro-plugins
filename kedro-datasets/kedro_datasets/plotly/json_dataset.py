@@ -165,6 +165,13 @@ class JSONDataset(
     def _invalidate_cache(self) -> None:
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+    
+    def _preview(self) -> Dict:
+        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
+        return {
+            "type": "plotly",
+            "content": plotly_data
+        }
 
 
 _DEPRECATED_CLASSES = {

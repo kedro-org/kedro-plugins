@@ -142,6 +142,13 @@ class PlotlyDataset(JSONDataset):
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
+    
+    def _preview(self) -> Dict:
+        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
+        return {
+            "type": "plotly",
+            "content": plotly_data
+        }
 
 
 _DEPRECATED_CLASSES = {

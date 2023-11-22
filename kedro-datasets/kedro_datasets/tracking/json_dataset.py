@@ -9,6 +9,7 @@ from kedro.io.core import DatasetError
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.json import json_dataset
+from typing import Dict
 
 
 class JSONDataset(json_dataset.JSONDataset):
@@ -46,6 +47,13 @@ class JSONDataset(json_dataset.JSONDataset):
 
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+    
+    def _preview(self) -> Dict:
+        data = self.load()  # Assuming this returns a plotly figure as a string
+        return {
+            "type": "json",
+            "content": data
+        }
 
 
 _DEPRECATED_CLASSES = {

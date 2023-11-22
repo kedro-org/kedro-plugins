@@ -21,14 +21,18 @@ from kedro_telemetry.plugin import (
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
-MOCK_PYPROJECT_TOOLS="""
+MOCK_PYPROJECT_TOOLS = """
 [tool.kedro]
 add_ons = "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'Pyspark']"
 """
 
+
 @fixture
 def mock_open_file(mocker):
-    return mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
+    return mocker.patch(
+        "builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS)
+    )
+
 
 @fixture
 def fake_metadata(tmp_path):
@@ -131,7 +135,7 @@ class TestKedroTelemetryCLIHooks:
             ),
         ]
         assert mocked_heap_call.call_args_list == expected_calls
-    
+
     def test_before_command_run_with_tools(self, mocker, fake_metadata, mock_open_file):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
@@ -143,12 +147,12 @@ class TestKedroTelemetryCLIHooks:
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
         )
-        
+
         mocker.patch(
             "kedro_telemetry.plugin._get_hashed_username",
             return_value="hashed_username",
         )
-        
+
         mocker.patch("kedro_telemetry.plugin.open", mock_open_file)
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -163,7 +167,7 @@ class TestKedroTelemetryCLIHooks:
             "python_version": sys.version,
             "os": sys.platform,
             "command": "kedro --version",
-            #"tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'Pyspark']"
+            # "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'Pyspark']"
         }
         generic_properties = {
             **expected_properties,

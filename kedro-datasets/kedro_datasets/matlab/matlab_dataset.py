@@ -87,7 +87,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         self._protocol = protocol
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)
-        self._fs = fsspec.filesystem(self._protocol)
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
         self.metadata = metadata
 
         super().__init__(

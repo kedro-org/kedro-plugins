@@ -6,13 +6,9 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-from kedro.io.core import (
-    AbstractVersionedDataset,
-    DatasetError,
-    Version,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
 class TextDataset(AbstractVersionedDataset[str, str]):

@@ -8,6 +8,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version, generate_ti
 from PIL import Image, ImageChops
 from s3fs.core import S3FileSystem
 
+from kedro_datasets._io import DatasetError
 from kedro_datasets.pillow import ImageDataset
 
 

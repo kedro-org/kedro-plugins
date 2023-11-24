@@ -18,6 +18,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+
 logger = logging.getLogger(__name__)
 
 

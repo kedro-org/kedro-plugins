@@ -10,6 +10,8 @@ from kedro.io.core import AbstractDataset, DatasetError
 from requests import Session, sessions
 from requests.auth import AuthBase
 
+from kedro_datasets._io import AbstractDataset, DatasetError
+
 
 class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.

@@ -17,6 +17,10 @@ Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will 
 pip install kedro-datasets
 ```
 
+# Datasets
+
+Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataset` implementations created by QuantumBlack and external contributors.
+
 ## What `AbstractDataset` implementations are supported?
 
 We support a range of data connectors, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. We even allow support for working with images.
@@ -27,8 +31,8 @@ These data connectors are supported with the APIs of `pandas`, `spark`, `network
 
 Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/api/kedro_datasets.html).
 
-## How can I create my own `AbstractDataSet` implementation?
-Take a look at our [instructions on how to create your own `AbstractDataSet` implementation](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html).
+## How can I create my own `AbstractDataset` implementation?
+Take a look at our [instructions on how to create your own `AbstractDataset` implementation](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html).
 
 ## Can I contribute?
 

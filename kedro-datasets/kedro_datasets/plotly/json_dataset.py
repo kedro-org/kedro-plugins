@@ -15,6 +15,8 @@ from kedro.io.core import (
 )
 from plotly import graph_objects as go
 
+from kedro_datasets._io import AbstractVersionedDataset
+
 
 class JSONDataset(
     AbstractVersionedDataset[go.Figure, Union[go.Figure, go.FigureWidget]]

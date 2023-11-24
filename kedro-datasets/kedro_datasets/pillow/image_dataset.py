@@ -15,6 +15,8 @@ from kedro.io.core import (
 )
 from PIL import Image
 
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+
 
 class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     """``ImageDataset`` loads/saves image data as `numpy` from an underlying

@@ -10,6 +10,7 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
+from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkHiveDataset
 
 TESTSPARKDIR = "test_spark_dir"

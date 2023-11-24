@@ -9,7 +9,8 @@ import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
-from kedro.io.core import AbstractDataset, DatasetError
+
+from kedro_datasets._io import AbstractDataset, DatasetError
 
 
 class DeltaTableDataset(AbstractDataset):

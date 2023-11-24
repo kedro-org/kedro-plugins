@@ -4,6 +4,7 @@ from kedro.io.core import DatasetError
 from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 
+from kedro_datasets._io import DatasetError
 from kedro_datasets.video import VideoDataset
 from kedro_datasets.video.video_dataset import (
     FileVideo,

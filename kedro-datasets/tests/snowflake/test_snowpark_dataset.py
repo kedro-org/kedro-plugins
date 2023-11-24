@@ -2,7 +2,8 @@ import datetime
 import os
 
 import pytest
-from kedro.io.core import DatasetError
+
+from kedro_datasets._io import DatasetError
 
 try:
     import snowflake.snowpark as sp

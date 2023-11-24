@@ -17,6 +17,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
+from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)

@@ -18,6 +18,8 @@ from kedro.io.core import (
     validate_on_forbidden_chars,
 )
 
+from kedro_datasets._io import AbstractDataset, DatasetError
+
 
 class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataset`` loads and saves data from/to Google BigQuery.

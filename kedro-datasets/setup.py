@@ -36,16 +36,8 @@ pandas_require = {
     "pandas.ExcelDataset": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.DeltaTableDataset": [PANDAS, "deltalake>=0.10.0"],
     "pandas.FeatherDataset": [PANDAS],
-    "pandas.GBQTableDataset": [
-        PANDAS,
-        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
-        "pandas-gbq>=0.18.0; python_version >= '3.11'",
-    ],
-    "pandas.GBQQueryDataset": [
-        PANDAS,
-        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
-        "pandas-gbq>=0.18.0; python_version >= '3.11'",
-    ],
+    "pandas.GBQTableDataset": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
+    "pandas.GBQQueryDataset": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
     "pandas.HDFDataset": [
         PANDAS,
         "tables~=3.6",
@@ -65,17 +57,9 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataset": [POLARS],
-    "polars.GenericDataset": [
-        POLARS,
-        "pyarrow>=4.0",
-        "xlsx2csv>=0.8.0",
-        "deltalake >= 0.6.2",
-    ],
-    "polars.EagerPolarsDataset": [
-        POLARS,
-        "pyarrow>=4.0",
-        "xlsx2csv>=0.8.0",
-        "deltalake >= 0.6.2",
+    "polars.EagerPolarsDataset":
+    [
+        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
     ],
     "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
@@ -87,7 +71,7 @@ polars_require = {
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0",
+        "snowflake-snowpark-python~=1.0.0",
         "pyarrow~=8.0",
     ]
 }
@@ -97,7 +81,7 @@ spark_require = {
     "spark.SparkJDBCDataset": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
-svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn>=1.0.2", "scipy~=1.7.3"]}
+svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
     "tensorflow.TensorFlowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.

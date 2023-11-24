@@ -1,8 +1,6 @@
 """``AbstractDataset`` implementations to load/save data in partitions
 from/to any underlying dataset format.
 """
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

@@ -2,14 +2,12 @@
 ``pyspark`` on Apache Hive.
 """
 import pickle
-import warnings
 from copy import deepcopy
 from typing import Any, Dict, List
 
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
@@ -210,21 +208,3 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "PySpark datasets objects cannot be pickled "
             "or serialised as Python objects."
         )
-
-
-_DEPRECATED_CLASSES = {
-    "SparkHiveDataSet": SparkHiveDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

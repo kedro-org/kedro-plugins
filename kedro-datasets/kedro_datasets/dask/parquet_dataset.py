@@ -1,6 +1,5 @@
 """``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
-import warnings
 from copy import deepcopy
 from typing import Any, Dict
 
@@ -9,7 +8,6 @@ import fsspec
 import triad
 from kedro.io.core import get_protocol_and_path
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 
 
@@ -204,21 +202,3 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(self._filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "ParquetDataSet": ParquetDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

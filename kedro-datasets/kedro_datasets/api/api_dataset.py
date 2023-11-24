@@ -2,7 +2,6 @@
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 import json as json_  # make pylint happy
-import warnings
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple, Union
 
@@ -10,7 +9,6 @@ import requests
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -236,21 +234,3 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         with sessions.Session() as session:
             response = self._execute_request(session)
         return response.ok
-
-
-_DEPRECATED_CLASSES = {
-    "APIDataSet": APIDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

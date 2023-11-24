@@ -4,7 +4,6 @@ and decode videos and OpenCV VideoWriter to encode and write video.
 """
 import itertools
 import tempfile
-import warnings
 from collections import abc
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
@@ -16,7 +15,6 @@ import numpy as np
 import PIL.Image
 from kedro.io.core import get_protocol_and_path
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset
 
 
@@ -367,21 +365,3 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     def _exists(self) -> bool:
         return self._fs.exists(self._filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "VideoDataSet": VideoDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,7 +1,6 @@
 """``HDFDataset`` loads/saves data from/to a hdf file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from threading import Lock
@@ -11,7 +10,6 @@ import fsspec
 import pandas as pd
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 HDFSTORE_DRIVER = "H5FD_CORE"
@@ -200,21 +198,3 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "HDFDataSet": HDFDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

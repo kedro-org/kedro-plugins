@@ -4,12 +4,10 @@ The ``MetricsDataset`` is part of Kedro Experiment Tracking. The dataset is vers
 and only takes metrics of numeric values.
 """
 import json
-import warnings
 from typing import Dict, NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.json import json_dataset
 
 
@@ -67,21 +65,3 @@ class MetricsDataset(json_dataset.JSONDataset):
             json.dump(data, fs_file, **self._save_args)
 
         self._invalidate_cache()
-
-
-_DEPRECATED_CLASSES = {
-    "MetricsDataSet": MetricsDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

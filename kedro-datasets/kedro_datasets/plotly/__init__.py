@@ -1,7 +1,5 @@
 """``AbstractDataset`` implementations to load/save a plotly figure from/to a JSON
 file."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

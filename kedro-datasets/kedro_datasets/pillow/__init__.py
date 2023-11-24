@@ -1,6 +1,4 @@
 """``AbstractDataset`` implementation to load/save image data."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

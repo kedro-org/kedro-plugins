@@ -2,8 +2,6 @@
 and returns them into either as string or json Dict.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

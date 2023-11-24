@@ -1,6 +1,4 @@
 """Provides I/O modules for Apache Spark."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

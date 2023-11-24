@@ -1,6 +1,4 @@
 """Provides I/O modules using dask dataframe."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

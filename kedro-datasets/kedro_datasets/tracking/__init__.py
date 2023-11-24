@@ -1,6 +1,4 @@
 """Dataset implementations to save data for Kedro Experiment Tracking."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

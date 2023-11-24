@@ -4,7 +4,6 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import re
-import warnings
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
@@ -14,7 +13,6 @@ from kedro.io.core import get_filepath_str, get_protocol_and_path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
@@ -544,22 +542,3 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 new_load_args.append(value)
         if new_load_args:
             self._load_args["params"] = new_load_args
-
-
-_DEPRECATED_CLASSES = {
-    "SQLTableDataSet": SQLTableDataset,
-    "SQLQueryDataSet": SQLQueryDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

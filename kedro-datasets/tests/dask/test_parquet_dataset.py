@@ -1,5 +1,3 @@
-import importlib
-
 import boto3
 import dask.dataframe as dd
 import pandas as pd
@@ -10,10 +8,8 @@ from moto import mock_s3
 from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.dask import ParquetDataset
-from kedro_datasets.dask.parquet_dataset import _DEPRECATED_CLASSES
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -73,17 +69,6 @@ def s3fs_cleanup():
     # clear cache so we get a clean slate every time we instantiate a S3FileSystem
     yield
     S3FileSystem.cachable = False
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.dask", "kedro_datasets.dask.parquet_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")

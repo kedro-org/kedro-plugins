@@ -1,4 +1,3 @@
-import importlib
 import sys
 from pathlib import PurePosixPath
 
@@ -10,7 +9,6 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 
 if sys.platform == "win32":
@@ -140,18 +138,6 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     model.compile("rmsprop", "mse")
     model.fit(dummy_x_train, dummy_y_train, batch_size=64, epochs=1)
     return model
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.tensorflow", "kedro_datasets.tensorflow.tensorflow_model_dataset"],
-)
-@pytest.mark.parametrize("class_name", ["TensorFlowModelDataSet"])
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestTensorFlowModelDataset:

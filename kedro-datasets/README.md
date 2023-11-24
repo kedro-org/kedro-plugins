@@ -17,9 +17,9 @@ pip install kedro-datasets
 
 # Datasets
 
-Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
+Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataset` implementations created by QuantumBlack and external contributors.
 
-## What `AbstractDataSet` implementations are supported?
+## What `AbstractDataset` implementations are supported?
 
 We support a range of data connectors, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. We even allow support for working with images.
 
@@ -29,7 +29,16 @@ These data connectors are supported with the APIs of `pandas`, `spark`, `network
 
 Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/en/stable/kedro_datasets.html).
 
-## How can I create my own `AbstractDataSet` implementation?
+## How can I create my own `AbstractDataset` implementation?
+Take a look at our [instructions on how to create your own `AbstractDataset` implementation](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html).
 
+## Can I contribute?
 
-Take a look at our [instructions on how to create your own `AbstractDataSet` implementation](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html).
+Yes! Want to help build Kedro-Datasets? Check out our guide to [contributing](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/CONTRIBUTING.md).
+
+## What licence do you use?
+
+Kedro-Datasets is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+* The [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy.

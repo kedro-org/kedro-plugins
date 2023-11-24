@@ -1,6 +1,4 @@
 """``AbstractDataset`` implementation to read/write from/to a sequence file."""
-from __future__ import annotations
-
 from typing import Any
 
 import lazy_loader as lazy

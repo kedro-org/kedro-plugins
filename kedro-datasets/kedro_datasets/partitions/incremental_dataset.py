@@ -60,6 +60,7 @@ class IncrementalDataset(PartitionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,

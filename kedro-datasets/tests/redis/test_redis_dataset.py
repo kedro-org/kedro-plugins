@@ -162,4 +162,4 @@ class TestPickleDataset:
             side_effect=ImportError,
         )
         with pytest.raises(ImportError, match=pattern):
-            PickleDataset("key", backend="fake.backend.does.not.exist")
+            PickleDataset(key="key", backend="fake.backend.does.not.exist")

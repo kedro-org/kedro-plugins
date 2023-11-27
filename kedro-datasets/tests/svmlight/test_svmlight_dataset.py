@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path, PurePosixPath
 
 import numpy as np
@@ -9,10 +8,8 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.svmlight import SVMLightDataset
-from kedro_datasets.svmlight.svmlight_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -39,18 +36,6 @@ def dummy_data():
     features = np.array([[1, 2, 10], [1, 0.4, 3.2], [0, 0, 0]])
     label = np.array([1, 0, 3])
     return features, label
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.svmlight", "kedro_datasets.svmlight.svmlight_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSVMLightDataset:

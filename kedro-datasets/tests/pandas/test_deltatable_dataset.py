@@ -1,14 +1,10 @@
-import importlib
-
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import DeltaTableDataset
-from kedro_datasets.pandas.deltatable_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -29,17 +25,6 @@ def deltatable_dataset_from_path(filepath, load_args, save_args, fs_args):
         save_args=save_args,
         fs_args=fs_args,
     )
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.deltatable_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestDeltaTableDataset:

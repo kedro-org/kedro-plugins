@@ -1,4 +1,3 @@
-import importlib
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -16,10 +15,8 @@ from moto import mock_s3
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import CSVDataset
-from kedro_datasets.pandas.csv_dataset import _DEPRECATED_CLASSES
 
 BUCKET_NAME = "test_bucket"
 FILE_NAME = "test.csv"
@@ -86,17 +83,6 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe):
         Body=mocked_dataframe.to_csv(index=False),
     )
     return f"s3://{BUCKET_NAME}/{FILE_NAME}"
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.csv_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestCSVDataset:

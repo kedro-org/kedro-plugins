@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -9,10 +8,8 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 from PIL import Image, ImageChops
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pillow import ImageDataset
-from kedro_datasets.pillow.image_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -41,17 +38,6 @@ def image_object():
 def images_equal(image_1, image_2):
     diff = ImageChops.difference(image_1, image_2)
     return not diff.getbbox()
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pillow", "kedro_datasets.pillow.image_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestImageDataset:

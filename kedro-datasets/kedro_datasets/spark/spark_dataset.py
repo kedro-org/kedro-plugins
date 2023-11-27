@@ -4,7 +4,6 @@
 import json
 import logging
 import os
-import warnings
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -25,7 +24,6 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -456,21 +454,3 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
                 f"with mode '{write_mode}' on 'SparkDataset'. "
                 f"Please use 'spark.DeltaTableDataset' instead."
             )
-
-
-_DEPRECATED_CLASSES = {
-    "SparkDataSet": SparkDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

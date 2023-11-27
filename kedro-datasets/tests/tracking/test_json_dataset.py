@@ -1,4 +1,3 @@
-import importlib
 import json
 from pathlib import Path, PurePosixPath
 
@@ -8,10 +7,8 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.tracking import JSONDataset
-from kedro_datasets.tracking.json_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -34,17 +31,6 @@ def explicit_versioned_json_dataset(filepath_json, load_version, save_version):
 @pytest.fixture
 def dummy_data():
     return {"col1": 1, "col2": 2, "col3": "mystring"}
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.tracking", "kedro_datasets.tracking.json_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestJSONDataset:

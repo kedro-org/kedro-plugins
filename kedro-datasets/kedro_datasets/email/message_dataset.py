@@ -2,7 +2,6 @@
 using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 ``email`` package in the standard library to manage email messages.
 """
-import warnings
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
@@ -14,7 +13,6 @@ from typing import Any, Dict
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
@@ -183,21 +181,3 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "EmailMessageDataSet": EmailMessageDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

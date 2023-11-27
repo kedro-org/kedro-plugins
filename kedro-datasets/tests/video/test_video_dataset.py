@@ -1,15 +1,11 @@
-import importlib
-
 import boto3
 import pytest
 from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.video import VideoDataset
 from kedro_datasets.video.video_dataset import (
-    _DEPRECATED_CLASSES,
     FileVideo,
     SequenceVideo,
 )
@@ -52,17 +48,6 @@ def mocked_s3_bucket():
         )
         conn.create_bucket(Bucket=S3_BUCKET_NAME)
         yield conn
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.video", "kedro_datasets.video.video_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestVideoDataset:

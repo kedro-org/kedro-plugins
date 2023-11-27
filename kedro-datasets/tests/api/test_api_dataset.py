@@ -1,5 +1,4 @@
 import base64
-import importlib
 import json
 import socket
 from typing import Any
@@ -8,10 +7,8 @@ import pytest
 import requests
 from requests.auth import HTTPBasicAuth
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.api import APIDataset
-from kedro_datasets.api.api_dataset import _DEPRECATED_CLASSES
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 SAVE_METHODS = ["POST", "PUT"]
@@ -27,17 +24,6 @@ TEST_METHOD = "GET"
 TEST_HEADERS = {"key": "value"}
 
 TEST_SAVE_DATA = [{"key1": "info1", "key2": "info2"}]
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.api", "kedro_datasets.api.api_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestAPIDataset:

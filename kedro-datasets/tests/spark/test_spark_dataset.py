@@ -1,4 +1,3 @@
-import importlib
 import re
 import sys
 import tempfile
@@ -26,13 +25,11 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset
 from kedro_datasets.spark.spark_dataset import (
-    _DEPRECATED_CLASSES,
     _dbfs_exists,
     _dbfs_glob,
     _get_dbutils,
@@ -171,17 +168,6 @@ class FileInfo:
 
     def isDir(self):
         return "." not in self.path.split("/")[-1]
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkDataset:

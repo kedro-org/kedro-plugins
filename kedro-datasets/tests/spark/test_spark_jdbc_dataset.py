@@ -1,11 +1,7 @@
-import importlib
-
 import pytest
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkJDBCDataset
-from kedro_datasets.spark.spark_jdbc_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -35,17 +31,6 @@ def spark_jdbc_args_save_load(spark_jdbc_args):
         {"save_args": connection_properties, "load_args": connection_properties}
     )
     return args
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_jdbc_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 def test_missing_url():

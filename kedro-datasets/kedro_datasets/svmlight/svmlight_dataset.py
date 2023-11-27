@@ -2,7 +2,6 @@
 underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
 ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional, Tuple, Union
@@ -13,7 +12,6 @@ from numpy import ndarray
 from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
@@ -192,21 +190,3 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "SVMLightDataSet": SVMLightDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

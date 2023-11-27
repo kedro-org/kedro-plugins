@@ -86,6 +86,7 @@ class DeltaTableDataset(AbstractDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: Optional[str] = None,
         catalog_type: Optional[DataCatalog] = None,
         catalog_name: Optional[str] = None,

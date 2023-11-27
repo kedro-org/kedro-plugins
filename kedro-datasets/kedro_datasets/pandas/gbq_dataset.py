@@ -64,6 +64,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         dataset: str,
         table_name: str,
         project: str = None,

@@ -52,6 +52,7 @@ class JSONDataset(
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         load_args: dict[str, Any] = None,
         save_args: dict[str, Any] = None,

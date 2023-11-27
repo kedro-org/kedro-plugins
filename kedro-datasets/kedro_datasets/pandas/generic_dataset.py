@@ -84,6 +84,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str,
         load_args: dict[str, Any] = None,

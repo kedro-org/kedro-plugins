@@ -90,6 +90,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         url: str,
         method: str = "GET",
         load_args: dict[str, Any] = None,

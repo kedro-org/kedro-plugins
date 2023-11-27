@@ -269,6 +269,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
         credentials: dict[str, Any] = None,

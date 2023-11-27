@@ -103,6 +103,7 @@ class MatplotlibWriter(
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         fs_args: dict[str, Any] = None,
         credentials: dict[str, Any] = None,

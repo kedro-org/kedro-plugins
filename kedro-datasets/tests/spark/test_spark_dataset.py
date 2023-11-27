@@ -974,9 +974,9 @@ class TestSparkDatasetVersionedHdfs:
 @pytest.fixture
 def data_catalog(tmp_path):
     source_path = Path(__file__).parent / "data/test.parquet"
-    spark_in = SparkDataset(source_path.as_posix())
-    spark_out = SparkDataset((tmp_path / "spark_data").as_posix())
-    pickle_ds = PickleDataset((tmp_path / "pickle/test.pkl").as_posix())
+    spark_in = SparkDataset(filepath=source_path.as_posix())
+    spark_out = SparkDataset(filepath=(tmp_path / "spark_data").as_posix())
+    pickle_ds = PickleDataset(filepath=(tmp_path / "pickle/test.pkl").as_posix())
 
     return DataCatalog(
         {"spark_in": spark_in, "spark_out": spark_out, "pickle_ds": pickle_ds}

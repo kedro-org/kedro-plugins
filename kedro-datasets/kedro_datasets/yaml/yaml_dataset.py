@@ -47,6 +47,7 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         save_args: dict[str, Any] = None,
         version: Version = None,

@@ -75,6 +75,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str,
         load_args: Optional[dict[str, Any]] = None,

@@ -65,7 +65,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, filepath: str, metadata: dict[str, Any] = None) -> None:
+    def __init__(self, *, filepath: str, metadata: dict[str, Any] = None) -> None:
         """Creates a new instance of ``DeltaTableDataset``.
 
         Args:

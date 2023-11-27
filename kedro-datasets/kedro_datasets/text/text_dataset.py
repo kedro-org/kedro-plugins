@@ -44,6 +44,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         version: Version = None,
         credentials: Dict[str, Any] = None,

@@ -71,6 +71,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         backend: str = "pickle",
         load_args: Dict[str, Any] = None,

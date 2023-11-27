@@ -70,6 +70,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         database: str,
         table: str,
         write_mode: str = "errorifexists",

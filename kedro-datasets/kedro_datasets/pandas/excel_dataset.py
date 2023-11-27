@@ -110,6 +110,7 @@ class ExcelDataset(
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         engine: str = "openpyxl",
         load_args: Dict[str, Any] = None,

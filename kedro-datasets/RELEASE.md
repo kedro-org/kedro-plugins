@@ -1,8 +1,7 @@
 # Upcoming Release
-* Removed support for Python 3.8
 
 ## Major features and improvements
-* Removed support for Python 3.7
+* Removed support for Python 3.7 and 3.8
 * Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html)
 
 ## Bug fixes and other changes

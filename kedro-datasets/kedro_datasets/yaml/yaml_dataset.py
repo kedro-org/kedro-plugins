@@ -3,7 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import yaml
@@ -12,7 +12,7 @@ from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
-class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
+class YAMLDataset(AbstractVersionedDataset[dict, dict]):
     """``YAMLDataset`` loads/saves data from/to a YAML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 
@@ -43,17 +43,17 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
 
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"default_flow_style": False}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"default_flow_style": False}
 
     def __init__(  # noqa: PLR0913
         self,
         *,
         filepath: str,
-        save_args: Dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``YAMLDataset`` pointing to a concrete YAML file
         on a specific filesystem.
@@ -114,7 +114,7 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -122,13 +122,13 @@ class YAMLDataset(AbstractVersionedDataset[Dict, Dict]):
             "version": self._version,
         }
 
-    def _load(self) -> Dict:
+    def _load(self) -> dict:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return yaml.safe_load(fs_file)
 
-    def _save(self, data: Dict) -> None:
+    def _save(self, data: dict) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             yaml.dump(data, fs_file, **self._save_args)

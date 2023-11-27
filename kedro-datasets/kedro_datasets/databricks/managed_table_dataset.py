@@ -4,7 +4,7 @@ in Databricks.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 from kedro.io.core import Version, VersionNotFoundError
@@ -33,7 +33,7 @@ class ManagedTable:
     dataframe_type: str
     primary_key: Optional[str]
     owner_group: str
-    partition_columns: Union[str, List[str]]
+    partition_columns: Union[str, list[str]]
     json_schema: StructType
 
     def __post_init__(self):
@@ -203,12 +203,12 @@ class ManagedTableDataset(AbstractVersionedDataset):
         database: str = "default",
         write_mode: Union[str, None] = None,
         dataframe_type: str = "spark",
-        primary_key: Optional[Union[str, List[str]]] = None,
+        primary_key: Optional[Union[str, list[str]]] = None,
         version: Version = None,
         # the following parameters are used by project hooks
         # to create or update table properties
-        schema: Dict[str, Any] = None,
-        partition_columns: List[str] = None,
+        schema: dict[str, Any] = None,
+        partition_columns: list[str] = None,
         owner_group: str = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
@@ -387,7 +387,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         elif self._table.write_mode == "append":
             self._save_append(data)
 
-    def _describe(self) -> Dict[str, str]:
+    def _describe(self) -> dict[str, str]:
         """Returns a description of the instance of ManagedTableDataset
 
         Returns:

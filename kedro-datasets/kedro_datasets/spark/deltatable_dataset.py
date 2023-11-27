@@ -2,7 +2,7 @@
 ``delta-spark``.
 """
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn
+from typing import Any, NoReturn
 
 from delta.tables import DeltaTable
 from pyspark.sql.utils import AnalysisException
@@ -65,7 +65,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, *, filepath: str, metadata: Dict[str, Any] = None) -> None:
+    def __init__(self, *, filepath: str, metadata: dict[str, Any] = None) -> None:
         """Creates a new instance of ``DeltaTableDataset``.
 
         Args:

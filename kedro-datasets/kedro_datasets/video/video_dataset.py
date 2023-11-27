@@ -5,9 +5,10 @@ and decode videos and OpenCV VideoWriter to encode and write video.
 import itertools
 import tempfile
 from collections import abc
+from collections.abc import Generator, Sequence
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Generator, Optional, Sequence, Tuple, Union
+from typing import Any, Optional, Union
 
 import cv2
 import fsspec
@@ -54,7 +55,7 @@ class AbstractVideo(abc.Sequence):
         raise NotImplementedError()
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         """Get the resolution of the video"""
         raise NotImplementedError()
 
@@ -84,7 +85,7 @@ class FileVideo(AbstractVideo):
         return self._cap.get(cv2.CAP_PROP_FPS)
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return width, height
@@ -148,7 +149,7 @@ class SequenceVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -183,7 +184,7 @@ class GeneratorVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -271,9 +272,9 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         *,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of VideoDataset to load / save video data for given filepath.
 
@@ -361,7 +362,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         finally:
             writer.release()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {"filepath": self._filepath, "protocol": self._protocol}
 
     def _exists(self) -> bool:

@@ -359,7 +359,7 @@ class TestCSVDatasetS3:
         (any implementation using S3FileSystem). Likely to be a bug with moto (tested
         with moto==4.0.8, moto==3.0.4) -- see #67
         """
-        df = CSVDataset(mocked_csv_in_s3)
+        df = CSVDataset(filepath=mocked_csv_in_s3)
         assert df._protocol == "s3"
         # if Python >= 3.10, modify test procedure (see #67)
         if sys.version_info[1] >= 10:

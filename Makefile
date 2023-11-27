@@ -27,12 +27,10 @@ dataset-tests: dataset-doctests
 dataset-doctests:
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
-	  --ignore kedro_datasets/api/api_dataset.py \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
 	  --ignore kedro_datasets/matplotlib/matplotlib_writer.py \
 	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
-	  --ignore kedro_datasets/pandas/generic_dataset.py \
 	  --ignore kedro_datasets/pandas/sql_dataset.py \
 	  --ignore kedro_datasets/partitions/incremental_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \

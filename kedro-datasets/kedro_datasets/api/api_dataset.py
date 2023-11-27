@@ -42,18 +42,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>>
         >>> dataset = APIDataset(
-        ...     url="https://quickstats.nass.usda.gov",
+        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        ...             "key": "SOME_TOKEN",
-        ...             "format": "JSON",
-        ...             "commodity_desc": "CORN",
-        ...             "statisticcat_des": "YIELD",
-        ...             "agg_level_desc": "STATE",
-        ...             "year": 2000,
+        ...             "news_site": "NASA",
+        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },
-        ...     credentials=("username", "password"),
         ... )
         >>> data = dataset.load()
 
@@ -65,7 +60,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method="POST", url="url_of_remote_server", save_args={"chunk_size": 1}
+        ...     method="POST",
+        ...     url="https://httpbin.org/post",
+        ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)
 

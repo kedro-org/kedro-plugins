@@ -1,4 +1,5 @@
 # Upcoming Release
+* Removed support for Python 3.8
 
 ## Major features and improvements
 * Removed support for Python 3.7

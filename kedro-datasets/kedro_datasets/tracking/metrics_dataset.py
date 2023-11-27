@@ -37,7 +37,7 @@ class MetricsDataset(json_dataset.JSONDataset):
         >>>
         >>> data = {"col1": 1, "col2": 0.23, "col3": 0.002}
         >>>
-        >>> dataset = MetricsDataset(filepath="test.json")
+        >>> dataset = MetricsDataset(filepath=tmp_path / "test.json")
         >>> dataset.save(data)
 
     """

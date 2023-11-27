@@ -64,7 +64,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = ParquetDataset(filepath="test.parquet")
+        >>> dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)

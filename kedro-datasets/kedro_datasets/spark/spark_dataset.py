@@ -245,7 +245,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
-        >>> dataset = SparkDataset(filepath="test_data")
+        >>> dataset = SparkDataset(filepath=tmp_path / "test_data")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>>

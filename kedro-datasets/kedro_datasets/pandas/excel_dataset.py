@@ -62,7 +62,7 @@ class ExcelDataset(
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = ExcelDataset(filepath="test.xlsx")
+        >>> dataset = ExcelDataset(filepath=tmp_path / "test.xlsx")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)

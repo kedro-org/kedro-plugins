@@ -25,7 +25,7 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         >>> from kedro_datasets.networkx import GraphMLDataset
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = GraphMLDataset(filepath="test.graphml")
+        >>> graph_dataset = GraphMLDataset(filepath=tmp_path / "test.graphml")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)

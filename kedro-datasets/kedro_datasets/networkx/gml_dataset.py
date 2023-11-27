@@ -26,7 +26,7 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         >>> from kedro_datasets.networkx import GMLDataset
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = GMLDataset(filepath="test.gml")
+        >>> graph_dataset = GMLDataset(filepath=tmp_path / "test.gml")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)

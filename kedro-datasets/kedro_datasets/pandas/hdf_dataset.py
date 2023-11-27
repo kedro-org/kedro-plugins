@@ -42,7 +42,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = HDFDataset(filepath="test.h5", key="data")
+        >>> dataset = HDFDataset(filepath=tmp_path / "test.h5", key="data")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)

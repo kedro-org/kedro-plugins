@@ -28,7 +28,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         >>> from kedro_datasets.holoviews import HoloviewsWriter
         >>>
         >>> curve = hv.Curve(range(10))
-        >>> holoviews_writer = HoloviewsWriter(filepath="/tmp/holoviews")
+        >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
         >>>
         >>> holoviews_writer.save(curve)
 

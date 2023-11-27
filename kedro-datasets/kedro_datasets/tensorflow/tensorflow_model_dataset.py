@@ -46,7 +46,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> dataset = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
+        >>> dataset = TensorFlowModelDataset(tmp_path / "data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>

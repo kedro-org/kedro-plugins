@@ -66,7 +66,7 @@ class DeltaTableDataset(AbstractDataset):
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> dataset = DeltaTableDataset(filepath="test")
+        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
         >>>
         >>> dataset.save(data)
         >>> reloaded = dataset.load()

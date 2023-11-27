@@ -35,7 +35,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> dataset = TextDataset(filepath="test.md")
+        >>> dataset = TextDataset(filepath=tmp_path / "test.md")
         >>> dataset.save(string_to_write)
         >>> reloaded = dataset.load()
         >>> assert string_to_write == reloaded

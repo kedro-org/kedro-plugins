@@ -54,7 +54,7 @@ class PlotlyDataset(JSONDataset):
         >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
         >>>
         >>> dataset = PlotlyDataset(
-        ...     filepath="scatter_plot.json",
+        ...     filepath=tmp_path / "scatter_plot.json",
         ...     plotly_args={
         ...         "type": "scatter",
         ...         "fig": {"x": "x1", "y": "x2"},

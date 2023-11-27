@@ -61,8 +61,7 @@ class MatplotlibWriter(
         >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
         [<matplotlib.lines.Line2D object at 0x...>]
         >>> pdf_plot_writer = MatplotlibWriter(
-        ...     filepath=tmp_path / "data/08_reporting/output_plot.pdf",
-        ...     save_args={"format": "pdf"},
+        ...     filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
         ... )
         >>> plt.close()
         >>> pdf_plot_writer.save(fig)

@@ -3,7 +3,6 @@ in Databricks.
 """
 import logging
 import re
-import warnings
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
@@ -13,7 +12,6 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
@@ -434,21 +432,3 @@ class ManagedTableDataset(AbstractVersionedDataset):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
-
-
-_DEPRECATED_CLASSES = {
-    "ManagedTableDataSet": ManagedTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

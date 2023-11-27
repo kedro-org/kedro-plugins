@@ -1,5 +1,3 @@
-import importlib
-
 import pytest
 from delta import DeltaTable
 from kedro.io import DataCatalog
@@ -12,10 +10,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import DeltaTableDataset, SparkDataset
-from kedro_datasets.spark.deltatable_dataset import _DEPRECATED_CLASSES
 
 SPARK_VERSION = Version(__version__)
 
@@ -32,17 +28,6 @@ def sample_spark_df():
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.deltatable_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestDeltaTableDataset:

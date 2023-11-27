@@ -3,7 +3,7 @@ S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
 from copy import deepcopy
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
@@ -81,20 +81,21 @@ class DeltaTableDataset(AbstractDataset):
     DEFAULT_WRITE_MODE = "overwrite"
     ACCEPTED_WRITE_MODES = ("overwrite", "append")
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: Optional[str] = None,
         catalog_type: Optional[DataCatalog] = None,
         catalog_name: Optional[str] = None,
         database: Optional[str] = None,
         table: Optional[str] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
-        credentials: Optional[Dict[str, Any]] = None,
-        fs_args: Optional[Dict[str, Any]] = None,
+        load_args: Optional[dict[str, Any]] = None,
+        save_args: Optional[dict[str, Any]] = None,
+        credentials: Optional[dict[str, Any]] = None,
+        fs_args: Optional[dict[str, Any]] = None,
     ) -> None:
         """Creates a new instance of ``DeltaTableDataset``
 
@@ -185,14 +186,14 @@ class DeltaTableDataset(AbstractDataset):
             )
 
     @property
-    def fs_args(self) -> Dict[str, Any]:
+    def fs_args(self) -> dict[str, Any]:
         """Appends and returns filesystem credentials to fs_args."""
         fs_args = deepcopy(self._fs_args)
         fs_args.update(self._credentials)
         return fs_args
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> dict[str, Any]:
         """Returns the schema of the DeltaTableDataset as a dictionary."""
         return self._delta_table.schema().json()
 
@@ -213,7 +214,7 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.metadata()
 
     @property
-    def history(self) -> List[Dict[str, Any]]:
+    def history(self) -> list[dict[str, Any]]:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
         return self._delta_table.history()
 
@@ -247,7 +248,7 @@ class DeltaTableDataset(AbstractDataset):
                 **self._save_args,
             )
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "catalog_type": self._catalog_type,

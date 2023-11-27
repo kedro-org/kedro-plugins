@@ -6,7 +6,7 @@ import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, ClassVar, Dict, Optional, Union
+from typing import Any, ClassVar, Optional, Union
 
 import fsspec
 import polars as pl
@@ -70,19 +70,20 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: ClassVar[Dict[str, Any]] = {}
-    DEFAULT_SAVE_ARGS: ClassVar[Dict[str, Any]] = {}
+    DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
+    DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        load_args: Optional[dict[str, Any]] = None,
+        save_args: Optional[dict[str, Any]] = None,
         version: Version = None,
-        credentials: Optional[Dict[str, Any]] = None,
-        fs_args: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        credentials: Optional[dict[str, Any]] = None,
+        fs_args: Optional[dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         """Creates a new instance of ``LazyPolarsDataset`` pointing to a concrete
         data file on a specific filesystem.
@@ -178,7 +179,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

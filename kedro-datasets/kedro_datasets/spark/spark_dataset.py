@@ -233,7 +233,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType, Row
+        >>> from pyspark.sql.types import IntegerType, Row, StructField, StructType
         >>>
         >>> from kedro_datasets.spark import SparkDataset
         >>>

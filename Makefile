@@ -38,7 +38,6 @@ dataset-doctests:
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
 	  --ignore kedro_datasets/spark/deltatable_dataset.py \
-	  --ignore kedro_datasets/spark/spark_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \

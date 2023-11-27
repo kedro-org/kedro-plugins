@@ -40,7 +40,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     .. code-block:: pycon
 
         >>> import pandas as pd
-        >>> from kedro_datasets import SparkJBDCDataset
+        >>> from kedro_datasets.spark import SparkJBDCDataset
         >>> from pyspark.sql import SparkSession
         >>>
         >>> spark = SparkSession.builder.getOrCreate()

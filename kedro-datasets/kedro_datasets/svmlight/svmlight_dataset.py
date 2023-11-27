@@ -88,6 +88,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,

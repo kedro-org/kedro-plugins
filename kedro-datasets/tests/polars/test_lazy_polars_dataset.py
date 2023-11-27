@@ -123,7 +123,7 @@ class TestLazyCSVDataset:
         assert df.collect().shape == (2, 3)
 
     def test_load_s3(self, dummy_dataframe, mocked_csv_in_s3):
-        ds = LazyPolarsDataset(mocked_csv_in_s3, file_format="csv")
+        ds = LazyPolarsDataset(filepath=mocked_csv_in_s3, file_format="csv")
 
         assert ds._protocol == "s3"
 

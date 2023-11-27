@@ -42,6 +42,7 @@ class SparkStreamingDataset(AbstractDataset):
 
     def __init__(
         self,
+        *,
         filepath: str = "",
         file_format: str = "",
         save_args: Dict[str, Any] = None,

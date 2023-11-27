@@ -262,6 +262,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str = "parquet",
         load_args: Dict[str, Any] = None,

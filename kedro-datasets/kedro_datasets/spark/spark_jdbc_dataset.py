@@ -70,6 +70,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         url: str,
         table: str,
         credentials: Dict[str, Any] = None,

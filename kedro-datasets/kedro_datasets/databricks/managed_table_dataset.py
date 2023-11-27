@@ -197,6 +197,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table: str,
         catalog: str = None,
         database: str = "default",
@@ -204,7 +205,6 @@ class ManagedTableDataset(AbstractVersionedDataset):
         dataframe_type: str = "spark",
         primary_key: Optional[Union[str, List[str]]] = None,
         version: Version = None,
-        *,
         # the following parameters are used by project hooks
         # to create or update table properties
         schema: Dict[str, Any] = None,

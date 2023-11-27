@@ -121,7 +121,7 @@ class TestImageDataset:
     )
     def test_get_format(self, image_filepath, expected_extension):
         """Unit test for pillow.ImageDataset._get_format() fn"""
-        dataset = ImageDataset(image_filepath)
+        dataset = ImageDataset(filepath=image_filepath)
         ext = dataset._get_format(Path(image_filepath))
         assert expected_extension == ext
 

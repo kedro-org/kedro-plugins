@@ -41,8 +41,7 @@ pandas_require = {
     "pandas.HDFDataset": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
-        "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
+        "tables~=3.6; platform_system != 'Windows'",
     ],
     "pandas.JSONDataset": [PANDAS],
     "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],
@@ -72,7 +71,7 @@ polars_require = {
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0.0",
+        "snowflake-snowpark-python~=1.0",
         "pyarrow~=8.0",
     ]
 }
@@ -216,14 +215,13 @@ extras_require["test"] = [
     "rioxarray>=0.9.0",
     "ruff~=0.0.290",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
-    "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
+    "snowflake-snowpark-python~=1.0; python_version == '3.9'",
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",
     "packaging",
     "SQLAlchemy~=1.2",
     "tables~=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
-    "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
+    "tables~=3.6; platform_system != 'Windows'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",

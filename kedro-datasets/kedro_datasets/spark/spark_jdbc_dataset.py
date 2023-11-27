@@ -1,6 +1,6 @@
 """SparkJDBCDataset to load and save a PySpark DataFrame via JDBC."""
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 from pyspark.sql import DataFrame
 
@@ -65,18 +65,18 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         *,
         url: str,
         table: str,
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataset``.
 
@@ -146,7 +146,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             self._load_args["properties"] = {**load_properties, **credentials}
             self._save_args["properties"] = {**save_properties, **credentials}
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = self._load_args
         save_args = self._save_args
 

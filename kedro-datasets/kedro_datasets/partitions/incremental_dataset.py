@@ -47,9 +47,8 @@ class IncrementalDataset(PartitionedDataset):
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
         >>> dataset = IncrementalDataset(
-        ...     path="s3://bucket-name/path/to/folder",
+        ...     path=tmp_path / "path/to/folder",
         ...     dataset="pandas.CSVDataset",
-        ...     credentials=credentials,
         ... )
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)

@@ -32,7 +32,6 @@ dataset-doctests:
 	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/pandas/sql_dataset.py \
-	  --ignore kedro_datasets/partitions/incremental_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/pillow/image_dataset.py \
 	  --ignore kedro_datasets/polars/lazy_polars_dataset.py \

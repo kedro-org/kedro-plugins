@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
 import logging
-import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -17,7 +16,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 logger = logging.getLogger(__name__)
@@ -270,21 +268,3 @@ class ExcelDataset(
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")
-
-
-_DEPRECATED_CLASSES = {
-    "ExcelDataSet": ExcelDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -2,7 +2,6 @@
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 import json as json_  # make pylint happy
-import warnings
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple, Union
 
@@ -10,7 +9,6 @@ import requests
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractDataset, DatasetError
 
 
@@ -44,18 +42,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>>
         >>> dataset = APIDataset(
-        ...     url="https://quickstats.nass.usda.gov",
+        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        ...             "key": "SOME_TOKEN",
-        ...             "format": "JSON",
-        ...             "commodity_desc": "CORN",
-        ...             "statisticcat_des": "YIELD",
-        ...             "agg_level_desc": "STATE",
-        ...             "year": 2000,
+        ...             "news_site": "NASA",
+        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },
-        ...     credentials=("username", "password"),
         ... )
         >>> data = dataset.load()
 
@@ -67,7 +60,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method="POST", url="url_of_remote_server", save_args={"chunk_size": 1}
+        ...     method="POST",
+        ...     url="https://httpbin.org/post",
+        ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)
 
@@ -236,21 +231,3 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         with sessions.Session() as session:
             response = self._execute_request(session)
         return response.ok
-
-
-_DEPRECATED_CLASSES = {
-    "APIDataSet": APIDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

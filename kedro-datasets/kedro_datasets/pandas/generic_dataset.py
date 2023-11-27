@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the
 type of read/write target.
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -11,7 +10,6 @@ import fsspec
 import pandas as pd
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 NON_FILE_SYSTEM_TARGETS = [
@@ -72,7 +70,9 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GenericDataset(filepath="test.csv", file_format="csv")
+        >>> dataset = GenericDataset(
+        ...     filepath="test.csv", file_format="csv", save_args={"index": False}
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
@@ -240,21 +240,3 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "GenericDataSet": GenericDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -29,7 +29,6 @@ dataset-doctests:
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/api/api_dataset.py \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
-	  --ignore kedro_datasets/matplotlib/matplotlib_writer.py \
 	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/pandas/generic_dataset.py \

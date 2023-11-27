@@ -31,7 +31,6 @@ dataset-doctests:
 	  --ignore kedro_datasets/matplotlib/matplotlib_writer.py \
 	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
-	  --ignore kedro_datasets/pandas/generic_dataset.py \
 	  --ignore kedro_datasets/pandas/sql_dataset.py \
 	  --ignore kedro_datasets/partitions/incremental_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \

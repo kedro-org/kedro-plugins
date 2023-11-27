@@ -12,8 +12,8 @@ CohereDataset: Any
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
-        "openai": ["ChatOpenAIDataset", "OpenAIEmbeddingsDataset"],
-        "anthropic": ["ChatAnthropicDataset"],
-        "cohere": ["CohereDataset"],
+        "_openai": ["ChatOpenAIDataset", "OpenAIEmbeddingsDataset"],
+        "_anthropic": ["ChatAnthropicDataset"],
+        "_cohere": ["CohereDataset"],
     },
 )

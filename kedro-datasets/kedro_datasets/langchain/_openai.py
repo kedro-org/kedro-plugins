@@ -12,8 +12,8 @@ OPENAI_TYPE = TypeVar("OPENAI_TYPE")
 
 
 class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
-    """OpenAI dataset used to access credentials at runtime.
-    """
+    """OpenAI dataset used to access credentials at runtime."""
+
     @property
     @abstractmethod
     def constructor(self) -> OPENAI_TYPE:
@@ -52,13 +52,11 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     catalog.yml:
 
     .. code-block:: yaml
-       gpt_3_5_turbo:
-         type: langchain.openai.ChatOpenAIDataSet
+       text_embedding_ada_002:
+         type: langchain.OpenAIEmbeddingsDataset
          kwargs:
-           model: "gpt-3.5-turbo"
-           temperature: 0.0
+           model: "text-embedding-ada-002"
          credentials: openai
-
 
     credentials.yml:
 
@@ -66,6 +64,27 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
        openai:
          openai_api_base: <openai-api-base>
          openai_api_key: <openai-api-key>
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
+        >>> from kedro_datasets.langchain import OpenAIEmbeddingsDataset
+        >>>
+        >>> embeddings = OpenAIEmbeddingsDataset(
+        ...     credentials={
+        ...         "openai_api_base": "<openai-api-base>",
+        ...         "openai_api_key": "<openai-api-key>",
+        ...     },
+        ...     kwargs={
+        ...         "model": "text-embedding-ada-002",
+        ...     },
+        ... ).load()
+        >>>
+        >>> # See: https://python.langchain.com/docs/integrations/text_embedding/openai
+        >>> embeddings.embed_query("Hello world!")
+
     """
 
     @property
@@ -82,12 +101,11 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
 
     .. code-block:: yaml
        gpt_3_5_turbo:
-         type: langchain.openai.ChatOpenAIDataSet
+         type: langchain.ChatOpenAIDataSet
          kwargs:
            model: "gpt-3.5-turbo"
            temperature: 0.0
          credentials: openai
-
 
     credentials.yml:
 
@@ -95,7 +113,30 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
        openai:
          openai_api_base: <openai-api-base>
          openai_api_key: <openai-api-key>
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
+        >>> from kedro_datasets.langchain import ChatOpenAIDataset
+        >>> from langchain.schema import HumanMessage
+        >>>
+        >>> llm = ChatOpenAIDataset(
+        ...     credentials={
+        ...         "openai_api_base": "<openai-api-base>",
+        ...         "openai_api_key": "<openai-api-key>",
+        ...     },
+        ...     kwargs={
+        ...         "model": "gpt-3.5-turbo",
+        ...         "temperature": 0,
+        ...     },
+        ... ).load()
+        >>>
+        >>> # See: https://python.langchain.com/docs/integrations/chat/openai
+        >>> llm([HumanMessage(content="Hello world!")])
     """
+
     @property
     def constructor(self) -> type[ChatOpenAI]:
         return ChatOpenAI

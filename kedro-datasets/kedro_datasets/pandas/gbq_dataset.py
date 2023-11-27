@@ -3,7 +3,7 @@ to read and write from/to BigQuery table.
 """
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Union
+from typing import Any, NoReturn, Union
 
 import fsspec
 import pandas as pd
@@ -59,18 +59,18 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"progress_bar": False}
 
     def __init__(  # noqa: PLR0913
         self,
         dataset: str,
         table_name: str,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataset``.
 
@@ -126,7 +126,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "dataset": self._dataset,
             "table_name": self._table_name,
@@ -204,17 +204,17 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         >>> sql_data = dataset.load()
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
 
@@ -288,7 +288,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         desc = {}
         desc["sql"] = str(load_args.pop("query", None))

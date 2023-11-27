@@ -3,7 +3,7 @@
 """
 import pickle
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any
 
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
@@ -66,16 +66,16 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         >>> reloaded.take(4)
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         database: str,
         table: str,
         write_mode: str = "errorifexists",
-        table_pk: List[str] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        table_pk: list[str] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataset``.
 
@@ -126,7 +126,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "database": self._database,
             "table": self._table,

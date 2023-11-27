@@ -3,7 +3,7 @@ file.
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List
+from typing import Any
 
 import fsspec
 from Bio import SeqIO
@@ -12,7 +12,7 @@ from kedro.io.core import get_filepath_str, get_protocol_and_path
 from kedro_datasets._io import AbstractDataset
 
 
-class BioSequenceDataset(AbstractDataset[List, List]):
+class BioSequenceDataset(AbstractDataset[list, list]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
     Example:
@@ -42,17 +42,17 @@ class BioSequenceDataset(AbstractDataset[List, List]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """
         Creates a new instance of ``BioSequenceDataset`` pointing
@@ -110,7 +110,7 @@ class BioSequenceDataset(AbstractDataset[List, List]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -118,12 +118,12 @@ class BioSequenceDataset(AbstractDataset[List, List]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> List:
+    def _load(self) -> list:
         load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return list(SeqIO.parse(handle=fs_file, **self._load_args))
 
-    def _save(self, data: List) -> None:
+    def _save(self, data: list) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

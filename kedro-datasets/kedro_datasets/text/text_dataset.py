@@ -3,7 +3,7 @@ filesystem (e.g.: local, S3, GCS).
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
@@ -47,9 +47,9 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         *,
         filepath: str,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``TextDataset`` pointing to a concrete text file
         on a specific filesystem.
@@ -102,7 +102,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

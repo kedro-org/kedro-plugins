@@ -4,7 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf fil
 from copy import deepcopy
 from pathlib import PurePosixPath
 from threading import Lock
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import pandas as pd
@@ -52,20 +52,20 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     # _lock is a class attribute that will be shared across all the instances.
     # It is used to make dataset safe for threads.
     _lock = Lock()
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         *,
         filepath: str,
         key: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``HDFDataset`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -135,7 +135,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "key": self._key,

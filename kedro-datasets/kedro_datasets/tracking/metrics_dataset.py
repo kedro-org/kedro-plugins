@@ -4,7 +4,7 @@ The ``MetricsDataset`` is part of Kedro Experiment Tracking. The dataset is vers
 and only takes metrics of numeric values.
 """
 import json
-from typing import Dict, NoReturn
+from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
@@ -47,7 +47,7 @@ class MetricsDataset(json_dataset.JSONDataset):
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: Dict[str, float]) -> None:
+    def _save(self, data: dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataset`` to float to make sure
         they are numeric values which can be displayed in Kedro Viz and then saves the dataset.
         """

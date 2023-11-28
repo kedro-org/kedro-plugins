@@ -6,7 +6,7 @@ supports all allowed options for loading and saving pickle files.
 import importlib
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
@@ -66,19 +66,20 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         >>> assert data.equals(reloaded)
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         backend: str = "pickle",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataset`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataset`` supports custom backends to
@@ -197,7 +198,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "backend": self._backend,

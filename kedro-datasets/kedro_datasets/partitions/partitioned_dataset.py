@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -28,7 +28,7 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataset(AbstractDataset[Dict[str, Any], Dict[str, Callable[[], Any]]]):
+class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], Any]]]):
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.

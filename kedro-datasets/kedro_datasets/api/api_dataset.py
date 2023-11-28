@@ -3,7 +3,7 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 import json as json_  # make pylint happy
 from copy import deepcopy
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Union
 
 import requests
 from requests import Session, sessions
@@ -42,18 +42,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>>
         >>> dataset = APIDataset(
-        ...     url="https://quickstats.nass.usda.gov",
+        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        ...             "key": "SOME_TOKEN",
-        ...             "format": "JSON",
-        ...             "commodity_desc": "CORN",
-        ...             "statisticcat_des": "YIELD",
-        ...             "agg_level_desc": "STATE",
-        ...             "year": 2000,
+        ...             "news_site": "NASA",
+        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },
-        ...     credentials=("username", "password"),
         ... )
         >>> data = dataset.load()
 
@@ -65,7 +60,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method="POST", url="url_of_remote_server", save_args={"chunk_size": 1}
+        ...     method="POST",
+        ...     url="https://httpbin.org/post",
+        ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)
 
@@ -93,12 +90,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         url: str,
         method: str = "GET",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: Union[tuple[str, str], list[str], AuthBase] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
@@ -149,7 +147,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         if "timeout" in self._params:
             self._params["timeout"] = self._convert_type(self._params["timeout"])
 
-        self._request_args: Dict[str, Any] = {
+        self._request_args: dict[str, Any] = {
             "url": url,
             "method": method,
             "auth": self._convert_type(self._auth),
@@ -165,11 +163,11 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         However, for some parameters in the Python requests library,
         only Tuples are allowed.
         """
-        if isinstance(value, List):
+        if isinstance(value, list):
             return tuple(value)
         return value
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)
@@ -195,7 +193,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     def _execute_save_with_chunks(
         self,
-        json_data: List[Dict[str, Any]],
+        json_data: list[dict[str, Any]],
     ) -> requests.Response:
         chunk_size = self._chunk_size
         n_chunks = len(json_data) // chunk_size + 1

@@ -5,7 +5,7 @@ type of read/write target.
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import polars as pl
@@ -54,13 +54,14 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         file_format: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ):
         """Creates a new instance of ``EagerPolarsDataset`` pointing to a concrete data file
         on a specific filesystem. The appropriate polars load/save methods are dynamically
@@ -177,7 +178,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
         return self._fs.exists(load_path)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "file_format": self._file_format,
             "filepath": self._filepath,

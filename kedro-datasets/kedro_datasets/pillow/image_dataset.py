@@ -24,7 +24,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
 
         >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> dataset = ImageDataset(filepath="test.png")
+        >>> dataset = ImageDataset(filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg")
         >>> image = dataset.load()
         >>> image.show()
 

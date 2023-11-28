@@ -225,9 +225,11 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         >>> from kedro_datasets.video import VideoDataset
         >>> import numpy as np
         >>>
-        >>> video = VideoDataset(filepath="/video/file/path.mp4").load()
+        >>> video = VideoDataset(
+        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        ... ).load()
         >>> frame = video[0]
-        >>> np.sum(np.asarray(frame))
+        >>> assert isinstance(np.sum(np.asarray(frame)), np.uint64)
 
 
     Example creating a video from numpy frames using Python API:
@@ -244,7 +246,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ...     imgs.append(Image.fromarray(frame))
         ...     frame -= 1
         ...
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataset(filepath="my_video.mp4")
         >>> video.save(SequenceVideo(imgs, fps=25))
 
 
@@ -262,7 +264,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ...         yield Image.fromarray(frame)
         ...         frame -= 1
         ...
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataset(filepath="my_video.mp4")
         >>> video.save(GeneratorVideo(gen(), fps=25, length=None))
 
     """

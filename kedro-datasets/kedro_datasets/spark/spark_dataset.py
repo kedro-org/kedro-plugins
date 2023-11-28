@@ -233,7 +233,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     .. code-block:: pycon
 
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
+        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
         >>>
         >>> from kedro_datasets.spark import SparkDataset
         >>>
@@ -249,7 +249,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>>
-        >>> reloaded.take(4)
+        >>> assert Row(name='Bob', age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

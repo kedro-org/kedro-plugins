@@ -40,8 +40,7 @@ dataset-doctests:
 	  --ignore kedro_datasets/spark/deltatable_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
-	  --ignore kedro_datasets/video/video_dataset.py
+	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml

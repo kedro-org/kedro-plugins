@@ -102,7 +102,7 @@ def _dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     return sorted(matched)
 
 
-def _get_dbutils(spark: SparkSession) -> Optional[Any]:
+def _get_dbutils(spark: SparkSession) -> Any:
     """Get the instance of 'dbutils' or None if the one could not be found."""
     dbutils = globals().get("dbutils")
     if dbutils:
@@ -251,7 +251,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>>
-        >>> assert Row(name='Bob', age=12) in reloaded.take(4)
+        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

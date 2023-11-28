@@ -99,6 +99,7 @@ type_targets = {
     "py:class": (
         "kedro.io.core.AbstractDataset",
         "kedro.io.AbstractDataset",
+        "AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",

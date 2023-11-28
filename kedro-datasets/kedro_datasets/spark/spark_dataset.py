@@ -62,8 +62,8 @@ def _parse_glob_pattern(pattern: str) -> str:
     return "/".join(clean)
 
 
-def _split_filepath(filepath: str) -> tuple[str, str]:
-    split_ = filepath.split("://", 1)
+def _split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
+    split_ = str(filepath).split("://", 1)
     if len(split_) == 2:  # noqa: PLR2004
         return split_[0] + "://", split_[1]
     return "", split_[0]

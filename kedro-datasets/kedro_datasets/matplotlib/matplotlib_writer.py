@@ -74,7 +74,7 @@ class MatplotlibWriter(
         >>> from kedro_datasets.matplotlib import MatplotlibWriter
         >>>
         >>> plots_dict = {}
-        >>> for colour in ["blue", "green", "red"]:  # doctest: +ELLIPSIS
+        >>> for colour in ["blue", "green", "red"]:
         ...     plots_dict[f"{colour}.png"] = plt.figure()
         ...     plt.plot([1, 2, 3], color=colour)
         ...

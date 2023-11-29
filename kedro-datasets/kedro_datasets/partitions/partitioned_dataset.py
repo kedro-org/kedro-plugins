@@ -6,7 +6,7 @@ from __future__ import annotations
 import operator
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 from urllib.parse import urlparse
 from warnings import warn
 

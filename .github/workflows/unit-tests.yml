@@ -58,7 +58,9 @@ jobs:
           git clone https://github.com/cdarlint/winutils.git
 
           # https://github.com/cdarlint/winutils#how-to-use
-          HADOOP_HOME="D:${${PWD:2}//\//\\\\}\\winutils\\hadoop-2.7.3"
+          PWD="${PWD:2}"
+          echo "$PWD"
+          HADOOP_HOME="D:${PWD//\//\\\\}\\winutils\\hadoop-2.7.3"
           echo "$HADOOP_HOME\\bin" >> $GITHUB_PATH
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'

@@ -69,4 +69,8 @@ jobs:
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
-          make test-no-spark HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
+          # https://github.com/cdarlint/winutils#how-to-use
+          HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
+          PATH=$env:PATH;$HADOOP_HOME/bin
+
+          make test-no-spark 

@@ -297,11 +297,13 @@ class TestIncrementalDatasetLocal:
         mock_ts = mocker.patch(
             "kedro.io.core.generate_timestamp", return_value=save_version
         )
-        IncrementalDataset(str(tmp_path), dataset_config).save(partitioned_data_pandas)
+        IncrementalDataset(path=str(tmp_path), dataset=dataset_config).save(
+            partitioned_data_pandas
+        )
         mock_ts.assert_called_once()
 
         dataset = IncrementalDataset(
-            str(tmp_path), dataset_config, filename_suffix=suffix
+            path=str(tmp_path), dataset=dataset_config, filename_suffix=suffix
         )
         loaded_partitions = dataset.load()
 
@@ -329,8 +331,8 @@ class TestIncrementalDatasetLocal:
         path.write_text("content")
 
         dataset = IncrementalDataset(
-            str(local_dir / "path/to/folder"),
-            {"type": "pandas.CSVDataset", "versioned": True},
+            path=str(local_dir / "path/to/folder"),
+            dataset={"type": "pandas.CSVDataset", "versioned": True},
         )
 
         pattern = re.escape(

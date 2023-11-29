@@ -24,7 +24,16 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/databricks --ignore tests/tensorflow
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
-dataset-doctests:
+dataset-doctests%:
+	if [ "${*}" = '-no-spark' ]; then \
+		extra_pytest_args='--ignore kedro_datasets/databricks --ignore kedro_datasets/spark'; \
+	elif [[ -z "${*}" ]]; then \
+		extra_pytest_args=''; \
+	else \
+		echo "make: *** No rule to make target \`dataset-doctests${*}\`.  Stop."; \
+		exit 2; \
+	fi
+
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
@@ -40,7 +49,7 @@ dataset-doctests:
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
-	  $(EXTRA_PYTEST_ARGS)
+	  ${extra_pytest_args}
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
@@ -74,10 +83,10 @@ sign-off:
 	chmod +x .git/hooks/commit-msg
 
 # kedro-datasets related only
-test-no-spark: dataset-doctests EXTRA_PYTEST_ARGS='--ignore kedro_datasets/databricks kedro_datasets/spark'
+test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
-test-no-spark-sequential: dataset-doctests EXTRA_PYTEST_ARGS='--ignore kedro_datasets/databricks kedro_datasets/spark'
+test-no-spark-sequential: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
 
 # kedro-datasets/snowflake tests skipped from default scope

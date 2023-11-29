@@ -21,7 +21,7 @@ test:
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
-	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks
+	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/databricks --ignore tests/tensorflow
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
 dataset-doctests:
@@ -39,7 +39,8 @@ dataset-doctests:
 	  --ignore kedro_datasets/spark/deltatable_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py
+	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
+	  $(EXTRA_PYTEST_ARGS)
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
@@ -73,10 +74,10 @@ sign-off:
 	chmod +x .git/hooks/commit-msg
 
 # kedro-datasets related only
-test-no-spark: dataset-doctests
+test-no-spark: dataset-doctests EXTRA_PYTEST_ARGS='--ignore kedro_datasets/databricks kedro_datasets/spark'
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
-test-no-spark-sequential: dataset-doctests
+test-no-spark-sequential: dataset-doctests EXTRA_PYTEST_ARGS='--ignore kedro_datasets/databricks kedro_datasets/spark'
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
 
 # kedro-datasets/snowflake tests skipped from default scope

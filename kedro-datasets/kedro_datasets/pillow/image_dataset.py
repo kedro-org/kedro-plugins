@@ -3,7 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
@@ -24,22 +24,23 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
 
         >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> dataset = ImageDataset(filepath="test.png")
+        >>> dataset = ImageDataset(filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg")
         >>> image = dataset.load()
         >>> image.show()
 
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        save_args: Dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ImageDataset`` pointing to a concrete image file
         on a specific filesystem.
@@ -100,7 +101,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

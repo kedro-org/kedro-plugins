@@ -59,7 +59,7 @@ class IncrementalDataset(PartitionedDataset):
         >>>
         >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
-        >>> dataset.load()
+        >>> assert dataset.load() == {}
     """
 
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
@@ -67,6 +67,7 @@ class IncrementalDataset(PartitionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,

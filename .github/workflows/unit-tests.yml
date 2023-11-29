@@ -58,7 +58,7 @@ jobs:
 
           # https://github.com/cdarlint/winutils#how-to-use
           HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
-          echo "$HADOOP_HOME/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Add-Content $env:GITHUB_PATH "$HADOOP_HOME/bin"
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test

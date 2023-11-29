@@ -56,7 +56,9 @@ jobs:
           # https://cwiki.apache.org/confluence/display/HADOOP2/WindowsProblems
           git clone https://github.com/cdarlint/winutils.git
           echo "HADOOP_HOME=$env:GITHUB_WORKSPACE/winutils/hadoop-2.7.3" >> $env:GITHUB_ENV
-      - if: inputs.os == 'windows-latest'
+      - env:
+          HADOOP_HOME: $env:HADOOP_HOME
+        if: inputs.os == 'windows-latest'
         run: python -c"import os;print(os.environ['HADOOP_HOME'])"
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'

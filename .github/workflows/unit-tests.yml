@@ -59,8 +59,7 @@ jobs:
 
           # https://github.com/cdarlint/winutils#how-to-use
           PWD="${PWD:2}"
-          echo "$PWD"
-          HADOOP_HOME="D:${PWD//\//\\\\}\\winutils\\hadoop-2.7.3"
+          HADOOP_HOME="D:${PWD//\//\\}\winutils\hadoop-2.7.3"
           echo "$HADOOP_HOME\\bin" >> $GITHUB_PATH
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
@@ -73,8 +72,6 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
-      - name: Show PATH
-        run: python -c'import os;print(os.environ["PATH"])'
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |

@@ -10,7 +10,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
 from pathlib import PurePosixPath
-from typing import Any, Optional
+from typing import Any
 from warnings import warn
 
 import fsspec

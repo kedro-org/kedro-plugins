@@ -73,4 +73,4 @@ jobs:
           $env:HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
           $env:PATH+=";$env:HADOOP_HOME/bin"
 
-          make test-no-spark 
+          make test-no-spark

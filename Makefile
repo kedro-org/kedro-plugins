@@ -25,7 +25,7 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
 dataset-doctests%:
-	if [ "${*}" = '-no-spark' ]; then \
+	if [[ "${*}" == '-no-spark' ]]; then \
 		extra_pytest_args='--ignore kedro_datasets/databricks --ignore kedro_datasets/spark'; \
 	elif [[ -z "${*}" ]]; then \
 		extra_pytest_args=''; \

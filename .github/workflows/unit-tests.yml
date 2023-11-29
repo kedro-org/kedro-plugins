@@ -70,7 +70,7 @@ jobs:
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           # https://github.com/cdarlint/winutils#how-to-use
-          $env:HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
-          $env:PATH+=";$env:HADOOP_HOME/bin"
+          HADOOP_HOME=$PWD/winutils/hadoop-2.7.3
+          PATH="$env:PATH;$HADOOP_HOME/bin"
 
           make test-no-spark

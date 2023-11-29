@@ -50,20 +50,12 @@ jobs:
           pip install ".[test]"
       - name: pip freeze
         run: pip freeze
-
-      # https://cwiki.apache.org/confluence/display/HADOOP2/WindowsProblems
-      - name: Get native Hadoop libraries
-        uses: actions/checkout@v4
-        if: inputs.os == 'windows-latest'
-        with:
-          repository: cdarlint/winutils
-          sparse-checkout: |
-            hadoop-2.7.3
-      - name: Set %HADOOP_HOME% environment variable
+      - name: Get native Hadoop libraries and set %HADOOP_HOME% environment variable
         if: inputs.os == 'windows-latest'
         run: |
-          echo "HADOOP_HOME=$env:GITHUB_WORKSPACE/hadoop-2.7.3" >> $env:GITHUB_ENV
-
+          # https://cwiki.apache.org/confluence/display/HADOOP2/WindowsProblems
+          git clone https://github.com/cdarlint/winutils.git
+          echo "HADOOP_HOME=$env:GITHUB_WORKSPACE/winutils/hadoop-2.7.3" >> $env:GITHUB_ENV
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test

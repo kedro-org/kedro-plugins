@@ -29,7 +29,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 def _grandparent(path: str) -> str:
-    "Validate that the parent's parent has the same name, and return."""
+    """Check and return the logical parent of the parent of the path."""
     path_obj = PurePosixPath(path)
     grandparent = path_obj.parents[1]
     if grandparent.name != path_obj.name:

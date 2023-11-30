@@ -1,6 +1,8 @@
 """``AbstractVersionedDataset`` implementation to access Spark dataframes using
 ``pyspark``.
 """
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -8,7 +10,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
 from pathlib import PurePosixPath
-from typing import Any, Optional
+from typing import Any
 from warnings import warn
 
 import fsspec
@@ -62,8 +64,8 @@ def _parse_glob_pattern(pattern: str) -> str:
     return "/".join(clean)
 
 
-def _split_filepath(filepath: str) -> tuple[str, str]:
-    split_ = filepath.split("://", 1)
+def _split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
+    split_ = str(filepath).split("://", 1)
     if len(split_) == 2:  # noqa: PLR2004
         return split_[0] + "://", split_[1]
     return "", split_[0]
@@ -100,7 +102,7 @@ def _dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     return sorted(matched)
 
 
-def _get_dbutils(spark: SparkSession) -> Optional[Any]:
+def _get_dbutils(spark: SparkSession) -> Any:
     """Get the instance of 'dbutils' or None if the one could not be found."""
     dbutils = globals().get("dbutils")
     if dbutils:
@@ -245,11 +247,11 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
-        >>> dataset = SparkDataset(filepath="test_data")
+        >>> dataset = SparkDataset(filepath=tmp_path / "test_data")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>>
-        >>> assert Row(name='Bob', age=12) in reloaded.take(4)
+        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

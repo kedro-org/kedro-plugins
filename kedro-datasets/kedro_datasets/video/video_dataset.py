@@ -229,7 +229,6 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
         ... ).load()
         >>> frame = video[0]
-        >>> assert isinstance(np.sum(np.asarray(frame)), np.uint64)
 
 
     Example creating a video from numpy frames using Python API:

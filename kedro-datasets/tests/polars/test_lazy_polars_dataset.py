@@ -1,8 +1,17 @@
 import re
 from pathlib import Path, PurePosixPath
 from time import sleep
+from typing import Callable
+from unittest.mock import MagicMock
 
+import aiobotocore.awsrequest
+import aiobotocore.endpoint
+import aiohttp
+import aiohttp.client_reqrep
+import aiohttp.typedefs
 import boto3
+import botocore.awsrequest
+import botocore.model
 import polars as pl
 import pytest
 from adlfs import AzureBlobFileSystem
@@ -17,17 +26,6 @@ from s3fs.core import S3FileSystem
 
 from kedro_datasets.polars import LazyPolarsDataset
 from kedro_datasets.polars.lazy_polars_dataset import ACCEPTED_FILE_FORMATS
-
-from typing import Callable
-from unittest.mock import MagicMock
-
-import aiobotocore.awsrequest
-import aiobotocore.endpoint
-import aiohttp
-import aiohttp.client_reqrep
-import aiohttp.typedefs
-import botocore.awsrequest
-import botocore.model
 
 """
 Patch aiobotocore to work with moto

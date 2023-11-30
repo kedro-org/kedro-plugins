@@ -56,7 +56,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         >>> assert data.equals(reloaded)
         >>>
         >>> dataset = PickleDataset(
-        ...     filepath="test.pickle.lz4",
+        ...     filepath=tmp_path / "test.pickle.lz4",
         ...     backend="compress_pickle",
         ...     load_args={"compression": "lz4"},
         ...     save_args={"compression": "lz4"},

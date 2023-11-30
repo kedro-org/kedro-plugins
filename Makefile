@@ -24,15 +24,13 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/databricks --ignore tests/tensorflow
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
+extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
+extra_pytest_args=
 dataset-doctests%:
-	if [ "${*}" = '-no-spark' ]; then \
-		extra_pytest_args='--ignore kedro_datasets/databricks --ignore kedro_datasets/spark'; \
-	elif [ -z "${*}" ]; then \
-		extra_pytest_args=''; \
-	else \
-		echo "make: *** No rule to make target \`dataset-doctests${*}\`.  Stop."; \
-		exit 2; \
-	fi
+	if [ "${*}" != '-no-spark' ] && [ "${*}" != '.o' ]; then \
+	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
+	  exit 2; \
+	fi; \
 
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
@@ -49,7 +47,7 @@ dataset-doctests%:
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
-	  ${extra_pytest_args}
+	  $(extra_pytest_args${*})
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml

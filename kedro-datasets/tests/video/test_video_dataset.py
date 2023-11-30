@@ -1,5 +1,3 @@
-import importlib
-
 import pytest
 from utils import TEST_FPS, assert_videos_equal
 

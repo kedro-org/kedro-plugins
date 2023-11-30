@@ -1,3 +1,6 @@
+from typing import Callable
+from unittest.mock import MagicMock
+
 import aiobotocore.awsrequest
 import aiobotocore.endpoint
 import aiohttp
@@ -6,8 +9,6 @@ import aiohttp.typedefs
 import botocore.awsrequest
 import botocore.model
 import pytest
-from typing import Callable
-from unittest.mock import MagicMock
 
 """
 Patch aiobotocore to work with moto
@@ -42,20 +43,23 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
     @property
     def raw_headers(self) -> aiohttp.typedefs.RawHeaders:
         # Return the headers encoded the way that aiobotocore expects them
-        return {k.encode('utf-8'): str(v).encode('utf-8') for k, v in
-                self.response.headers.items()}.items()
+        return {
+            k.encode("utf-8"): str(v).encode("utf-8")
+            for k, v in self.response.headers.items()
+        }.items()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def patch_aiobotocore():
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
-                http_response: botocore.awsrequest.AWSResponse,
-                operation_model: botocore.model.OperationModel
+            http_response: botocore.awsrequest.AWSResponse,
+            operation_model: botocore.model.OperationModel,
         ):
             return original(MockAWSResponse(http_response), operation_model)
 
         return patched_convert_to_response_dict
 
     aiobotocore.endpoint.convert_to_response_dict = factory(
-        aiobotocore.endpoint.convert_to_response_dict)
+        aiobotocore.endpoint.convert_to_response_dict
+    )

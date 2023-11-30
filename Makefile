@@ -1,3 +1,5 @@
+.SUFFIXES:
+
 package:
 	cd $(plugin);\
 	rm -Rf dist;\
@@ -26,12 +28,12 @@ dataset-tests: dataset-doctests
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=
-dataset-doctests%:
-	if [ "${*}" != '-no-spark' ] && [ "${*}" != '.o' ]; then \
+dataset-doctest%:
+	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
 	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
 	  exit 2; \
 	fi; \
-
+    \
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
@@ -47,7 +49,7 @@ dataset-doctests%:
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
-	  $(extra_pytest_args${*})
+	  $(extra_pytest_arg${*})
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml

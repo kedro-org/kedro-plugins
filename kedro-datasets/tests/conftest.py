@@ -6,11 +6,6 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 import json
 import os
-
-import requests
-from kedro.io.core import generate_timestamp
-from moto.moto_server.threaded_moto_server import ThreadedMotoServer
-from pytest import fixture
 from typing import Callable
 from unittest.mock import MagicMock
 
@@ -21,13 +16,15 @@ import aiohttp.client_reqrep
 import aiohttp.typedefs
 import botocore.awsrequest
 import botocore.model
-import pytest
+import requests
+from kedro.io.core import generate_timestamp
+from moto.moto_server.threaded_moto_server import ThreadedMotoServer
+from pytest import fixture
 
 BUCKET_NAME = "test_bucket"
 IP_ADDRESS = "127.0.0.1"
 PORT = 5555
 ENDPOINT_URI = f"http://{IP_ADDRESS}:{PORT}/"
-
 
 
 """

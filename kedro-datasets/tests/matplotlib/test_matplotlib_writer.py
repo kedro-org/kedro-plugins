@@ -49,7 +49,9 @@ def overwrite(request):
 
 
 @pytest.fixture
-def plot_writer(mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite, tmp_path):
+def plot_writer(
+    mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite, tmp_path
+):
     full_path = f"s3://{BUCKET_NAME}/{tmp_path}"
     return MatplotlibWriter(
         filepath=full_path,

@@ -40,7 +40,7 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> dataset = EmailMessageDataset(filepath="test")
+        >>> dataset = EmailMessageDataset(filepath=tmp_path / "test")
         >>> dataset.save(msg)
         >>> reloaded = dataset.load()
         >>> assert msg.__dict__ == reloaded.__dict__

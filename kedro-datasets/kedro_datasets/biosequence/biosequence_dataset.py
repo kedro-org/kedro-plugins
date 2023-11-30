@@ -30,7 +30,7 @@ class BioSequenceDataset(AbstractDataset[list, list]):
         ...
         >>>
         >>> dataset = BioSequenceDataset(
-        ...     filepath="ls_orchid.fasta",
+        ...     filepath=tmp_path / "ls_orchid.fasta",
         ...     load_args={"format": "fasta"},
         ...     save_args={"format": "fasta"},
         ... )

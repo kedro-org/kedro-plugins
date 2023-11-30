@@ -9,7 +9,7 @@ from kedro_datasets._io import DatasetError
 from kedro_datasets.matplotlib import MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
-KEY_PATH = "matplotlib"
+KEY_PATH = "merel"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
 

@@ -1,3 +1,5 @@
+.SUFFIXES:
+
 package:
 	cd $(plugin);\
 	rm -Rf dist;\
@@ -21,10 +23,17 @@ test:
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
-	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks
+	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/databricks --ignore tests/tensorflow
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
-dataset-doctests:
+extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
+extra_pytest_args=
+dataset-doctest%:
+	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
+	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
+	  exit 2; \
+	fi; \
+    \
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
@@ -38,7 +47,8 @@ dataset-doctests:
 	  --ignore kedro_datasets/spark/deltatable_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py
+	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
+	  $(extra_pytest_arg${*})
 
 test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
@@ -72,10 +82,10 @@ sign-off:
 	chmod +x .git/hooks/commit-msg
 
 # kedro-datasets related only
-test-no-spark: dataset-doctests
+test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
-test-no-spark-sequential: dataset-doctests
+test-no-spark-sequential: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
 
 # kedro-datasets/snowflake tests skipped from default scope

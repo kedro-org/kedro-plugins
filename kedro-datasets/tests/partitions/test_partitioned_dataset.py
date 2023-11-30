@@ -28,7 +28,7 @@ def partitioned_data_pandas():
 
 @pytest.fixture
 def local_csvs(tmp_path, partitioned_data_pandas):
-    local_dir = local_dir = tmp_path / "csvs"
+    local_dir = tmp_path / "csvs"
     local_dir.mkdir()
 
     for k, data in partitioned_data_pandas.items():

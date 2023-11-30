@@ -69,7 +69,7 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
         }.items()
 
 
-@fixture(scope="session")
+@fixture(scope="session", autouse=True)
 def patch_aiobotocore():
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
@@ -132,7 +132,7 @@ def credentials():
 
 
 @fixture(scope="session")
-def moto_server(patch_aiobotocore):
+def moto_server():
     # This fixture is module-scoped, meaning that we can re-use the MotoServer across all tests
     server = ThreadedMotoServer(ip_address=IP_ADDRESS, port=PORT)
     server.start()
@@ -164,8 +164,8 @@ def _get_boto3_client():
 @fixture
 def mocked_s3_bucket(moto_server):  # pylint: disable=unused-argument
     """Create a bucket for testing using moto."""
-    _reset_moto_server(patch_aiobotocore)
-    client = _get_boto3_client(patch_aiobotocore)
+    _reset_moto_server()
+    client = _get_boto3_client()
     client.create_bucket(Bucket=BUCKET_NAME)
     yield client
 
@@ -187,8 +187,8 @@ def mocked_encrypted_s3_bucket(moto_server):  # pylint: disable=unused-argument
         ],
     }
     bucket_policy = json.dumps(bucket_policy)
-    _reset_moto_server(patch_aiobotocore)
-    client = _get_boto3_client(patch_aiobotocore)
+    _reset_moto_server()
+    client = _get_boto3_client()
     client.create_bucket(Bucket=BUCKET_NAME)
     client.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
     yield client

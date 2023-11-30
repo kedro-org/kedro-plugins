@@ -12,7 +12,6 @@ BUCKET_NAME = "test_bucket"
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
-
 matplotlib.use("Agg")  # Disable interactive mode
 
 

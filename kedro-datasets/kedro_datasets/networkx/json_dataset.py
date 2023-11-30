@@ -26,7 +26,7 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         >>> from kedro_datasets.networkx import JSONDataset
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = JSONDataset(filepath="test.json")
+        >>> graph_dataset = JSONDataset(filepath=tmp_path / "test.json")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)

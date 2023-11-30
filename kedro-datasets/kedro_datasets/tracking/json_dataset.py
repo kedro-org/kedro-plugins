@@ -35,7 +35,7 @@ class JSONDataset(json_dataset.JSONDataset):
         >>>
         >>> data = {"col1": 1, "col2": 0.23, "col3": 0.002}
         >>>
-        >>> dataset = JSONDataset(filepath="test.json")
+        >>> dataset = JSONDataset(filepath=tmp_path / "test.json")
         >>> dataset.save(data)
 
     """

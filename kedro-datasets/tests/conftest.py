@@ -69,7 +69,7 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
         }.items()
 
 
-@fixture()
+@fixture(scope="session")
 def patch_aiobotocore():
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
@@ -147,13 +147,13 @@ def moto_server(patch_aiobotocore):
     server.stop()
 
 
-def _reset_moto_server(patch_aiobotocore):
+def _reset_moto_server():
     # We reuse the MotoServer for all S3 related tests
     # But we do want a clean state for every test
     requests.post(f"{ENDPOINT_URI}/moto-api/reset", timeout=2.0)
 
 
-def _get_boto3_client(patch_aiobotocore):
+def _get_boto3_client():
     from botocore.session import Session  # pylint: disable=import-outside-toplevel
 
     # NB: we use the sync botocore client for setup
@@ -162,7 +162,7 @@ def _get_boto3_client(patch_aiobotocore):
 
 
 @fixture
-def mocked_s3_bucket(patch_aiobotocore, moto_server):  # pylint: disable=unused-argument
+def mocked_s3_bucket(moto_server):  # pylint: disable=unused-argument
     """Create a bucket for testing using moto."""
     _reset_moto_server(patch_aiobotocore)
     client = _get_boto3_client(patch_aiobotocore)
@@ -171,7 +171,7 @@ def mocked_s3_bucket(patch_aiobotocore, moto_server):  # pylint: disable=unused-
 
 
 @fixture
-def mocked_encrypted_s3_bucket(patch_aiobotocore, moto_server):  # pylint: disable=unused-argument
+def mocked_encrypted_s3_bucket(moto_server):  # pylint: disable=unused-argument
     bucket_policy = {
         "Version": "2012-10-17",
         "Id": "PutObjPolicy",

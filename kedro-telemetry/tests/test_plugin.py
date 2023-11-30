@@ -183,7 +183,7 @@ class TestKedroTelemetryCLIHooks:
             "python_version": sys.version,
             "os": sys.platform,
             "command": "kedro --version",
-            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'Pyspark']",
+            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']",
         }
         generic_properties = {
             **expected_properties,
@@ -566,7 +566,7 @@ class TestKedroTelemetryProjectHooks:
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
-            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'Pyspark']",
+            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']",
         }
         project_statistics = {
             "number_of_datasets": 3,

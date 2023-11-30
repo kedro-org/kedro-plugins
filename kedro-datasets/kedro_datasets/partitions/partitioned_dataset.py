@@ -87,7 +87,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
         >>> dataset = PartitionedDataset(
-        ...     path="df_with_partition", dataset="pandas.CSVDataset", filename_suffix=".csv"
+        ...     path=tmp_path / "df_with_partition",
+        ...     dataset="pandas.CSVDataset",
+        ...     filename_suffix=".csv",
         ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.

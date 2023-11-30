@@ -35,7 +35,7 @@ class GeoJSONDataset(
         ...     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
         ...     geometry=[Point(1, 1), Point(2, 4)],
         ... )
-        >>> dataset = GeoJSONDataset(filepath="test.geojson", save_args=None)
+        >>> dataset = GeoJSONDataset(filepath=tmp_path / "test.geojson", save_args=None)
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>

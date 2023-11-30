@@ -9,10 +9,9 @@ from kedro_datasets._io import DatasetError
 from kedro_datasets.matplotlib import MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
-KEY_PATH = "merel"
+KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
-
 matplotlib.use("Agg")  # Disable interactive mode
 
 
@@ -50,9 +49,10 @@ def overwrite(request):
 
 
 @pytest.fixture
-def plot_writer(mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite):
+def plot_writer(mocked_s3_bucket, credentials, mock_fs_args, save_args, overwrite, tmp_path):
+    full_path = f"s3://{BUCKET_NAME}/{tmp_path}"
     return MatplotlibWriter(
-        filepath=FULL_PATH,
+        filepath=full_path,
         credentials=credentials,
         fs_args=mock_fs_args,
         save_args=save_args,

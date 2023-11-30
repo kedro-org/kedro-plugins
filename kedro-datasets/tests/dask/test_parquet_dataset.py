@@ -5,8 +5,6 @@ import pandas as pd
 import pyarrow as pa
 import pytest
 from pandas.testing import assert_frame_equal
-from moto import mock_s3
-import boto3
 
 from kedro_datasets._io import DatasetError
 from kedro_datasets.dask import ParquetDataset
@@ -24,19 +22,6 @@ def dummy_dd_dataframe() -> dd.DataFrame:
         {"Name": ["Alex", "Bob", "Clarke", "Dave"], "Age": [31, 12, 65, 29]}
     )
     return dd.from_pandas(df, npartitions=1)
-
-
-@pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
-        )
-        conn.create_bucket(Bucket=BUCKET_NAME)
-        yield conn
 
 
 @pytest.fixture

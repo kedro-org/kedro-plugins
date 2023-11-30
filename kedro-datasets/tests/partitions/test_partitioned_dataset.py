@@ -1,20 +1,16 @@
 import logging
-import os
 import re
 from pathlib import Path
 
-import boto3
 import pandas as pd
 import pytest
 import s3fs
 from kedro.io import DatasetError
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from moto import mock_s3
-from pandas.util.testing import assert_frame_equal
-
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.partitions import PartitionedDataset
 from kedro_datasets.partitions.partitioned_dataset import KEY_PROPAGATION_WARNING
+from pandas.util.testing import assert_frame_equal
 
 
 @pytest.fixture
@@ -412,18 +408,6 @@ S3_DATASET_DEFINITION = [
 ]
 
 
-@pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
-        )
-        conn.create_bucket(Bucket=BUCKET_NAME)
-        yield conn
-
 
 @pytest.fixture
 def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
@@ -438,8 +422,6 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDatasetS3:
-    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):

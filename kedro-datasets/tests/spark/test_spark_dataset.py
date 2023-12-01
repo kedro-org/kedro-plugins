@@ -798,7 +798,7 @@ class TestSparkDatasetVersionedS3:
         s3a_path = f"s3a://{path}"
         # pds = PartitionedDataset(s3a_path, "pandas.CSVDataset", filename_suffix=".csv")
         pds = SparkDataset(filepath=s3a_path, version=version)
-        assert pds._protocol == "s3a"
+        assert "s3a" in pds._fs_prefix
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"

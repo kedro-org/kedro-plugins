@@ -160,7 +160,6 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
     mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
     )
-    # return mocked_s3_bucket
     return f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}"
 
 
@@ -731,22 +730,10 @@ class TestSparkDatasetVersionedS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    def test_no_version(self, mocked_s3_schema, versioned_dataset_s3, version):
-        ds_s3 = SparkDataset(
-            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
-        )
+    def test_no_version(self, versioned_dataset_s3):
         pattern = r"Did not find any versions for SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            ds_s3.load()
-
-    def test_bla(self, mocker):
-        ts = generate_timestamp()
-        ds_s3 = SparkDataset(
-            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
-            version=Version(ts, None),
-        )
-
-        ds_s3.load()
+            versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(

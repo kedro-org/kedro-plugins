@@ -36,14 +36,16 @@ pandas_require = {
     "pandas.ExcelDataset": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.DeltaTableDataset": [PANDAS, "deltalake>=0.10.0"],
     "pandas.FeatherDataset": [PANDAS],
-    "pandas.GBQTableDataset": [PANDAS,
+    "pandas.GBQTableDataset": [
+        PANDAS,
         "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
         "pandas-gbq>=0.18.0; python_version >= '3.11'",
     ],
-    "pandas.GBQQueryDataset": [PANDAS,
+    "pandas.GBQQueryDataset": [
+        PANDAS,
         "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
         "pandas-gbq>=0.18.0; python_version >= '3.11'",
-                                ],
+    ],
     "pandas.HDFDataset": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",

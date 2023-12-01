@@ -739,6 +739,15 @@ class TestSparkDatasetVersionedS3:
         with pytest.raises(DatasetError, match=pattern):
             ds_s3.load()
 
+    def test_bla(self, mocker):
+        ts = generate_timestamp()
+        ds_s3 = SparkDataset(
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
+            version=Version(ts, None),
+        )
+
+        ds_s3.load()
+
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(
             "kedro_datasets.spark.spark_dataset._get_spark",
@@ -797,12 +806,6 @@ class TestSparkDatasetVersionedS3:
             version=exact_version,
         )
         mocked_spark_df = mocker.Mock()
-
-        # need resolve_load_version() call to return a load version that
-        # matches save version due to consistency check in versioned_dataset_s3.save()
-        mocker.patch.object(
-            ds_s3, "resolve_load_version", return_value=exact_version.save
-        )
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "

@@ -1,8 +1,9 @@
+import os
 import re
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
-import os
+
 import boto3
 import pandas as pd
 import pytest
@@ -770,14 +771,13 @@ class TestSparkDatasetVersionedS3:
             f"s3a://{BUCKET_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
-
-# @pytest.fixture
-# def versioned_dataset_s3(version):
-#     return SparkDataset(
-#         filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
-#         version=version,
-#         credentials=AWS_CREDENTIALS,
-#     )
+    # @pytest.fixture
+    # def versioned_dataset_s3(version):
+    #     return SparkDataset(
+    #         filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
+    #         version=version,
+    #         credentials=AWS_CREDENTIALS,
+    #     )
 
     def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
@@ -802,8 +802,10 @@ class TestSparkDatasetVersionedS3:
 
         mocker.patch.object(pds, "resolve_load_version", return_value=version.save)
         pds.save(mocked_spark_df)
-        pds.assert_called_once_with(filepath=f"{s3a_path}/{FILENAME}.parquet")
-        pds.return_value.save.assert_called_once_with(mocked_spark_df)
+        mocked_spark_df.write.save.assert_called_once_with(
+            f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
+            "parquet",
+        )
 
     def test_save_version_warning(self, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")

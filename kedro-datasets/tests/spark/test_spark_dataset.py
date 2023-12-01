@@ -731,7 +731,7 @@ class TestSparkDatasetVersionedS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    def test_no_version(self, version):
+    def test_no_version(self, mocked_s3_schema, versioned_dataset_s3, version):
         ds_s3 = SparkDataset(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
         )
@@ -774,7 +774,7 @@ class TestSparkDatasetVersionedS3:
             f"s3a://{BUCKET_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
-    def test_save(self, version, mocker):
+    def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
 
         ds_s3 = SparkDataset(
@@ -790,7 +790,7 @@ class TestSparkDatasetVersionedS3:
             "parquet",
         )
 
-    def test_save_version_warning(self, mocker):
+    def test_save_version_warning(self, mocked_s3_schema, versioned_dataset_s3, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")
         ds_s3 = SparkDataset(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",

@@ -779,7 +779,7 @@ class TestSparkDatasetVersionedS3:
 #         credentials=AWS_CREDENTIALS,
 #     )
 
-    def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
+    def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker, sample_pandas_df):
         # mocked_spark_df = mocker.Mock()
         #
         # # need resolve_load_version() call to return a load version that
@@ -800,14 +800,10 @@ class TestSparkDatasetVersionedS3:
         pds = SparkDataset(filepath=s3a_path, version=version)
         assert "s3a" in pds._fs_prefix
 
-        mocked_ds = mocker.patch.object(pds, "_dataset_type")
-        mocked_ds.__name__ = "mocked"
-        new_partition = "new/data"
-        data = "data"
-
-        pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.parquet")
-        mocked_ds.return_value.save.assert_called_once_with(data)
+        mocker.patch.object(pds, "resolve_load_version", return_value=version.save)
+        pds.save(sample_pandas_df)
+        pds.assert_called_once_with(filepath=f"{s3a_path}/{FILENAME}.parquet")
+        pds.return_value.save.assert_called_once_with(sample_pandas_df)
 
     def test_save_version_warning(self, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")

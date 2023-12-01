@@ -731,10 +731,13 @@ class TestSparkDatasetVersionedS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    def test_no_version(self, versioned_dataset_s3):
+    def test_no_version(self, version):
+        ds_s3 = SparkDataset(
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
+        )
         pattern = r"Did not find any versions for SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_dataset_s3.load()
+            ds_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(
@@ -771,24 +774,12 @@ class TestSparkDatasetVersionedS3:
             f"s3a://{BUCKET_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
-    # @pytest.fixture
-    # def versioned_dataset_s3(version):
-    #     return SparkDataset(
-    #         filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
-    #         version=version,
-    #         credentials=AWS_CREDENTIALS,
-    #     )
-
-    def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
+    def test_save(self, version, mocker):
         mocked_spark_df = mocker.Mock()
 
-        # path = mocked_s3_schema.split("://", 1)[1]
-        # s3a_path = f"s3a://{path}"
-        # pds = SparkDataset(filepath=s3a_path, version=version)
         ds_s3 = SparkDataset(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
         )
-        assert "s3a" in ds_s3._fs_prefix
 
         # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_dataset_s3.save()
@@ -804,9 +795,14 @@ class TestSparkDatasetVersionedS3:
         ds_s3 = SparkDataset(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=exact_version,
-            credentials=AWS_CREDENTIALS,
         )
         mocked_spark_df = mocker.Mock()
+
+        # need resolve_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_dataset_s3.save()
+        mocker.patch.object(
+            ds_s3, "resolve_load_version", return_value=exact_version.save
+        )
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "

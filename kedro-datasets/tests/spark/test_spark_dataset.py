@@ -159,7 +159,8 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
     mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
     )
-    return mocked_s3_bucket
+    # return mocked_s3_bucket
+    return f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}"
 
 
 class FileInfo:

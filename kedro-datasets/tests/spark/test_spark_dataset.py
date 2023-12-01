@@ -781,27 +781,19 @@ class TestSparkDatasetVersionedS3:
 
     def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
-        #
-        # # need resolve_load_version() call to return a load version that
-        # # matches save version due to consistency check in versioned_dataset_s3.save()
-        # mocker.patch.object(
-        #     versioned_dataset_s3, "resolve_load_version", return_value=version.save
-        # )
-        #
-        # versioned_dataset_s3.save(mocked_spark_df)
-        # mocked_spark_df.write.save.assert_called_once_with(
-        #     f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
-        #     "parquet",
-        # )
 
-        path = mocked_s3_schema.split("://", 1)[1]
-        s3a_path = f"s3a://{path}"
-        # pds = PartitionedDataset(s3a_path, "pandas.CSVDataset", filename_suffix=".csv")
-        pds = SparkDataset(filepath=s3a_path, version=version)
-        assert "s3a" in pds._fs_prefix
+        # path = mocked_s3_schema.split("://", 1)[1]
+        # s3a_path = f"s3a://{path}"
+        # pds = SparkDataset(filepath=s3a_path, version=version)
+        ds_s3 = SparkDataset(
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
+        )
+        assert "s3a" in ds_s3._fs_prefix
 
-        mocker.patch.object(pds, "resolve_load_version", return_value=version.save)
-        pds.save(mocked_spark_df)
+        # need resolve_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_dataset_s3.save()
+        mocker.patch.object(ds_s3, "resolve_load_version", return_value=version.save)
+        ds_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
             f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             "parquet",

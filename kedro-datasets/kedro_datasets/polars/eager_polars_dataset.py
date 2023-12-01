@@ -42,7 +42,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         >>>
         >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = EagerPolarsDataset(filepath="test.parquet", file_format="parquet")
+        >>> dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.frame_equal(reloaded)

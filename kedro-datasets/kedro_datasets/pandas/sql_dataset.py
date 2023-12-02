@@ -168,9 +168,8 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
                 parameters in ``load_args``.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
-                through credentials. It overwrites `con` parameter in
-                ``load_args`` and ``save_args`` in case it is provided. To find
-                all supported connection string formats, see here:
+                through credentials.
+                To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.

@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Removed support for Python 3.7 and 3.8
 * Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html)
+* Bump `s3fs` to latest calendar versioning. 
 
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.

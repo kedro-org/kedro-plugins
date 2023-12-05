@@ -96,9 +96,9 @@ class TestParquetDataset:
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
         # s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        # pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
-        # with pytest.raises(DatasetError, match=pattern):
-        s3_dataset.load().compute()
+        pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
+        with pytest.raises(DatasetError, match=pattern):
+            s3_dataset.load().compute()
 
         assert client_mock.call_count == 1
         # args, kwargs = client_mock.call_args_list[0]

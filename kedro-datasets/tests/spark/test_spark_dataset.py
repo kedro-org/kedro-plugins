@@ -4,7 +4,6 @@ import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
-import boto3
 import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
@@ -12,7 +11,7 @@ from kedro.io.core import generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
-from moto import mock_s3
+from moto.moto_server.threaded_moto_server import ThreadedMotoServer
 from packaging.version import Version as PackagingVersion
 from pyspark import __version__
 from pyspark.sql import SparkSession
@@ -35,6 +34,11 @@ from kedro_datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
+from s3fs import S3FileSystem
+
+IP_ADDRESS = "127.0.0.1"
+PORT = 5555
+ENDPOINT_URI = f"http://{IP_ADDRESS}:{PORT}/"
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -138,17 +142,54 @@ def spark_in(tmp_path, sample_spark_df):
     return spark_in
 
 
+# @pytest.fixture
+# def mocked_s3_bucket():
+#     """Create a bucket for testing using moto."""
+#     with mock_s3():
+#         conn = boto3.client(
+#             "s3",
+#             aws_access_key_id=AWS_CREDENTIALS["key"],
+#             aws_secret_access_key=AWS_CREDENTIALS["secret"],
+#         )
+#         conn.create_bucket(Bucket=BUCKET_NAME)
+#         yield conn
+
+
 @pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id=AWS_CREDENTIALS["key"],
-            aws_secret_access_key=AWS_CREDENTIALS["secret"],
-        )
-        conn.create_bucket(Bucket=BUCKET_NAME)
-        yield conn
+def s3_base():
+    # writable local S3 system
+
+    # This fixture is module-scoped, meaning that we can re-use the MotoServer across all tests
+    server = ThreadedMotoServer(ip_address="127.0.0.1", port=PORT)
+    server.start()
+    if "AWS_SECRET_ACCESS_KEY" not in os.environ:
+        os.environ["AWS_SECRET_ACCESS_KEY"] = "foo"
+    if "AWS_ACCESS_KEY_ID" not in os.environ:
+        os.environ["AWS_ACCESS_KEY_ID"] = "foo"
+
+    print("server up")
+    yield
+    print("moto done")
+    server.stop()
+
+
+def get_boto3_client():
+    from botocore.session import Session
+
+    # NB: we use the sync botocore client for setup
+    session = Session()
+    return session.create_client("s3", endpoint_url=ENDPOINT_URI)
+
+
+@pytest.fixture()
+def mocked_s3_bucket(s3_base):
+    client = get_boto3_client()
+    client.create_bucket(Bucket=BUCKET_NAME, ACL="public-read")
+
+    S3FileSystem.clear_instance_cache()
+    s3 = S3FileSystem(anon=False, client_kwargs={"endpoint_url": ENDPOINT_URI})
+    s3.invalidate_cache()
+    yield s3
 
 
 @pytest.fixture
@@ -730,10 +771,10 @@ class TestSparkDatasetVersionedS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    # def test_no_version(self, versioned_dataset_s3):
-    #     pattern = r"Did not find any versions for SparkDataset\(.+\)"
-    #     with pytest.raises(DatasetError, match=pattern):
-    #         versioned_dataset_s3.load()
+    def test_no_version(self, versioned_dataset_s3):
+        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(

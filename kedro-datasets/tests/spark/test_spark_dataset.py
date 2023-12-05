@@ -730,10 +730,11 @@ class TestSparkDatasetVersionedS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    # def test_no_version(self, versioned_dataset_s3):
-    #     pattern = r"Did not find any versions for SparkDataset\(.+\)"
-    #     with pytest.raises(DatasetError, match=pattern):
-    #         versioned_dataset_s3.load()
+    @pytest.mark.xfail
+    def test_no_version(self, versioned_dataset_s3):
+        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(

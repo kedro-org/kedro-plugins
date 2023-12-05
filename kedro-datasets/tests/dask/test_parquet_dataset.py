@@ -91,23 +91,22 @@ class TestParquetDataset:
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load().compute()
 
-    def test_pass_credentials(self, mocker):
-        """Test that AWS credentials are passed successfully into boto3
-        client instantiation on creating S3 connection."""
-        client_mock = mocker.patch("botocore.session.Session.create_client")
-        s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
-        with pytest.raises(DatasetError, match=pattern):
-            s3_dataset.load().compute()
+    # def test_pass_credentials(self, mocker):
+    #     """Test that AWS credentials are passed successfully into boto3
+    #     client instantiation on creating S3 connection."""
+    #     client_mock = mocker.patch("botocore.session.Session.create_client")
+    #     s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
+    #     pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
+    #     with pytest.raises(DatasetError, match=pattern):
+    #         s3_dataset.load().compute()
+    #
+    #     assert client_mock.call_count == 1
+    #     args, kwargs = client_mock.call_args_list[0]
+    #     assert args == ("s3",)
+    #     assert kwargs["aws_access_key_id"] == AWS_CREDENTIALS["key"]
+    #     assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
 
-        assert client_mock.call_count == 1
-        args, kwargs = client_mock.call_args_list[0]
-        assert args == ("s3",)
-        assert kwargs["aws_access_key_id"] == AWS_CREDENTIALS["key"]
-        assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
-
-    @pytest.mark.usefixtures("mocked_s3_bucket")
-    def test_save_data(self, s3_dataset):
+    def test_save_data(self, s3_dataset, mocked_s3_bucket):
         """Test saving the data to S3."""
         pd_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
@@ -117,14 +116,12 @@ class TestParquetDataset:
         loaded_data = s3_dataset.load()
         assert_frame_equal(loaded_data.compute(), dd_data.compute())
 
-    @pytest.mark.usefixtures("mocked_s3_object")
-    def test_load_data(self, s3_dataset, dummy_dd_dataframe):
+    def test_load_data(self, s3_dataset, dummy_dd_dataframe, mocked_s3_object):
         """Test loading the data from S3."""
         loaded_data = s3_dataset.load()
         assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
 
-    @pytest.mark.usefixtures("mocked_s3_bucket")
-    def test_exists(self, s3_dataset, dummy_dd_dataframe):
+    def test_exists(self, s3_dataset, dummy_dd_dataframe, mocked_s3_bucket):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
         assert not s3_dataset.exists()

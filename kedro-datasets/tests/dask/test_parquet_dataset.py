@@ -94,7 +94,7 @@ class TestParquetDataset:
     def test_pass_credentials(self, mocker, s3_dataset, mocked_s3_bucket):
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
-        client_mock = mocker.patch("botocore.session.Session.create_client")
+        client_mock = mocker.patch("boto3.client")
         # s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
         pattern = r"Failed while loading data from data set ParquetDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):

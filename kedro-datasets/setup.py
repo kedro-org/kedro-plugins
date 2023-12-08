@@ -89,7 +89,7 @@ spark_require = {
     "spark.SparkJDBCDataset": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
-svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
+svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn>=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
     "tensorflow.TensorFlowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.

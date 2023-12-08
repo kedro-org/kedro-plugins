@@ -32,7 +32,7 @@ class HFDataset(AbstractVersionedDataset):
 
     """
 
-    def __init__(self, dataset_name: str):
+    def __init__(self, *, dataset_name: str):
         self.dataset_name = dataset_name
 
     def _load(self):

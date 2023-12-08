@@ -59,7 +59,9 @@ class TestPartitionedDatasetLocal:
     def test_load(
         self, dataset, local_csvs, partitioned_data_pandas, suffix, expected_num_parts
     ):
-        pds = PartitionedDataset(str(local_csvs), dataset, filename_suffix=suffix)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, filename_suffix=suffix
+        )
         loaded_partitions = pds.load()
 
         assert len(loaded_partitions.keys()) == expected_num_parts
@@ -72,7 +74,9 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize("suffix", ["", ".csv"])
     def test_save(self, dataset, local_csvs, suffix):
-        pds = PartitionedDataset(str(local_csvs), dataset, filename_suffix=suffix)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, filename_suffix=suffix
+        )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data"
         pds.save({part_id: original_data})
@@ -86,7 +90,9 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize("suffix", ["", ".csv"])
     def test_lazy_save(self, dataset, local_csvs, suffix):
-        pds = PartitionedDataset(str(local_csvs), dataset, filename_suffix=suffix)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, filename_suffix=suffix
+        )
 
         def original_data():
             return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
@@ -102,7 +108,7 @@ class TestPartitionedDatasetLocal:
 
     def test_save_invalidates_cache(self, local_csvs, mocker):
         """Test that save calls invalidate partition cache"""
-        pds = PartitionedDataset(str(local_csvs), "pandas.CSVDataset")
+        pds = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
         mocked_fs_invalidate = mocker.patch.object(pds._filesystem, "invalidate_cache")
         first_load = pds.load()
         assert pds._partition_cache.currsize == 1
@@ -126,7 +132,7 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("overwrite,expected_num_parts", [(False, 6), (True, 1)])
     def test_overwrite(self, local_csvs, overwrite, expected_num_parts):
         pds = PartitionedDataset(
-            str(local_csvs), "pandas.CSVDataset", overwrite=overwrite
+            path=str(local_csvs), dataset="pandas.CSVDataset", overwrite=overwrite
         )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data"
@@ -138,9 +144,9 @@ class TestPartitionedDatasetLocal:
 
     def test_release_instance_cache(self, local_csvs):
         """Test that cache invalidation does not affect other instances"""
-        ds_a = PartitionedDataset(str(local_csvs), "pandas.CSVDataset")
+        ds_a = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
         ds_a.load()
-        ds_b = PartitionedDataset(str(local_csvs), "pandas.CSVDataset")
+        ds_b = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
         ds_b.load()
 
         assert ds_a._partition_cache.currsize == 1
@@ -154,17 +160,17 @@ class TestPartitionedDatasetLocal:
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.ParquetDataset"])
     def test_exists(self, local_csvs, dataset):
-        assert PartitionedDataset(str(local_csvs), dataset).exists()
+        assert PartitionedDataset(path=str(local_csvs), dataset=dataset).exists()
 
         empty_folder = local_csvs / "empty" / "folder"
-        assert not PartitionedDataset(str(empty_folder), dataset).exists()
+        assert not PartitionedDataset(path=str(empty_folder), dataset=dataset).exists()
         empty_folder.mkdir(parents=True)
-        assert not PartitionedDataset(str(empty_folder), dataset).exists()
+        assert not PartitionedDataset(path=str(empty_folder), dataset=dataset).exists()
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_release(self, dataset, local_csvs):
         partition_to_remove = "p2.csv"
-        pds = PartitionedDataset(str(local_csvs), dataset)
+        pds = PartitionedDataset(path=str(local_csvs), dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
 
@@ -179,7 +185,7 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_describe(self, dataset):
         path = str(Path.cwd())
-        pds = PartitionedDataset(path, dataset)
+        pds = PartitionedDataset(path=path, dataset=dataset)
 
         assert f"path={path}" in str(pds)
         assert "dataset_type=CSVDataset" in str(pds)
@@ -193,7 +199,9 @@ class TestPartitionedDatasetLocal:
 
         path = str(Path.cwd())
         load_args = {"maxdepth": 42, "withdirs": True}
-        pds = PartitionedDataset(path, "pandas.CSVDataset", load_args=load_args)
+        pds = PartitionedDataset(
+            path=path, dataset="pandas.CSVDataset", load_args=load_args
+        )
         mocker.patch.object(pds, "_path_to_partition", return_value=fake_partition_name)
 
         assert pds.load().keys() == {fake_partition_name}
@@ -208,7 +216,9 @@ class TestPartitionedDatasetLocal:
     ):
         mocked_filesystem = mocker.patch("fsspec.filesystem")
         path = str(Path.cwd())
-        pds = PartitionedDataset(path, "pandas.CSVDataset", credentials=credentials)
+        pds = PartitionedDataset(
+            path=path, dataset="pandas.CSVDataset", credentials=credentials
+        )
 
         assert mocked_filesystem.call_count == 2
         mocked_filesystem.assert_called_with("file", **expected_pds_creds)
@@ -234,7 +244,9 @@ class TestPartitionedDatasetLocal:
 
         mocked_filesystem = mocker.patch("fsspec.filesystem")
         path = str(Path.cwd())
-        pds = PartitionedDataset(path, "pandas.CSVDataset", fs_args=fs_args)
+        pds = PartitionedDataset(
+            path=path, dataset="pandas.CSVDataset", fs_args=fs_args
+        )
 
         assert mocked_filesystem.call_count == 2
         mocked_filesystem.assert_called_with("file", **fs_args)
@@ -242,7 +254,7 @@ class TestPartitionedDatasetLocal:
 
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataset", ParquetDataset])
     def test_invalid_dataset(self, dataset, local_csvs):
-        pds = PartitionedDataset(str(local_csvs), dataset)
+        pds = PartitionedDataset(path=str(local_csvs), dataset=dataset)
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
@@ -274,7 +286,7 @@ class TestPartitionedDatasetLocal:
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
         with pytest.raises(DatasetError, match=error_pattern):
-            PartitionedDataset(str(Path.cwd()), dataset_config)
+            PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config)
 
     @pytest.mark.parametrize(
         "dataset_config",
@@ -289,10 +301,10 @@ class TestPartitionedDatasetLocal:
             "dataset. Please remove 'versioned' flag from the dataset definition."
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
-            PartitionedDataset(str(Path.cwd()), dataset_config)
+            PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config)
 
     def test_no_partitions(self, tmpdir):
-        pds = PartitionedDataset(str(tmpdir), "pandas.CSVDataset")
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
 
         pattern = re.escape(f"No partitions found in '{tmpdir}'")
         with pytest.raises(DatasetError, match=pattern):
@@ -443,7 +455,7 @@ class TestPartitionedDatasetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
-        pds = PartitionedDataset(mocked_csvs_in_s3, dataset)
+        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset)
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
@@ -456,7 +468,7 @@ class TestPartitionedDatasetS3:
         s3a_path = f"s3a://{path}"
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
-        pds = PartitionedDataset(s3a_path, "pandas.CSVDataset")
+        pds = PartitionedDataset(path=s3a_path, dataset="pandas.CSVDataset")
         assert pds._protocol == "s3a"
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
@@ -473,7 +485,7 @@ class TestPartitionedDatasetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_save(self, dataset, mocked_csvs_in_s3):
-        pds = PartitionedDataset(mocked_csvs_in_s3, dataset)
+        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset)
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data.csv"
         pds.save({part_id: original_data})
@@ -492,7 +504,9 @@ class TestPartitionedDatasetS3:
         s3a_path = f"s3a://{path}"
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
-        pds = PartitionedDataset(s3a_path, "pandas.CSVDataset", filename_suffix=".csv")
+        pds = PartitionedDataset(
+            path=s3a_path, dataset="pandas.CSVDataset", filename_suffix=".csv"
+        )
         assert pds._protocol == "s3a"
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
@@ -506,18 +520,18 @@ class TestPartitionedDatasetS3:
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.HDFDataset"])
     def test_exists(self, dataset, mocked_csvs_in_s3):
-        assert PartitionedDataset(mocked_csvs_in_s3, dataset).exists()
+        assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataset(empty_folder, dataset).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
         s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataset(empty_folder, dataset).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_release(self, dataset, mocked_csvs_in_s3):
         partition_to_remove = "p2.csv"
-        pds = PartitionedDataset(mocked_csvs_in_s3, dataset)
+        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
 
@@ -533,7 +547,7 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):
         path = f"s3://{BUCKET_NAME}/foo/bar"
-        pds = PartitionedDataset(path, dataset)
+        pds = PartitionedDataset(path=path, dataset=dataset)
 
         assert f"path={path}" in str(pds)
         assert "dataset_type=CSVDataset" in str(pds)

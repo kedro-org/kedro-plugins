@@ -11,7 +11,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import DeltaTableDataset, SparkDataset
 
 SPARK_VERSION = Version(__version__)

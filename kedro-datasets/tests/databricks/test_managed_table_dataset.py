@@ -4,7 +4,6 @@ from kedro.io.core import DatasetError, Version, VersionNotFoundError
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.databricks import ManagedTableDataset
 
 

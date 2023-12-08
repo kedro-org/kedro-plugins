@@ -28,8 +28,6 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
-
 logger = logging.getLogger(__name__)
 
 

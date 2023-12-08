@@ -15,7 +15,6 @@ from moto import mock_s3
 from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.polars import CSVDataset
 
 BUCKET_NAME = "test_bucket"

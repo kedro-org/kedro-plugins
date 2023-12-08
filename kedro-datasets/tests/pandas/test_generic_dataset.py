@@ -12,7 +12,6 @@ from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, generate_timestamp
 from pandas._testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import GenericDataset
 
 

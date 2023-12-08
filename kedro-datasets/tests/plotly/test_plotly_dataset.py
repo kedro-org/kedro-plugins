@@ -11,7 +11,6 @@ from plotly import graph_objects
 from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.plotly import PlotlyDataset
 
 

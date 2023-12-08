@@ -9,7 +9,6 @@ from kedro.io import Version
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from s3fs.core import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.networkx import JSONDataset
 
 ATTRS = {

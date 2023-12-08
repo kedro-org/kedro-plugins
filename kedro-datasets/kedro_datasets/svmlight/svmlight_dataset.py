@@ -18,8 +18,6 @@ from numpy import ndarray
 from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
-
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)

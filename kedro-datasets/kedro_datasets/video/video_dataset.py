@@ -14,9 +14,7 @@ import cv2
 import fsspec
 import numpy as np
 import PIL.Image
-from kedro.io.core import get_protocol_and_path
-
-from kedro_datasets._io import AbstractDataset
+from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 
 class SlicedVideo:

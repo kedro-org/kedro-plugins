@@ -6,10 +6,8 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs import S3FileSystem
-
-from kedro_datasets._io import DatasetError
 
 if sys.platform == "win32":
     pytest.skip(

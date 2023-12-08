@@ -7,9 +7,7 @@ from typing import Any
 
 import fsspec
 from Bio import SeqIO
-from kedro.io.core import get_filepath_str, get_protocol_and_path
-
-from kedro_datasets._io import AbstractDataset
+from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_path
 
 
 class BioSequenceDataset(AbstractDataset[list, list]):

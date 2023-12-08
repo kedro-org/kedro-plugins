@@ -5,11 +5,10 @@ import boto3
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
-from kedro.io import Version
+from kedro.io import DatasetError, Version
 from moto import mock_s3
 from s3fs import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.matplotlib import MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"

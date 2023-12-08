@@ -1,6 +1,6 @@
 import pytest
+from kedro.io.core import DatasetError
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkJDBCDataset
 
 

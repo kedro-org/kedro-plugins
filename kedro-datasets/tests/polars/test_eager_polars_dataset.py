@@ -9,11 +9,10 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import Version
-from kedro.io.core import PROTOCOL_DELIMITER, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, generate_timestamp
 from polars.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.polars import EagerPolarsDataset
 
 

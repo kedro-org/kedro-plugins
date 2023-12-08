@@ -12,12 +12,11 @@ import fsspec
 import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
-
-from kedro_datasets._io import AbstractVersionedDataset
 
 logger = logging.getLogger(__name__)
 

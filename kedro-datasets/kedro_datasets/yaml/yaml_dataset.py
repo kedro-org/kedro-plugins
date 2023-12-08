@@ -7,9 +7,13 @@ from typing import Any
 
 import fsspec
 import yaml
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 class YAMLDataset(AbstractVersionedDataset[dict, dict]):

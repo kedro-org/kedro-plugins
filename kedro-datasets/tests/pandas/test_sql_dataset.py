@@ -4,8 +4,8 @@ from unittest.mock import ANY
 import pandas as pd
 import pytest
 import sqlalchemy
+from kedro.io.core import DatasetError
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
 
 TABLE_NAME = "table_a"

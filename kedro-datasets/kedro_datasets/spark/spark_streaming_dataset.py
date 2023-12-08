@@ -3,10 +3,10 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
+from kedro.io.core import AbstractDataset
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
     SparkDataset,
     _get_spark,

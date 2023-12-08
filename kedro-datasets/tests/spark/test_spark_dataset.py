@@ -8,7 +8,7 @@ import boto3
 import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
-from kedro.io.core import generate_timestamp
+from kedro.io.core import DatasetError, generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -26,7 +26,6 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset

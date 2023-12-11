@@ -5,9 +5,9 @@ from typing import Any
 
 import pytest
 import requests
+from kedro.io.core import DatasetError
 from requests.auth import HTTPBasicAuth
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.api import APIDataset
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]

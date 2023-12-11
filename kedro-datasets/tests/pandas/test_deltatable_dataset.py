@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
+from kedro.io.core import DatasetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import DeltaTableDataset
 
 

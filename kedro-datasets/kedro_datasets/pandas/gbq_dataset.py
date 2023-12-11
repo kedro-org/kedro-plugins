@@ -11,12 +11,12 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 from kedro.io.core import (
+    AbstractDataset,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
 )
-
-from kedro_datasets._io import AbstractDataset, DatasetError
 
 
 class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):

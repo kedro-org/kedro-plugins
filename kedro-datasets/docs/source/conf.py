@@ -25,7 +25,7 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "kedro"
+project = "kedro-datasets"
 author = "kedro"
 
 # The short X.Y version.

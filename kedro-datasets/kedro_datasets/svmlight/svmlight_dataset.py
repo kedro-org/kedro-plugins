@@ -7,12 +7,16 @@ from pathlib import PurePosixPath
 from typing import Any, Optional, Union
 
 import fsspec
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from numpy import ndarray
 from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
-
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets

@@ -1,11 +1,13 @@
 # Kedro-Datasets
 
+<!-- Note that the contents of this file are also used in the documentation, see docs/source/index.md -->
+
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-datasets/)
 [![PyPI Version](https://badge.fury.io/py/kedro-datasets.svg)](https://pypi.org/project/kedro-datasets/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
-A Kedro plugin that powers Kedro's DataCatalog.
+Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataset` implementations powering Kedro's DataCatalog created by QuantumBlack and external contributors.
 
 ## Installation
 
@@ -14,10 +16,6 @@ A Kedro plugin that powers Kedro's DataCatalog.
 ```bash
 pip install kedro-datasets
 ```
-
-# Datasets
-
-Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataset` implementations created by QuantumBlack and external contributors.
 
 ## What `AbstractDataset` implementations are supported?
 

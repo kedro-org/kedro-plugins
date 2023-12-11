@@ -6,6 +6,7 @@
 # Release 2.0.0
 ## Major features and improvements
 * Removed Dataset classes ending with "DataSet", use the "Dataset" spelling instead.
+* Added Hugging Face datasets `huggingface.HFDataset` and `huggingface.HFTransformerPipelineDataset`.
 * Removed support for Python 3.7 and 3.8.
 * Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html).
 * Bump `s3fs` to latest calendar-versioned release.

@@ -28,7 +28,7 @@ def partitioned_data_pandas():
 
 @pytest.fixture
 def local_csvs(tmp_path, partitioned_data_pandas):
-    local_dir = Path(str(tmp_path / "csvs"))
+    local_dir = tmp_path / "csvs"
     local_dir.mkdir()
 
     for k, data in partitioned_data_pandas.items():
@@ -36,6 +36,11 @@ def local_csvs(tmp_path, partitioned_data_pandas):
         path.parent.mkdir(parents=True, exist_ok=True)
         data.to_csv(str(path), index=False)
     return local_dir
+
+
+@pytest.fixture
+def filepath_csvs(tmp_path):
+    return str(tmp_path / "csvs")
 
 
 LOCAL_DATASET_DEFINITION = [
@@ -291,17 +296,72 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize(
         "dataset_config",
         [
-            {"type": CSVDataset, "versioned": True},
-            {"type": "pandas.CSVDataset", "versioned": True},
+            {**ds_config, "versioned": True}
+            for ds_config in LOCAL_DATASET_DEFINITION
+            if isinstance(ds_config, dict)
         ],
     )
-    def test_versioned_dataset_not_allowed(self, dataset_config):
-        pattern = (
-            "'PartitionedDataset' does not support versioning of the underlying "
-            "dataset. Please remove 'versioned' flag from the dataset definition."
+    @pytest.mark.parametrize(
+        "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
+    )
+    def test_versioned_dataset_save_and_load(
+        self,
+        mocker,
+        filepath_csvs,
+        dataset_config,
+        suffix,
+        expected_num_parts,
+        partitioned_data_pandas,
+    ):
+        """Test that saved and reloaded data matches the original one for
+        the versioned dataset."""
+        save_version = "2020-01-01T00.00.00.000Z"
+        mock_ts = mocker.patch(
+            "kedro.io.core.generate_timestamp", return_value=save_version
         )
-        with pytest.raises(DatasetError, match=re.escape(pattern)):
-            PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config)
+        PartitionedDataset(path=filepath_csvs, dataset=dataset_config).save(
+            partitioned_data_pandas
+        )
+        mock_ts.assert_called_once()
+
+        pds = PartitionedDataset(
+            path=filepath_csvs, dataset=dataset_config, filename_suffix=suffix
+        )
+        loaded_partitions = pds.load()
+
+        assert len(loaded_partitions) == expected_num_parts
+        actual_save_versions = set()
+        for partition_id, load_func in loaded_partitions.items():
+            partition_dir = Path(filepath_csvs, partition_id + suffix)
+            actual_save_versions |= {each.name for each in partition_dir.iterdir()}
+            df = load_func()
+            assert_frame_equal(df, partitioned_data_pandas[partition_id + suffix])
+            if suffix:
+                assert not partition_id.endswith(suffix)
+
+        if expected_num_parts:
+            # all partitions were saved using the same version string
+            assert actual_save_versions == {save_version}
+
+    def test_malformed_versioned_path(self, tmp_path):
+        local_dir = tmp_path / "files"
+        local_dir.mkdir()
+
+        path = local_dir / "path/to/folder/new/partition/version/partition/file"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("content")
+
+        pds = PartitionedDataset(
+            path=str(local_dir / "path/to/folder"),
+            dataset={"type": "pandas.CSVDataset", "versioned": True},
+        )
+
+        pattern = re.escape(
+            f"`{path.as_posix()}` is not a well-formed versioned path ending with "
+            f"`filename/timestamp/filename` (got `version/partition/file`)."
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            pds.load()
 
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")

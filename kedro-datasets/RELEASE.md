@@ -1,6 +1,11 @@
 # Upcoming Release
-
 ## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 2.0.0
+## Major features and improvements
+* Removed Dataset classes ending with "DataSet", use the "Dataset" spelling instead.
 * Removed support for Python 3.7 and 3.8.
 * Spark and Databricks based datasets now support [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html).
 * Bump `s3fs` to latest calendar-versioned release.
@@ -9,12 +14,14 @@
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
 * Make dataset parameters keyword-only.
+* Correct pandas-gbq as py311 dependency
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Edouard59](https://github.com/Edouard59)
 * [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 * [felixscherz](https://github.com/felixscherz)
+* [Onur Kuru](https://github.com/kuruonur1)
 
 # Release 1.8.0
 ## Major features and improvements

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import operator
 from copy import deepcopy
+from pathlib import PurePosixPath
 from typing import Any, Callable
 from urllib.parse import urlparse
 from warnings import warn
@@ -13,7 +14,6 @@ import fsspec
 from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
-    VERSIONED_FLAG_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
@@ -26,6 +26,19 @@ KEY_PROPAGATION_WARNING = (
 )
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
+
+
+def _grandparent(path: str) -> str:
+    """Check and return the logical parent of the parent of the path."""
+    path_obj = PurePosixPath(path)
+    grandparent = path_obj.parents[1]
+    if grandparent.name != path_obj.name:
+        last_three_parts = path_obj.relative_to(*path_obj.parts[:-3])
+        raise DatasetError(
+            f"`{path}` is not a well-formed versioned path ending with "
+            f"`filename/timestamp/filename` (got `{last_three_parts}`)."
+        )
+    return str(grandparent)
 
 
 class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], Any]]]):
@@ -174,7 +187,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
@@ -195,12 +208,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
-        if VERSION_KEY in self._dataset_config:
-            raise DatasetError(
-                f"'{self.__class__.__name__}' does not support versioning of the "
-                f"underlying dataset. Please remove '{VERSIONED_FLAG_KEY}' flag from "
-                f"the dataset definition."
-            )
 
         if credentials:
             if CREDENTIALS_KEY in self._dataset_config:
@@ -248,8 +255,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
         return [
-            path
+            _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]

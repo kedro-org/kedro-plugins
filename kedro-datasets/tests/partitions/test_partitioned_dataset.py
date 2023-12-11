@@ -319,10 +319,14 @@ class TestPartitionedDatasetLocal:
         mock_ts = mocker.patch(
             "kedro.io.core.generate_timestamp", return_value=save_version
         )
-        PartitionedDataset(filepath_csvs, dataset_config).save(partitioned_data_pandas)
+        PartitionedDataset(path=filepath_csvs, dataset=dataset_config).save(
+            partitioned_data_pandas
+        )
         mock_ts.assert_called_once()
 
-        pds = PartitionedDataset(filepath_csvs, dataset_config, filename_suffix=suffix)
+        pds = PartitionedDataset(
+            path=filepath_csvs, dataset=dataset_config, filename_suffix=suffix
+        )
         loaded_partitions = pds.load()
 
         assert len(loaded_partitions) == expected_num_parts
@@ -348,8 +352,8 @@ class TestPartitionedDatasetLocal:
         path.write_text("content")
 
         pds = PartitionedDataset(
-            str(local_dir / "path/to/folder"),
-            {"type": "pandas.CSVDataset", "versioned": True},
+            path=str(local_dir / "path/to/folder"),
+            dataset={"type": "pandas.CSVDataset", "versioned": True},
         )
 
         pattern = re.escape(

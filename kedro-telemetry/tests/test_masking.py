@@ -104,6 +104,12 @@ class TestCLIMasking:
                 "--checkout",
                 "--directory",
                 "--help",
+                "--example",
+                "--name",
+                "--tools",
+                "-e",
+                "-n",
+                "-t",
             ]
         )
         # now check that once params and args are reached, the values are None

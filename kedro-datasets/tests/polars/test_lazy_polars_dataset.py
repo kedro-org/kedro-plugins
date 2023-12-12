@@ -38,7 +38,7 @@ def dummy_dataframe():
 
 
 @pytest.fixture
-def csv_data_set(filepath_csv, load_args, save_args, fs_args):
+def csv_dataset(filepath_csv, load_args, save_args, fs_args):
     return LazyPolarsDataset(
         filepath=filepath_csv,
         file_format="csv",
@@ -109,17 +109,17 @@ def mocked_csv_in_s3(mocked_s3_bucket, dummy_dataframe):
 class TestLazyCSVDataset:
     """Test class for LazyPolarsDataset csv functionality"""
 
-    def test_exists(self, csv_data_set, dummy_dataframe):
+    def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set.
         """
-        assert not csv_data_set.exists()
-        csv_data_set.save(dummy_dataframe)
-        assert csv_data_set.exists()
+        assert not csv_dataset.exists()
+        csv_dataset.save(dummy_dataframe)
+        assert csv_dataset.exists()
 
-    def test_load(self, dummy_dataframe, csv_data_set, filepath_csv):
+    def test_load(self, dummy_dataframe, csv_dataset, filepath_csv):
         dummy_dataframe.write_csv(filepath_csv)
-        df = csv_data_set.load()
+        df = csv_dataset.load()
         assert df.collect().shape == (2, 3)
 
     def test_load_s3(self, dummy_dataframe, mocked_csv_in_s3):
@@ -130,32 +130,32 @@ class TestLazyCSVDataset:
         loaded_df = ds.load().collect()
         assert_frame_equal(loaded_df, dummy_dataframe)
 
-    def test_save_and_load(self, csv_data_set, dummy_dataframe):
-        csv_data_set.save(dummy_dataframe)
-        reloaded_df = csv_data_set.load().collect()
+    def test_save_and_load(self, csv_dataset, dummy_dataframe):
+        csv_dataset.save(dummy_dataframe)
+        reloaded_df = csv_dataset.load().collect()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
-    def test_load_missing_file(self, csv_data_set):
+    def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            csv_data_set.load()
+            csv_dataset.load()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
-    def test_load_extra_params(self, csv_data_set, load_args):
+    def test_load_extra_params(self, csv_dataset, load_args):
         """Test overriding the default load arguments."""
         for key, value in load_args.items():
-            assert csv_data_set._load_args[key] == value
+            assert csv_dataset._load_args[key] == value
 
     @pytest.mark.parametrize(
         "save_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
-    def test_save_extra_params(self, csv_data_set, save_args):
+    def test_save_extra_params(self, csv_dataset, save_args):
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
-            assert csv_data_set._save_args[key] == value
+            assert csv_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
         "load_args,save_args",

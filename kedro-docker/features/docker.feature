@@ -2,7 +2,7 @@
 Feature: Docker commands in new projects
   Background:
     Given I have prepared a config file
-    And I run a non-interactive kedro new using pandas-iris starter
+    And I run a non-interactive kedro new using spaceflights-pandas starter
     And I have installed the project dependencies
     And I have removed old docker image of test project
 

@@ -197,7 +197,7 @@ def exec_kedro_command(context, command):
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
-    reqs_path = Path("src", "requirements.txt")
+    reqs_path = Path("requirements.txt")
     res = run(
         [context.pip, "install", "-r", str(reqs_path)],
         env=context.env,

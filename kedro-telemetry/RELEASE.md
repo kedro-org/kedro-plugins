@@ -1,4 +1,6 @@
 # Upcoming release
+
+# Release 0.4.0
 * Fixed double execution of `after_catalog_created` hook by moving the logic of determining and sending of project statistics from `after_context_created` to the `after_catalog_created` hook.
 * Updated the plugin to also share the tools selected during project creation with Heap.
 

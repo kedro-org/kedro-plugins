@@ -10,7 +10,7 @@ import tensorflow as tf
 
 from kedro_datasets.tensorflow import TensorFlowModelDataset
 
-data_set = TensorFlowModelDataset("tf_model_dirname")
+dataset = TensorFlowModelDataset("tf_model_dirname")
 
 model = tf.keras.Model()
 predictions = model.predict([...])

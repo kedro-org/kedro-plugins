@@ -19,13 +19,9 @@ from kedro_telemetry.masking import (
 REPO_NAME = "cli_tools_dummy_project"
 PACKAGE_NAME = "cli_tools_dummy_package"
 DEFAULT_KEDRO_COMMANDS = [
-    "activate-nbstripout",
-    "build-docs",
-    "build-reqs",
     "catalog",
     "ipython",
     "jupyter",
-    "lint",
     "micropkg",
     "new",
     "package",
@@ -33,7 +29,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
-    "test",
 ]
 
 
@@ -109,6 +104,12 @@ class TestCLIMasking:
                 "--checkout",
                 "--directory",
                 "--help",
+                "--example",
+                "--name",
+                "--tools",
+                "-e",
+                "-n",
+                "-t",
             ]
         )
         # now check that once params and args are reached, the values are None

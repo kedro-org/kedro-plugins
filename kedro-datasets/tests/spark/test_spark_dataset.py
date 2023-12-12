@@ -994,7 +994,7 @@ class TestDataFlowSequentialRunner:
         pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0
 
@@ -1016,6 +1016,6 @@ class TestDataFlowSequentialRunner:
         )
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0

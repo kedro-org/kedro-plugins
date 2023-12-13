@@ -11,7 +11,7 @@ Feature: Airflow
     And I have executed the kedro command "airflow create -t ../airflow/dags/"
     When I execute the airflow command "tasks list project-dummy"
     Then I should get a successful exit code
-    And I should get a message including "create-model0input-table-node"
+    And I should get a message including "create-model-input-table-node"
     And I should get a message including "preprocess-companies-node"
     And I should get a message including "preprocess-shuttles-node"
 
@@ -22,6 +22,6 @@ Feature: Airflow
     And I have prepared a data catalog
     And I have executed the kedro command "airflow create -t ../airflow/dags/"
     And I have installed the kedro project package
-    When I execute the airflow command "tasks test project-dummy split 2016-06-01T00:00:00+00:00"
+    When I execute the airflow command "tasks test project-dummy create-model-input-table-node 2016-06-01T00:00:00+00:00"
     Then I should get a successful exit code
     And I should get a message including "Loading data from 'parameters'"

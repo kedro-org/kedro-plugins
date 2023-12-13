@@ -100,7 +100,7 @@ def install_kedro(context, version):
 @given("I have installed the kedro project package")
 def install_project_package(context):
     """Install the packaged project."""
-    cmd = [context.pip, "install", "-e", "src/"]
+    cmd = [context.pip, "install", "-e", "."]
     res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:

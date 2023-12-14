@@ -75,7 +75,7 @@ Feature: Docker commands in new projects
     When I occupy port "8890"
     And I execute the kedro command "docker jupyter lab --port 8890"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Port 8890 is already in use on the host. Please specify an alternative port number."
+    And Standard output should contain a message including "Error: Port 8890 is already in use on the host. Please specify an alternative port number."
 
   Scenario: Execute docker kedro test target
     Given I have executed the kedro command "docker build"

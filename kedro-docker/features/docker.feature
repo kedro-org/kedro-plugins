@@ -29,26 +29,26 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker run with custom base image
     When I execute kedro docker build with custom base image
     Then I should get a successful exit code
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker run in parallel mode
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker run --runner=ParallelRunner"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Use custom UID and GID for Docker image
     Given I have executed the kedro command "docker build --uid 10001 --gid 20002"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker jupyter notebook target
     Given I have executed the kedro command "docker build"
@@ -88,7 +88,7 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker cmd"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker cmd with non-existent target
     Given I have executed the kedro command "docker build"

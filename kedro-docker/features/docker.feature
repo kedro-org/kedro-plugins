@@ -99,13 +99,17 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker ipython"
     Then I should see messages from docker ipython startup including "An enhanced Interactive Python"
-    And  I should see messages from docker ipython startup including "INFO - Kedro project project-dummy"
-    And  I should see messages from docker ipython startup including "INFO - Defined global variable 'context', 'session', 'catalog' and 'pipelines'"
+    And  I should see messages from docker ipython startup including "Kedro project project-dummy"
+    And  I should see messages from docker ipython startup including "Defined global variable"
+    And  I should see messages from docker ipython startup including "'context'"
+    And  I should see messages from docker ipython startup including "'session'"
+    And  I should see messages from docker ipython startup including "'catalog'"
+    And  I should see messages from docker ipython startup including "'pipelines'"
 
   Scenario: Execute docker run target without building image
     When I execute the kedro command "docker run"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."
 
   Scenario: Execute docker dive target
     Given I have executed the kedro command "docker build"
@@ -123,4 +127,4 @@ Feature: Docker commands in new projects
   Scenario: Execute docker dive without building image
     When I execute the kedro command "docker dive"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."

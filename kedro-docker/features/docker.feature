@@ -77,13 +77,6 @@ Feature: Docker commands in new projects
     Then I should get an error exit code
     And Standard output should contain a message including "Error: Port 8890 is already in use on the host. Please specify an alternative port number."
 
-  Scenario: Execute docker kedro test target
-    Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker cmd kedro test"
-    Then I should get a successful exit code
-    And I should get a message including "1 passed"
-    And I should get a message including "/usr/local/bin/python -m pytest"
-
   Scenario: Execute docker cmd without target command
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker cmd"

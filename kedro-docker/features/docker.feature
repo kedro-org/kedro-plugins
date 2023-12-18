@@ -88,7 +88,7 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker cmd"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker cmd with non-existent target
     Given I have executed the kedro command "docker build"

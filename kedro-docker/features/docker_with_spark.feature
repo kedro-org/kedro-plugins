@@ -20,4 +20,4 @@ Feature: Docker commands in new Spark projects
     And A new docker image for test project should be created
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"

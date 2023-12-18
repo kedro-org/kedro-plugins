@@ -46,6 +46,7 @@ def before_all(context):
             "setuptools>=38.0",
             "wheel",
             ".",
+            "kedro==0.18.14"
         ],
         env=context.env,
     )

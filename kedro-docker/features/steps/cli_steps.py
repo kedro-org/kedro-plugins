@@ -1,6 +1,7 @@
 """Behave step definitions for the cli_scenarios feature."""
 import re
 import sys
+import os
 import textwrap
 from pathlib import Path
 from time import sleep
@@ -150,6 +151,8 @@ def create_project_from_config_file(context, starter_name):
 
     # override base logging configuration to simplify assertions
     logging_conf = context.root_project_dir / "conf" / "base" / "logging.yml"
+    os.environ["KEDRO_LOGGING_CONFIG"] = logging_conf
+
     logging_conf.write_text(
         textwrap.dedent(
             """

@@ -29,7 +29,6 @@ test = [
     "behave",
     "black~=22.0",
     "kedro-datasets",
-    "pendulum<3.0.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

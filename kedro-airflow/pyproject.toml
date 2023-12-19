@@ -24,13 +24,12 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<2.7.0", # TODO: Temporary fix, to be reverted
+    "apache-airflow<3.0",
     "bandit",
     "behave",
     "black~=22.0",
-    "connexion<3.0.0", # TODO: Temporary fix, connexion has changed their API, but airflow hasn't caught up yet
     "kedro-datasets",
-    "pendulum<3.0.0", # TODO: Also to be removed
+    "pendulum<3.0.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

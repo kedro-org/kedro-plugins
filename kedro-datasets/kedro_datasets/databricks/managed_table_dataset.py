@@ -187,7 +187,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>> dataset = ManagedTableDataset(table="names_and_ages")
+        >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>> reloaded.take(4)

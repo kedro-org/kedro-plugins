@@ -1,7 +1,7 @@
 """Behave step definitions for the cli_scenarios feature."""
+import os
 import re
 import sys
-import os
 import textwrap
 from pathlib import Path
 from time import sleep

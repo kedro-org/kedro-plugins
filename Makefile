@@ -37,7 +37,6 @@ dataset-doctest%:
 	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
-	  --ignore kedro_datasets/partitions/incremental_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \

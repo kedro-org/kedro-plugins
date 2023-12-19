@@ -73,7 +73,7 @@ class DeltaTableDataset(AbstractDataset):
         >>>
         >>> new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
         >>> dataset.save(new_data)
-        >>> dataset.get_loaded_version()
+        >>> assert isinstance(dataset.get_loaded_version(), int)
 
     """
 

@@ -21,6 +21,6 @@ Feature: Airflow
     And I have run a non-interactive kedro new
     And I have executed the kedro command "airflow create -t ../airflow/dags/"
     And I have installed the kedro project package
-    When I execute the airflow command "tasks test project-dummy preprocess-companies-node 2016-06-01T00:00:00+00:00"
+    When I execute the airflow command "tasks test project-dummy preprocess-companies-node"
     Then I should get a successful exit code
     And I should get a message including "Loading data from 'parameters'"

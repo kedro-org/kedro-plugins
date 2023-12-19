@@ -23,4 +23,4 @@ Feature: Airflow
     And I have installed the kedro project package
     When I execute the airflow command "tasks test project-dummy preprocess-companies-node"
     Then I should get a successful exit code
-    And I should get a message including "Loading data from 'parameters'"
+    And I should get a message including "Loading data from companies"

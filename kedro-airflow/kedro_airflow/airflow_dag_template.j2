@@ -30,7 +30,7 @@ class KedroOperator(BaseOperator):
 
     def execute(self, context):
         configure_project(self.package_name)
-        with KedroSession.create(self.project_path,
+        with KedroSession.create(project_path=self.project_path,
                                  env=self.env) as session:
             session.run(self.pipeline_name, node_names=[self.node_name])
 

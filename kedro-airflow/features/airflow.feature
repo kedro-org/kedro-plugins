@@ -7,7 +7,6 @@ Feature: Airflow
     Given I have installed kedro version "latest"
     And I have prepared a config file
     And I have run a non-interactive kedro new
-    And I have prepared a data catalog
     And I have executed the kedro command "airflow create -t ../airflow/dags/"
     When I execute the airflow command "tasks list project-dummy"
     Then I should get a successful exit code

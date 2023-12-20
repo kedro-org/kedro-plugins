@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
@@ -12,7 +12,7 @@ def _is_memory_dataset(catalog, dataset_name: str) -> bool:
         return False
 
     dataset = catalog._data_sets.get(dataset_name, None)
-    return dataset is not None and isinstance(dataset, MemoryDataSet)
+    return dataset is not None and isinstance(dataset, MemoryDataset)
 
 
 def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:

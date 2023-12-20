@@ -180,17 +180,19 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         >>> from kedro_datasets.databricks import ManagedTableDataset
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+        >>> import importlib_metadata
         >>>
+        >>> DELTA_VERSION = importlib_metadata.version("delta-spark")
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>> dataset = ManagedTableDataset(table="names_and_ages")
+        >>> spark_df = SparkSession.builder.config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog","org.apache.spark.sql.delta.catalog.DeltaCatalog",).getOrCreate().createDataFrame(data, schema)
+        >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
-        >>> reloaded.take(4)
+        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

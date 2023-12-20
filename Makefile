@@ -34,20 +34,14 @@ dataset-doctest%:
 	  exit 2; \
 	fi; \
     \
-	# TODO(deepyaman): Fix as many doctests as possible (so that they run).
+	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
-	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
-	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
-	  --ignore kedro_datasets/partitions/incremental_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
-	  --ignore kedro_datasets/polars/lazy_polars_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
-	  --ignore kedro_datasets/spark/deltatable_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_datasets/tensorflow/tensorflow_model_dataset.py \
 	  $(extra_pytest_arg${*})
 
 test-sequential:

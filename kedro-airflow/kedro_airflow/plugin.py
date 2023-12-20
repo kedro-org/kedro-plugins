@@ -39,7 +39,7 @@ def _load_config(context: KedroContext) -> dict[str, Any]:
     # Backwards compatibility for ConfigLoader that does not support `config_patterns`
     config_loader = context.config_loader
     if not hasattr(config_loader, "config_patterns"):
-        return config_loader.get("airflow*", "airflow/**")
+        return config_loader.get("airflow*", "airflow/**")  # pragma: no cover
 
     # Set the default pattern for `airflow` if not provided in `settings.py`
     if "airflow" not in config_loader.config_patterns.keys():

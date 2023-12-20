@@ -1,5 +1,7 @@
 # Upcoming Release
-## Community contributions
+
+# Release 0.8.0
+* Added support for Kedro 0.19.x
 
 # Release 0.7.0
 * Added support for Python 3.11

@@ -104,7 +104,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             method: The method of the request. GET, POST, PUT are the only supported
                 methods
             load_args: Additional parameters to be fed to requests.request.
-                https://requests.readthedocs.io/en/latest/api/#requests.request
+                https://requests.readthedocs.io/en/latest/api.html#requests.request
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.

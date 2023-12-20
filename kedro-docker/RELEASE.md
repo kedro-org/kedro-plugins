@@ -6,6 +6,9 @@
 
 ## Breaking changes to the API
 
+# Release 0.5.0
+## Major features and improvements
+* Add compatibility with `kedro` 0.19.x
 
 # Release 0.4.0
 * Migrate all project metadata to static `pyproject.toml`.

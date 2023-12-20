@@ -44,17 +44,7 @@ class IncrementalDataset(PartitionedDataset):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
-        >>> # these credentials will be passed to:
-        >>> # a) 'fsspec.filesystem()' call,
-        >>> # b) the dataset initializer,
-        >>> # c) the checkpoint initializer
-        >>> credentials = {"key1": "secret1", "key2": "secret2"}
-        >>>
-        >>> dataset = IncrementalDataset(
-        ...     path="s3://bucket-name/path/to/folder",
-        ...     dataset="pandas.CSVDataset",
-        ...     credentials=credentials,
-        ... )
+        >>> dataset = IncrementalDataset(path=str(tmp_path/ "test_data"), dataset="pandas.CSVDataset")
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>

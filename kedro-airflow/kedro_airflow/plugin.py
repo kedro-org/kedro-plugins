@@ -24,6 +24,8 @@ If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
+DEFAULT_RUN_ENV = "local"
+DEFAULT_PIPELINE = "__default__"
 
 
 @click.group(name="Kedro-Airflow")
@@ -80,11 +82,11 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--pipelines",
     "pipeline_names",
     multiple=True,
-    default=("__default__",),
+    default=(DEFAULT_PIPELINE,),
     help=PIPELINE_ARG_HELP,
 )
 @click.option("--all", "convert_all", is_flag=True, help=ALL_ARG_HELP)
-@click.option("-e", "--env", default="local", help=ENV_HELP)
+@click.option("-e", "--env", default=DEFAULT_RUN_ENV, help=ENV_HELP)
 @click.option(
     "-t",
     "--target-dir",
@@ -129,7 +131,7 @@ def create(  # noqa: PLR0913
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
-    if convert_all and pipeline_names != ("__default__",):
+    if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
         )
@@ -170,11 +172,13 @@ def create(  # noqa: PLR0913
             raise KedroCliError(f"Pipeline {name} not found.")
 
         # Obtain the file name
-        dag_filename = dags_folder / (
-            f"{package_name}_dag.py"
-            if name == "__default__"
-            else f"{package_name}_{name}_dag.py"
-        )
+        dag_name = package_name
+        if env != DEFAULT_RUN_ENV:
+            dag_name += f"_{env}"
+        if name != DEFAULT_PIPELINE:
+            dag_name += f"_{name}"
+        dag_name += "_dag.py"
+        dag_filename = dags_folder / dag_name
 
         # group memory nodes
         if group_in_memory:

@@ -252,7 +252,7 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
 
     _kedro_create_env(Path.cwd())
 
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_remote_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)

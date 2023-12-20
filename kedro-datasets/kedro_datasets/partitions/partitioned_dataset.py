@@ -86,9 +86,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     for day_of_month in df["DAY_OF_MONTH"]
         ... }
         >>>
-        >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
+        >>> # Save it as small partitions with DAY_OF_MONTH as the partition key
         >>> dataset = PartitionedDataset(
-        ...     path=tmp_path / "df_with_partition",
+        ...     path=str(tmp_path / "df_with_partition"),
         ...     dataset="pandas.CSVDataset",
         ...     filename_suffix=".csv",
         ... )
@@ -105,7 +105,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     partition_data = partition_load_func()
         ...
         >>> # Add the processing logic for individual partition HERE
-        >>> print(partition_data)
+        >>> # print(partition_data)
 
     You can also load multiple partitions from a remote storage and combine them
     like this:

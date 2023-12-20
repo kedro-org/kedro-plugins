@@ -46,9 +46,8 @@ Feature: Docker commands in new projects
 
   Scenario: Use custom UID and GID for Docker image
     Given I have executed the kedro command "docker build --uid 10001 --gid 20002"
-    When I execute the kedro command "docker run"
-    Then I should get a successful exit code
-    And I should get a message including "Pipeline execution completed"
+    When I execute the kedro command "docker cmd id"
+    Then Standard output should contain a message including "uid=10001(kedro_docker) gid=20002(kedro_group) groups=20002(kedro_group)"
 
   Scenario: Execute docker jupyter notebook target
     Given I have executed the kedro command "docker build"

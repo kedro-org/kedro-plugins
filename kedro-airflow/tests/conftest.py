@@ -30,9 +30,9 @@ def cli_runner():
 
 def _create_kedro_settings_py(file_name: Path, patterns: list[str]):
     patterns = ", ".join([f'"{p}"' for p in patterns])
-    content = f"""from kedro.config import OmegaConfigLoader
-CONFIG_LOADER_CLASS = OmegaConfigLoader
-CONFIG_LOADER_ARGS = {{
+    content = f"""CONFIG_LOADER_ARGS = {{
+    "base_env": "base",
+    "default_run_env": "local",
     "config_patterns": {{
         "airflow": [{patterns}],  # configure the pattern for configuration files
     }}
@@ -53,14 +53,12 @@ def kedro_project(cli_runner):
         "python_package": "fake_project",
         "include_example": True,
     }
-
     cookiecutter(
         str(TEMPLATE_PATH),
         output_dir=config["output_dir"],
         no_input=True,
         extra_context=config,
     )
-
     pipeline_registry_py = """
 from kedro.pipeline import Pipeline, node
 
@@ -106,7 +104,7 @@ def metadata(kedro_project):
         "hello_world",
         "Hello world !!!",
         project_path,
-        kedro_version,
         project_path / "src",
         kedro_version,
+        "none",
     )

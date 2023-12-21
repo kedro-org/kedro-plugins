@@ -58,13 +58,14 @@ namespaces = false
 @fixture
 def fake_metadata(tmp_path):
     metadata = ProjectMetadata(
-        tmp_path / REPO_NAME / "pyproject.toml",
-        PACKAGE_NAME,
-        "CLI Testing Project",
-        tmp_path / REPO_NAME,
-        kedro_version,
-        tmp_path / REPO_NAME / "src",
-        kedro_version,
+        config_file=tmp_path / REPO_NAME / "pyproject.toml",
+        package_name=PACKAGE_NAME,
+        project_name="CLI Testing Project",
+        project_path=tmp_path / REPO_NAME,
+        source_dir=tmp_path / REPO_NAME / "src",
+        kedro_init_version=kedro_version,
+        tools=[],
+        example_pipeline="No",
     )
     return metadata
 

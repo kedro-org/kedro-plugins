@@ -106,6 +106,6 @@ def metadata(kedro_project):
         project_name="Hello world !!!",
         kedro_init_version=kedro_version,
         project_path=project_path,
-        tools=None,
-        example_pipeline="no",
+        tools=[],
+        example_pipeline="No",
     )

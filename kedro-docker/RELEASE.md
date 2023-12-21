@@ -6,7 +6,6 @@
 
 ## Breaking changes to the API
 
-
 # Release 0.4.0
 * Migrate all project metadata to static `pyproject.toml`.
 * Removed support for Python 3.7

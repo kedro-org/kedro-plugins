@@ -62,9 +62,10 @@ def fake_metadata(tmp_path):
         PACKAGE_NAME,
         "CLI Testing Project",
         tmp_path / REPO_NAME,
-        kedro_version,
         tmp_path / REPO_NAME / "src",
         kedro_version,
+        [],
+        "No",
     )
     return metadata
 

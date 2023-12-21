@@ -51,7 +51,6 @@ def kedro_project(cli_runner):
         "project_name": "This is a fake project",
         "repo_name": "fake-project",
         "python_package": "fake_project",
-        "tools": "none",
         "include_example": True,
     }
     cookiecutter(

@@ -107,5 +107,5 @@ def metadata(kedro_project):
         kedro_init_version=kedro_version,
         project_path=project_path,
         tools=None,
-        example_pipeline=None,
+        example_pipeline="no",
     )

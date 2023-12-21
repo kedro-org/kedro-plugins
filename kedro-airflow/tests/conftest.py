@@ -100,11 +100,12 @@ def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
     project_path = kedro_project
     return ProjectMetadata(
-        project_path / "pyproject.toml",
-        "hello_world",
-        "Hello world !!!",
-        project_path,
-        project_path / "src",
-        kedro_version,
-        "none",
+        source_dir=project_path / "src",
+        config_file=project_path / "pyproject.toml",
+        package_name="hello_world",
+        project_name="Hello world !!!",
+        kedro_init_version=kedro_version,
+        project_path=project_path,
+        tools=None,
+        example_pipeline=None,
     )

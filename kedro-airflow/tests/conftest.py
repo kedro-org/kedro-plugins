@@ -52,6 +52,7 @@ def kedro_project(cli_runner):
         "repo_name": "fake-project",
         "python_package": "fake_project",
         "include_example": True,
+        "tools": ['1', '2', '3', '4', '5']
     }
     cookiecutter(
         str(TEMPLATE_PATH),
@@ -106,6 +107,6 @@ def metadata(kedro_project):
         project_name="Hello world !!!",
         kedro_init_version=kedro_version,
         project_path=project_path,
-        tools=[],
+        tools=['None'],
         example_pipeline="No",
     )

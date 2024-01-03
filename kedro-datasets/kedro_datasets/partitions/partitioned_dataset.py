@@ -57,7 +57,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     .. code-block:: yaml
 
         station_data:
-          type: PartitionedDataset
+          type: partitions.PartitionedDataset
           path: data/03_primary/station_data
           dataset:
             type: pandas.CSVDataset

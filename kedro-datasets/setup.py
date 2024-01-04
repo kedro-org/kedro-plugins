@@ -100,7 +100,7 @@ tensorflow_require = {
     ]
 }
 video_require = {"video.VideoDataset": ["opencv-python~=4.5.5.64"]}
-xarray_require = {"xarray.GeoTIFFDataSet": ["rioxarray>=0.15.0"]}
+xarray_require = {"xarray.GeoTIFFDataset": ["rioxarray>=0.15.0"]}
 yaml_require = {"yaml.YAMLDataset": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {

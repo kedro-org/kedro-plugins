@@ -1,12 +1,24 @@
 # Upcoming release
-* Migrate all project metadata to static `pyproject.toml`.
 
 ## Major features and improvements
-* Added support for Python 3.11
 
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+
+# Release 0.5.0
+## Major features and improvements
+* Add compatibility with `kedro` 0.19
+
+## Breaking changes
+* `kedro-docker` was updated to use the `0.19` version of the Kedro starters. If you need to use `kedro-docker` for an old project, you can either use an older version or move the requirements file up from `src` to the top-level project directory.
+
+# Release 0.4.0
+* Migrate all project metadata to static `pyproject.toml`.
+* Removed support for Python 3.7
+
+## Major features and improvements
+* Added support for Python 3.11
 
 # Release 0.3.1
 ## Major features and improvements

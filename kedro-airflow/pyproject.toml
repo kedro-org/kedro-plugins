@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.17.5",
@@ -24,11 +24,13 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<2.7.0", # TODO: Temporary fix, make kedro-airflow compatible with new version of airflow
+    "apache-airflow<2.7.0", # TODO: Temporary fix, to be reverted
     "bandit",
     "behave",
     "black~=22.0",
+    "connexion<3.0.0", # TODO: Temporary fix, connexion has changed their API, but airflow hasn't caught up yet
     "kedro-datasets",
+    "pendulum<3.0.0", # TODO: Also to be removed
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

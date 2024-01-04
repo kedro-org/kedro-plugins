@@ -4,20 +4,17 @@ and decode videos and OpenCV VideoWriter to encode and write video.
 """
 import itertools
 import tempfile
-import warnings
 from collections import abc
+from collections.abc import Generator, Sequence
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Generator, Optional, Sequence, Tuple, Union
+from typing import Any, Optional, Union
 
 import cv2
 import fsspec
 import numpy as np
 import PIL.Image
-from kedro.io.core import get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset
+from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 
 class SlicedVideo:
@@ -56,7 +53,7 @@ class AbstractVideo(abc.Sequence):
         raise NotImplementedError()
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         """Get the resolution of the video"""
         raise NotImplementedError()
 
@@ -86,7 +83,7 @@ class FileVideo(AbstractVideo):
         return self._cap.get(cv2.CAP_PROP_FPS)
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return width, height
@@ -150,7 +147,7 @@ class SequenceVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -185,7 +182,7 @@ class GeneratorVideo(AbstractVideo):
         return self._fps
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def size(self) -> tuple[int, int]:
         return self._size
 
     def __getitem__(self, index: Union[int, slice]):
@@ -226,9 +223,10 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         >>> from kedro_datasets.video import VideoDataset
         >>> import numpy as np
         >>>
-        >>> video = VideoDataset(filepath="/video/file/path.mp4").load()
+        >>> video = VideoDataset(
+        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        ... ).load()
         >>> frame = video[0]
-        >>> np.sum(np.asarray(frame))
 
 
     Example creating a video from numpy frames using Python API:
@@ -245,7 +243,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ...     imgs.append(Image.fromarray(frame))
         ...     frame -= 1
         ...
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataset(filepath=tmp_path / "my_video.mp4")
         >>> video.save(SequenceVideo(imgs, fps=25))
 
 
@@ -263,18 +261,19 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ...         yield Image.fromarray(frame)
         ...         frame -= 1
         ...
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataset(filepath=tmp_path / "my_video.mp4")
         >>> video.save(GeneratorVideo(gen(), fps=25, length=None))
 
     """
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of VideoDataset to load / save video data for given filepath.
 
@@ -362,26 +361,8 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         finally:
             writer.release()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {"filepath": self._filepath, "protocol": self._protocol}
 
     def _exists(self) -> bool:
         return self._fs.exists(self._filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "VideoDataSet": VideoDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

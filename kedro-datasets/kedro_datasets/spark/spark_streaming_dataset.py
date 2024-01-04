@@ -1,16 +1,15 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
-from pyspark.sql import DataFrame, SparkSession
+from kedro.io.core import AbstractDataset
+from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
     SparkDataset,
+    _get_spark,
     _split_filepath,
     _strip_dbfs_prefix,
 )
@@ -43,10 +42,11 @@ class SparkStreamingDataset(AbstractDataset):
 
     def __init__(
         self,
+        *,
         filepath: str = "",
         file_format: str = "",
-        save_args: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataset.
 
@@ -95,7 +95,7 @@ class SparkStreamingDataset(AbstractDataset):
             if isinstance(self._schema, dict):
                 self._schema = SparkDataset._load_schema_from_file(self._schema)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         """Returns a dict that describes attributes of the dataset."""
         return {
             "filepath": self._fs_prefix + str(self._filepath),
@@ -103,10 +103,6 @@ class SparkStreamingDataset(AbstractDataset):
             "load_args": self._load_args,
             "save_args": self._save_args,
         }
-
-    @staticmethod
-    def _get_spark():
-        return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
         """Loads data from filepath.
@@ -117,7 +113,7 @@ class SparkStreamingDataset(AbstractDataset):
         """
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         data_stream_reader = (
-            self._get_spark()
+            _get_spark()
             .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
@@ -146,7 +142,7 @@ class SparkStreamingDataset(AbstractDataset):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            self._get_spark().readStream.schema(self._schema).load(
+            _get_spark().readStream.schema(self._schema).load(
                 load_path, self._file_format
             )
         except AnalysisException as exception:
@@ -159,21 +155,3 @@ class SparkStreamingDataset(AbstractDataset):
                 return False
             raise
         return True
-
-
-_DEPRECATED_CLASSES = {
-    "SparkStreamingDataSet": SparkStreamingDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

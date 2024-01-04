@@ -2,20 +2,22 @@
 using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 ``email`` package in the standard library to manage email messages.
 """
-import warnings
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
 from email.parser import Parser
 from email.policy import default
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
@@ -42,25 +44,26 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> dataset = EmailMessageDataset(filepath="test")
+        >>> dataset = EmailMessageDataset(filepath=tmp_path / "test")
         >>> dataset.save(msg)
         >>> reloaded = dataset.load()
         >>> assert msg.__dict__ == reloaded.__dict__
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``EmailMessageDataset`` pointing to a concrete text file
         on a specific filesystem.
@@ -141,7 +144,7 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -182,21 +185,3 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "EmailMessageDataSet": EmailMessageDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

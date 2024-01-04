@@ -3,18 +3,21 @@ in Databricks.
 """
 import logging
 import re
-import warnings
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
-from kedro.io.core import Version, VersionNotFoundError
-from pyspark.sql import DataFrame, SparkSession
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    VersionNotFoundError,
+)
+from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +37,7 @@ class ManagedTable:
     dataframe_type: str
     primary_key: Optional[str]
     owner_group: str
-    partition_columns: Union[str, List[str]]
+    partition_columns: Union[str, list[str]]
     json_schema: StructType
 
     def __post_init__(self):
@@ -173,21 +176,23 @@ class ManagedTableDataset(AbstractVersionedDataset):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
 
-        from pyspark.sql import SparkSession
-        from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-        from kedro_datasets.databricks import ManagedTableDataset
-
-        schema = StructType(
-            [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
-        )
-        data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        dataset = ManagedTableDataset(table="names_and_ages")
-        dataset.save(spark_df)
-        reloaded = dataset.load()
-        reloaded.take(4)
+        >>> from kedro_datasets.databricks import ManagedTableDataset
+        >>> from pyspark.sql import SparkSession
+        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+        >>> import importlib_metadata
+        >>>
+        >>> DELTA_VERSION = importlib_metadata.version("delta-spark")
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
+        >>> spark_df = SparkSession.builder.config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog","org.apache.spark.sql.delta.catalog.DeltaCatalog",).getOrCreate().createDataFrame(data, schema)
+        >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
+        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -198,18 +203,18 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table: str,
         catalog: str = None,
         database: str = "default",
         write_mode: Union[str, None] = None,
         dataframe_type: str = "spark",
-        primary_key: Optional[Union[str, List[str]]] = None,
+        primary_key: Optional[Union[str, list[str]]] = None,
         version: Version = None,
-        *,
         # the following parameters are used by project hooks
         # to create or update table properties
-        schema: Dict[str, Any] = None,
-        partition_columns: List[str] = None,
+        schema: dict[str, Any] = None,
+        partition_columns: list[str] = None,
         owner_group: str = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
@@ -264,10 +269,6 @@ class ManagedTableDataset(AbstractVersionedDataset):
             exists_function=self._exists,
         )
 
-    @staticmethod
-    def _get_spark() -> SparkSession:
-        return SparkSession.builder.getOrCreate()
-
     def _load(self) -> Union[DataFrame, pd.DataFrame]:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe)
@@ -283,7 +284,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         if self._version and self._version.load >= 0:
             try:
                 data = (
-                    self._get_spark()
+                    _get_spark()
                     .read.format("delta")
                     .option("versionAsOf", self._version.load)
                     .table(self._table.full_table_location())
@@ -291,7 +292,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             except Exception as exc:
                 raise VersionNotFoundError(self._version.load) from exc
         else:
-            data = self._get_spark().table(self._table.full_table_location())
+            data = _get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data
@@ -329,7 +330,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             update_data (DataFrame): the Spark dataframe to upsert
         """
         if self._exists():
-            base_data = self._get_spark().table(self._table.full_table_location())
+            base_data = _get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
 
@@ -352,13 +353,11 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            self._get_spark().conf.set(
-                "fullTableAddress", self._table.full_table_location()
-            )
-            self._get_spark().conf.set("whereExpr", where_expr)
+            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
+            _get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
-            self._get_spark().sql(upsert_sql)
+            _get_spark().sql(upsert_sql)
         else:
             self._save_append(update_data)
 
@@ -380,13 +379,13 @@ class ManagedTableDataset(AbstractVersionedDataset):
         if self._table.schema():
             cols = self._table.schema().fieldNames()
             if self._table.dataframe_type == "pandas":
-                data = self._get_spark().createDataFrame(
+                data = _get_spark().createDataFrame(
                     data.loc[:, cols], schema=self._table.schema()
                 )
             else:
                 data = data.select(*cols)
         elif self._table.dataframe_type == "pandas":
-            data = self._get_spark().createDataFrame(data)
+            data = _get_spark().createDataFrame(data)
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":
@@ -394,7 +393,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         elif self._table.write_mode == "append":
             self._save_append(data)
 
-    def _describe(self) -> Dict[str, str]:
+    def _describe(self) -> dict[str, str]:
         """Returns a description of the instance of ManagedTableDataset
 
         Returns:
@@ -421,7 +420,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         """
         if self._table.catalog:
             try:
-                self._get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
+                _get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
             except (ParseException, AnalysisException) as exc:
                 logger.warning(
                     "catalog %s not found or unity not enabled. Error message: %s",
@@ -430,7 +429,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 )
         try:
             return (
-                self._get_spark()
+                _get_spark()
                 .sql(f"SHOW TABLES IN `{self._table.database}`")
                 .filter(f"tableName = '{self._table.table}'")
                 .count()
@@ -439,21 +438,3 @@ class ManagedTableDataset(AbstractVersionedDataset):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
-
-
-_DEPRECATED_CLASSES = {
-    "ManagedTableDataSet": ManagedTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

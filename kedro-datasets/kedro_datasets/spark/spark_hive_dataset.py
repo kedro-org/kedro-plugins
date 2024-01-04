@@ -2,15 +2,14 @@
 ``pyspark`` on Apache Hive.
 """
 import pickle
-import warnings
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any
 
-from pyspark.sql import DataFrame, SparkSession, Window
+from kedro.io.core import AbstractDataset, DatasetError
+from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
@@ -67,16 +66,17 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         >>> reloaded.take(4)
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         database: str,
         table: str,
         write_mode: str = "errorifexists",
-        table_pk: List[str] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        table_pk: list[str] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataset``.
 
@@ -127,7 +127,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "database": self._database,
             "table": self._table,
@@ -136,20 +136,6 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "partition_by": self._save_args.get("partitionBy"),
             "format": self._format,
         }
-
-    @staticmethod
-    def _get_spark() -> SparkSession:
-        """
-        This method should only be used to get an existing SparkSession
-        with valid Hive configuration.
-        Configuration for Hive is read from hive-site.xml on the classpath.
-        It supports running both SQL and HiveQL commands.
-        Additionally, if users are leveraging the `upsert` functionality,
-        then a `checkpoint` directory must be set, e.g. using
-        `spark.sparkContext.setCheckpointDir("/path/to/dir")`
-        """
-        _spark = SparkSession.builder.getOrCreate()
-        return _spark
 
     def _create_hive_table(self, data: DataFrame, mode: str = None):
         _mode: str = mode or self._write_mode
@@ -161,7 +147,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         )
 
     def _load(self) -> DataFrame:
-        return self._get_spark().read.table(self._full_table_address)
+        return _get_spark().read.table(self._full_table_address)
 
     def _save(self, data: DataFrame) -> None:
         self._validate_save(data)
@@ -213,7 +199,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     def _exists(self) -> bool:
         return (
-            self._get_spark()
+            _get_spark()
             ._jsparkSession.catalog()
             .tableExists(self._database, self._table)
         )
@@ -223,21 +209,3 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "PySpark datasets objects cannot be pickled "
             "or serialised as Python objects."
         )
-
-
-_DEPRECATED_CLASSES = {
-    "SparkHiveDataSet": SparkHiveDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

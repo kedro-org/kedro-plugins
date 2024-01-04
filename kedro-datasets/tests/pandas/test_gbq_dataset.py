@@ -1,15 +1,12 @@
-import importlib
 from pathlib import PosixPath
 
 import pandas as pd
 import pytest
 from google.cloud.exceptions import NotFound
+from kedro.io.core import DatasetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import GBQQueryDataset, GBQTableDataset
-from kedro_datasets.pandas.gbq_dataset import _DEPRECATED_CLASSES
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"
@@ -67,17 +64,6 @@ def gbq_sql_file_dataset(load_args, sql_file, mock_bigquery_client):
     )
 
 
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.gbq_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
-
-
 class TestGBQDataset:
     def test_exists(self, mock_bigquery_client):
         """Test `exists` method invocation."""
@@ -86,7 +72,7 @@ class TestGBQDataset:
             "exists",
         ]
 
-        dataset = GBQTableDataset(DATASET, TABLE_NAME)
+        dataset = GBQTableDataset(dataset=DATASET, table_name=TABLE_NAME)
         assert not dataset.exists()
         assert dataset.exists()
 

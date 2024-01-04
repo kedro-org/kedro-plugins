@@ -1,6 +1,6 @@
 # Kedro-Telemetry
 
-[![Python Version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro-telemetry/)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-telemetry/)
 [![PyPI version](https://badge.fury.io/py/kedro-telemetry.svg)](https://pypi.org/project/kedro-telemetry/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
@@ -78,3 +78,11 @@ Kedro-Telemetry is installed, but you have opted out of sharing usage analytics 
 ## How is the data collected
 
 Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/). Project maintainers have access to the data and can create dashboards that show adoption and feature usage.
+
+## What licence do you use?
+
+Kedro-Telemetry is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+
+* The [Kedro-Telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-telemetry`. This is not considered a breaking change.

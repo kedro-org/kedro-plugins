@@ -8,23 +8,30 @@ version: 2
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.8"
+    python: "3.9"
   jobs:
+    pre_install:
+    # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+    # pip==23.3 breaks dependency resolution
+      - python -m pip install -U "pip>=21.2,<23.2"
+    # These are technically installation steps, due to RTD's limit we need to inject the installation earlier.
+      - python -m pip install --upgrade --no-cache-dir sphinx readthedocs-sphinx-ext
+      - python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir ./kedro-datasets[docs,test]
     pre_build:
       - pip freeze
       - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d kedro-datasets/_build/doctrees kedro-datasets/docs/source kedro-datasets/_build/linkcheck
-
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
   configuration: kedro-datasets/docs/source/conf.py
   fail_on_warning: true
 
+# TODO: Revert the hot fix with `pre_install` when pip release a better version.
 # Optionally set the version of Python and requirements required to build your docs
-python:
-  install:
-    - method: pip
-      path: kedro-datasets
-      extra_requirements:
-        - docs
-        - test
+# python:
+#   install:
+#     - method: pip
+#       path: kedro-datasets
+#       extra_requirements:
+#         - docs
+#         - test

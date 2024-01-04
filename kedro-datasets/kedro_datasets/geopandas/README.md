@@ -1,6 +1,6 @@
 # GeoJSON
 
-``GeoJSONDataSet`` loads and saves data to a local yaml file using ``geopandas``.
+``GeoJSONDataset`` loads and saves data to a local yaml file using ``geopandas``.
 See [geopandas.GeoDataFrame](http://geopandas.org/reference/geopandas.GeoDataFrame.html) for details.
 
 #### Example use:
@@ -8,15 +8,15 @@ See [geopandas.GeoDataFrame](http://geopandas.org/reference/geopandas.GeoDataFra
 ```python
 import geopandas as gpd
 from shapely.geometry import Point
-from kedro_datasets.geopandas import GeoJSONDataSet
+from kedro_datasets.geopandas import GeoJSONDataset
 
 data = gpd.GeoDataFrame(
     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
     geometry=[Point(1, 1), Point(2, 4)],
 )
-data_set = GeoJSONDataSet(filepath="test.geojson")
-data_set.save(data)
-reloaded = data_set.load()
+dataset = GeoJSONDataset(filepath="test.geojson")
+dataset.save(data)
+reloaded = dataset.load()
 assert data.equals(reloaded)
 ```
 
@@ -24,7 +24,7 @@ assert data.equals(reloaded)
 
 ```yaml
 example_geojson_data:
-  type: geopandas.GeoJSONDataSet
+  type: geopandas.GeoJSONDataset
   filepath: data/08_reporting/test.geojson
 ```
 

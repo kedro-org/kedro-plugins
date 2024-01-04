@@ -1,14 +1,11 @@
 """``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
 """
 import logging
-import warnings
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import snowflake.snowpark as sp
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 logger = logging.getLogger(__name__)
 
@@ -100,18 +97,19 @@ class SnowparkTableDataset(AbstractDataset):
     # for parallelism within a pipeline please consider
     # ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table_name: str,
         schema: str = None,
         database: str = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SnowparkTableDataset``.
 
@@ -172,11 +170,10 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self._session = self._get_session(self._connection_parameters)
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "table_name": self._table_name,
             "database": self._database,
@@ -207,9 +204,13 @@ class SnowparkTableDataset(AbstractDataset):
             logger.debug("Trying to reuse active snowpark session...")
             session = sp.context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
-            logger.debug("No active snowpark session found. Creating")
+            logger.debug("No active snowpark session found. Creating...")
             session = sp.Session.builder.configs(connection_parameters).create()
         return session
+
+    @property
+    def _session(self) -> sp.Session:
+        return self._get_session(self._connection_parameters)
 
     def _load(self) -> sp.DataFrame:
         table_name = [
@@ -243,21 +244,3 @@ class SnowparkTableDataset(AbstractDataset):
             )
         ).collect()
         return rows[0][0] == 1
-
-
-_DEPRECATED_CLASSES = {
-    "SnowparkTableDataSet": SnowparkTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

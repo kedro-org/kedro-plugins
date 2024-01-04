@@ -1,4 +1,3 @@
-import importlib
 import sys
 from pathlib import PurePosixPath
 
@@ -7,11 +6,8 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs import S3FileSystem
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 
 if sys.platform == "win32":
     pytest.skip(
@@ -142,18 +138,6 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.tensorflow", "kedro_datasets.tensorflow.tensorflow_model_dataset"],
-)
-@pytest.mark.parametrize("class_name", ["TensorFlowModelDataSet"])
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
-
-
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
@@ -274,7 +258,7 @@ class TestTensorFlowModelDataset:
     @pytest.mark.parametrize("fs_args", [{"storage_option": "value"}])
     def test_fs_args(self, fs_args, mocker, tensorflow_model_dataset):
         fs_mock = mocker.patch("fsspec.filesystem")
-        tensorflow_model_dataset("test.tf", fs_args=fs_args)
+        tensorflow_model_dataset(filepath="test.tf", fs_args=fs_args)
 
         fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
 

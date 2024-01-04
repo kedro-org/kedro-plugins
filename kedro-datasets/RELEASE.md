@@ -1,7 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
-* Removed Windows specific conditions in `pandas.HDFDataSet` extra dependencies
+* Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
 ## Community contributions
 
 # Release 2.0.0

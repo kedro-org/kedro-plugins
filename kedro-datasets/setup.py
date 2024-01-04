@@ -64,7 +64,7 @@ plotly_require = {
     "plotly.JSONDataset": ["plotly>=4.8.0, <6.0"],
 }
 polars_require = {
-    "polars.CSVDataSet": [POLARS],
+    "polars.CSVDataset": [POLARS],
     "polars.GenericDataset": [
         POLARS,
         "pyarrow>=4.0",

@@ -2,11 +2,11 @@ from itertools import chain
 
 from setuptools import setup
 
-# at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
+# at least 1.3 to be able to use XMLDataset and pandas integration with fsspec
 PANDAS = "pandas>=1.3, <3.0"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.5"
+S3FS = "s3fs>=2021.4, <2024.1"  # Upper bound set arbitrarily, to be reassessed in early 2024
 POLARS = "polars>=0.18.0"
 DELTA = "delta-spark~=1.2.1"
 
@@ -15,46 +15,57 @@ def _collect_requirements(requires):
     return sorted(set(chain.from_iterable(requires.values())))
 
 
-api_require = {"api.APIDataSet": ["requests~=2.20"]}
-biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
+api_require = {"api.APIDataset": ["requests~=2.20"]}
+biosequence_require = {"biosequence.BioSequenceDataset": ["biopython~=1.73"]}
 dask_require = {
-    "dask.ParquetDataSet": ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+    "dask.ParquetDataset": ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 }
-databricks_require = {"databricks.ManagedTableDataSet": [SPARK, PANDAS, DELTA]}
+databricks_require = {"databricks.ManagedTableDataset": [SPARK, PANDAS, DELTA]}
 geopandas_require = {
-    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+    "geopandas.GeoJSONDataset": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
-matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
-networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
-pandas_require = {
-    "pandas.CSVDataSet": [PANDAS],
-    "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
-    "pandas.DeltaTableDataSet": [PANDAS, "deltalake>=0.10.0"],
-    "pandas.FeatherDataSet": [PANDAS],
-    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
-    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
-    "pandas.HDFDataSet": [
-        PANDAS,
-        "tables~=3.6, <3.9; python_version<'3.9'",
-        "tables~=3.6; python_version>='3.9'",
-    ],
-    "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=6.0"],
-    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0"],
-    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"],
-    "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
-    "pandas.GenericDataSet": [PANDAS],
+huggingface_require = {
+    "huggingface.HFDataset": ["datasets", "huggingface_hub"],
+    "huggingface.HFTransformerPipelineDataset": ["transformers"],
 }
-pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
-pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+networkx_require = {"networkx.NetworkXDataset": ["networkx~=2.4"]}
+pandas_require = {
+    "pandas.CSVDataset": [PANDAS],
+    "pandas.ExcelDataset": [PANDAS, "openpyxl>=3.0.6, <4.0"],
+    "pandas.DeltaTableDataset": [PANDAS, "deltalake>=0.10.0"],
+    "pandas.FeatherDataset": [PANDAS],
+    "pandas.GBQTableDataset": [
+        PANDAS,
+        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+        "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    ],
+    "pandas.GBQQueryDataset": [
+        PANDAS,
+        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+        "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    ],
+    "pandas.HDFDataset": [
+        PANDAS,
+        "tables~=3.6,
+    ],
+    "pandas.JSONDataset": [PANDAS],
+    "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],
+    "pandas.SQLTableDataset": [PANDAS, "SQLAlchemy>=1.4, <3.0"],
+    "pandas.SQLQueryDataset": [PANDAS, "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"],
+    "pandas.XMLDataset": [PANDAS, "lxml~=4.6"],
+    "pandas.GenericDataset": [PANDAS],
+}
+pickle_require = {"pickle.PickleDataset": ["compress-pickle[lz4]~=2.1.0"]}
+pillow_require = {"pillow.ImageDataset": ["Pillow~=9.0"]}
 plotly_require = {
-    "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
-    "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
+    "plotly.PlotlyDataset": [PANDAS, "plotly>=4.8.0, <6.0"],
+    "plotly.JSONDataset": ["plotly>=4.8.0, <6.0"],
 }
 polars_require = {
     "polars.CSVDataSet": [POLARS],
-    "polars.GenericDataSet": [
+    "polars.GenericDataset": [
         POLARS,
         "pyarrow>=4.0",
         "xlsx2csv>=0.8.0",
@@ -73,22 +84,22 @@ polars_require = {
         "deltalake >= 0.6.2",
     ],
 }
-redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
+redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
-    "snowflake.SnowparkTableDataSet": [
-        "snowflake-snowpark-python~=1.0.0",
+    "snowflake.SnowparkTableDataset": [
+        "snowflake-snowpark-python~=1.0",
         "pyarrow~=8.0",
     ]
 }
 spark_require = {
-    "spark.SparkDataSet": [SPARK, HDFS, S3FS],
-    "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
-    "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
-    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
+    "spark.SparkDataset": [SPARK, HDFS, S3FS],
+    "spark.SparkHiveDataset": [SPARK, HDFS, S3FS],
+    "spark.SparkJDBCDataset": [SPARK, HDFS, S3FS],
+    "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
-svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
+svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn>=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
-    "tensorflow.TensorFlowModelDataSet": [
+    "tensorflow.TensorFlowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serialises differently
         "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
@@ -96,8 +107,8 @@ tensorflow_require = {
         "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ]
 }
-video_require = {"video.VideoDataSet": ["opencv-python~=4.5.5.64"]}
-yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
+video_require = {"video.VideoDataset": ["opencv-python~=4.5.5.64"]}
+yaml_require = {"yaml.YAMLDataset": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -106,6 +117,7 @@ extras_require = {
     "databricks": _collect_requirements(databricks_require),
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
+    "huggingface": _collect_requirements(huggingface_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
@@ -169,8 +181,7 @@ extras_require["test"] = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
-    "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
-    "delta-spark~=1.2.1; python_version < '3.11'",
+    "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
@@ -214,20 +225,23 @@ extras_require["test"] = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "ruff~=0.0.290",
-    "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
-    "snowflake-snowpark-python~=1.0.0; python_version == '3.8'",
+    "s3fs>=2021.04, <2024.1",
+    "snowflake-snowpark-python~=1.0; python_version == '3.9'",
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",
     "packaging",
     "SQLAlchemy~=1.2",
     "tables~=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6, <3.9; platform_system != 'Windows' and python_version<'3.9'",
-    "tables~=3.6; platform_system != 'Windows' and python_version>='3.9'",
+    "tables~=3.6; platform_system != 'Windows'",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
     "xlsxwriter~=1.0",
+    # huggingface
+    "datasets",
+    "huggingface_hub",
+    "transformers",
 ]
 
 setup(

@@ -4,12 +4,10 @@ The ``MetricsDataset`` is part of Kedro Experiment Tracking. The dataset is vers
 and only takes metrics of numeric values.
 """
 import json
-import warnings
-from typing import Dict, NoReturn
+from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.json import json_dataset
 
 
@@ -39,7 +37,7 @@ class MetricsDataset(json_dataset.JSONDataset):
         >>>
         >>> data = {"col1": 1, "col2": 0.23, "col3": 0.002}
         >>>
-        >>> dataset = MetricsDataset(filepath="test.json")
+        >>> dataset = MetricsDataset(filepath=tmp_path / "test.json")
         >>> dataset.save(data)
 
     """
@@ -49,7 +47,7 @@ class MetricsDataset(json_dataset.JSONDataset):
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: Dict[str, float]) -> None:
+    def _save(self, data: dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataset`` to float to make sure
         they are numeric values which can be displayed in Kedro Viz and then saves the dataset.
         """
@@ -67,21 +65,3 @@ class MetricsDataset(json_dataset.JSONDataset):
             json.dump(data, fs_file, **self._save_args)
 
         self._invalidate_cache()
-
-
-_DEPRECATED_CLASSES = {
-    "MetricsDataSet": MetricsDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

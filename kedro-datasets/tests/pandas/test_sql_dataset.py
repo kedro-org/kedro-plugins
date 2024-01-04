@@ -1,15 +1,12 @@
-import importlib
 from pathlib import PosixPath
 from unittest.mock import ANY
 
 import pandas as pd
 import pytest
 import sqlalchemy
+from kedro.io.core import DatasetError
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
-from kedro_datasets.pandas.sql_dataset import _DEPRECATED_CLASSES
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
@@ -60,17 +57,6 @@ def query_file_dataset(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLQueryDataset(**kwargs)
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.sql_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSQLTableDataset:

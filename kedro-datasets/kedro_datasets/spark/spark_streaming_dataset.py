@@ -1,14 +1,12 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
+from kedro.io.core import AbstractDataset
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset
 from kedro_datasets.spark.spark_dataset import (
     SparkDataset,
     _get_spark,
@@ -44,10 +42,11 @@ class SparkStreamingDataset(AbstractDataset):
 
     def __init__(
         self,
+        *,
         filepath: str = "",
         file_format: str = "",
-        save_args: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataset.
 
@@ -96,7 +95,7 @@ class SparkStreamingDataset(AbstractDataset):
             if isinstance(self._schema, dict):
                 self._schema = SparkDataset._load_schema_from_file(self._schema)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         """Returns a dict that describes attributes of the dataset."""
         return {
             "filepath": self._fs_prefix + str(self._filepath),
@@ -156,21 +155,3 @@ class SparkStreamingDataset(AbstractDataset):
                 return False
             raise
         return True
-
-
-_DEPRECATED_CLASSES = {
-    "SparkStreamingDataSet": SparkStreamingDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

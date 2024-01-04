@@ -1,15 +1,13 @@
 """``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``.
 """
-import warnings
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn
+from typing import Any, NoReturn
 
 from delta.tables import DeltaTable
+from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import (
     _get_spark,
     _split_filepath,
@@ -41,6 +39,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
 
     .. code-block:: pycon
 
+        >>> from delta import DeltaTable
         >>> from kedro_datasets.spark import DeltaTableDataset, SparkDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
@@ -52,13 +51,13 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>>
-        >>> dataset = SparkDataset(filepath="test_data", file_format="delta")
+        >>> filepath = (tmp_path / "test_data").as_posix()
+        >>> dataset = SparkDataset(filepath=filepath, file_format="delta")
         >>> dataset.save(spark_df)
-        >>> deltatable_dataset = DeltaTableDataset(filepath="test_data")
+        >>> deltatable_dataset = DeltaTableDataset(filepath=filepath)
         >>> delta_table = deltatable_dataset.load()
         >>>
-        >>> delta_table.update()
+        >>> assert isinstance(delta_table, DeltaTable)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -67,7 +66,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, filepath: str, metadata: Dict[str, Any] = None) -> None:
+    def __init__(self, *, filepath: str, metadata: dict[str, Any] = None) -> None:
         """Creates a new instance of ``DeltaTableDataset``.
 
         Args:
@@ -107,21 +106,3 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
 
     def _describe(self):
         return {"filepath": str(self._filepath), "fs_prefix": self._fs_prefix}
-
-
-_DEPRECATED_CLASSES = {
-    "DeltaTableDataSet": DeltaTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

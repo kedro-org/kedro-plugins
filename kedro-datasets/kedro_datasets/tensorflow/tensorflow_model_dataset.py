@@ -3,16 +3,18 @@ TensorFlow models.
 """
 import copy
 import tempfile
-import warnings
 from pathlib import PurePath, PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import tensorflow as tf
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
@@ -48,29 +50,30 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> dataset = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
-        >>> model = tf.keras.Model()
-        >>> predictions = model.predict([...])
+        >>> dataset = TensorFlowModelDataset(filepath=tmp_path / "data/06_models/tensorflow_model.h5")
+        >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(3,)),tf.keras.layers.Softmax()])
+        >>>
+        >>> # x = tf.random.uniform((10, 3))
+        >>> # predictions = model.predict(x)
         >>>
         >>> dataset.save(model)
         >>> loaded_model = dataset.load()
-        >>> new_predictions = loaded_model.predict([...])
-        >>> np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"save_format": "tf"}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"save_format": "tf"}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``TensorFlowModelDataset``.
 
@@ -172,7 +175,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
             return False
         return self._fs.exists(load_path)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -189,23 +192,3 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "TensorFlowModelDataSet": TensorFlowModelDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(  # pragma: no cover
-        f"module {repr(__name__)} has no attribute {repr(name)}"
-    )

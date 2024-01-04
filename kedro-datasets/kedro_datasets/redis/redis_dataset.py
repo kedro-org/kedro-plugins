@@ -3,14 +3,11 @@ functionality is supported by the redis library, so it supports all allowed
 options for instantiating the redis app ``from_url`` and setting a value."""
 import importlib
 import os
-import warnings
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import redis
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 
 class PickleDataset(AbstractDataset[Any, Any]):
@@ -58,18 +55,19 @@ class PickleDataset(AbstractDataset[Any, Any]):
     """
 
     DEFAULT_REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379")
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         key: str,
         backend: str = "pickle",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        redis_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        redis_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataset``. This loads/saves data from/to
         a Redis database while deserialising/serialising. Supports custom backends to
@@ -162,7 +160,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             **self._redis_from_url_args, **_credentials
         )
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {"key": self._key, **self._redis_from_url_args}
 
     # `redis_db` mypy does not work since it is optional and optional is not
@@ -195,21 +193,3 @@ class PickleDataset(AbstractDataset[Any, Any]):
             raise DatasetError(
                 f"The existence of key {self._key} could not be established due to: {exc}"
             ) from exc
-
-
-_DEPRECATED_CLASSES = {
-    "PickleDataSet": PickleDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

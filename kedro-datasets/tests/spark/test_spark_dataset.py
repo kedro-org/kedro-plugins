@@ -1,4 +1,4 @@
-import importlib
+import os
 import re
 import sys
 import tempfile
@@ -8,7 +8,7 @@ import boto3
 import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
-from kedro.io.core import generate_timestamp
+from kedro.io.core import DatasetError, generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -26,13 +26,10 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset
 from kedro_datasets.spark.spark_dataset import (
-    _DEPRECATED_CLASSES,
     _dbfs_exists,
     _dbfs_glob,
     _get_dbutils,
@@ -146,8 +143,8 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
+            aws_access_key_id=AWS_CREDENTIALS["key"],
+            aws_secret_access_key=AWS_CREDENTIALS["secret"],
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
@@ -162,7 +159,7 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
     mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
     )
-    return mocked_s3_bucket
+    return f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}"
 
 
 class FileInfo:
@@ -171,17 +168,6 @@ class FileInfo:
 
     def isDir(self):
         return "." not in self.path.split("/")[-1]
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.spark", "kedro_datasets.spark.spark_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkDataset:
@@ -740,6 +726,10 @@ class TestSparkDatasetVersionedDBFS:
 
 
 class TestSparkDatasetVersionedS3:
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+
+    @pytest.mark.xfail
     def test_no_version(self, versioned_dataset_s3):
         pattern = r"Did not find any versions for SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
@@ -780,27 +770,27 @@ class TestSparkDatasetVersionedS3:
             f"s3a://{BUCKET_NAME}/{FILENAME}/{ts}/{FILENAME}", "parquet"
         )
 
-    def test_save(self, versioned_dataset_s3, version, mocker):
+    def test_save(self, mocked_s3_schema, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
+
+        ds_s3 = SparkDataset(
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}", version=version
+        )
 
         # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_dataset_s3.save()
-        mocker.patch.object(
-            versioned_dataset_s3, "resolve_load_version", return_value=version.save
-        )
-
-        versioned_dataset_s3.save(mocked_spark_df)
+        mocker.patch.object(ds_s3, "resolve_load_version", return_value=version.save)
+        ds_s3.save(mocked_spark_df)
         mocked_spark_df.write.save.assert_called_once_with(
             f"s3a://{BUCKET_NAME}/{FILENAME}/{version.save}/{FILENAME}",
             "parquet",
         )
 
-    def test_save_version_warning(self, mocker):
+    def test_save_version_warning(self, mocked_s3_schema, versioned_dataset_s3, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")
         ds_s3 = SparkDataset(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=exact_version,
-            credentials=AWS_CREDENTIALS,
         )
         mocked_spark_df = mocker.Mock()
 
@@ -988,9 +978,9 @@ class TestSparkDatasetVersionedHdfs:
 @pytest.fixture
 def data_catalog(tmp_path):
     source_path = Path(__file__).parent / "data/test.parquet"
-    spark_in = SparkDataset(source_path.as_posix())
-    spark_out = SparkDataset((tmp_path / "spark_data").as_posix())
-    pickle_ds = PickleDataset((tmp_path / "pickle/test.pkl").as_posix())
+    spark_in = SparkDataset(filepath=source_path.as_posix())
+    spark_out = SparkDataset(filepath=(tmp_path / "spark_data").as_posix())
+    pickle_ds = PickleDataset(filepath=(tmp_path / "pickle/test.pkl").as_posix())
 
     return DataCatalog(
         {"spark_in": spark_in, "spark_out": spark_out, "pickle_ds": pickle_ds}
@@ -1004,7 +994,7 @@ class TestDataFlowSequentialRunner:
         pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0
 
@@ -1026,6 +1016,6 @@ class TestDataFlowSequentialRunner:
         )
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0

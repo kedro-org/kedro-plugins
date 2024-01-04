@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -10,14 +9,11 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import Version
-from kedro.io.core import PROTOCOL_DELIMITER, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, generate_timestamp
 from polars.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.polars import EagerPolarsDataset
-from kedro_datasets.polars.eager_polars_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -103,18 +99,6 @@ def excel_dataset(dummy_dataframe: pl.DataFrame, filepath_excel):
         filepath=filepath_excel.as_posix(),
         file_format="excel",
     )
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.polars", "kedro_datasets.polars.eager_polars_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestEagerExcelDataset:

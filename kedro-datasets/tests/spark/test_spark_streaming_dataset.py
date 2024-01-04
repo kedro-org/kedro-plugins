@@ -1,8 +1,8 @@
-import importlib
 import json
 
 import boto3
 import pytest
+from kedro.io.core import DatasetError
 from moto import mock_s3
 from packaging.version import Version
 from pyspark import __version__
@@ -10,10 +10,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkDataset, SparkStreamingDataset
-from kedro_datasets.spark.spark_streaming_dataset import _DEPRECATED_CLASSES
 
 SCHEMA_FILE_NAME = "schema.json"
 BUCKET_NAME = "test_bucket"
@@ -89,18 +86,6 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
         Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
     )
     return mocked_s3_bucket
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.spark", "kedro_datasets.spark.spark_streaming_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkStreamingDataset:

@@ -4,13 +4,17 @@ filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, TypeVar
+from typing import Any, NoReturn, TypeVar
 
 import fsspec
 import holoviews as hv
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 # HoloViews to be passed in `hv.save()`
 HoloViews = TypeVar("HoloViews")
@@ -28,22 +32,23 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         >>> from kedro_datasets.holoviews import HoloviewsWriter
         >>>
         >>> curve = hv.Curve(range(10))
-        >>> holoviews_writer = HoloviewsWriter("/tmp/holoviews")
+        >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
         >>>
         >>> holoviews_writer.save(curve)
 
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"fmt": "png"}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"fmt": "png"}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        fs_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``HoloviewsWriter``.
 
@@ -98,7 +103,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         if save_args is not None:
             self._save_args.update(save_args)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,

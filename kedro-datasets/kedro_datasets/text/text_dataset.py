@@ -1,16 +1,18 @@
 """``TextDataset`` loads/saves data from/to a text file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 class TextDataset(AbstractVersionedDataset[str, str]):
@@ -37,7 +39,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> dataset = TextDataset(filepath="test.md")
+        >>> dataset = TextDataset(filepath=tmp_path / "test.md")
         >>> dataset.save(string_to_write)
         >>> reloaded = dataset.load()
         >>> assert string_to_write == reloaded
@@ -46,11 +48,12 @@ class TextDataset(AbstractVersionedDataset[str, str]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
         version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``TextDataset`` pointing to a concrete text file
         on a specific filesystem.
@@ -103,7 +106,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -140,21 +143,3 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "TextDataSet": TextDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

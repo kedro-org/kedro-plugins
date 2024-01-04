@@ -48,7 +48,7 @@ pandas_require = {
     ],
     "pandas.HDFDataset": [
         PANDAS,
-        "tables~=3.6,
+        "tables~=3.6",
     ],
     "pandas.JSONDataset": [PANDAS],
     "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],

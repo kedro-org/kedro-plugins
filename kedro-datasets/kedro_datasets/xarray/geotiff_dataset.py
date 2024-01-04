@@ -12,7 +12,7 @@ import rioxarray as rxr
 import xarray
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io import AbstractVersionedDataset, DatasetError
 
 
 class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):

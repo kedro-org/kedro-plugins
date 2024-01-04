@@ -2,12 +2,12 @@
 filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 The ``JSONDataset`` is part of Kedro Experiment Tracking. The dataset is versioned by default.
 """
-from typing import NoReturn
+import json
+from typing import NoReturn, NewType
 
-from kedro.io.core import DatasetError
+from kedro.io.core import DatasetError, get_filepath_str
 
 from kedro_datasets.json import json_dataset
-
 
 class JSONDataset(json_dataset.JSONDataset):
     """``JSONDataset`` saves data to a JSON file using an underlying
@@ -41,6 +41,14 @@ class JSONDataset(json_dataset.JSONDataset):
     """
 
     versioned = True
+    
+    JSONData = NewType('JSONData', str)
 
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+
+    def _preview(self) -> JSONData:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            return json.load(fs_file)

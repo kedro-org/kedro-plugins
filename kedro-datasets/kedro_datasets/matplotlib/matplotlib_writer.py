@@ -2,9 +2,10 @@
 files to an underlying filesystem (e.g. local, S3, GCS)."""
 
 import io
+import base64
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn, Union, NewType
 from warnings import warn
 
 import fsspec
@@ -113,6 +114,8 @@ class MatplotlibWriter(
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    
+    Image = NewType('Image', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -245,3 +248,9 @@ class MatplotlibWriter(
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _preview(self) -> Image:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(load_path, mode="rb") as img_file:
+            base64_bytes = base64.b64encode(img_file.read())
+        return base64_bytes.decode("utf-8")

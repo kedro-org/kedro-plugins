@@ -3,7 +3,7 @@ filesystem (e.g.: local, S3, GCS).
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any, Union, NewType
 
 import fsspec
 import plotly.io as pio
@@ -52,6 +52,8 @@ class JSONDataset(
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    
+    Plot = NewType('Plot', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -167,3 +169,7 @@ class JSONDataset(
     def _invalidate_cache(self) -> None:
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+        
+    def _preview(self) -> Plot:
+        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
+        return plotly_data

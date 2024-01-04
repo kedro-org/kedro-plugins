@@ -3,7 +3,7 @@ file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON in
 plotly figure.
 """
 from copy import deepcopy
-from typing import Any
+from typing import Any, NewType
 
 import pandas as pd
 import plotly.express as px
@@ -65,6 +65,8 @@ class PlotlyDataset(JSONDataset):
         >>> assert px.scatter(df_data, x="x1", y="x2") == reloaded
 
     """
+    
+    Plot = NewType('Plot', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -148,3 +150,7 @@ class PlotlyDataset(JSONDataset):
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
+    
+    def _preview(self) -> Plot:
+        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
+        return plotly_data

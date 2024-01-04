@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, NewType
 
 import fsspec
 import pandas as pd
@@ -67,6 +67,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
+    
+    DataFrame = NewType('DataFrame', dict)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -194,7 +196,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _preview(self, nrows: int = 40) -> dict:
+    def _preview(self, nrows: int = 40) -> DataFrame:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows

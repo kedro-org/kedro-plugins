@@ -5,14 +5,13 @@ returns a xarray.DataArray object.
 
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import rioxarray as rxr
 import xarray
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
 from kedro.io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
 
 class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
@@ -50,16 +49,16 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
         version: Version = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``GeoTiffDataset`` pointing to a concrete
         tiff or tif file with geospatial data.
@@ -120,7 +119,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
 
         return self._fs.exists(load_path)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "load_args": self._load_args,

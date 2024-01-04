@@ -48,8 +48,7 @@ pandas_require = {
     ],
     "pandas.HDFDataset": [
         PANDAS,
-        "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6; platform_system != 'Windows'",
+        "tables~=3.6",
     ],
     "pandas.JSONDataset": [PANDAS],
     "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],
@@ -66,14 +65,23 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataset": [POLARS],
-    "polars.EagerPolarsDataset":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
-    "polars.LazyPolarsDataset":
-    [
+    "polars.EagerPolarsDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
+    ],
+    "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
-        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
+        POLARS,
+        "pyarrow>=4.0",
+        "deltalake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}

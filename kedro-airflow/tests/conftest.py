@@ -11,9 +11,8 @@ from pathlib import Path
 from shutil import copyfile
 
 from click.testing import CliRunner
-from cookiecutter.main import cookiecutter
 from kedro import __version__ as kedro_version
-from kedro.framework.cli.starters import TEMPLATE_PATH
+from kedro.framework.cli.starters import create_cli as kedro_cli
 from kedro.framework.startup import ProjectMetadata
 from pytest import fixture
 
@@ -43,21 +42,19 @@ def _create_kedro_settings_py(file_name: Path, patterns: list[str]):
 
 @fixture(scope="session")
 def kedro_project(cli_runner):
-    tmp_path = Path().cwd()
-    # From `kedro-mlflow.tests.conftest.py`
-    config = {
-        "output_dir": tmp_path,
-        "kedro_version": kedro_version,
-        "project_name": "This is a fake project",
-        "repo_name": "fake-project",
-        "python_package": "fake_project",
-        "include_example": True,
-    }
-    cookiecutter(
-        str(TEMPLATE_PATH),
-        output_dir=config["output_dir"],
-        no_input=True,
-        extra_context=config,
+    CliRunner().invoke(
+        # Supply name, tools, and example to skip interactive prompts
+        kedro_cli,
+        [
+            "new",
+            "-v",
+            "--name",
+            "Fake Project",
+            "--tools",
+            "none",
+            "--example",
+            "no",
+        ],
     )
     pipeline_registry_py = """
 from kedro.pipeline import Pipeline, node
@@ -81,7 +78,7 @@ def register_pipelines():
     }
     """
 
-    project_path = tmp_path / "fake-project"
+    project_path = Path().cwd() / "fake-project"
     (project_path / "src" / "fake_project" / "pipeline_registry.py").write_text(
         pipeline_registry_py
     )
@@ -100,11 +97,12 @@ def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
     project_path = kedro_project
     return ProjectMetadata(
-        project_path / "pyproject.toml",
-        "hello_world",
-        "Hello world !!!",
-        project_path,
-        project_path / "src",
-        kedro_version,
-        "none",
+        source_dir=project_path / "src",
+        config_file=project_path / "pyproject.toml",
+        package_name="hello_world",
+        project_name="Hello world !!!",
+        kedro_init_version=kedro_version,
+        project_path=project_path,
+        tools=["None"],
+        example_pipeline="No",
     )

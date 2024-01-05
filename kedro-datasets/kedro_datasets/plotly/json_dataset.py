@@ -5,6 +5,7 @@ from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Union, NewType
 
+import json
 import fsspec
 import plotly.io as pio
 from kedro.io.core import (
@@ -53,7 +54,7 @@ class JSONDataset(
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
     
-    Plot = NewType('Plot', str)
+    Plot = NewType('plot', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -171,5 +172,7 @@ class JSONDataset(
         self._fs.invalidate_cache(filepath)
         
     def _preview(self) -> Plot:
-        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
-        return plotly_data
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            return json.load(fs_file)

@@ -108,7 +108,7 @@ class ExcelDataset(
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
     
-    DataFrame = NewType('DataFrame', dict)
+    Dataframe = NewType('dataframe', dict)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -264,7 +264,7 @@ class ExcelDataset(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _preview(self, nrows: int = 40) -> DataFrame:
+    def _preview(self, nrows: int = 40) -> Dataframe:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows

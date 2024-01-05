@@ -115,7 +115,7 @@ class MatplotlibWriter(
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
     
-    Image = NewType('Image', str)
+    Image = NewType('image', str)
 
     def __init__(  # noqa: PLR0913
         self,

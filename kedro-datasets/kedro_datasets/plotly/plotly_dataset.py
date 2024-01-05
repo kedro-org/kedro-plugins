@@ -4,10 +4,10 @@ plotly figure.
 """
 from copy import deepcopy
 from typing import Any, NewType
-
+import json
 import pandas as pd
 import plotly.express as px
-from kedro.io.core import Version
+from kedro.io.core import Version, get_filepath_str
 from plotly import graph_objects as go
 
 from kedro_datasets.plotly.json_dataset import JSONDataset
@@ -66,7 +66,7 @@ class PlotlyDataset(JSONDataset):
 
     """
     
-    Plot = NewType('Plot', str)
+    Plot = NewType('plot', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -152,5 +152,6 @@ class PlotlyDataset(JSONDataset):
         return fig
     
     def _preview(self) -> Plot:
-        plotly_data = self.load()  # Assuming this returns a plotly figure as a string
-        return plotly_data
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            return json.load(fs_file)

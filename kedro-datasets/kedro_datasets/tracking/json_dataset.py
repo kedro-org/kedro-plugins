@@ -42,12 +42,12 @@ class JSONDataset(json_dataset.JSONDataset):
 
     versioned = True
     
-    JSONData = NewType('JSONData', str)
+    tracking_data = NewType('JSONTracking', str)
 
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _preview(self) -> JSONData:
+    def _preview(self) -> tracking_data:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

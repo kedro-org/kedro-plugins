@@ -18,6 +18,7 @@ kedro_datasets
    kedro_datasets.email.EmailMessageDataSet
    kedro_datasets.geopandas.GeoJSONDataSet
    kedro_datasets.holoviews.HoloviewsWriter
+   kedro_datasets.influx.InfluxQueryDataset
    kedro_datasets.json.JSONDataSet
    kedro_datasets.matplotlib.MatplotlibWriter
    kedro_datasets.networkx.GMLDataSet

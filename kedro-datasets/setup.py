@@ -25,6 +25,7 @@ geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
+influx_require = {"influx.InfluxQueryDataSet": [PANDAS, "influxdb-client>=1.9.0, <2.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 neo4j_require = {"neo4j.Neo4jCypherDataset": [PANDAS, "neo4j>=5.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
@@ -95,6 +96,7 @@ extras_require = {
     "databricks": _collect_requirements(databricks_require),
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
+    "influx": _collect_requirements(influx_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "neo4j": _collect_requirements(neo4j_require),
@@ -116,6 +118,7 @@ extras_require = {
     **databricks_require,
     **geopandas_require,
     **holoviews_require,
+    **influx_require,
     **matplotlib_require,
     **networkx_require,
     **neo4j_require,

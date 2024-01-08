@@ -9,8 +9,7 @@ import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
-
-from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 
 class DeltaTableDataset(AbstractDataset):
@@ -74,7 +73,7 @@ class DeltaTableDataset(AbstractDataset):
         >>>
         >>> new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
         >>> dataset.save(new_data)
-        >>> dataset.get_loaded_version()
+        >>> assert isinstance(dataset.get_loaded_version(), int)
 
     """
 

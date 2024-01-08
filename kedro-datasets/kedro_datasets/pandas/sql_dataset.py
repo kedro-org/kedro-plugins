@@ -9,11 +9,14 @@ from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractDataset,
+    DatasetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
-
-from kedro_datasets._io import AbstractDataset, DatasetError
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
@@ -135,11 +138,11 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> table_name = "table_a"
-        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
-        >>> data_set = SQLTableDataset(table_name=table_name, credentials=credentials)
+        >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+        >>> dataset = SQLTableDataset(table_name=table_name, credentials=credentials)
         >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 
@@ -168,9 +171,8 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
                 parameters in ``load_args``.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
-                through credentials. It overwrites `con` parameter in
-                ``load_args`` and ``save_args`` in case it is provided. To find
-                all supported connection string formats, see here:
+                through credentials.
+                To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.
@@ -314,20 +316,30 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     .. code-block:: pycon
 
+        >>> import sqlite3
+        >>>
         >>> from kedro_datasets.pandas import SQLQueryDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> sql = "SELECT * FROM table_a"
-        >>> credentials = {"con": "postgresql://scott:tiger@localhost/test"}
-        >>> data_set = SQLQueryDataset(sql=sql, credentials=credentials)
+        >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+        >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials)
         >>>
-        >>> sql_data = data_set.load()
+        >>> con = sqlite3.connect(tmp_path / "test.db")
+        >>> cur = con.cursor()
+        >>> cur.execute("CREATE TABLE table_a(col1, col2, col3)")
+        <sqlite3.Cursor object at 0x...>
+        >>> cur.execute("INSERT INTO table_a VALUES (1, 4, 5), (2, 5, 6)")
+        <sqlite3.Cursor object at 0x...>
+        >>> con.commit()
+        >>> reloaded = dataset.load()
+        >>>
+        >>> assert data.equals(reloaded)
 
-    Example of usage for mssql:
+    Example of usage for MSSQL:
 
     .. code-block:: pycon
-
 
         >>> credentials = {
         ...     "server": "localhost",
@@ -339,8 +351,8 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         >>> def _make_mssql_connection_str(
         ...     server: str, port: str, database: str, user: str, password: str
         ... ) -> str:
-        ...     import pyodbc  # noqa
-        ...     from sqlalchemy.engine import URL  # noqa
+        ...     import pyodbc
+        ...     from sqlalchemy.engine import URL
         ...     driver = pyodbc.drivers()[-1]
         ...     connection_str = (
         ...         f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
@@ -349,11 +361,11 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         ...     )
         ...     return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
         ...
-        >>> connection_str = _make_mssql_connection_str(**credentials)
-        >>> data_set = SQLQueryDataset(
+        >>> connection_str = _make_mssql_connection_str(**credentials)  # doctest: +SKIP
+        >>> dataset = SQLQueryDataset(  # doctest: +SKIP
         ...     credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
         ... )
-        >>> df = data_set.load()
+        >>> df = dataset.load()
 
     In addition, here is an example of a catalog with dates parsing:
 

@@ -120,7 +120,6 @@ def create_configuration_file(context):
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.project_name.replace("-", "_"),
-        "include_example": True,
     }
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
@@ -197,7 +196,7 @@ def exec_kedro_command(context, command):
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
-    reqs_path = Path("src", "requirements.txt")
+    reqs_path = Path("requirements.txt")
     res = run(
         [context.pip, "install", "-r", str(reqs_path)],
         env=context.env,
@@ -268,6 +267,21 @@ def read_docker_stdout(context, msg):
         kill_docker_containers(context.project_name)
 
 
+@then('Standard output should contain a message including "{msg}"')
+def read_docker_stdout_error(context, msg):
+    """Read stdout and raise AssertionError if the given message is not there."""
+
+    if hasattr(context.result.stdout, "read"):
+        context.result.stdout = context.result.stdout.read().decode("utf-8")
+
+    try:
+        if msg not in context.result.stdout:
+            print(context.result.stdout)
+            assert False, f"Message '{msg}' not found in stdout"
+    finally:
+        kill_docker_containers(context.project_name)
+
+
 @then('Standard error should contain a message including "{msg}"')
 def read_docker_stderr(context, msg):
     """Read stderr and raise AssertionError if the given message is not there."""
@@ -306,6 +320,7 @@ def check_failed_status_code(context):
 @then('I should see messages from docker ipython startup including "{msg}"')
 def check_docker_ipython_msg(context, msg):
     stdout = _get_docker_ipython_output(context)
+
     assert msg in stdout, (
         "Expected the following message segment to be printed on stdout: "
         f"{msg},\nbut got {stdout}"

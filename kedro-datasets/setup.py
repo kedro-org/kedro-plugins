@@ -36,12 +36,19 @@ pandas_require = {
     "pandas.ExcelDataset": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.DeltaTableDataset": [PANDAS, "deltalake>=0.10.0"],
     "pandas.FeatherDataset": [PANDAS],
-    "pandas.GBQTableDataset": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
-    "pandas.GBQQueryDataset": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
+    "pandas.GBQTableDataset": [
+        PANDAS,
+        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+        "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    ],
+    "pandas.GBQQueryDataset": [
+        PANDAS,
+        "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+        "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    ],
     "pandas.HDFDataset": [
         PANDAS,
-        "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6; platform_system != 'Windows'",
+        "tables~=3.6",
     ],
     "pandas.JSONDataset": [PANDAS],
     "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],
@@ -58,14 +65,23 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataset": [POLARS],
-    "polars.EagerPolarsDataset":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
-    "polars.LazyPolarsDataset":
-    [
+    "polars.EagerPolarsDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
+    ],
+    "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
-        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
+        POLARS,
+        "pyarrow>=4.0",
+        "deltalake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
@@ -81,7 +97,7 @@ spark_require = {
     "spark.SparkJDBCDataset": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
-svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
+svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn>=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
     "tensorflow.TensorFlowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
@@ -165,8 +181,7 @@ extras_require["test"] = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
-    "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
-    "delta-spark~=1.2.1; python_version < '3.11'",
+    "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",

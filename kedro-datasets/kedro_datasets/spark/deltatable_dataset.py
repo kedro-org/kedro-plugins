@@ -5,9 +5,9 @@ from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
 from delta.tables import DeltaTable
+from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import (
     _get_spark,
     _split_filepath,
@@ -39,6 +39,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
 
     .. code-block:: pycon
 
+        >>> from delta import DeltaTable
         >>> from kedro_datasets.spark import DeltaTableDataset, SparkDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
@@ -50,13 +51,13 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>>
-        >>> dataset = SparkDataset(filepath=tmp_path / "test_data", file_format="delta")
+        >>> filepath = (tmp_path / "test_data").as_posix()
+        >>> dataset = SparkDataset(filepath=filepath, file_format="delta")
         >>> dataset.save(spark_df)
-        >>> deltatable_dataset = DeltaTableDataset(filepath=tmp_path / "test_data")
+        >>> deltatable_dataset = DeltaTableDataset(filepath=filepath)
         >>> delta_table = deltatable_dataset.load()
         >>>
-        >>> delta_table.update()
+        >>> assert isinstance(delta_table, DeltaTable)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

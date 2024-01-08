@@ -2,6 +2,7 @@ import json
 
 import boto3
 import pytest
+from kedro.io.core import DatasetError
 from moto import mock_s3
 from packaging.version import Version
 from pyspark import __version__
@@ -9,7 +10,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkDataset, SparkStreamingDataset
 
 SCHEMA_FILE_NAME = "schema.json"

@@ -1,6 +1,7 @@
 import pytest
 from delta import DeltaTable
 from kedro.io import DataCatalog
+from kedro.io.core import DatasetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
@@ -10,7 +11,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import DeltaTableDataset, SparkDataset
 
 SPARK_VERSION = Version(__version__)

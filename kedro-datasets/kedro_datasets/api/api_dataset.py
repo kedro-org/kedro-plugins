@@ -6,10 +6,9 @@ from copy import deepcopy
 from typing import Any, Union
 
 import requests
+from kedro.io.core import AbstractDataset, DatasetError
 from requests import Session, sessions
 from requests.auth import AuthBase
-
-from kedro_datasets._io import AbstractDataset, DatasetError
 
 
 class APIDataset(AbstractDataset[None, requests.Response]):
@@ -105,7 +104,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             method: The method of the request. GET, POST, PUT are the only supported
                 methods
             load_args: Additional parameters to be fed to requests.request.
-                https://requests.readthedocs.io/en/latest/api/#requests.request
+                https://requests.readthedocs.io/en/latest/api.html#requests.request
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.

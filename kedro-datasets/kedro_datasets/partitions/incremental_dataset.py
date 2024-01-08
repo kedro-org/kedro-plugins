@@ -22,7 +22,11 @@ from kedro.io.core import (
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
-from .partitioned_dataset import KEY_PROPAGATION_WARNING, PartitionedDataset
+from .partitioned_dataset import (
+    KEY_PROPAGATION_WARNING,
+    PartitionedDataset,
+    _grandparent,
+)
 
 
 class IncrementalDataset(PartitionedDataset):
@@ -40,17 +44,7 @@ class IncrementalDataset(PartitionedDataset):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
-        >>> # these credentials will be passed to:
-        >>> # a) 'fsspec.filesystem()' call,
-        >>> # b) the dataset initializer,
-        >>> # c) the checkpoint initializer
-        >>> credentials = {"key1": "secret1", "key2": "secret2"}
-        >>>
-        >>> dataset = IncrementalDataset(
-        ...     path="s3://bucket-name/path/to/folder",
-        ...     dataset="pandas.CSVDataset",
-        ...     credentials=credentials,
-        ... )
+        >>> dataset = IncrementalDataset(path=str(tmp_path/ "test_data"), dataset="pandas.CSVDataset")
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>
@@ -126,7 +120,7 @@ class IncrementalDataset(PartitionedDataset):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DatasetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the checkpoint dataset.
         """
 
         super().__init__(
@@ -186,6 +180,7 @@ class IncrementalDataset(PartitionedDataset):
         checkpoint_path = self._filesystem._strip_protocol(
             self._checkpoint_config[self._filepath_arg]
         )
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
 
         def _is_valid_partition(partition) -> bool:
             if not partition.endswith(self._filename_suffix):
@@ -199,9 +194,9 @@ class IncrementalDataset(PartitionedDataset):
             return self._comparison_func(partition_id, checkpoint)
 
         return sorted(
-            part
-            for part in self._filesystem.find(self._normalized_path, **self._load_args)
-            if _is_valid_partition(part)
+            _grandparent(path) if dataset_is_versioned else path
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
+            if _is_valid_partition(path)
         )
 
     @property

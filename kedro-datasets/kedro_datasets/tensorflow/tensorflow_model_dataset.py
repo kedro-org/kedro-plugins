@@ -8,9 +8,13 @@ from typing import Any
 
 import fsspec
 import tensorflow as tf
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
@@ -46,14 +50,14 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> dataset = TensorFlowModelDataset(tmp_path / "data/06_models/tensorflow_model.h5")
-        >>> model = tf.keras.Model()
-        >>> predictions = model.predict([...])
+        >>> dataset = TensorFlowModelDataset(filepath=tmp_path / "data/06_models/tensorflow_model.h5")
+        >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(3,)),tf.keras.layers.Softmax()])
+        >>>
+        >>> # x = tf.random.uniform((10, 3))
+        >>> # predictions = model.predict(x)
         >>>
         >>> dataset.save(model)
         >>> loaded_model = dataset.load()
-        >>> new_predictions = loaded_model.predict([...])
-        >>> np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
     """
 

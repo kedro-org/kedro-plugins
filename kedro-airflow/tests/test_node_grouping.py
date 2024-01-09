@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 

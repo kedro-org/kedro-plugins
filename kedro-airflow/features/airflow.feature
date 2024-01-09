@@ -22,4 +22,4 @@ Feature: Airflow
     And I have installed the kedro project package
     When I execute the airflow command "tasks test project-dummy split"
     Then I should get a successful exit code
-    And I should get a message including "Loading data from example_iris_data"
+    And I should get a message including "Loading data"

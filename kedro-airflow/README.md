@@ -159,7 +159,7 @@ The default template provided by `kedro-airflow` uses the `BaseOperator`.
 When running Kedro nodes using Airflow, MemoryDatasets are often not shared across operators.
 This will cause the DAG run to fail.
 
-MemoryDataSets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).
+MemoryDatasets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).
 
 Nodes that are connected through MemoryDataSets are grouped together via the `--group-in-memory` flag.
 This preserves the option to have logical separation in Kedro, with little computational overhead.

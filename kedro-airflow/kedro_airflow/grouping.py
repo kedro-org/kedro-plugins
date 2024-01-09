@@ -16,7 +16,7 @@ def _is_memory_dataset(catalog, dataset_name: str) -> bool:
 
 
 def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
-    """Gather all datasets in the pipeline that are of type MemoryDataSet, excluding 'parameters'."""
+    """Gather all datasets in the pipeline that are of type MemoryDataset, excluding 'parameters'."""
     return {
         dataset_name
         for dataset_name in pipeline.data_sets()

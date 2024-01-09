@@ -1,5 +1,5 @@
 # Upcoming Release
-* Option to group MemoryDataSets in the same Airflow task (breaking change for custom template via `--jinja-file`).
+* Option to group MemoryDatasets in the same Airflow task (breaking change for custom template via `--jinja-file`).
 
 # Release 0.8.0
 * Added support for Kedro 0.19.x

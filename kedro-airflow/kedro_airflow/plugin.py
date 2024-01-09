@@ -107,7 +107,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--group-in-memory",
     is_flag=True,
     default=False,
-    help="Group nodes with at least one MemoryDataSet as input/output together, "
+    help="Group nodes with at least one MemoryDataset as input/output together, "
     "as they do not persist between Airflow operators.",
 )
 @click.option(

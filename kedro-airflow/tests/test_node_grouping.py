@@ -10,7 +10,7 @@ from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
 
 
-class TestDataSet(AbstractDataSet):
+class TestDataset(AbstractDataset):
     def _save(self, data) -> None:
         pass
 

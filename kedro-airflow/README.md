@@ -156,7 +156,7 @@ The default template provided by `kedro-airflow` uses the `BaseOperator`.
 
 ### Can I group nodes together?
 
-When running Kedro nodes using Airflow, MemoryDataSets are often not shared across operators.
+When running Kedro nodes using Airflow, MemoryDatasets are often not shared across operators.
 This will cause the DAG run to fail.
 
 MemoryDataSets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).

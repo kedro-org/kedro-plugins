@@ -143,8 +143,9 @@ class NetCDFDataset(AbstractDataset):
         if self._protocol != "file":
             logger.info("Syncing remote NetCDF file to local storage.")
 
-            # `get_filepath_str` drops remote protocol prefix.
-            load_path = self._protocol + "://" + load_path
+            if self._protocol not in ["http", "https"]:
+                # `get_filepath_str` drops remote protocol prefix.
+                load_path = self._protocol + "://" + load_path
             if self._is_multifile:
                 load_path = sorted(self._fs.glob(load_path))
 
@@ -167,7 +168,7 @@ class NetCDFDataset(AbstractDataset):
         else:
             save_path = get_filepath_str(self._filepath, self._protocol)
 
-            if self._protocol != "file":
+            if self._protocol not in ["file", "http", "https"]:
                 # `get_filepath_str` drops remote protocol prefix.
                 save_path = self._protocol + "://" + save_path
 

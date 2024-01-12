@@ -4,7 +4,7 @@ The ``MetricsDataset`` is part of Kedro Experiment Tracking. The dataset is vers
 and only takes metrics of numeric values.
 """
 import json
-from typing import Dict, NoReturn
+from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 

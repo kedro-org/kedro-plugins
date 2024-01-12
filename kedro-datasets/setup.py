@@ -65,9 +65,23 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataset": [POLARS],
-    "polars.EagerPolarsDataset":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
+    ],
+    "polars.EagerPolarsDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
+    ],
+    "polars.LazyPolarsDataset": [
+        # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
+        POLARS,
+        "pyarrow>=4.0",
+        "deltalake >= 0.6.2",
     ],
     "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
@@ -79,7 +93,7 @@ polars_require = {
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
     "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0.0",
+        "snowflake-snowpark-python~=1.0",
         "pyarrow~=8.0",
     ]
 }

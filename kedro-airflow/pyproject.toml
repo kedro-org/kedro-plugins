@@ -24,7 +24,6 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<2.7.0", # TODO: Temporary fix, to be reverted
     "bandit",
     "behave",
     "black~=22.0",

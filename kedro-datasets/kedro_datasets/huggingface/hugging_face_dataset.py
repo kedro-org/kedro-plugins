@@ -31,8 +31,6 @@ class HFDataset(AbstractVersionedDataset):
        >>> assert len(yelp_review_full["train"]) == 650000
 
     """
-
-    def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 
     def _load(self):

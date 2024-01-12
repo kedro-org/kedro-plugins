@@ -72,12 +72,9 @@ def fake_metadata(tmp_path):
 
 @fixture
 def fake_catalog():
-def fake_catalog():
     dummy_1 = MemoryDataset()
     dummy_2 = MemoryDataset()
     dummy_3 = MemoryDataset()
-    catalog = DataCatalog({"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3})
-    return catalog
     catalog = DataCatalog({"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3})
     return catalog
 

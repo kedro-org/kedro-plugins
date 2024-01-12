@@ -36,8 +36,6 @@ dataset-doctest%:
     \
 	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
-	  --ignore kedro_datasets/databricks/managed_table_dataset.py \
-	  --ignore kedro_datasets/pandas/deltatable_dataset.py \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \

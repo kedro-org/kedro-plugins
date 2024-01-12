@@ -37,7 +37,6 @@ class HFTransformerPipelineDataset(AbstractDataset):
 
     def __init__(
         self,
-        *,
         task: str | None = None,
         model_name: str | None = None,
         pipeline_kwargs: dict[t.Any] | None = None,

@@ -25,7 +25,7 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "kedro-datasets"
+project = "kedro"
 author = "kedro"
 
 # The short X.Y version.
@@ -99,7 +99,6 @@ type_targets = {
     "py:class": (
         "kedro.io.core.AbstractDataset",
         "kedro.io.AbstractDataset",
-        "AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",

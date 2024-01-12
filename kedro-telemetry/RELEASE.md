@@ -1,4 +1,5 @@
 # Upcoming release
+* Fixed double execution of `after_catalog_created` hook by moving the logic of determining and sending of project statistics from `after_context_created` to the `after_catalog_created` hook.
 
 # Release 0.3.1
 * Fixed double execution of `after_catalog_created` hook by moving the logic of determining and sending of project statistics from `after_context_created` to the `after_catalog_created` hook.

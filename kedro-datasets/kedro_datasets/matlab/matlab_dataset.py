@@ -11,7 +11,7 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
 from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._io import AbstractVersionedDataset, DatasetError

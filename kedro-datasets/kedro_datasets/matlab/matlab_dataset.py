@@ -27,24 +27,27 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
+
         cars:
-            type: mat.MatlabDataset
-            filepath: gcs://your_bucket/cars.mat
-            fs_args:
-                project: my-project
-            credentials: my_gcp_credentials
+          type: matlab.MatlabDataset
+          filepath: gcs://your_bucket/cars.mat
+          fs_args:
+            project: my-project
+          credentials: my_gcp_credentials
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
+
         >>> from kedro_datasets.matlab import MatlabDataset
         >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>> dataset = MatlabDataset(filepath="my_data.mat")
+        >>> dataset = MatlabDataset(filepath=tmp_path / "test.csv")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data == reloaded
+
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}

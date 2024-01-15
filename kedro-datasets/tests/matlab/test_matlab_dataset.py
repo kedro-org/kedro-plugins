@@ -1,17 +1,14 @@
-import importlib
 from pathlib import Path, PurePosixPath
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.matlab import MatlabDataset
-from kedro_datasets.matlab.matlab_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -34,17 +31,6 @@ def versioned_matlab_dataset(filepath_matlab, load_version, save_version):
 @pytest.fixture
 def dummy_data():
     return {"col1": 1, "col2": 2, "col3": 3}
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.matlab", "kedro_datasets.matlab.matlab_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestMatlabDataset:

@@ -3,18 +3,20 @@ filesystem ?(e.g.: local, S3, GCS)?. The underlying functionality is supported b
 the specified backend library passed in (defaults to the ``matlab`` library), so it
 supports all allowed options for loading and saving matlab files.
 """
-import warnings
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import numpy as np
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from scipy import io
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 
 class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
@@ -39,20 +41,23 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     .. code-block:: pycon
         >>> from kedro_datasets.matlab import MatlabDataset
         >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>> dataset = MatlabDataset(filepath='my_data.mat')
+        >>> dataset = MatlabDataset(filepath="my_data.mat")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data == reloaded
     """
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"indent": 2}
-    def __init__(    # noqa = PLR0913
-            self,
-            filepath: str,
-            save_args: Dict[str, Any]=None,
-            version: Version =None,
-            credentials: Dict[str, Any] =None,
-            fs_args: Dict[str, Any]=None,
-            metadata: Dict[str, Any]=None)->None:
+
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}
+
+    def __init__(  # noqa = PLR0913
+        self,
+        filepath: str,
+        save_args: dict[str, Any] = None,
+        version: Version = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
+    ) -> None:
         """Creates a new instance of MatlabDataSet to load and save data from/to a MATLAB file.
 
         Args:
@@ -105,7 +110,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -114,9 +119,9 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         }
 
     def _load(self) -> np.ndarray:
-        '''
+        """
         Access the specific variable in the .mat file, e.g, data['variable_name']
-        '''
+        """
         load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path, mode="rb") as f:
             data = io.loadmat(f)
@@ -125,10 +130,10 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     def _save(self, data: np.ndarray) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
-            io.savemat(f, {'data': data})
+            io.savemat(f, {"data": data})
         self._invalidate_cache()
 
-    def _exists(self)-> bool:
+    def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
         except DatasetError:
@@ -144,19 +149,3 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs._invalidate_cache(filepath)
-
-_DEPRECATED_CLASSES = {
-    "MatlabDataSet": MatlabDataset
-}
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

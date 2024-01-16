@@ -42,11 +42,12 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     .. code-block:: pycon
 
         >>> from kedro_datasets.matlab import MatlabDataset
-        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>> dataset = MatlabDataset(filepath=tmp_path / "test.csv")
+        >>> import numpy as np
+        >>> data = np.array([1, 2, 3])
+        >>> dataset = MatlabDataset(filepath=tmp_path / "test.mat")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data == reloaded
+        >>> assert (data == reloaded["data"]).all()
 
     """
 

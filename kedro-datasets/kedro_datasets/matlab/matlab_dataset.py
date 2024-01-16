@@ -151,4 +151,4 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
-        self._fs._invalidate_cache(filepath)
+        self._fs.invalidate_cache(filepath)

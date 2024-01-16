@@ -9,5 +9,5 @@ MatlabDataSet: type[MatlabDataset]
 MatlabDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"matlab_dataset": ["MatlabDataSet", "MatlabDataset"]}
+    __name__, submod_attrs={"matlab_dataset": ["MatlabDataset"]}
 )

@@ -105,7 +105,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             exists_function=self._fs.exists,
             glob_function=self._fs.glob,
         )
-        # Handle default save arguements
+        # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
@@ -126,13 +126,13 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         """
         Access the specific variable in the .mat file, e.g, data['variable_name']
         """
-        load_path = get_filepath_str(self._filepath, self._protocol)
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="rb") as f:
             data = io.loadmat(f)
             return data
 
     def _save(self, data: np.ndarray) -> None:
-        save_path = get_filepath_str(self._filepath, self._protocol)
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             io.savemat(f, {"data": data})
         self._invalidate_cache()

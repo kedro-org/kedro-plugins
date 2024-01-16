@@ -1,5 +1,6 @@
 from pathlib import Path, PurePosixPath
 
+import numpy as np
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
@@ -30,7 +31,7 @@ def versioned_matlab_dataset(filepath_matlab, load_version, save_version):
 
 @pytest.fixture
 def dummy_data():
-    return {"col1": 1, "col2": 2, "col3": 3}
+    return np.array([1, 2, 3, 4, 5])
 
 
 class TestMatlabDataset:
@@ -38,7 +39,7 @@ class TestMatlabDataset:
         """Test saving and reloading the data set."""
         matlab_dataset.save(dummy_data)
         reloaded = matlab_dataset.load()
-        assert dummy_data == reloaded
+        assert (dummy_data == reloaded["data"]).all()
         assert matlab_dataset._fs_open_args_load == {}
         assert matlab_dataset._fs_open_args_save == {"mode": "w"}
 
@@ -127,11 +128,11 @@ class TestMatlabDatasetVersioned:
         the versioned data set."""
         versioned_matlab_dataset.save(dummy_data)
         reloaded = versioned_matlab_dataset.load()
-        assert dummy_data == reloaded
+        assert (dummy_data == reloaded["data"]).all()
 
     def test_no_versions(self, versioned_matlab_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for JSONDataset\(.+\)"
+        pattern = r"Did not find any versions for MatlabDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_matlab_dataset.load()
 
@@ -146,7 +147,7 @@ class TestMatlabDatasetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_matlab_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for JSONDataset\(.+\) must "
+            r"Save path \'.+\' for MatlabDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -166,7 +167,7 @@ class TestMatlabDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"JSONDataset\(.+\)"
+            r"MatlabDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_matlab_dataset.save(dummy_data)

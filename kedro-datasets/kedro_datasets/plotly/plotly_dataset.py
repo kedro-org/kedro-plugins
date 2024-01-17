@@ -151,7 +151,7 @@ class PlotlyDataset(JSONDataset):
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
     
-    def _preview(self) -> Plot:
+    def preview(self) -> Plot:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return json.load(fs_file)

@@ -174,9 +174,9 @@ class TestCSVDataset:
         ],
     )
     def test_preview(self, csv_dataset, dummy_dataframe, nrows, expected):
-        """Test _preview returns the correct data structure."""
+        """Test preview returns the correct data structure."""
         csv_dataset.save(dummy_dataframe)
-        previewed = csv_dataset._preview(nrows=nrows)
+        previewed = csv_dataset.preview(nrows=nrows)
         assert previewed == expected
 
     def test_load_missing_file(self, csv_dataset):

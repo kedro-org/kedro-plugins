@@ -67,7 +67,7 @@ class MetricsDataset(json_dataset.JSONDataset):
 
         self._invalidate_cache()
         
-    def _preview(self) -> tracking_data:
+    def preview(self) -> tracking_data:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

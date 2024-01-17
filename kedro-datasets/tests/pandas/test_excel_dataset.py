@@ -158,9 +158,9 @@ class TestExcelDataset:
         ],
     )
     def test_preview(self, excel_dataset, dummy_dataframe, nrows, expected):
-        """Test _preview returns the correct data structure."""
+        """Test preview returns the correct data structure."""
         excel_dataset.save(dummy_dataframe)
-        previewed = excel_dataset._preview(nrows=nrows)
+        previewed = excel_dataset.preview(nrows=nrows)
         assert previewed == expected
 
     def test_load_missing_file(self, excel_dataset):

@@ -249,7 +249,7 @@ class MatplotlibWriter(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _preview(self) -> Image:
+    def preview(self) -> Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="rb") as img_file:
             base64_bytes = base64.b64encode(img_file.read())

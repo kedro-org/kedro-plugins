@@ -171,7 +171,7 @@ class JSONDataset(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
         
-    def _preview(self) -> Plot:
+    def preview(self) -> Plot:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

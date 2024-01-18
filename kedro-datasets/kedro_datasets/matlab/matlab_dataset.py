@@ -127,7 +127,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
         Access the specific variable in the .mat file, e.g, data['variable_name']
         """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, mode="rb") as f:
+        with self._fs.open(load_path) as f:
             data = io.loadmat(f)
             return data
 

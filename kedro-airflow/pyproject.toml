@@ -30,6 +30,7 @@ test = [
     "black~=22.0",
     "connexion<3.0.0", # TODO: Temporary fix, connexion has changed their API, but airflow hasn't caught up yet
     "kedro-datasets",
+    "pendulum<3.0.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

@@ -180,7 +180,7 @@ extras_require["test"] = [
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]~=2024.1.0",
+    "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",

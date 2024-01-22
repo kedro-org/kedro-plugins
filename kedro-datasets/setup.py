@@ -30,6 +30,7 @@ huggingface_require = {
     "huggingface.HFTransformerPipelineDataset": ["transformers"],
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+matlab_require = {"matlab.MatlabDataset": ["scipy"]}
 networkx_require = {"networkx.NetworkXDataset": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataset": [PANDAS],
@@ -119,6 +120,7 @@ extras_require = {
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
     "huggingface": _collect_requirements(huggingface_require),
+    "matlab": _collect_requirements(matlab_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),

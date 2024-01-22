@@ -1,8 +1,12 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `MatlabDataset` which uses `scipy` to save and load `.mat` files.
+
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Samuel Lee SJ](https://github.com/samuel-lee-sj)
 
 # Release 2.0.0
 ## Major features and improvements

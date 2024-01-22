@@ -41,7 +41,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> from kedro_datasets.dask import ParquetDataset
         >>> from pandas.testing import assert_frame_equal
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [6, 7]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> dataset = ParquetDataset(

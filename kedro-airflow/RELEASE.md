@@ -1,4 +1,5 @@
 # Upcoming Release
+* Sort DAGs to make sure `kedro airflow create` is deterministic.
 
 # Release 0.8.0
 * Added support for Kedro 0.19.x

@@ -16,6 +16,8 @@ from kedro_airflow.plugin import commands
         ("hello_world", "__default__", ["airflow", "create"]),
         # Test execution with alternate pipeline name
         ("hello_world", "ds", ["airflow", "create", "--pipeline", "ds"]),
+        # Test with grouping
+        ("hello_world", "__default__", ["airflow", "create", "--group-in-memory"]),
     ],
 )
 def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metadata):

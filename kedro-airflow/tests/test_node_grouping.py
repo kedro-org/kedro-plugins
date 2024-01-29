@@ -53,9 +53,9 @@ def test_group_memory_nodes(
     mock_catalog = DataCatalog()
     for dataset_name in nodes:
         if dataset_name in memory_nodes:
-            dataset = MemoryDataSet()
+            dataset = MemoryDataset()
         else:
-            dataset = TestDataSet()
+            dataset = TestDataset()
         mock_catalog.add(dataset_name, dataset)
 
     def identity_one_to_one(x):
@@ -120,8 +120,8 @@ def test_is_memory_dataset():
     catalog = DataCatalog()
     catalog.add("parameters", {"hello": "world"})
     catalog.add("params:hello", "world")
-    catalog.add("my_dataset", MemoryDataSet(True))
-    catalog.add("test_dataset", TestDataSet())
+    catalog.add("my_dataset", MemoryDataset(True))
+    catalog.add("test_dataset", TestDataset())
     assert not _is_memory_dataset(catalog, "parameters")
     assert not _is_memory_dataset(catalog, "params:hello")
     assert _is_memory_dataset(catalog, "my_dataset")

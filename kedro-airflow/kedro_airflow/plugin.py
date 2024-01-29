@@ -17,6 +17,8 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from slugify import slugify
 
+from kedro_airflow.grouping import group_memory_nodes
+
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
@@ -101,6 +103,14 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help="The template file for the generated Airflow dags",
 )
 @click.option(
+    "-g",
+    "--group-in-memory",
+    is_flag=True,
+    default=False,
+    help="Group nodes with at least one MemoryDataset as input/output together, "
+    "as they do not persist between Airflow operators.",
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -114,6 +124,7 @@ def create(  # noqa: PLR0913
     env,
     target_path,
     jinja_file,
+    group_in_memory,
     params,
     convert_all: bool,
 ):
@@ -165,13 +176,20 @@ def create(  # noqa: PLR0913
             else f"{package_name}_{name}_dag.py"
         )
 
-        dependencies = defaultdict(list)
-        for node, parent_nodes in pipeline.node_dependencies.items():
-            for parent in parent_nodes:
-                dependencies[parent].append(node)
+        # group memory nodes
+        if group_in_memory:
+            nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+        else:
+            nodes = {node.name: [node] for node in pipeline.nodes}
+
+            dependencies = defaultdict(list)
+            for node, parent_nodes in pipeline.node_dependencies.items():
+                for parent in parent_nodes:
+                    dependencies[parent.name].append(node.name)
 
         template.stream(
             dag_name=package_name,
+            nodes=nodes,
             dependencies=dependencies,
             env=env,
             pipeline_name=name,

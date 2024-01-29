@@ -11,7 +11,7 @@ def _is_memory_dataset(catalog, dataset_name: str) -> bool:
     if dataset_name == "parameters" or dataset_name.startswith("params:"):
         return False
 
-    dataset = catalog._data_sets.get(dataset_name, None)
+    dataset = catalog._datasets.get(dataset_name, None)
     return dataset is not None and isinstance(dataset, MemoryDataset)
 
 

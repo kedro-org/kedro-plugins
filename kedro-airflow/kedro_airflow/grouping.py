@@ -30,7 +30,7 @@ def node_sequence_name(node_sequence: list[Node]) -> str:
 
 def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
     # get all memory datasets in the pipeline
-    ds = get_memory_datasets(catalog, pipeline)
+    memory_datasets = get_memory_datasets(catalog, pipeline)
 
     # Node sequences
     node_sequences = []

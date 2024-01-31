@@ -39,9 +39,10 @@ def airflow_commands():
     pass
 
 
-def _load_config(context: KedroContext) -> dict[str, Any]:
+def _load_airflow_config(context: KedroContext) -> dict[str, Any]:
     # Backwards compatibility for ConfigLoader that does not support `config_patterns`
     config_loader = context.config_loader
+
     if not hasattr(config_loader, "config_patterns"):
         return config_loader.get("airflow*", "airflow/**")  # pragma: no cover
 
@@ -56,6 +57,28 @@ def _load_config(context: KedroContext) -> dict[str, Any]:
     # Load the config
     try:
         return config_loader["airflow"]
+    except MissingConfigException:
+        # File does not exist
+        return {}
+
+
+def _load_spark_configs(context: KedroContext) -> dict[str, Any]:
+    # Backwards compatibility for ConfigLoader that does not support `config_patterns`
+    config_loader = context.config_loader
+
+    if not hasattr(config_loader, "config_patterns"):
+        return config_loader.get("spark*", "spark/**")  # pragma: no cover
+
+    # Set the default pattern for `spark` if not provided in `settings.py`
+    if "spark" not in config_loader.config_patterns.keys():
+        config_loader.config_patterns.update(  # pragma: no cover
+            {"spark": ["spark*", "spark/**"]}
+        )
+    assert "spark" in config_loader.config_patterns.keys()
+
+    # Load the config
+    try:
+        return config_loader["spark"]
     except MissingConfigException:
         # File does not exist
         return {}
@@ -140,7 +163,8 @@ def create(  # noqa: PLR0913
     bootstrap_project(project_path)
     with KedroSession.create(project_path=project_path, env=env) as session:
         context = session.load_context()
-        config_airflow = _load_config(context)
+        config_airflow = _load_airflow_config(context)
+        spark_config= _load_spark_configs(context)
 
     jinja_file = Path(jinja_file).resolve()
     loader = jinja2.FileSystemLoader(jinja_file.parent)

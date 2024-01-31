@@ -104,13 +104,14 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
-        "DataCatalog"
+        "DataCatalog",
     ),
     "py:data": (
         "typing.Any",
         "typing.Union",
         "typing.Optional",
         "typing.Tuple",
+        "typing.NewType"
     ),
     "py:exc": (
         "DatasetError",

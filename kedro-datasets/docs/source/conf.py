@@ -105,6 +105,7 @@ type_targets = {
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
         "DataCatalog",
+        "typing.NewType"
     ),
     "py:func": (
         "typing.NewType"
@@ -114,9 +115,11 @@ type_targets = {
         "typing.Union",
         "typing.Optional",
         "typing.Tuple",
+        "typing.NewType"
     ),
     "py:exc": (
         "DatasetError",
+        "typing.NewType"
     ),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote

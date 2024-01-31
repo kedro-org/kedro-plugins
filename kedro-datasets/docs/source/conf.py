@@ -106,6 +106,9 @@ type_targets = {
         "deltalake.table.Metadata",
         "DataCatalog"
     ),
+    "py:func": (
+        "typing.NewType"
+    ),
     "py:data": (
         "typing.Any",
         "typing.Union",

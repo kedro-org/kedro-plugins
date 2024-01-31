@@ -250,6 +250,12 @@ class MatplotlibWriter(
         self._fs.invalidate_cache(filepath)
 
     def preview(self) -> Image:
+        """
+        Generates a preview of the matplotlib dataset as a base64 encoded image.
+
+        Returns:
+            str: A base64 encoded string representing the matplotlib plot image.
+        """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="rb") as img_file:
             base64_bytes = base64.b64encode(img_file.read())

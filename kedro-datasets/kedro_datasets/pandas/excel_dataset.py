@@ -265,6 +265,15 @@ class ExcelDataset(
         self._fs.invalidate_cache(filepath)
 
     def preview(self, nrows: int = 5) -> Dataframe:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows (int, optional): The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows

@@ -152,6 +152,12 @@ class PlotlyDataset(JSONDataset):
         return fig
 
     def preview(self) -> Plot:
+        """
+        Generates a preview of the plotly dataset.
+
+        Returns:
+            dict: A dictionary containing the plotly data.
+        """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return json.load(fs_file)

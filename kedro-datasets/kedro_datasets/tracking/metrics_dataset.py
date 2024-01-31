@@ -12,6 +12,7 @@ from kedro_datasets.json import json_dataset
 
 metrics_tracking = NewType("metrics_tracking", str)
 
+
 class MetricsDataset(json_dataset.JSONDataset):
     """``MetricsDataset`` saves data to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file. The
@@ -67,8 +68,12 @@ class MetricsDataset(json_dataset.JSONDataset):
 
         self._invalidate_cache()
 
-    def preview(self) -> metrics_tracking:
-        "Loads the metrics tracking dataset which is used in Kedro-viz experiment tracking"
+    def preview(self) -> NewType("metrics_tracking", str):
+        """
+        Load the Metrics tracking dataset used in Kedro-viz experiment tracking.
+
+        :return: NewType('metric_tracking', str): The loaded metrics tracjubg data.
+        """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

@@ -49,6 +49,7 @@ class JSONDataset(json_dataset.JSONDataset):
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def preview(self) -> json_tracking:
+        "Loads the json tracking dataset which is used in Kedro-viz experiment tracking"
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

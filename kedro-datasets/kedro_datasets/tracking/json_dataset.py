@@ -9,7 +9,7 @@ from kedro.io.core import DatasetError, get_filepath_str
 
 from kedro_datasets.json import json_dataset
 
-
+json_tracking = NewType("json_tracking", str)
 class JSONDataset(json_dataset.JSONDataset):
     """``JSONDataset`` saves data to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
@@ -42,8 +42,6 @@ class JSONDataset(json_dataset.JSONDataset):
     """
 
     versioned = True
-
-    json_tracking = NewType("json_tracking", str)
 
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")

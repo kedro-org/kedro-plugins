@@ -10,6 +10,7 @@ from kedro.io.core import DatasetError, get_filepath_str
 
 from kedro_datasets.json import json_dataset
 
+metrics_tracking = NewType("metrics_tracking", str)
 
 class MetricsDataset(json_dataset.JSONDataset):
     """``MetricsDataset`` saves data to a JSON file using an underlying
@@ -43,7 +44,6 @@ class MetricsDataset(json_dataset.JSONDataset):
     """
 
     versioned = True
-    metrics_tracking = NewType("metrics_tracking", str)
 
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")

@@ -3,7 +3,7 @@ import logging
 from copy import deepcopy
 from glob import glob
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import xarray as xr
@@ -62,18 +62,18 @@ class NetCDFDataset(AbstractDataset):
         >>> reloaded = dataset.load()
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa
         self,
         filepath: str,
         temppath: str = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -179,7 +179,7 @@ class NetCDFDataset(AbstractDataset):
 
             self._invalidate_cache()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,

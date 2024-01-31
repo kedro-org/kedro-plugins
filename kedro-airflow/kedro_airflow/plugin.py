@@ -200,6 +200,7 @@ def create(  # noqa: PLR0913
             package_name=package_name,
             pipeline=pipeline,
             **dag_config,
+            **spark_config,
         ).dump(str(dag_filename))
 
         secho(

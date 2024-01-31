@@ -62,7 +62,7 @@ def _load_airflow_config(context: KedroContext) -> dict[str, Any]:
         return {}
 
 
-def _load_spark_configs(context: KedroContext) -> dict[str, Any]:
+def _load_spark_config(context: KedroContext) -> dict[str, Any]:
     # Backwards compatibility for ConfigLoader that does not support `config_patterns`
     config_loader = context.config_loader
 
@@ -164,7 +164,7 @@ def create(  # noqa: PLR0913
     with KedroSession.create(project_path=project_path, env=env) as session:
         context = session.load_context()
         config_airflow = _load_airflow_config(context)
-        spark_config= _load_spark_configs(context)
+        spark_config= _load_spark_config(context)
 
     jinja_file = Path(jinja_file).resolve()
     loader = jinja2.FileSystemLoader(jinja_file.parent)

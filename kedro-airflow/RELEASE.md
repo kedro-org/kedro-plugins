@@ -1,5 +1,6 @@
 # Upcoming Release
 * Option to group MemoryDatasets in the same Airflow task (breaking change for custom template via `--jinja-file`).
+* Include the environment name in the DAG file name when different from the default.
 
 # Release 0.8.0
 * Added support for Kedro 0.19.x

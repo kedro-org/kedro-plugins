@@ -3,7 +3,6 @@
 * Added `MatlabDataset` which uses `scipy` to save and load `.mat` files.
 * Added `NetCDFDataset` for loading and saving `*.nc` files.
 
-
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
 ## Community contributions

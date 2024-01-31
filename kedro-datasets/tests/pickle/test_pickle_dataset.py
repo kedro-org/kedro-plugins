@@ -1,4 +1,3 @@
-import importlib
 import pickle
 from pathlib import Path, PurePosixPath
 
@@ -7,14 +6,11 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pickle import PickleDataset
-from kedro_datasets.pickle.pickle_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -48,17 +44,6 @@ def versioned_pickle_dataset(filepath_pickle, load_version, save_version):
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pickle", "kedro_datasets.pickle.pickle_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestPickleDataset:

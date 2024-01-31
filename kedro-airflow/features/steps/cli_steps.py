@@ -12,74 +12,8 @@ OK_EXIT_CODE = 0
 def init_airflow(context, home_dir):
     context.airflow_dir = context.temp_dir / home_dir
     context.env["AIRFLOW_HOME"] = str(context.airflow_dir)
-    res = run([context.airflow, "db", "init"], env=context.env)
+    res = run(["airflow", "db", "migrate"], env=context.env)
     assert res.returncode == 0
-
-
-@given("I have prepared an old data catalog")
-def prepare_old_catalog(context):
-    config = {
-        "example_train_x": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_train_x.pkl",
-        },
-        "example_train_y": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_train_y.pkl",
-        },
-        "example_test_x": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_test_x.pkl",
-        },
-        "example_test_y": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_test_y.pkl",
-        },
-        "example_model": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_model.pkl",
-        },
-        "example_predictions": {
-            "type": "PickleLocalDataset",
-            "filepath": "data/02_intermediate/example_predictions.pkl",
-        },
-    }
-    catalog_file = context.root_project_dir / "conf" / "local" / "catalog.yml"
-    with catalog_file.open("w") as catalog_file:
-        yaml.dump(config, catalog_file, default_flow_style=False)
-
-
-@given("I have prepared a data catalog")
-def prepare_catalog(context):
-    config = {
-        "example_train_x": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_train_x.pkl",
-        },
-        "example_train_y": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_train_y.pkl",
-        },
-        "example_test_x": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_test_x.pkl",
-        },
-        "example_test_y": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_test_y.pkl",
-        },
-        "example_model": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_model.pkl",
-        },
-        "example_predictions": {
-            "type": "pickle.PickleDataset",
-            "filepath": "data/02_intermediate/example_predictions.pkl",
-        },
-    }
-    catalog_file = context.root_project_dir / "conf" / "local" / "catalog.yml"
-    with catalog_file.open("w") as catalog_file:
-        yaml.dump(config, catalog_file, default_flow_style=False)
 
 
 @given('I have installed kedro version "{version}"')
@@ -100,7 +34,7 @@ def install_kedro(context, version):
 @given("I have installed the kedro project package")
 def install_project_package(context):
     """Install the packaged project."""
-    cmd = [context.pip, "install", "-e", "src/"]
+    cmd = [context.pip, "install", "-e", "."]
     res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:
@@ -159,7 +93,7 @@ def create_project_from_config_file(context):
             "-c",
             str(context.config_file),
             "--starter",
-            "pandas-iris",
+            "astro-airflow-iris",
         ],
         env=context.env,
         cwd=str(context.temp_dir),

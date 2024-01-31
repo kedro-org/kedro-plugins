@@ -1,16 +1,12 @@
 """``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
-import warnings
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import dask.dataframe as dd
 import fsspec
 import triad
-from kedro.io.core import get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset
+from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 
 class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
@@ -43,24 +39,18 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> import dask.dataframe as dd
         >>> import pandas as pd
         >>> from kedro_datasets.dask import ParquetDataset
+        >>> import numpy as np
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [6, 7]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> dataset = ParquetDataset(
-        ...     filepath="s3://bucket_name/path/to/folder",
-        ...     credentials={
-        ...         "client_kwargs": {
-        ...             "aws_access_key_id": "YOUR_KEY",
-        ...             "aws_secret_access_key": "YOUR SECRET",
-        ...         }
-        ...     },
-        ...     save_args={"compression": "GZIP"},
+        ...     filepath=tmp_path / "path/to/folder", save_args={"compression": "GZIP"}
         ... )
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
         >>>
-        >>> assert ddf.compute().equals(reloaded.compute())
+        >>> assert np.array_equal(ddf.compute(), reloaded.compute())
 
     The output schema can also be explicitly specified using
     `Triad <https://triad.readthedocs.io/en/latest/api/\
@@ -86,17 +76,18 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               col3: [[int32]]
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"write_index": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"write_index": False}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ParquetDataset`` pointing to concrete
         parquet files.
@@ -130,7 +121,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             self._save_args.update(save_args)
 
     @property
-    def fs_args(self) -> Dict[str, Any]:
+    def fs_args(self) -> dict[str, Any]:
         """Property of optional file system parameters.
 
         Returns:
@@ -140,7 +131,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         fs_args.update(self._credentials)
         return fs_args
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "load_args": self._load_args,
@@ -154,7 +145,9 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
 
     def _save(self, data: dd.DataFrame) -> None:
         self._process_schema()
-        data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
+        data.to_parquet(
+            path=self._filepath, storage_options=self.fs_args, **self._save_args
+        )
 
     def _process_schema(self) -> None:
         """This method processes the schema in the catalog.yml or the API, if provided.
@@ -210,21 +203,3 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(self._filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "ParquetDataSet": ParquetDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

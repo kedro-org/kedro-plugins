@@ -42,7 +42,7 @@ The Airflow DAG configuration can be customized by editing this file.
 ### Step 3: Package and install the Kedro pipeline in the Airflow executor's environment
 
 After generating and deploying the DAG file, you will then need to package and install the Kedro pipeline into the Airflow executor's environment.
-Please visit the guide to [deploy Kedro as a Python package](https://kedro.readthedocs.io/en/stable/10_deployment/02_single_machine.html#package-based) for more details.
+Please visit the guide to [deploy Kedro as a Python package](https://docs.kedro.org/en/stable/deployment/single_machine.html#package-based) for more details.
 
 ### FAQ
 
@@ -153,3 +153,27 @@ You can set the operator to use by providing a custom template.
 See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 The [rich offering](https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/index.html) of operators means that the `kedro-airflow` plugin is providing templates for specific operators.
 The default template provided by `kedro-airflow` uses the `BaseOperator`.
+
+### Can I group nodes together?
+
+When running Kedro nodes using Airflow, MemoryDatasets are often not shared across operators.
+This will cause the DAG run to fail.
+
+MemoryDatasets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).
+
+Nodes that are connected through MemoryDatasets are grouped together via the `--group-in-memory` flag.
+This preserves the option to have logical separation in Kedro, with little computational overhead.
+
+It is possible to use [task groups](https://docs.astronomer.io/learn/task-groups) by changing the template.
+See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
+
+## Can I contribute?
+
+Yes! Want to help build Kedro-Airflow? Check out our guide to [contributing](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-airflow/CONTRIBUTING.md).
+
+## What licence do you use?
+
+Kedro-Airflow is licensed under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) License.
+
+## Python version support policy
+* The [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from `kedro-airflow`. This is not considered a breaking change.

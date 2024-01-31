@@ -19,13 +19,9 @@ from kedro_telemetry.masking import (
 REPO_NAME = "cli_tools_dummy_project"
 PACKAGE_NAME = "cli_tools_dummy_package"
 DEFAULT_KEDRO_COMMANDS = [
-    "activate-nbstripout",
-    "build-docs",
-    "build-reqs",
     "catalog",
     "ipython",
     "jupyter",
-    "lint",
     "micropkg",
     "new",
     "package",
@@ -33,7 +29,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
-    "test",
 ]
 
 
@@ -48,13 +43,14 @@ def fake_root_dir(tmp_path):
 @pytest.fixture
 def fake_metadata(fake_root_dir):
     metadata = ProjectMetadata(
-        fake_root_dir / REPO_NAME / "pyproject.toml",
-        PACKAGE_NAME,
-        "CLI Tools Testing Project",
-        fake_root_dir / REPO_NAME,
-        kedro_version,
-        fake_root_dir / REPO_NAME / "src",
-        kedro_version,
+        config_file=fake_root_dir / REPO_NAME / "pyproject.toml",
+        package_name=PACKAGE_NAME,
+        project_name="CLI Tools Testing Project",
+        project_path=fake_root_dir / REPO_NAME,
+        source_dir=fake_root_dir / REPO_NAME / "src",
+        kedro_init_version=kedro_version,
+        tools=[],
+        example_pipeline="No",
     )
     return metadata
 
@@ -109,6 +105,12 @@ class TestCLIMasking:
                 "--checkout",
                 "--directory",
                 "--help",
+                "--example",
+                "--name",
+                "--tools",
+                "-e",
+                "-n",
+                "-t",
             ]
         )
         # now check that once params and args are reached, the values are None

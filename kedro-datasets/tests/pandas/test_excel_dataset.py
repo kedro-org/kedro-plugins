@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
@@ -6,14 +5,11 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import ExcelDataset
-from kedro_datasets.pandas.excel_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -57,17 +53,6 @@ def dummy_dataframe():
 @pytest.fixture
 def another_dummy_dataframe():
     return pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.excel_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestExcelDataset:

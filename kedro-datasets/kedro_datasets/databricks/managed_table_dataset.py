@@ -3,18 +3,20 @@ in Databricks.
 """
 import logging
 import re
-import warnings
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
-from kedro.io.core import Version, VersionNotFoundError
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    VersionNotFoundError,
+)
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ class ManagedTable:
     dataframe_type: str
     primary_key: Optional[str]
     owner_group: str
-    partition_columns: Union[str, List[str]]
+    partition_columns: Union[str, list[str]]
     json_schema: StructType
 
     def __post_init__(self):
@@ -178,17 +180,19 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         >>> from kedro_datasets.databricks import ManagedTableDataset
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+        >>> import importlib_metadata
         >>>
+        >>> DELTA_VERSION = importlib_metadata.version("delta-spark")
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>> dataset = ManagedTableDataset(table="names_and_ages")
+        >>> spark_df = SparkSession.builder.config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog","org.apache.spark.sql.delta.catalog.DeltaCatalog",).getOrCreate().createDataFrame(data, schema)
+        >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
-        >>> reloaded.take(4)
+        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -199,18 +203,18 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         table: str,
         catalog: str = None,
         database: str = "default",
         write_mode: Union[str, None] = None,
         dataframe_type: str = "spark",
-        primary_key: Optional[Union[str, List[str]]] = None,
+        primary_key: Optional[Union[str, list[str]]] = None,
         version: Version = None,
-        *,
         # the following parameters are used by project hooks
         # to create or update table properties
-        schema: Dict[str, Any] = None,
-        partition_columns: List[str] = None,
+        schema: dict[str, Any] = None,
+        partition_columns: list[str] = None,
         owner_group: str = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
@@ -389,7 +393,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         elif self._table.write_mode == "append":
             self._save_append(data)
 
-    def _describe(self) -> Dict[str, str]:
+    def _describe(self) -> dict[str, str]:
         """Returns a description of the instance of ManagedTableDataset
 
         Returns:
@@ -434,21 +438,3 @@ class ManagedTableDataset(AbstractVersionedDataset):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
-
-
-_DEPRECATED_CLASSES = {
-    "ManagedTableDataSet": ManagedTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

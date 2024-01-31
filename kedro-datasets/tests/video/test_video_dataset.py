@@ -1,15 +1,11 @@
-import importlib
-
 import boto3
 import pytest
+from kedro.io.core import DatasetError
 from moto import mock_s3
 from utils import TEST_FPS, assert_videos_equal
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.video import VideoDataset
 from kedro_datasets.video.video_dataset import (
-    _DEPRECATED_CLASSES,
     FileVideo,
     SequenceVideo,
 )
@@ -54,21 +50,10 @@ def mocked_s3_bucket():
         yield conn
 
 
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.video", "kedro_datasets.video.video_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
-
-
 class TestVideoDataset:
     def test_load_mp4(self, filepath_mp4, mp4_object):
         """Loading a mp4 dataset should create a FileVideo"""
-        ds = VideoDataset(filepath_mp4)
+        ds = VideoDataset(filepath=filepath_mp4)
         loaded_video = ds.load()
         assert_videos_equal(loaded_video, mp4_object)
 
@@ -195,7 +180,7 @@ class TestVideoDataset:
         """
         video_name = f"video.{suffix}"
         video = SequenceVideo(color_video._frames, 25, fourcc)
-        ds = VideoDataset(video_name, fourcc=None)
+        ds = VideoDataset(filepath=video_name, fourcc=None)
         ds.save(video)
         # We also need to verify that the correct codec was used
         # since OpenCV silently (with a warning in the log) fall backs to

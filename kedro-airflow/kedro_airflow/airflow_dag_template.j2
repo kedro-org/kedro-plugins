@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -16,7 +17,7 @@ class KedroOperator(BaseOperator):
         self,
         package_name: str,
         pipeline_name: str,
-        node_name: str,
+        node_name: str | list[str],
         project_path: str | Path,
         env: str,
         *args, **kwargs
@@ -30,11 +31,10 @@ class KedroOperator(BaseOperator):
 
     def execute(self, context):
         configure_project(self.package_name)
-        with KedroSession.create(self.package_name,
-                                 self.project_path,
-                                 env=self.env) as session:
-            session.run(self.pipeline_name, node_names=[self.node_name])
-
+        with KedroSession.create(self.project_path, env=self.env) as session:
+            if isinstance(self.node_name, str):
+                self.node_name = [self.node_name]
+            session.run(self.pipeline_name, node_names=self.node_name)
 
 # Kedro settings required to run your pipeline
 env = "{{ env }}"
@@ -61,17 +61,17 @@ with DAG(
     )
 ) as dag:
     tasks = {
-    {% for node in pipeline.nodes %}        "{{ node.name | safe | slugify }}": KedroOperator(
-            task_id="{{ node.name | safe | slugify  }}",
+    {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
+            task_id="{{ node_name | safe | slugify  }}",
             package_name=package_name,
             pipeline_name=pipeline_name,
-            node_name="{{ node.name | safe }}",
+            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe | slugify }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
         ),
 {% endfor %}    }
 
     {% for parent_node, child_nodes in dependencies.items() -%}
-    {% for child in child_nodes %}    tasks["{{ parent_node.name | safe | slugify }}"] >> tasks["{{ child.name | safe | slugify }}"]
+    {% for child in child_nodes %}    tasks["{{ parent_node | safe | slugify }}"] >> tasks["{{ child | safe | slugify }}"]
     {% endfor %}
     {%- endfor %}

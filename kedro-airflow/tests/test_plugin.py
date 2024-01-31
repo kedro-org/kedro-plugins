@@ -5,11 +5,8 @@ from typing import Any
 
 import pytest
 import yaml
-from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext
-from pluggy import PluginManager
 
-from kedro_airflow.plugin import _load_config, commands
+from kedro_airflow.plugin import commands
 
 
 @pytest.mark.parametrize(
@@ -19,6 +16,8 @@ from kedro_airflow.plugin import _load_config, commands
         ("hello_world", "__default__", ["airflow", "create"]),
         # Test execution with alternate pipeline name
         ("hello_world", "ds", ["airflow", "create", "--pipeline", "ds"]),
+        # Test with grouping
+        ("hello_world", "__default__", ["airflow", "create", "--group-in-memory"]),
     ],
 )
 def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metadata):
@@ -69,6 +68,15 @@ def test_airflow_config_params(cli_runner, metadata):
     assert dag_file.read_text() == default_content
     dag_file.unlink()
 
+
+def test_airflow_config_params_cli(cli_runner, metadata):
+    """Check if config variables are picked up"""
+    dag_name = "hello_world"
+    template_name = "airflow_params.j2"
+    content = "{{ owner | default('hello')}}"
+
+    _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
+
     # "--params"
     expected_content = "testme"
     command = ["airflow", "create", "--params", "owner=testme", "-j", template_name]
@@ -79,6 +87,15 @@ def test_airflow_config_params(cli_runner, metadata):
     assert dag_file.exists()
     assert dag_file.read_text() == expected_content
     dag_file.unlink()
+
+
+def test_airflow_config_params_from_config(cli_runner, metadata):
+    """Check if config variables are picked up"""
+    dag_name = "hello_world"
+    template_name = "airflow_params.j2"
+    content = "{{ owner | default('hello')}}"
+
+    _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
 
     # airflow.yml
     expected_content = "someone else"
@@ -107,6 +124,16 @@ def test_airflow_config_params(cli_runner, metadata):
     assert dag_file.read_text() == expected_content
     file_name.unlink()
 
+
+def test_airflow_config_params_from_config_non_default(cli_runner, metadata):
+    """Check if config variables are picked up"""
+    dag_name = "hello_world"
+    template_name = "airflow_params.j2"
+    content = "{{ owner | default('hello')}}"
+    default_content = "hello"
+
+    _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
+
     # random.yml
     expected_content = "yet someone else again"
     file_name = Path.cwd() / "conf" / "base" / "random.yml"
@@ -132,6 +159,15 @@ def test_airflow_config_params(cli_runner, metadata):
     dag_file.unlink()
     file_name.unlink()
 
+
+def test_airflow_config_params_env(cli_runner, metadata):
+    """Check if config variables are picked up"""
+    dag_name = "hello_world"
+    template_name = "airflow_params.j2"
+    content = "{{ owner | default('hello')}}"
+
+    _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
+
     # env
     expected_content = "again someone else"
     file_name = Path.cwd() / "conf" / "local" / "airflow.yml"
@@ -144,6 +180,15 @@ def test_airflow_config_params(cli_runner, metadata):
     assert dag_file.exists()
     assert dag_file.read_text() == expected_content
     dag_file.unlink()
+
+
+def test_airflow_config_params_custom_pipeline(cli_runner, metadata):
+    """Check if config variables are picked up"""
+    dag_name = "hello_world"
+    template_name = "airflow_params.j2"
+    content = "{{ owner | default('hello')}}"
+
+    _create_kedro_airflow_jinja_template(Path.cwd(), template_name, content)
 
     # custom pipeline name
     expected_content = "finally someone else"
@@ -207,7 +252,7 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
 
     _kedro_create_env(Path.cwd())
 
-    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_dag.py"
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_remote_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
@@ -267,22 +312,3 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
         "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
         in result.stdout
     )
-
-
-def test_config_loader_backwards_compatibility(cli_runner, metadata):
-    # Emulate ConfigLoader in kedro <= 0.18.2
-    conf_source = Path.cwd() / "conf"
-    config_loader = ConfigLoader(conf_source=conf_source)
-    del config_loader.config_patterns
-    context = KedroContext(
-        config_loader=config_loader,
-        hook_manager=PluginManager(project_name=metadata.project_name),
-        package_name=metadata.package_name,
-        project_path=metadata.project_path,
-    )
-
-    config = _load_config(context)
-    assert config == {
-        "default": {"owner": "again someone else"},
-        "ds": {"owner": "finally someone else"},
-    }

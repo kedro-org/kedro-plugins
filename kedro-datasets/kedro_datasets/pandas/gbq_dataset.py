@@ -2,9 +2,8 @@
 to read and write from/to BigQuery table.
 """
 import copy
-import warnings
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Union
+from typing import Any, NoReturn, Union
 
 import fsspec
 import pandas as pd
@@ -12,13 +11,12 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 from kedro.io.core import (
+    AbstractDataset,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
 )
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
 
 
 class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
@@ -53,7 +51,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GBQTableDataset("dataset", "table_name", project="my-project")
+        >>> dataset = GBQTableDataset(dataset="dataset", table_name="table_name", project="my-project")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>
@@ -61,18 +59,19 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"progress_bar": False}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"progress_bar": False}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         dataset: str,
         table_name: str,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataset``.
 
@@ -128,7 +127,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "dataset": self._dataset,
             "table_name": self._table_name,
@@ -206,17 +205,17 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         >>> sql_data = dataset.load()
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         project: str = None,
-        credentials: Union[Dict[str, Any], Credentials] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: Union[dict[str, Any], Credentials] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         filepath: str = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
 
@@ -290,7 +289,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         desc = {}
         desc["sql"] = str(load_args.pop("query", None))
@@ -315,22 +314,3 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")
-
-
-_DEPRECATED_CLASSES = {
-    "GBQTableDataSet": GBQTableDataset,
-    "GBQQueryDataSet": GBQQueryDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

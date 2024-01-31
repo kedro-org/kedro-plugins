@@ -1,20 +1,15 @@
 import datetime
-import importlib
 import os
 
 import pytest
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
+from kedro.io.core import DatasetError
 
 try:
     import snowflake.snowpark as sp
 
     from kedro_datasets.snowflake import SnowparkTableDataset as spds
-    from kedro_datasets.snowflake.snowpark_dataset import _DEPRECATED_CLASSES
 except ImportError:
-    # this is only for test discovery to succeed on Python <> 3.8
-    _DEPRECATED_CLASSES = ["SnowparkTableDataSet"]
+    pass  # this is only for test discovery to succeed on Python <> 3.8
 
 
 def get_connection():
@@ -139,19 +134,6 @@ def sf_session():
     yield sf_session
     sf_db_cleanup(sf_session)
     sf_session.close()
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.snowflake", "kedro_datasets.snowflake.snowpark_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-@pytest.mark.snowflake
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSnowparkTableDataset:

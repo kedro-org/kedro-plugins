@@ -4,13 +4,12 @@ The ``MetricsDataset`` is part of Kedro Experiment Tracking. The dataset is vers
 and only takes metrics of numeric values.
 """
 import json
-from typing import NewType, NoReturn
+from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
+from kedro_datasets.constants import MetricsTracking
 from kedro_datasets.json import json_dataset
-
-metrics_tracking = NewType("metrics_tracking", str)
 
 
 class MetricsDataset(json_dataset.JSONDataset):
@@ -68,12 +67,8 @@ class MetricsDataset(json_dataset.JSONDataset):
 
         self._invalidate_cache()
 
-    def preview(self) -> NewType("metrics_tracking", str):
-        """
-        Load the Metrics tracking dataset used in Kedro-viz experiment tracking.
-
-        :return: NewType('metric_tracking', str): The loaded metrics tracjubg data.
-        """
+    def preview(self) -> MetricsTracking:
+        "Load the Metrics tracking dataset used in Kedro-viz experiment tracking"
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

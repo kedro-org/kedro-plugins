@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
@@ -162,6 +163,10 @@ class TestExcelDataset:
         excel_dataset.save(dummy_dataframe)
         previewed = excel_dataset.preview(nrows=nrows)
         assert previewed == expected
+        assert (
+            inspect.signature(excel_dataset.preview).return_annotation.__name__
+            == "Dataframe"
+        )
 
     def test_load_missing_file(self, excel_dataset):
         """Check the error when trying to load missing file."""

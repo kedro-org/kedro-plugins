@@ -1,3 +1,4 @@
+import inspect
 import json
 from pathlib import Path, PurePosixPath
 
@@ -191,3 +192,13 @@ class TestMetricsDataset:
             MetricsDataset(
                 filepath="https://example.com/file.json", version=Version(None, None)
             )
+
+    def test_preview(self, metrics_dataset, dummy_data):
+        expected_preview = {"col1": 1, "col2": 2, "col3": 3}
+        metrics_dataset.save(dummy_data)
+        preview = metrics_dataset.preview()
+        assert preview == expected_preview
+        assert (
+            inspect.signature(metrics_dataset.preview).return_annotation.__name__
+            == "metrics_tracking"
+        )

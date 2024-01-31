@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -178,6 +179,10 @@ class TestCSVDataset:
         csv_dataset.save(dummy_dataframe)
         previewed = csv_dataset.preview(nrows=nrows)
         assert previewed == expected
+        assert (
+            inspect.signature(csv_dataset.preview).return_annotation.__name__
+            == "Dataframe"
+        )
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""

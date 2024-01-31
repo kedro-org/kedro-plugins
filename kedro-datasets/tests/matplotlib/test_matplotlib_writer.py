@@ -253,6 +253,13 @@ class TestMatplotlibWriter:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
 
+    def test_preview(self, mock_single_plot, plot_writer):
+        plot_writer.save(mock_single_plot)
+        # Define the expected beginning of the base64 encoded image string
+        expected_beginning = "iVBORw0KGgoAAAANSUh"
+        preview = plot_writer.preview()
+        assert preview.startswith(expected_beginning)
+
 
 class TestMatplotlibWriterVersioned:
     def test_version_str_repr(self, load_version, save_version):

@@ -1,11 +1,11 @@
 """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
+import json
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Union, NewType
+from typing import Any, Union
 
-import json
 import fsspec
 import plotly.io as pio
 from kedro.io.core import (
@@ -15,6 +15,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 from plotly import graph_objects as go
+
+from kedro_datasets.constants import Plot
 
 
 class JSONDataset(
@@ -53,8 +55,6 @@ class JSONDataset(
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
-    
-    Plot = NewType('plot', str)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -170,9 +170,8 @@ class JSONDataset(
     def _invalidate_cache(self) -> None:
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-        
+
     def preview(self) -> Plot:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return json.load(fs_file)

@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, NewType
+from typing import Any
 
 import fsspec
 import pandas as pd
@@ -17,6 +17,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets.constants import Dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +69,6 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
-    
-    Dataframe = NewType('dataframe', dict)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -196,7 +196,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def preview(self, nrows: int = 40) -> Dataframe:
+    def preview(self, nrows: int = 5) -> Dataframe:
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows

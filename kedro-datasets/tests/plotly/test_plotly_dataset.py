@@ -1,3 +1,4 @@
+import inspect
 from pathlib import PurePosixPath
 
 import pandas as pd
@@ -105,3 +106,13 @@ class TestPlotlyDataset:
         dataset = PlotlyDataset(filepath=filepath, plotly_args=plotly_args)
         with pytest.raises(DatasetError):
             dataset.save(dummy_dataframe)
+
+    def test_preview(self, plotly_dataset, dummy_dataframe):
+        plotly_dataset.save(dummy_dataframe)
+        preview = plotly_dataset.preview()
+        assert (
+            inspect.signature(plotly_dataset.preview).return_annotation.__name__
+            == "Plot"
+        )
+        assert "data" in preview
+        assert "layout" in preview

@@ -1,11 +1,11 @@
 import boto3
 import pytest
 import xarray as xr
+from kedro.io.core import DatasetError
 from moto import mock_s3
 from s3fs import S3FileSystem
 from xarray.testing import assert_equal
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.netcdf import NetCDFDataset
 
 FILE_NAME = "test.nc"

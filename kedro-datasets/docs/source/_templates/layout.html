@@ -31,7 +31,7 @@
 
   // Wait for DOM to load and clone main nav into the sidebar
   document.addEventListener("DOMContentLoaded", function() {
-      
+
     function showReadTheDocsSearch() {
         const searchEvent = new CustomEvent("readthedocs-search-show");
         document.dispatchEvent(searchEvent);
@@ -43,7 +43,7 @@
     // Add keyboard event listener for Cmd+K (Mac) or Ctrl+K (Windows)
     document.addEventListener("keydown", function(e) {
       if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault(); 
+        e.preventDefault();
         showReadTheDocsSearch();
       }
     });
@@ -57,7 +57,7 @@
     closeBtn.dataset.toggle = 'wy-nav-top';
     closeBtn.classList.add('wy-nav-top-close');
     document.querySelector('.wy-nav-top').prepend(closeBtn);
-    
+
    // Prepend open button to mobile header
     var openBtn = document.createElement("span");
     openBtn.dataset.toggle = 'wy-nav-top';

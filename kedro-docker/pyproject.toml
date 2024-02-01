@@ -24,13 +24,13 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "bandit<=1.7.6",
+    "bandit<1.7.7",
     "behave",
     "black~=22.0",
     "docker",
     "pre-commit>=2.9.2",
-    "psutil",
-    "pytest",
+    "psutil<5.9.8",
+    "pytest<8.0.0",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]~=2.2.1",

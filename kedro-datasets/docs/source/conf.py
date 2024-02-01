@@ -114,6 +114,7 @@ type_targets = {
         "typing.Union",
         "typing.Optional",
         "typing.Tuple",
+        "typing.ClassVar"
     ),
     "py:exc": (
         "DatasetError",

@@ -24,7 +24,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "bandit",
+    "bandit==1.7.6",
     "behave",
     "black~=22.0",
     "docker",

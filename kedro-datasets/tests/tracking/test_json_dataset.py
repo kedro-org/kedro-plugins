@@ -191,5 +191,5 @@ class TestJSONDataset:
         assert preview == expected_preview
         assert (
             inspect.signature(json_dataset.preview).return_annotation.__name__
-            == "json_tracking"
+            == "JSONTracking"
         )

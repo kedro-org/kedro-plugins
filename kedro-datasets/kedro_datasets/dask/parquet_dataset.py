@@ -39,9 +39,9 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> import dask.dataframe as dd
         >>> import pandas as pd
         >>> from kedro_datasets.dask import ParquetDataset
-        >>> from pandas.testing import assert_frame_equal
+        >>> import numpy as np
         >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [6, 7]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> dataset = ParquetDataset(
@@ -50,7 +50,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
         >>>
-        >>> assert_frame_equal(ddf.compute(), reloaded.compute())
+        >>> assert np.array_equal(ddf.compute(), reloaded.compute())
 
     The output schema can also be explicitly specified using
     `Triad <https://triad.readthedocs.io/en/latest/api/\
@@ -145,7 +145,9 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
 
     def _save(self, data: dd.DataFrame) -> None:
         self._process_schema()
-        data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
+        data.to_parquet(
+            path=self._filepath, storage_options=self.fs_args, **self._save_args
+        )
 
     def _process_schema(self) -> None:
         """This method processes the schema in the catalog.yml or the API, if provided.

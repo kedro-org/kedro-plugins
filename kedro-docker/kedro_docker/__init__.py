@@ -1,3 +1,3 @@
-"""Kedro plugin for packaging a project with Docker."""
+"""Kedro plugin for packaging a project with Docker. TEST"""
 
 __version__ = "0.5.0"

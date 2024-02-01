@@ -1,6 +1,12 @@
 ARG BASE_IMAGE=python:3.9-slim
 FROM $BASE_IMAGE as runtime-environment
 
+# Install gcc, python3-dev, and other essential build tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    build-essential
+
 # install project requirements
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache -r /tmp/requirements.txt && rm -f /tmp/requirements.txt

@@ -54,6 +54,7 @@ Feature: Docker commands in new projects
     When I execute the kedro command "docker jupyter notebook"
     Then Jupyter Notebook should run on port 8888
 
+  @debug
   Scenario: Execute docker jupyter notebook target on custom port
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker jupyter notebook --port 8899"

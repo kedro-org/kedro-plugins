@@ -112,7 +112,7 @@ class TestPlotlyDataset:
         preview = plotly_dataset.preview()
         assert (
             inspect.signature(plotly_dataset.preview).return_annotation.__name__
-            == "Plot"
+            == "Plotly"
         )
         assert "data" in preview
         assert "layout" in preview

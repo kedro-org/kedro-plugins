@@ -104,7 +104,8 @@ class TestJSONDataset:
         json_dataset.save(dummy_plot)
         preview = json_dataset.preview()
         assert (
-            inspect.signature(json_dataset.preview).return_annotation.__name__ == "Plot"
+            inspect.signature(json_dataset.preview).return_annotation.__name__
+            == "Plotly"
         )
         assert "data" in preview
         assert "layout" in preview

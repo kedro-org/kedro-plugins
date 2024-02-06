@@ -180,8 +180,7 @@ class TestCSVDataset:
         previewed = csv_dataset.preview(nrows=nrows)
         assert previewed == expected
         assert (
-            inspect.signature(csv_dataset.preview).return_annotation.__name__
-            == "Dataframe"
+            inspect.signature(csv_dataset.preview).return_annotation.__name__ == "Table"
         )
 
     def test_load_missing_file(self, csv_dataset):

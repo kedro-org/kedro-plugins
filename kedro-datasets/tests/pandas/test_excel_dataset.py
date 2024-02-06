@@ -165,7 +165,7 @@ class TestExcelDataset:
         assert previewed == expected
         assert (
             inspect.signature(excel_dataset.preview).return_annotation.__name__
-            == "Table"
+            == "TablePreview"
         )
 
     def test_load_missing_file(self, excel_dataset):

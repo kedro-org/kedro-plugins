@@ -16,7 +16,7 @@ from kedro.io.core import (
 )
 from plotly import graph_objects as go
 
-from kedro_datasets._typing import Plotly
+from kedro_datasets._typing import PlotlyPreview
 
 
 class JSONDataset(
@@ -171,7 +171,7 @@ class JSONDataset(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def preview(self) -> Plotly:
+    def preview(self) -> PlotlyPreview:
         """
         Generates a preview of the plotly dataset.
 

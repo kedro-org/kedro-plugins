@@ -8,7 +8,7 @@ from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
-from kedro_datasets._typing import MetricsTracking
+from kedro_datasets._typing import MetricsTrackingPreview
 from kedro_datasets.json import json_dataset
 
 
@@ -67,7 +67,7 @@ class MetricsDataset(json_dataset.JSONDataset):
 
         self._invalidate_cache()
 
-    def preview(self) -> MetricsTracking:
+    def preview(self) -> MetricsTrackingPreview:
         "Load the Metrics tracking dataset used in Kedro-viz experiment tracking"
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 

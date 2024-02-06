@@ -200,5 +200,5 @@ class TestMetricsDataset:
         assert preview == expected_preview
         assert (
             inspect.signature(metrics_dataset.preview).return_annotation.__name__
-            == "MetricsTracking"
+            == "MetricsTrackingPreview"
         )

@@ -18,7 +18,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets._typing import Table
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -264,7 +264,7 @@ class ExcelDataset(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def preview(self, nrows: int = 5) -> Table:
+    def preview(self, nrows: int = 5) -> TablePreview:
         """
         Generate a preview of the dataset with a specified number of rows.
 

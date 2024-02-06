@@ -105,7 +105,7 @@ class TestJSONDataset:
         preview = json_dataset.preview()
         assert (
             inspect.signature(json_dataset.preview).return_annotation.__name__
-            == "Plotly"
+            == "PlotlyPreview"
         )
         assert "data" in preview
         assert "layout" in preview

@@ -11,7 +11,7 @@ import plotly.express as px
 from kedro.io.core import Version, get_filepath_str
 from plotly import graph_objects as go
 
-from kedro_datasets.constants import Plot
+from kedro_datasets._typing import Plotly
 from kedro_datasets.plotly.json_dataset import JSONDataset
 
 
@@ -151,7 +151,7 @@ class PlotlyDataset(JSONDataset):
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
 
-    def preview(self) -> Plot:
+    def preview(self) -> Plotly:
         """
         Generates a preview of the plotly dataset.
 

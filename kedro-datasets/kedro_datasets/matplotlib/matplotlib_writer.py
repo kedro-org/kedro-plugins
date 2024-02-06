@@ -18,7 +18,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets.constants import Image
+from kedro_datasets._typing import Image
 
 
 class MatplotlibWriter(

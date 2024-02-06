@@ -7,7 +7,7 @@ from typing import NoReturn
 
 from kedro.io.core import DatasetError, get_filepath_str
 
-from kedro_datasets.constants import JSONTracking
+from kedro_datasets._typing import JSONTracking
 from kedro_datasets.json import json_dataset
 
 

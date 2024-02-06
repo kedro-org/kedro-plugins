@@ -5,12 +5,12 @@ These types are used to facilitate data rendering in the Kedro-viz front-end.
 
 from typing import NewType
 
-Dataframe = NewType("Dataframe", dict)
+Table = NewType("Table", dict)
 Image = NewType("Image", str)
-Plot = NewType("Plot", dict)
-JSON = NewType("JSON", str)
+Plotly = NewType("Plotly", dict)
+JSON = NewType("JSON", dict)
 
 
 # experiment tracking datasets types
-MetricsTracking = NewType("MetricsTracking", str)
-JSONTracking = NewType("JSONTracking", str)
+MetricsTracking = NewType("MetricsTracking", dict)
+JSONTracking = NewType("JSONTracking", dict)

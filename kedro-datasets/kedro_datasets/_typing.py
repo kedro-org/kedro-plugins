@@ -6,7 +6,7 @@ These types are used to facilitate data rendering in the Kedro-viz front-end.
 from typing import NewType
 
 TablePreview = NewType("TablePreview", dict)
-ImagePreview = NewType("ImagePreview", str)
+ImagePreview = NewType("ImagePreview", bytes)
 PlotlyPreview = NewType("PlotlyPreview", dict)
 JSONPreview = NewType("JSONPreview", dict)
 

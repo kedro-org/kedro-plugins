@@ -18,7 +18,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets._typing import Image
+from kedro_datasets._typing import ImagePreview
 
 
 class MatplotlibWriter(
@@ -249,7 +249,7 @@ class MatplotlibWriter(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def preview(self) -> Image:
+    def preview(self) -> ImagePreview:
         """
         Generates a preview of the matplotlib dataset as a base64 encoded image.
 

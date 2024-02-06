@@ -1,3 +1,4 @@
+import inspect
 import json
 from pathlib import Path
 
@@ -259,6 +260,10 @@ class TestMatplotlibWriter:
         expected_beginning = "iVBORw0KGgoAAAANSUh"
         preview = plot_writer.preview()
         assert preview.startswith(expected_beginning)
+        assert (
+            inspect.signature(plot_writer.preview).return_annotation.__name__
+            == "ImagePreview"
+        )
 
 
 class TestMatplotlibWriterVersioned:

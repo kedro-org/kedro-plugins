@@ -23,7 +23,7 @@ The Kedro Project’s telemetry has been reviewed and approved under the [Teleme
 
 ## What data is being collected?
 
-We process your hashed computer username, which is pseudonymized information that indirectly relates to you personally. In total, we collect the following project-related and environmental information, relying on your consent to do so:
+We process your hashed computer username, which is pseudonymized information that indirectly relates to you personally. We collect the following project-related and environmental information, relying on your consent to do so:
 
 |Description|Example Input|What we receive|
 |-|-|-|

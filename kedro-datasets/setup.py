@@ -70,19 +70,19 @@ polars_require = {
         POLARS,
         "pyarrow>=4.0",
         "xlsx2csv>=0.8.0",
-        "deltalake >= 0.6.2",
+        "lake >= 0.6.2",
     ],
     "polars.EagerPolarsDataset": [
         POLARS,
         "pyarrow>=4.0",
         "xlsx2csv>=0.8.0",
-        "deltalake >= 0.6.2",
+        "lake >= 0.6.2",
     ],
     "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
         POLARS,
         "pyarrow>=4.0",
-        "deltalake >= 0.6.2",
+        "lake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
@@ -96,7 +96,7 @@ spark_require = {
     "spark.SparkDataset": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataset": [SPARK, HDFS, S3FS],
     "spark.SparkJDBCDataset": [SPARK, HDFS, S3FS],
-    "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
+    "spark.TableDataset": [SPARK, HDFS, S3FS, "-spark>=1.0, <3.0"],
 }
 svmlight_require = {"svmlight.SVMLightDataset": ["scikit-learn>=1.0.2", "scipy~=1.7.3"]}
 tensorflow_require = {
@@ -184,7 +184,7 @@ extras_require["test"] = [
     "coverage[toml]",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0, !=0.15.2",
+    "deltalake>=0.10.0, <0.15.2",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",

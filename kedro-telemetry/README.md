@@ -7,13 +7,13 @@
 
 ## Introduction
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
+To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
 
 The data it gathers will help drive future development of Kedro because we can understand how the product is being used.
 
 ## Why is my data being collected?
 
-Telemetry data is made available to [project maintainers of the Kedro Project](https://kedro.readthedocs.io/en/stable/faq/faq.html#who-maintains-kedro). The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics.
+Telemetry data is made available to [project maintainers of the Kedro Project](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html). The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics.
 
 
 ## What about my personal data?

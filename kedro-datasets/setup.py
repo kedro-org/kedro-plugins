@@ -181,7 +181,7 @@ extras_require["test"] = [
     "coverage[toml]",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <0.15.2",  # temporary pin as 0.15.2 breaks some of our tests
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",

@@ -29,7 +29,7 @@ test = [
     "black~=22.0",
     "docker",
     "pre-commit>=2.9.2",
-    "psutil",
+    "psutil<5.9.8",
     "pytest",
     "pytest-cov",
     "pytest-mock",

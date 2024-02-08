@@ -205,7 +205,7 @@ def pip_install_dependencies(context):
             "-U",
             # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
             # pip==23.3 breaks dependency resolution
-            "pip>=21.2,<23.2",
+            "pip=~24.0",
         ],
         env=context.env,
     )

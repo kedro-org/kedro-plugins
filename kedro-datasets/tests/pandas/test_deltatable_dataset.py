@@ -69,11 +69,7 @@ class TestDeltaTableDataset:
         appended = pd.concat([dummy_df, new_df], ignore_index=True)
         deltatable_dataset_from_path.save(new_df)
         reloaded = deltatable_dataset_from_path.load()
-        appended.sort_values(by=["col1"], inplace=True)
-        reloaded.sort_values(by=["col1"], inplace=True)
-        assert_frame_equal(
-            appended.reset_index(drop=True), reloaded.reset_index(drop=True)
-        )
+        assert_frame_equal(appended, reloaded)
 
     def test_versioning(self, filepath, dummy_df):
         """Test loading different versions."""

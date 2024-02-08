@@ -196,7 +196,7 @@ def exec_kedro_command(context, command):
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
-    call(
+    run(
         [
             "python",
             "-m",

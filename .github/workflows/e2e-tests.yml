@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          pip install kedro
+          pip install git+https://github.com/kedro-org/kedro@main
           pip install ".[test]"
       - name: pip freeze
         run: pip freeze

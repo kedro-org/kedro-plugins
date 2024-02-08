@@ -28,15 +28,16 @@ test = [
     "behave",
     "black~=22.0",
     "docker",
+    "openpxyl",
     "pre-commit>=2.9.2",
     "psutil",
+    "pyarrow",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]~=2.2.1",
     "PyYAML>=5.1, <7.0",
     "trufflehog>=2.0.99, <3.0",
-    "ruamel.yaml<0.18.6",
     "ruff~=0.0.290",
     "wheel==0.32.2"
 ]

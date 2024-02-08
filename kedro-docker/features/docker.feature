@@ -26,7 +26,8 @@ Feature: Docker commands in new projects
     And I should get a message including "Python"
 
   Scenario: Execute docker run target successfully
-    Given I have executed the kedro command "docker build"
+    Given I have installed the project dependencies
+    And I have executed the kedro command "docker build"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
     And I should get a message including "Pipeline execution completed"

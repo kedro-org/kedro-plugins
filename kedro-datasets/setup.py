@@ -87,10 +87,7 @@ polars_require = {
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
-    "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0",
-        "pyarrow~=8.0",
-    ]
+    "snowflake.SnowparkTableDataset": ["snowflake-snowpark-python~=1.0"]
 }
 spark_require = {
     "spark.SparkDataset": [SPARK, HDFS, S3FS],

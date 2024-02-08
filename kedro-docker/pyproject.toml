@@ -28,7 +28,7 @@ test = [
     "behave",
     "black~=22.0",
     "docker",
-    "openpxyl",
+    "openpyxl",
     "pre-commit>=2.9.2",
     "psutil",
     "pyarrow",

@@ -196,6 +196,19 @@ def exec_kedro_command(context, command):
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
+    call(
+        [
+            "python",
+            "-m",
+            "pip",
+            "install",
+            "-U",
+            # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+            # pip==23.3 breaks dependency resolution
+            "pip>=21.2,<23.2",
+        ],
+        env=context.env,
+    )
     reqs_path = Path("requirements.txt")
     res = run(
         [context.pip, "install", "-r", str(reqs_path)],

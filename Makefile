@@ -48,7 +48,7 @@ test-sequential:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml
 
 e2e-tests:
-	cd $(plugin) && behave --no-capture
+	cd $(plugin) && behave
 
 secret-scan:
 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .

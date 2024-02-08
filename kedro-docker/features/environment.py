@@ -42,7 +42,7 @@ def before_all(context):
             "pip>=20.0",
             "setuptools>=38.0",
             "wheel",
-            ".[test]",
+            ".",
         ],
         env=context.env,
     )

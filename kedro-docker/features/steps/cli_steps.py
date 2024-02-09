@@ -198,14 +198,15 @@ def pip_install_dependencies(context):
     """Install project dependencies using pip."""
     reqs_path = Path("requirements.txt")
     res = run(
-        [context.pip, "install", "-r", str(reqs_path), "--no-cache"],
+        [context.pip, "install", "-r", str(reqs_path)],
         env=context.env,
         cwd=str(context.root_project_dir),
     )
 
-    print(res.stdout)
-    print(res.stderr)
-    # assert False
+    if res.returncode != OK_EXIT_CODE:
+        print(res.stdout)
+        print(res.stderr)
+        assert False
 
 
 @given("I have removed old docker image of test project")

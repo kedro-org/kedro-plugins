@@ -72,22 +72,30 @@ def _get_cli_structure(
     return output
 
 
+def _mask_unrecognized_arg(arg: str, vocabulary: Set[str]) -> str:
+    return arg if arg in vocabulary else MASK
+
+
 def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
     vocabulary = _get_vocabulary(cli_struct)
+    mask_next = False
     for arg in command_args:
         if arg.startswith("-"):
-            for arg_part in arg.split("="):
-                if arg_part in vocabulary:
-                    output.append(arg_part)
-                elif arg_part:
-                    output.append(MASK)
-        elif arg in vocabulary:
-            output.append(arg)
-        elif arg:
+            if "=" in arg:
+                arg_left = arg.split("=")[0]
+                output.append(_mask_unrecognized_arg(arg_left, vocabulary))
+                output.append(MASK)
+            else:
+                mask_next = True
+                output.append(_mask_unrecognized_arg(arg, vocabulary))
+        elif mask_next:
             output.append(MASK)
+            mask_next = False
+        else:
+            output.append(_mask_unrecognized_arg(arg, vocabulary))
     return output
 
 

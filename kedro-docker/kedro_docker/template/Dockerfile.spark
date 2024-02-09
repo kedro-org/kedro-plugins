@@ -7,7 +7,7 @@ apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
 # install project requirements
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
 
 # add kedro user
 ARG KEDRO_UID=999

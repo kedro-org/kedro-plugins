@@ -198,7 +198,7 @@ def pip_install_dependencies(context):
     """Install project dependencies using pip."""
     reqs_path = Path("requirements.txt")
     res = run(
-        [context.pip, "install", "-r", str(reqs_path)],
+        [context.pip, "install", "-r", str(reqs_path), "--no-cache"],
         env=context.env,
         cwd=str(context.root_project_dir),
     )

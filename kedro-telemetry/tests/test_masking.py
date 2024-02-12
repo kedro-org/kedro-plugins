@@ -28,6 +28,9 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
+    "--version",
+    "-V",
+    "--help",
 ]
 
 
@@ -74,7 +77,6 @@ class TestCLIMasking:
 
         for k, v in raw_cli_structure["kedro"].items():
             assert isinstance(k, str)
-            assert isinstance(v, dict)
 
         assert sorted(list(raw_cli_structure["kedro"])) == sorted(
             DEFAULT_KEDRO_COMMANDS

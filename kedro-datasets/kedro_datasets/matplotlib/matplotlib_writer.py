@@ -1,6 +1,7 @@
 """``MatplotlibWriter`` saves one or more Matplotlib objects as image
 files to an underlying filesystem (e.g. local, S3, GCS)."""
 
+import base64
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -16,6 +17,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import ImagePreview
 
 
 class MatplotlibWriter(
@@ -245,3 +248,15 @@ class MatplotlibWriter(
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self) -> ImagePreview:
+        """
+        Generates a preview of the matplotlib dataset as a base64 encoded image.
+
+        Returns:
+            str: A base64 encoded string representing the matplotlib plot image.
+        """
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(load_path, mode="rb") as img_file:
+            base64_bytes = base64.b64encode(img_file.read())
+        return base64_bytes.decode("utf-8")

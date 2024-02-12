@@ -44,6 +44,10 @@ def _recurse_cli(
                 io_dict[element_name],
                 get_help,
             )
+        nested_parameter_list = [option.opts for option in cli_element.get_params(ctx)]
+        for item in (item for sublist in nested_parameter_list for item in sublist):
+            if item not in io_dict[element_name]:
+                io_dict[element_name][item] = None
 
     elif isinstance(cli_element, click.Command):
         if get_help:  # gets formatted CLI help incl params for printing
@@ -89,7 +93,7 @@ def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List
         current_CLI = current_CLI[command_args[arg_index]]
         arg_index += 1
 
-    # Mask everything except recognized parameter keywords
+    # Mask everything except parameter keywords
     for arg in command_args[arg_index:]:
         if arg.startswith("-"):
             if "=" in arg:

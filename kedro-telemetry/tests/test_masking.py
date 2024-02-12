@@ -230,8 +230,8 @@ class TestCLIMasking:
                         "command_b": None,
                     }
                 },
-                ["none", "of", "this", "should", "be", "seen", "except", "command_a"],
-                [MASK, MASK, MASK, MASK, MASK, MASK, MASK, "command_a"],
+                ["command_a", "should", "be", "seen", "only"],
+                ["command_a", MASK, MASK, MASK, MASK],
             ),
         ],
     )

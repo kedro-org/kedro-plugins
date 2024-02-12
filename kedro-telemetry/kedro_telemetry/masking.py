@@ -72,39 +72,39 @@ def _get_cli_structure(
     return output
 
 
-def _mask_unrecognized_arg(arg: str, vocabulary: Set[str]) -> str:
-    return arg if arg in vocabulary else MASK
-
-
 def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
-    vocabulary = _get_vocabulary(cli_struct)
-    mask_next = False
-    for arg in command_args:
+
+    # Preserve the initial part of the command until parameters sections begin
+    arg_index = 0
+    current_CLI = cli_struct.get("kedro", {})
+    while (
+        arg_index < len(command_args)
+        and not command_args[arg_index].startswith("-")
+        and command_args[arg_index] in current_CLI
+    ):
+        output.append(command_args[arg_index])
+        current_CLI = current_CLI[command_args[arg_index]]
+        arg_index += 1
+
+    # Mask everything except recognized parameter keywords
+    for arg in command_args[arg_index:]:
         if arg.startswith("-"):
             if "=" in arg:
                 arg_left = arg.split("=")[0]
-                output.append(_mask_unrecognized_arg(arg_left, vocabulary))
+                if arg_left in current_CLI:
+                    output.append(arg_left)
                 output.append(MASK)
+            elif arg in current_CLI:
+                output.append(arg)
             else:
-                mask_next = True
-                output.append(_mask_unrecognized_arg(arg, vocabulary))
-        elif mask_next:
-            output.append(MASK)
-            mask_next = False
+                output.append(MASK)
         else:
-            output.append(_mask_unrecognized_arg(arg, vocabulary))
+            output.append(MASK)
+
     return output
-
-
-def _get_vocabulary(cli_struct: Dict[str, Any]) -> Set[str]:
-    """Builds a unique whitelist of terms - a vocabulary"""
-    vocabulary = {"-h", "--version"}  # -h help and version args are not in by default
-    cli_dynamic_vocabulary = set(_recursive_items(cli_struct)) - {None}
-    vocabulary.update(cli_dynamic_vocabulary)
-    return vocabulary
 
 
 def _recursive_items(dictionary: Dict[Any, Any]) -> Iterator[Any]:

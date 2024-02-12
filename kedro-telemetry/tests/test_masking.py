@@ -11,7 +11,6 @@ from kedro.framework.startup import ProjectMetadata
 from kedro_telemetry.masking import (
     MASK,
     _get_cli_structure,
-    _get_vocabulary,
     _mask_kedro_cli,
     _recursive_items,
 )
@@ -174,9 +173,6 @@ class TestCLIMasking:
 
     def test_recursive_items_empty(self):
         assert len(list(_recursive_items({}))) == 0
-
-    def test_get_vocabulary_empty(self):
-        assert _get_vocabulary({}) == {"-h", "--version"}
 
     @pytest.mark.parametrize(
         "input_cli_structure, input_command_args, expected_masked_args",

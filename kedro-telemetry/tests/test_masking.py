@@ -28,9 +28,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
-    "--version",
-    "-V",
-    "--help",
 ]
 
 

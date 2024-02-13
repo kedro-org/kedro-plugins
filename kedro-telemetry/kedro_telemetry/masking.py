@@ -1,5 +1,5 @@
 """Module containing command masking functionality."""
-from typing import Any, Dict, Iterator, List, Set, Union
+from typing import Any, Dict, Iterator, List, Union
 
 import click
 

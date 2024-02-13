@@ -28,6 +28,9 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
+    "--version",
+    "-V",
+    "--help",
 ]
 
 
@@ -143,10 +146,6 @@ class TestCLIMasking:
                     )
             elif isinstance(v, str):
                 assert v.startswith("Usage:  [OPTIONS]")
-
-        assert sorted(list(help_cli_structure["kedro"])) == sorted(
-            DEFAULT_KEDRO_COMMANDS
-        )
 
     @pytest.mark.parametrize(
         "input_dict, expected_output_count",

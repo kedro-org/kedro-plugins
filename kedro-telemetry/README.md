@@ -7,13 +7,13 @@
 
 ## Introduction
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
+To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
 
 The data it gathers will help drive future development of Kedro because we can understand how the product is being used.
 
 ## Why is my data being collected?
 
-Telemetry data is made available to [project maintainers of the Kedro Project](https://kedro.readthedocs.io/en/stable/faq/faq.html#who-maintains-kedro). The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics.
+Telemetry data is made available to [project maintainers of the Kedro Project](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html). The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics.
 
 
 ## What about my personal data?
@@ -23,17 +23,21 @@ The Kedro Project’s telemetry has been reviewed and approved under the [Teleme
 
 ## What data is being collected?
 
-We process your hashed hostname and hashed computer username, which both is pseudonymized information that indirectly relates to you personally. Besides the hashed host and username, we collect the following project-related information. Again, we rely on your consent to do so:
+We process your hashed computer username, which is pseudonymized information that indirectly relates to you personally. We collect the following project-related and environmental information, relying on your consent to do so:
 
 |Description|Example Input|What we receive|
 |-|-|-|
+|_(Hashed)_ User name||581d037773d794f9563dc7ba7c43b63d...|
 |CLI command (masked arguments)|`kedro run --pipeline=ds --env=test`|`kedro run --pipeline ***** --env *****`|
 |_(Hashed)_ Package name|my-project|1c7cd944c28cd888904f3efc2345198507...|
-|_(Hashed)_ Project name|my_project|a6392d359362dc9827cf8688c9d634520e...|
-|`kedro` project version|0.17.6|0.17.6|
-|`kedro-telemetry` version|0.1.2|0.1.2|
-|Python version|3.8.10 (default, Jun  2 2021, 10:49:15)|3.8.10 (default, Jun  2 2021, 10:49:15)|
+|`kedro` project version|0.19.2|0.19.2|
+|`kedro-telemetry` version|0.3.1|0.3.1|
+|Python version|3.10.13 (main, Sep 11 2023, 08:16:02) [Clang 14.0.6 ]|3.10.13 (main, Sep 11 2023, 08:16:02) [Clang 14.0.6 ]|
 |Operating system used|darwin|darwin|
+|Tools selected if the `kedro new` command was used|['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure']|['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure']|
+|Number of datasets|6|6|
+|Number of nodes|4|4|
+|Number of pipelines|2|2|
 
 ## How do I consent to the use of Kedro-Telemetry?
 

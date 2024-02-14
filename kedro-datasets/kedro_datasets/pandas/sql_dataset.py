@@ -554,4 +554,4 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             except (TypeError, ValueError):
                 new_load_args.append(value)
         if new_load_args:
-            self._load_args["params"] = new_load_args
+            self._load_args["params"] = tuple(new_load_args)

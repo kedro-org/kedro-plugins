@@ -17,11 +17,15 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from slugify import slugify
 
+from kedro_airflow.grouping import group_memory_nodes
+
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
+DEFAULT_RUN_ENV = "local"
+DEFAULT_PIPELINE = "__default__"
 
 
 @click.group(name="Kedro-Airflow")
@@ -78,11 +82,11 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--pipelines",
     "pipeline_names",
     multiple=True,
-    default=("__default__",),
+    default=(DEFAULT_PIPELINE,),
     help=PIPELINE_ARG_HELP,
 )
 @click.option("--all", "convert_all", is_flag=True, help=ALL_ARG_HELP)
-@click.option("-e", "--env", default="local", help=ENV_HELP)
+@click.option("-e", "--env", default=DEFAULT_RUN_ENV, help=ENV_HELP)
 @click.option(
     "-t",
     "--target-dir",
@@ -101,6 +105,14 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help="The template file for the generated Airflow dags",
 )
 @click.option(
+    "-g",
+    "--group-in-memory",
+    is_flag=True,
+    default=False,
+    help="Group nodes with at least one MemoryDataset as input/output together, "
+    "as they do not persist between Airflow operators.",
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -114,11 +126,12 @@ def create(  # noqa: PLR0913
     env,
     target_path,
     jinja_file,
+    group_in_memory,
     params,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
-    if convert_all and pipeline_names != ("__default__",):
+    if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
         )
@@ -159,16 +172,24 @@ def create(  # noqa: PLR0913
             raise KedroCliError(f"Pipeline {name} not found.")
 
         # Obtain the file name
-        dag_filename = dags_folder / (
-            f"{package_name}_dag.py"
-            if name == "__default__"
-            else f"{package_name}_{name}_dag.py"
-        )
+        dag_name = package_name
+        if env != DEFAULT_RUN_ENV:
+            dag_name += f"_{env}"
+        if name != DEFAULT_PIPELINE:
+            dag_name += f"_{name}"
+        dag_name += "_dag.py"
+        dag_filename = dags_folder / dag_name
 
-        dependencies = defaultdict(list)
-        for node, parent_nodes in pipeline.node_dependencies.items():
-            for parent in parent_nodes:
-                dependencies[parent].append(node)
+        # group memory nodes
+        if group_in_memory:
+            nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+        else:
+            nodes = {node.name: [node] for node in pipeline.nodes}
+
+            dependencies = defaultdict(list)
+            for node, parent_nodes in pipeline.node_dependencies.items():
+                for parent in parent_nodes:
+                    dependencies[parent.name].append(node.name)
 
         # Sort both parent and child nodes to make sure it's deterministic
         sorted_dependencies = {}
@@ -177,6 +198,7 @@ def create(  # noqa: PLR0913
 
         template.stream(
             dag_name=package_name,
+            nodes=nodes,
             dependencies=sorted_dependencies,
             env=env,
             pipeline_name=name,

@@ -95,10 +95,7 @@ polars_require = {
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
-    "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0",
-        "pyarrow~=8.0",
-    ]
+    "snowflake.SnowparkTableDataset": ["snowflake-snowpark-python~=1.0"]
 }
 spark_require = {
     "spark.SparkDataset": [SPARK, HDFS, S3FS],
@@ -193,7 +190,7 @@ extras_require["test"] = [
     "coverage[toml]",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <0.15.2",  # temporary pin as 0.15.2 breaks some of our tests
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",

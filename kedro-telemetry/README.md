@@ -12,7 +12,7 @@ that gathers anonymised and aggregated usage analytics
 to help [the Kedro team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html)
 understand how Kedro is used and prioritise improvements to the product accordingly.
 
-## Why is my data being collected?
+## What data is being collected?
 
 Read [our Telemetry documentation](https://docs.kedro.org/en/stable/configuration/telemetry.html)
 for further information on the intent of the data collection and what data is collected.

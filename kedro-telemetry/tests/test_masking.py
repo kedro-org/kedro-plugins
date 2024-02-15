@@ -11,7 +11,6 @@ from kedro.framework.startup import ProjectMetadata
 from kedro_telemetry.masking import (
     MASK,
     _get_cli_structure,
-    _get_vocabulary,
     _mask_kedro_cli,
     _recursive_items,
 )
@@ -29,6 +28,9 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
+    "--version",
+    "-V",
+    "--help",
 ]
 
 
@@ -75,7 +77,6 @@ class TestCLIMasking:
 
         for k, v in raw_cli_structure["kedro"].items():
             assert isinstance(k, str)
-            assert isinstance(v, dict)
 
         assert sorted(list(raw_cli_structure["kedro"])) == sorted(
             DEFAULT_KEDRO_COMMANDS
@@ -146,10 +147,6 @@ class TestCLIMasking:
             elif isinstance(v, str):
                 assert v.startswith("Usage:  [OPTIONS]")
 
-        assert sorted(list(help_cli_structure["kedro"])) == sorted(
-            DEFAULT_KEDRO_COMMANDS
-        )
-
     @pytest.mark.parametrize(
         "input_dict, expected_output_count",
         [
@@ -174,9 +171,6 @@ class TestCLIMasking:
 
     def test_recursive_items_empty(self):
         assert len(list(_recursive_items({}))) == 0
-
-    def test_get_vocabulary_empty(self):
-        assert _get_vocabulary({}) == {"-h", "--version"}
 
     @pytest.mark.parametrize(
         "input_cli_structure, input_command_args, expected_masked_args",
@@ -234,8 +228,8 @@ class TestCLIMasking:
                         "command_b": None,
                     }
                 },
-                ["none", "of", "this", "should", "be", "seen", "except", "command_a"],
-                [MASK, MASK, MASK, MASK, MASK, MASK, MASK, "command_a"],
+                ["command_a", "should", "be", "seen", "only"],
+                ["command_a", MASK, MASK, MASK, MASK],
             ),
         ],
     )

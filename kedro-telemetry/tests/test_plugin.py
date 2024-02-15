@@ -40,6 +40,7 @@ package_name = "spaceflights"
 project_name = "spaceflights"
 kedro_init_version = "0.18.14"
 tools = ["Linting", "Testing", "Custom Logging", "Documentation", "Data Structure", "PySpark"]
+example_pipeline = "True"
 
 [project.entry-points."kedro.hooks"]
 
@@ -185,6 +186,7 @@ class TestKedroTelemetryCLIHooks:
             "os": sys.platform,
             "command": "kedro --version",
             "tools": "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark",
+            "example_pipeline": "True",
         }
         generic_properties = {
             **expected_properties,
@@ -568,6 +570,7 @@ class TestKedroTelemetryProjectHooks:
             "python_version": sys.version,
             "os": sys.platform,
             "tools": "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark",
+            "example_pipeline": "True",
         }
         project_statistics = {
             "number_of_datasets": 3,

@@ -39,7 +39,7 @@ new-proj = "spaceflights.__main__:main"
 package_name = "spaceflights"
 project_name = "spaceflights"
 kedro_init_version = "0.18.14"
-tools = "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark"
+tools = ["Linting", "Testing", "Custom Logging", "Documentation", "Data Structure", "PySpark"]
 
 [project.entry-points."kedro.hooks"]
 

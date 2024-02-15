@@ -10,11 +10,11 @@
 Kedro-Telemetry is a [plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html)
 that gathers anonymised and aggregated usage analytics
 to help [the Kedro team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html)
-improve the software.
+understand how Kedro is used and prioritise improvements to the product accordingly.
 
 ## Why is my data being collected?
 
-Read [our Telemetry collection documentation](https://docs.kedro.org/en/stable/configuration/telemetry.html)
+Read [our Telemetry documentation](https://docs.kedro.org/en/stable/configuration/telemetry.html)
 for further information on the intent of the data collection and what data is collected.
 
 For technical information on how the telemetry collection works, you can browse

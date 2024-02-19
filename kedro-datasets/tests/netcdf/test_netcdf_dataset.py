@@ -154,6 +154,7 @@ class TestNetCDFDataset:
         with pytest.raises(DatasetError, match=pattern):
             netcdf_dataset.load()
 
+    @pytest.mark.usefixtures("mocked_s3_bucket_single")
     def test_pass_credentials(self, mocker, tmp_path):
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""

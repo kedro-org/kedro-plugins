@@ -159,11 +159,16 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)
 
-        if build_config := pyproject_data.get("tool", {}).get("kedro", {}):
-            if tools := build_config.get("tools"):
-                properties["tools"] = ", ".join(tools)
-            if example_pipeline := build_config.get("example_pipeline"):
-                properties["example_pipeline"] = example_pipeline
+        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
+            if "tools" in pyproject_data["tool"]["kedro"]:
+                # convert list of tools to comma-separated string
+                properties["tools"] = ", ".join(
+                    pyproject_data["tool"]["kedro"]["tools"]
+                )
+            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
+                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
+                    "example_pipeline"
+                ]
 
     return properties
 

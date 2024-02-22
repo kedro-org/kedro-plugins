@@ -30,6 +30,10 @@ from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
+KNOWN_CI_ENV_VAR_KEYS = [
+    "CODEBUILD_BUILD_ID"  # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    "JENKINS_URL",  # https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
+]
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
@@ -145,6 +149,19 @@ class KedroTelemetryProjectHooks:
         )
 
 
+def _check_is_ci_env():
+    # Most CI tools will set the CI environment variable to true
+    if os.environ.get("CI") is True:
+        return True
+
+    # Not all CI tools follow this convention, we can check through those that don't
+    for env_var_key in KNOWN_CI_ENV_VAR_KEYS:
+        if env_var_key in os.environ:
+            return True
+
+    return False
+
+
 def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
     hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
     properties = {
@@ -154,6 +171,7 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
+        "is_ci_env": _check_is_ci_env(),
     }
     pyproject_path = Path(project_path) / "pyproject.toml"
     if pyproject_path.exists():

@@ -422,7 +422,6 @@ class TestKedroTelemetryProjectHooks:
         fake_sub_pipeline,
         fake_context,
     ):
-
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )

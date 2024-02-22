@@ -16,7 +16,6 @@ from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
-    _check_is_known_ci_env,
     _confirm_consent,
 )
 
@@ -119,9 +118,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -167,9 +164,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -218,9 +213,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -290,9 +283,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -446,9 +437,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
@@ -504,9 +493,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
@@ -565,9 +552,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch(
-            "kedro_telemetry.plugin._check_is_known_ci_env", return_value=True
-        )
+        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(

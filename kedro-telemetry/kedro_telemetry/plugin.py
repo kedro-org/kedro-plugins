@@ -149,7 +149,7 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _check_is_ci_env():
+def _check_is_known_ci_env():
     # Most CI tools will set the CI environment variable to true
     if os.environ.get("CI") is True:
         return True
@@ -171,7 +171,7 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
-        "is_ci_env": _check_is_ci_env(),
+        "is_ci_env": _check_is_known_ci_env(),
     }
     pyproject_path = Path(project_path) / "pyproject.toml"
     if pyproject_path.exists():

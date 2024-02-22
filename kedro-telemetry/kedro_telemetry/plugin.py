@@ -31,7 +31,7 @@ HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
 KNOWN_CI_ENV_VAR_KEYS = [
-    "CODEBUILD_BUILD_ID"  # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    "CODEBUILD_BUILD_ID",  # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
     "JENKINS_URL",  # https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
 ]
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -151,7 +151,7 @@ class KedroTelemetryProjectHooks:
 
 def _check_is_known_ci_env():
     # Most CI tools will set the CI environment variable to true
-    if os.environ.get("CI") is True:
+    if os.getenv("CI") == "true":
         return True
 
     # Not all CI tools follow this convention, we can check through those that don't

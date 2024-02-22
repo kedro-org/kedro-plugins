@@ -9,13 +9,14 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-from pytest import fixture
+from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
+    _check_is_known_ci_env,
     _confirm_consent,
 )
 
@@ -419,6 +420,21 @@ class TestKedroTelemetryCLIHooks:
             "pytest: reading from stdin while output is captured!  Consider using `-s`."
         )
         assert msg in caplog.messages[-1]
+
+    @mark.parametrize(
+        "env_vars,result",
+        [
+            ({"CI": "true"}, True),
+            ({"CI": "false"}, False),
+            ({"CI": "false", "CODEBUILD_BUILD_ID": "Testing known CI env var"}, True),
+            ({"CI": "false", "JENKINS_URL": "Testing known CI env var"}, True),
+        ],
+    )
+    def test_check_is_known_ci_env(self, monkeypatch, env_vars, result):
+        for env_var, env_var_value in env_vars.items():
+            monkeypatch.setenv(env_var, env_var_value)
+
+        assert _check_is_known_ci_env() == result
 
 
 class TestKedroTelemetryProjectHooks:

@@ -60,13 +60,6 @@ class KedroTelemetryCLIHooks:
     ):
         """Hook implementation to send command run data to Heap"""
         try:
-            # get KedroCLI and its structure from actual project root
-            cli = KedroCLI(project_path=Path.cwd())
-            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-            masked_command_args = _mask_kedro_cli(
-                cli_struct=cli_struct, command_args=command_args
-            )
-            main_command = masked_command_args[0] if masked_command_args else "kedro"
             if not project_metadata:  # in package mode
                 return
 
@@ -77,6 +70,14 @@ class KedroTelemetryCLIHooks:
                     "sharing usage analytics so none will be collected.",
                 )
                 return
+
+            # get KedroCLI and its structure from actual project root
+            cli = KedroCLI(project_path=Path.cwd())
+            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
+            masked_command_args = _mask_kedro_cli(
+                cli_struct=cli_struct, command_args=command_args
+            )
+            main_command = masked_command_args[0] if masked_command_args else "kedro"
 
             logger.debug("You have opted into product usage analytics.")
             hashed_username = _get_hashed_username()

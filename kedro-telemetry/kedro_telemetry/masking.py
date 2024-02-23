@@ -1,5 +1,5 @@
 """Module containing command masking functionality."""
-from typing import Any, Dict, Iterator, List, Set, Union
+from typing import Any, Dict, Iterator, List, Union
 
 import click
 
@@ -44,6 +44,13 @@ def _recurse_cli(
                 io_dict[element_name],
                 get_help,
             )
+        if not get_help:
+            nested_parameter_list = [
+                option.opts for option in cli_element.get_params(ctx)
+            ]
+            for item in (item for sublist in nested_parameter_list for item in sublist):
+                if item not in io_dict[element_name]:
+                    io_dict[element_name][item] = None
 
     elif isinstance(cli_element, click.Command):
         if get_help:  # gets formatted CLI help incl params for printing
@@ -76,27 +83,35 @@ def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
-    vocabulary = _get_vocabulary(cli_struct)
-    for arg in command_args:
+
+    # Preserve the initial part of the command until parameters sections begin
+    arg_index = 0
+    current_CLI = cli_struct.get("kedro", {})
+    while (
+        arg_index < len(command_args)
+        and not command_args[arg_index].startswith("-")
+        and command_args[arg_index] in current_CLI
+    ):
+        output.append(command_args[arg_index])
+        current_CLI = current_CLI[command_args[arg_index]]
+        arg_index += 1
+
+    # Mask everything except parameter keywords
+    for arg in command_args[arg_index:]:
         if arg.startswith("-"):
-            for arg_part in arg.split("="):
-                if arg_part in vocabulary:
-                    output.append(arg_part)
-                elif arg_part:
-                    output.append(MASK)
-        elif arg in vocabulary:
-            output.append(arg)
-        elif arg:
+            if "=" in arg:
+                arg_left = arg.split("=")[0]
+                if arg_left in current_CLI:
+                    output.append(arg_left)
+                output.append(MASK)
+            elif arg in current_CLI:
+                output.append(arg)
+            else:
+                output.append(MASK)
+        else:
             output.append(MASK)
+
     return output
-
-
-def _get_vocabulary(cli_struct: Dict[str, Any]) -> Set[str]:
-    """Builds a unique whitelist of terms - a vocabulary"""
-    vocabulary = {"-h", "--version"}  # -h help and version args are not in by default
-    cli_dynamic_vocabulary = set(_recursive_items(cli_struct)) - {None}
-    vocabulary.update(cli_dynamic_vocabulary)
-    return vocabulary
 
 
 def _recursive_items(dictionary: Dict[Any, Any]) -> Iterator[Any]:

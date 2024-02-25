@@ -36,7 +36,7 @@ jobs:
       os: ubuntu-latest
       python-version: "3.11"
 
-  RTD-build:
+  check-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,6 +56,6 @@ jobs:
           python -m pip install -U "pip>=21.2,<23.2" # Temporary fix
           cd kedro-datasets
           pip install ".[docs,test]"
-      - name: RTD build for kedro-datasets
+      - name: Documentation check for kedro-datasets
         run: |
-          make rtd
+          make plugin=kedro-datasets check-docs

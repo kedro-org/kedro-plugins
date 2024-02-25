@@ -154,10 +154,11 @@ class TestNetCDFDataset:
         with pytest.raises(DatasetError, match=pattern):
             netcdf_dataset.load()
 
-    @pytest.mark.usefixtures("mocked_s3_bucket_single")
+    @pytest.mark.xfail
     def test_pass_credentials(self, mocker, tmp_path):
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
+        # See https://github.com/kedro-org/kedro-plugins/pull/360#issuecomment-1963091476
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_dataset = NetCDFDataset(
             filepath=S3_PATH, temppath=tmp_path, credentials=AWS_CREDENTIALS

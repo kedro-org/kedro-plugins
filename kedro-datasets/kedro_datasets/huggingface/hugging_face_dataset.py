@@ -24,11 +24,12 @@ class HFDataset(AbstractVersionedDataset):
     .. code-block:: pycon
 
        >>> from kedro_datasets.huggingface import HFDataset
-       >>> dataset = HFDataset(dataset_name="yelp_review_full")
-       >>> yelp_review_full = dataset.load()
-       >>> assert "train" in yelp_review_full
-       >>> assert "test" in yelp_review_full
-       >>> assert len(yelp_review_full["train"]) == 650000
+       >>> dataset = HFDataset(dataset_name="openai_humaneval")
+       >>> ds = dataset.load()  # doctest: +SKIP
+       ...
+       >>> ds = dataset.load()  # second time there is no output (doctest workaround)
+       >>> assert "test" in ds
+       >>> assert len(ds["test"]) == 164
 
     """
 

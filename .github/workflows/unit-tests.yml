@@ -61,7 +61,7 @@ jobs:
         if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: |
           cd ${{ inputs.plugin }}
-          pytest tests
+          python -m pytest tests
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |

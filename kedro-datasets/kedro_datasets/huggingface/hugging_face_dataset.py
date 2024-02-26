@@ -28,7 +28,9 @@ class HFDataset(AbstractVersionedDataset):
        >>> set_verbosity(ERROR)  # for doctest to pass
        >>> from kedro_datasets.huggingface import HFDataset
        >>> dataset = HFDataset(dataset_name="openai_humaneval")
-       >>> ds = dataset.load()
+       >>> ds = dataset.load()  # doctest: +ELLIPSIS
+       Downloading and preparing dataset ...
+       Dataset ...
        >>> assert "test" in ds
        >>> assert len(ds["test"]) == 164
 

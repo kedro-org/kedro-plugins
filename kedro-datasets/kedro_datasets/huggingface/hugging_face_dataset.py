@@ -23,11 +23,12 @@ class HFDataset(AbstractVersionedDataset):
 
     .. code-block:: pycon
 
+       >>> from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
+       >>> disable_progress_bar()  # for doctest to pass
+       >>> set_verbosity(ERROR)  # for doctest to pass
        >>> from kedro_datasets.huggingface import HFDataset
        >>> dataset = HFDataset(dataset_name="openai_humaneval")
-       >>> ds = dataset.load()  # doctest: +SKIP
-       ...
-       >>> ds = dataset.load()  # second time there is no output (doctest workaround)
+       >>> ds = dataset.load()
        >>> assert "test" in ds
        >>> assert len(ds["test"]) == 164
 

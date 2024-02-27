@@ -60,13 +60,6 @@ class KedroTelemetryCLIHooks:
     ):
         """Hook implementation to send command run data to Heap"""
         try:
-            # get KedroCLI and its structure from actual project root
-            cli = KedroCLI(project_path=Path.cwd())
-            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-            masked_command_args = _mask_kedro_cli(
-                cli_struct=cli_struct, command_args=command_args
-            )
-            main_command = masked_command_args[0] if masked_command_args else "kedro"
             if not project_metadata:  # in package mode
                 return
 
@@ -77,6 +70,14 @@ class KedroTelemetryCLIHooks:
                     "sharing usage analytics so none will be collected.",
                 )
                 return
+
+            # get KedroCLI and its structure from actual project root
+            cli = KedroCLI(project_path=Path.cwd())
+            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
+            masked_command_args = _mask_kedro_cli(
+                cli_struct=cli_struct, command_args=command_args
+            )
+            main_command = masked_command_args[0] if masked_command_args else "kedro"
 
             logger.debug("You have opted into product usage analytics.")
             hashed_username = _get_hashed_username()
@@ -159,8 +160,16 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)
 
-        if "tools" in pyproject_data["tool"]["kedro"]:
-            properties["tools"] = pyproject_data["tool"]["kedro"]["tools"]
+        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
+            if "tools" in pyproject_data["tool"]["kedro"]:
+                # convert list of tools to comma-separated string
+                properties["tools"] = ", ".join(
+                    pyproject_data["tool"]["kedro"]["tools"]
+                )
+            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
+                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
+                    "example_pipeline"
+                ]
 
     return properties
 
@@ -185,8 +194,10 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     project_statistics_properties = properties.copy()
-    project_statistics_properties["number_of_datasets"] = len(
-        catalog.datasets.__dict__.keys()
+    project_statistics_properties["number_of_datasets"] = sum(
+        1
+        for c in catalog.list()
+        if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (
         len(default_pipeline.nodes) if default_pipeline else None

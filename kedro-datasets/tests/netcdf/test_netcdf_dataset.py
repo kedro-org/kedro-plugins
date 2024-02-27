@@ -20,8 +20,8 @@ S3_PATH = f"s3://{BUCKET_NAME}/{FILE_NAME}"
 
 
 @pytest.fixture
-def mocked_s3_bucket_single():
-    """Create a bucket for testing to store a singular NetCDF file."""
+def mocked_s3_bucket():
+    """Create a bucket for testing using moto."""
     with mock_aws():
         conn = boto3.client(
             "s3",
@@ -67,17 +67,15 @@ def dummy_xr_dataset() -> xr.Dataset:
 
 
 @pytest.fixture
-def mocked_s3_object_single(
-    tmp_path, mocked_s3_bucket_single, dummy_xr_dataset: xr.Dataset
-):
+def mocked_s3_object_single(tmp_path, mocked_s3_bucket, dummy_xr_dataset: xr.Dataset):
     """Creates singular test NetCDF and adds it to mocked S3 bucket."""
     temporary_path = tmp_path / FILE_NAME
-    dummy_xr_dataset.to_netcdf(str(temporary_path))
+    dummy_xr_dataset.to_netcdf()
 
-    mocked_s3_bucket_single.put_object(
+    mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME, Key=FILE_NAME, Body=temporary_path.read_bytes()
     )
-    return mocked_s3_bucket_single
+    return mocked_s3_bucket
 
 
 # @pytest.fixture
@@ -200,7 +198,7 @@ class TestNetCDFDataset:
     #     loaded_data = s3_dataset_multi.load()
     #     assert_equal(loaded_data.compute(), dummy_xr_dataset_multi)
 
-    @pytest.mark.usefixtures("mocked_s3_bucket_single")
+    @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_exists(self, s3_dataset, dummy_xr_dataset):
         """Test `exists` method invocation for both existing and nonexistent single
         NetCDF file."""

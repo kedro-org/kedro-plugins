@@ -16,8 +16,8 @@ from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
-    _check_is_known_ci_env,
     _confirm_consent,
+    _is_known_ci_env,
 )
 
 REPO_NAME = "dummy_project"
@@ -125,7 +125,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -171,7 +171,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -221,7 +221,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -291,7 +291,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
@@ -435,13 +435,20 @@ class TestKedroTelemetryCLIHooks:
             ({"CI": "false"}, False),
             ({"CI": "false", "CODEBUILD_BUILD_ID": "Testing known CI env var"}, True),
             ({"CI": "false", "JENKINS_URL": "Testing known CI env var"}, True),
+            ({"CI": "false", "TRAVIS": "Testing known CI env var"}, True),
+            ({"CI": "false", "GITLAB_CI": "Testing known CI env var"}, True),
+            ({"CI": "false", "CIRCLECI": "Testing known CI env var"}, True),
+            ({"CI": "false", "GITHUB_ACTIONS": "Testing known CI env var"}, True),
+            (
+                {"CI": "false", "BITBUCKET_BUILD_NUMBER": "Testing known CI env var"},
+                True,
+            ),
         ],
     )
     def test_check_is_known_ci_env(self, monkeypatch, env_vars, result):
         for env_var, env_var_value in env_vars.items():
             monkeypatch.setenv(env_var, env_var_value)
-
-        assert _check_is_known_ci_env() == result
+        assert _is_known_ci_env() == result
 
 
 class TestKedroTelemetryProjectHooks:
@@ -453,14 +460,13 @@ class TestKedroTelemetryProjectHooks:
         fake_sub_pipeline,
         fake_context,
     ):
-
         mocker.patch.dict(
             pipelines, {"__default__": fake_default_pipeline, "sub": fake_sub_pipeline}
         )
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
@@ -516,7 +522,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
@@ -575,7 +581,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        mocker.patch("kedro_telemetry.plugin._check_is_known_ci_env", return_value=True)
+        mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
@@ -603,9 +609,9 @@ class TestKedroTelemetryProjectHooks:
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
+            "is_ci_env": True,
             "tools": "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark",
             "example_pipeline": "True",
-
         }
         project_statistics = {
             "number_of_datasets": 3,

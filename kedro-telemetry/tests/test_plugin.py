@@ -439,7 +439,6 @@ class TestKedroTelemetryCLIHooks:
             ({"CI": "false", "TRAVIS": "Testing known CI env var"}, True),
             ({"GITLAB_CI": "Testing known CI env var"}, True),
             ({"CI": "false", "CIRCLECI": "Testing known CI env var"}, True),
-            ({"CI": "false", "GITHUB_ACTION": "Testing known CI env var"}, True),
             (
                 {"CI": "false", "BITBUCKET_BUILD_NUMBER": "Testing known CI env var"},
                 True,

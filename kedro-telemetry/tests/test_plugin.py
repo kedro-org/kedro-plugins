@@ -1,3 +1,5 @@
+import logging
+import os
 import sys
 from pathlib import Path
 
@@ -447,6 +449,9 @@ class TestKedroTelemetryCLIHooks:
     def test_check_is_known_ci_env(self, monkeypatch, env_vars, result):
         for env_var, env_var_value in env_vars.items():
             monkeypatch.setenv(env_var, env_var_value)
+
+        logging.warning(os.environ)
+        raise
         assert _is_known_ci_env() == result
 
 

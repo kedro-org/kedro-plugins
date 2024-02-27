@@ -1,4 +1,5 @@
 # Upcoming Release
+* Sort DAGs to make sure `kedro airflow create` is deterministic.
 * Option to group MemoryDatasets in the same Airflow task (breaking change for custom template via `--jinja-file`).
 * Include the environment name in the DAG file name when different from the default.
 

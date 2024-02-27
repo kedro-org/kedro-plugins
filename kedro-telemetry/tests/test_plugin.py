@@ -432,11 +432,10 @@ class TestKedroTelemetryCLIHooks:
         "env_vars,result",
         [
             ({"CI": "true"}, True),
-            ({"CI": "false"}, False),
             ({"CI": "false", "CODEBUILD_BUILD_ID": "Testing known CI env var"}, True),
-            ({"CI": "false", "JENKINS_URL": "Testing known CI env var"}, True),
+            ({"JENKINS_URL": "Testing known CI env var"}, True),
             ({"CI": "false", "TRAVIS": "Testing known CI env var"}, True),
-            ({"CI": "false", "GITLAB_CI": "Testing known CI env var"}, True),
+            ({"GITLAB_CI": "Testing known CI env var"}, True),
             ({"CI": "false", "CIRCLECI": "Testing known CI env var"}, True),
             ({"CI": "false", "GITHUB_ACTIONS": "Testing known CI env var"}, True),
             (

@@ -178,8 +178,16 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)
 
-        if "tools" in pyproject_data["tool"]["kedro"]:
-            properties["tools"] = pyproject_data["tool"]["kedro"]["tools"]
+        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
+            if "tools" in pyproject_data["tool"]["kedro"]:
+                # convert list of tools to comma-separated string
+                properties["tools"] = ", ".join(
+                    pyproject_data["tool"]["kedro"]["tools"]
+                )
+            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
+                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
+                    "example_pipeline"
+                ]
 
     return properties
 
@@ -204,8 +212,10 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     project_statistics_properties = properties.copy()
-    project_statistics_properties["number_of_datasets"] = len(
-        catalog.datasets.__dict__.keys()
+    project_statistics_properties["number_of_datasets"] = sum(
+        1
+        for c in catalog.list()
+        if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (
         len(default_pipeline.nodes) if default_pipeline else None

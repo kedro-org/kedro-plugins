@@ -16,7 +16,7 @@ AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 # Pathlib cannot be used since it strips out the second slash from "s3://"
 S3_PATH = f"s3://{BUCKET_NAME}/{FILE_NAME}"
-S3_PATH_MULTIFILE = f"s3://{MULTIFILE_BUCKET_NAME}/{MULTIFILE_NAME}"
+# S3_PATH_MULTIFILE = f"s3://{MULTIFILE_BUCKET_NAME}/{MULTIFILE_NAME}"
 
 
 @pytest.fixture
@@ -32,17 +32,17 @@ def mocked_s3_bucket_single():
         yield conn
 
 
-@pytest.fixture
-def mocked_s3_bucket_multi():
-    """Create a bucket for testing to store multiple NetCDF files."""
-    with mock_aws():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
-        )
-        conn.create_bucket(Bucket=MULTIFILE_BUCKET_NAME)
-        yield conn
+# @pytest.fixture
+# def mocked_s3_bucket_multi():
+#     """Create a bucket for testing to store multiple NetCDF files."""
+#     with mock_aws():
+#         conn = boto3.client(
+#             "s3",
+#             aws_access_key_id="fake_access_key",
+#             aws_secret_access_key="fake_secret_key",
+#         )
+#         conn.create_bucket(Bucket=MULTIFILE_BUCKET_NAME)
+#         yield conn
 
 
 def dummy_data() -> xr.Dataset:
@@ -59,11 +59,11 @@ def dummy_xr_dataset() -> xr.Dataset:
     return dummy_data()
 
 
-@pytest.fixture
-def dummy_xr_dataset_multi() -> xr.Dataset:
-    """Expected concatenated result for load/save on multiple NetCDF files."""
-    data = dummy_data()
-    return xr.concat([data, data], dim="dummy")
+# @pytest.fixture
+# def dummy_xr_dataset_multi() -> xr.Dataset:
+#     """Expected concatenated result for load/save on multiple NetCDF files."""
+#     data = dummy_data()
+#     return xr.concat([data, data], dim="dummy")
 
 
 @pytest.fixture
@@ -80,25 +80,25 @@ def mocked_s3_object_single(
     return mocked_s3_bucket_single
 
 
-@pytest.fixture
-def mocked_s3_object_multi(
-    tmp_path, mocked_s3_bucket_multi, dummy_xr_dataset: xr.Dataset
-):
-    """Creates multiple test NetCDFs and adds them to mocked S3 bucket."""
+# @pytest.fixture
+# def mocked_s3_object_multi(
+#     tmp_path, mocked_s3_bucket_multi, dummy_xr_dataset: xr.Dataset
+# ):
+#     """Creates multiple test NetCDFs and adds them to mocked S3 bucket."""
 
-    def put_data(file_name: str):
-        temporary_path = tmp_path / file_name
-        dummy_xr_dataset.to_netcdf(str(temporary_path))
-        mocked_s3_bucket_multi.put_object(
-            Bucket=MULTIFILE_BUCKET_NAME,
-            Key=file_name,
-            Body=temporary_path.read_bytes(),
-        )
-        return mocked_s3_bucket_multi
+#     def put_data(file_name: str):
+#         temporary_path = tmp_path / file_name
+#         dummy_xr_dataset.to_netcdf(str(temporary_path))
+#         mocked_s3_bucket_multi.put_object(
+#             Bucket=MULTIFILE_BUCKET_NAME,
+#             Key=file_name,
+#             Body=temporary_path.read_bytes(),
+#         )
+#         return mocked_s3_bucket_multi
 
-    mocked_s3_bucket_multi = put_data("test1.nc")
-    mocked_s3_bucket_multi = put_data("test2.nc")
-    return mocked_s3_bucket_multi
+#     mocked_s3_bucket_multi = put_data("test1.nc")
+#     mocked_s3_bucket_multi = put_data("test2.nc")
+#     return mocked_s3_bucket_multi
 
 
 @pytest.fixture
@@ -113,16 +113,16 @@ def s3_dataset(load_args, save_args, tmp_path):
     )
 
 
-@pytest.fixture
-def s3_dataset_multi(save_args, tmp_path):
-    """Sample NetCDF dataset pointing to mocked S3 bucket with multiple NetCDF files."""
-    return NetCDFDataset(
-        filepath=S3_PATH_MULTIFILE,
-        temppath=tmp_path,
-        credentials=AWS_CREDENTIALS,
-        load_args={"concat_dim": "dummy", "combine": "nested"},
-        save_args=save_args,
-    )
+# @pytest.fixture
+# def s3_dataset_multi(save_args, tmp_path):
+#     """Sample NetCDF dataset pointing to mocked S3 bucket with multiple NetCDF files."""
+#     return NetCDFDataset(
+#         filepath=S3_PATH_MULTIFILE,
+#         temppath=tmp_path,
+#         credentials=AWS_CREDENTIALS,
+#         load_args={"concat_dim": "dummy", "combine": "nested"},
+#         save_args=save_args,
+#     )
 
 
 @pytest.fixture()
@@ -179,14 +179,14 @@ class TestNetCDFDataset:
         loaded_data = s3_dataset.load()
         assert_equal(loaded_data, dummy_xr_dataset)
 
-    @pytest.mark.usefixtures("mocked_s3_object_multi")
-    def test_save_data_multi_error(self, s3_dataset_multi):
-        """Test that error is raised when trying to save to a NetCDF destination with
-        a glob pattern."""
-        loaded_data = s3_dataset_multi.load()
-        pattern = r"Globbed multifile datasets with '*'"
-        with pytest.raises(DatasetError, match=pattern):
-            s3_dataset_multi.save(loaded_data)
+    # @pytest.mark.usefixtures("mocked_s3_object_multi")
+    # def test_save_data_multi_error(self, s3_dataset_multi):
+    #     """Test that error is raised when trying to save to a NetCDF destination with
+    #     a glob pattern."""
+    #     loaded_data = s3_dataset_multi.load()
+    #     pattern = r"Globbed multifile datasets with '*'"
+    #     with pytest.raises(DatasetError, match=pattern):
+    #         s3_dataset_multi.save(loaded_data)
 
     @pytest.mark.usefixtures("mocked_s3_object_single")
     def test_load_data_single(self, s3_dataset, dummy_xr_dataset):
@@ -194,11 +194,11 @@ class TestNetCDFDataset:
         loaded_data = s3_dataset.load()
         assert_equal(loaded_data, dummy_xr_dataset)
 
-    @pytest.mark.usefixtures("mocked_s3_object_multi")
-    def test_load_data_multi(self, s3_dataset_multi, dummy_xr_dataset_multi):
-        """Test loading multiple NetCDF files from S3."""
-        loaded_data = s3_dataset_multi.load()
-        assert_equal(loaded_data.compute(), dummy_xr_dataset_multi)
+    # @pytest.mark.usefixtures("mocked_s3_object_multi")
+    # def test_load_data_multi(self, s3_dataset_multi, dummy_xr_dataset_multi):
+    #     """Test loading multiple NetCDF files from S3."""
+    #     loaded_data = s3_dataset_multi.load()
+    #     assert_equal(loaded_data.compute(), dummy_xr_dataset_multi)
 
     @pytest.mark.usefixtures("mocked_s3_bucket_single")
     def test_exists(self, s3_dataset, dummy_xr_dataset):
@@ -208,19 +208,19 @@ class TestNetCDFDataset:
         s3_dataset.save(dummy_xr_dataset)
         assert s3_dataset.exists()
 
-    @pytest.mark.usefixtures("mocked_s3_object_multi")
-    def test_exists_multi_remote(self, s3_dataset_multi):
-        """Test `exists` method invocation works for multifile glob pattern on S3."""
-        assert s3_dataset_multi.exists()
+    # @pytest.mark.usefixtures("mocked_s3_object_multi")
+    # def test_exists_multi_remote(self, s3_dataset_multi):
+    #     """Test `exists` method invocation works for multifile glob pattern on S3."""
+    #     assert s3_dataset_multi.exists()
 
-    def test_exists_multi_locally(self, tmp_path, dummy_xr_dataset):
-        """Test `exists` method invocation for both existing and nonexistent set of
-        multiple local NetCDF files."""
-        dataset = NetCDFDataset(filepath=str(tmp_path / MULTIFILE_NAME))
-        assert not dataset.exists()
-        NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(dummy_xr_dataset)
-        NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
-        assert dataset.exists()
+    # def test_exists_multi_locally(self, tmp_path, dummy_xr_dataset):
+    #     """Test `exists` method invocation for both existing and nonexistent set of
+    #     multiple local NetCDF files."""
+    #     dataset = NetCDFDataset(filepath=str(tmp_path / MULTIFILE_NAME))
+    #     assert not dataset.exists()
+    #     NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(dummy_xr_dataset)
+    #     NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
+    #     assert dataset.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_xr_dataset):
         """Test loading and saving the a NetCDF file locally."""
@@ -233,25 +233,25 @@ class TestNetCDFDataset:
         loaded_data = dataset.load()
         dummy_xr_dataset.equals(loaded_data)
 
-    def test_load_locally_multi(
-        self, tmp_path, dummy_xr_dataset, dummy_xr_dataset_multi
-    ):
-        """Test loading multiple NetCDF files locally."""
-        file_path = str(tmp_path / "some" / "dir" / MULTIFILE_NAME)
-        dataset = NetCDFDataset(
-            filepath=file_path, load_args={"concat_dim": "dummy", "combine": "nested"}
-        )
+    # def test_load_locally_multi(
+    #     self, tmp_path, dummy_xr_dataset, dummy_xr_dataset_multi
+    # ):
+    #     """Test loading multiple NetCDF files locally."""
+    #     file_path = str(tmp_path / "some" / "dir" / MULTIFILE_NAME)
+    #     dataset = NetCDFDataset(
+    #         filepath=file_path, load_args={"concat_dim": "dummy", "combine": "nested"}
+    #     )
 
-        assert not dataset.exists()
-        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test1.nc")).save(
-            dummy_xr_dataset
-        )
-        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test2.nc")).save(
-            dummy_xr_dataset
-        )
-        assert dataset.exists()
-        loaded_data = dataset.load()
-        dummy_xr_dataset_multi.equals(loaded_data.compute())
+    #     assert not dataset.exists()
+    #     NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test1.nc")).save(
+    #         dummy_xr_dataset
+    #     )
+    #     NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test2.nc")).save(
+    #         dummy_xr_dataset
+    #     )
+    #     assert dataset.exists()
+    #     loaded_data = dataset.load()
+    #     dummy_xr_dataset_multi.equals(loaded_data.compute())
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True

@@ -67,6 +67,7 @@ class NetCDFDataset(AbstractDataset):
 
     def __init__(  # noqa
         self,
+        *,
         filepath: str,
         temppath: str = None,
         load_args: dict[str, Any] = None,

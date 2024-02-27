@@ -2,7 +2,7 @@ import boto3
 import pytest
 import xarray as xr
 from kedro.io.core import DatasetError
-from moto import mock_s3
+from moto import mock_aws
 from s3fs import S3FileSystem
 from xarray.testing import assert_equal
 
@@ -22,7 +22,7 @@ S3_PATH_MULTIFILE = f"s3://{MULTIFILE_BUCKET_NAME}/{MULTIFILE_NAME}"
 @pytest.fixture
 def mocked_s3_bucket_single():
     """Create a bucket for testing to store a singular NetCDF file."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -35,7 +35,7 @@ def mocked_s3_bucket_single():
 @pytest.fixture
 def mocked_s3_bucket_multi():
     """Create a bucket for testing to store multiple NetCDF files."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

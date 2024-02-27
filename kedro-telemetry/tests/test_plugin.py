@@ -39,7 +39,8 @@ new-proj = "spaceflights.__main__:main"
 package_name = "spaceflights"
 project_name = "spaceflights"
 kedro_init_version = "0.18.14"
-tools = "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']"
+tools = ["Linting", "Testing", "Custom Logging", "Documentation", "Data Structure", "PySpark"]
+example_pipeline = "True"
 
 [project.entry-points."kedro.hooks"]
 
@@ -72,10 +73,15 @@ def fake_metadata(tmp_path):
 
 @fixture
 def fake_catalog():
-    dummy_1 = MemoryDataset()
-    dummy_2 = MemoryDataset()
-    dummy_3 = MemoryDataset()
-    catalog = DataCatalog({"dummy_1": dummy_1, "dummy_2": dummy_2, "dummy_3": dummy_3})
+    catalog = DataCatalog(
+        {
+            "dummy_1": MemoryDataset(),
+            "dummy_2": MemoryDataset(),
+            "dummy_3": MemoryDataset(),
+            "parameters": MemoryDataset(),
+            "params:dummy": MemoryDataset(),
+        }
+    )
     return catalog
 
 
@@ -184,7 +190,8 @@ class TestKedroTelemetryCLIHooks:
             "python_version": sys.version,
             "os": sys.platform,
             "command": "kedro --version",
-            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']",
+            "tools": "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark",
+            "example_pipeline": "True",
         }
         generic_properties = {
             **expected_properties,
@@ -567,7 +574,8 @@ class TestKedroTelemetryProjectHooks:
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
-            "tools": "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']",
+            "tools": "Linting, Testing, Custom Logging, Documentation, Data Structure, PySpark",
+            "example_pipeline": "True",
         }
         project_statistics = {
             "number_of_datasets": 3,

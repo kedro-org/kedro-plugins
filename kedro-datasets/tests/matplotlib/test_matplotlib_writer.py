@@ -80,7 +80,7 @@ def mocked_encrypted_s3_bucket():
     }
     bucket_policy = json.dumps(bucket_policy)
 
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

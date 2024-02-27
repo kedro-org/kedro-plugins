@@ -30,7 +30,7 @@ from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
-KNOWN_CI_ENV_VAR_KEYS = (
+KNOWN_CI_ENV_VAR_KEYS = {
     "GITLAB_CI",  # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
     "GITHUB_ACTION",  # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
     "BITBUCKET_BUILD_NUMBER",  # https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
@@ -39,7 +39,7 @@ KNOWN_CI_ENV_VAR_KEYS = (
     "CIRCLECI",  # https://circleci.com/docs/variables/#built-in-environment-variables
     "TRAVIS",  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
-)
+}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
@@ -155,12 +155,12 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _is_known_ci_env():
+def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     # Most CI tools will set the CI environment variable to true
     if os.getenv("CI") == "true":
         return True
     # Not all CI tools follow this convention, we can check through those that don't
-    return any(os.getenv(key) for key in KNOWN_CI_ENV_VAR_KEYS)
+    return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
 def _get_project_properties(hashed_username: str, project_path: str) -> Dict:

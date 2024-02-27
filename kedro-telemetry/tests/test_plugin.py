@@ -15,6 +15,7 @@ from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
+    KNOWN_CI_ENV_VAR_KEYS,
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
@@ -434,12 +435,13 @@ class TestKedroTelemetryCLIHooks:
         "env_vars,result",
         [
             ({"CI": "true"}, True),
+            ({"CI": "false"}, False),
             ({"CI": "false", "CODEBUILD_BUILD_ID": "Testing known CI env var"}, True),
             ({"JENKINS_URL": "Testing known CI env var"}, True),
             ({"CI": "false", "TRAVIS": "Testing known CI env var"}, True),
             ({"GITLAB_CI": "Testing known CI env var"}, True),
             ({"CI": "false", "CIRCLECI": "Testing known CI env var"}, True),
-            ({"CI": "false", "GITHUB_ACTIONS": "Testing known CI env var"}, True),
+            ({"CI": "false", "GITHUB_ACTION": "Testing known CI env var"}, True),
             (
                 {"CI": "false", "BITBUCKET_BUILD_NUMBER": "Testing known CI env var"},
                 True,
@@ -450,9 +452,10 @@ class TestKedroTelemetryCLIHooks:
         for env_var, env_var_value in env_vars.items():
             monkeypatch.setenv(env_var, env_var_value)
 
-        logging.warning(os.environ)
-        raise
-        assert _is_known_ci_env() == result
+        known_ci_vars = KNOWN_CI_ENV_VAR_KEYS
+        # Because our CI runs on Github Actions, this would always return True otherwise
+        known_ci_vars.discard("GITHUB_ACTION")
+        assert _is_known_ci_env(known_ci_vars) == result
 
 
 class TestKedroTelemetryProjectHooks:

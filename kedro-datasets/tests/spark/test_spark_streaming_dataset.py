@@ -3,7 +3,7 @@ import json
 import boto3
 import pytest
 from kedro.io.core import DatasetError
-from moto import mock_s3
+from moto import mock_aws
 from packaging.version import Version
 from pyspark import __version__
 from pyspark.sql import SparkSession
@@ -57,7 +57,7 @@ def sample_spark_streaming_df(tmp_path, sample_spark_df_schema):
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -69,7 +69,7 @@ def mocked_s3_bucket():
 
 @pytest.fixture
 def s3_bucket():
-    with mock_s3():
+    with mock_aws():
         s3 = boto3.resource("s3", region_name="us-east-1")
         bucket_name = "test-bucket"
         s3.create_bucket(Bucket=bucket_name)

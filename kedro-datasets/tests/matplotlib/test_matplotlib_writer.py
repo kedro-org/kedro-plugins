@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pytest
 from kedro.io import DatasetError, Version
-from moto import mock_s3
+from moto import mock_aws
 from s3fs import S3FileSystem
 
 from kedro_datasets.matplotlib import MatplotlibWriter
@@ -52,7 +52,7 @@ def mock_dict_plot():
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

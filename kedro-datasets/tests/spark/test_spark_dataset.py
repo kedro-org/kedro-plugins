@@ -12,7 +12,7 @@ from kedro.io.core import DatasetError, generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
-from moto import mock_s3
+from moto import mock_aws
 from packaging.version import Version as PackagingVersion
 from pyspark import __version__
 from pyspark.sql import SparkSession
@@ -140,7 +140,7 @@ def spark_in(tmp_path, sample_spark_df):
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id=AWS_CREDENTIALS["key"],

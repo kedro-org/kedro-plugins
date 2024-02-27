@@ -5,7 +5,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 from kedro.io.core import DatasetError
-from moto import mock_s3
+from moto import mock_aws
 from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
@@ -22,7 +22,7 @@ S3_PATH = f"s3://{BUCKET_NAME}/{FILE_NAME}"
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

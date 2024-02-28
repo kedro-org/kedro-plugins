@@ -177,14 +177,12 @@ class TestNetCDFDataset:
     #     loaded_data = s3_dataset.load()
     #     assert_equal(loaded_data, dummy_xr_dataset)
 
-    # @pytest.mark.usefixtures("mocked_s3_object_multi")
-    # def test_save_data_multi_error(self, s3_dataset_multi):
-    #     """Test that error is raised when trying to save to a NetCDF destination with
-    #     a glob pattern."""
-    #     loaded_data = s3_dataset_multi.load()
-    #     pattern = r"Globbed multifile datasets with '*'"
-    #     with pytest.raises(DatasetError, match=pattern):
-    #         s3_dataset_multi.save(loaded_data)
+    def test_save_data_multi_error(self, s3_dataset_multi, dummy_xr_dataset_multi):
+        """Test that error is raised when trying to save to a NetCDF destination with
+        a glob pattern."""
+        pattern = r"Globbed multifile datasets with '*'"
+        with pytest.raises(DatasetError, match=pattern):
+            s3_dataset_multi.save(dummy_xr_dataset)
 
     # @pytest.mark.usefixtures("mocked_s3_object_single")
     # def test_load_data_single(self, s3_dataset, dummy_xr_dataset):

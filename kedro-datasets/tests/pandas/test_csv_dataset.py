@@ -12,7 +12,7 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version, generate_timestamp
-from moto import mock_s3
+from moto import mock_aws
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
@@ -59,7 +59,7 @@ def partitioned_data_pandas():
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

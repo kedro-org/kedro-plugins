@@ -191,10 +191,15 @@ def create(  # noqa: PLR0913
                 for parent in parent_nodes:
                     dependencies[parent.name].append(node.name)
 
+        # Sort both parent and child nodes to make sure it's deterministic
+        sorted_dependencies = {}
+        for parent in sorted(dependencies.keys()):
+            sorted_dependencies[parent] = sorted(dependencies[parent])
+
         template.stream(
             dag_name=package_name,
             nodes=nodes,
-            dependencies=dependencies,
+            dependencies=sorted_dependencies,
             env=env,
             pipeline_name=name,
             package_name=package_name,

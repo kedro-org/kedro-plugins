@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from kedro.io.core import AbstractDataset, DatasetError
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from moto import mock_s3
+from moto import mock_aws
 from pandas.util.testing import assert_frame_equal
 
 from kedro_datasets.partitions import IncrementalDataset
@@ -433,7 +433,7 @@ BUCKET_NAME = "fake_bucket_name"
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",

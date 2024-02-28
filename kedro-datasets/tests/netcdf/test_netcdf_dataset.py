@@ -170,12 +170,12 @@ class TestNetCDFDataset:
         assert kwargs["aws_access_key_id"] == AWS_CREDENTIALS["key"]
         assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
 
-    # @pytest.mark.usefixtures("mocked_s3_bucket")
-    # def test_save_data_single(self, s3_dataset, dummy_xr_dataset):
-    #     """Test saving a single NetCDF file to S3."""
-    #     s3_dataset.save(dummy_xr_dataset)
-    #     loaded_data = s3_dataset.load()
-    #     assert_equal(loaded_data, dummy_xr_dataset)
+    @pytest.mark.skip
+    def test_save_data_single(self, s3_dataset, dummy_xr_dataset):
+        """Test saving a single NetCDF file to S3."""
+        s3_dataset.save(dummy_xr_dataset)
+        loaded_data = s3_dataset.load()
+        assert_equal(loaded_data, dummy_xr_dataset)
 
     def test_save_data_multi_error(self, s3_dataset_multi, dummy_xr_dataset_multi):
         """Test that error is raised when trying to save to a NetCDF destination with
@@ -184,17 +184,17 @@ class TestNetCDFDataset:
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset_multi.save(dummy_xr_dataset)
 
-    # @pytest.mark.usefixtures("mocked_s3_object_single")
-    # def test_load_data_single(self, s3_dataset, dummy_xr_dataset):
-    #     """Test loading a single NetCDF file from S3."""
-    #     loaded_data = s3_dataset.load()
-    #     assert_equal(loaded_data, dummy_xr_dataset)
+    @pytest.mark.skip
+    def test_load_data_single(self, s3_dataset, dummy_xr_dataset):
+        """Test loading a single NetCDF file from S3."""
+        loaded_data = s3_dataset.load()
+        assert_equal(loaded_data, dummy_xr_dataset)
 
-    # @pytest.mark.usefixtures("mocked_s3_object_multi")
-    # def test_load_data_multi(self, s3_dataset_multi, dummy_xr_dataset_multi):
-    #     """Test loading multiple NetCDF files from S3."""
-    #     loaded_data = s3_dataset_multi.load()
-    #     assert_equal(loaded_data, dummy_xr_dataset_multi)
+    @pytest.mark.skip
+    def test_load_data_multi(self, s3_dataset_multi, dummy_xr_dataset_multi):
+        """Test loading multiple NetCDF files from S3."""
+        loaded_data = s3_dataset_multi.load()
+        assert_equal(loaded_data, dummy_xr_dataset_multi)
 
     @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_exists(self, s3_dataset, dummy_xr_dataset):

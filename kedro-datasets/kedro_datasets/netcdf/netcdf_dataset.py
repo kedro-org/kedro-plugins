@@ -10,7 +10,6 @@ import xarray as xr
 from kedro.io.core import (
     AbstractDataset,
     DatasetError,
-    get_filepath_str,
     get_protocol_and_path,
 )
 
@@ -221,7 +220,7 @@ class NetCDFDataset(AbstractDataset):
                         pass  # pragma: no cover
             else:
                 temp_filepath = (
-                    str(temp_filepath) + PurePosixPath(self._filepath).suffix
+                    str(temp_filepath) + "/" + PurePosixPath(self._filepath).name
                 )
                 try:
                     Path(temp_filepath).unlink()

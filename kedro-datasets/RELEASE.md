@@ -17,6 +17,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Samuel Lee SJ](https://github.com/samuel-lee-sj)
 * [Felipe Monroy](https://github.com/felipemonroy)
+* [Manuel Spierenburg](https://github.com/mjspier)
 
 # Release 2.0.0
 ## Major features and improvements

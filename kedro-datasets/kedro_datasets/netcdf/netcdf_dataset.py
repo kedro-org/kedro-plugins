@@ -169,9 +169,8 @@ class NetCDFDataset(AbstractDataset):
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )
         else:
-            save_path = (
-                self._filepath
-            )  # get_filepath_str(self._filepath, self._protocol)
+            save_path = self._filepath
+            # get_filepath_str(self._filepath, self._protocol)
 
             # if self._protocol not in ["file", "http", "https"]:
             #     # `get_filepath_str` drops remote protocol prefix.

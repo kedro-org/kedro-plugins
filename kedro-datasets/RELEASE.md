@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added `MatlabDataset` which uses `scipy` to save and load `.mat` files.
 * Extend preview feature for matplotlib, plotly and tracking datasets.
+* Allow additional parameters for sqlalchemy engine when using sql datasets.
 
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies

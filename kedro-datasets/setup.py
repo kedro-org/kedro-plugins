@@ -30,6 +30,15 @@ huggingface_require = {
     "huggingface.HFTransformerPipelineDataset": ["transformers"],
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+matlab_require = {"matlab.MatlabDataset": ["scipy"]}
+netcdf_require = {
+    "netcdf.NetCDFDataset": [
+        "h5netcdf>=1.2.0",
+        "netcdf4>=1.6.4",
+        "xarray<=0.20.2; python_version == '3.7'",
+        "xarray>=2023.1.0; python_version >= '3.8'",
+    ]
+}
 networkx_require = {"networkx.NetworkXDataset": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataset": [PANDAS],
@@ -48,8 +57,7 @@ pandas_require = {
     ],
     "pandas.HDFDataset": [
         PANDAS,
-        "tables~=3.6.0; platform_system == 'Windows'",
-        "tables~=3.6; platform_system != 'Windows'",
+        "tables~=3.6",
     ],
     "pandas.JSONDataset": [PANDAS],
     "pandas.ParquetDataset": [PANDAS, "pyarrow>=6.0"],
@@ -66,22 +74,28 @@ plotly_require = {
 }
 polars_require = {
     "polars.CSVDataset": [POLARS],
-    "polars.EagerPolarsDataset":
-    [
-        POLARS, "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"
+    "polars.GenericDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
     ],
-    "polars.LazyPolarsDataset":
-    [
+    "polars.EagerPolarsDataset": [
+        POLARS,
+        "pyarrow>=4.0",
+        "xlsx2csv>=0.8.0",
+        "deltalake >= 0.6.2",
+    ],
+    "polars.LazyPolarsDataset": [
         # Note: there is no Lazy read Excel option, so we exclude xlsx2csv here.
-        POLARS, "pyarrow>=4.0", "deltalake >= 0.6.2"
+        POLARS,
+        "pyarrow>=4.0",
+        "deltalake >= 0.6.2",
     ],
 }
 redis_require = {"redis.PickleDataset": ["redis~=4.1"]}
 snowflake_require = {
-    "snowflake.SnowparkTableDataset": [
-        "snowflake-snowpark-python~=1.0",
-        "pyarrow~=8.0",
-    ]
+    "snowflake.SnowparkTableDataset": ["snowflake-snowpark-python~=1.0"]
 }
 spark_require = {
     "spark.SparkDataset": [SPARK, HDFS, S3FS],
@@ -111,7 +125,9 @@ extras_require = {
     "geopandas": _collect_requirements(geopandas_require),
     "holoviews": _collect_requirements(holoviews_require),
     "huggingface": _collect_requirements(huggingface_require),
+    "matlab": _collect_requirements(matlab_require),
     "matplotlib": _collect_requirements(matplotlib_require),
+    "netcdf": _collect_requirements(netcdf_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pickle": _collect_requirements(pickle_require),
@@ -175,9 +191,9 @@ extras_require["test"] = [
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
+    "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <0.15.2",  # temporary pin as 0.15.2 breaks some of our tests
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",
@@ -194,8 +210,7 @@ extras_require["test"] = [
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
     "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
-    "moto==1.3.7; python_version < '3.10'",
-    "moto==4.1.12; python_version >= '3.10'",
+    "moto==5.0.0",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -233,6 +248,7 @@ extras_require["test"] = [
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
+    "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
     "datasets",

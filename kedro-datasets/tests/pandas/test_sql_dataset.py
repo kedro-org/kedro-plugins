@@ -6,6 +6,7 @@ import pytest
 import sqlalchemy
 from kedro.io.core import DatasetError
 
+import kedro_datasets
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
 
 TABLE_NAME = "table_a"
@@ -196,6 +197,18 @@ class TestSQLTableDataset:
         table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
             name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
+        )
+
+    def test_additional_params(self, mocker):
+        """Check additional parametes are sent to engine"""
+        mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.create_engine",
+        )
+        additional_params = {"param1": "1", "param2": "2"}
+        credentials = {"con": CONNECTION, **additional_params}
+        SQLTableDataset(table_name=TABLE_NAME, credentials=credentials).engine
+        kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
+            CONNECTION, **additional_params
         )
 
 
@@ -500,3 +513,15 @@ class TestSQLQueryDataset:
                 credentials={"con": MSSQL_CONNECTION},
                 load_args=load_args,
             )
+
+    def test_additional_params(self, mocker):
+        """Check additional parametes are sent to engine"""
+        mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.create_engine",
+        )
+        additional_params = {"param1": "1", "param2": "2"}
+        credentials = {"con": CONNECTION, **additional_params}
+        SQLQueryDataset(sql=SQL_QUERY, credentials=credentials).engine
+        kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
+            CONNECTION, **additional_params
+        )

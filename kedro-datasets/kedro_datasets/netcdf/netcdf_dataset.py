@@ -182,7 +182,7 @@ class NetCDFDataset(AbstractDataset):
         )
 
     def _exists(self) -> bool:
-        load_path = self._filepath  # get_filepath_str(self._filepath, self._protocol)
+        load_path = self._filepath
 
         if self._is_multifile:
             files = self._fs.glob(load_path)

@@ -36,16 +36,16 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         >>> import numpy as np
         >>>
         >>> data = xr.DataArray(
-                np.random.randn(2, 3, 2),
-                dims=("band", "y", "x"),
-                coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
-            )
-        >>> data = data.rio.write_crs("epsg:4326")
-        >>> data = data.rio.set_spatial_dims("x", "y")
+        ...     np.random.randn(2, 3, 2),
+        ...     dims=("band", "y", "x"),
+        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]}
+        ... )
+        >>> data_crs = data.rio.write_crs("epsg:4326")
+        >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
         >>> dataset = GeoTiffDataset(filepath="test.tif")
-        >>> dataset.save(data)
+        >>> dataset.save(data_spatial_dims)
         >>> reloaded = dataset.load()
-        >>> xr.testing.assert_allclose(data, reloaded, rtol=1e-5)
+        >>> xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
 
     """
 

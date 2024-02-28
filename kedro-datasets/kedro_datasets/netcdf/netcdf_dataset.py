@@ -10,7 +10,6 @@ import xarray as xr
 from kedro.io.core import (
     AbstractDataset,
     DatasetError,
-    get_filepath_str,
     get_protocol_and_path,
 )
 
@@ -67,6 +66,7 @@ class NetCDFDataset(AbstractDataset):
 
     def __init__(  # noqa
         self,
+        *,
         filepath: str,
         temppath: str = None,
         load_args: dict[str, Any] = None,
@@ -117,7 +117,7 @@ class NetCDFDataset(AbstractDataset):
                 + "filesystem"
             )
         self._protocol = protocol
-        self._filepath = PurePosixPath(path)
+        self._filepath = filepath
 
         self._storage_options = {**self._credentials, **self._fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
@@ -133,26 +133,25 @@ class NetCDFDataset(AbstractDataset):
             self._save_args.update(save_args)
 
         # Determine if multiple NetCDF files are being loaded in.
-        self._is_multifile = True if "*" in str(self._filepath.stem) else False
+        self._is_multifile = (
+            True if "*" in str(PurePosixPath(self._filepath).stem) else False
+        )
 
     def _load(self) -> xr.Dataset:
-        load_path = get_filepath_str(self._filepath, self._protocol)
+        load_path = self._filepath
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
         if self._protocol != "file":
             logger.info("Syncing remote NetCDF file to local storage.")
 
-            if self._protocol not in ["http", "https"]:
-                # `get_filepath_str` drops remote protocol prefix.
-                load_path = self._protocol + "://" + load_path
             if self._is_multifile:
                 load_path = sorted(self._fs.glob(load_path))
 
             self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{self._filepath.stem}.nc"
 
-        if "*" in str(load_path):
+        if self._is_multifile:
             data = xr.open_mfdataset(str(load_path), **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)
@@ -166,12 +165,7 @@ class NetCDFDataset(AbstractDataset):
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )
         else:
-            save_path = get_filepath_str(self._filepath, self._protocol)
-
-            if self._protocol not in ["file", "http", "https"]:
-                # `get_filepath_str` drops remote protocol prefix.
-                save_path = self._protocol + "://" + save_path
-
+            save_path = self._filepath
             bytes_buffer = data.to_netcdf(**self._save_args)
 
             with self._fs.open(save_path, mode="wb") as fs_file:
@@ -188,7 +182,7 @@ class NetCDFDataset(AbstractDataset):
         )
 
     def _exists(self) -> bool:
-        load_path = get_filepath_str(self._filepath, self._protocol)
+        load_path = self._filepath  # get_filepath_str(self._filepath, self._protocol)
 
         if self._is_multifile:
             files = self._fs.glob(load_path)
@@ -200,14 +194,13 @@ class NetCDFDataset(AbstractDataset):
 
     def _invalidate_cache(self):
         """Invalidate underlying filesystem caches."""
-        filepath = get_filepath_str(self._filepath, self._protocol)
-        self._fs.invalidate_cache(filepath)
+        self._fs.invalidate_cache(self._filepath)
 
     def __del__(self):
         """Cleanup temporary directory"""
         if self._temppath is not None:
             logger.info("Deleting local temporary files.")
-            temp_filepath = self._temppath / self._filepath.stem
+            temp_filepath = self._temppath / PurePosixPath(self._filepath).stem
             if self._is_multifile:
                 temp_files = glob(str(temp_filepath))
                 for file in temp_files:
@@ -216,7 +209,9 @@ class NetCDFDataset(AbstractDataset):
                     except FileNotFoundError:  # pragma: no cover
                         pass  # pragma: no cover
             else:
-                temp_filepath = str(temp_filepath) + self._filepath.suffix
+                temp_filepath = (
+                    str(temp_filepath) + "/" + PurePosixPath(self._filepath).name
+                )
                 try:
                     Path(temp_filepath).unlink()
                 except FileNotFoundError:

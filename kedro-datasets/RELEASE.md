@@ -1,8 +1,12 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `NetCDFDataset` for loading and saving `*.nc` files.
 
 ## Bug fixes and other changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Riley Brady](https://github.com/riley-brady)
+
 
 # Release 2.1.0
 ## Major features and improvements

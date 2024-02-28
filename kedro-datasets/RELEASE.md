@@ -1,14 +1,23 @@
 # Upcoming Release
 ## Major features and improvements
+
+## Bug fixes and other changes
+## Community contributions
+
+# Release 2.1.0
+## Major features and improvements
 * Added `MatlabDataset` which uses `scipy` to save and load `.mat` files.
 * Extend preview feature for matplotlib, plotly and tracking datasets.
 * Allow additional parameters for sqlalchemy engine when using sql datasets.
 
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Samuel Lee SJ](https://github.com/samuel-lee-sj)
+* [Felipe Monroy](https://github.com/felipemonroy)
+* [Manuel Spierenburg](https://github.com/mjspier)
 
 # Release 2.0.0
 ## Major features and improvements

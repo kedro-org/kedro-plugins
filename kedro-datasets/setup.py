@@ -31,6 +31,14 @@ huggingface_require = {
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 matlab_require = {"matlab.MatlabDataset": ["scipy"]}
+netcdf_require = {
+    "netcdf.NetCDFDataset": [
+        "h5netcdf>=1.2.0",
+        "netcdf4>=1.6.4",
+        "xarray<=0.20.2; python_version == '3.7'",
+        "xarray>=2023.1.0; python_version >= '3.8'",
+    ]
+}
 networkx_require = {"networkx.NetworkXDataset": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataset": [PANDAS],
@@ -118,6 +126,7 @@ extras_require = {
     "huggingface": _collect_requirements(huggingface_require),
     "matlab": _collect_requirements(matlab_require),
     "matplotlib": _collect_requirements(matplotlib_require),
+    "netcdf": _collect_requirements(netcdf_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
     "pickle": _collect_requirements(pickle_require),
@@ -235,6 +244,7 @@ extras_require["test"] = [
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
+    "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
     "datasets",

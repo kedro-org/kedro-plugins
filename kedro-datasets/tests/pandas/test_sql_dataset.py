@@ -487,14 +487,16 @@ class TestSQLQueryDataset:
         ds = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION}, load_args=load_args
         )
-        assert ds._load_args["params"] == tuple([
-            "2023-01-01T00:00:00",
-            "2023-01-01T20:26",
-            "2023",
-            "test",
-            1.0,
-            100,
-        ])
+        assert ds._load_args["params"] == tuple(
+            [
+                "2023-01-01T00:00:00",
+                "2023-01-01T20:26",
+                "2023",
+                "test",
+                1.0,
+                100,
+            ]
+        )
 
     def test_adapt_mssql_date_params_wrong_input(self, mocker):
         """Test that the adapt_mssql_date_params

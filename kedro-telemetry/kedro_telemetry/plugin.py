@@ -30,6 +30,16 @@ from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
 HEAP_HEADERS = {"Content-Type": "application/json"}
+KNOWN_CI_ENV_VAR_KEYS = {
+    "GITLAB_CI",  # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+    "GITHUB_ACTION",  # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+    "BITBUCKET_BUILD_NUMBER",  # https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
+    "JENKINS_URL",  # https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
+    "CODEBUILD_BUILD_ID",  # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    "CIRCLECI",  # https://circleci.com/docs/variables/#built-in-environment-variables
+    "TRAVIS",  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+    "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
+}
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 logger = logging.getLogger(__name__)
@@ -145,6 +155,14 @@ class KedroTelemetryProjectHooks:
         )
 
 
+def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
+    # Most CI tools will set the CI environment variable to true
+    if os.getenv("CI") == "true":
+        return True
+    # Not all CI tools follow this convention, we can check through those that don't
+    return any(os.getenv(key) for key in known_ci_env_var_keys)
+
+
 def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
     hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
     properties = {
@@ -154,6 +172,7 @@ def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
+        "is_ci_env": _is_known_ci_env(),
     }
     pyproject_path = Path(project_path) / "pyproject.toml"
     if pyproject_path.exists():

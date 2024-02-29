@@ -45,7 +45,9 @@ class IncrementalDataset(PartitionedDataset):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
-        >>> dataset = IncrementalDataset(path=str(tmp_path/ "test_data"), dataset="pandas.CSVDataset")
+        >>> dataset = IncrementalDataset(
+        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
+        ... )
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>

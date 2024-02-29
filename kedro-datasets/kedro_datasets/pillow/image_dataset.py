@@ -35,7 +35,9 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         >>> if sys.platform.startswith("win"):
         ...     pytest.skip("this doctest hangs on Windows CI runner")
         ...
-        >>> dataset = ImageDataset(filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg")
+        >>> dataset = ImageDataset(
+        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
+        ... )
         >>> image = dataset.load()
         >>> image.show()
 

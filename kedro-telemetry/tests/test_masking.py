@@ -1,4 +1,5 @@
 """Testing module for CLI tools"""
+
 import shutil
 from collections import namedtuple
 from pathlib import Path

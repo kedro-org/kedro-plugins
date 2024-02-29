@@ -29,7 +29,9 @@ class HFTransformerPipelineDataset(AbstractDataset):
     .. code-block:: pycon
 
        >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
-       >>> dataset = HFTransformerPipelineDataset(task="text-classification", model_name="papluca/xlm-roberta-base-language-detection")
+       >>> dataset = HFTransformerPipelineDataset(
+       ...     task="text-classification", model_name="papluca/xlm-roberta-base-language-detection"
+       ... )
        >>> detector = dataset.load()
        >>> assert detector("Ceci n'est pas une pipe")[0]["label"] == "fr"
 

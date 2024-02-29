@@ -1,4 +1,5 @@
 """``AbstractDataset`` implementation to load/save data from/to a Redis database."""
+
 from typing import Any
 
 import lazy_loader as lazy

@@ -1,7 +1,7 @@
 import boto3
 import pytest
 from kedro.io.core import DatasetError
-from moto import mock_s3
+from moto import mock_aws
 from utils import TEST_FPS, assert_videos_equal
 
 from kedro_datasets.video import VideoDataset
@@ -39,7 +39,7 @@ def empty_dataset_avi(tmp_filepath_avi):
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             region_name="us-east-1",

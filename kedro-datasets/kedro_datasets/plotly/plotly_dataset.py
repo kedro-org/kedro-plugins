@@ -2,6 +2,7 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
+
 import json
 from copy import deepcopy
 from typing import Any

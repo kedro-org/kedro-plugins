@@ -1,6 +1,7 @@
 """``AbstractDataset`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive.
 """
+
 import pickle
 from copy import deepcopy
 from typing import Any

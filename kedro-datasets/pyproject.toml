@@ -187,7 +187,6 @@ test = [
     "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
-    "xarray>=2023.1.0",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -224,6 +223,7 @@ test = [
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
     "trufflehog~=2.1",
+    "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
     "datasets",

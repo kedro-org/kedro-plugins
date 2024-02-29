@@ -1,6 +1,8 @@
 # Upcoming Release
+
 ## Major features and improvements
 * Added `NetCDFDataset` for loading and saving `*.nc` files.
+* Added xarray.GeoTiffDataset to handle GeoTIFF files.
 
 ## Bug fixes and other changes
 ## Community contributions

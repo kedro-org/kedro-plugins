@@ -114,6 +114,7 @@ tensorflow_require = {
     ]
 }
 video_require = {"video.VideoDataset": ["opencv-python~=4.5.5.64"]}
+xarray_require = {"xarray.GeoTIFFDataset": ["rioxarray>=0.15.0"]}
 yaml_require = {"yaml.YAMLDataset": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {
@@ -138,6 +139,7 @@ extras_require = {
     "spark": _collect_requirements(spark_require),
     "svmlight": _collect_requirements(svmlight_require),
     "tensorflow": _collect_requirements(tensorflow_require),
+    "xarray": _collect_requirements(xarray_require),
     "video": _collect_requirements(video_require),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
@@ -158,6 +160,7 @@ extras_require = {
     **svmlight_require,
     **tensorflow_require,
     **video_require,
+    **xarray_require,
     **yaml_require,
 }
 
@@ -231,6 +234,7 @@ extras_require["test"] = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
+    "rioxarray>=0.9.0",
     "ruff~=0.0.290",
     "s3fs>=2021.04, <2024.1",
     "snowflake-snowpark-python~=1.0; python_version == '3.9'",

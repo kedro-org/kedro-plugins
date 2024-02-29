@@ -58,6 +58,9 @@ matlab = ["kedro-datasets[matlab-matlabdataset]"]
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib = ["kedro-datasets[]"]
 
+netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
+
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
@@ -183,8 +186,8 @@ test = [
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
     "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
-    "moto==1.3.7; python_version < '3.10'",
-    "moto==4.1.12; python_version >= '3.10'",
+    "moto==5.0.0",
+    "xarray>=2023.1.0",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",

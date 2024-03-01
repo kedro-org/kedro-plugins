@@ -60,4 +60,4 @@ jobs:
           uv pip install --system "kedro-datasets[docs,test] @ ."
       - name: Documentation check for kedro-datasets
         run: |
-          make plugin=kedro-datasets check-docs
+          make check-datasets-docs

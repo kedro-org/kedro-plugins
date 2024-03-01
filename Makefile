@@ -87,5 +87,5 @@ test-snowflake-only:
 	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
 	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
-rtd:
+check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

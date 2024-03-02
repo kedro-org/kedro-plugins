@@ -39,8 +39,8 @@ dask = ["kedro-datasets[dask-parquetdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-geojasondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
-geopandas = ["kedro-datasets[geopandas-geopandasjsondataset]"]
+geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+geopandas = ["kedro-datasets[geopandas-geojsondataset]"]
 
 holoviews-holoviewswriter = ["holoviews~=1.13.0"]
 holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
@@ -58,8 +58,8 @@ matlab = ["kedro-datasets[matlab-matlabdataset]"]
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
 
-netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
+netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -102,9 +102,9 @@ plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
 plotly = ["kedro-datasets[plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
-polars-genericdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2",]
-polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2",]
-polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2",]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
+polars-genericdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
 polars = ["kedro-datasets[polars-genericdataset]"]
 
 redis-pickledataset = ["redis~=4.1"]
@@ -126,7 +126,7 @@ tensorflow-tensorflowmodeldataset = ["tensorflow~=2.0; platform_system != 'Darwi
 tensorflow = ["kedro-datasets[tensorflow-tensorflowmodeldataset]"]
 
 text-textdataset = []
-text = ["kedro-datasets[test-textdataset]"]
+text = ["kedro-datasets[text-textdataset]"]
 
 tracking-jsondataset = []
 tracking-metricsdataset = []

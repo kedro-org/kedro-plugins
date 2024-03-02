@@ -49,6 +49,28 @@ huggingface-hfdataset = ["datasets", "huggingface_hub"]
 huggingface-hftransformerpipelinedataset = ["transformers"]
 huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
 
+ibis-bigquery = ["ibis-framework[bigquery]"]
+ibis-clickhouse = ["ibis-framework[clickhouse]"]
+ibis-dask = ["ibis-framework[dask]"]
+ibis-datafusion = ["ibis-framework[datafusion]"]
+ibis-druid = ["ibis-framework[druid]"]
+ibis-duckdb = ["ibis-framework[duckdb]"]
+ibis-exasol = ["ibis-framework[exasol]"]
+ibis-flink = ["ibis-framework", "apache-flink"]
+ibis-impala = ["ibis-framework[impala]"]
+ibis-mssql = ["ibis-framework[mssql]"]
+ibis-mysql = ["ibis-framework[mysql]"]
+ibis-oracle = ["ibis-framework[oracle]"]
+ibis-pandas = ["ibis-framework[pandas]"]
+ibis-polars = ["ibis-framework[polars]"]
+ibis-postgres = ["ibis-framework[postgres]"]
+ibis-pyspark = ["ibis-framework[pyspark]"]
+ibis-risingwave = ["ibis-framework[risingwave]"]
+ibis-snowflake = ["ibis-framework[snowflake]"]
+ibis-sqlite = ["ibis-framework[sqlite]"]
+ibis-trino = ["ibis-framework[trino]"]
+ibis = ["ibis-framework"]
+
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
 
@@ -180,6 +202,7 @@ test = [
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
+    "ibis-framework",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.1.0",

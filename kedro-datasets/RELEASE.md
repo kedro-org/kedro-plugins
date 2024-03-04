@@ -8,9 +8,12 @@ pip install kedro-datasets[pandas-parquetdataset]
 * Added `NetCDFDataset` for loading and saving `*.nc` files.
 
 ## Bug fixes and other changes
+* If using MSSQL, `load_args:params` will be typecasted as tuple.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Riley Brady](https://github.com/riley-brady)
+* [Andrew Cao](https://github.com/andrewcao1)
 
 
 # Release 2.1.0

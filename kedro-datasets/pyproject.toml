@@ -70,24 +70,28 @@ pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
-pandas-gbqdataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'",]
+pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
+pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
 pandas-genericdataset = ["kedro-datasets[pandas-base]"]
 pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
 pandas-jsondataset = ["kedro-datasets[pandas-base]"]
 pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
-pandas-sqldataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"]
+pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
+pandas-sqlquerydataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"]
 pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
 pandas = [
     """kedro-datasets[pandas-csvdataset,\
     pandas-deltatabledataset,\
     pandas-exceldataset,\
     pandas-featherdataset,\
-    pandas-gbqdataset,\
+    pandas-gbqquerydataset,\
+    pandas-gbqtabledataset.\
     pandas-genericdataset,\
     pandas-hdfdataset,\
     pandas-jsondataset,\
     pandas-parquetdataset,\
-    pandas-sqldataset,\
+    pandas-sqltabledataset,\
+    pandas-sqlquerydataset,\
     pandas-xmldataset]"""
 ]
 

@@ -18,6 +18,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
+
 logger = logging.getLogger(__name__)
 
 
@@ -213,3 +215,32 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+def preview(self, nrows: int = 5) -> TablePreview:
+    """
+    Generate a preview of the dataset with a specified number of rows.
+
+    Args:
+        nrows: The number of rows to include in the preview. Defaults to 5.
+
+    Returns:
+        dict: A dictionary containing the data in a split format.
+    """
+    # Determine the load path, taking into account the protocol and potential versioning
+    load_path = str(self._get_load_path())
+    if self._protocol == "file":
+        # For local files, directly use the path
+        load_path = load_path
+    else:
+        # For files in remote storage, prepend the protocol
+        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+
+    # Use a modified load_args dict to limit the rows read to nrows
+    modified_load_args = deepcopy(self._load_args)
+    modified_load_args["nrows"] = nrows
+
+    # Read the parquet file with the modified arguments
+    data_preview = pd.read_parquet(load_path, storage_options=self._storage_options, **modified_load_args)
+
+    return data_preview

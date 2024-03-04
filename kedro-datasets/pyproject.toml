@@ -14,7 +14,226 @@ dependencies = [
     "kedro>=0.19",
     "lazy_loader",
 ]
-dynamic = ["readme", "version", "optional-dependencies"]
+dynamic = ["readme", "version"]
+
+[project.optional-dependencies]
+pandas-base = ["pandas>=1.3, <3.0",]
+spark-base = ["pyspark>=2.2, <4.0",]
+hdfs-base = ["hdfs>=2.5.8, <3.0",]
+s3fs-base = ["s3fs>=2021.4, <2024.1",]  # Upper bound set arbitrarily, to be reassessed in early 2024
+polars-base = ["polars>=0.18.0",]
+plotly-base = ["plotly>=4.8.0, <6.0"]
+delta-base = ["delta-spark~=1.2.1",]
+networkx-base = ["networkx~=2.4"]
+
+# Individual Datasets
+api-apidataset = ["requests~=2.20"]
+api = ["kedro-datasets[api-apidataset]"]
+
+biosequence-biosequencedataset = ["biopython~=1.73"]
+biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
+
+dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+dask = ["kedro-datasets[dask-parquetdataset]"]
+
+databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base]"]
+databricks = ["kedro-datasets[databricks-managedtabledataset]"]
+
+geopandas-geojasondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+geopandas = ["kedro-datasets[geopandas-geopandasjsondataset]"]
+
+holoviews-holoviewswriter = ["holoviews~=1.13.0"]
+holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
+
+huggingface-hfdataset = ["datasets", "huggingface_hub"]
+huggingface-hftransformerpipelinedataset = ["transformers"]
+huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
+
+json-jsondataset = []
+json = ["kedro-datasets[json-jsondataset]"]
+
+matlab-matlabdataset = ["scipy"]
+matlab = ["kedro-datasets[matlab-matlabdataset]"]
+
+matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
+
+netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
+
+networkx-gmldataset = ["kedro-datasets[networkx-base]"]
+networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
+networkx-jsondataset = ["kedro-datasets[networkx-base]"]
+networkx = ["kedro-datasets[networkx-base]"]
+
+pandas-csvdataset = ["kedro-datasets[pandas-base]"]
+pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
+pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
+pandas-featherdataset = ["kedro-datasets[pandas-base]"]
+pandas-gbqdataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'",]
+pandas-genericdataset = ["kedro-datasets[pandas-base]"]
+pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
+pandas-jsondataset = ["kedro-datasets[pandas-base]"]
+pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
+pandas-sqldataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc~=4.0"]
+pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
+pandas = [
+    """kedro-datasets[pandas-csvdataset,\
+    pandas-deltatabledataset,\
+    pandas-exceldataset,\
+    pandas-featherdataset,\
+    pandas-gbqdataset,\
+    pandas-genericdataset,\
+    pandas-hdfdataset,\
+    pandas-jsondataset,\
+    pandas-parquetdataset,\
+    pandas-sqldataset,\
+    pandas-xmldataset]"""
+]
+
+pickle-pickledataset = ["compress-pickle[lz4]~=2.1.0"]
+pickle = ["kedro-datasets[pickle-pickledataset]"]
+
+pillow-imagedataset = ["Pillow~=9.0"]
+pillow = ["kedro-datasets[pillow-imagedataset]"]
+
+plotly-jsondataset = ["kedro-datasets[plotly-base]"]
+plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
+plotly = ["kedro-datasets[plotly-jsondataset,plotly-plotlydataset]"]
+
+polars-csvdataset = ["kedro-datasets[polars-base]"]
+polars-genericdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2",]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2",]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2",]
+polars = ["kedro-datasets[polars-genericdataset]"]
+
+redis-pickledataset = ["redis~=4.1"]
+redis = ["kedro-datasets[redis-pickledataset]"]
+
+snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
+snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
+
+spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]", "delta-spark>=1.0, <3.0"]
+spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+spark-sparkjdbcdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+spark = ["kedro-datasets[spark-deltatabledataset]"]
+
+svmlight-svmlightdataset = ["scikit-learn>=1.0.2", "scipy~=1.7.3"]
+svmlight = ["kedro-datasets[svmlight-svmlightdataset]"]
+
+tensorflow-tensorflowmodeldataset = ["tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'", "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",]
+tensorflow = ["kedro-datasets[tensorflow-tensorflowmodeldataset]"]
+
+text-textdataset = []
+text = ["kedro-datasets[test-textdataset]"]
+
+tracking-jsondataset = []
+tracking-metricsdataset = []
+tracking = ["kedro-datasets[tracking-jsondataset, tracking-metricsdataset]"]
+
+video-videodataset = ["opencv-python~=4.5.5.64"]
+video = ["kedro-datasets[video-videodataset]"]
+
+yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
+yaml = ["kedro-datasets[yaml-yamldataset]"]
+
+# Docs requirements
+docs = [
+    # docutils>=0.17 changed the HTML
+    # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
+    "docutils==0.16",
+    "sphinx~=5.3.0",
+    "sphinx_rtd_theme==1.2.0",
+    # Regression on sphinx-autodoc-typehints 1.21
+    # that creates some problematic docstrings
+    "sphinx-autodoc-typehints==1.20.2",
+    "sphinx_copybutton==0.3.1",
+    "sphinx-notfound-page",
+    "ipykernel>=5.3, <7.0",
+    "sphinxcontrib-mermaid~=0.7.1",
+    "myst-parser~=1.0.0",
+    "Jinja2<3.1.0",
+]
+
+# Test requirements
+test = [
+    "adlfs~=2023.1",
+    "bandit>=1.6.2, <2.0",
+    "behave==1.2.6",
+    "biopython~=1.73",
+    "blacken-docs==1.9.2",
+    "black~=22.0",
+    "cloudpickle<=2.0.0",
+    "compress-pickle[lz4]~=2.1.0",
+    "coverage[toml]",
+    "dask[complete]>=2021.10",
+    "delta-spark>=1.0, <3.0",
+    "deltalake>=0.10.0, <0.15.2",  # temporary pin as 0.15.2 breaks some of our tests
+    "dill~=0.3.1",
+    "filelock>=3.4.0, <4.0",
+    "gcsfs>=2023.1, <2023.3",
+    "geopandas>=0.6.0, <1.0",
+    "hdfs>=2.5.8, <3.0",
+    "holoviews>=1.13.0",
+    "import-linter[toml]==1.2.6",
+    "ipython>=7.31.1, <8.0",
+    "Jinja2<3.1.0",
+    "joblib>=0.14",
+    "jupyterlab~=3.0",
+    "jupyter~=1.0",
+    "lxml~=4.6",
+    "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
+    "matplotlib>=3.5, <3.6; python_version >= '3.10'",
+    "memory_profiler>=0.50.0, <1.0",
+    "moto==5.0.0",
+    "networkx~=2.4",
+    "opencv-python~=4.5.5.64",
+    "openpyxl>=3.0.3, <4.0",
+    "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+    "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    "pandas~=1.3",  # 1.3 for read_xml/to_xml
+    "Pillow~=9.0",
+    "plotly>=4.8.0, <6.0",
+    "polars[xlsx2csv, deltalake]~=0.18.0",
+    "pre-commit>=2.9.2",
+    "pyarrow>=1.0; python_version < '3.11'",
+    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyodbc~=4.0.35",
+    "pyproj~=3.0",
+    "pyspark>=2.2, <3.4; python_version < '3.11'",
+    "pyspark>=3.4; python_version >= '3.11'",
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest-xdist[psutil]~=2.2.1",
+    "pytest~=7.2",
+    "redis~=4.1",
+    "requests-mock~=1.6",
+    "requests~=2.20",
+    "ruff~=0.0.290",
+    "s3fs>=2021.04, <2024.1",
+    "snowflake-snowpark-python~=1.0; python_version == '3.9'",
+    "scikit-learn>=1.0.2,<2",
+    "scipy>=1.7.3",
+    "packaging",
+    "SQLAlchemy~=1.2",
+    "tables~=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
+    "tables~=3.6; platform_system != 'Windows'",
+    "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
+    "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+    "triad>=0.6.7, <1.0",
+    "trufflehog~=2.1",
+    "xarray>=2023.1.0",
+    "xlsxwriter~=1.0",
+    # huggingface
+    "datasets",
+    "huggingface_hub",
+    "transformers",
+]
+
+# All requirements
+all = ["kedro-datasets[test,docs]"]
+
 
 [project.urls]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"

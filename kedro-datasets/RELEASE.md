@@ -1,5 +1,10 @@
 # Upcoming Release
 ## Major features and improvements
+* Normalised optional dependencies names for datasets to follow [PEP 685](https://peps.python.org/pep-0685/). The `.` characters have been replaced with `-` in the optional dependencies names. Note that this might be breaking for some users. For example, users should now install optional dependencies for `pandas.ParquetDataset` from `kedro-datasets` like this:
+```bash
+pip install kedro-datasets[pandas-parquetdataset]
+```
+* Remove `setup.py` and move to `pyproject.toml` completely for `kedro-datasets`.
 * Added `NetCDFDataset` for loading and saving `*.nc` files.
 
 ## Bug fixes and other changes

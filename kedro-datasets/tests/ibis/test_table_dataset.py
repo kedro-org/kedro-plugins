@@ -35,3 +35,10 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         reloaded = table_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+    def test_exists(self, table_dataset, dummy_table):
+        """Test `exists` method invocation for both existing and
+        nonexistent data set."""
+        assert not table_dataset.exists()
+        table_dataset.save(dummy_table)
+        assert table_dataset.exists()

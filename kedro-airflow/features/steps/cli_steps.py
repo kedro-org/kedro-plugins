@@ -93,7 +93,7 @@ def create_project_from_config_file(context):
             "-c",
             str(context.config_file),
             "--starter",
-            "astro-airflow-iris",
+            "spaceflights-pandas",
         ],
         env=context.env,
         cwd=str(context.temp_dir),

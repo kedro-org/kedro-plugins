@@ -65,7 +65,7 @@ with DAG(
             task_id="{{ node_name | safe | slugify  }}",
             package_name=package_name,
             pipeline_name=pipeline_name,
-            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe | slugify }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
+            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
         ),

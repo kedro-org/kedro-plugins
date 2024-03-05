@@ -18,6 +18,8 @@ from kedro.io.core import (
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
+from kedro_datasets._typing import TablePreview
+
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
 KNOWN_PIP_INSTALL = {

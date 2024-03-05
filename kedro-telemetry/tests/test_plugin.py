@@ -131,7 +131,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
-            "kedro_telemetry.plugin._get_hashed_username",
+            "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="hashed_username",
         )
 
@@ -177,7 +177,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
-            "kedro_telemetry.plugin._get_hashed_username",
+            "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="hashed_username",
         )
 
@@ -474,7 +474,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
-            "kedro_telemetry.plugin._get_hashed_username",
+            "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -530,7 +530,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
-            "kedro_telemetry.plugin._get_hashed_username",
+            "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -589,7 +589,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin._hash", return_value="digested")
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
-            "kedro_telemetry.plugin._get_hashed_username",
+            "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="hashed_username",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")

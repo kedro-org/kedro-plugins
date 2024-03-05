@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 import uuid
-from appdirs import user_config_dir
 from configparser import ConfigParser
 from copy import deepcopy
 from datetime import datetime
@@ -17,6 +16,7 @@ import click
 import requests
 import toml
 import yaml
+from appdirs import user_config_dir
 from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl

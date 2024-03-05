@@ -56,31 +56,35 @@ def _get_or_create_uuid():
     """
     Reads a UUID from a configuration file or generates and saves a new one if not present.
     """
+    try:
+        config_path = user_config_dir("kedro")
+        full_path = os.path.join(config_path, CONFIG_FILENAME)
+        config = ConfigParser()
 
-    config_path = user_config_dir("kedro")
-    full_path = os.path.join(config_path, CONFIG_FILENAME)
-    config = ConfigParser()
+        if os.path.exists(full_path):
+            config.read(full_path)
 
-    if os.path.exists(full_path):
-        config.read(full_path)
+            if config.has_section("telemetry") and "uuid" in config["telemetry"]:
+                try:
+                    return uuid.UUID(config["telemetry"]["uuid"]).hex
+                except ValueError:
+                    pass  # Invalid UUID found, will generate a new one
 
-        if config.has_section("telemetry") and "uuid" in config["telemetry"]:
-            try:
-                return uuid.UUID(config["telemetry"]["uuid"]).hex
-            except ValueError:
-                pass  # Invalid UUID found, will generate a new one
+        # Generate a new UUID and save it to the config file
+        if not config.has_section("telemetry"):
+            config.add_section("telemetry")
+        new_uuid = uuid.uuid4().hex
+        config.set("telemetry", "uuid", new_uuid)
 
-    # Generate a new UUID and save it to the config file
-    if not config.has_section("telemetry"):
-        config.add_section("telemetry")
-    new_uuid = uuid.uuid4().hex
-    config.set("telemetry", "uuid", new_uuid)
+        os.makedirs(config_path, exist_ok=True)
+        with open(full_path, "w") as configfile:
+            config.write(configfile)
 
-    os.makedirs(config_path, exist_ok=True)
-    with open(full_path, "w") as configfile:
-        config.write(configfile)
+        return new_uuid
 
-    return new_uuid
+    except Exception as e:
+        logging.error(f"Failed to get or create UUID: {e}")
+        return ""
 
 
 class KedroTelemetryCLIHooks:

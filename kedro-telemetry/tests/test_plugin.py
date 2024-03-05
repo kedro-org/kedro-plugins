@@ -226,13 +226,17 @@ class TestKedroTelemetryCLIHooks:
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_uuid",
+            return_value="hashed_username",
+        )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()
         command_args = []
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "digested",
+            "username": "hashed_username",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -249,12 +253,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: kedro",
-                identity="digested",
+                identity="hashed_username",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="digested",
+                identity="hashed_username",
                 properties=generic_properties,
             ),
         ]
@@ -296,7 +300,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
-        mocker.patch("getpass.getuser", side_effect=Exception)
+        mocker.patch("kedro_telemetry.plugin.user_config_dir", side_effect=Exception)
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()

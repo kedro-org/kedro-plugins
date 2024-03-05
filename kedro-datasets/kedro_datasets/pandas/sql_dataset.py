@@ -567,3 +567,16 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 new_load_args.append(value)
         if new_load_args:
             self._load_args["params"] = tuple(new_load_args)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset by fetching a limited number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the preview rows.
+        """
+        sql_query = f"SELECT * FROM {self._load_args['table_name']} LIMIT {nrows}"
+        return pd.read_sql_query(sql_query, con=self.engine)

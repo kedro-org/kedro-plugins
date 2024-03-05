@@ -1,11 +1,13 @@
 """Kedro Telemetry plugin for collecting Kedro usage data."""
 
-import getpass
 import hashlib
 import json
 import logging
 import os
 import sys
+import uuid
+from appdirs import user_config_dir
+from configparser import ConfigParser
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -41,6 +43,7 @@ KNOWN_CI_ENV_VAR_KEYS = {
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
 }
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+CONFIG_FILENAME = "telemetry.conf"
 
 logger = logging.getLogger(__name__)
 
@@ -49,16 +52,35 @@ def _hash(string: str) -> str:
     return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
 
 
-def _get_hashed_username():
-    try:
-        username = getpass.getuser()
-        return _hash(username)
-    except Exception as exc:
-        logger.warning(
-            "Something went wrong with getting the username. Exception: %s",
-            exc,
-        )
-        return ""
+def _get_or_create_uuid():
+    """
+    Reads a UUID from a configuration file or generates and saves a new one if not present.
+    """
+
+    config_path = user_config_dir("kedro")
+    full_path = os.path.join(config_path, CONFIG_FILENAME)
+    config = ConfigParser()
+
+    if os.path.exists(full_path):
+        config.read(full_path)
+
+        if config.has_section("telemetry") and "uuid" in config["telemetry"]:
+            try:
+                return uuid.UUID(config["telemetry"]["uuid"]).hex
+            except ValueError:
+                pass  # Invalid UUID found, will generate a new one
+
+    # Generate a new UUID and save it to the config file
+    if not config.has_section("telemetry"):
+        config.add_section("telemetry")
+    new_uuid = uuid.uuid4().hex
+    config.set("telemetry", "uuid", new_uuid)
+
+    os.makedirs(config_path, exist_ok=True)
+    with open(full_path, "w") as configfile:
+        config.write(configfile)
+
+    return new_uuid
 
 
 class KedroTelemetryCLIHooks:
@@ -90,7 +112,7 @@ class KedroTelemetryCLIHooks:
             main_command = masked_command_args[0] if masked_command_args else "kedro"
 
             logger.debug("You have opted into product usage analytics.")
-            hashed_username = _get_hashed_username()
+            hashed_username = _get_or_create_uuid()
             project_properties = _get_project_properties(
                 hashed_username, project_metadata.project_path
             )
@@ -141,7 +163,7 @@ class KedroTelemetryProjectHooks:
         logger.debug("You have opted into product usage analytics.")
 
         default_pipeline = pipelines.get("__default__")  # __default__
-        hashed_username = _get_hashed_username()
+        hashed_username = _get_or_create_uuid()
 
         project_properties = _get_project_properties(hashed_username, self.project_path)
 

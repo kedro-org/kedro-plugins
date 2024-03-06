@@ -56,11 +56,11 @@ def _get_or_create_uuid():
     """
     Reads a UUID from a configuration file or generates and saves a new one if not present.
     """
-    try:
-        config_path = user_config_dir("kedro")
-        full_path = os.path.join(config_path, CONFIG_FILENAME)
-        config = ConfigParser()
+    config_path = user_config_dir("kedro")
+    full_path = os.path.join(config_path, CONFIG_FILENAME)
+    config = ConfigParser()
 
+    try:
         if os.path.exists(full_path):
             config.read(full_path)
 

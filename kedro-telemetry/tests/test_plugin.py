@@ -300,7 +300,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
         mocked_anon_id.return_value = "digested"
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
-        mocker.patch("kedro_telemetry.plugin.user_config_dir", side_effect=Exception)
+        mocker.patch("builtins.open", side_effect=Exception)
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()

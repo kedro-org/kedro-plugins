@@ -1,5 +1,5 @@
 # Upcoming release
-* Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`.
+* Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`. (On release 0.4)
 
 # Release 0.3.2
 * Updated plugin to share if a project is being run in a ci environment.

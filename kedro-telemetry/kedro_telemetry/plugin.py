@@ -68,7 +68,7 @@ def _get_or_create_uuid():
                 try:
                     return uuid.UUID(config["telemetry"]["uuid"]).hex
                 except ValueError:
-                    pass  # Invalid UUID found, will generate a new one
+                    return ""
 
         # Generate a new UUID and save it to the config file
         if not config.has_section("telemetry"):

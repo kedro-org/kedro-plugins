@@ -273,6 +273,23 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         schema = self._load_args.get("schema", None)
         return insp.has_table(self._load_args["table_name"], schema)
 
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format, suitable for table previews.
+        """
+
+        sql_query = f"SELECT * FROM {self._load_args['table_name']} LIMIT {nrows}"
+        data_preview = pd.read_sql_query(sql_query, con=self.engine)
+
+        preview_data = data_preview.to_dict(orient="split")
+        return preview_data
+
 
 class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     """``SQLQueryDataset`` loads data from a provided SQL query. It
@@ -569,16 +586,3 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 new_load_args.append(value)
         if new_load_args:
             self._load_args["params"] = tuple(new_load_args)
-
-    def preview(self, nrows: int = 5) -> TablePreview:
-        """
-        Generate a preview of the dataset by fetching a limited number of rows.
-
-        Args:
-            nrows: The number of rows to include in the preview. Defaults to 5.
-
-        Returns:
-            pd.DataFrame: A DataFrame containing the preview rows.
-        """
-        sql_query = f"SELECT * FROM {self._load_args['table_name']} LIMIT {nrows}"
-        return pd.read_sql_query(sql_query, con=self.engine)

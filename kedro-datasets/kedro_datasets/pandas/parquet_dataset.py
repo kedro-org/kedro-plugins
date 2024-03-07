@@ -216,31 +216,27 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
 
-def preview(self, nrows: int = 5) -> TablePreview:
-    """
-    Generate a preview of the dataset with a specified number of rows.
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
 
-    Args:
-        nrows: The number of rows to include in the preview. Defaults to 5.
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
 
-    Returns:
-        dict: A dictionary containing the data in a split format.
-    """
-    # Determine the load path, taking into account the protocol and potential versioning
-    load_path = str(self._get_load_path())
-    if self._protocol == "file":
-        # For local files, directly use the path
-        load_path = load_path
-    else:
-        # For files in remote storage, prepend the protocol
-        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+        load_path = str(self._get_load_path())
 
-    # Use a modified load_args dict to limit the rows read to nrows
-    modified_load_args = deepcopy(self._load_args)
-    modified_load_args["nrows"] = nrows
+        if self._protocol != "file":
+            # For remote storage
+            data_preview = pd.read_parquet(load_path, storage_options=self._storage_options, **self._load_args)
+        else:
+            # For local storage
+            data_preview = pd.read_parquet(load_path, **self._load_args)
 
-    # Read the parquet file with the modified arguments
-    data_preview = pd.read_parquet(load_path, storage_options=self._storage_options, **modified_load_args)
+        preview_data = data_preview.head(nrows).to_dict(orient="split")
 
-    return data_preview
+        return preview_data
+

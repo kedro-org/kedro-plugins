@@ -42,7 +42,7 @@ class HFDataset(AbstractVersionedDataset):
         self._dataset_kwargs = dataset_kwargs or {}
 
     def _load(self):
-        return load_dataset(self.dataset_name, **self._pipeline_kwargs)
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)
 
     def _save(self):
         raise NotImplementedError("Not yet implemented")

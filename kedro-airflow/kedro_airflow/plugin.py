@@ -149,10 +149,11 @@ def create(  # noqa: PLR0913
     jinja_env.filters["slugify"] = slugify
     template = jinja_env.get_template(jinja_file.name)
 
-    if Path(target_path).is_absolute():
-        dags_folder = Path(target_path)
-    else:
-        dags_folder = metadata.project_path / Path(target_path)
+    dags_folder = (
+        Path(target_path)
+        if Path(target_path).is_absolute()
+        else metadata.project_path / Path(target_path)
+    )
 
     # Ensure that the DAGs folder exists
     dags_folder.mkdir(parents=True, exist_ok=True)

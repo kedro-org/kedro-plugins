@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 import uuid
-from configparser import ConfigParser
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -43,7 +42,7 @@ KNOWN_CI_ENV_VAR_KEYS = {
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
 }
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-CONFIG_FILENAME = "telemetry.conf"
+CONFIG_FILENAME = "telemetry.toml"
 
 logger = logging.getLogger(__name__)
 
@@ -58,21 +57,20 @@ def _get_or_create_uuid():
     """
     config_path = user_config_dir("kedro")
     full_path = os.path.join(config_path, CONFIG_FILENAME)
-    config = ConfigParser()
 
     try:
         if os.path.exists(full_path):
-            config.read(full_path)
+            with open(full_path, 'r') as f:
+                config = toml.load(f)
 
-            if config.has_section("telemetry") and "uuid" in config["telemetry"]:
-                try:
-                    return uuid.UUID(config["telemetry"]["uuid"]).hex
-                except ValueError:
-                    return ""
+                if "telemetry" in config and "uuid" in config["telemetry"]:
+                    try:
+                        return uuid.UUID(config["telemetry"]["uuid"]).hex
+                    except ValueError:
+                        return ""
 
         # Generate a new UUID and save it to the config file
-        if not config.has_section("telemetry"):
-            new_uuid = _generate_new_uuid(config, config_path, full_path)
+        new_uuid = _generate_new_uuid(full_path)
 
         return new_uuid
 
@@ -81,15 +79,16 @@ def _get_or_create_uuid():
         return ""
 
 
-def _generate_new_uuid(config, config_path, full_path):
+def _generate_new_uuid(full_path):
     try:
-        config.add_section("telemetry")
+        config = {}
+        config["telemetry"] = {}
         new_uuid = uuid.uuid4().hex
-        config.set("telemetry", "uuid", new_uuid)
+        config["telemetry"]["uuid"] = new_uuid
 
-        os.makedirs(config_path, exist_ok=True)
-        with open(full_path, "w") as configfile:
-            config.write(configfile)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, "w") as f:
+            toml.dump(config, f)
 
         return new_uuid
     except Exception as e:

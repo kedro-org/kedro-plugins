@@ -13,17 +13,17 @@ from kedro_airflow.plugin import commands
     "dag_name,pipeline_name,command",
     [
         # Test normal execution
-        ("hello_world", "__default__", ["airflow", "create"]),
+        ("fake_project", "__default__", ["airflow", "create"]),
         # Test execution with alternate pipeline name
-        ("hello_world", "ds", ["airflow", "create", "--pipeline", "ds"]),
-        # Test with grouping
-        ("hello_world", "__default__", ["airflow", "create", "--group-in-memory"]),
+        ("fake_project", "ds", ["airflow", "create", "--pipeline", "ds"]),
+        # # Test with grouping
+        ("fake_project", "__default__", ["airflow", "create", "--group-in-memory"]),
     ],
 )
 def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metadata):
     """Check the generation and validity of a simple Airflow DAG."""
     dag_file = (
-        Path.cwd()
+        metadata.project_path
         / "airflow_dags"
         / (
             f"{dag_name}_dag.py"
@@ -51,7 +51,7 @@ def _create_kedro_airflow_yml(file_name: Path, content: dict[str, Any]):
 
 def test_airflow_config_params(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -71,7 +71,7 @@ def test_airflow_config_params(cli_runner, metadata):
 
 def test_airflow_config_params_cli(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -91,7 +91,7 @@ def test_airflow_config_params_cli(cli_runner, metadata):
 
 def test_airflow_config_params_from_config(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -127,7 +127,7 @@ def test_airflow_config_params_from_config(cli_runner, metadata):
 
 def test_airflow_config_params_from_config_non_default(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
     default_content = "hello"
@@ -162,7 +162,7 @@ def test_airflow_config_params_from_config_non_default(cli_runner, metadata):
 
 def test_airflow_config_params_env(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -184,7 +184,7 @@ def test_airflow_config_params_env(cli_runner, metadata):
 
 def test_airflow_config_params_custom_pipeline(cli_runner, metadata):
     """Check if config variables are picked up"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "airflow_params.j2"
     content = "{{ owner | default('hello')}}"
 
@@ -212,7 +212,7 @@ def _create_kedro_airflow_jinja_template(path: Path, name: str, content: str):
 
 def test_custom_template_exists(cli_runner, metadata):
     """Test execution with different dir and filename for Jinja2 Template"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     template_name = "custom_template.j2"
     command = ["airflow", "create", "-j", template_name]
     content = "print('my custom dag')"
@@ -247,7 +247,7 @@ def _kedro_create_env(project_root: Path):
 
 def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     """Test the `env` parameter"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     command = ["airflow", "create", "--env", "remote"]
 
     _kedro_create_env(Path.cwd())
@@ -280,14 +280,13 @@ def test_create_airflow_all_dags(cli_runner, metadata):
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 0, (result.exit_code, result.stdout)
-    print(result.stdout)
 
     for dag_name, pipeline_name in [
-        ("hello_world", "__default__"),
-        ("hello_world", "ds"),
+        ("fake_project", "__default__"),
+        ("fake_project", "ds"),
     ]:
         dag_file = (
-            Path.cwd()
+            metadata.project_path
             / "airflow_dags"
             / (
                 f"{dag_name}_dag.py"

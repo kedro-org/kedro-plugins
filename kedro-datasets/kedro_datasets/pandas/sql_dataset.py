@@ -281,7 +281,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             nrows: The number of rows to include in the preview. Defaults to 5.
 
         Returns:
-            dict: A dictionary containing the data in a split format, suitable for table previews.
+            dict: A dictionary containing the data in a split format.
         """
 
         sql_query = f"SELECT * FROM {self._load_args['table_name']} LIMIT {nrows}"

@@ -72,7 +72,18 @@ def _get_or_create_uuid():
 
         # Generate a new UUID and save it to the config file
         if not config.has_section("telemetry"):
-            config.add_section("telemetry")
+            new_uuid = _generate_new_uuid(config, config_path, full_path)
+
+        return new_uuid
+
+    except Exception as e:
+        logging.error(f"Failed to retrieve UUID: {e}")
+        return ""
+
+
+def _generate_new_uuid(config, config_path, full_path):
+    try:
+        config.add_section("telemetry")
         new_uuid = uuid.uuid4().hex
         config.set("telemetry", "uuid", new_uuid)
 
@@ -81,9 +92,8 @@ def _get_or_create_uuid():
             config.write(configfile)
 
         return new_uuid
-
     except Exception as e:
-        logging.error(f"Failed to get or create UUID: {e}")
+        logging.error(f"Failed to create UUID: {e}")
         return ""
 
 

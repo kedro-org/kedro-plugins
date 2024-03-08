@@ -132,7 +132,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -140,7 +140,7 @@ class TestKedroTelemetryCLIHooks:
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -157,12 +157,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: --version",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=generic_properties,
             ),
         ]
@@ -178,7 +178,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -188,7 +188,7 @@ class TestKedroTelemetryCLIHooks:
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -207,12 +207,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: --version",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=generic_properties,
             ),
         ]
@@ -228,7 +228,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -236,7 +236,7 @@ class TestKedroTelemetryCLIHooks:
         command_args = []
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -253,12 +253,12 @@ class TestKedroTelemetryCLIHooks:
         expected_calls = [
             mocker.call(
                 event_name="Command run: kedro",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=expected_properties,
             ),
             mocker.call(
                 event_name="CLI command",
-                identity="hashed_username",
+                identity="user_uuid",
                 properties=generic_properties,
             ),
         ]
@@ -479,7 +479,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.open")
@@ -491,7 +491,7 @@ class TestKedroTelemetryProjectHooks:
         telemetry_hook.after_catalog_created(fake_catalog)
 
         project_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -508,7 +508,7 @@ class TestKedroTelemetryProjectHooks:
 
         expected_call = mocker.call(
             event_name="Kedro Project Statistics",
-            identity="hashed_username",
+            identity="user_uuid",
             properties=expected_properties,
         )
 
@@ -535,7 +535,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.toml.load")
@@ -550,7 +550,7 @@ class TestKedroTelemetryProjectHooks:
         telemetry_hook.after_catalog_created(fake_catalog)
 
         project_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -567,7 +567,7 @@ class TestKedroTelemetryProjectHooks:
 
         expected_call = mocker.call(
             event_name="Kedro Project Statistics",
-            identity="hashed_username",
+            identity="user_uuid",
             properties=expected_properties,
         )
 
@@ -594,7 +594,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin.PACKAGE_NAME", "spaceflights")
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
-            return_value="hashed_username",
+            return_value="user_uuid",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
@@ -611,7 +611,7 @@ class TestKedroTelemetryProjectHooks:
         telemetry_hook.after_catalog_created(fake_catalog)
 
         project_properties = {
-            "username": "hashed_username",
+            "username": "user_uuid",
             "package_name": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
@@ -630,7 +630,7 @@ class TestKedroTelemetryProjectHooks:
 
         expected_call = mocker.call(
             event_name="Kedro Project Statistics",
-            identity="hashed_username",
+            identity="user_uuid",
             properties=expected_properties,
         )
 

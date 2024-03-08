@@ -51,7 +51,7 @@ def _hash(string: str) -> str:
     return hashlib.sha512(bytes(string, encoding="utf8")).hexdigest()
 
 
-def _get_or_create_uuid():
+def _get_or_create_uuid() -> str:
     """
     Reads a UUID from a configuration file or generates and saves a new one if not present.
     """
@@ -76,7 +76,7 @@ def _get_or_create_uuid():
         return ""
 
 
-def _generate_new_uuid(full_path):
+def _generate_new_uuid(full_path: str) -> str:
     try:
         config = {}
         config["telemetry"] = {}
@@ -122,9 +122,9 @@ class KedroTelemetryCLIHooks:
             main_command = masked_command_args[0] if masked_command_args else "kedro"
 
             logger.debug("You have opted into product usage analytics.")
-            hashed_username = _get_or_create_uuid()
+            user_uuid = _get_or_create_uuid()
             project_properties = _get_project_properties(
-                hashed_username, project_metadata.project_path
+                user_uuid, project_metadata.project_path
             )
             cli_properties = _format_user_cli_data(
                 project_properties, masked_command_args
@@ -132,7 +132,7 @@ class KedroTelemetryCLIHooks:
 
             _send_heap_event(
                 event_name=f"Command run: {main_command}",
-                identity=hashed_username,
+                identity=user_uuid,
                 properties=cli_properties,
             )
 
@@ -141,7 +141,7 @@ class KedroTelemetryCLIHooks:
             generic_properties["main_command"] = main_command
             _send_heap_event(
                 event_name="CLI command",
-                identity=hashed_username,
+                identity=user_uuid,
                 properties=generic_properties,
             )
         except Exception as exc:
@@ -173,16 +173,16 @@ class KedroTelemetryProjectHooks:
         logger.debug("You have opted into product usage analytics.")
 
         default_pipeline = pipelines.get("__default__")  # __default__
-        hashed_username = _get_or_create_uuid()
+        user_uuid = _get_or_create_uuid()
 
-        project_properties = _get_project_properties(hashed_username, self.project_path)
+        project_properties = _get_project_properties(user_uuid, self.project_path)
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines
         )
         _send_heap_event(
             event_name="Kedro Project Statistics",
-            identity=hashed_username,
+            identity=user_uuid,
             properties=project_statistics_properties,
         )
 
@@ -195,10 +195,10 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(hashed_username: str, project_path: str) -> Dict:
+def _get_project_properties(user_uuid: str, project_path: str) -> Dict:
     hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
     properties = {
-        "username": hashed_username,
+        "username": user_uuid,
         "package_name": hashed_package_name,
         "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,

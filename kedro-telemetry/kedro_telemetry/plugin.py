@@ -64,10 +64,7 @@ def _get_or_create_uuid():
                 config = toml.load(f)
 
                 if "telemetry" in config and "uuid" in config["telemetry"]:
-                    try:
-                        return uuid.UUID(config["telemetry"]["uuid"]).hex
-                    except ValueError:
-                        return ""
+                    return uuid.UUID(config["telemetry"]["uuid"]).hex
 
         # Generate a new UUID and save it to the config file
         new_uuid = _generate_new_uuid(full_path)

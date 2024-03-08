@@ -60,7 +60,7 @@ def _get_or_create_uuid():
 
     try:
         if os.path.exists(full_path):
-            with open(full_path, 'r') as f:
+            with open(full_path) as f:
                 config = toml.load(f)
 
                 if "telemetry" in config and "uuid" in config["telemetry"]:

@@ -95,4 +95,6 @@ def register_pipelines():
 def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
     project_path = kedro_project
-    return bootstrap_project(project_path)
+    metadata = bootstrap_project(project_path)
+    print("!!!!!!!!", metadata)
+    return metadata

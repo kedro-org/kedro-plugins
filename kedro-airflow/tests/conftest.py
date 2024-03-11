@@ -94,7 +94,6 @@ def register_pipelines():
 @fixture(scope="session")
 def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
-    project_path = kedro_project
+    project_path = kedro_project.resolve()
     metadata = bootstrap_project(project_path)
-    print("!!!!!!!!", metadata)
     return metadata

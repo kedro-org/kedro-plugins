@@ -17,6 +17,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
+
 
 class PickleDataset(AbstractVersionedDataset[Any, Any]):
     """``PickleDataset`` loads/saves data from/to a Pickle file using an underlying
@@ -249,3 +251,19 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format,
+            suitable for table previews.
+        """
+        loaded_data = self._load()
+        preview_data = loaded_data.head(nrows).to_dict(orient="split")
+
+        return preview_data

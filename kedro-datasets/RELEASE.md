@@ -15,7 +15,7 @@ pip install kedro-datasets[pandas-parquetdataset]
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Riley Brady](https://github.com/riley-brady)
 * [Andrew Cao](https://github.com/andrewcao1)
-
+* [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
 
 # Release 2.1.0
 ## Major features and improvements
@@ -52,7 +52,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 * [felixscherz](https://github.com/felixscherz)
 * [Onur Kuru](https://github.com/kuruonur1)
-* [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
 
 # Release 1.8.0
 ## Major features and improvements

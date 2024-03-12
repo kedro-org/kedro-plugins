@@ -1,5 +1,4 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
-
 from __future__ import annotations
 
 import copy
@@ -226,9 +225,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(
-        cls, connection_str: str, connection_args: dict = None
-    ) -> None:
+    def create_connection(cls, connection_str: str, connection_args: dict = None) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
@@ -501,9 +498,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(
-        cls, connection_str: str, connection_args: dict = None
-    ) -> None:
+    def create_connection(cls, connection_str: str, connection_args: dict = None) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.

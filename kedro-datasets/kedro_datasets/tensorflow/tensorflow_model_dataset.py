@@ -1,7 +1,6 @@
 """``TensorFlowModelDataset`` is a dataset implementation which can save and load
 TensorFlow models.
 """
-
 import copy
 import tempfile
 from pathlib import PurePath, PurePosixPath

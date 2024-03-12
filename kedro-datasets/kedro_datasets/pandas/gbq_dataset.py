@@ -1,7 +1,6 @@
 """``GBQTableDataset`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
 to read and write from/to BigQuery table.
 """
-
 import copy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn, Union

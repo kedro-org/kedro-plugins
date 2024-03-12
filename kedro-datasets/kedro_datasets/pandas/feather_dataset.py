@@ -2,7 +2,6 @@
 using an underlying filesystem (e.g.: local, S3, GCS). The underlying functionality
 is supported by pandas, so it supports all operations the pandas supports.
 """
-
 import logging
 from copy import deepcopy
 from io import BytesIO

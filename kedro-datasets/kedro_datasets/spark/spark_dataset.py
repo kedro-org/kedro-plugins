@@ -1,7 +1,6 @@
 """``AbstractVersionedDataset`` implementation to access Spark dataframes using
 ``pyspark``.
 """
-
 from __future__ import annotations
 
 import json

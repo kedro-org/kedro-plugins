@@ -1,7 +1,6 @@
 """``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``.
 """
-
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
 

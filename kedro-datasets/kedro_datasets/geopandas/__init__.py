@@ -1,5 +1,4 @@
 """``GeoJSONDataset`` is an ``AbstractVersionedDataset`` to save and load GeoJSON files."""
-
 from typing import Any
 
 import lazy_loader as lazy

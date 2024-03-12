@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 The ``JSONDataset`` is part of Kedro Experiment Tracking. The dataset is versioned by default.
 """
-
 import json
 from typing import NoReturn
 

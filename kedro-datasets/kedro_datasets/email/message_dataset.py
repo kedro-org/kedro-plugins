@@ -2,7 +2,6 @@
 using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 ``email`` package in the standard library to manage email messages.
 """
-
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message

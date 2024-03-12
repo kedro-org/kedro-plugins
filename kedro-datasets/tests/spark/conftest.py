@@ -4,7 +4,6 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-
 import pytest
 from delta import configure_spark_with_delta_pip
 from filelock import FileLock

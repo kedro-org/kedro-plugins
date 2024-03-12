@@ -1,5 +1,4 @@
 """SparkJDBCDataset to load and save a PySpark DataFrame via JDBC."""
-
 from copy import deepcopy
 from typing import Any
 

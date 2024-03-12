@@ -2,7 +2,6 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
-
 from copy import deepcopy
 from typing import Any, Optional
 

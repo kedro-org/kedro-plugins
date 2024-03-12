@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses OpenCV VideoCapture to read
 and decode videos and OpenCV VideoWriter to encode and write video.
 """
-
 import itertools
 import tempfile
 from collections import abc

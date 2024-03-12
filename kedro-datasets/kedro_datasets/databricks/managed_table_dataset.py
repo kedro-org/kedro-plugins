@@ -1,7 +1,6 @@
 """``ManagedTableDataset`` implementation to access managed delta tables
 in Databricks.
 """
-
 import logging
 import re
 from dataclasses import dataclass

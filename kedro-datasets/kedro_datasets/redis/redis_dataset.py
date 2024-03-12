@@ -1,7 +1,6 @@
 """``PickleDataset`` loads/saves data from/to a Redis database. The underlying
 functionality is supported by the redis library, so it supports all allowed
 options for instantiating the redis app ``from_url`` and setting a value."""
-
 import importlib
 import os
 from copy import deepcopy

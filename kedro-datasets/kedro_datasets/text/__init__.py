@@ -1,5 +1,4 @@
 """``AbstractDataset`` implementation to load/save data from/to a text file."""
-
 from typing import Any
 
 import lazy_loader as lazy

@@ -1,7 +1,6 @@
 """``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-
 import json as json_  # make pylint happy
 from copy import deepcopy
 from typing import Any, Union

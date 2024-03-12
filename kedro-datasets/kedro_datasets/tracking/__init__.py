@@ -1,5 +1,4 @@
 """Dataset implementations to save data for Kedro Experiment Tracking."""
-
 from typing import Any
 
 import lazy_loader as lazy

@@ -1,7 +1,6 @@
 """``PartitionedDataset`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
-
 from __future__ import annotations
 
 import operator

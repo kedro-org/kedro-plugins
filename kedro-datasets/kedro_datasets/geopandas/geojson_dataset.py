@@ -2,7 +2,6 @@
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
-
 import copy
 from pathlib import PurePosixPath
 from typing import Any, Union

@@ -1,5 +1,4 @@
 """Provides interface to Unity Catalog Tables."""
-
 from typing import Any
 
 import lazy_loader as lazy

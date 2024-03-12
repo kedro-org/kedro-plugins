@@ -5,7 +5,6 @@ processed partition in so-called `checkpoint` that is persisted to the location
 of the data partitions by default, so that subsequent pipeline run loads only
 new partitions past the checkpoint.It also uses `fsspec` for filesystem level operations.
 """
-
 from __future__ import annotations
 
 import operator

@@ -1,7 +1,6 @@
 """``ParquetDataset`` loads/saves data from/to a Parquet file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
-
 import logging
 from copy import deepcopy
 from io import BytesIO

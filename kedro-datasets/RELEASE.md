@@ -44,6 +44,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
 * Make dataset parameters keyword-only.
 * Correct pandas-gbq as py311 dependency
+* Fixed bug with loading datasets from Hugging Face.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -9,6 +9,7 @@ pip install kedro-datasets[pandas-parquetdataset]
 
 ## Bug fixes and other changes
 * If using MSSQL, `load_args:params` will be typecasted as tuple.
+* Fixed bug with loading datasets from Hugging Face. Now allows passing parameters to the load_dataset function.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
@@ -43,8 +44,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
 * Make dataset parameters keyword-only.
-* Correct pandas-gbq as py311 dependency
-* Fixed bug with loading datasets from Hugging Face.
+* Correct pandas-gbq as py311 dependency.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

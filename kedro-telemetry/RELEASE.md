@@ -1,4 +1,4 @@
-# Upcoming release
+# Upcoming release 0.4.0
 * Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`.
 
 # Release 0.3.2

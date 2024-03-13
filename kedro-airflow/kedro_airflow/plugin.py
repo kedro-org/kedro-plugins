@@ -24,6 +24,9 @@ If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
+TAGS_ARG_HELP = """Tags to be used for filtering pipeline nodes.
+Multiple tags are supported. Use the following format:
+`--tags tag1,tag2`."""
 DEFAULT_RUN_ENV = "local"
 DEFAULT_PIPELINE = "__default__"
 
@@ -113,6 +116,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "as they do not persist between Airflow operators.",
 )
 @click.option(
+    "--tags",
+    type=str,
+    default="",
+    help=TAGS_ARG_HELP,
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -127,6 +136,7 @@ def create(  # noqa: PLR0913
     target_path,
     jinja_file,
     group_in_memory,
+    tags,
     params,
     convert_all: bool,
 ):
@@ -179,6 +189,10 @@ def create(  # noqa: PLR0913
             dag_name += f"_{name}"
         dag_name += "_dag.py"
         dag_filename = dags_folder / dag_name
+
+        if tags:
+            tags_list = tags.split(",")
+            pipeline = pipeline.only_nodes_with_tags(*tags_list)
 
         # group memory nodes
         if group_in_memory:

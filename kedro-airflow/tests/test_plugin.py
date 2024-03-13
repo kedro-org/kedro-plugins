@@ -264,6 +264,27 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     assert expected_airflow_dag in dag_code
 
 
+def test_create_airflow_dag_tags_parameter_exists(cli_runner, metadata):
+    """Test the `tags` parameter"""
+    dag_name = "hello_world"
+    command = ["airflow", "create", "--tags", "tag0", "--env", "remote"]
+
+    _kedro_create_env(Path.cwd())
+
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_remote_dag.py"
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+    assert dag_file.exists()
+
+    expected_airflow_dag = 'tasks["node0"] >> tasks["node2"]'
+    unexpected_airflow_dag = 'tasks["node0"] >> tasks["node1"]'
+    with dag_file.open(encoding="utf-8") as f:
+        dag_code = [line.strip() for line in f.read().splitlines()]
+    assert expected_airflow_dag in dag_code
+    assert unexpected_airflow_dag not in dag_code
+
+
 def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):
     """Test executing with a non-existing pipeline"""
     command = ["airflow", "create", "--pipeline", "de"]

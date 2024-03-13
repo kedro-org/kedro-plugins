@@ -114,7 +114,7 @@ class KedroTelemetryCLIHooks:
                 return
 
             # get KedroCLI and its structure from actual project root
-            cli = KedroCLI(project_path=Path.cwd())
+            cli = KedroCLI(project_path=project_metadata.project_path)
             cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
             masked_command_args = _mask_kedro_cli(
                 cli_struct=cli_struct, command_args=command_args

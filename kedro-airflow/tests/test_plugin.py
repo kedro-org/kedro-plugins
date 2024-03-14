@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import shutil
 import yaml
 
 from kedro_airflow.plugin import commands
@@ -245,6 +246,10 @@ def _kedro_create_env(project_root: Path):
     (project_root / "conf" / "remote").mkdir(parents=True)
 
 
+def _kedro_remove_env(project_root: Path):
+    shutil.rmtree(project_root / "conf" / "remote")
+
+
 def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     """Test the `env` parameter"""
     dag_name = "hello_world"
@@ -262,6 +267,8 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     with dag_file.open(encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
     assert expected_airflow_dag in dag_code
+
+    _kedro_remove_env(Path.cwd())
 
 
 def test_create_airflow_dag_tags_parameter_exists(cli_runner, metadata):
@@ -283,6 +290,8 @@ def test_create_airflow_dag_tags_parameter_exists(cli_runner, metadata):
         dag_code = [line.strip() for line in f.read().splitlines()]
     assert expected_airflow_dag in dag_code
     assert unexpected_airflow_dag not in dag_code
+
+    _kedro_remove_env(Path.cwd())
 
 
 def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):

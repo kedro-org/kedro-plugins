@@ -53,7 +53,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         >>> dataset = TensorFlowModelDataset(filepath=tmp_path / "data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Sequential([tf.keras.layers.Dense(5, input_shape=(3,)),tf.keras.layers.Softmax()])
         >>>
-        >>> # x = tf.random.uniform((10, 3))
+        >>> # x = tf.random.uniform((10, 3))
         >>> # predictions = model.predict(x)
         >>>
         >>> dataset.save(model)

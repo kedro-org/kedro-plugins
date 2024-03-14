@@ -17,6 +17,7 @@ from kedro.io.core import (
 )
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
+TEMPORARY_KERAS_FILE = "tmp_tensorflow_model.keras"
 
 
 class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.Model]):
@@ -134,12 +135,14 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     def _load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
-                self._fs.copy(load_path, path)
+                path = str(PurePath(tempdir) / TEMPORARY_H5_FILE)  # noqa: PLW2901
             else:
-                self._fs.get(load_path + "/", path, recursive=True)
+                # We assume .keras
+                path = str(PurePath(tempdir) / TEMPORARY_KERAS_FILE)  # noqa: PLW2901
+
+            self._fs.copy(load_path, path)
 
             # Pass the local temporary directory/file path to keras.load_model
             device_name = self._load_args.pop("tf_device", None)
@@ -153,20 +156,18 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     def _save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)  # noqa: PLW2901
+                path = str(PurePath(tempdir) / TEMPORARY_H5_FILE)  # noqa: PLW2901
+            else:
+                # We assume .keras
+                path = str(PurePath(tempdir) / TEMPORARY_KERAS_FILE)  # noqa: PLW2901
 
             tf.keras.models.save_model(data, path, **self._save_args)
 
             # Use fsspec to take from local tempfile directory/file and
             # put in ArbitraryFileSystem
-            if self._is_h5:
-                self._fs.copy(path, save_path)
-            else:
-                if self._fs.exists(save_path):
-                    self._fs.rm(save_path, recursive=True)
-                self._fs.put(path, save_path, recursive=True)
+            self._fs.copy(path, save_path)
 
     def _exists(self) -> bool:
         try:

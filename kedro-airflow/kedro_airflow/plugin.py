@@ -129,7 +129,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     callback=_split_params,
 )
 @click.pass_obj
-def create(  # noqa: PLR0913
+def create(  # noqa: PLR0913, PLR0912
     metadata: ProjectMetadata,
     pipeline_names,
     env,
@@ -192,7 +192,7 @@ def create(  # noqa: PLR0913
 
         if tags:
             tags_list = tags.split(",")
-            pipeline = pipeline.only_nodes_with_tags(*tags_list)
+            pipeline = pipeline.only_nodes_with_tags(*tags_list)  # noqa: PLW2901
 
         # group memory nodes
         if group_in_memory:

@@ -151,7 +151,7 @@ class TestTensorFlowModelDataset:
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
         assert tf_model_dataset._load_args == {}
-        assert tf_model_dataset._save_args == {"save_format": "tf"}
+        assert tf_model_dataset._save_args == {}
 
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""

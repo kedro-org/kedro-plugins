@@ -232,7 +232,7 @@ test = [
     # huggingface
     "datasets",
     "huggingface_hub",
-    "transformers",
+    "transformers[torch]",
 ]
 
 # All requirements

@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
 import logging
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -178,6 +179,31 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             )
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
+
+        if "dtypes" in self._load_args and self._file_format in ("csv"):
+            if isinstance(self._load_args["dtypes"], Sequence) and not isinstance(
+                self._load_args["dtypes"], str
+            ):
+                self._load_args["dtypes"] = [
+                    getattr(pl, dtype.split(".")[-1])
+                    for dtype in self._load_args["dtypes"]
+                ]
+            elif isinstance(self._load_args["dtypes"], Mapping):
+                self._load_args["dtypes"] = {
+                    key: getattr(pl, dtype.split(".")[-1])
+                    for key, dtype in self._load_args["dtypes"].items()
+                }
+            elif self._load_args["dtypes"] is None:
+                pass
+            else:
+                examples = "\nValid examples: None, [pl.Utf8, pl.Int64], {str_col: pl.Utf8, int_col: pl.Int64}"
+                raise ValueError(
+                    f"Invalid type for 'dtypes' in load_args: {type(self._load_args['dtypes'])}. {examples}"
+                )
+        elif "dtypes" in self._load_args and self._file_format not in ("csv"):
+            raise ValueError(
+                f"Invalid argument 'dtypes' for file_format '{self._file_format}'"
+            )
 
     def _describe(self) -> dict[str, Any]:
         return {

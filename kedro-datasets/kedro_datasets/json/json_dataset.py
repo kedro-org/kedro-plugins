@@ -161,32 +161,16 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def preview(self, nrows: int = 5) -> JSONPreview:
+    def preview(self) -> JSONPreview:
         """
          Generate a preview of the JSON dataset with a specified number of items.
 
-         Args:
-             nrows: The number of items to include in the preview. Defaults to 5.
-
          Returns:
-             JSONPreview: A simplified version of the JSON data for preview purposes.
+             JSONPreview: The JSON data for preview purposes.
          """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, mode="r", **self._fs_open_args_load) as fs_file:
             data = json.load(fs_file)
 
-        # Simplify the data for preview based on its type
-        if isinstance(data, list):
-            # If the data is a list, return the first few elements
-            preview_data = data[:nrows]
-        elif isinstance(data, dict):
-            # If the data is a dict, return a dict with the first few keys
-            preview_data = dict(list(data.items())[:nrows])
-        else:
-            # If the data is neither a list nor a dict, return it as is
-            preview_data = data
-
-        # Convert the preview data back to JSON for the preview
-        # This step assumes JSONPreview is a type hint for a JSON-serializable structure
-        return json.dumps(preview_data, indent=2)
+        return json.dumps(data)

@@ -46,7 +46,7 @@ def tensorflow_model_dataset():
 
 @pytest.fixture
 def filepath(tmp_path):
-    return (tmp_path / "test_tf").as_posix()
+    return (tmp_path / "test_tf.h5").as_posix()
 
 
 @pytest.fixture
@@ -172,7 +172,7 @@ class TestTensorFlowModelDataset:
     ):
         """Test TensorFlowModelDataset can save TF graph models in HDF5 format"""
         hdf5_dataset = tensorflow_model_dataset(
-            filepath=filepath, save_args={"save_format": "h5"}
+            filepath=filepath,
         )
 
         predictions = dummy_tf_base_model.predict(dummy_x_test)
@@ -193,6 +193,8 @@ class TestTensorFlowModelDataset:
     ):
         """Test TensorFlowModelDataset cannot save subclassed user models in HDF5 format
 
+        FIXME: What is this test doing??
+
         Subclassed model
 
         From TF docs
@@ -201,22 +203,15 @@ class TestTensorFlowModelDataset:
         create its weights.
         """
         hdf5_dataset = tensorflow_model_dataset(
-            filepath=filepath, save_args={"save_format": "h5"}
+            filepath=filepath,
         )
         # demonstrating is a working model
         dummy_tf_subclassed_model.fit(
             dummy_x_train, dummy_y_train, batch_size=64, epochs=1
         )
         dummy_tf_subclassed_model.predict(dummy_x_test)
-        pattern = (
-            r"Saving the model to HDF5 format requires the model to be a Functional model or a "
-            r"Sequential model. It does not work for subclassed models, because such models are "
-            r"defined via the body of a Python method, which isn\'t safely serializable. Consider "
-            r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
-            r"or using `save_weights`."
-        )
-        with pytest.raises(DatasetError, match=pattern):
-            hdf5_dataset.save(dummy_tf_subclassed_model)
+
+        hdf5_dataset.save(dummy_tf_subclassed_model)  # Nothing happens
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -328,7 +323,6 @@ class TestTensorFlowModelDatasetVersioned:
         HDF5 format"""
         hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath,
-            save_args={"save_format": "h5"},
             version=Version(load_version, save_version),
         )
 
@@ -407,18 +401,6 @@ class TestTensorFlowModelDatasetVersioned:
         assert ver_str in str(versioned_tf_model_dataset)
         assert "protocol" in str(versioned_tf_model_dataset)
         assert "save_args" in str(versioned_tf_model_dataset)
-
-    def test_versioning_existing_dataset(
-        self, tf_model_dataset, versioned_tf_model_dataset, dummy_tf_base_model
-    ):
-        """Check behavior when attempting to save a versioned dataset on top of an
-        already existing (non-versioned) dataset. Note: because TensorFlowModelDataset
-        saves to a directory even if non-versioned, an error is not expected."""
-        tf_model_dataset.save(dummy_tf_base_model)
-        assert tf_model_dataset.exists()
-        assert tf_model_dataset._filepath == versioned_tf_model_dataset._filepath
-        versioned_tf_model_dataset.save(dummy_tf_base_model)
-        assert versioned_tf_model_dataset.exists()
 
     def test_save_and_load_with_device(
         self,

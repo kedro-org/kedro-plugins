@@ -1,4 +1,5 @@
 """Common functions for e2e testing."""
+
 import tempfile
 import urllib
 import venv

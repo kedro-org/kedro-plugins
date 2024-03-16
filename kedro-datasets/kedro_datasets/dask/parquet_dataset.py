@@ -1,5 +1,6 @@
 """``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
+
 from copy import deepcopy
 from typing import Any
 

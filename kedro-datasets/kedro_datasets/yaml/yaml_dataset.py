@@ -1,6 +1,7 @@
 """``YAMLDataset`` loads/saves data from/to a YAML file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any

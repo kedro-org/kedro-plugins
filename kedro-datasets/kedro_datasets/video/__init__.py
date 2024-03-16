@@ -1,4 +1,5 @@
 """Dataset implementation to load/save data from/to a video file."""
+
 from typing import Any
 
 import lazy_loader as lazy

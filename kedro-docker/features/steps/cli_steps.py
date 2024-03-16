@@ -1,4 +1,5 @@
 """Behave step definitions for the cli_scenarios feature."""
+
 import re
 import sys
 import textwrap

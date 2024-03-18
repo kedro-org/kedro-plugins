@@ -14,6 +14,8 @@ jobs:
 
   unit-tests:
     runs-on: ${{ inputs.os }}
+    env:
+      UV_HTTP_TIMEOUT: 600
     defaults:
       run:
         shell: bash

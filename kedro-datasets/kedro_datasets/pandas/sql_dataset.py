@@ -92,6 +92,12 @@ def _get_sql_alchemy_missing_error() -> DatasetError:
     )
 
 
+def sanitise_table_name(table_name):
+    if not re.match("^[A-Za-z0-9_]+$", table_name):
+        raise ValueError("Invalid table name provided.")
+    return table_name
+
+
 class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     """``SQLTableDataset`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
@@ -285,7 +291,9 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             dict: A dictionary containing the data in a split format.
         """
 
-        sql_query = f"SELECT * FROM {self._load_args['table_name']} LIMIT {nrows}"
+        table_name = sanitise_table_name(self._load_args["table_name"])
+
+        sql_query = f"SELECT * FROM {table_name} LIMIT {nrows}"  # nosec
         data_preview = pd.read_sql_query(sql_query, con=self.engine)
 
         preview_data = data_preview.to_dict(orient="split")

@@ -203,17 +203,18 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             dict: A dictionary in a split format for preview, if possible.
         """
         load_path = self._get_load_path()
-        if self._load_args.get('lines', False):
-            data_preview = pd.read_json(load_path, lines=True, nrows=nrows, **self._load_args)
+        if self._load_args.get("lines", False):
+            data_preview = pd.read_json(
+                load_path, lines=True, nrows=nrows, **self._load_args
+            )
         else:
             full_data = pd.read_json(load_path, **self._load_args)
             # if its nested try normalise
             try:
-                data_preview = pd.json_normalize(full_data.to_dict(orient='records'))
+                data_preview = pd.json_normalize(full_data.to_dict(orient="records"))
             except AttributeError:
                 data_preview = full_data
 
             data_preview = data_preview.head(nrows)
 
         return data_preview.to_dict(orient="split")
-

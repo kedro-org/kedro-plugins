@@ -18,6 +18,7 @@ from kedro.io.core import (
 
 from kedro_datasets._typing import JSONPreview
 
+
 class JSONDataset(AbstractVersionedDataset[Any, Any]):
     """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
@@ -164,11 +165,11 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
 
     def preview(self) -> JSONPreview:
         """
-         Generate a preview of the JSON dataset with a specified number of items.
+        Generate a preview of the JSON dataset with a specified number of items.
 
-         Returns:
-             JSONPreview: The JSON data for preview purposes.
-         """
+        Returns:
+            JSONPreview: The JSON data for preview purposes.
+        """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, mode="r", **self._fs_open_args_load) as fs_file:

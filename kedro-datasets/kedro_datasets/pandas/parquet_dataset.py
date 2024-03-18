@@ -232,7 +232,9 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         if self._protocol != "file":
             # For remote storage
-            data_preview = pd.read_parquet(load_path, storage_options=self._storage_options, **self._load_args)
+            data_preview = pd.read_parquet(
+                load_path, storage_options=self._storage_options, **self._load_args
+            )
         else:
             # For local storage
             data_preview = pd.read_parquet(load_path, **self._load_args)
@@ -240,4 +242,3 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         preview_data = data_preview.head(nrows).to_dict(orient="split")
 
         return preview_data
-

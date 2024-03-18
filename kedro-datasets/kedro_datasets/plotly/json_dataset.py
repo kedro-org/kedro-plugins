@@ -1,6 +1,7 @@
 """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
+
 import json
 from copy import deepcopy
 from pathlib import PurePosixPath

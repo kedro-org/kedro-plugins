@@ -1,6 +1,7 @@
 """BioSequenceDataset loads and saves data to/from bio-sequence objects to
 file.
 """
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any

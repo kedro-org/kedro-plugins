@@ -1,5 +1,6 @@
 """``AbstractDataset`` implementation to load/save data from/to a
 svmlight/libsvm sparse data file."""
+
 from typing import Any
 
 import lazy_loader as lazy

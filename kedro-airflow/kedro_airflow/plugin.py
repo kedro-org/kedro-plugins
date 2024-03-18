@@ -1,4 +1,5 @@
 """ Kedro plugin for running a project with Airflow """
+
 from __future__ import annotations
 
 from collections import defaultdict

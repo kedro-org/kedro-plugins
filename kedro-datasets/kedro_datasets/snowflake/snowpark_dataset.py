@@ -1,5 +1,6 @@
 """``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
 """
+
 import logging
 from copy import deepcopy
 from typing import Any

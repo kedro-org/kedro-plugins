@@ -1,3 +1,4 @@
+import json
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -6,7 +7,6 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
-import json
 
 from kedro_datasets.json import JSONDataset
 
@@ -215,4 +215,6 @@ class TestJSONDatasetVersioned:
         expected_data = json.dumps(full_data)
 
         # Assert preview data matches the expected data
-        assert preview_data == expected_data, "The preview data does not match the expected data."
+        assert (
+            preview_data == expected_data
+        ), "The preview data does not match the expected data."

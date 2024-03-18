@@ -44,11 +44,14 @@ def dummy_dataframe():
 
 @pytest.fixture
 def dummy_dataframe_preview():
-    return pd.DataFrame({
-        "col1": [1, 2, 3, 4, 5, 6],
-        "col2": [4, 5, 6, 7, 8, 9],
-        "col3": [5, 6, 7, 8, 9, 10]
-    })
+    return pd.DataFrame(
+        {
+            "col1": [1, 2, 3, 4, 5, 6],
+            "col2": [4, 5, 6, 7, 8, 9],
+            "col3": [5, 6, 7, 8, 9, 10],
+        }
+    )
+
 
 class TestParquetDataset:
     def test_credentials_propagated(self, mocker):
@@ -224,11 +227,16 @@ class TestParquetDataset:
     @pytest.mark.parametrize(
         "nrows,expected_rows",
         [
-            (5, 5),  # Test with specified rows less than total
-            (10, 6),  # Test with specified rows more than total, assuming 6 rows in dummy data
-        ]
+            (5, 5),
+            (
+                10,
+                6,
+            ),  # Test with specified rows more than total, assuming 6 rows in dummy data
+        ],
     )
-    def test_preview(self, parquet_dataset, dummy_dataframe_preview, nrows, expected_rows):
+    def test_preview(
+        self, parquet_dataset, dummy_dataframe_preview, nrows, expected_rows
+    ):
         """Test the preview functionality for ParquetDataset."""
         # Save dummy data to dataset
         parquet_dataset.save(dummy_dataframe_preview)
@@ -237,9 +245,9 @@ class TestParquetDataset:
         previewed_data = parquet_dataset.preview(nrows=nrows)
 
         # Assert preview data matches expected rows
-        assert len(previewed_data['data']) == expected_rows
+        assert len(previewed_data["data"]) == expected_rows
         # Assert columns match
-        assert previewed_data['columns'] == list(dummy_dataframe_preview.columns)
+        assert previewed_data["columns"] == list(dummy_dataframe_preview.columns)
 
 
 class TestParquetDatasetVersioned:

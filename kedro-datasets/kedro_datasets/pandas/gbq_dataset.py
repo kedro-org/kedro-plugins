@@ -1,6 +1,7 @@
 """``GBQTableDataset`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
 to read and write from/to BigQuery table.
 """
+
 import copy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn, Union
@@ -51,7 +52,9 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GBQTableDataset(dataset="dataset", table_name="table_name", project="my-project")
+        >>> dataset = GBQTableDataset(
+        ...     dataset="dataset", table_name="table_name", project="my-project"
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>

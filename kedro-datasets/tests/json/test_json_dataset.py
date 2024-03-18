@@ -6,6 +6,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
+import json
 
 from kedro_datasets.json import JSONDataset
 
@@ -197,3 +198,21 @@ class TestJSONDatasetVersioned:
         Path(json_dataset._filepath.as_posix()).unlink()
         versioned_json_dataset.save(dummy_data)
         assert versioned_json_dataset.exists()
+
+    def test_preview(self, json_dataset, dummy_data):
+        """Test the preview method."""
+        # Save dummy data to the dataset
+        json_dataset.save(dummy_data)
+
+        # Get preview data
+        preview_data = json_dataset.preview()
+
+        # Load the data directly for comparison
+        with json_dataset._fs.open(json_dataset._get_load_path(), mode="r") as fs_file:
+            full_data = json.load(fs_file)
+
+        # Prepare expected data
+        expected_data = json.dumps(full_data)
+
+        # Assert preview data matches the expected data
+        assert preview_data == expected_data, "The preview data does not match the expected data."

@@ -10,7 +10,12 @@ import jinja2
 from click import secho
 from kedro.config import MissingConfigException
 from kedro.framework.cli.project import PARAMS_ARG_HELP
-from kedro.framework.cli.utils import ENV_HELP, KedroCliError, _split_params
+from kedro.framework.cli.utils import (
+    ENV_HELP,
+    KedroCliError,
+    _split_params,
+    split_string,
+)
 from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
@@ -120,6 +125,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     type=str,
     default="",
     help=TAGS_ARG_HELP,
+    callback=split_string,
 )
 @click.option(
     "--params",
@@ -191,8 +197,7 @@ def create(  # noqa: PLR0913, PLR0912
         dag_filename = dags_folder / dag_name
 
         if tags:
-            tags_list = tags.split(",")
-            pipeline = pipeline.only_nodes_with_tags(*tags_list)  # noqa: PLW2901
+            pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
         # group memory nodes
         if group_in_memory:

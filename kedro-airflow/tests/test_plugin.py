@@ -271,10 +271,29 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     _kedro_remove_env(Path.cwd())
 
 
-def test_create_airflow_dag_tags_parameter_exists(cli_runner, metadata):
+@pytest.mark.parametrize(
+    "tags, expected_airflow_dags, unexpected_airflow_dags",
+    [
+        # Test one tag
+        (
+            ["--tags", "tag0"],
+            ['tasks["node0"] >> tasks["node2"]'],
+            ['tasks["node0"] >> tasks["node1"]'],
+        ),
+        # Test few tags with whitespaces
+        (
+            ["--tags", "tag0,tag1"],
+            ['tasks["node0"] >> tasks["node2"]', 'tasks["node0"] >> tasks["node3"]'],
+            ['tasks["node0"] >> tasks["node1"]', 'tasks["node0"] >> tasks["node4"]'],
+        ),
+    ],
+)
+def test_create_airflow_dag_tags_parameter_exists(
+    tags, expected_airflow_dags, unexpected_airflow_dags, cli_runner, metadata
+):
     """Test the `tags` parameter"""
     dag_name = "hello_world"
-    command = ["airflow", "create", "--tags", "tag0", "--env", "remote"]
+    command = ["airflow", "create", "--env", "remote"] + tags
 
     _kedro_create_env(Path.cwd())
 
@@ -284,12 +303,12 @@ def test_create_airflow_dag_tags_parameter_exists(cli_runner, metadata):
     assert result.exit_code == 0, (result.exit_code, result.stdout)
     assert dag_file.exists()
 
-    expected_airflow_dag = 'tasks["node0"] >> tasks["node2"]'
-    unexpected_airflow_dag = 'tasks["node0"] >> tasks["node1"]'
     with dag_file.open(encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
-    assert expected_airflow_dag in dag_code
-    assert unexpected_airflow_dag not in dag_code
+    for expected_dag in expected_airflow_dags:
+        assert expected_dag in dag_code
+    for unexpected_dag in unexpected_airflow_dags:
+        assert unexpected_dag not in dag_code
 
     _kedro_remove_env(Path.cwd())
 

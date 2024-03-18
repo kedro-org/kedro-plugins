@@ -282,7 +282,7 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
         ),
         # Test few tags with whitespaces
         (
-            ["--tags", "tag0,tag1"],
+            ["--tags", "tag0 , tag1"],
             ['tasks["node0"] >> tasks["node2"]', 'tasks["node0"] >> tasks["node3"]'],
             ['tasks["node0"] >> tasks["node1"]', 'tasks["node0"] >> tasks["node4"]'],
         ),

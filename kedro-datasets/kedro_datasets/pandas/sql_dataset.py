@@ -6,7 +6,7 @@ import copy
 import datetime as dt
 import re
 from pathlib import PurePosixPath
-from typing import Any, NoReturn, Optional
+from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
@@ -157,13 +157,13 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
-            self,
-            *,
-            table_name: str,
-            credentials: dict[str, Any],
-            load_args: dict[str, Any] = None,
-            save_args: dict[str, Any] = None,
-            metadata: dict[str, Any] = None,
+        self,
+        *,
+        table_name: str,
+        credentials: dict[str, Any],
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLTableDataset``.
 
@@ -226,7 +226,9 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: Optional[dict] = None) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
@@ -402,14 +404,14 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     engines: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
-            self,
-            sql: str = None,
-            credentials: dict[str, Any] = None,
-            load_args: dict[str, Any] = None,
-            fs_args: dict[str, Any] = None,
-            filepath: str = None,
-            execution_options: dict[str, Any] | None = None,
-            metadata: dict[str, Any] = None,
+        self,
+        sql: str = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        filepath: str = None,
+        execution_options: dict[str, Any] | None = None,
+        metadata: dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -499,7 +501,9 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: Optional[dict] = None) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.

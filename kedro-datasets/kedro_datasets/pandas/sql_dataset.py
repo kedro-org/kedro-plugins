@@ -6,7 +6,7 @@ import copy
 import datetime as dt
 import re
 from pathlib import PurePosixPath
-from typing import Any, NoReturn
+from typing import Any, NoReturn, Optional
 
 import fsspec
 import pandas as pd

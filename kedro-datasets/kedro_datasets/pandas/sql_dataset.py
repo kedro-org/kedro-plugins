@@ -227,7 +227,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     @classmethod
     def create_connection(
-        cls, connection_str: str, connection_args: dict = None
+        cls, connection_str: str, connection_args: Optional[dict] = None
     ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
@@ -502,7 +502,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     @classmethod
     def create_connection(
-        cls, connection_str: str, connection_args: dict = None
+        cls, connection_str: str, connection_args: Optional[dict] = None
     ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that

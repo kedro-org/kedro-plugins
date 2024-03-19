@@ -12,6 +12,8 @@ on:
 
 jobs:
   e2e-tests:
+    env:
+      UV_HTTP_TIMEOUT: 600
     defaults:
       run:
         shell: bash

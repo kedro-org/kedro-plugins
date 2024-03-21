@@ -1,12 +1,12 @@
+import inspect
 from pathlib import PosixPath
 from unittest.mock import ANY
 
-import inspect
 import pandas as pd
 import pytest
 import sqlalchemy
-from sqlalchemy.exc import SQLAlchemyError
 from kedro.io.core import DatasetError
+from sqlalchemy.exc import SQLAlchemyError
 
 import kedro_datasets
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
@@ -68,10 +68,7 @@ def sql_dataset(tmp_path):
     table_name = "test_table"
 
     engine = sqlalchemy.create_engine(connection_string)
-    test_data = pd.DataFrame({
-        "col1": [1, 2, 3],
-        "col2": ["a", "b", "c"]
-    })
+    test_data = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
     test_data.to_sql(table_name, engine, index=False)
 
     credentials = {"con": connection_string}
@@ -243,7 +240,10 @@ class TestSQLTableDataset:
         assert return_annotation == "TablePreview"
 
     def test_preview_sql_error(self, table_dataset, mocker):
-        mocker.patch("pandas.read_sql_query", side_effect=SQLAlchemyError("Mocked SQL error", "", ""))
+        mocker.patch(
+            "pandas.read_sql_query",
+            side_effect=SQLAlchemyError("Mocked SQL error", "", ""),
+        )
 
         with pytest.raises(SQLAlchemyError):
             table_dataset.preview(nrows=3)

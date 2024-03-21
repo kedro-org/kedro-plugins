@@ -1,5 +1,6 @@
 from pathlib import Path, PurePosixPath
 
+import inspect
 import pandas as pd
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -238,16 +239,17 @@ class TestParquetDataset:
         self, parquet_dataset, dummy_dataframe_preview, nrows, expected_rows
     ):
         """Test the preview functionality for ParquetDataset."""
-        # Save dummy data to dataset
         parquet_dataset.save(dummy_dataframe_preview)
-
-        # Load preview data
         previewed_data = parquet_dataset.preview(nrows=nrows)
 
         # Assert preview data matches expected rows
         assert len(previewed_data["data"]) == expected_rows
         # Assert columns match
         assert previewed_data["columns"] == list(dummy_dataframe_preview.columns)
+        assert (
+                inspect.signature(parquet_dataset.preview).return_annotation.__name__
+                == "TablePreview"
+        )
 
 
 class TestParquetDatasetVersioned:

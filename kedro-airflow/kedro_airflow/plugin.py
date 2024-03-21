@@ -20,7 +20,7 @@ from kedro.framework.cli.utils import (
 from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import ProjectMetadata, bootstrap_project
+from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
 from kedro_airflow.grouping import group_memory_nodes
@@ -100,8 +100,8 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "-t",
     "--target-dir",
     "target_path",
-    type=click.Path(writable=True, resolve_path=True, file_okay=False),
-    default="./airflow_dags/",
+    type=click.Path(writable=True, resolve_path=False, file_okay=False),
+    default="airflow_dags/",
     help="The directory path to store the generated Airflow dags",
 )
 @click.option(
@@ -152,10 +152,7 @@ def create(  # noqa: PLR0913, PLR0912
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
         )
-
-    project_path = Path.cwd().resolve()
-    bootstrap_project(project_path)
-    with KedroSession.create(project_path=project_path, env=env) as session:
+    with KedroSession.create(project_path=metadata.project_path, env=env) as session:
         context = session.load_context()
         config_airflow = _load_config(context)
 
@@ -165,10 +162,15 @@ def create(  # noqa: PLR0913, PLR0912
     jinja_env.filters["slugify"] = slugify
     template = jinja_env.get_template(jinja_file.name)
 
-    dags_folder = Path(target_path)
+    dags_folder = (
+        Path(target_path)
+        if Path(target_path).is_absolute()
+        else metadata.project_path / Path(target_path)
+    )
+
     # Ensure that the DAGs folder exists
     dags_folder.mkdir(parents=True, exist_ok=True)
-    secho(f"Location of the Airflow DAG folder: {target_path!s}", fg="green")
+    secho(f"Location of the Airflow DAG folder: {dags_folder!s}", fg="green")
 
     package_name = metadata.package_name
 

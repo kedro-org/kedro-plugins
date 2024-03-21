@@ -4,6 +4,7 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
+
 from __future__ import annotations
 
 import os
@@ -66,8 +67,11 @@ def identity(arg):
 def register_pipelines():
     pipeline = Pipeline(
         [
-            node(identity, ["input"], ["intermediate"], name="node0"),
+            node(identity, ["input"], ["intermediate"], name="node0", tags=["tag0", "tag1"]),
             node(identity, ["intermediate"], ["output"], name="node1"),
+            node(identity, ["intermediate"], ["output2"], name="node2", tags=["tag0"]),
+            node(identity, ["intermediate"], ["output3"], name="node3", tags=["tag1", "tag2"]),
+            node(identity, ["intermediate"], ["output4"], name="node4", tags=["tag2"]),
         ],
         tags="pipeline0",
     )

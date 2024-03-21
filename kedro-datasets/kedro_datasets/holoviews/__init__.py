@@ -1,4 +1,5 @@
 """``AbstractDataset`` implementation to save Holoviews objects as image files."""
+
 from typing import Any
 
 import lazy_loader as lazy

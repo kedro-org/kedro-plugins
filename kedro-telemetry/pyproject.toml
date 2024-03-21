@@ -13,6 +13,7 @@ license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.18.0",
     "requests~=2.20",
+    "appdirs>=1.4.4",
 ]
 dynamic = ["readme", "version"]
 

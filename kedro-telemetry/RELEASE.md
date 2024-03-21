@@ -1,4 +1,6 @@
-# Upcoming release
+# Upcoming release 0.4.0
+* Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`.
+* Added support for Python 3.12.
 
 # Release 0.3.2
 * Updated plugin to share if a project is being run in a ci environment.

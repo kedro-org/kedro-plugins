@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -241,8 +242,12 @@ def test_custom_template_nonexistent(cli_runner, metadata):
     )
 
 
-def _kedro_create_env(project_root: Path):
-    (project_root / "conf" / "remote").mkdir(parents=True)
+def _kedro_create_env(project_root: Path, env: str):
+    (project_root / "conf" / env).mkdir(parents=True)
+
+
+def _kedro_remove_env(project_root: Path, env: str):
+    shutil.rmtree(project_root / "conf" / env)
 
 
 def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
@@ -250,7 +255,7 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     dag_name = "hello_world"
     command = ["airflow", "create", "--env", "remote"]
 
-    _kedro_create_env(Path.cwd())
+    _kedro_create_env(Path.cwd(), "remote")
 
     dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_remote_dag.py"
     result = cli_runner.invoke(commands, command, obj=metadata)
@@ -262,6 +267,50 @@ def test_create_airflow_dag_env_parameter_exists(cli_runner, metadata):
     with dag_file.open(encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
     assert expected_airflow_dag in dag_code
+
+    _kedro_remove_env(Path.cwd(), "remote")
+
+
+@pytest.mark.parametrize(
+    "tags, expected_airflow_dags, unexpected_airflow_dags",
+    [
+        # Test one tag
+        (
+            ["--tags", "tag0"],
+            ['tasks["node0"] >> tasks["node2"]'],
+            ['tasks["node0"] >> tasks["node1"]'],
+        ),
+        # Test few tags with whitespaces
+        (
+            ["--tags", "tag0 , tag1"],
+            ['tasks["node0"] >> tasks["node2"]', 'tasks["node0"] >> tasks["node3"]'],
+            ['tasks["node0"] >> tasks["node1"]', 'tasks["node0"] >> tasks["node4"]'],
+        ),
+    ],
+)
+def test_create_airflow_dag_tags_parameter_exists(
+    tags, expected_airflow_dags, unexpected_airflow_dags, cli_runner, metadata
+):
+    """Test the `tags` parameter"""
+    dag_name = "hello_world"
+    command = ["airflow", "create", "--env", "remote"] + tags
+
+    _kedro_create_env(Path.cwd(), "remote")
+
+    dag_file = Path.cwd() / "airflow_dags" / f"{dag_name}_remote_dag.py"
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+    assert dag_file.exists()
+
+    with dag_file.open(encoding="utf-8") as f:
+        dag_code = [line.strip() for line in f.read().splitlines()]
+    for expected_dag in expected_airflow_dags:
+        assert expected_dag in dag_code
+    for unexpected_dag in unexpected_airflow_dags:
+        assert unexpected_dag not in dag_code
+
+    _kedro_remove_env(Path.cwd(), "remote")
 
 
 def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):

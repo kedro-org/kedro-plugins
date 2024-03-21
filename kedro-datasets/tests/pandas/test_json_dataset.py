@@ -64,6 +64,17 @@ def json_lines_data(tmp_path):
     return filepath.as_posix()
 
 
+@pytest.fixture
+def flat_json_data(tmp_path):
+    data = [
+        {"name": "Alice", "age": 30, "city": "New York"},
+        {"name": "Bob", "age": 25, "city": "Los Angeles"},
+    ]
+    filepath = tmp_path / "flat_test.json"
+    filepath.write_text(json.dumps(data))
+    return filepath.as_posix()
+
+
 class TestJSONDataset:
     def test_save_and_load(self, json_dataset, dummy_dataframe):
         """Test saving and reloading the data set."""
@@ -168,13 +179,13 @@ class TestJSONDataset:
 
     def test_preview_nested_json(self, json_dataset, nested_json_data):
         json_dataset._filepath = (
-            nested_json_data  # Assuming this is how you set the path
+            nested_json_data
         )
         preview_data = json_dataset.preview()
         assert "name" in preview_data["columns"]
         assert (
             "info.age" in preview_data["columns"]
-        )  # Assuming normalization works this way
+        )
         assert (
             inspect.signature(json_dataset.preview).return_annotation.__name__
             == "TablePreview"
@@ -184,11 +195,23 @@ class TestJSONDataset:
         json_dataset._filepath = json_lines_data
         json_dataset._load_args = {"lines": True}
         preview_data = json_dataset.preview()
-        assert len(preview_data["data"]) == 2  # Assuming 2 lines/data points
+        assert len(preview_data["data"]) == 2
         assert (
             inspect.signature(json_dataset.preview).return_annotation.__name__
             == "TablePreview"
         )
+
+    def test_preview_attribute_error(self, json_dataset, flat_json_data, mocker):
+        json_dataset._filepath = flat_json_data
+
+        mocker.patch('pandas.json_normalize', side_effect=AttributeError)
+        json_dataset._load_args = {}
+
+        preview_data = json_dataset.preview()
+
+        assert isinstance(preview_data, dict)
+        assert 'columns' in preview_data
+        assert len(preview_data['data']) == 2
 
 
 class TestJSONDatasetVersioned:

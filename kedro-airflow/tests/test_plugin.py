@@ -292,7 +292,7 @@ def test_create_airflow_dag_tags_parameter_exists(
     tags, expected_airflow_dags, unexpected_airflow_dags, cli_runner, metadata
 ):
     """Test the `tags` parameter"""
-    dag_name = "hello_world"
+    dag_name = "fake_project"
     command = ["airflow", "create", "--env", "remote"] + tags
 
     _kedro_create_env(Path.cwd(), "remote")

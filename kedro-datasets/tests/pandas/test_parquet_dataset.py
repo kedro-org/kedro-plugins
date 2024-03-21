@@ -1,6 +1,6 @@
+import inspect
 from pathlib import Path, PurePosixPath
 
-import inspect
 import pandas as pd
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -247,8 +247,8 @@ class TestParquetDataset:
         # Assert columns match
         assert previewed_data["columns"] == list(dummy_dataframe_preview.columns)
         assert (
-                inspect.signature(parquet_dataset.preview).return_annotation.__name__
-                == "TablePreview"
+            inspect.signature(parquet_dataset.preview).return_annotation.__name__
+            == "TablePreview"
         )
 
 

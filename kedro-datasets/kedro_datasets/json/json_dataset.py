@@ -168,7 +168,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         Generate a preview of the JSON dataset with a specified number of items.
 
         Returns:
-            JSONPreview: The JSON data for preview purposes.
+            JSON: The JSON data for preview purposes.
         """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 

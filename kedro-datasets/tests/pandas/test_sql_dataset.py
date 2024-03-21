@@ -248,6 +248,19 @@ class TestSQLTableDataset:
         with pytest.raises(SQLAlchemyError):
             table_dataset.preview(nrows=3)
 
+    def test_preview_with_bad_table_name(self):
+        connection_string = "sqlite:///:memory:"
+        bad_table_name = "test_table%$£^"  # Intentionally bad table name
+
+        # Create dataset instance with the bad table name
+        with pytest.raises(ValueError) as exc_info:
+            dataset = SQLTableDataset(
+                table_name=bad_table_name, credentials={"con": connection_string}
+            )
+            dataset.preview(nrows=5)
+
+        assert "Invalid table name provided." in str(exc_info.value)
+
 
 class TestSQLTableDatasetSingleConnection:
     def test_single_connection(self, dummy_dataframe, mocker):

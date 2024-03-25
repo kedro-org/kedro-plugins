@@ -51,7 +51,7 @@ def before_all(context):
     )
 
     # install the plugin
-    call([context.python, "-m", "pip", "install", "."], env=context.env)
+    call([context.python, "-m", "pip", "install", ".[test]"], env=context.env)
 
 
 def _setup_context_with_venv(context, venv_dir):

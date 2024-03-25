@@ -28,6 +28,7 @@ test = [
     "behave",
     "black~=22.0",
     "docker",
+    "kedro@git+https://github.com/kedro-org/kedro",
     "pre-commit>=2.9.2",
     "psutil",
     "pytest",

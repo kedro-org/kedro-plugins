@@ -24,7 +24,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<3.0",
+    "apache-airflow=~2.8",
     "bandit",
     "behave",
     "black~=22.0",

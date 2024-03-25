@@ -59,7 +59,7 @@ def before_all(context):
             "-m",
             "pip",
             "install",
-            "kedro@git+https://github.com/kedro-org/kedro#egg=main",
+            "git+https://github.com/kedro-org/kedro",
         ],
         env=context.env,
     )

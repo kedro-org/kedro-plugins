@@ -1,4 +1,5 @@
 # Upcoming release
+* Added support for Python 3.12
 
 ## Major features and improvements
 

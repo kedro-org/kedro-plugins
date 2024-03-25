@@ -29,7 +29,6 @@ test = [
     "black~=22.0",
     "docker",
     "pre-commit>=2.9.2",
-    "kedro@git+https://github.com/kedro-org/kedro#egg=main",
     "psutil",
     "pytest",
     "pytest-cov",

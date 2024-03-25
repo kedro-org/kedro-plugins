@@ -181,7 +181,7 @@ class TestJSONDataset:
         json_dataset._filepath = nested_json_data
         preview_data = json_dataset.preview()
         assert "name" in preview_data["columns"]
-        assert "info.age" in preview_data["columns"]
+        assert "info" in preview_data["columns"]
         assert (
             inspect.signature(json_dataset.preview).return_annotation.__name__
             == "TablePreview"

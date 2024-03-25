@@ -227,8 +227,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         Returns:
             dict: A dictionary containing the data in a split format.
         """
-        load_path = str(self._get_load_path())
-        data_preview = pd.read_parquet(load_path, **self._load_args)
+        data_preview = self._load()
         preview_data = data_preview.head(nrows).to_dict(orient="split")
 
         return preview_data

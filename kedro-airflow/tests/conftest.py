@@ -12,9 +12,8 @@ from pathlib import Path
 from shutil import copyfile
 
 from click.testing import CliRunner
-from kedro import __version__ as kedro_version
 from kedro.framework.cli.starters import create_cli as kedro_cli
-from kedro.framework.startup import ProjectMetadata
+from kedro.framework.startup import bootstrap_project
 from pytest import fixture
 
 
@@ -99,14 +98,6 @@ def register_pipelines():
 @fixture(scope="session")
 def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
-    project_path = kedro_project
-    return ProjectMetadata(
-        source_dir=project_path / "src",
-        config_file=project_path / "pyproject.toml",
-        package_name="hello_world",
-        project_name="Hello world !!!",
-        kedro_init_version=kedro_version,
-        project_path=project_path,
-        tools=["None"],
-        example_pipeline="No",
-    )
+    project_path = kedro_project.resolve()
+    metadata = bootstrap_project(project_path)
+    return metadata

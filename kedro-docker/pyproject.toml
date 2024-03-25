@@ -12,7 +12,7 @@ requires-python = ">=3.8"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "anyconfig~=0.10.0",  # not directly required, pinned by Snyk to avoid a vulnerability
-    "kedro>=0.16.0",
+    "kedro@git+https://github.com/kedro-org/kedro",
     "semver~=2.10",  # Needs to be at least 2.10.0 to get VersionInfo.match
 ]
 dynamic = ["readme", "version"]
@@ -28,7 +28,6 @@ test = [
     "behave",
     "black~=22.0",
     "docker",
-    "kedro@git+https://github.com/kedro-org/kedro",
     "pre-commit>=2.9.2",
     "psutil",
     "pytest",

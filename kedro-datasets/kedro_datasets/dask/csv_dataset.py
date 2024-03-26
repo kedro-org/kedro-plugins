@@ -50,7 +50,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> ddf = dd.from_pandas(data, npartitions=1)
         >>>
         >>> data_set = CSVDataset(
-        ...     filepath=tmp_path / "path/to/folder" / "*.csv"
+        ...     filepath=tmp_path / "path/to/folder" / "*.csv",
         ...     save_args={"index":False}
         ... )
         >>> data_set.save(ddf)

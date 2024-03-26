@@ -197,18 +197,6 @@ class TestJSONDataset:
             == "TablePreview"
         )
 
-    def test_preview_attribute_error(self, json_dataset, flat_json_data, mocker):
-        json_dataset._filepath = flat_json_data
-
-        mocker.patch("pandas.json_normalize", side_effect=AttributeError)
-        json_dataset._load_args = {}
-
-        preview_data = json_dataset.preview()
-
-        assert isinstance(preview_data, dict)
-        assert "columns" in preview_data
-        assert len(preview_data["data"]) == 2
-
 
 class TestJSONDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

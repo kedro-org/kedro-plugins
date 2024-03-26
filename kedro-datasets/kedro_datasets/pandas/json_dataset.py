@@ -202,8 +202,22 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         Returns:
             dict: A dictionary in a split format for preview, if possible.
         """
-        data_preview = self._load()
+        data = self._load()
 
-        preview_data = data_preview.head(nrows).to_dict(orient="split")
+        # Check if data is directly a list
+        if isinstance(data, dict):
+            # Convert dict list
+            data = [data]
 
-        return preview_data
+        preview_df = pd.DataFrame(data)
+
+        # Limit to the specified number of rows
+        preview_df = preview_df.head(nrows)
+
+        # Replace complex nested structures with placeholders for simplicity
+        for column in preview_df.columns:
+            preview_df[column] = preview_df[column].apply(
+                lambda x: "{...}" if isinstance(x, (dict, list)) else x
+            )
+
+        return preview_df.to_dict(orient="split")

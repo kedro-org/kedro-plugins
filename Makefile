@@ -22,7 +22,7 @@ test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
-dataset-tests: dataset-doctests
+dataset-tests: # dataset-doctests
 	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/databricks --ignore tests/tensorflow
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 

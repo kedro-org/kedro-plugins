@@ -226,11 +226,14 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: dict) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
             engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:
@@ -498,11 +501,14 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: dict) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
             engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:

@@ -50,8 +50,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> ddf = dd.from_pandas(data, npartitions=1)
         >>>
         >>> data_set = CSVDataset(
-        ...     filepath="path/to/folder/*.csv",
-        ...     save_args={"index":False}
+        ...     filepath="path/to/folder/*.csv"
         ... )
         >>> data_set.save(ddf)
         >>> reloaded = data_set.load()
@@ -60,9 +59,9 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
             self,
             filepath: str,
             load_args: Dict[str, Any] = None,

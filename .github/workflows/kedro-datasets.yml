@@ -39,7 +39,7 @@ jobs:
   check-docs:
     runs-on: ubuntu-latest
     env:
-      UV_HTTP_TIMEOUT: 600
+      UV_HTTP_TIMEOUT: 1000
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

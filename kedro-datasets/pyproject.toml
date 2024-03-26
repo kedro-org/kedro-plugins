@@ -194,16 +194,17 @@ test = [
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
-    "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
-    "pandas-gbq>=0.18.0; python_version >= '3.11'",
+    #"pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+    #"pandas-gbq>=0.18.0; python_version >= '3.11'",
+    "pandas-gbq>=0.12.0",
     "pandas~=2.0",  # 1.3 for read_xml/to_xml
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
     "pre-commit>=2.9.2",
-    "pyarrow>=1.0; python_version < '3.11'",
-    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    #"pyarrow>=10.0.1",
+    #"pyarrow>=1.0; python_version < '3.11'",
+    #"pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyarrow>=10.0.1",
     "pyodbc~=5.0",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",

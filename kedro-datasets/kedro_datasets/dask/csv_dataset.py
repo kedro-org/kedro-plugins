@@ -47,10 +47,11 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> import dask.dataframe as dd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],  'col3': [[5, 6], [7, 8]]})
-        >>> ddf = dd.from_pandas(data, npartitions=2)
+        >>> ddf = dd.from_pandas(data, npartitions=1)
         >>>
         >>> data_set = CSVDataset(
         ...     filepath=tmp_path / "path/to/folder" / "*.csv"
+        ...     save_args={"index":False}
         ... )
         >>> data_set.save(ddf)
         >>> reloaded = data_set.load()

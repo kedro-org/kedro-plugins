@@ -170,9 +170,6 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         Returns:
             JSON: The JSON data for preview purposes.
         """
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-
-        with self._fs.open(load_path, mode="r", **self._fs_open_args_load) as fs_file:
-            data = json.load(fs_file)
+        data = self._load()
 
         return json.dumps(data)

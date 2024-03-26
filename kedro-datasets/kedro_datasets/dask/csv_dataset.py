@@ -50,8 +50,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
         >>> data_set = CSVDataset(
-        ...     filepath=tmp_path / "path/to/folder",
-        ...     save_args={"compression": "GZIP"}
+        ...     filepath=tmp_path / "path/to/folder"
         ... )
         >>> data_set.save(ddf)
         >>> reloaded = data_set.load()

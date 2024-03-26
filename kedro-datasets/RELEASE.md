@@ -11,12 +11,14 @@ pip install kedro-datasets[pandas-parquetdataset]
 ## Bug fixes and other changes
 * If using MSSQL, `load_args:params` will be typecasted as tuple.
 * Fixed bug with loading datasets from Hugging Face. Now allows passing parameters to the load_dataset function.
+* Make `connection_args` argument optional when calling `create_connection()` in `sql_dataset.py`.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Riley Brady](https://github.com/riley-brady)
 * [Andrew Cao](https://github.com/andrewcao1)
 * [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
+* [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
 
 # Release 2.1.0
 ## Major features and improvements

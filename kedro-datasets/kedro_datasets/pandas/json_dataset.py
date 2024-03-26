@@ -204,15 +204,8 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """
         data = self._load()
 
-        # Check if data is directly a list
-        if isinstance(data, dict):
-            # Convert dict list
-            data = [data]
-
-        preview_df = pd.DataFrame(data)
-
         # Limit to the specified number of rows
-        preview_df = preview_df.head(nrows)
+        preview_df = data.head(nrows)
 
         # Replace complex nested structures with placeholders for simplicity
         for column in preview_df.columns:

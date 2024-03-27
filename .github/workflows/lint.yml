@@ -13,7 +13,7 @@ on:
 jobs:
   lint:
     env:
-      UV_HTTP_TIMEOUT: 600
+      UV_HTTP_TIMEOUT: 1000
     defaults:
       run:
         shell: bash

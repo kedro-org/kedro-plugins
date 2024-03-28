@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.9", "3.10", "3.11" ]
+        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-datasets
@@ -39,7 +39,7 @@ jobs:
   check-docs:
     runs-on: ubuntu-latest
     env:
-      UV_HTTP_TIMEOUT: 600
+      UV_HTTP_TIMEOUT: 1000
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

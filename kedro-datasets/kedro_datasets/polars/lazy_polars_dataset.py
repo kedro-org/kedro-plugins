@@ -207,15 +207,15 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         collected_data = None
-        if isinstance(data, pl.LazyFrame):
-            collected_data = data.collect()
+        if not isinstance(data, pl.LazyFrame):
+            collected_data = data.lazy()
         else:
             collected_data = data
 
         # Note: polars does support writing partitioned parquet file
         # it is leveraging Arrow to do so, see e.g.
         # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
-        save_method = getattr(collected_data, f"write_{self._file_format}", None)
+        save_method = getattr(collected_data, f"sink_{self._file_format}", None)
         if save_method:
             buf = BytesIO()
             save_method(file=buf, **self._save_args)

@@ -19,6 +19,8 @@ from kedro.io.core import (
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import NoSuchModuleError
 
+from kedro_datasets._typing import TablePreview
+
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
 KNOWN_PIP_INSTALL = {
@@ -88,6 +90,12 @@ def _get_sql_alchemy_missing_error() -> DatasetError:
         "https://docs.sqlalchemy.org/core/engines.html#supported-databases "
         "for more information."
     )
+
+
+def _sanitise_table_name(table_name):
+    if not re.match("^[A-Za-z0-9_]+$", table_name):
+        raise ValueError("Invalid table name provided.")
+    return table_name
 
 
 class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
@@ -274,6 +282,25 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         insp = inspect(self.engine)
         schema = self._load_args.get("schema", None)
         return insp.has_table(self._load_args["table_name"], schema)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+
+        table_name = _sanitise_table_name(self._load_args["table_name"])
+
+        sql_query = f"SELECT * FROM {table_name} LIMIT {nrows}"  # nosec
+        data_preview = pd.read_sql_query(sql_query, con=self.engine)
+
+        preview_data = data_preview.to_dict(orient="split")
+        return preview_data
 
 
 class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):

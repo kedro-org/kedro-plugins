@@ -19,6 +19,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
+
 logger = logging.getLogger(__name__)
 
 
@@ -188,3 +190,27 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows,
+        including handling for both flat and nested JSON structures.
+
+        Args:
+            nrows: Number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary in a split format for preview, if possible.
+        """
+        data = self._load()
+
+        # Limit to the specified number of rows
+        preview_df = data.head(nrows)
+
+        # Replace complex nested structures with placeholders for simplicity
+        for column in preview_df.columns:
+            preview_df[column] = preview_df[column].apply(
+                lambda x: "{...}" if isinstance(x, (dict, list)) else x
+            )
+
+        return preview_df.to_dict(orient="split")

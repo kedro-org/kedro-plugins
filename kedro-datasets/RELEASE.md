@@ -2,6 +2,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
+* Added `CSVDataset` to [dask](https://www.dask.org/) module.
 ## Community contributions
 
 # Release 2.0.0

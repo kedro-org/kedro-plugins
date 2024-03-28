@@ -13,6 +13,7 @@ kedro_datasets
 
    kedro_datasets.api.APIDataset
    kedro_datasets.biosequence.BioSequenceDataset
+   kedro_datasets.dask.CSVDataset
    kedro_datasets.dask.ParquetDataset
    kedro_datasets.databricks.ManagedTableDataset
    kedro_datasets.email.EmailMessageDataset

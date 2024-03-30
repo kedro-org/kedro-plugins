@@ -168,11 +168,13 @@ class NetCDFDataset(AbstractDataset):
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )
         else:
-            save_path = self._filepath
-            bytes_buffer = data.to_netcdf(**self._save_args)
-
-            with self._fs.open(save_path, mode="wb") as fs_file:
-                fs_file.write(bytes_buffer)
+            if self._protocol == "file":
+                data.to_netcdf(path=self._filepath, **self._save_args)
+            else:
+                temp_save_path = self._temppath / PurePosixPath(self._filepath).name
+                data.to_netcdf(path=str(temp_save_path), **self._save_args)
+                # Sync to remote storage
+                self._fs.put_file(str(temp_save_path), self._filepath)
 
             self._invalidate_cache()
 

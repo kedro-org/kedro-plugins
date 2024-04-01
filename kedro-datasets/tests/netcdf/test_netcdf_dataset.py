@@ -224,7 +224,16 @@ class TestNetCDFDataset:
         NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
         assert dataset.exists()
 
-    def test_save_load_locally(self, tmp_path, dummy_xr_dataset):
+    @pytest.parametrize(
+        "save_args, load_args",
+        [
+            ({"engine": "netcdf4"}, {"engine": "netcdf4"}),
+            ({"engine": "scipy"}, {"engine": "scipy"}),
+            ({"engine": "h5netcdf"}, {"engine": "h5netcdf"}),
+        ],
+        indirect=True,
+    )
+    def test_save_load_locally(self, tmp_path, dummy_xr_dataset, save_args, load_args):
         """Test loading and saving the a NetCDF file locally."""
         file_path = str(tmp_path / "some" / "dir" / FILE_NAME)
         dataset = NetCDFDataset(filepath=file_path)

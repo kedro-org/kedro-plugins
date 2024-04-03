@@ -226,10 +226,10 @@ class TestSQLTableDataset:
             CONNECTION, **additional_params
         )
 
-    def test_preview_normal_scenario(self, sql_dataset, mocker):
+    def test_preview_normal_scenario(self, sql_dataset):
+        engine = sql_dataset.engine
         expected_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
-        mocker.patch("pandas.read_sql_query", return_value=expected_df)
-
+        expected_df.to_sql(sql_dataset._load_args["table_name"], engine, index=False)
         preview = sql_dataset.preview(nrows=3)
 
         assert "columns" in preview
@@ -247,19 +247,6 @@ class TestSQLTableDataset:
 
         with pytest.raises(SQLAlchemyError):
             table_dataset.preview(nrows=3)
-
-    def test_preview_with_bad_table_name(self):
-        connection_string = "sqlite:///:memory:"
-        bad_table_name = "test_table%$£^"  # Intentionally bad table name
-
-        # Create dataset instance with the bad table name
-        with pytest.raises(ValueError) as exc_info:
-            dataset = SQLTableDataset(
-                table_name=bad_table_name, credentials={"con": connection_string}
-            )
-            dataset.preview(nrows=5)
-
-        assert "Invalid table name provided." in str(exc_info.value)
 
 
 class TestSQLTableDatasetSingleConnection:

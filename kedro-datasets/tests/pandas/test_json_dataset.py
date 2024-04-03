@@ -43,17 +43,6 @@ def dummy_dataframe():
 
 
 @pytest.fixture
-def nested_json_data(tmp_path):
-    data = [
-        {"name": "Alice", "info": {"age": 30, "city": "New York"}},
-        {"name": "Bob", "info": {"age": 25, "city": "Los Angeles"}},
-    ]
-    filepath = tmp_path / "nested_test.json"
-    filepath.write_text(json.dumps(data))
-    return filepath.as_posix()
-
-
-@pytest.fixture
 def json_lines_data(tmp_path):
     data = [
         {"name": "Alice", "age": 30, "city": "New York"},
@@ -61,17 +50,6 @@ def json_lines_data(tmp_path):
     ]
     filepath = tmp_path / "lines_test.json"
     filepath.write_text("\n".join(json.dumps(item) for item in data))
-    return filepath.as_posix()
-
-
-@pytest.fixture
-def flat_json_data(tmp_path):
-    data = [
-        {"name": "Alice", "age": 30, "city": "New York"},
-        {"name": "Bob", "age": 25, "city": "Los Angeles"},
-    ]
-    filepath = tmp_path / "flat_test.json"
-    filepath.write_text(json.dumps(data))
     return filepath.as_posix()
 
 
@@ -177,13 +155,17 @@ class TestJSONDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_preview_nested_json(self, json_dataset, nested_json_data):
-        json_dataset._filepath = nested_json_data
-        preview_data = json_dataset.preview()
-        assert "name" in preview_data["columns"]
-        assert "info" in preview_data["columns"]
+    def test_preview_json(self, json_lines_data):
+        dataset = JSONDataset(filepath=json_lines_data, load_args={"lines": True})
+        preview_data = dataset.preview(nrows=2)
+        expected_columns = ["name", "age", "city"]
+        expected_data = [["Alice", 30, "New York"], ["Bob", 25, "Los Angeles"]]
+
+        assert preview_data["columns"] == expected_columns
+        assert preview_data["data"] == expected_data
+        assert len(preview_data["data"]) == 2
         assert (
-            inspect.signature(json_dataset.preview).return_annotation.__name__
+            inspect.signature(dataset.preview).return_annotation.__name__
             == "TablePreview"
         )
 

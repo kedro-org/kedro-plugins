@@ -16,7 +16,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import MetaData, Table, create_engine, inspect, select
 from sqlalchemy.exc import NoSuchModuleError
 
 from kedro_datasets._typing import TablePreview
@@ -296,8 +296,14 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
         table_name = _sanitise_table_name(self._load_args["table_name"])
 
-        sql_query = f"SELECT * FROM {table_name} LIMIT {nrows}"  # nosec
-        data_preview = pd.read_sql_query(sql_query, con=self.engine)
+        metadata = MetaData()
+        table_ref = Table(table_name, metadata, autoload_with=self.engine)
+
+        query = select(table_ref).limit(nrows)
+
+        with self.engine.connect() as conn:
+            result = conn.execute(query)
+            data_preview = pd.DataFrame(result.fetchall(), columns=result.keys())
 
         preview_data = data_preview.to_dict(orient="split")
         return preview_data

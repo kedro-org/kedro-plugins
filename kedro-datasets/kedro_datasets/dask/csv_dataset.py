@@ -2,13 +2,11 @@
 dataframe"""
 
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import dask.dataframe as dd
 import fsspec
-
 from kedro.io.core import AbstractDataset, get_protocol_and_path
-
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -62,12 +60,12 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
     def __init__(  # noqa: PLR0913
-            self,
-            filepath: str,
-            load_args: Dict[str, Any] = None,
-            save_args: Dict[str, Any] = None,
-            credentials: Dict[str, Any] = None,
-            fs_args: Dict[str, Any] = None,
+        self,
+        filepath: str,
+        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``CSVDataset`` pointing to concrete
         CSV files.
@@ -97,7 +95,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             self._save_args.update(save_args)
 
     @property
-    def fs_args(self) -> Dict[str, Any]:
+    def fs_args(self) -> dict[str, Any]:
         """Property of optional file system parameters.
 
         Returns:
@@ -107,7 +105,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         fs_args.update(self._credentials)
         return fs_args
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "load_args": self._load_args,

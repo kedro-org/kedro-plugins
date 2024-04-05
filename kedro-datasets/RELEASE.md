@@ -1,9 +1,41 @@
 # Upcoming Release
 ## Major features and improvements
+* Added support for Python 3.12.
+* Normalised optional dependencies names for datasets to follow [PEP 685](https://peps.python.org/pep-0685/). The `.` characters have been replaced with `-` in the optional dependencies names. Note that this might be breaking for some users. For example, users should now install optional dependencies for `pandas.ParquetDataset` from `kedro-datasets` like this:
+```bash
+pip install kedro-datasets[pandas-parquetdataset]
+```
+* Remove `setup.py` and move to `pyproject.toml` completely for `kedro-datasets`.
+* Added `NetCDFDataset` for loading and saving `*.nc` files.
+* Added new `CSVDataset` to [dask](https://www.dask.org/) module.
+
+## Bug fixes and other changes
+* If using MSSQL, `load_args:params` will be typecasted as tuple.
+* Fixed bug with loading datasets from Hugging Face. Now allows passing parameters to the load_dataset function.
+* Make `connection_args` argument optional when calling `create_connection()` in `sql_dataset.py`.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Riley Brady](https://github.com/riley-brady)
+* [Andrew Cao](https://github.com/andrewcao1)
+* [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
+* [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
+* [Michael Sexton](https://github.com/michaelsexton)
+
+# Release 2.1.0
+## Major features and improvements
+* Added `MatlabDataset` which uses `scipy` to save and load `.mat` files.
+* Extend preview feature for matplotlib, plotly and tracking datasets.
+* Allow additional parameters for sqlalchemy engine when using sql datasets.
+
 ## Bug fixes and other changes
 * Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
-* Added `CSVDataset` to [dask](https://www.dask.org/) module.
+
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Samuel Lee SJ](https://github.com/samuel-lee-sj)
+* [Felipe Monroy](https://github.com/felipemonroy)
+* [Manuel Spierenburg](https://github.com/mjspier)
 
 # Release 2.0.0
 ## Major features and improvements
@@ -17,7 +49,7 @@
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
 * Make dataset parameters keyword-only.
-* Correct pandas-gbq as py311 dependency
+* Correct pandas-gbq as py311 dependency.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

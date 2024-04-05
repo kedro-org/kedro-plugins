@@ -1,6 +1,7 @@
 """``ParquetDataset`` loads/saves data from/to a Parquet file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
+
 import logging
 from copy import deepcopy
 from io import BytesIO
@@ -17,6 +18,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -213,3 +216,24 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        import pyarrow.parquet as pq
+
+        load_path = str(self._get_load_path())
+
+        table = pq.read_table(
+            load_path, columns=self._load_args.get("columns"), use_threads=True
+        )[:nrows]
+        data_preview = table.to_pandas()
+
+        return data_preview.to_dict(orient="split")

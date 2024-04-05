@@ -66,7 +66,7 @@ class TestDeltaTableDataset:
         """Test saving by appending new data."""
         deltatable_dataset_from_path.save(dummy_df)
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
-        appended = pd.concat([dummy_df, new_df], ignore_index=True)
+        appended = pd.concat([new_df, dummy_df], ignore_index=True)
         deltatable_dataset_from_path.save(new_df)
         reloaded = deltatable_dataset_from_path.load()
         assert_frame_equal(appended, reloaded)

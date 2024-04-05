@@ -23,20 +23,30 @@ class HFDataset(AbstractVersionedDataset):
 
     .. code-block:: pycon
 
+       >>> from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
+       >>> disable_progress_bar()  # for doctest to pass
+       >>> set_verbosity(ERROR)  # for doctest to pass
        >>> from kedro_datasets.huggingface import HFDataset
-       >>> dataset = HFDataset(dataset_name="yelp_review_full")
-       >>> yelp_review_full = dataset.load()
-       >>> assert "train" in yelp_review_full
-       >>> assert "test" in yelp_review_full
-       >>> assert len(yelp_review_full["train"]) == 650000
+       >>> dataset = HFDataset(dataset_name="openai_humaneval")
+       >>> ds = dataset.load()  # doctest: +ELLIPSIS
+       Downloading and preparing dataset ...
+       Dataset ...
+       >>> assert "test" in ds
+       >>> assert len(ds["test"]) == 164
 
     """
 
-    def __init__(self, *, dataset_name: str):
+    def __init__(
+        self,
+        *,
+        dataset_name: str,
+        dataset_kwargs: dict[Any] | None = None,
+    ):
         self.dataset_name = dataset_name
+        self._dataset_kwargs = dataset_kwargs or {}
 
     def _load(self):
-        return load_dataset(self.dataset_name)
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)
 
     def _save(self):
         raise NotImplementedError("Not yet implemented")

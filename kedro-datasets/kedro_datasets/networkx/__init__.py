@@ -1,5 +1,6 @@
 """``AbstractDataset`` implementation to save and load graphs in JSON,
 GraphML and GML formats using NetworkX."""
+
 from typing import Any
 
 import lazy_loader as lazy

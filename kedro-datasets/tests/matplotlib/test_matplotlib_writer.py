@@ -1,3 +1,4 @@
+import inspect
 import json
 from pathlib import Path
 
@@ -6,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pytest
 from kedro.io import DatasetError, Version
-from moto import mock_s3
+from moto import mock_aws
 from s3fs import S3FileSystem
 
 from kedro_datasets.matplotlib import MatplotlibWriter
@@ -51,7 +52,7 @@ def mock_dict_plot():
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -79,7 +80,7 @@ def mocked_encrypted_s3_bucket():
     }
     bucket_policy = json.dumps(bucket_policy)
 
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -252,6 +253,17 @@ class TestMatplotlibWriter:
         dataset = MatplotlibWriter(filepath=FULL_PATH)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
+
+    def test_preview(self, mock_single_plot, plot_writer):
+        plot_writer.save(mock_single_plot)
+        # Define the expected beginning of the base64 encoded image string
+        expected_beginning = "iVBORw0KGgoAAAANSUh"
+        preview = plot_writer.preview()
+        assert preview.startswith(expected_beginning)
+        assert (
+            inspect.signature(plot_writer.preview).return_annotation.__name__
+            == "ImagePreview"
+        )
 
 
 class TestMatplotlibWriterVersioned:

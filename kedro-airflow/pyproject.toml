@@ -28,7 +28,6 @@ test = [
     "bandit",
     "behave",
     "black~=22.0",
-    "kedro @ git+https://github.com/kedro-org/kedro@main",
     "kedro-datasets",
     "pre-commit>=2.9.2",
     "pytest",

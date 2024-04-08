@@ -1,3 +1,4 @@
+import inspect
 from pathlib import PosixPath
 from unittest.mock import ANY
 
@@ -5,6 +6,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 from kedro.io.core import DatasetError
+from sqlalchemy.exc import SQLAlchemyError
 
 import kedro_datasets
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
@@ -58,6 +60,19 @@ def query_file_dataset(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLQueryDataset(**kwargs)
+
+
+@pytest.fixture
+def sql_dataset(tmp_path):
+    connection_string = "sqlite:///:memory:"
+    table_name = "test_table"
+
+    engine = sqlalchemy.create_engine(connection_string)
+    test_data = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
+    test_data.to_sql(table_name, engine, index=False)
+
+    credentials = {"con": connection_string}
+    return SQLTableDataset(table_name=table_name, credentials=credentials)
 
 
 class TestSQLTableDataset:
@@ -210,6 +225,28 @@ class TestSQLTableDataset:
         kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
             CONNECTION, **additional_params
         )
+
+    def test_preview_normal_scenario(self, sql_dataset):
+        engine = sql_dataset.engine
+        expected_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
+        expected_df.to_sql(sql_dataset._load_args["table_name"], engine, index=False)
+        preview = sql_dataset.preview(nrows=3)
+
+        assert "columns" in preview
+        assert "data" in preview
+        assert len(preview["data"]) == len(expected_df)
+
+        return_annotation = inspect.signature(sql_dataset.preview).return_annotation
+        assert return_annotation == "TablePreview"
+
+    def test_preview_sql_error(self, table_dataset, mocker):
+        mocker.patch(
+            "pandas.read_sql_query",
+            side_effect=SQLAlchemyError("Mocked SQL error", "", ""),
+        )
+
+        with pytest.raises(SQLAlchemyError):
+            table_dataset.preview(nrows=3)
 
 
 class TestSQLTableDatasetSingleConnection:

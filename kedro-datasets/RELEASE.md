@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added support for Python 3.12.
 * Normalised optional dependencies names for datasets to follow [PEP 685](https://peps.python.org/pep-0685/). The `.` characters have been replaced with `-` in the optional dependencies names. Note that this might be breaking for some users. For example, users should now install optional dependencies for `pandas.ParquetDataset` from `kedro-datasets` like this:
 ```bash
 pip install kedro-datasets[pandas-parquetdataset]
@@ -10,12 +11,15 @@ pip install kedro-datasets[pandas-parquetdataset]
 
 ## Bug fixes and other changes
 * If using MSSQL, `load_args:params` will be typecasted as tuple.
+* Fixed bug with loading datasets from Hugging Face. Now allows passing parameters to the load_dataset function.
+* Made `connection_args` argument optional when calling `create_connection()` in `sql_dataset.py`.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Riley Brady](https://github.com/riley-brady)
 * [Andrew Cao](https://github.com/andrewcao1)
-
+* [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
+* [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
 
 # Release 2.1.0
 ## Major features and improvements
@@ -44,7 +48,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Bug fixes and other changes
 * Fixed bug with loading models saved with `TensorFlowModelDataset`.
 * Made dataset parameters keyword-only.
-* Corrected pandas-gbq as py311 dependency
+* Corrected pandas-gbq as py311 dependency.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -5,6 +5,7 @@ processed partition in so-called `checkpoint` that is persisted to the location
 of the data partitions by default, so that subsequent pipeline run loads only
 new partitions past the checkpoint.It also uses `fsspec` for filesystem level operations.
 """
+
 from __future__ import annotations
 
 import operator
@@ -44,7 +45,9 @@ class IncrementalDataset(PartitionedDataset):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
-        >>> dataset = IncrementalDataset(path=str(tmp_path/ "test_data"), dataset="pandas.CSVDataset")
+        >>> dataset = IncrementalDataset(
+        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
+        ... )
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>

@@ -1,6 +1,7 @@
 """``JSONDataset`` loads and saves graphs to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.
 """
+
 import json
 from copy import deepcopy
 from pathlib import PurePosixPath

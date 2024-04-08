@@ -1,4 +1,5 @@
 """``AbstractDataset`` implementation to read/write from/to a sequence file."""
+
 from typing import Any
 
 import lazy_loader as lazy

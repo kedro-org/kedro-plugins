@@ -1,4 +1,5 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any

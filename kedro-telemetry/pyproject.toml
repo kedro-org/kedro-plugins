@@ -13,6 +13,7 @@ license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.18.0",
     "requests~=2.20",
+    "appdirs>=1.4.4",
 ]
 dynamic = ["readme", "version"]
 
@@ -24,7 +25,6 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 [project.optional-dependencies]
 test = [
     "bandit>=1.6.2, <2.0",
-    "behave",
     "black~=22.0",
     "pre-commit>=2.9.2",
     "pytest",

@@ -9,14 +9,14 @@ from kedro_datasets.ibis import TableDataset
 
 @pytest.fixture(scope="session")
 def filepath_csv(tmp_path_factory):
-    path = (tmp_path_factory.mktemp("data") / "penguins.csv").as_posix()
-    ibis.examples.penguins.fetch().to_csv(path)
+    path = (tmp_path_factory.mktemp("data") / "test.csv").as_posix()
+    ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}).to_csv(path)
     return path
 
 
 @pytest.fixture
 def database(tmp_path):
-    return (tmp_path / "penguins.ddb").as_posix()
+    return (tmp_path / "file.db").as_posix()
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def connection_config(database):
 @pytest.fixture
 def table_dataset(connection_config, load_args, save_args):
     return TableDataset(
-        table_name="penguins",
+        table_name="test",
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -59,11 +59,8 @@ class TestTableDataset:
 
         # Verify that the appropriate materialization strategy was used.
         con = duckdb.connect(database)
-        assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["database_name"]
-        assert (
-            "penguins"
-            in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["database_name"]
-        )
+        assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
+        assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     def test_exists(self, table_dataset, dummy_table):
         """Test `exists` method invocation for both existing and
@@ -85,10 +82,9 @@ class TestTableDataset:
         # Verify that the appropriate materialization strategy was used.
         con = duckdb.connect(database)
         assert (
-            "penguins"
-            in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["database_name"]
+            "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
-        assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["database_name"]
+        assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     def test_no_filepath_or_table_name(connection_config):
         pattern = r"Must provide at least one of `filepath` or `table_name`\."

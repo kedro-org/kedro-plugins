@@ -14,11 +14,52 @@ if TYPE_CHECKING:
 class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
-    Example:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
+
+    .. code-block:: yaml
+
+        cars:
+          type: ibis.TableDataset
+          filepath: data/01_raw/company/cars.csv
+          file_format: csv
+          table_name: cars
+          connection:
+            backend: duckdb
+            database: company.db
+          load_args:
+            sep: ","
+            nullstr: "#NA"
+          save_args:
+            materialized: table
+
+        motorbikes:
+          type: ibis.TableDataset
+          table_name: motorbikes
+          connection:
+            backend: duckdb
+            database: company.db
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
 
+        >>> import ibis
         >>> from kedro_datasets.ibis import TableDataset
+        >>>
+        >>> data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = TableDataset(
+        ...     table_name="test",
+        ...     connection={"backend": "duckdb", "database": tmp_path / "file.db"},
+        ...     save_args={"materialized": "table"},
+        ... )
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.execute().equals(reloaded.execute())
 
     """
 

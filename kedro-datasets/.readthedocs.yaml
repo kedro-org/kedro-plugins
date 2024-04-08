@@ -12,8 +12,7 @@ build:
   jobs:
     pre_install:
       - python -m pip install "uv==0.1.13"
-      - export UV_HTTP_TIMEOUT=600
-      - uv pip install --system --upgrade sphinx readthedocs-sphinx-ext "kedro-datasets[docs,test] @ ./kedro-datasets"
+      - UV_HTTP_TIMEOUT=1000 uv pip install --system --upgrade sphinx readthedocs-sphinx-ext "kedro-datasets[docs,test] @ ./kedro-datasets"
       - uv pip freeze
     pre_build:
       - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d kedro-datasets/_build/doctrees kedro-datasets/docs/source kedro-datasets/_build/linkcheck

@@ -1,3 +1,5 @@
+import inspect
+import json
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
@@ -38,6 +40,17 @@ def versioned_json_dataset(filepath_json, load_version, save_version):
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+@pytest.fixture
+def json_lines_data(tmp_path):
+    data = [
+        {"name": "Alice", "age": 30, "city": "New York"},
+        {"name": "Bob", "age": 25, "city": "Los Angeles"},
+    ]
+    filepath = tmp_path / "lines_test.json"
+    filepath.write_text("\n".join(json.dumps(item) for item in data))
+    return filepath.as_posix()
 
 
 class TestJSONDataset:
@@ -141,6 +154,30 @@ class TestJSONDataset:
         dataset = JSONDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_preview_json(self, json_lines_data):
+        dataset = JSONDataset(filepath=json_lines_data, load_args={"lines": True})
+        preview_data = dataset.preview(nrows=2)
+        expected_columns = ["name", "age", "city"]
+        expected_data = [["Alice", 30, "New York"], ["Bob", 25, "Los Angeles"]]
+
+        assert preview_data["columns"] == expected_columns
+        assert preview_data["data"] == expected_data
+        assert len(preview_data["data"]) == 2
+        assert (
+            inspect.signature(dataset.preview).return_annotation.__name__
+            == "TablePreview"
+        )
+
+    def test_preview_json_lines(self, json_dataset, json_lines_data):
+        json_dataset._filepath = json_lines_data
+        json_dataset._load_args = {"lines": True}
+        preview_data = json_dataset.preview()
+        assert len(preview_data["data"]) == 2
+        assert (
+            inspect.signature(json_dataset.preview).return_annotation.__name__
+            == "TablePreview"
+        )
 
 
 class TestJSONDatasetVersioned:

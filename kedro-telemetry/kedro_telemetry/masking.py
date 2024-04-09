@@ -8,9 +8,9 @@ MASK = "*****"
 
 
 def _recurse_cli(
-    cli_element: Union[click.Command, click.Group, click.CommandCollection],
+    cli_element: Union[click.Command, click.Group, click.CommandCollection, None],
     ctx: click.Context,
-    io_dict: Dict[str, Any],
+    io_dict: Dict[str | None, Any],
     get_help: bool = False,
 ) -> None:
     """
@@ -39,7 +39,7 @@ def _recurse_cli(
         element_name = cli_element.name or "kedro"
         io_dict[element_name] = {}
         for command_name in cli_element.list_commands(ctx):
-            _recurse_cli(  # type: ignore
+            _recurse_cli(
                 cli_element.get_command(ctx, command_name),
                 ctx,
                 io_dict[element_name],
@@ -68,19 +68,21 @@ def _recurse_cli(
 def _get_cli_structure(
     cli_obj: Union[click.Command, click.Group, click.CommandCollection],
     get_help: bool = False,
-) -> Dict[str, Any]:
+) -> Dict[str | None, Any]:
     """Code copied over from kedro.tools.cli to maintain backwards compatibility
     with previous versions of kedro (<0.17.5).
     Convenience wrapper function for `_recurse_cli` to work within
     `click.Context` and return a `dict`.
     """
-    output: Dict[str, Any] = {}
+    output: Dict[str | None, Any] = {}
     with click.Context(cli_obj) as ctx:  # type: ignore
         _recurse_cli(cli_obj, ctx, output, get_help)
     return output
 
 
-def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List[str]:
+def _mask_kedro_cli(
+    cli_struct: Dict[str | None, Any], command_args: List[str]
+) -> List[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []

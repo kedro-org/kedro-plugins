@@ -12,10 +12,10 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import click
-import requests
-import toml
-import yaml
-from appdirs import user_config_dir
+import requests  # type: ignore[import-untyped]
+import toml  # type: ignore[import-untyped]
+import yaml  # type: ignore[import-untyped]
+from appdirs import user_config_dir  # type: ignore[import-untyped]
 from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl
@@ -78,7 +78,7 @@ def _get_or_create_uuid() -> str:
 
 def _generate_new_uuid(full_path: str) -> str:
     try:
-        config = {}
+        config: Dict[str, Dict[str, Any]] = {}
         config["telemetry"] = {}
         new_uuid = uuid.uuid4().hex
         config["telemetry"]["uuid"] = new_uuid
@@ -195,8 +195,8 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: str) -> Dict:
-    hashed_package_name = _hash(PACKAGE_NAME) if PACKAGE_NAME else "undefined"
+def _get_project_properties(user_uuid: str, project_path: Path) -> Dict:
+    hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
     properties = {
         "username": user_uuid,
         "package_name": hashed_package_name,
@@ -267,7 +267,7 @@ def _get_heap_app_id() -> str:
 
 
 def _send_heap_event(
-    event_name: str, identity: str, properties: Dict[str, Any] = None
+    event_name: str, identity: str, properties: Dict[str, Any] | None = None
 ) -> None:
     data = {
         "app_id": _get_heap_app_id(),

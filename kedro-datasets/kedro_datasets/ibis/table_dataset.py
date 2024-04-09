@@ -84,6 +84,27 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     ) -> None:
         """Creates a new ``TableDataset`` pointing to a table (or file).
 
+        ``TableDataset`` connects to the Ibis backend object constructed
+        from the connection configuration. The `backend` key provided in
+        the config can be any of the `supported backends <https://ibis-\
+        project.org/install>`_. The remaining dictionary entries will be
+        passed as arguments to the underlying ``connect()`` method (e.g.
+        `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
+        #ibis.duckdb.connect>`_).
+
+        If ``filepath`` and ``file_format`` are given, the corresponding
+        read method (e.g. `read_csv() <https://ibis-project.org/backends/\
+        duckdb#ibis.backends.duckdb.Backend.read_csv>`_) is used to load
+        the file with the backend. Note that only the data is loaded; no
+        link to the underlying file exists past ``TableDataset.load()``.
+
+        If ``table_name`` is given (and ``filepath`` isn't), the dataset
+        establishes a connection to the relevant table for the execution
+        backend. Therefore, Ibis doesn't fetch data on load; all compute
+        is deferred until materialization, when the expression is saved.
+        In practice, this happens when another ``TableDataset`` instance
+        is saved, after running code defined across one more more nodes.
+
         Args:
             filepath: Path to a file to register as a table. Most useful
                 for loading data into your data warehouse (for testing).

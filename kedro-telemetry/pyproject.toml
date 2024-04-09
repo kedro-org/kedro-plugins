@@ -26,6 +26,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 test = [
     "bandit>=1.6.2, <2.0",
     "black~=22.0",
+    "mypy~=1.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

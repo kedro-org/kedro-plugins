@@ -31,6 +31,7 @@ test = [
     "connexion<3.0.0", # TODO: Temporary fix, connexion has changed their API, but airflow hasn't caught up yet
     "Flask-Session<0.6", # TODO: Temporary pin, 0.6 breaks apache-airflow
     "kedro-datasets",
+    "mypy~=1.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",

@@ -28,6 +28,7 @@ test = [
     "behave",
     "black~=22.0",
     "docker",
+    "mypy~=1.0",
     "pre-commit>=2.9.2",
     "psutil",
     "pytest",

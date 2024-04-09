@@ -1,5 +1,7 @@
 """Kedro Telemetry plugin for collecting Kedro usage data."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
@@ -9,7 +11,7 @@ import uuid
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import click
 import requests  # type: ignore[import-untyped]
@@ -78,7 +80,7 @@ def _get_or_create_uuid() -> str:
 
 def _generate_new_uuid(full_path: str) -> str:
     try:
-        config: Dict[str, Dict[str, Any]] = {}
+        config: dict[str, dict[str, Any]] = {}
         config["telemetry"] = {}
         new_uuid = uuid.uuid4().hex
         config["telemetry"]["uuid"] = new_uuid
@@ -98,7 +100,7 @@ class KedroTelemetryCLIHooks:
 
     @cli_hook_impl
     def before_command_run(
-        self, project_metadata: ProjectMetadata, command_args: List[str]
+        self, project_metadata: ProjectMetadata, command_args: list[str]
     ):
         """Hook implementation to send command run data to Heap"""
         try:
@@ -195,7 +197,7 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: Path) -> Dict:
+def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
     hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
     properties = {
         "username": user_uuid,
@@ -227,7 +229,7 @@ def _get_project_properties(user_uuid: str, project_path: Path) -> Dict:
 
 def _format_user_cli_data(
     properties: dict,
-    command_args: List[str],
+    command_args: list[str],
 ):
     """Add format CLI command data to send to Heap."""
     cli_properties = properties.copy()
@@ -267,7 +269,7 @@ def _get_heap_app_id() -> str:
 
 
 def _send_heap_event(
-    event_name: str, identity: str, properties: Dict[str, Any] | None = None
+    event_name: str, identity: str, properties: dict[str, Any] | None = None
 ) -> None:
     data = {
         "app_id": _get_heap_app_id(),

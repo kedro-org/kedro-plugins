@@ -141,8 +141,15 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
     @property
     def connection(self) -> BaseBackend:
+        def hashable(value):
+            if isinstance(value, dict):
+                return tuple((k, hashable(v)) for k, v in sorted(value.items()))
+            if isinstance(value, list):
+                return tuple(hashable(x) for x in value)
+            return value
+
         cls = type(self)
-        key = tuple(sorted(self._connection_config.items()))
+        key = hashable(self._connection_config)
         if key not in cls._connections:
             import ibis
 

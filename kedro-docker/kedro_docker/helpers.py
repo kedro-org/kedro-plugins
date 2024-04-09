@@ -1,5 +1,7 @@
 """ Utilities for use with click docker commands """
 
+from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -9,7 +11,7 @@ from importlib import import_module
 from itertools import chain
 from pathlib import Path, PurePosixPath
 from subprocess import DEVNULL, PIPE
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence
 
 from click import secho
 from kedro.framework.cli.utils import KedroCliError
@@ -61,10 +63,10 @@ def compose_docker_run_args(  # noqa: PLR0913
     host_root: str | None = None,
     container_root: str | None = None,
     mount_volumes: Sequence[str] | None = None,
-    required_args: Sequence[Tuple[str, Union[str, None]]] | None = None,
-    optional_args: Sequence[Tuple[str, Union[str, None]]] | None = None,
+    required_args: Sequence[tuple[str, str | None]] | None = None,
+    optional_args: Sequence[tuple[str, str | None]] | None = None,
     user_args: Sequence[str] | None = None,
-) -> List[str]:
+) -> list[str]:
     """
     Make a list of arguments for the docker command.
 
@@ -95,7 +97,7 @@ def compose_docker_run_args(  # noqa: PLR0913
 
     def _add_args(
         name_: str, value_: str | None = None, force_: bool = False
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Add extra args to existing list of CLI args.
         Args:
@@ -175,7 +177,7 @@ def copy_template_files(
             secho(msg, fg="yellow")
 
 
-def get_uid_gid(uid: int | None = None, gid: int | None = None) -> Tuple[int, int]:
+def get_uid_gid(uid: int | None = None, gid: int | None = None) -> tuple[int, int]:
     """
     Get UID and GID to be passed into the Docker container.
     Defaults to the current user's UID and GID on Unix and (999, 0) on Windows.
@@ -208,7 +210,7 @@ def get_uid_gid(uid: int | None = None, gid: int | None = None) -> Tuple[int, in
     return uid, gid
 
 
-def add_jupyter_args(run_args: List[str]) -> List[str]:
+def add_jupyter_args(run_args: list[str]) -> list[str]:
     """
     Adds `--ip 0.0.0.0` and `--no-browser` options to run args if those are not
     there yet.

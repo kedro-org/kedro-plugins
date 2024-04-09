@@ -1,6 +1,7 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
@@ -121,7 +122,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     @property
     def connection(self) -> BaseBackend:
         cls = type(self)
-        key = tuple(sorted(self._connection_config.items()))
+        key = json.dumps(self._connection_config, sort_keys=True)
         if key not in cls._connections:
             import ibis
 

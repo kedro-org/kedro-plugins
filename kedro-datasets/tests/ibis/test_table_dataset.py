@@ -19,9 +19,9 @@ def database(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
 
-@pytest.fixture
-def connection_config(database):
-    return {"backend": "duckdb", "database": database}
+@pytest.fixture(params=[None])
+def connection_config(request, database):
+    return request.param or {"backend": "duckdb", "database": database}
 
 
 @pytest.fixture
@@ -95,3 +95,23 @@ class TestTableDataset:
         pattern = r"Must provide `table_name` for materialization\."
         with pytest.raises(DatasetError, match=pattern):
             table_dataset_from_csv.save(dummy_table)
+
+    @pytest.mark.parametrize(
+        ("connection_config", "key"),
+        [
+            (
+                {"backend": "duckdb", "database": "file.db", "extensions": ["spatial"]},
+                (
+                    ("backend", "duckdb"),
+                    ("database", "file.db"),
+                    ("extensions", ("spatial",)),
+                ),
+            )
+        ],
+        indirect=["connection_config"],
+    )
+    def test_connection_config(self, mocker, table_dataset, connection_config, key):
+        """Test hashing of more complicated connection configuration."""
+        mocker.patch("ibis.duckdb")
+        table_dataset.load()
+        assert key in table_dataset._connections

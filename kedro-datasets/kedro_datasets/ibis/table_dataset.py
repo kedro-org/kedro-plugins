@@ -145,7 +145,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             if isinstance(value, dict):
                 return tuple((k, hashable(v)) for k, v in sorted(value.items()))
             if isinstance(value, list):
-                return tuple(hashable(x) for x in value)  # pragma: no cover
+                return tuple(hashable(x) for x in value)
             return value
 
         cls = type(self)

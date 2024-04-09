@@ -126,7 +126,7 @@ def compose_docker_run_args(  # noqa: PLR0913
         combined_args += _add_args(arg_name, arg_value, True)
     for arg_name, arg_value in optional_args:
         combined_args += _add_args(arg_name, arg_value)
-    return combined_args + List(user_args)
+    return combined_args + list(user_args)
 
 
 def make_container_name(image: str, suffix: str = "") -> str:

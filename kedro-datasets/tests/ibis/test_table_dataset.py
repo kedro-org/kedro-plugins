@@ -106,12 +106,27 @@ class TestTableDataset:
                     ("database", "file.db"),
                     ("extensions", ("spatial",)),
                 ),
-            )
+            ),
+            # https://github.com/kedro-org/kedro-plugins/pull/560#discussion_r1536083525
+            (
+                {
+                    "host": "xxx.sql.azuresynapse.net",
+                    "database": "xxx",
+                    "query": {"driver": "ODBC Driver 17 for SQL Server"},
+                    "backend": "mssql",
+                },
+                (
+                    ("backend", "mssql"),
+                    ("database", "xxx"),
+                    ("host", "xxx.sql.azuresynapse.net"),
+                    ("query", (("driver", "ODBC Driver 17 for SQL Server"),)),
+                ),
+            ),
         ],
         indirect=["connection_config"],
     )
     def test_connection_config(self, mocker, table_dataset, connection_config, key):
         """Test hashing of more complicated connection configuration."""
-        mocker.patch("ibis.duckdb")
+        mocker.patch(f"ibis.{connection_config['backend']}")
         table_dataset.load()
         assert key in table_dataset._connections

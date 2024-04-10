@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Any
 
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
@@ -43,7 +44,7 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
     node_sequences = []
 
     # Mapping from dataset name -> node sequence index
-    sequence_map = {}
+    sequence_map: dict[str, Any] = {}
     for node in pipeline.nodes:
         if all(o not in memory_datasets for o in node.inputs + node.outputs):
             # standalone node
@@ -62,7 +63,7 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
                         sequence_id = sequence_map[i]
 
                 # Append to map
-                node_sequences[sequence_id].append(node)
+                node_sequences[sequence_id].append(node)  # type: ignore[index]
 
             # map outputs to sequence_id
             for o in node.outputs:
@@ -83,7 +84,7 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
     }
 
     # Grouped dependencies
-    dependencies = defaultdict(list)
+    dependencies: dict[str, list] = defaultdict(list)
     for node, parent_nodes in pipeline.node_dependencies.items():
         for parent in parent_nodes:
             parent_name = node_mapping[parent.name]

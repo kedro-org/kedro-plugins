@@ -10,10 +10,10 @@
 
 * Added the following new datasets:
 
-| Type                   | Description                                               | Location                |
-|------------------------|-----------------------------------------------------------|-------------------------|
-| `netcdf.NetCDFDataset` | A dataset for loading and saving `*.nc` files.            | `kedro_datasets.netcdf` |
-| `ibis.NetCDFDataset`   | A dataset for loading and saving using Ibis's backends.   | `kedro_datasets.ibis`   |
+| Type                    | Description                                               | Location                |
+|-------------------------|-----------------------------------------------------------|-------------------------|
+| `netcdf.NetCDFDataset`  | A dataset for loading and saving `*.nc` files.            | `kedro_datasets.netcdf` |
+| `ibis.TableDataset`     | A dataset for loading and saving using Ibis's backends.   | `kedro_datasets.ibis`   |
 
 * Added support for Python 3.12.
 * Normalised optional dependencies names for datasets to follow [PEP 685](https://peps.python.org/pep-0685/). The `.` characters have been replaced with `-` in the optional dependencies names. Note that this might be breaking for some users. For example, users should now install optional dependencies for `pandas.ParquetDataset` from `kedro-datasets` like this:

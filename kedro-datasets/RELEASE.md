@@ -7,6 +7,8 @@ pip install kedro-datasets[pandas-parquetdataset]
 ```
 * Remove `setup.py` and move to `pyproject.toml` completely for `kedro-datasets`.
 * Added `NetCDFDataset` for loading and saving `*.nc` files.
+* Remove support for `pandas < 2.0`.
+* Remove support for `pyspark < 3.0`.
 
 ## Bug fixes and other changes
 * If using MSSQL, `load_args:params` will be typecasted as tuple.

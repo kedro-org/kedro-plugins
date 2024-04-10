@@ -9,7 +9,7 @@ from typing import Dict, Sequence
 import click
 from kedro import __version__ as kedro_version
 from kedro.framework.cli.utils import KedroCliError, call, forward_command
-from semver import VersionInfo  # type: ignore
+from semver import VersionInfo
 
 from .helpers import (
     add_jupyter_args,

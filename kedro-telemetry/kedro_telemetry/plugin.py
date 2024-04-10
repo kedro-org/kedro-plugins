@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import Any
 
 import click
-import requests  # type: ignore[import-untyped]
-import toml  # type: ignore[import-untyped]
-import yaml  # type: ignore[import-untyped]
-from appdirs import user_config_dir  # type: ignore[import-untyped]
+import requests
+import toml
+import yaml
+from appdirs import user_config_dir
 from kedro import __version__ as KEDRO_VERSION
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl

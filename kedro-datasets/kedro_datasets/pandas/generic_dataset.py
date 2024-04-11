@@ -92,12 +92,12 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         *,
         filepath: str,
         file_format: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``GenericDataset`` pointing to a concrete data file
         on a specific filesystem. The appropriate pandas load/save methods are

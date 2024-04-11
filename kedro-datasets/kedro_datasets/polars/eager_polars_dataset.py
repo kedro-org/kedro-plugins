@@ -54,8 +54,8 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS = {}  # type: dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: dict[str, Any]
 
     def __init__(  # noqa: PLR0913
         self,

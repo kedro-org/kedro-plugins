@@ -38,8 +38,8 @@ class SparkStreamingDataset(AbstractDataset):
                 filepath: data/01_raw/schema/inventory_schema.json
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS = {}  # type: dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: dict[str, Any]
 
     def __init__(
         self,

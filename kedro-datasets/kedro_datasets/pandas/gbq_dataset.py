@@ -70,11 +70,11 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         *,
         dataset: str,
         table_name: str,
-        project: str = None,
-        credentials: Union[dict[str, Any], Credentials] = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        project: str | None = None,
+        credentials: dict[str, Any] | Credentials | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataset``.
 
@@ -212,13 +212,13 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
-        sql: str = None,
-        project: str = None,
-        credentials: Union[dict[str, Any], Credentials] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        filepath: str = None,
-        metadata: dict[str, Any] = None,
+        sql: str | None = None,
+        project: str | None = None,
+        credentials: dict[str, Any] | Credentials | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        filepath: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
 

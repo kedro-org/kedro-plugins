@@ -272,9 +272,9 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         *,
         filepath: str,
         fourcc: Optional[str] = "mp4v",
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of VideoDataset to load / save video data for given filepath.
 

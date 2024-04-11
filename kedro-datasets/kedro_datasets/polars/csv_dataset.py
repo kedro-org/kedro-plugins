@@ -71,12 +71,12 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
         version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``CSVDataset`` pointing to a concrete CSV file
         on a specific filesystem.

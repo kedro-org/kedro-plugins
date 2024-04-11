@@ -79,12 +79,12 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         *,
         filepath: str,
         file_format: str,
-        load_args: Optional[dict[str, Any]] = None,
-        save_args: Optional[dict[str, Any]] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
         version: Version = None,
-        credentials: Optional[dict[str, Any]] = None,
-        fs_args: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``LazyPolarsDataset`` pointing to a concrete
         data file on a specific filesystem.

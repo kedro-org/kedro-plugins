@@ -70,10 +70,10 @@ class IncrementalDataset(PartitionedDataset):
         checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``IncrementalDataset``.
 

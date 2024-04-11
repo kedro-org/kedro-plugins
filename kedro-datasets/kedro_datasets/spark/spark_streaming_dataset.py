@@ -46,8 +46,8 @@ class SparkStreamingDataset(AbstractDataset):
         *,
         filepath: str = "",
         file_format: str = "",
-        save_args: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataset.
 

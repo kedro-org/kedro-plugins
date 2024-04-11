@@ -69,12 +69,12 @@ class NetCDFDataset(AbstractDataset):
         self,
         *,
         filepath: str,
-        temppath: str = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        temppath: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem

@@ -118,7 +118,7 @@ class ExcelDataset(
         engine: str = "openpyxl",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        version: Version | None = None,
+        version: Version = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,

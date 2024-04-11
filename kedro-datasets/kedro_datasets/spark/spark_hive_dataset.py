@@ -75,9 +75,9 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         database: str,
         table: str,
         write_mode: str = "errorifexists",
-        table_pk: list[str] = None,
-        save_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        table_pk: list[str] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataset``.
 
@@ -138,7 +138,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "format": self._format,
         }
 
-    def _create_hive_table(self, data: DataFrame, mode: str = None):
+    def _create_hive_table(self, data: DataFrame, mode: str | None = None):
         _mode: str = mode or self._write_mode
         data.write.saveAsTable(
             self._full_table_address,

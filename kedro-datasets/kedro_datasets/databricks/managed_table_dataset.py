@@ -32,13 +32,13 @@ class ManagedTable:
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
-    catalog: Optional[str]
+    catalog: str | None
     table: str
-    write_mode: Union[str, None]
+    write_mode: str | None
     dataframe_type: str
-    primary_key: Optional[str]
-    owner_group: str
-    partition_columns: Union[str, list[str]]
+    primary_key: str | list[str] | None
+    owner_group: str | None
+    partition_columns: str | list[str] | None
     json_schema: StructType
 
     def __post_init__(self):
@@ -120,11 +120,11 @@ class ManagedTable:
                     f"`write_mode` {self.write_mode}"
                 )
 
-    def full_table_location(self) -> str:
+    def full_table_location(self) -> str | None:
         """Returns the full table location
 
         Returns:
-            str: table location in the format catalog.database.table
+            str | None : table location in the format catalog.database.table or None if database and table aren't defined
         """
         full_table_location = None
         if self.catalog and self.database and self.table:
@@ -217,17 +217,17 @@ class ManagedTableDataset(AbstractVersionedDataset):
         self,
         *,
         table: str,
-        catalog: str = None,
+        catalog: str | None = None,
         database: str = "default",
-        write_mode: Union[str, None] = None,
+        write_mode: str | None = None,
         dataframe_type: str = "spark",
-        primary_key: Optional[Union[str, list[str]]] = None,
+        primary_key: str | list[str] | None = None,
         version: Version = None,
         # the following parameters are used by project hooks
         # to create or update table properties
-        schema: dict[str, Any] = None,
-        partition_columns: list[str] = None,
-        owner_group: str = None,
+        schema: dict[str, Any] | None = None,
+        partition_columns: list[str] | None = None,
+        owner_group: str | None = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
 

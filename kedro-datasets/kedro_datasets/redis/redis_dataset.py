@@ -64,11 +64,11 @@ class PickleDataset(AbstractDataset[Any, Any]):
         *,
         key: str,
         backend: str = "pickle",
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        redis_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        redis_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``PickleDataset``. This loads/saves data from/to
         a Redis database while deserialising/serialising. Supports custom backends to

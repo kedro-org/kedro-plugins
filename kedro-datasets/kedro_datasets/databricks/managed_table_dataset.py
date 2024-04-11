@@ -405,7 +405,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         elif self._table.write_mode == "append":
             self._save_append(data)
 
-    def _describe(self) -> dict[str, str]:
+    def _describe(self) -> dict[str, str | list | None]:
         """Returns a description of the instance of ManagedTableDataset
 
         Returns:

@@ -35,8 +35,6 @@ test = [
     "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
     "wheel"
-    # mypy related dependencies
-    "types-requests"
 ]
 
 [project.entry-points."kedro.cli_hooks"]
@@ -70,7 +68,3 @@ ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.ruff.isort]
 known-first-party = ["kedro_telemetry"]
-
-[tool.mypy]
-ignore_missing_imports = true
-disable_error_code = ['misc']

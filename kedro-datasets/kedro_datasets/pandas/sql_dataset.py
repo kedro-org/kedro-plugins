@@ -163,9 +163,9 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         *,
         table_name: str,
         credentials: dict[str, Any],
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``SQLTableDataset``.
 
@@ -432,13 +432,13 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
-        sql: str = None,
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        filepath: str = None,
+        sql: str | None = None,
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        filepath: str | None = None,
         execution_options: dict[str, Any] | None = None,
-        metadata: dict[str, Any] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 

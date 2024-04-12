@@ -42,12 +42,12 @@ Regular datasets are maintained by the [Kedro Technical Steering Committee (TSC)
 4. Must run as part of the regular CI/CD jobs.
 5. Must have 100% test coverage.
 6. Should support all Python versions under NEP 29 (3.9+ currently).
-7. Should work on Ubuntu, Linux, and Windows.
+7. Should work on Linux, macOS, and Windows.
 
-#### Experimental Datasets
+#### Experimental datasets
 The requirements for experimental datasets are more flexible and these datasets are not maintained by the Kedro TSC. Experimental datasets:
 
-1. Do not need to be fully documented but must have doc strings explaining their use.
+1. Do not need to be fully documented but must have docstrings explaining their use.
 2. Do not need to run as part of regular CI/CD jobs.
 3. Can be in the early stages of development or do not have to meet the criteria for regular Kedro datasets.
 

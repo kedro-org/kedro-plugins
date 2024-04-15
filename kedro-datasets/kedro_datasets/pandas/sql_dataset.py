@@ -16,8 +16,10 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import MetaData, Table, create_engine, inspect, select
 from sqlalchemy.exc import NoSuchModuleError
+
+from kedro_datasets._typing import TablePreview
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
@@ -226,11 +228,14 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: dict) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
             engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:
@@ -271,6 +276,31 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         insp = inspect(self.engine)
         schema = self._load_args.get("schema", None)
         return insp.has_table(self._load_args["table_name"], schema)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+
+        table_name = self._load_args["table_name"]
+
+        metadata = MetaData()
+        table_ref = Table(table_name, metadata, autoload_with=self.engine)
+
+        query = select(table_ref).limit(nrows)
+
+        with self.engine.connect() as conn:
+            result = conn.execute(query)
+            data_preview = pd.DataFrame(result.fetchall(), columns=result.keys())
+
+        preview_data = data_preview.to_dict(orient="split")
+        return preview_data
 
 
 class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
@@ -498,11 +528,14 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str, connection_args: dict) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
             engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:

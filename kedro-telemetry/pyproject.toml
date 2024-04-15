@@ -69,6 +69,3 @@ ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.ruff.isort]
 known-first-party = ["kedro_telemetry"]
-
-[tool.mypy]
-ignore_missing_imports = true

@@ -1,5 +1,6 @@
 """``HoloviewsWriter`` saves Holoviews objects as image file(s) to an underlying
 filesystem (e.g. local, S3, GCS)."""
+from __future__ import annotations
 
 import io
 from copy import deepcopy
@@ -47,7 +48,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         fs_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        version: Version = None,
+        version: Version | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``HoloviewsWriter``.

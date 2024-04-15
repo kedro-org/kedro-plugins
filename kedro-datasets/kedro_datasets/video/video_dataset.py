@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses OpenCV VideoCapture to read
 and decode videos and OpenCV VideoWriter to encode and write video.
 """
+from __future__ import annotations
 
 import itertools
 import tempfile
@@ -9,7 +10,7 @@ from collections import abc
 from collections.abc import Generator, Sequence
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Optional, Union
+from typing import Any
 
 import cv2
 import fsspec
@@ -25,7 +26,7 @@ class SlicedVideo:
         self.video = video
         self.indexes = range(*slice_indexes.indices(len(video)))
 
-    def __getitem__(self, index: Union[int, slice]) -> PIL.Image.Image:
+    def __getitem__(self, index: int | slice) -> PIL.Image.Image:
         if isinstance(index, slice):
             return SlicedVideo(self, index)
         return self.video[self.indexes[index]]
@@ -61,7 +62,7 @@ class AbstractVideo(abc.Sequence):
     def __len__(self) -> int:
         return self._n_frames
 
-    def __getitem__(self, index: Union[int, slice]):
+    def __getitem__(self, index: int | slice):
         """Get a frame from the video"""
         raise NotImplementedError()
 
@@ -89,7 +90,7 @@ class FileVideo(AbstractVideo):
         height = int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return width, height
 
-    def __getitem__(self, index: Union[int, slice]):
+    def __getitem__(self, index: int | slice):
         if isinstance(index, slice):
             return SlicedVideo(self, index)
 
@@ -151,7 +152,7 @@ class SequenceVideo(AbstractVideo):
     def size(self) -> tuple[int, int]:
         return self._size
 
-    def __getitem__(self, index: Union[int, slice]):
+    def __getitem__(self, index: int | slice):
         if isinstance(index, slice):
             return SlicedVideo(self, index)
         return self._frames[index]
@@ -186,7 +187,7 @@ class GeneratorVideo(AbstractVideo):
     def size(self) -> tuple[int, int]:
         return self._size
 
-    def __getitem__(self, index: Union[int, slice]):
+    def __getitem__(self, index: int | slice):
         raise NotImplementedError("Underlying video is a generator")
 
     def __next__(self):
@@ -271,7 +272,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         self,
         *,
         filepath: str,
-        fourcc: Optional[str] = "mp4v",
+        fourcc: str | None = "mp4v",
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,

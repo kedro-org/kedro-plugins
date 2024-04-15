@@ -1,4 +1,5 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+from __future__ import annotations
 
 import logging
 from copy import deepcopy

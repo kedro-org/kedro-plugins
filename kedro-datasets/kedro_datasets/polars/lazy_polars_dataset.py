@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -203,7 +204,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         )
         return pl.scan_pyarrow_dataset(dataset)
 
-    def _save(self, data: Union[pl.DataFrame, pl.LazyFrame]) -> None:
+    def _save(self, data: pl.DataFrame | pl.LazyFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         collected_data = None

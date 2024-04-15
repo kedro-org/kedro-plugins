@@ -7,7 +7,7 @@ import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Union
 
 import fsspec
 import polars as pl

@@ -5,7 +5,7 @@ in Databricks.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import pandas as pd
 from kedro.io.core import (

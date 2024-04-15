@@ -148,9 +148,9 @@ class NetCDFDataset(AbstractDataset):
             logger.info("Syncing remote NetCDF file to local storage.")
 
             if self._is_multifile:
-                load_paths = sorted(self._fs.glob(load_path))
+                load_path = sorted(self._fs.glob(load_path))
 
-            self._fs.get(load_paths, f"{self._temppath}/")
+            self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{self._filepath.stem}.nc"
 
         if self._is_multifile:

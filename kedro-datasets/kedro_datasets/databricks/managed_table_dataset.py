@@ -279,7 +279,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
             version=version,
-            exists_function=self._exists,
+            exists_function=self._exists,  # type: ignore[arg-type]
         )
 
     def _load(self) -> DataFrame | pd.DataFrame:

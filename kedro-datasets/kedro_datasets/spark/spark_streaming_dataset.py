@@ -129,13 +129,16 @@ class SparkStreamingDataset(AbstractDataset):
         """
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         output_constructor = data.writeStream.format(self._file_format)
-
+        output_mode = (
+            self._save_args.pop("output_mode", None) if self._save_args else None
+        )
+        checkpoint = (
+            self._save_args.pop("checkpoint", None) if self._save_args else None
+        )
         (
-            output_constructor.option(
-                "checkpointLocation", self._save_args.pop("checkpoint")
-            )
+            output_constructor.option("checkpointLocation", checkpoint)
             .option("path", save_path)
-            .outputMode(self._save_args.pop("output_mode"))
+            .outputMode(output_mode)
             .options(**self._save_args)
             .start()
         )

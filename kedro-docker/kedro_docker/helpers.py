@@ -58,8 +58,8 @@ def _list_docker_volumes(host_root: str, container_root: str, volumes: Sequence[
 
 
 def compose_docker_run_args(  # noqa: PLR0913
-    host_root: str | None = None,
-    container_root: str | None = None,
+    host_root: str = None,
+    container_root: str = None,
     mount_volumes: Sequence[str] = None,
     required_args: Sequence[Tuple[str, Union[str, None]]] = None,
     optional_args: Sequence[Tuple[str, Union[str, None]]] = None,

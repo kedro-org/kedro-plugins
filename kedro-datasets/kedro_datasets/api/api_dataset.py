@@ -61,7 +61,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>> dataset = APIDataset(
         ...     method="POST",
-        ...     url="https://httpbin.org/post",
+        ...     url="https://httpbin.org/forms/post",
         ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)

@@ -33,7 +33,7 @@ api = ["kedro-datasets[api-apidataset]"]
 biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
-dask-parquetdataset = ["dask[complete]>=2021.10, <2024.3", "triad>=0.6.7, <1.0"]
+dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset]"]
 
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base]"]
@@ -48,6 +48,28 @@ holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
 huggingface-hfdataset = ["datasets", "huggingface_hub"]
 huggingface-hftransformerpipelinedataset = ["transformers"]
 huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
+
+ibis-bigquery = ["ibis-framework[bigquery]"]
+ibis-clickhouse = ["ibis-framework[clickhouse]"]
+ibis-dask = ["ibis-framework[dask]"]
+ibis-datafusion = ["ibis-framework[datafusion]"]
+ibis-druid = ["ibis-framework[druid]"]
+ibis-duckdb = ["ibis-framework[duckdb]"]
+ibis-exasol = ["ibis-framework[exasol]"]
+ibis-flink = ["ibis-framework", "apache-flink"]
+ibis-impala = ["ibis-framework[impala]"]
+ibis-mssql = ["ibis-framework[mssql]"]
+ibis-mysql = ["ibis-framework[mysql]"]
+ibis-oracle = ["ibis-framework[oracle]"]
+ibis-pandas = ["ibis-framework[pandas]"]
+ibis-polars = ["ibis-framework[polars]"]
+ibis-postgres = ["ibis-framework[postgres]"]
+ibis-pyspark = ["ibis-framework[pyspark]"]
+ibis-risingwave = ["ibis-framework[risingwave]"]
+ibis-snowflake = ["ibis-framework[snowflake]"]
+ibis-sqlite = ["ibis-framework[sqlite]"]
+ibis-trino = ["ibis-framework[trino]"]
+ibis = ["ibis-framework"]
 
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
@@ -171,7 +193,7 @@ test = [
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]>=2021.10, <2024.3",
+    "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
@@ -180,6 +202,7 @@ test = [
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
+    "ibis-framework[duckdb,examples]",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.1.0",
@@ -195,7 +218,7 @@ test = [
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
-    "pandas>=1.3",
+    "pandas>=2.0",
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
@@ -204,7 +227,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
     "pyproj~=3.0",
-    "pyspark>=2.2, <3.4; python_version < '3.11'",
+    "pyspark>=3.0, <3.4; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",

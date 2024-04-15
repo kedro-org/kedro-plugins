@@ -219,7 +219,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def _save(self, data: Any) -> requests.Response:
+    def _save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
                 return self._execute_save_with_chunks(json_data=data)

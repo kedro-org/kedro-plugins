@@ -81,7 +81,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         file_format: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        version: Version = None,
+        version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -195,7 +195,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         if self._protocol == "file":
             # With local filesystems, we can use Polar's build-in I/O method:
             load_method = getattr(pl, f"scan_{self._file_format}", None)
-            return load_method(load_path, **self._load_args)
+            return load_method(load_path, **self._load_args)  # type: ignore[misc]
 
         # For object storage, we use pyarrow for I/O:
         dataset = ds.dataset(

@@ -1,11 +1,12 @@
 """``ManagedTableDataset`` implementation to access managed delta tables
 in Databricks.
 """
+from __future__ import annotations
 
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any
 
 import pandas as pd
 from kedro.io.core import (
@@ -222,7 +223,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         write_mode: str | None = None,
         dataframe_type: str = "spark",
         primary_key: str | list[str] | None = None,
-        version: Version = None,
+        version: Version | None = None,
         # the following parameters are used by project hooks
         # to create or update table properties
         schema: dict[str, Any] | None = None,
@@ -276,12 +277,12 @@ class ManagedTableDataset(AbstractVersionedDataset):
         self._version = version
 
         super().__init__(
-            filepath=None,
+            filepath=None,  # type: ignore[arg-type]
             version=version,
             exists_function=self._exists,
         )
 
-    def _load(self) -> Union[DataFrame, pd.DataFrame]:
+    def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe)
 
@@ -373,7 +374,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         else:
             self._save_append(update_data)
 
-    def _save(self, data: Union[DataFrame, pd.DataFrame]) -> None:
+    def _save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves the data based on the write_mode and dataframe_type in the init.
         If write_mode is pandas, Spark dataframe is created first.
         If schema is provided, data is matched to schema before saving

@@ -1,6 +1,7 @@
 """``TensorFlowModelDataset`` is a dataset implementation which can save and load
 TensorFlow models.
 """
+from __future__ import annotations
 
 import copy
 import tempfile
@@ -76,7 +77,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         filepath: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        version: Version = None,
+        version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,

@@ -214,7 +214,7 @@ class SnowparkTableDataset(AbstractDataset):
         return self._get_session(self._connection_parameters)
 
     def _load(self) -> sp.DataFrame:
-        table_name = [
+        table_name: list = [
             self._database,
             self._schema,
             self._table_name,

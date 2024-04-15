@@ -124,7 +124,7 @@ class MatplotlibWriter(
         fs_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        version: Version = None,
+        version: Version | None = None,
         overwrite: bool = False,
         metadata: dict[str, Any] | None = None,
     ) -> None:

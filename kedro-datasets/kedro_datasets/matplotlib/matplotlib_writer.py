@@ -1,5 +1,6 @@
 """``MatplotlibWriter`` saves one or more Matplotlib objects as image
 files to an underlying filesystem (e.g. local, S3, GCS)."""
+from __future__ import annotations
 
 import base64
 import io
@@ -204,7 +205,7 @@ class MatplotlibWriter(
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
-        self, data: Union[plt.figure, list[plt.figure], dict[str, plt.figure]]
+        self, data: plt.figure | (list[plt.figure] | dict[str, plt.figure])
     ) -> None:
         save_path = self._get_save_path()
 

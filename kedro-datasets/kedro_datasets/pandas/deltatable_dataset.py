@@ -195,7 +195,7 @@ class DeltaTableDataset(AbstractDataset):
     @property
     def schema(self) -> dict[str, Any]:
         """Returns the schema of the DeltaTableDataset as a dictionary."""
-        return self._delta_table.schema().json()
+        return self._delta_table.schema().json() if self._delta_table else {}
 
     @property
     def metadata(self) -> Metadata:
@@ -211,19 +211,19 @@ class DeltaTableDataset(AbstractDataset):
 
         Returns: Metadata object containing the above metadata attributes.
         """
-        return self._delta_table.metadata()
+        return self._delta_table.metadata() if self._delta_table else None
 
     @property
     def history(self) -> list[dict[str, Any]]:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
-        return self._delta_table.history()
+        return self._delta_table.history() if self._delta_table else None
 
     def get_loaded_version(self) -> int:
         """Returns the version of the DeltaTableDataset that is currently loaded."""
-        return self._delta_table.version()
+        return self._delta_table.version() if self._delta_table else None
 
     def _load(self) -> pd.DataFrame:
-        return self._delta_table.to_pandas()
+        return self._delta_table.to_pandas() if self._delta_table else None
 
     def _save(self, data: pd.DataFrame) -> None:
         if self.is_empty_dir:

@@ -278,7 +278,7 @@ class ExcelDataset(
         """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows
+        dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")

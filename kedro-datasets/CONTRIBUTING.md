@@ -36,7 +36,7 @@ Below is a guide to help you understand the process of contributing a new datase
 #### Regular datasets
 Regular datasets are maintained by the [Kedro Technical Steering Committee (TSC)](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html) and adhere to specific standards. These datasets adhere to the following requirements:
 
-1. Datasets that the Kedro TSC is willing to maintain.
+1. Must be something that the Kedro TSC is willing to maintain.
 2. Must be fully documented.
 3. Must have working doctests (unless complex cloud/DB setup required, which can be discussed in the review).
 4. Must run as part of the regular CI/CD jobs.
@@ -112,8 +112,8 @@ We use a branching model that helps us keep track of branches in a logical, cons
  4. Make sure all your commits are signed off by using `-s` flag with `git commit`.
  5. Open a PR against the `main` branch and sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(datasets)`.
  6. The TSC will review your contribution and decide whether it fits as a regular or experimental dataset.
- 7. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below)
- 8. Update the PR according to the reviewer's comments
+ 7. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below).
+ 8. Update the PR according to the reviewer's comments.
 
 
 ## CI / CD and running checks locally

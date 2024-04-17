@@ -1,5 +1,5 @@
 # Experimental contributions
-This directory is meant for `experimental` dataset contributions. These are datasets that are more experimental compared to the regular datasets in `kedro_datasets` and may not fully adhere to the usual standards.
+This directory is meant for `experimental` dataset contributions. These are datasets that are more experimental compared to the core datasets in `kedro_datasets` and may not fully adhere to the usual standards.
 This space allows for the inclusion of datasets that are in the early stages of development or might not meet the criteria for being part of the core Kedro datasets. As such, these datasets
 are not maintained by the Kedro TSC, but will have been reviewed to ensure the dataset is usable.
 

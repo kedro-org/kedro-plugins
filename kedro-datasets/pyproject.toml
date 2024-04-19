@@ -267,7 +267,7 @@ Documentation = "https://docs.kedro.org"
 Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [tool.setuptools.packages.find]
-include = ["kedro_datasets*", "experimental*"]
+include = ["kedro_datasets*"]
 
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}

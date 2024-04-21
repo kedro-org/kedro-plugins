@@ -5,10 +5,11 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
-from kedro.io import AbstractDataset, DatasetError
 
-if TYPE_CHECKING:
-    from ibis import BaseBackend
+# TODO(deepyaman): Restore `TYPE_CHECKING` guard after upgrading Sphinx;
+#   see https://github.com/tox-dev/sphinx-autodoc-typehints/issues/22
+from ibis import BaseBackend
+from kedro.io import AbstractDataset, DatasetError
 
 
 class TableDataset(AbstractDataset[ir.Table, ir.Table]):

@@ -52,17 +52,6 @@ def before_all(context):
 
     # install the plugin
     call([context.python, "-m", "pip", "install", "."], env=context.env)
-    # install kedro from main branch
-    call(
-        [
-            context.python,
-            "-m",
-            "pip",
-            "install",
-            "git+https://github.com/kedro-org/kedro",
-        ],
-        env=context.env,
-    )
 
 
 def _setup_context_with_venv(context, venv_dir):

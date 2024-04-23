@@ -39,7 +39,11 @@ test = [
     "pytest-xdist",
     "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
-    "wheel"
+    "wheel",
+    # mypy requirements
+    "types-PyYAML",
+    "types-cachetools",
+    "types-toml",
 ]
 
 [project.entry-points."kedro.project_commands"]

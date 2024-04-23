@@ -176,7 +176,7 @@ def create(  # noqa: PLR0913, PLR0912
 
     if convert_all:
         # Convert all pipelines
-        conversion_pipelines = pipelines
+        conversion_pipelines = dict(pipelines)
     else:
         conversion_pipelines = {
             pipeline_name: pipelines.get(pipeline_name)

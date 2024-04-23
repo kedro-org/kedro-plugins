@@ -1,6 +1,7 @@
 """Module containing command masking functionality."""
+from __future__ import annotations
 
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Iterator
 
 import click
 
@@ -8,9 +9,9 @@ MASK = "*****"
 
 
 def _recurse_cli(
-    cli_element: Union[click.Command, click.Group, click.CommandCollection],
+    cli_element: click.Command | (click.Group | (click.CommandCollection | None)),
     ctx: click.Context,
-    io_dict: Dict[str, Any],
+    io_dict: dict[str | None, Any],
     get_help: bool = False,
 ) -> None:
     """
@@ -39,7 +40,7 @@ def _recurse_cli(
         element_name = cli_element.name or "kedro"
         io_dict[element_name] = {}
         for command_name in cli_element.list_commands(ctx):
-            _recurse_cli(  # type: ignore
+            _recurse_cli(
                 cli_element.get_command(ctx, command_name),
                 ctx,
                 io_dict[element_name],
@@ -66,21 +67,23 @@ def _recurse_cli(
 
 
 def _get_cli_structure(
-    cli_obj: Union[click.Command, click.Group, click.CommandCollection],
+    cli_obj: click.Command | (click.Group | click.CommandCollection),
     get_help: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str | None, Any]:
     """Code copied over from kedro.tools.cli to maintain backwards compatibility
     with previous versions of kedro (<0.17.5).
     Convenience wrapper function for `_recurse_cli` to work within
     `click.Context` and return a `dict`.
     """
-    output: Dict[str, Any] = {}
+    output: dict[str | None, Any] = {}
     with click.Context(cli_obj) as ctx:  # type: ignore
         _recurse_cli(cli_obj, ctx, output, get_help)
     return output
 
 
-def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List[str]:
+def _mask_kedro_cli(
+    cli_struct: dict[str | None, Any], command_args: list[str]
+) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
@@ -115,7 +118,7 @@ def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List
     return output
 
 
-def _recursive_items(dictionary: Dict[Any, Any]) -> Iterator[Any]:
+def _recursive_items(dictionary: dict[Any, Any]) -> Iterator[Any]:
     for key, value in dictionary.items():
         if isinstance(value, dict):
             yield key

@@ -38,6 +38,8 @@ test = [
     "wheel",
     # mypy requirements
     "types-requests",
+    "types-PyYAML",
+    "types-toml",
 ]
 
 [project.entry-points."kedro.cli_hooks"]

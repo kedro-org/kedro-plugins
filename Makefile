@@ -20,10 +20,7 @@ lint:
 	# $(MAKE) mypy # temp commented out till mypy PR for other plugins is merged
 
 mypy:
-	mypy $(plugin)/$(subst -,_,$(plugin))
-
-mypy:
-	mypy $(plugin)/$(subst -,_,$(plugin)) --ignore-missing-imports
+	cd $(plugin) && mypy $(subst -,_,$(plugin))
 
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile

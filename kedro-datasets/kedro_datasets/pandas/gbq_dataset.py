@@ -2,6 +2,8 @@
 to read and write from/to BigQuery table.
 """
 
+from __future__ import annotations
+
 import copy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn

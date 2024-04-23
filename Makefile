@@ -22,6 +22,9 @@ lint:
 mypy:
 	mypy $(plugin)/$(subst -,_,$(plugin))
 
+mypy:
+	mypy $(plugin)/$(subst -,_,$(plugin)) --ignore-missing-imports
+
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 

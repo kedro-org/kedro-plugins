@@ -29,7 +29,9 @@ class HFTransformerPipelineDataset(AbstractDataset):
     .. code-block:: pycon
 
        >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
-       >>> dataset = HFTransformerPipelineDataset(task="text-classification", model_name="prajjwal1/bert-tiny")
+       >>> dataset = HFTransformerPipelineDataset(
+       ...     task="text-classification", model_name="prajjwal1/bert-tiny"
+       ... )
        >>> model = dataset.load()
        >>> assert model("Hello world")[0]["label"].startswith("LABEL_")
 

@@ -93,7 +93,7 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
-    "python": ("https://docs.python.org/3.9/", None)
+    "python": ("https://docs.python.org/3.9/", None),
 }
 
 type_targets = {
@@ -105,7 +105,8 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
-        "DataCatalog"
+        "DataCatalog",
+        "ibis.backends.base.BaseBackend",
     ),
     "py:data": (
         "typing.Any",
@@ -113,9 +114,7 @@ type_targets = {
         "typing.Optional",
         "typing.Tuple",
     ),
-    "py:exc": (
-        "DatasetError",
-    ),
+    "py:exc": ("DatasetError",),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
@@ -404,9 +403,7 @@ def _add_jinja_filters(app):
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
+    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
@@ -419,6 +416,7 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
+
 
 # (regex, restructuredText link replacement, object) list
 replacements = []

@@ -40,7 +40,7 @@ class ManagedTable:
     primary_key: str | list[str] | None
     owner_group: str | None
     partition_columns: str | list[str] | None
-    json_schema: StructType
+    json_schema: dict[str, Any] | None = None
 
     def __post_init__(self):
         """Run validation methods if declared.
@@ -134,7 +134,7 @@ class ManagedTable:
             full_table_location = f"`{self.database}`.`{self.table}`"
         return full_table_location
 
-    def schema(self) -> StructType:
+    def schema(self) -> StructType | None:
         """Returns the Spark schema of the table if it exists
 
         Returns:
@@ -318,7 +318,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             data (DataFrame): the Spark dataframe to append to the table
         """
         data.write.format("delta").mode("append").saveAsTable(
-            self._table.full_table_location()
+            self._table.full_table_location() or ""
         )
 
     def _save_overwrite(self, data: DataFrame) -> None:
@@ -333,7 +333,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             delta_table = delta_table.mode("overwrite").option(
                 "overwriteSchema", "true"
             )
-        delta_table.saveAsTable(self._table.full_table_location())
+        delta_table.saveAsTable(self._table.full_table_location() or "")
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
@@ -389,8 +389,9 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
             )
         # filter columns specified in schema and match their ordering
-        if self._table.schema():
-            cols = self._table.schema().fieldNames()
+        schema = self._table.schema()
+        if schema:
+            cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
                 data = _get_spark().createDataFrame(
                     data.loc[:, cols], schema=self._table.schema()

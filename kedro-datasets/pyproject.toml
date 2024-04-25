@@ -262,6 +262,9 @@ test = [
     "types-PyYAML",
     "types-redis",
     "types-requests",
+    "types-decorator",
+    "types-six",
+    "types-tabulate",
 ]
 
 # All requirements

@@ -8,7 +8,7 @@ from typing import NewType
 TablePreview = NewType("TablePreview", dict)
 ImagePreview = NewType("ImagePreview", bytes)
 PlotlyPreview = NewType("PlotlyPreview", dict)
-JSONPreview = NewType("JSONPreview", dict)
+JSONPreview = NewType("JSONPreview", str)
 
 
 # experiment tracking datasets types

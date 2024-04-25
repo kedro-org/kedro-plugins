@@ -181,7 +181,7 @@ class DeltaTableDataset(AbstractDataset):
             self._delta_table = DeltaTable.from_data_catalog(
                 data_catalog=DataCatalog[self._catalog_type],
                 data_catalog_id=self._catalog_name,
-                database_name=self._database,
+                database_name=self._database or "",
                 table_name=self._table,
             )
 

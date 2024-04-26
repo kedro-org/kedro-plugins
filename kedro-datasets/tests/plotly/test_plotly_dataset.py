@@ -111,7 +111,7 @@ class TestPlotlyDataset:
         plotly_dataset.save(dummy_dataframe)
         preview = plotly_dataset.preview()
         assert (
-            inspect.signature(plotly_dataset.preview).return_annotation.__name__
+            inspect.signature(plotly_dataset.preview).return_annotation
             == "PlotlyPreview"
         )
         assert "data" in preview

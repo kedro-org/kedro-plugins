@@ -173,4 +173,4 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         """
         data = self._load()
 
-        return json.dumps(data)
+        return JSONPreview(json.dumps(data))

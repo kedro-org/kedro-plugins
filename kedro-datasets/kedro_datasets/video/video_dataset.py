@@ -28,7 +28,7 @@ class SlicedVideo:
 
     def __getitem__(self, index: int | slice) -> PIL.Image.Image:
         if isinstance(index, slice):
-            return SlicedVideo(self, index)
+            return SlicedVideo(self, index)  # type: ignore
         return self.video[self.indexes[index]]
 
     def __len__(self) -> int:

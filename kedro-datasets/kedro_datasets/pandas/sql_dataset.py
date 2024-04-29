@@ -293,7 +293,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         metadata = MetaData()
         table_ref = Table(table_name, metadata, autoload_with=self.engine)
 
-        query = select(table_ref).limit(nrows)
+        query = select(table_ref).limit(nrows)  # type: ignore[arg-type]
 
         with self.engine.connect() as conn:
             result = conn.execute(query)

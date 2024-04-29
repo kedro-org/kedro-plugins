@@ -18,14 +18,13 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+from matplotlib.figure import Figure
 
 from kedro_datasets._typing import ImagePreview
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataset[
-        Union[plt.figure, list[plt.figure], dict[str, plt.figure]], NoReturn
-    ]
+    AbstractVersionedDataset[Union[Figure, list[Figure], dict[str, Figure]], NoReturn]
 ):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
@@ -204,9 +203,7 @@ class MatplotlibWriter(
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(
-        self, data: plt.figure | (list[plt.figure] | dict[str, plt.figure])
-    ) -> None:
+    def _save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
         save_path = self._get_save_path()
 
         if isinstance(data, (list, dict)) and self._overwrite and self._exists():
@@ -230,7 +227,7 @@ class MatplotlibWriter(
 
         self._invalidate_cache()
 
-    def _save_to_fs(self, full_key_path: str, plot: plt.figure):
+    def _save_to_fs(self, full_key_path: str, plot: Figure):
         bytes_buffer = io.BytesIO()
         plot.savefig(bytes_buffer, **self._save_args)
 
@@ -260,4 +257,4 @@ class MatplotlibWriter(
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="rb") as img_file:
             base64_bytes = base64.b64encode(img_file.read())
-        return base64_bytes.decode("utf-8")
+        return ImagePreview(base64_bytes.decode("utf-8"))

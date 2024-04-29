@@ -172,8 +172,7 @@ class TestJSONDataset:
         preview_data = json_dataset.preview()
         assert len(preview_data["data"]) == 2
         assert (
-            inspect.signature(json_dataset.preview).return_annotation.__name__
-            == "TablePreview"
+            inspect.signature(json_dataset.preview).return_annotation == "TablePreview"
         )
 
 

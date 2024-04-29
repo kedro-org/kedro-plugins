@@ -4,7 +4,7 @@ load and save using a pandas dataframe.
 """
 
 from copy import deepcopy
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
@@ -198,7 +198,7 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.schema().to_json() if self._delta_table else ""
 
     @property
-    def metadata(self) -> Metadata | None:
+    def metadata(self) -> Union[Metadata, None]:
         """Returns the metadata of the DeltaTableDataset as a dictionary.
         Metadata contains the following:
         1. A unique id
@@ -214,11 +214,11 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.metadata() if self._delta_table else None
 
     @property
-    def history(self) -> list[dict[str, Any]] | None:
+    def history(self) -> Union[list[dict[str, Any]], None]:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
         return self._delta_table.history() if self._delta_table else None
 
-    def get_loaded_version(self) -> int | None:
+    def get_loaded_version(self) -> Union[int, None]:
         """Returns the version of the DeltaTableDataset that is currently loaded."""
         return self._delta_table.version() if self._delta_table else None
 

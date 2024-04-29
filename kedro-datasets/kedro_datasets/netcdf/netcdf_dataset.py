@@ -141,6 +141,7 @@ class NetCDFDataset(AbstractDataset):
 
     def _load(self) -> xr.Dataset:
         load_path = self._filepath
+        multi_load_path = load_path
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.

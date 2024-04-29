@@ -153,7 +153,7 @@ class NetCDFDataset(AbstractDataset):
             self._fs.get(load_path, f"{self._temppath}/")
             load_path = f"{self._temppath}/{str(Path(self._filepath).stem)}.nc"
 
-        if self._is_multifile:
+        if self._is_multifile and multi_load_path:
             data = xr.open_mfdataset(multi_load_path, **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)

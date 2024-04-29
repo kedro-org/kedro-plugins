@@ -96,7 +96,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         method: str = "GET",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        credentials: tuple[str, str] | (list[str] | AuthBase) | None = None,
+        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.

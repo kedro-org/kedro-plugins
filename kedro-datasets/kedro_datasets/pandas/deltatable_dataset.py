@@ -179,10 +179,10 @@ class DeltaTableDataset(AbstractDataset):
                 self.is_empty_dir = True
         else:
             self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=DataCatalog[self._catalog_type],
+                data_catalog=DataCatalog[self._catalog_type],  # type: ignore[misc]
                 data_catalog_id=self._catalog_name,
                 database_name=self._database or "",
-                table_name=self._table,
+                table_name=self._table or "",
             )
 
     @property
@@ -193,12 +193,12 @@ class DeltaTableDataset(AbstractDataset):
         return fs_args
 
     @property
-    def schema(self) -> dict[str, Any]:
+    def schema(self) -> str:
         """Returns the schema of the DeltaTableDataset as a dictionary."""
-        return self._delta_table.schema().json() if self._delta_table else {}
+        return self._delta_table.schema().to_json() if self._delta_table else ""
 
     @property
-    def metadata(self) -> Metadata:
+    def metadata(self) -> Metadata | None:
         """Returns the metadata of the DeltaTableDataset as a dictionary.
         Metadata contains the following:
         1. A unique id
@@ -214,11 +214,11 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.metadata() if self._delta_table else None
 
     @property
-    def history(self) -> list[dict[str, Any]]:
+    def history(self) -> list[dict[str, Any]] | None:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
         return self._delta_table.history() if self._delta_table else None
 
-    def get_loaded_version(self) -> int:
+    def get_loaded_version(self) -> int | None:
         """Returns the version of the DeltaTableDataset that is currently loaded."""
         return self._delta_table.version() if self._delta_table else None
 
@@ -229,20 +229,20 @@ class DeltaTableDataset(AbstractDataset):
         if self.is_empty_dir:
             # first time creation of delta table
             write_deltalake(
-                self._filepath,
+                self._filepath or "",
                 data,
                 storage_options=self.fs_args,
                 **self._save_args,
             )
             self.is_empty_dir = False
             self._delta_table = DeltaTable(
-                table_uri=self._filepath,
+                table_uri=self._filepath or "",
                 storage_options=self.fs_args,
                 version=self._version,
             )
         else:
             write_deltalake(
-                self._delta_table,
+                self._delta_table or "",
                 data,
                 storage_options=self.fs_args,
                 **self._save_args,

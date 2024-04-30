@@ -42,7 +42,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
         *,
         task: str | None = None,
         model_name: str | None = None,
-        pipeline_kwargs: dict[t.Any] | None = None,
+        pipeline_kwargs: dict[str, t.Any] | None = None,
     ):
         if task is None and model_name is None:
             raise ValueError("At least 'task' or 'model_name' are needed")

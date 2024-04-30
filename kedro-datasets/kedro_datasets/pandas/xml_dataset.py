@@ -1,6 +1,7 @@
 """``XMLDataset`` loads/saves data from/to a XML file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -51,12 +52,12 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``XMLDataset`` pointing to a concrete XML file
         on a specific filesystem.

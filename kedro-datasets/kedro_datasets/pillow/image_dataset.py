@@ -1,6 +1,7 @@
 """``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -49,11 +50,11 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         self,
         *,
         filepath: str,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``ImageDataset`` pointing to a concrete image file
         on a specific filesystem.

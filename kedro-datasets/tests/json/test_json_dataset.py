@@ -215,6 +215,5 @@ class TestJSONDatasetVersioned:
             preview_data == expected_data
         ), "The preview data does not match the expected data."
         assert (
-            inspect.signature(json_dataset.preview).return_annotation.__name__
-            == "JSONPreview"
+            inspect.signature(json_dataset.preview).return_annotation == "JSONPreview"
         )

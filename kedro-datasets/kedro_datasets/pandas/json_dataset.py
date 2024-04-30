@@ -1,6 +1,7 @@
 """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the JSON file.
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -70,12 +71,12 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``JSONDataset`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -204,8 +205,8 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """
         # Create a copy, so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args.setdefault("lines", True)
-        dataset_copy._load_args["nrows"] = nrows
+        dataset_copy._load_args.setdefault("lines", True)  # type: ignore[attr-defined]
+        dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         preview_df = dataset_copy._load()
 
         preview_dict = preview_df.to_dict(orient="split")

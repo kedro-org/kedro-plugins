@@ -11,7 +11,7 @@ try:
     from kedro import KedroDeprecationWarning
 except ImportError:  # pragma: no cover
 
-    class KedroDeprecationWarning(DeprecationWarning):
+    class KedroDeprecationWarning(DeprecationWarning):  # type: ignore[no-redef]
         """Custom class for warnings about deprecated Kedro features."""
 
 

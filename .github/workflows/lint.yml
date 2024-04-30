@@ -47,5 +47,4 @@ jobs:
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
       - name: Run mypy
-        if: inputs.plugin != 'kedro-datasets'  # temporary, will remove in a follow up PR
         run: make plugin=${{ inputs.plugin }} mypy

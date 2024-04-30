@@ -1,6 +1,7 @@
 """``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``.
 """
+from __future__ import annotations
 
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -67,7 +68,9 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, *, filepath: str, metadata: dict[str, Any] = None) -> None:
+    def __init__(
+        self, *, filepath: str, metadata: dict[str, Any] | None = None
+    ) -> None:
         """Creates a new instance of ``DeltaTableDataset``.
 
         Args:

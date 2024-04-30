@@ -2,6 +2,7 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
+from __future__ import annotations
 
 import json
 from copy import deepcopy
@@ -74,12 +75,12 @@ class PlotlyDataset(JSONDataset):
         *,
         filepath: str,
         plotly_args: dict[str, Any],
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``PlotlyDataset`` pointing to a concrete JSON file
         on a specific filesystem.

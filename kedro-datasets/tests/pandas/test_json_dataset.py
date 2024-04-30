@@ -164,10 +164,7 @@ class TestJSONDataset:
         assert preview_data["columns"] == expected_columns
         assert preview_data["data"] == expected_data
         assert len(preview_data["data"]) == 2
-        assert (
-            inspect.signature(dataset.preview).return_annotation.__name__
-            == "TablePreview"
-        )
+        assert inspect.signature(dataset.preview).return_annotation == "TablePreview"
 
     def test_preview_json_lines(self, json_dataset, json_lines_data):
         json_dataset._filepath = json_lines_data
@@ -175,8 +172,7 @@ class TestJSONDataset:
         preview_data = json_dataset.preview()
         assert len(preview_data["data"]) == 2
         assert (
-            inspect.signature(json_dataset.preview).return_annotation.__name__
-            == "TablePreview"
+            inspect.signature(json_dataset.preview).return_annotation == "TablePreview"
         )
 
 

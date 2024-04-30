@@ -154,7 +154,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             import ibis
 
             config = deepcopy(self._connection_config)
-            backend = getattr(ibis, config.pop("backend"))
+            backend_attr = config.pop("backend") if config else None
+            backend = getattr(ibis, backend_attr)
             cls._connections[key] = backend.connect(**config)
 
         return cls._connections[key]

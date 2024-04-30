@@ -2,9 +2,10 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Optional, Union
+from typing import Any
 
 import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
@@ -87,15 +88,15 @@ class DeltaTableDataset(AbstractDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: Optional[str] = None,
-        catalog_type: Optional[DataCatalog] = None,
-        catalog_name: Optional[str] = None,
-        database: Optional[str] = None,
-        table: Optional[str] = None,
-        load_args: Optional[dict[str, Any]] = None,
-        save_args: Optional[dict[str, Any]] = None,
-        credentials: Optional[dict[str, Any]] = None,
-        fs_args: Optional[dict[str, Any]] = None,
+        filepath: str | None = None,
+        catalog_type: DataCatalog | None = None,
+        catalog_name: str | None = None,
+        database: str | None = None,
+        table: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``DeltaTableDataset``
 
@@ -141,7 +142,7 @@ class DeltaTableDataset(AbstractDataset):
         # DeltaTable cannot be instantiated from an empty directory
         # for the first time creation from filepath, we need to delay the instantiation
         self.is_empty_dir: bool = False
-        self._delta_table: Optional[DeltaTable] = None
+        self._delta_table: DeltaTable | None = None
 
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args:
@@ -198,7 +199,7 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.schema().to_json() if self._delta_table else ""
 
     @property
-    def metadata(self) -> Union[Metadata, None]:
+    def metadata(self) -> Metadata | None:
         """Returns the metadata of the DeltaTableDataset as a dictionary.
         Metadata contains the following:
         1. A unique id
@@ -214,11 +215,11 @@ class DeltaTableDataset(AbstractDataset):
         return self._delta_table.metadata() if self._delta_table else None
 
     @property
-    def history(self) -> Union[list[dict[str, Any]], None]:
+    def history(self) -> list[dict[str, Any]] | None:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
         return self._delta_table.history() if self._delta_table else None
 
-    def get_loaded_version(self) -> Union[int, None]:
+    def get_loaded_version(self) -> int | None:
         """Returns the version of the DeltaTableDataset that is currently loaded."""
         return self._delta_table.version() if self._delta_table else None
 

@@ -9,11 +9,9 @@ from kedro.pipeline.pipeline import Pipeline
 
 
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
-    if dataset_name == "parameters" or dataset_name.startswith("params:"):
-        return False
-
-    dataset = catalog._datasets.get(dataset_name, None)
-    return dataset is not None and isinstance(dataset, MemoryDataset)
+    if dataset_name not in catalog:
+        return True
+    return False
 
 
 def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:

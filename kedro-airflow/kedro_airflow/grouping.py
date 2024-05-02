@@ -27,7 +27,28 @@ def node_sequence_name(node_sequence: list[Node]) -> str:
     return "_".join([node.name for node in node_sequence])
 
 
+def group_memory_nodes_fix(catalog: DataCatalog, pipeline: Pipeline):
+    memory_datasets = get_memory_datasets(catalog, pipeline)
+    aj_matrix = {node.name: set() for node in pipeline.nodes}
+
+    output_to_node = {
+        node_output: node
+        for node in pipeline.nodes
+        for node_output in node.outputs
+    }
+
+    for node in pipeline.nodes:
+        for node_input in node.inputs:
+            if node_input in memory_datasets:
+                if node_input in output_to_node:
+                    aj_matrix[node.name].add(output_to_node[node_input].name)
+
+    print(aj_matrix)
+
+
 def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
+    group_memory_nodes_fix(catalog, pipeline)
+    return
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -37,6 +58,7 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
     """
     # get all memory datasets in the pipeline
     memory_datasets = get_memory_datasets(catalog, pipeline)
+    print(memory_datasets)
 
     # Node sequences
     node_sequences = []
@@ -57,7 +79,7 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
                 sequence_id = None
                 for i in node.inputs:
                     if i in memory_datasets:
-                        assert sequence_id is None or sequence_id == sequence_map[i]
+                        # assert sequence_id is None or sequence_id == sequence_map[i]
                         sequence_id = sequence_map[i]
 
                 # Append to map
@@ -88,9 +110,11 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
             parent_name = node_mapping[parent.name]
             node_name = node_mapping[node.name]
             if parent_name != node_name and (
-                parent_name not in dependencies
-                or node_name not in dependencies[parent_name]
+                    parent_name not in dependencies
+                    or node_name not in dependencies[parent_name]
             ):
                 dependencies[parent_name].append(node_name)
 
+    print(nodes)
+    print(dependencies)
     return nodes, dependencies

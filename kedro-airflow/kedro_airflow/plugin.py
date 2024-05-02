@@ -23,7 +23,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
-from kedro_airflow.grouping import group_memory_nodes_fix
+from kedro_airflow.grouping import group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
@@ -204,7 +204,7 @@ def create(  # noqa: PLR0913, PLR0912
 
         # group memory nodes
         if group_in_memory:
-            nodes, dependencies = group_memory_nodes_fix(context.catalog, pipeline)
+            nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
         else:
             nodes = {}
             dependencies = {}

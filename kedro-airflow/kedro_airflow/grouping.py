@@ -42,8 +42,27 @@ def group_memory_nodes_fix(catalog: DataCatalog, pipeline: Pipeline):
             if node_input in memory_datasets:
                 if node_input in output_to_node:
                     aj_matrix[node.name].add(output_to_node[node_input].name)
+                    aj_matrix[output_to_node[node_input].name].add(node.name)
 
     print(aj_matrix)
+
+    con_components = {node.name: None for node in pipeline.nodes}
+
+    def dfs(cur_node_name: str, component: int) -> None:
+        if con_components[cur_node_name] is not None:
+            return
+
+        con_components[cur_node_name] = component
+        for next_node_name in aj_matrix[cur_node_name]:
+            dfs(next_node_name, component)
+
+    cur_component = 0
+    for node_name in aj_matrix.keys():
+        if con_components[node_name] is None:
+            dfs(node_name, cur_component)
+            cur_component += 1
+
+    print(con_components)
 
 
 def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):

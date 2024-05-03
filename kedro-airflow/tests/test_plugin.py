@@ -11,17 +11,35 @@ from kedro_airflow.plugin import commands
 
 
 @pytest.mark.parametrize(
-    "dag_name,pipeline_name,command",
+    "dag_name,pipeline_name,command,expected_airflow_dag",
     [
         # Test normal execution
-        ("fake_project", "__default__", ["airflow", "create"]),
+        (
+            "fake_project",
+            "__default__",
+            ["airflow", "create"],
+            'tasks["node0"] >> tasks["node1"]',
+        ),
         # Test execution with alternate pipeline name
-        ("fake_project", "ds", ["airflow", "create", "--pipeline", "ds"]),
-        # # Test with grouping
-        ("fake_project", "__default__", ["airflow", "create", "--group-in-memory"]),
+        (
+            "fake_project",
+            "ds",
+            ["airflow", "create", "--pipeline", "ds"],
+            'tasks["node0"] >> tasks["node1"]',
+        ),
+        # Test with grouping
+        # All the datasets are MemoryDataset(), so we have only one joined node without dependencies
+        (
+            "fake_project",
+            "__default__",
+            ["airflow", "create", "--group-in-memory"],
+            'task_id="node0-node1-node2-node3-node4",',
+        ),
     ],
 )
-def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metadata):
+def test_create_airflow_dag(
+    dag_name, pipeline_name, expected_airflow_dag, command, cli_runner, metadata
+):
     """Check the generation and validity of a simple Airflow DAG."""
     dag_file = (
         metadata.project_path
@@ -37,9 +55,9 @@ def test_create_airflow_dag(dag_name, pipeline_name, command, cli_runner, metada
     assert result.exit_code == 0, (result.exit_code, result.stdout)
     assert dag_file.exists()
 
-    expected_airflow_dag = 'tasks["node0"] >> tasks["node1"]'
     with dag_file.open(encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
+
     assert expected_airflow_dag in dag_code
     dag_file.unlink()
 

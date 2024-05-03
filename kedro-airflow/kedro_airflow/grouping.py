@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Tuple
 
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
@@ -22,6 +22,31 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
     }
 
 
+def _build_adjacency_matrix(catalog: DataCatalog, pipeline: Pipeline):
+    """
+    Builds adjacency matrix (adj_matrix) to search connected components - undirected graph,
+    and adjacency matrix (parents) to retrieve connections between new components using on
+    initial kedro topological sort - directed graph.
+    """
+    memory_datasets = get_memory_datasets(catalog, pipeline)
+
+    adj_matrix = {node.name: set() for node in pipeline.nodes}
+    parents = {node.name: set() for node in pipeline.nodes}
+    output_to_node = {
+        node_output: node for node in pipeline.nodes for node_output in node.outputs
+    }
+
+    for node in pipeline.nodes:
+        for node_input in node.inputs:
+            if node_input in output_to_node:
+                if node_input in memory_datasets:
+                    adj_matrix[node.name].add(output_to_node[node_input].name)
+                    adj_matrix[output_to_node[node_input].name].add(node.name)
+                parents[output_to_node[node_input].name].add(node.name)
+
+    return adj_matrix, parents
+
+
 def group_memory_nodes(
     catalog: DataCatalog, pipeline: Pipeline
 ) -> Tuple[dict[str, list[Node]], dict[str, list[str]]]:
@@ -32,23 +57,9 @@ def group_memory_nodes(
     together. Essentially, this computes connected components over the graph of
     nodes connected by MemoryDatasets.
     """
-    memory_datasets = get_memory_datasets(catalog, pipeline)
+    adj_matrix, parents = _build_adjacency_matrix(catalog, pipeline)
 
-    aj_matrix = {node.name: set() for node in pipeline.nodes}
-    parents = {node.name: set() for node in pipeline.nodes}
     name_to_node = {node.name: node for node in pipeline.nodes}
-    output_to_node = {
-        node_output: node for node in pipeline.nodes for node_output in node.outputs
-    }
-
-    for node in pipeline.nodes:
-        for node_input in node.inputs:
-            if node_input in output_to_node:
-                if node_input in memory_datasets:
-                    aj_matrix[node.name].add(output_to_node[node_input].name)
-                    aj_matrix[output_to_node[node_input].name].add(node.name)
-                parents[output_to_node[node_input].name].add(node.name)
-
     con_components = {node.name: None for node in pipeline.nodes}
 
     def dfs(cur_node_name: str, component: int) -> None:
@@ -56,11 +67,11 @@ def group_memory_nodes(
             return
 
         con_components[cur_node_name] = component
-        for next_node_name in aj_matrix[cur_node_name]:
+        for next_node_name in adj_matrix[cur_node_name]:
             dfs(next_node_name, component)
 
     cur_component = 0
-    for node_name in aj_matrix.keys():
+    for node_name in adj_matrix.keys():
         if con_components[node_name] is None:
             dfs(node_name, cur_component)
             cur_component += 1

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 from kedro.io import DataCatalog
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
@@ -24,7 +22,7 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
 
 def _build_adjacency_matrix(
     catalog: DataCatalog, pipeline: Pipeline
-) -> Tuple[dict[str, set], dict[str, set]]:
+) -> tuple[dict[str, set], dict[str, set]]:
     """
     Builds adjacency matrix (adj_matrix) to search connected components - undirected graph,
     and adjacency matrix (parents) to retrieve connections between new components using on
@@ -51,7 +49,7 @@ def _build_adjacency_matrix(
 
 def group_memory_nodes(
     catalog: DataCatalog, pipeline: Pipeline
-) -> Tuple[dict[str, list[Node]], dict[str, list[str]]]:
+) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function

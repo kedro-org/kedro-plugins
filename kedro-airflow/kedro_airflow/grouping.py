@@ -23,8 +23,7 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
 
 
 def group_memory_nodes(
-    catalog: DataCatalog,
-    pipeline: Pipeline
+    catalog: DataCatalog, pipeline: Pipeline
 ) -> Tuple[dict[str, list[Node]], dict[str, list[str]]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
@@ -39,9 +38,7 @@ def group_memory_nodes(
     parents = {node.name: set() for node in pipeline.nodes}
     name_to_node = {node.name: node for node in pipeline.nodes}
     output_to_node = {
-        node_output: node
-        for node in pipeline.nodes
-        for node_output in node.outputs
+        node_output: node for node in pipeline.nodes for node_output in node.outputs
     }
 
     for node in pipeline.nodes:

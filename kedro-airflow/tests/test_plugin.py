@@ -11,18 +11,16 @@ from kedro_airflow.plugin import commands
 
 
 @pytest.mark.parametrize(
-    "dag_name,pipeline_name,command,expected_airflow_dag",
+    "pipeline_name,command,expected_airflow_dag",
     [
         # Test normal execution
         (
-            "fake_project",
             "__default__",
             ["airflow", "create"],
             'tasks["node0"] >> tasks["node1"]',
         ),
         # Test execution with alternate pipeline name
         (
-            "fake_project",
             "ds",
             ["airflow", "create", "--pipeline", "ds"],
             'tasks["node0"] >> tasks["node1"]',
@@ -30,7 +28,6 @@ from kedro_airflow.plugin import commands
         # Test with grouping
         # All the datasets are MemoryDataset(), so we have only one joined node without dependencies
         (
-            "fake_project",
             "__default__",
             ["airflow", "create", "--group-in-memory"],
             'task_id="node0-node1-node2-node3-node4",',
@@ -38,9 +35,10 @@ from kedro_airflow.plugin import commands
     ],
 )
 def test_create_airflow_dag(
-    dag_name, pipeline_name, expected_airflow_dag, command, cli_runner, metadata
+    pipeline_name, command, expected_airflow_dag, cli_runner, metadata
 ):
     """Check the generation and validity of a simple Airflow DAG."""
+    dag_name = "fake_project"
     dag_file = (
         metadata.project_path
         / "airflow_dags"

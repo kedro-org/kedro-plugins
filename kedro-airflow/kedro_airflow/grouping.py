@@ -57,11 +57,13 @@ def group_memory_nodes(
     together. Essentially, this computes connected components over the graph of
     nodes connected by MemoryDatasets.
     """
+    # Building adjacency matrix
     adj_matrix, parents = _build_adjacency_matrix(catalog, pipeline)
 
     name_to_node = {node.name: node for node in pipeline.nodes}
     con_components = {node.name: None for node in pipeline.nodes}
 
+    # Searching connected components
     def dfs(cur_node_name: str, component: int) -> None:
         if con_components[cur_node_name] is not None:
             return
@@ -76,6 +78,7 @@ def group_memory_nodes(
             dfs(node_name, cur_component)
             cur_component += 1
 
+    # Joining nodes based on found connected components
     groups = [[] for _ in range(cur_component)]
     for node_name, component in con_components.items():
         groups[component].append(node_name)
@@ -88,6 +91,7 @@ def group_memory_nodes(
         for node_name in group:
             old_name_to_group[node_name] = group_name
 
+    # Retrieving dependencies between joined nodes based on initial topological sort
     group_dependencies = {}
     for parent, children in parents.items():
         if not children:

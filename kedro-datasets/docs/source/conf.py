@@ -106,7 +106,7 @@ type_targets = {
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
         "DataCatalog",
-        "ibis.backends.base.BaseBackend",
+        "ibis.base.BaseBackend",
     ),
     "py:data": (
         "typing.Any",

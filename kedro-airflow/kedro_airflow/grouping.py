@@ -22,7 +22,9 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
     }
 
 
-def _build_adjacency_matrix(catalog: DataCatalog, pipeline: Pipeline):
+def _build_adjacency_matrix(
+    catalog: DataCatalog, pipeline: Pipeline
+) -> Tuple[dict[str, set], dict[str, set]]:
     """
     Builds adjacency matrix (adj_matrix) to search connected components - undirected graph,
     and adjacency matrix (parents) to retrieve connections between new components using on

@@ -30,8 +30,8 @@ def _build_adjacency_matrix(
     """
     memory_datasets = get_memory_datasets(catalog, pipeline)
 
-    adj_matrix = {node.name: set() for node in pipeline.nodes}
-    parents = {node.name: set() for node in pipeline.nodes}
+    adj_matrix: dict[str, set] = {node.name: set() for node in pipeline.nodes}
+    parents: dict[str, set] = {node.name: set() for node in pipeline.nodes}
     output_to_node = {
         node_output: node for node in pipeline.nodes for node_output in node.outputs
     }
@@ -61,11 +61,11 @@ def group_memory_nodes(
     adj_matrix, parents = _build_adjacency_matrix(catalog, pipeline)
 
     name_to_node = {node.name: node for node in pipeline.nodes}
-    con_components = {node.name: None for node in pipeline.nodes}
+    con_components: dict[str, int] = {node.name: -1 for node in pipeline.nodes}
 
     # Searching connected components
     def dfs(cur_node_name: str, component: int) -> None:
-        if con_components[cur_node_name] is not None:
+        if con_components[cur_node_name] != -1:
             return
 
         con_components[cur_node_name] = component
@@ -74,16 +74,16 @@ def group_memory_nodes(
 
     cur_component = 0
     for node_name in adj_matrix.keys():
-        if con_components[node_name] is None:
+        if con_components[node_name] == -1:
             dfs(node_name, cur_component)
             cur_component += 1
 
     # Joining nodes based on found connected components
-    groups = [[] for _ in range(cur_component)]
+    groups: list[list[str]] = [[] for _ in range(cur_component)]
     for node_name, component in con_components.items():
         groups[component].append(node_name)
 
-    group_to_seq = {}
+    group_to_seq: dict[str, list[Node]] = {}
     old_name_to_group = {}
     for group in groups:
         group_name = "_".join(group)
@@ -92,7 +92,7 @@ def group_memory_nodes(
             old_name_to_group[node_name] = group_name
 
     # Retrieving dependencies between joined nodes based on initial topological sort
-    group_dependencies = {}
+    group_dependencies: dict[str, list[str]] = {}
     for parent, children in parents.items():
         if not children:
             continue

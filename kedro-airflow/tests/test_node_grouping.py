@@ -84,7 +84,7 @@ def mock_kedro_pipeline() -> Pipeline:
 
 
 @pytest.mark.parametrize(
-    "nodes,memory_nodes,expected_nodes,expected_dependencies",
+    "all_nodes,memory_nodes,expected_nodes,expected_dependencies",
     [
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
@@ -107,23 +107,23 @@ def mock_kedro_pipeline() -> Pipeline:
     ],
 )
 def test_group_memory_nodes(
-    nodes: list[str],
+    all_nodes: list[str],
     memory_nodes: set[str],
     expected_nodes: list[list[str]],
     expected_dependencies: dict[str, set[str]],
 ):
     """Check the grouping of memory nodes."""
-    mock_catalog = mock_data_catalog(nodes, memory_nodes)
+    mock_catalog = mock_data_catalog(all_nodes, memory_nodes)
     mock_pipeline = mock_kedro_pipeline()
 
-    nodes, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
+    groups, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
     sequence = [
-        [node_.name for node_ in node_sequence] for node_sequence in nodes.values()
+        [node_.name for node_ in node_sequence] for node_sequence in groups.values()
     ]
 
     assert sequence == expected_nodes
-    dependencies = {nn: set(deps) for nn, deps in dependencies.items()}
-    assert dict(dependencies) == expected_dependencies
+    dependencies_set = {nn: set(deps) for nn, deps in dependencies.items()}
+    assert dependencies_set == expected_dependencies
 
 
 @pytest.mark.parametrize(

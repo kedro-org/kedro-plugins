@@ -247,7 +247,7 @@ class TestParquetDataset:
         # Assert columns match
         assert previewed_data["columns"] == list(dummy_dataframe_preview.columns)
         assert (
-            inspect.signature(parquet_dataset.preview).return_annotation.__name__
+            inspect.signature(parquet_dataset.preview).return_annotation
             == "TablePreview"
         )
 

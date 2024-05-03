@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
@@ -103,7 +105,7 @@ class TestDeltaTableDataset:
         """Test the schema property to return the underlying delta table schema."""
         deltatable_dataset_from_path.save(dummy_df)
         s1 = deltatable_dataset_from_path.schema
-        s2 = deltatable_dataset_from_path._delta_table.schema().json()
+        s2 = deltatable_dataset_from_path._delta_table.schema().to_json()
         assert s1 == s2
 
     def test_describe(self, filepath):

@@ -1,6 +1,7 @@
 """``TextDataset`` loads/saves data from/to a text file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
+from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -51,10 +52,10 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         self,
         *,
         filepath: str,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``TextDataset`` pointing to a concrete text file
         on a specific filesystem.

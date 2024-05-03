@@ -1,6 +1,7 @@
 """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -75,12 +76,12 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``CSVDataset`` pointing to a concrete CSV file
         on a specific filesystem.
@@ -209,7 +210,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows
+        dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")

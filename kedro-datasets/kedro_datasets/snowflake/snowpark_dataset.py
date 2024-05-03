@@ -1,5 +1,6 @@
 """``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
@@ -105,12 +106,12 @@ class SnowparkTableDataset(AbstractDataset):
         self,
         *,
         table_name: str,
-        schema: str = None,
-        database: str = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        schema: str | None = None,
+        database: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``SnowparkTableDataset``.
 
@@ -214,7 +215,7 @@ class SnowparkTableDataset(AbstractDataset):
         return self._get_session(self._connection_parameters)
 
     def _load(self) -> sp.DataFrame:
-        table_name = [
+        table_name: list = [
             self._database,
             self._schema,
             self._table_name,

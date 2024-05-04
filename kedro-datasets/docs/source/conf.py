@@ -107,7 +107,6 @@ type_targets = {
         "deltalake.table.Metadata",
         "DataCatalog",
         "ibis.backends.BaseBackend",
-        "ibis.backends.base.BaseBackend",
     ),
     "py:data": (
         "typing.Any",

@@ -181,7 +181,7 @@ test = [
     "black~=22.0",
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
-    "coverage[toml]",
+    "coverage>=7.2.0",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0",
@@ -277,7 +277,7 @@ fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
 omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/netcdf/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "kedro_datasets/databricks/*"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
 addopts = """

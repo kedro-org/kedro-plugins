@@ -25,13 +25,13 @@ def _build_adjacency_matrix(
 ) -> tuple[dict[str, set], dict[str, set]]:
     """
     Builds adjacency matrix (adj_matrix) to search connected components - undirected graph,
-    and adjacency matrix (parents) to retrieve connections between new components using on
+    and adjacency matrix (parent_to_children) to retrieve connections between new components using on
     initial kedro topological sort - directed graph.
     """
     memory_datasets = get_memory_datasets(catalog, pipeline)
 
     adj_matrix: dict[str, set] = {node.name: set() for node in pipeline.nodes}
-    parents: dict[str, set] = {node.name: set() for node in pipeline.nodes}
+    parent_to_children: dict[str, set] = {node.name: set() for node in pipeline.nodes}
     output_to_node = {
         node_output: node for node in pipeline.nodes for node_output in node.outputs
     }
@@ -42,9 +42,9 @@ def _build_adjacency_matrix(
                 if node_input in memory_datasets:
                     adj_matrix[node.name].add(output_to_node[node_input].name)
                     adj_matrix[output_to_node[node_input].name].add(node.name)
-                parents[output_to_node[node_input].name].add(node.name)
+                parent_to_children[output_to_node[node_input].name].add(node.name)
 
-    return adj_matrix, parents
+    return adj_matrix, parent_to_children
 
 
 def group_memory_nodes(
@@ -58,7 +58,7 @@ def group_memory_nodes(
     nodes connected by MemoryDatasets.
     """
     # Building adjacency matrix
-    adj_matrix, parents = _build_adjacency_matrix(catalog, pipeline)
+    adj_matrix, parent_to_children = _build_adjacency_matrix(catalog, pipeline)
 
     name_to_node = {node.name: node for node in pipeline.nodes}
     con_components: dict[str, int] = {node.name: -1 for node in pipeline.nodes}
@@ -93,7 +93,7 @@ def group_memory_nodes(
 
     # Retrieving dependencies between joined nodes based on initial topological sort
     group_dependencies: dict[str, list[str]] = {}
-    for parent, children in parents.items():
+    for parent, children in parent_to_children.items():
         if not children:
             continue
         new_name_parent = old_name_to_group[parent]

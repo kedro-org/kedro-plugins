@@ -27,6 +27,7 @@ test = [
     "bandit",
     "behave",
     "black~=22.0",
+    "coverage>=7.2.0",
     "docker",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
@@ -76,7 +77,7 @@ addopts = """
 fail_under = 100
 show_missing = true
 omit = ["tests/*",  "*/plugin.py"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_also = ["raise NotImplementedError"]
 
 [tool.ruff]
 line-length = 88

@@ -28,6 +28,7 @@ test = [
     "bandit",
     "behave",
     "black~=22.0",
+    "coverage>=7.2.0",
     "kedro-datasets",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
@@ -75,7 +76,7 @@ exclude=".*template.py"
 fail_under = 100
 show_missing = true
 omit = ["tests/*"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_also = ["raise NotImplementedError"]
 
 [tool.ruff]
 line-length = 88

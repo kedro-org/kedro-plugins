@@ -39,10 +39,10 @@ def build_adjacency_list(
     for node in pipeline.nodes:
         for node_input in node.inputs:
             if node_input in output_to_node:
+                parent_to_children[output_to_node[node_input].name].add(node.name)
                 if node_input in memory_datasets:
                     adj_list[node.name].add(output_to_node[node_input].name)
                     adj_list[output_to_node[node_input].name].add(node.name)
-                parent_to_children[output_to_node[node_input].name].add(node.name)
 
     return adj_list, parent_to_children
 

@@ -201,10 +201,16 @@ def create(  # noqa: PLR0913, PLR0912
         if tags:
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
-        # group memory nodes
+        # Group memory nodes
         if group_in_memory:
+            # The order of nodes and dependencies is deterministic and based on the
+            # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
+            # implementation
             nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
         else:
+            # To keep the order of nodes and dependencies deterministic - nodes are
+            # iterated in the topological sort order obtained from pipeline.nodes and
+            # appended to the corresponding dictionaries
             nodes = {}
             dependencies = {}
             for node in pipeline.nodes:

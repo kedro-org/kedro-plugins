@@ -20,7 +20,7 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
     }
 
 
-def build_adjacency_list(
+def create_adjacency_list(
     catalog: DataCatalog, pipeline: Pipeline
 ) -> tuple[dict[str, set], dict[str, set]]:
     """
@@ -57,8 +57,8 @@ def group_memory_nodes(
     together. Essentially, this computes connected components over the graph of
     nodes connected by MemoryDatasets.
     """
-    # Building adjacency matrix
-    adj_list, parent_to_children = build_adjacency_list(catalog, pipeline)
+    # Creating adjacency list
+    adj_list, parent_to_children = create_adjacency_list(catalog, pipeline)
 
     name_to_node = {node.name: node for node in pipeline.nodes}
     con_components: dict[str, int] = {node.name: -1 for node in pipeline.nodes}

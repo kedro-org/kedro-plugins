@@ -28,12 +28,12 @@ def cli_runner():
 
 
 def _create_kedro_settings_py(file_name: Path, patterns: list[str]):
-    patterns = ", ".join([f'"{p}"' for p in patterns])
+    patterns_str = ", ".join([f'"{p}"' for p in patterns])
     content = f"""CONFIG_LOADER_ARGS = {{
     "base_env": "base",
     "default_run_env": "local",
     "config_patterns": {{
-        "airflow": [{patterns}],  # configure the pattern for configuration files
+        "airflow": [{patterns_str}],  # configure the pattern for configuration files
     }}
 }}
 """

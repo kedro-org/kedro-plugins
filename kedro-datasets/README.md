@@ -19,17 +19,17 @@ pip install kedro-datasets
 
 ### Install dependencies at a group-level
 
-Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
+Datasets are organised into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of datasets, e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
 
 ```bash
 pip install "kedro-datasets[<group>]"
 ```
 
-This installs Kedro and dependencies related to the data type group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install "kedro-datasets[pandas]"` to install Kedro and the dependencies for the data types in the [`pandas` group](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets/pandas).
+This installs Kedro-Datasets and dependencies related to the dataset group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install 'kedro-datasets[pandas]'` to install Kedro-Datasets and the dependencies for the datasets in the [`pandas` group](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets/pandas).
 
 ### Install dependencies at a type-level
 
-To limit installation to dependencies specific to a data type:
+To limit installation to dependencies specific to a dataset:
 
 ```bash
 pip install "kedro-datasets[<group>-<dataset>]"

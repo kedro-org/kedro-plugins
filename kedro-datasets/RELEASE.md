@@ -2,6 +2,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Removed arbitrary upper bound for `s3fs`.
 
 ## Community contributions
 

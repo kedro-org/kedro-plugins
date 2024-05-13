@@ -46,3 +46,5 @@ jobs:
             pre-commit install --hook-type pre-push
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
+      - name: Run mypy
+        run: make plugin=${{ inputs.plugin }} mypy

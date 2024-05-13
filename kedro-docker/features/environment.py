@@ -91,7 +91,7 @@ def after_all(context):
 
 
 def before_scenario(context, feature):
-    context.temp_dir = Path(tempfile.mkdtemp())
+    context.temp_dir = Path(tempfile.mkdtemp()).resolve()
 
 
 def after_scenario(context, feature):

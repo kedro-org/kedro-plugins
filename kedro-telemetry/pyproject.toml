@@ -26,6 +26,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 test = [
     "bandit>=1.6.2, <2.0",
     "black~=22.0",
+    "mypy~=1.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",
@@ -34,7 +35,11 @@ test = [
     "PyYAML==5.3.1", # Temporary fix, to be removed
     "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
-    "wheel"
+    "wheel",
+    # mypy requirements
+    "types-requests",
+    "types-PyYAML",
+    "types-toml",
 ]
 
 [project.entry-points."kedro.cli_hooks"]

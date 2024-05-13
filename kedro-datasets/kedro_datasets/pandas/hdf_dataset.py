@@ -1,6 +1,7 @@
 """``HDFDataset`` loads/saves data from/to a hdf file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 """
+from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -65,12 +66,12 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         *,
         filepath: str,
         key: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``HDFDataset`` pointing to a concrete hdf file
         on a specific filesystem.

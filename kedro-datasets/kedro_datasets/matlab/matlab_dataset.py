@@ -3,6 +3,7 @@ filesystem ?(e.g.: local, S3, GCS)?. The underlying functionality is supported b
 the specified backend library passed in (defaults to the ``matlab`` library), so it
 supports all allowed options for loading and saving matlab files.
 """
+from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -57,11 +58,11 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     def __init__(  # noqa = PLR0913
         self,
         filepath: str,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of MatlabDataSet to load and save data from/to a MATLAB file.
 

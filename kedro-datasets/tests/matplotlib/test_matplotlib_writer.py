@@ -261,8 +261,7 @@ class TestMatplotlibWriter:
         preview = plot_writer.preview()
         assert preview.startswith(expected_beginning)
         assert (
-            inspect.signature(plot_writer.preview).return_annotation.__name__
-            == "ImagePreview"
+            inspect.signature(plot_writer.preview).return_annotation == "ImagePreview"
         )
 
 

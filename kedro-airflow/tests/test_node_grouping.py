@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
-from kedro.pipeline import node
+from kedro.io import AbstractDataset, DataCatalog
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
@@ -21,47 +21,21 @@ class TestDataset(AbstractDataset):
         return []
 
 
-@pytest.mark.parametrize(
-    "memory_nodes,expected_nodes,expected_dependencies",
-    [
-        (
-            ["ds3", "ds6"],
-            [["f1"], ["f2", "f3", "f4", "f6", "f7"], ["f5"]],
-            {"f1": ["f2_f3_f4_f6_f7"], "f2_f3_f4_f6_f7": ["f5"]},
-        ),
-        (
-            ["ds3"],
-            [["f1"], ["f2", "f3", "f4", "f7"], ["f5"], ["f6"]],
-            {"f1": ["f2_f3_f4_f7"], "f2_f3_f4_f7": ["f5", "f6"]},
-        ),
-        (
-            [],
-            [["f1"], ["f2"], ["f3"], ["f4"], ["f5"], ["f6"], ["f7"]],
-            {"f1": ["f2"], "f2": ["f3", "f4", "f5", "f7"], "f4": ["f6", "f7"]},
-        ),
-    ],
-)
-def test_group_memory_nodes(
-    memory_nodes: list[str],
-    expected_nodes: list[list[str]],
-    expected_dependencies: dict[str, list[str]],
-):
-    """Check the grouping of memory nodes."""
-    nodes = [f"ds{i}" for i in range(1, 10)]
-    assert all(node_name in nodes for node_name in memory_nodes)
-
+def mock_data_catalog(nodes: list[str], memory_nodes: set[str]) -> DataCatalog:
     mock_catalog = DataCatalog()
     for dataset_name in nodes:
-        if dataset_name in memory_nodes:
-            dataset = MemoryDataset()
-        else:
+        if dataset_name not in memory_nodes:
             dataset = TestDataset()
-        mock_catalog.add(dataset_name, dataset)
+            mock_catalog.add(dataset_name, dataset)
 
+    return mock_catalog
+
+
+def mock_kedro_pipeline() -> Pipeline:
     def identity_one_to_one(x):
         return x
 
-    mock_pipeline = modular_pipeline(
+    return modular_pipeline(
         [
             node(
                 func=identity_one_to_one,
@@ -108,21 +82,71 @@ def test_group_memory_nodes(
         ],
     )
 
-    nodes, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
+
+@pytest.mark.parametrize(
+    "all_nodes,memory_nodes,expected_nodes,expected_dependencies",
+    [
+        (
+            ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
+            {"ds3", "ds6"},
+            [["f1"], ["f2", "f3", "f4", "f6", "f7"], ["f5"]],
+            {"f1": {"f2_f3_f4_f6_f7"}, "f2_f3_f4_f6_f7": {"f5"}},
+        ),
+        (
+            ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
+            {"ds3"},
+            [["f1"], ["f2", "f3", "f4", "f7"], ["f5"], ["f6"]],
+            {"f1": {"f2_f3_f4_f7"}, "f2_f3_f4_f7": {"f5", "f6"}},
+        ),
+        (
+            ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
+            {},
+            [["f1"], ["f2"], ["f3"], ["f4"], ["f5"], ["f6"], ["f7"]],
+            {"f1": {"f2"}, "f2": {"f3", "f4", "f5", "f7"}, "f4": {"f6", "f7"}},
+        ),
+    ],
+)
+def test_group_memory_nodes(
+    all_nodes: list[str],
+    memory_nodes: set[str],
+    expected_nodes: list[list[str]],
+    expected_dependencies: dict[str, set[str]],
+):
+    """Check the grouping of memory nodes."""
+    mock_catalog = mock_data_catalog(all_nodes, memory_nodes)
+    mock_pipeline = mock_kedro_pipeline()
+
+    groups, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
     sequence = [
-        [node_.name for node_ in node_sequence] for node_sequence in nodes.values()
+        [node_.name for node_ in node_sequence] for node_sequence in groups.values()
     ]
+
     assert sequence == expected_nodes
-    assert dict(dependencies) == expected_dependencies
+    dependencies_set = {nn: set(deps) for nn, deps in dependencies.items()}
+    assert dependencies_set == expected_dependencies
 
 
-def test_is_memory_dataset():
-    catalog = DataCatalog()
-    catalog.add("parameters", {"hello": "world"})
-    catalog.add("params:hello", "world")
-    catalog.add("my_dataset", MemoryDataset(True))
-    catalog.add("test_dataset", TestDataset())
-    assert not _is_memory_dataset(catalog, "parameters")
-    assert not _is_memory_dataset(catalog, "params:hello")
-    assert _is_memory_dataset(catalog, "my_dataset")
-    assert not _is_memory_dataset(catalog, "test_dataset")
+@pytest.mark.parametrize(
+    "nodes,memory_nodes",
+    [
+        (
+            ["ds0", "ds1", "ds2"],
+            {"ds0", "ds1", "ds2"},
+        ),
+        (
+            ["ds0", "ds1", "ds2"],
+            {"ds0"},
+        ),
+        (
+            ["ds0", "ds1", "ds2"],
+            {},
+        ),
+    ],
+)
+def test_is_memory_dataset(nodes: list[str], memory_nodes: set[str]):
+    mock_catalog = mock_data_catalog(nodes, memory_nodes)
+    for node_name in nodes:
+        if node_name in memory_nodes:
+            assert _is_memory_dataset(mock_catalog, node_name)
+        else:
+            assert not _is_memory_dataset(mock_catalog, node_name)

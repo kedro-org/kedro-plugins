@@ -106,7 +106,7 @@ We use a branching model that helps us keep track of branches in a logical, cons
 
  1. Fork the project
  2. Develop your contribution in a new branch.
- 3. Add your dataset as an `experimental` dataset.
+ 3. Add your dataset to `kedro_datasets_experimental`.
  4. Make sure all your commits are signed off by using `-s` flag with `git commit`.
  5. Open a PR against the `main` branch and make sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(datasets)`.
  6. The TSC will review your contribution and decide whether they want to maintain the dataset, and thus, whether it is contributed as a core or experimental dataset.

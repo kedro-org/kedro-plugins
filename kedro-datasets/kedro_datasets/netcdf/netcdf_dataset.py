@@ -9,7 +9,6 @@ from typing import Any
 
 import fsspec
 import xarray as xr
-from _pytest.tmpdir import tmp_path
 from kedro.io.core import (
     AbstractDataset,
     DatasetError,
@@ -58,7 +57,7 @@ class NetCDFDataset(AbstractDataset):
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
         ...     filepath=tmp_path / "path/to/folder",
-        ...     save_args={"mode": "w"},
+        ...     save_args={"mode": "w", "engine": "netcdf4"},
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()

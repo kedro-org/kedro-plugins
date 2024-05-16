@@ -56,7 +56,7 @@ class NetCDFDataset(AbstractDataset):
         ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
-        ...     filepath=tmp_path / "path/to/folder",
+        ...     filepath=tmp_path / "data.nc",
         ...     save_args={"mode": "w", "engine": "scipy"},
         ... )
         >>> dataset.save(ds)

@@ -224,7 +224,7 @@ class TestNetCDFDataset:
         NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
         assert dataset.exists()
 
-    @pytest.parametrize(
+    @pytest.mark.parametrize(
         "save_args, load_args",
         [
             ({"engine": "netcdf4"}, {"engine": "netcdf4"}),

@@ -1,4 +1,5 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+
 from __future__ import annotations
 
 import logging
@@ -171,6 +172,9 @@ class NetCDFDataset(AbstractDataset):
             if self._protocol == "file":
                 data.to_netcdf(path=self._filepath, **self._save_args)
             else:
+                assert (
+                    self._temppath is not None
+                ), "_temppath should have been set in __init__"
                 temp_save_path = self._temppath / PurePosixPath(self._filepath).name
                 data.to_netcdf(path=str(temp_save_path), **self._save_args)
                 # Sync to remote storage

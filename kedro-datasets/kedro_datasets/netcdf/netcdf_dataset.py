@@ -57,7 +57,7 @@ class NetCDFDataset(AbstractDataset):
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
         ...     filepath=tmp_path / "data.nc",
-        ...     save_args={"mode": "w", "engine": "scipy"},
+        ...     save_args={"mode": "w"},
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()

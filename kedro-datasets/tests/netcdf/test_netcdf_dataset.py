@@ -235,7 +235,7 @@ class TestNetCDFDataset:
     )
     def test_save_load_locally(self, tmp_path, dummy_xr_dataset, save_args, load_args):
         """Test loading and saving the a NetCDF file locally."""
-        file_path = str(tmp_path / "some" / "dir" / FILE_NAME)
+        file_path = str(tmp_path / FILE_NAME)
         dataset = NetCDFDataset(filepath=file_path)
 
         assert not dataset.exists()
@@ -248,16 +248,16 @@ class TestNetCDFDataset:
         self, tmp_path, dummy_xr_dataset, dummy_xr_dataset_multi
     ):
         """Test loading multiple NetCDF files locally."""
-        file_path = str(tmp_path / "some" / "dir" / MULTIFILE_NAME)
+        file_path = str(tmp_path / MULTIFILE_NAME)
         dataset = NetCDFDataset(
             filepath=file_path, load_args={"concat_dim": "dummy", "combine": "nested"}
         )
 
         assert not dataset.exists()
-        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test1.nc")).save(
+        NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(
             dummy_xr_dataset
         )
-        NetCDFDataset(filepath=str(tmp_path / "some" / "dir" / "test2.nc")).save(
+        NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(
             dummy_xr_dataset
         )
         assert dataset.exists()

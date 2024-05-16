@@ -57,7 +57,7 @@ class NetCDFDataset(AbstractDataset):
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
         ...     filepath=tmp_path / "path/to/folder",
-        ...     save_args={"mode": "w", "engine": "netcdf4"},
+        ...     save_args={"mode": "w", "engine": "scipy"},
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()
@@ -170,11 +170,13 @@ class NetCDFDataset(AbstractDataset):
         else:
             if self._protocol == "file":
                 data.to_netcdf(path=self._filepath, **self._save_args)
-            else:
+            elif self._temppath:
                 temp_save_path = self._temppath / PurePosixPath(self._filepath).name
                 data.to_netcdf(path=str(temp_save_path), **self._save_args)
                 # Sync to remote storage
                 self._fs.put_file(str(temp_save_path), self._filepath)
+            else:
+                raise DatasetError("No tmp path provided")
 
             self._invalidate_cache()
 

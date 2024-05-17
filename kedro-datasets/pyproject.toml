@@ -164,6 +164,11 @@ video = ["kedro-datasets[video-videodataset]"]
 yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
+# Experimental Datasets
+xarray-geotiff = ["rioxarray>=0.15.0"]
+xarray = ["kedro-datasets[xarray-geotiff"]
+
+
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.4.0",

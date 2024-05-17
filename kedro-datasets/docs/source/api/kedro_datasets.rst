@@ -64,4 +64,3 @@ kedro_datasets
    kedro_datasets.tracking.MetricsDataset
    kedro_datasets.video.VideoDataset
    kedro_datasets.yaml.YAMLDataset
-   kedro_datasets_experimental.xarray.GeoTiffDataset

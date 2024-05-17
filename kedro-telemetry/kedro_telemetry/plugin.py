@@ -107,6 +107,10 @@ class KedroTelemetryCLIHooks:
             if not project_metadata:  # in package mode
                 return
 
+            for arg in command_args:
+                if "--telemetry" in arg:
+                    return
+
             consent = _check_for_telemetry_consent(project_metadata.project_path)
             if not consent:
                 logger.debug(

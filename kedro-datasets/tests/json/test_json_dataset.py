@@ -1,3 +1,5 @@
+import inspect
+import json
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -197,3 +199,21 @@ class TestJSONDatasetVersioned:
         Path(json_dataset._filepath.as_posix()).unlink()
         versioned_json_dataset.save(dummy_data)
         assert versioned_json_dataset.exists()
+
+    def test_preview(self, json_dataset, dummy_data):
+        """Test the preview method."""
+        json_dataset.save(dummy_data)
+        preview_data = json_dataset.preview()
+
+        # Load the data directly for comparison
+        with json_dataset._fs.open(json_dataset._get_load_path(), mode="r") as fs_file:
+            full_data = json.load(fs_file)
+
+        expected_data = json.dumps(full_data)
+
+        assert (
+            preview_data == expected_data
+        ), "The preview data does not match the expected data."
+        assert (
+            inspect.signature(json_dataset.preview).return_annotation == "JSONPreview"
+        )

@@ -1,4 +1,6 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from glob import glob
@@ -68,12 +70,12 @@ class NetCDFDataset(AbstractDataset):
         self,
         *,
         filepath: str,
-        temppath: str = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        temppath: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -139,6 +141,7 @@ class NetCDFDataset(AbstractDataset):
 
     def _load(self) -> xr.Dataset:
         load_path = self._filepath
+        multi_load_path = load_path
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
@@ -146,13 +149,13 @@ class NetCDFDataset(AbstractDataset):
             logger.info("Syncing remote NetCDF file to local storage.")
 
             if self._is_multifile:
-                load_path = sorted(self._fs.glob(load_path))
+                multi_load_path = sorted(self._fs.glob(load_path))  # type: ignore[assignment]
 
             self._fs.get(load_path, f"{self._temppath}/")
-            load_path = f"{self._temppath}/{self._filepath.stem}.nc"
+            load_path = f"{self._temppath}/{str(Path(self._filepath).stem)}.nc"
 
-        if self._is_multifile:
-            data = xr.open_mfdataset(str(load_path), **self._load_args)
+        if self._is_multifile and multi_load_path:
+            data = xr.open_mfdataset(multi_load_path, **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)
 

@@ -11,7 +11,7 @@ import pytest
 from kedro.io.core import AbstractDataset, DatasetError
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from moto import mock_aws
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro_datasets.partitions import IncrementalDataset
 from kedro_datasets.pickle import PickleDataset

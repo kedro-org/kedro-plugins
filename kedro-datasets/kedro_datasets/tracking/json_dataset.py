@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 The ``JSONDataset`` is part of Kedro Experiment Tracking. The dataset is versioned by default.
 """
+
 import json
 from typing import NoReturn
 
@@ -47,9 +48,9 @@ class JSONDataset(json_dataset.JSONDataset):
     def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def preview(self) -> JSONTrackingPreview:
+    def preview(self) -> JSONTrackingPreview:  # type: ignore[override]
         "Load the JSON tracking dataset used in Kedro-viz experiment tracking."
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return json.load(fs_file)
+            return JSONTrackingPreview(json.load(fs_file))

@@ -1,6 +1,8 @@
 """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
+from __future__ import annotations
+
 import json
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -60,12 +62,12 @@ class JSONDataset(
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``JSONDataset`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -142,7 +144,7 @@ class JSONDataset(
             "version": self._version,
         }
 
-    def _load(self) -> Union[go.Figure, go.FigureWidget]:
+    def _load(self) -> go.Figure | go.FigureWidget:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

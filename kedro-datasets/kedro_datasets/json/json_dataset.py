@@ -1,6 +1,8 @@
 """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 """
+from __future__ import annotations
+
 import json
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -14,6 +16,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import JSONPreview
 
 
 class JSONDataset(AbstractVersionedDataset[Any, Any]):
@@ -56,11 +60,11 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         self,
         *,
         filepath: str,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``JSONDataset`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -159,3 +163,14 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self) -> JSONPreview:
+        """
+        Generate a preview of the JSON dataset with a specified number of items.
+
+        Returns:
+            A string representing the JSON data for previewing.
+        """
+        data = self._load()
+
+        return JSONPreview(json.dumps(data))

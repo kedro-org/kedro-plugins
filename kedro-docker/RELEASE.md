@@ -1,10 +1,8 @@
-# Upcoming release
+# Upcoming Release
 
+# Release 0.6.0
 ## Major features and improvements
-
-## Bug fixes and other changes
-
-## Breaking changes to the API
+* Added support for Python 3.12
 
 # Release 0.5.0
 ## Major features and improvements

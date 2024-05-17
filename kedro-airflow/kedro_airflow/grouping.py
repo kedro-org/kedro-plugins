@@ -1,18 +1,14 @@
 from __future__ import annotations
 
-from collections import defaultdict
-
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
 
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
-    if dataset_name == "parameters" or dataset_name.startswith("params:"):
-        return False
-
-    dataset = catalog._datasets.get(dataset_name, None)
-    return dataset is not None and isinstance(dataset, MemoryDataset)
+    if dataset_name not in catalog:
+        return True
+    return False
 
 
 def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
@@ -24,11 +20,36 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
     }
 
 
-def node_sequence_name(node_sequence: list[Node]) -> str:
-    return "_".join([node.name for node in node_sequence])
+def create_adjacency_list(
+    catalog: DataCatalog, pipeline: Pipeline
+) -> tuple[dict[str, set], dict[str, set]]:
+    """
+    Builds adjacency list (adj_list) to search connected components - undirected graph,
+    and adjacency list (parent_to_children) to retrieve connections between new components
+    using on initial kedro topological sort - directed graph.
+    """
+    memory_datasets = get_memory_datasets(catalog, pipeline)
+
+    adj_list: dict[str, set] = {node.name: set() for node in pipeline.nodes}
+    parent_to_children: dict[str, set] = {node.name: set() for node in pipeline.nodes}
+    output_to_node = {
+        node_output: node for node in pipeline.nodes for node_output in node.outputs
+    }
+
+    for node in pipeline.nodes:
+        for node_input in node.inputs:
+            if node_input in output_to_node:
+                parent_to_children[output_to_node[node_input].name].add(node.name)
+                if node_input in memory_datasets:
+                    adj_list[node.name].add(output_to_node[node_input].name)
+                    adj_list[output_to_node[node_input].name].add(node.name)
+
+    return adj_list, parent_to_children
 
 
-def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
+def group_memory_nodes(
+    catalog: DataCatalog, pipeline: Pipeline
+) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -36,62 +57,51 @@ def group_memory_nodes(catalog: DataCatalog, pipeline: Pipeline):
     together. Essentially, this computes connected components over the graph of
     nodes connected by MemoryDatasets.
     """
-    # get all memory datasets in the pipeline
-    memory_datasets = get_memory_datasets(catalog, pipeline)
+    # Creating adjacency list
+    adj_list, parent_to_children = create_adjacency_list(catalog, pipeline)
 
-    # Node sequences
-    node_sequences = []
+    name_to_node = {node.name: node for node in pipeline.nodes}
+    con_components: dict[str, int] = {node.name: -1 for node in pipeline.nodes}
 
-    # Mapping from dataset name -> node sequence index
-    sequence_map = {}
-    for node in pipeline.nodes:
-        if all(o not in memory_datasets for o in node.inputs + node.outputs):
-            # standalone node
-            node_sequences.append([node])
-        else:
-            if all(i not in memory_datasets for i in node.inputs):
-                # start of a sequence; create a new sequence and store the id
-                node_sequences.append([node])
-                sequence_id = len(node_sequences) - 1
-            else:
-                # continuation of a sequence; retrieve sequence_id
-                sequence_id = None
-                for i in node.inputs:
-                    if i in memory_datasets:
-                        assert sequence_id is None or sequence_id == sequence_map[i]
-                        sequence_id = sequence_map[i]
+    # Searching connected components
+    def dfs(cur_node_name: str, component: int) -> None:
+        if con_components[cur_node_name] != -1:
+            return
 
-                # Append to map
-                node_sequences[sequence_id].append(node)
+        con_components[cur_node_name] = component
+        for next_node_name in adj_list[cur_node_name]:
+            dfs(next_node_name, component)
 
-            # map outputs to sequence_id
-            for o in node.outputs:
-                if o in memory_datasets:
-                    sequence_map[o] = sequence_id
+    cur_component = 0
+    for node_name in adj_list.keys():
+        if con_components[node_name] == -1:
+            dfs(node_name, cur_component)
+            cur_component += 1
 
-    # Named node sequences
-    nodes = {
-        node_sequence_name(node_sequence): node_sequence
-        for node_sequence in node_sequences
-    }
+    # Joining nodes based on found connected components
+    groups: list[list[str]] = [[] for _ in range(cur_component)]
+    for node_name, component in con_components.items():
+        groups[component].append(node_name)
 
-    # Inverted mapping
-    node_mapping = {
-        node.name: sequence_name
-        for sequence_name, node_sequence in nodes.items()
-        for node in node_sequence
-    }
+    group_to_seq: dict[str, list[Node]] = {}
+    old_name_to_group = {}
+    for group in groups:
+        group_name = "_".join(group)
+        group_to_seq[group_name] = [name_to_node[node_name] for node_name in group]
+        for node_name in group:
+            old_name_to_group[node_name] = group_name
 
-    # Grouped dependencies
-    dependencies = defaultdict(list)
-    for node, parent_nodes in pipeline.node_dependencies.items():
-        for parent in parent_nodes:
-            parent_name = node_mapping[parent.name]
-            node_name = node_mapping[node.name]
-            if parent_name != node_name and (
-                parent_name not in dependencies
-                or node_name not in dependencies[parent_name]
-            ):
-                dependencies[parent_name].append(node_name)
+    # Retrieving dependencies between joined nodes based on initial topological sort
+    group_dependencies: dict[str, list[str]] = {}
+    for parent, children in parent_to_children.items():
+        if not children:
+            continue
+        new_name_parent = old_name_to_group[parent]
+        if new_name_parent not in group_dependencies:
+            group_dependencies[new_name_parent] = []
+        for child in children:
+            new_name_child = old_name_to_group[child]
+            if new_name_parent != new_name_child:
+                group_dependencies[new_name_parent].append(new_name_child)
 
-    return nodes, dependencies
+    return group_to_seq, group_dependencies

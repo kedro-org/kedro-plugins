@@ -4,6 +4,7 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
+
 from __future__ import annotations
 
 import os
@@ -11,9 +12,8 @@ from pathlib import Path
 from shutil import copyfile
 
 from click.testing import CliRunner
-from kedro import __version__ as kedro_version
 from kedro.framework.cli.starters import create_cli as kedro_cli
-from kedro.framework.startup import ProjectMetadata
+from kedro.framework.startup import bootstrap_project
 from pytest import fixture
 
 
@@ -28,12 +28,12 @@ def cli_runner():
 
 
 def _create_kedro_settings_py(file_name: Path, patterns: list[str]):
-    patterns = ", ".join([f'"{p}"' for p in patterns])
+    patterns_str = ", ".join([f'"{p}"' for p in patterns])
     content = f"""CONFIG_LOADER_ARGS = {{
     "base_env": "base",
     "default_run_env": "local",
     "config_patterns": {{
-        "airflow": [{patterns}],  # configure the pattern for configuration files
+        "airflow": [{patterns_str}],  # configure the pattern for configuration files
     }}
 }}
 """
@@ -67,8 +67,11 @@ def identity(arg):
 def register_pipelines():
     pipeline = Pipeline(
         [
-            node(identity, ["input"], ["intermediate"], name="node0"),
+            node(identity, ["input"], ["intermediate"], name="node0", tags=["tag0", "tag1"]),
             node(identity, ["intermediate"], ["output"], name="node1"),
+            node(identity, ["intermediate"], ["output2"], name="node2", tags=["tag0"]),
+            node(identity, ["intermediate"], ["output3"], name="node3", tags=["tag1", "tag2"]),
+            node(identity, ["intermediate"], ["output4"], name="node4", tags=["tag2"]),
         ],
         tags="pipeline0",
     )
@@ -95,14 +98,6 @@ def register_pipelines():
 @fixture(scope="session")
 def metadata(kedro_project):
     # cwd() depends on ^ the isolated filesystem, created by CliRunner()
-    project_path = kedro_project
-    return ProjectMetadata(
-        source_dir=project_path / "src",
-        config_file=project_path / "pyproject.toml",
-        package_name="hello_world",
-        project_name="Hello world !!!",
-        kedro_init_version=kedro_version,
-        project_path=project_path,
-        tools=["None"],
-        example_pipeline="No",
-    )
+    project_path = kedro_project.resolve()
+    metadata = bootstrap_project(project_path)
+    return metadata

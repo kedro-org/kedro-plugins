@@ -1,4 +1,5 @@
 """Testing module for CLI tools"""
+
 import shutil
 from collections import namedtuple
 from pathlib import Path
@@ -109,9 +110,11 @@ class TestCLIMasking:
                 "--example",
                 "--name",
                 "--tools",
+                "--telemetry",
                 "-e",
                 "-n",
                 "-t",
+                "-tc",
             ]
         )
         # now check that once params and args are reached, the values are None

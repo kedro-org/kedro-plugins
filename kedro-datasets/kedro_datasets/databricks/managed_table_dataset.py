@@ -1,10 +1,12 @@
 """``ManagedTableDataset`` implementation to access managed delta tables
 in Databricks.
 """
+from __future__ import annotations
+
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 import pandas as pd
 from kedro.io.core import (
@@ -31,14 +33,14 @@ class ManagedTable:
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
     _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
     database: str
-    catalog: Optional[str]
+    catalog: str | None
     table: str
-    write_mode: Union[str, None]
+    write_mode: str | None
     dataframe_type: str
-    primary_key: Optional[str]
-    owner_group: str
-    partition_columns: Union[str, list[str]]
-    json_schema: StructType
+    primary_key: str | list[str] | None
+    owner_group: str | None
+    partition_columns: str | list[str] | None
+    json_schema: dict[str, Any] | None = None
 
     def __post_init__(self):
         """Run validation methods if declared.
@@ -119,11 +121,11 @@ class ManagedTable:
                     f"`write_mode` {self.write_mode}"
                 )
 
-    def full_table_location(self) -> str:
+    def full_table_location(self) -> str | None:
         """Returns the full table location
 
         Returns:
-            str: table location in the format catalog.database.table
+            str | None : table location in the format catalog.database.table or None if database and table aren't defined
         """
         full_table_location = None
         if self.catalog and self.database and self.table:
@@ -132,7 +134,7 @@ class ManagedTable:
             full_table_location = f"`{self.database}`.`{self.table}`"
         return full_table_location
 
-    def schema(self) -> StructType:
+    def schema(self) -> StructType | None:
         """Returns the Spark schema of the table if it exists
 
         Returns:
@@ -188,7 +190,18 @@ class ManagedTableDataset(AbstractVersionedDataset):
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>> spark_df = SparkSession.builder.config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog","org.apache.spark.sql.delta.catalog.DeltaCatalog",).getOrCreate().createDataFrame(data, schema)
+        >>> spark_df = (
+        ...     SparkSession.builder.config(
+        ...         "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        ...     )
+        ...     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        ...     .config(
+        ...         "spark.sql.catalog.spark_catalog",
+        ...         "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        ...     )
+        ...     .getOrCreate()
+        ...     .createDataFrame(data, schema)
+        ... )
         >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
@@ -205,17 +218,17 @@ class ManagedTableDataset(AbstractVersionedDataset):
         self,
         *,
         table: str,
-        catalog: str = None,
+        catalog: str | None = None,
         database: str = "default",
-        write_mode: Union[str, None] = None,
+        write_mode: str | None = None,
         dataframe_type: str = "spark",
-        primary_key: Optional[Union[str, list[str]]] = None,
-        version: Version = None,
+        primary_key: str | list[str] | None = None,
+        version: Version | None = None,
         # the following parameters are used by project hooks
         # to create or update table properties
-        schema: dict[str, Any] = None,
-        partition_columns: list[str] = None,
-        owner_group: str = None,
+        schema: dict[str, Any] | None = None,
+        partition_columns: list[str] | None = None,
+        owner_group: str | None = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
 
@@ -264,12 +277,12 @@ class ManagedTableDataset(AbstractVersionedDataset):
         self._version = version
 
         super().__init__(
-            filepath=None,
+            filepath=None,  # type: ignore[arg-type]
             version=version,
-            exists_function=self._exists,
+            exists_function=self._exists,  # type: ignore[arg-type]
         )
 
-    def _load(self) -> Union[DataFrame, pd.DataFrame]:
+    def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe)
 
@@ -305,7 +318,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             data (DataFrame): the Spark dataframe to append to the table
         """
         data.write.format("delta").mode("append").saveAsTable(
-            self._table.full_table_location()
+            self._table.full_table_location() or ""
         )
 
     def _save_overwrite(self, data: DataFrame) -> None:
@@ -320,7 +333,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             delta_table = delta_table.mode("overwrite").option(
                 "overwriteSchema", "true"
             )
-        delta_table.saveAsTable(self._table.full_table_location())
+        delta_table.saveAsTable(self._table.full_table_location() or "")
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
@@ -361,7 +374,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         else:
             self._save_append(update_data)
 
-    def _save(self, data: Union[DataFrame, pd.DataFrame]) -> None:
+    def _save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves the data based on the write_mode and dataframe_type in the init.
         If write_mode is pandas, Spark dataframe is created first.
         If schema is provided, data is matched to schema before saving
@@ -376,8 +389,9 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
             )
         # filter columns specified in schema and match their ordering
-        if self._table.schema():
-            cols = self._table.schema().fieldNames()
+        schema = self._table.schema()
+        if schema:
+            cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
                 data = _get_spark().createDataFrame(
                     data.loc[:, cols], schema=self._table.schema()
@@ -393,7 +407,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         elif self._table.write_mode == "append":
             self._save_append(data)
 
-    def _describe(self) -> dict[str, str]:
+    def _describe(self) -> dict[str, str | list | None]:
         """Returns a description of the instance of ManagedTableDataset
 
         Returns:

@@ -254,12 +254,8 @@ class TestNetCDFDataset:
         )
 
         assert not dataset.exists()
-        NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(
-            dummy_xr_dataset
-        )
-        NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(
-            dummy_xr_dataset
-        )
+        NetCDFDataset(filepath=str(tmp_path / "test1.nc")).save(dummy_xr_dataset)
+        NetCDFDataset(filepath=str(tmp_path / "test2.nc")).save(dummy_xr_dataset)
         assert dataset.exists()
         loaded_data = dataset.load()
         dummy_xr_dataset_multi.equals(loaded_data.compute())

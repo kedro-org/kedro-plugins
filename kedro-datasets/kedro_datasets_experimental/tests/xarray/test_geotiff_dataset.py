@@ -6,7 +6,7 @@ import rioxarray
 import xarray as xr
 from kedro.io import DatasetError
 
-from kedro_datasets.xarray import GeoTiffDataset
+from kedro_datasets_experimental.xarray import GeoTiffDataset
 
 
 @pytest.fixture
@@ -93,4 +93,3 @@ class TestGeoTiffDataset:
         pattern = r"Failed while loading data from data set GeoTiffDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             geotiff_dataset.load()
-

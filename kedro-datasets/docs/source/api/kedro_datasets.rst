@@ -17,7 +17,6 @@ kedro_datasets
    kedro_datasets.databricks.ManagedTableDataset
    kedro_datasets.email.EmailMessageDataset
    kedro_datasets.geopandas.GeoJSONDataset
-   kedro_datasets.xarray.GeoTiffDataset
    kedro_datasets.holoviews.HoloviewsWriter
    kedro_datasets.huggingface.HFDataset
    kedro_datasets.huggingface.HFTransformerPipelineDataset
@@ -65,3 +64,4 @@ kedro_datasets
    kedro_datasets.tracking.MetricsDataset
    kedro_datasets.video.VideoDataset
    kedro_datasets.yaml.YAMLDataset
+   kedro_datasets_experimental.xarray.GeoTiffDataset

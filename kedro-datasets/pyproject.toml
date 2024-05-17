@@ -166,7 +166,7 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
 xarray-geotiff = ["rioxarray>=0.15.0"]
-xarray = ["kedro-datasets[xarray-geotiff"]
+xarray = ["kedro-datasets[xarray-geotiff]"]
 
 
 # Docs requirements

@@ -154,19 +154,8 @@ extras_require = {
 
 extras_require["all"] = _collect_requirements(extras_require)
 extras_require["docs"] = [
-    # docutils>=0.17 changed the HTML
-    # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
-    "docutils==0.16",
-    "sphinx~=5.3.0",
-    "sphinx_rtd_theme==1.2.0",
-    # Regression on sphinx-autodoc-typehints 1.21
-    # that creates some problematic docstrings
-    "sphinx-autodoc-typehints==1.20.2",
-    "sphinx_copybutton==0.3.1",
-    "sphinx-notfound-page",
+    "kedro-sphinx-theme==2024.4.0"
     "ipykernel>=5.3, <7.0",
-    "sphinxcontrib-mermaid~=0.7.1",
-    "myst-parser~=1.0.0",
     "Jinja2<3.1.0",
 ]
 extras_require["test"] = [

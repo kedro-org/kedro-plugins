@@ -154,7 +154,7 @@ extras_require = {
 
 extras_require["all"] = _collect_requirements(extras_require)
 extras_require["docs"] = [
-    "kedro-sphinx-theme==2024.4.0"
+    "kedro-sphinx-theme==2024.4.0",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.1.0",
 ]

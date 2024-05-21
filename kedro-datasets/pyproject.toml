@@ -164,6 +164,13 @@ video = ["kedro-datasets[video-videodataset]"]
 yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
+# Experimental Datasets
+langchain-chatopenaidataset = ["langchain[openai]"]
+langchain-openaiembeddingsdataset = ["langchain[openai]"]
+langchain-chatanthropicdataset = ["langchain[anthropic]"]
+langchain-coheredataset = ["langchain[cohere]"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-coheredataset ]"]
+
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.4.0",
@@ -202,7 +209,6 @@ test = [
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
     "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
-    "mypy~=1.0",
     "moto==5.0.0",
     "mypy~=1.0",
     "networkx~=2.4",
@@ -256,9 +262,11 @@ test = [
     "types-tabulate",
 ]
 
+# Experimental dataset requirements
+experimental = ["langchain[openai,anthropic,cohere]"]
+
 # All requirements
 all = ["kedro-datasets[test,docs]"]
-
 
 [project.urls]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"

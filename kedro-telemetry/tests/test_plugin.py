@@ -353,6 +353,34 @@ class TestKedroTelemetryCLIHooks:
         assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
+    def test_before_command_run_telemetry_flag_yes(self, mocker, fake_metadata):
+        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocked_check_consent_function = mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent"
+        )
+
+        telemetry_hook = KedroTelemetryCLIHooks()
+        command_args = ["run", "--telemetry=yes"]
+
+        telemetry_hook.before_command_run(fake_metadata, command_args)
+
+        assert mocked_heap_call.called
+        mocked_check_consent_function.assert_not_called()
+
+    def test_before_command_run_telemetry_flag_no(self, mocker, fake_metadata):
+        mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocked_check_consent_function = mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent"
+        )
+
+        telemetry_hook = KedroTelemetryCLIHooks()
+        command_args = ["run", "--telemetry=no"]
+
+        telemetry_hook.before_command_run(fake_metadata, command_args)
+
+        assert not mocked_heap_call.called
+        mocked_check_consent_function.assert_not_called()
+
     def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"

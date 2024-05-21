@@ -6,8 +6,7 @@ from typing import Any, NoReturn
 
 from cohere import AsyncClient, Client
 from kedro.io import AbstractDataset, DatasetError
-from langchain.llms import Cohere
-
+from langchain_cohere.llms import Cohere
 
 class CohereDataset(AbstractDataset[None, Cohere]):
     """``CohereDataset`` loads a Cohere `langchain <https://python.langchain.com/>`_ model.
@@ -40,7 +39,6 @@ class CohereDataset(AbstractDataset[None, Cohere]):
         >>> from kedro_datasets_experimental.langchain import CohereDataset
         >>> llm = CohereDataset(
         ...     credentials={
-        ...         "cohere_api_url": "xxx",
         ...         "cohere_api_key": "xxx",
         ...     },
         ...     kwargs={
@@ -50,7 +48,7 @@ class CohereDataset(AbstractDataset[None, Cohere]):
         ... ).load()
         >>>
         >>> # See: https://python.langchain.com/docs/integrations/llms/cohere
-        >>> llm("Hello world!")
+        >>> llm.invoke("Hello world!")
     """
 
     def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
@@ -75,7 +73,6 @@ class CohereDataset(AbstractDataset[None, Cohere]):
 
         client_kwargs = {
             "api_key": self.cohere_api_key,
-            "api_url": self.cohere_api_url,
         }
         llm.client = Client(**client_kwargs, client_name=llm.user_agent)
         llm.async_client = AsyncClient(**client_kwargs, client_name=llm.user_agent)

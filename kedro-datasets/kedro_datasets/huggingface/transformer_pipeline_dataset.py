@@ -29,17 +29,20 @@ class HFTransformerPipelineDataset(AbstractDataset):
     .. code-block:: pycon
 
        >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
-       >>> dataset = HFTransformerPipelineDataset(task="text-classification", model_name="papluca/xlm-roberta-base-language-detection")
-       >>> detector = dataset.load()
-       >>> assert detector("Ceci n'est pas une pipe")[0]["label"] == "fr"
+       >>> dataset = HFTransformerPipelineDataset(
+       ...     task="text-classification", model_name="prajjwal1/bert-tiny"
+       ... )
+       >>> model = dataset.load()
+       >>> assert model("Hello world")[0]["label"].startswith("LABEL_")
 
     """
 
     def __init__(
         self,
+        *,
         task: str | None = None,
         model_name: str | None = None,
-        pipeline_kwargs: dict[t.Any] | None = None,
+        pipeline_kwargs: dict[str, t.Any] | None = None,
     ):
         if task is None and model_name is None:
             raise ValueError("At least 'task' or 'model_name' are needed")

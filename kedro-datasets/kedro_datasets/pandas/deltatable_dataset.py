@@ -2,17 +2,16 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
-import warnings
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pandas as pd
 from deltalake import DataCatalog, DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 
 class DeltaTableDataset(AbstractDataset):
@@ -68,7 +67,7 @@ class DeltaTableDataset(AbstractDataset):
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> dataset = DeltaTableDataset(filepath="test")
+        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
         >>>
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
@@ -76,27 +75,28 @@ class DeltaTableDataset(AbstractDataset):
         >>>
         >>> new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
         >>> dataset.save(new_data)
-        >>> dataset.get_loaded_version()
+        >>> assert isinstance(dataset.get_loaded_version(), int)
 
     """
 
     DEFAULT_WRITE_MODE = "overwrite"
     ACCEPTED_WRITE_MODES = ("overwrite", "append")
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"mode": DEFAULT_WRITE_MODE}
 
     def __init__(  # noqa: PLR0913
         self,
-        filepath: Optional[str] = None,
-        catalog_type: Optional[DataCatalog] = None,
-        catalog_name: Optional[str] = None,
-        database: Optional[str] = None,
-        table: Optional[str] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
-        credentials: Optional[Dict[str, Any]] = None,
-        fs_args: Optional[Dict[str, Any]] = None,
+        *,
+        filepath: str | None = None,
+        catalog_type: DataCatalog | None = None,
+        catalog_name: str | None = None,
+        database: str | None = None,
+        table: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``DeltaTableDataset``
 
@@ -142,7 +142,7 @@ class DeltaTableDataset(AbstractDataset):
         # DeltaTable cannot be instantiated from an empty directory
         # for the first time creation from filepath, we need to delay the instantiation
         self.is_empty_dir: bool = False
-        self._delta_table: Optional[DeltaTable] = None
+        self._delta_table: DeltaTable | None = None
 
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args:
@@ -180,26 +180,26 @@ class DeltaTableDataset(AbstractDataset):
                 self.is_empty_dir = True
         else:
             self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=DataCatalog[self._catalog_type],
+                data_catalog=DataCatalog[self._catalog_type],  # type: ignore[misc]
                 data_catalog_id=self._catalog_name,
-                database_name=self._database,
-                table_name=self._table,
+                database_name=self._database or "",
+                table_name=self._table or "",
             )
 
     @property
-    def fs_args(self) -> Dict[str, Any]:
+    def fs_args(self) -> dict[str, Any]:
         """Appends and returns filesystem credentials to fs_args."""
         fs_args = deepcopy(self._fs_args)
         fs_args.update(self._credentials)
         return fs_args
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> str:
         """Returns the schema of the DeltaTableDataset as a dictionary."""
-        return self._delta_table.schema().json()
+        return self._delta_table.schema().to_json() if self._delta_table else ""
 
     @property
-    def metadata(self) -> Metadata:
+    def metadata(self) -> Metadata | None:
         """Returns the metadata of the DeltaTableDataset as a dictionary.
         Metadata contains the following:
         1. A unique id
@@ -212,44 +212,44 @@ class DeltaTableDataset(AbstractDataset):
 
         Returns: Metadata object containing the above metadata attributes.
         """
-        return self._delta_table.metadata()
+        return self._delta_table.metadata() if self._delta_table else None
 
     @property
-    def history(self) -> List[Dict[str, Any]]:
+    def history(self) -> list[dict[str, Any]] | None:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
-        return self._delta_table.history()
+        return self._delta_table.history() if self._delta_table else None
 
-    def get_loaded_version(self) -> int:
+    def get_loaded_version(self) -> int | None:
         """Returns the version of the DeltaTableDataset that is currently loaded."""
-        return self._delta_table.version()
+        return self._delta_table.version() if self._delta_table else None
 
     def _load(self) -> pd.DataFrame:
-        return self._delta_table.to_pandas()
+        return self._delta_table.to_pandas() if self._delta_table else None
 
     def _save(self, data: pd.DataFrame) -> None:
         if self.is_empty_dir:
             # first time creation of delta table
             write_deltalake(
-                self._filepath,
+                self._filepath or "",
                 data,
                 storage_options=self.fs_args,
                 **self._save_args,
             )
             self.is_empty_dir = False
             self._delta_table = DeltaTable(
-                table_uri=self._filepath,
+                table_uri=self._filepath or "",
                 storage_options=self.fs_args,
                 version=self._version,
             )
         else:
             write_deltalake(
-                self._delta_table,
+                self._delta_table or "",
                 data,
                 storage_options=self.fs_args,
                 **self._save_args,
             )
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "catalog_type": self._catalog_type,
@@ -260,21 +260,3 @@ class DeltaTableDataset(AbstractDataset):
             "save_args": self._save_args,
             "version": self._version,
         }
-
-
-_DEPRECATED_CLASSES = {
-    "DeltaTableDataSet": DeltaTableDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,4 +1,3 @@
-import importlib
 from io import StringIO
 from pathlib import PurePosixPath
 
@@ -7,13 +6,10 @@ from Bio import SeqIO
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.biosequence import BioSequenceDataset
-from kedro_datasets.biosequence.biosequence_dataset import _DEPRECATED_CLASSES
 
 LOAD_ARGS = {"format": "fasta"}
 SAVE_ARGS = {"format": "fasta"}
@@ -38,18 +34,6 @@ def biosequence_dataset(filepath_biosequence, fs_args):
 def dummy_data():
     data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
     return list(SeqIO.parse(StringIO(data), "fasta"))
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.biosequence", "kedro_datasets.biosequence.biosequence_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestBioSequenceDataset:

@@ -1,17 +1,16 @@
 """``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+from __future__ import annotations
+
 import json as json_  # make pylint happy
-import warnings
 from copy import deepcopy
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any
 
 import requests
+from kedro.io.core import AbstractDataset, DatasetError
 from requests import Session, sessions
 from requests.auth import AuthBase
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
 
 
 class APIDataset(AbstractDataset[None, requests.Response]):
@@ -44,18 +43,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>>
         >>> dataset = APIDataset(
-        ...     url="https://quickstats.nass.usda.gov",
+        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        ...             "key": "SOME_TOKEN",
-        ...             "format": "JSON",
-        ...             "commodity_desc": "CORN",
-        ...             "statisticcat_des": "YIELD",
-        ...             "agg_level_desc": "STATE",
-        ...             "year": 2000,
+        ...             "news_site": "NASA",
+        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },
-        ...     credentials=("username", "password"),
         ... )
         >>> data = dataset.load()
 
@@ -67,7 +61,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method="POST", url="url_of_remote_server", save_args={"chunk_size": 1}
+        ...     method="POST",
+        ...     url="https://dummyjson.com/products/add",
+        ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)
 
@@ -95,12 +91,13 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         url: str,
         method: str = "GET",
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
@@ -109,7 +106,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             method: The method of the request. GET, POST, PUT are the only supported
                 methods
             load_args: Additional parameters to be fed to requests.request.
-                https://requests.readthedocs.io/en/latest/api/#requests.request
+                https://requests.readthedocs.io/en/latest/api.html#requests.request
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
                 determines the size of the package sent at each request.
@@ -151,7 +148,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         if "timeout" in self._params:
             self._params["timeout"] = self._convert_type(self._params["timeout"])
 
-        self._request_args: Dict[str, Any] = {
+        self._request_args: dict[str, Any] = {
             "url": url,
             "method": method,
             "auth": self._convert_type(self._auth),
@@ -167,11 +164,11 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         However, for some parameters in the Python requests library,
         only Tuples are allowed.
         """
-        if isinstance(value, List):
+        if isinstance(value, list):
             return tuple(value)
         return value
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)
@@ -197,7 +194,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     def _execute_save_with_chunks(
         self,
-        json_data: List[Dict[str, Any]],
+        json_data: list[dict[str, Any]],
     ) -> requests.Response:
         chunk_size = self._chunk_size
         n_chunks = len(json_data) // chunk_size + 1
@@ -223,7 +220,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def _save(self, data: Any) -> requests.Response:
+    def _save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
                 return self._execute_save_with_chunks(json_data=data)
@@ -236,21 +233,3 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         with sessions.Session() as session:
             response = self._execute_request(session)
         return response.ok
-
-
-_DEPRECATED_CLASSES = {
-    "APIDataSet": APIDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

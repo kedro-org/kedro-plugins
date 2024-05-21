@@ -8,10 +8,9 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import Version
-from kedro.io.core import PROTOCOL_DELIMITER
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from s3fs.core import S3FileSystem
 
-from kedro_datasets._io import DatasetError
 from kedro_datasets.holoviews import HoloviewsWriter
 
 
@@ -27,12 +26,14 @@ def dummy_hv_object():
 
 @pytest.fixture
 def hv_writer(filepath_png, save_args, fs_args):
-    return HoloviewsWriter(filepath_png, save_args=save_args, fs_args=fs_args)
+    return HoloviewsWriter(filepath=filepath_png, save_args=save_args, fs_args=fs_args)
 
 
 @pytest.fixture
 def versioned_hv_writer(filepath_png, load_version, save_version):
-    return HoloviewsWriter(filepath_png, version=Version(load_version, save_version))
+    return HoloviewsWriter(
+        filepath=filepath_png, version=Version(load_version, save_version)
+    )
 
 
 @pytest.mark.skipif(
@@ -63,7 +64,7 @@ class TestHoloviewsWriter:
     )
     def test_open_extra_args(self, tmp_path, fs_args, mocker):
         fs_mock = mocker.patch("fsspec.filesystem")
-        writer = HoloviewsWriter(str(tmp_path), fs_args)
+        writer = HoloviewsWriter(filepath=str(tmp_path), fs_args=fs_args)
 
         fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
         assert writer._fs_open_args_save == fs_args["open_args_save"]

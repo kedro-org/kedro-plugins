@@ -2,7 +2,7 @@
 Feature: Docker commands in new projects
   Background:
     Given I have prepared a config file
-    And I run a non-interactive kedro new using pandas-iris starter
+    And I run a non-interactive kedro new using spaceflights-pandas starter
     And I have installed the project dependencies
     And I have removed old docker image of test project
 
@@ -29,36 +29,35 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker run with custom base image
     When I execute kedro docker build with custom base image
     Then I should get a successful exit code
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker run in parallel mode
     Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker run --runner=ParallelRunner"
+    When I execute the kedro command "docker run --runner=ParallelRunner --pipeline=data_processing"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Use custom UID and GID for Docker image
     Given I have executed the kedro command "docker build --uid 10001 --gid 20002"
-    When I execute the kedro command "docker run"
-    Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    When I execute the kedro command "docker cmd id"
+    Then Standard output should contain a message including "uid=10001(kedro_docker) gid=20002(kedro_group) groups=20002(kedro_group)"
 
   Scenario: Execute docker jupyter notebook target
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker jupyter notebook"
-    Then Jupyter Notebook should run on port 8888
+    Then Jupyter Server should run on port 8888
 
   Scenario: Execute docker jupyter notebook target on custom port
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker jupyter notebook --port 8899"
-    Then Jupyter Notebook should run on port 8899
+    Then Jupyter Server should run on port 8899
 
   Scenario: Execute docker jupyter lab target
     Given I have executed the kedro command "docker build"
@@ -75,20 +74,13 @@ Feature: Docker commands in new projects
     When I occupy port "8890"
     And I execute the kedro command "docker jupyter lab --port 8890"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Port 8890 is already in use on the host. Please specify an alternative port number."
-
-  Scenario: Execute docker kedro test target
-    Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker cmd kedro test"
-    Then I should get a successful exit code
-    And I should get a message including "1 passed"
-    And I should get a message including "/usr/local/bin/python -m pytest"
+    And Standard output should contain a message including "Error: Port 8890 is already in use on the host. Please specify an alternative port number."
 
   Scenario: Execute docker cmd without target command
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker cmd"
     Then I should get a successful exit code
-    And I should get a message including "kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully"
+    And I should get a message including "Pipeline execution completed"
 
   Scenario: Execute docker cmd with non-existent target
     Given I have executed the kedro command "docker build"
@@ -99,13 +91,17 @@ Feature: Docker commands in new projects
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker ipython"
     Then I should see messages from docker ipython startup including "An enhanced Interactive Python"
-    And  I should see messages from docker ipython startup including "INFO - Kedro project project-dummy"
-    And  I should see messages from docker ipython startup including "INFO - Defined global variable 'context', 'session', 'catalog' and 'pipelines'"
+    And  I should see messages from docker ipython startup including "Kedro project project-dummy"
+    And  I should see messages from docker ipython startup including "Defined global variable"
+    And  I should see messages from docker ipython startup including "'context'"
+    And  I should see messages from docker ipython startup including "'session'"
+    And  I should see messages from docker ipython startup including "'catalog'"
+    And  I should see messages from docker ipython startup including "'pipelines'"
 
   Scenario: Execute docker run target without building image
     When I execute the kedro command "docker run"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."
 
   Scenario: Execute docker dive target
     Given I have executed the kedro command "docker build"
@@ -123,4 +119,4 @@ Feature: Docker commands in new projects
   Scenario: Execute docker dive without building image
     When I execute the kedro command "docker dive"
     Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."

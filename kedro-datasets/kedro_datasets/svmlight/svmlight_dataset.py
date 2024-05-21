@@ -2,28 +2,32 @@
 underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
 ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.
 """
-import warnings
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Union
 
 import fsspec
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 from numpy import ndarray
 from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 # Type of data input
-_DI = Tuple[Union[ndarray, csr_matrix], ndarray]
+_DI = tuple[Union[ndarray, csr_matrix], ndarray]
 # Type of data output
-_DO = Tuple[csr_matrix, ndarray]
+_DO = tuple[csr_matrix, ndarray]
 
 
 class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
@@ -77,7 +81,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
         >>> # Features and labels.
         >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
         >>>
-        >>> dataset = SVMLightDataset(filepath="test.svm")
+        >>> dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
         >>> dataset.save(data)
         >>> reloaded_features, reloaded_labels = dataset.load()
         >>> assert (data[0] == reloaded_features).all()
@@ -85,18 +89,19 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        version: Optional[Version] = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of SVMLightDataset to load/save data from a svmlight/libsvm file.
 
@@ -191,21 +196,3 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "SVMLightDataSet": SVMLightDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

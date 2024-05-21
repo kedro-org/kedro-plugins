@@ -1,24 +1,26 @@
 """``ParquetDataset`` loads/saves data from/to a Parquet file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
+from __future__ import annotations
+
 import logging
-import warnings
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
+    AbstractVersionedDataset,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset, DatasetError
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -66,25 +68,26 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = ParquetDataset(filepath="test.parquet")
+        >>> dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``ParquetDataset`` pointing to a concrete Parquet file
         on a specific filesystem.
@@ -153,7 +156,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -215,20 +218,23 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
 
-_DEPRECATED_CLASSES = {
-    "ParquetDataSet": ParquetDataset,
-}
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
 
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        import pyarrow.parquet as pq
 
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+        load_path = str(self._get_load_path())
+
+        table = pq.read_table(
+            load_path, columns=self._load_args.get("columns"), use_threads=True
+        )[:nrows]
+        data_preview = table.to_pandas()
+
+        return data_preview.to_dict(orient="split")

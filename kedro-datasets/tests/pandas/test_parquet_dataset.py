@@ -1,4 +1,4 @@
-import importlib
+import inspect
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
@@ -6,15 +6,12 @@ import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from pandas.testing import assert_frame_equal
 from pyarrow.fs import FSSpecHandler, PyFileSystem
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import ParquetDataset
-from kedro_datasets.pandas.parquet_dataset import _DEPRECATED_CLASSES
 
 FILENAME = "test.parquet"
 
@@ -46,15 +43,15 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.parquet_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
+@pytest.fixture
+def dummy_dataframe_preview():
+    return pd.DataFrame(
+        {
+            "col1": [1, 2, 3, 4, 5, 6],
+            "col2": [4, 5, 6, 7, 8, 9],
+            "col3": [5, 6, 7, 8, 9, 10],
+        }
+    )
 
 
 class TestParquetDataset:
@@ -227,6 +224,32 @@ class TestParquetDataset:
 
         with pytest.raises(DatasetError, match=pattern):
             dataset.save(dummy_dataframe)
+
+    @pytest.mark.parametrize(
+        "nrows,expected_rows",
+        [
+            (5, 5),
+            (
+                10,
+                6,
+            ),  # Test with specified rows more than total, assuming 6 rows in dummy data
+        ],
+    )
+    def test_preview(
+        self, parquet_dataset, dummy_dataframe_preview, nrows, expected_rows
+    ):
+        """Test the preview functionality for ParquetDataset."""
+        parquet_dataset.save(dummy_dataframe_preview)
+        previewed_data = parquet_dataset.preview(nrows=nrows)
+
+        # Assert preview data matches expected rows
+        assert len(previewed_data["data"]) == expected_rows
+        # Assert columns match
+        assert previewed_data["columns"] == list(dummy_dataframe_preview.columns)
+        assert (
+            inspect.signature(parquet_dataset.preview).return_annotation
+            == "TablePreview"
+        )
 
 
 class TestParquetDatasetVersioned:

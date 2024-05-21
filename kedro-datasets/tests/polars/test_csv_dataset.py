@@ -1,4 +1,3 @@
-import importlib
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -11,15 +10,12 @@ from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
-from moto import mock_s3
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version, generate_timestamp
+from moto import mock_aws
 from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.polars import CSVDataset
-from kedro_datasets.polars.csv_dataset import _DEPRECATED_CLASSES
 
 BUCKET_NAME = "test_bucket"
 FILE_NAME = "test.csv"
@@ -62,7 +58,7 @@ def partitioned_data_polars():
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -89,17 +85,6 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe: pl.DataFrame):
     )
 
     return f"s3://{BUCKET_NAME}/{FILE_NAME}"
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.polars", "kedro_datasets.polars.csv_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestCSVDataset:
@@ -373,7 +358,7 @@ class TestCSVDatasetS3:
         (any implementation using S3FileSystem). Likely to be a bug with moto (tested
         with moto==4.0.8, moto==3.0.4) -- see #67
         """
-        df = CSVDataset(mocked_csv_in_s3)
+        df = CSVDataset(filepath=mocked_csv_in_s3)
         assert df._protocol == "s3"
         # if Python >= 3.10, modify test procedure (see #67)
         if sys.version_info[1] >= 10:

@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path, PurePosixPath
 
 import networkx
@@ -7,13 +6,10 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io import Version
-from kedro.io.core import PROTOCOL_DELIMITER
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.networkx import GMLDataset
-from kedro_datasets.networkx.gml_dataset import _DEPRECATED_CLASSES
 
 ATTRS = {
     "source": "from",
@@ -51,17 +47,6 @@ def versioned_gml_dataset(filepath_gml, load_version, save_version):
 @pytest.fixture()
 def dummy_graph_data():
     return networkx.complete_graph(3)
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.networkx", "kedro_datasets.networkx.gml_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestGMLDataset:

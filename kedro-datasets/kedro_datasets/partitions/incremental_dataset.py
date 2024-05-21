@@ -5,6 +5,7 @@ processed partition in so-called `checkpoint` that is persisted to the location
 of the data partitions by default, so that subsequent pipeline run loads only
 new partitions past the checkpoint.It also uses `fsspec` for filesystem level operations.
 """
+
 from __future__ import annotations
 
 import operator
@@ -22,7 +23,11 @@ from kedro.io.core import (
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
-from .partitioned_dataset import KEY_PROPAGATION_WARNING, PartitionedDataset
+from .partitioned_dataset import (
+    KEY_PROPAGATION_WARNING,
+    PartitionedDataset,
+    _grandparent,
+)
 
 
 class IncrementalDataset(PartitionedDataset):
@@ -40,16 +45,8 @@ class IncrementalDataset(PartitionedDataset):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
-        >>> # these credentials will be passed to:
-        >>> # a) 'fsspec.filesystem()' call,
-        >>> # b) the dataset initializer,
-        >>> # c) the checkpoint initializer
-        >>> credentials = {"key1": "secret1", "key2": "secret2"}
-        >>>
         >>> dataset = IncrementalDataset(
-        ...     path="s3://bucket-name/path/to/folder",
-        ...     dataset="pandas.CSVDataset",
-        ...     credentials=credentials,
+        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
         ... )
         >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
@@ -59,7 +56,7 @@ class IncrementalDataset(PartitionedDataset):
         >>>
         >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
-        >>> dataset.load()
+        >>> assert dataset.load() == {}
     """
 
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
@@ -67,15 +64,16 @@ class IncrementalDataset(PartitionedDataset):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``IncrementalDataset``.
 
@@ -125,7 +123,7 @@ class IncrementalDataset(PartitionedDataset):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DatasetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the checkpoint dataset.
         """
 
         super().__init__(
@@ -185,6 +183,7 @@ class IncrementalDataset(PartitionedDataset):
         checkpoint_path = self._filesystem._strip_protocol(
             self._checkpoint_config[self._filepath_arg]
         )
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
 
         def _is_valid_partition(partition) -> bool:
             if not partition.endswith(self._filename_suffix):
@@ -198,9 +197,9 @@ class IncrementalDataset(PartitionedDataset):
             return self._comparison_func(partition_id, checkpoint)
 
         return sorted(
-            part
-            for part in self._filesystem.find(self._normalized_path, **self._load_args)
-            if _is_valid_partition(part)
+            _grandparent(path) if dataset_is_versioned else path
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
+            if _is_valid_partition(path)
         )
 
     @property

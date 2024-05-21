@@ -1,17 +1,20 @@
 """NetworkX ``GraphMLDataset`` loads and saves graphs to a GraphML file using an underlying
 filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
 """
-import warnings
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 import fsspec
 import networkx
-from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
-
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractVersionedDataset
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
@@ -27,25 +30,26 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         >>> from kedro_datasets.networkx import GraphMLDataset
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = GraphMLDataset(filepath="test.graphml")
+        >>> graph_dataset = GraphMLDataset(filepath=tmp_path / "test.graphml")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)
 
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GraphMLDataset``.
 
@@ -122,7 +126,7 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return self._fs.exists(load_path)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -139,21 +143,3 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-_DEPRECATED_CLASSES = {
-    "GraphMLDataSet": GraphMLDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

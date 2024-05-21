@@ -1,19 +1,16 @@
-import importlib
 import json
 
 import boto3
 import pytest
-from moto import mock_s3
+from kedro.io.core import DatasetError
+from moto import mock_aws
 from packaging.version import Version
 from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.spark import SparkDataset, SparkStreamingDataset
-from kedro_datasets.spark.spark_streaming_dataset import _DEPRECATED_CLASSES
 
 SCHEMA_FILE_NAME = "schema.json"
 BUCKET_NAME = "test_bucket"
@@ -60,7 +57,7 @@ def sample_spark_streaming_df(tmp_path, sample_spark_df_schema):
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -72,7 +69,7 @@ def mocked_s3_bucket():
 
 @pytest.fixture
 def s3_bucket():
-    with mock_s3():
+    with mock_aws():
         s3 = boto3.resource("s3", region_name="us-east-1")
         bucket_name = "test-bucket"
         s3.create_bucket(Bucket=bucket_name)
@@ -89,18 +86,6 @@ def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructT
         Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
     )
     return mocked_s3_bucket
-
-
-@pytest.mark.parametrize(
-    "module_name",
-    ["kedro_datasets.spark", "kedro_datasets.spark.spark_streaming_dataset"],
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestSparkStreamingDataset:

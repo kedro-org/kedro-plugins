@@ -5,35 +5,20 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
-## Introduction
+## What is kedro-telemetry?
 
-To find out how Kedro's features are used, the [Kedro team](https://github.com/kedro-org/kedro) have created an opt-in Kedro-Telemetry [plugin](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) to gather anonymised (before being sent across the internet) and aggregated usage analytics.
-
-The data it gathers will help drive future development of Kedro because we can understand how the product is being used.
-
-## Why is my data being collected?
-
-Telemetry data is made available to [project maintainers of the Kedro Project](https://kedro.readthedocs.io/en/stable/faq/faq.html#who-maintains-kedro). The purpose of providing this information is to provide metrics to the maintainers on how Kedro is used. This data helps inform future product development because we can better understand if certain features are having traction with our users. We want to make sure that Kedro is as streamlined as possible and it is difficult to do this without usage analytics.
-
-
-## What about my personal data?
-
-The Kedro Project’s telemetry has been reviewed and approved under the [Telemetry Data Collection and Usage Policy](https://lfprojects.org/policies/telemetry-data-policy/) of LF Projects, LLC.
-
+Kedro-Telemetry is a [plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html)
+that gathers anonymised and aggregated usage analytics
+to help [the Kedro team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html)
+understand how Kedro is used and prioritise improvements to the product accordingly.
 
 ## What data is being collected?
 
-We process your hashed hostname and hashed computer username, which both is pseudonymized information that indirectly relates to you personally. Besides the hashed host and username, we collect the following project-related information. Again, we rely on your consent to do so:
+Read [our Telemetry documentation](https://docs.kedro.org/en/stable/configuration/telemetry.html)
+for further information on the intent of the data collection and what data is collected.
 
-|Description|Example Input|What we receive|
-|-|-|-|
-|CLI command (masked arguments)|`kedro run --pipeline=ds --env=test`|`kedro run --pipeline ***** --env *****`|
-|_(Hashed)_ Package name|my-project|1c7cd944c28cd888904f3efc2345198507...|
-|_(Hashed)_ Project name|my_project|a6392d359362dc9827cf8688c9d634520e...|
-|`kedro` project version|0.17.6|0.17.6|
-|`kedro-telemetry` version|0.1.2|0.1.2|
-|Python version|3.8.10 (default, Jun  2 2021, 10:49:15)|3.8.10 (default, Jun  2 2021, 10:49:15)|
-|Operating system used|darwin|darwin|
+For technical information on how the telemetry collection works, you can browse
+[the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).
 
 ## How do I consent to the use of Kedro-Telemetry?
 

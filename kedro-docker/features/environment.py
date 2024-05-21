@@ -42,7 +42,7 @@ def before_all(context):
             # Temporarily pin pip to fix https://github.com/jazzband/pip-tools/issues/1503
             # This can be removed when Kedro 0.17.6 is released, because pip-tools is upgraded
             # for that version.
-            "pip>=20.0,<21.3",
+            "pip>=21.2",
             "setuptools>=38.0",
             "wheel",
             ".",
@@ -91,7 +91,7 @@ def after_all(context):
 
 
 def before_scenario(context, feature):
-    context.temp_dir = Path(tempfile.mkdtemp())
+    context.temp_dir = Path(tempfile.mkdtemp()).resolve()
 
 
 def after_scenario(context, feature):

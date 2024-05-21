@@ -1,4 +1,4 @@
-import importlib
+import inspect
 from pathlib import PurePosixPath
 
 import plotly.express as px
@@ -7,13 +7,10 @@ from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from s3fs.core import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.plotly import JSONDataset
-from kedro_datasets.plotly.json_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -34,17 +31,6 @@ def json_dataset(filepath_json, load_args, save_args, fs_args):
 @pytest.fixture
 def dummy_plot():
     return px.scatter(x=[1, 2, 3], y=[1, 3, 2], title="Test")
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.plotly", "kedro_datasets.plotly.json_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestJSONDataset:
@@ -113,3 +99,12 @@ class TestJSONDataset:
         dataset = JSONDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_preview(self, json_dataset, dummy_plot):
+        json_dataset.save(dummy_plot)
+        preview = json_dataset.preview()
+        assert (
+            inspect.signature(json_dataset.preview).return_annotation == "PlotlyPreview"
+        )
+        assert "data" in preview
+        assert "layout" in preview

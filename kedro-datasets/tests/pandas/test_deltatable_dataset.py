@@ -1,14 +1,12 @@
-import importlib
+from __future__ import annotations
 
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
+from kedro.io.core import DatasetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import DatasetError
 from kedro_datasets.pandas import DeltaTableDataset
-from kedro_datasets.pandas.deltatable_dataset import _DEPRECATED_CLASSES
 
 
 @pytest.fixture
@@ -29,17 +27,6 @@ def deltatable_dataset_from_path(filepath, load_args, save_args, fs_args):
         save_args=save_args,
         fs_args=fs_args,
     )
-
-
-@pytest.mark.parametrize(
-    "module_name", ["kedro_datasets.pandas", "kedro_datasets.pandas.deltatable_dataset"]
-)
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
 
 
 class TestDeltaTableDataset:
@@ -81,14 +68,14 @@ class TestDeltaTableDataset:
         """Test saving by appending new data."""
         deltatable_dataset_from_path.save(dummy_df)
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
-        appended = pd.concat([dummy_df, new_df], ignore_index=True)
+        appended = pd.concat([new_df, dummy_df], ignore_index=True)
         deltatable_dataset_from_path.save(new_df)
         reloaded = deltatable_dataset_from_path.load()
         assert_frame_equal(appended, reloaded)
 
     def test_versioning(self, filepath, dummy_df):
         """Test loading different versions."""
-        deltatable_dataset_from_path = DeltaTableDataset(filepath)
+        deltatable_dataset_from_path = DeltaTableDataset(filepath=filepath)
         deltatable_dataset_from_path.save(dummy_df)
         assert deltatable_dataset_from_path.get_loaded_version() == 0
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
@@ -96,14 +83,14 @@ class TestDeltaTableDataset:
         assert deltatable_dataset_from_path.get_loaded_version() == 1
 
         deltatable_dataset_from_path0 = DeltaTableDataset(
-            filepath, load_args={"version": 0}
+            filepath=filepath, load_args={"version": 0}
         )
         version_0 = deltatable_dataset_from_path0.load()
         assert deltatable_dataset_from_path0.get_loaded_version() == 0
         assert_frame_equal(dummy_df, version_0)
 
         deltatable_dataset_from_path1 = DeltaTableDataset(
-            filepath, load_args={"version": 1}
+            filepath=filepath, load_args={"version": 1}
         )
         version_1 = deltatable_dataset_from_path1.load()
         assert deltatable_dataset_from_path1.get_loaded_version() == 1
@@ -118,12 +105,12 @@ class TestDeltaTableDataset:
         """Test the schema property to return the underlying delta table schema."""
         deltatable_dataset_from_path.save(dummy_df)
         s1 = deltatable_dataset_from_path.schema
-        s2 = deltatable_dataset_from_path._delta_table.schema().json()
+        s2 = deltatable_dataset_from_path._delta_table.schema().to_json()
         assert s1 == s2
 
     def test_describe(self, filepath):
         """Test the describe method."""
-        deltatable_dataset_from_path = DeltaTableDataset(filepath)
+        deltatable_dataset_from_path = DeltaTableDataset(filepath=filepath)
         desc = deltatable_dataset_from_path._describe()
         assert desc["filepath"] == filepath
         assert desc["version"] is None
@@ -167,7 +154,7 @@ class TestDeltaTableDataset:
         """Test write mode not supported."""
         pattern = "Write mode unsupported is not supported"
         with pytest.raises(DatasetError, match=pattern):
-            DeltaTableDataset(filepath, save_args={"mode": "unsupported"})
+            DeltaTableDataset(filepath=filepath, save_args={"mode": "unsupported"})
 
     def test_metadata(self, deltatable_dataset_from_path, dummy_df):
         """Test metadata property exists and return a metadata object."""

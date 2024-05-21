@@ -1,16 +1,16 @@
 """``AbstractDataset`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive.
 """
-import pickle
-import warnings
-from copy import deepcopy
-from typing import Any, Dict, List
+from __future__ import annotations
 
+import pickle
+from copy import deepcopy
+from typing import Any
+
+from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets._io import AbstractDataset, DatasetError
 from kedro_datasets.spark.spark_dataset import _get_spark
 
 
@@ -68,16 +68,17 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         >>> reloaded.take(4)
     """
 
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         database: str,
         table: str,
         write_mode: str = "errorifexists",
-        table_pk: List[str] = None,
-        save_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        table_pk: list[str] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataset``.
 
@@ -128,7 +129,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
         self.metadata = metadata
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
             "database": self._database,
             "table": self._table,
@@ -138,7 +139,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "format": self._format,
         }
 
-    def _create_hive_table(self, data: DataFrame, mode: str = None):
+    def _create_hive_table(self, data: DataFrame, mode: str | None = None):
         _mode: str = mode or self._write_mode
         data.write.saveAsTable(
             self._full_table_address,
@@ -210,21 +211,3 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "PySpark datasets objects cannot be pickled "
             "or serialised as Python objects."
         )
-
-
-_DEPRECATED_CLASSES = {
-    "SparkHiveDataSet": SparkHiveDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro-Datasets 2.0.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

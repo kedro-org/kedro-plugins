@@ -14,7 +14,6 @@
 from __future__ import annotations
 
 import importlib
-import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -25,7 +24,7 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "kedro"
+project = "kedro-datasets"
 author = "kedro"
 
 # The short X.Y version.
@@ -93,17 +92,20 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
+    "python": ("https://docs.python.org/3.9/", None),
 }
 
 type_targets = {
     "py:class": (
-        "kedro.io.core.AbstractDataSet",
-        "kedro.io.AbstractDataSet",
+        "kedro.io.core.AbstractDataset",
+        "kedro.io.AbstractDataset",
+        "AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
-        "DataCatalog"
+        "DataCatalog",
+        "ibis.backends.BaseBackend",
     ),
     "py:data": (
         "typing.Any",
@@ -111,10 +113,7 @@ type_targets = {
         "typing.Optional",
         "typing.Tuple",
     ),
-    "py:exc": (
-        "DataSetError",
-        "DatasetError",
-    ),
+    "py:exc": ("DatasetError",),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
@@ -127,7 +126,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "kedro-sphinx-theme"
 here = Path(__file__).parent.absolute()
 
 # Theme options are theme-specific and customise the look and feel of a theme
@@ -251,16 +250,16 @@ def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     is a reStructuredText link to their documentation.
 
     For example, if the docstring reads:
-        This LambdaDataSet loads and saves ...
+        This LambdaDataset loads and saves ...
 
-    Then the word ``LambdaDataSet``, will be replaced by
-    :class:`~kedro.io.LambdaDataSet`
+    Then the word ``LambdaDataset``, will be replaced by
+    :class:`~kedro.io.LambdaDataset`
 
     Works for plural as well, e.g:
-        These ``LambdaDataSet``s load and save
+        These ``LambdaDataset``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet` load and save
+        These :class:`kedro.io.LambdaDataset` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values
@@ -385,39 +384,9 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
     remove_arrows_in_examples(lines)
 
 
-def env_override(default_appid):
-    build_version = os.getenv("READTHEDOCS_VERSION")
-
-    if build_version == "latest":
-        return os.environ["HEAP_APPID_QA"]
-    if build_version == "stable":
-        return os.environ["HEAP_APPID_PROD"]
-
-    return default_appid  # default to Development for local builds
-
-
-def _add_jinja_filters(app):
-    # https://github.com/crate/crate/issues/10833
-    from sphinx.builders.latex import LaTeXBuilder
-    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
-
-    # LaTeXBuilder is used in the PDF docs build,
-    # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
-        app.builder.templates.environment.filters["env_override"] = env_override
-
-
-def _override_permalinks_icon(app):
-    # https://github.com/readthedocs/sphinx_rtd_theme/issues/98#issuecomment-1503211439
-    app.config.html_permalinks_icon = "¶"
-
-
 def setup(app):
-    app.connect("builder-inited", _add_jinja_filters)
-    app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
+
 
 # (regex, restructuredText link replacement, object) list
 replacements = []

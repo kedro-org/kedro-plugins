@@ -6,6 +6,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import uuid
 from copy import deepcopy
@@ -95,6 +96,17 @@ def _generate_new_uuid(full_path: str) -> str:
         return ""
 
 
+def _validate_response_from_telemetry_flag(arg: str) -> bool:
+    value = arg.split("=")
+    pattern = r"(?i)^\s*(y|yes|n|no)\s*$"
+    return True if re.match(pattern, value[1]) else False
+
+
+def _extract_response_from_telemetry_flag(arg: str) -> bool:
+    value = arg.split("=")
+    return value[1].strip().lower() in ["y", "yes"] if value[1] is not None else None
+
+
 class KedroTelemetryCLIHooks:
     """Hook to send CLI command data to Heap"""
 
@@ -104,14 +116,24 @@ class KedroTelemetryCLIHooks:
     ):
         """Hook implementation to send command run data to Heap"""
         try:
+            telemetry_flag_response = None
+
             if not project_metadata:  # in package mode
                 return
 
             for arg in command_args:
                 if "--telemetry" in arg:
-                    return
+                    # if the response from the flag is invalid, we can stop the hook
+                    # since the `run` function will fail validation and exit
+                    if not _validate_response_from_telemetry_flag(arg):
+                        return
+                    telemetry_flag_response = _extract_response_from_telemetry_flag(arg)
 
-            consent = _check_for_telemetry_consent(project_metadata.project_path)
+            consent = (
+                _check_for_telemetry_consent(project_metadata.project_path)
+                if telemetry_flag_response is None
+                else telemetry_flag_response
+            )
             if not consent:
                 logger.debug(
                     "Kedro-Telemetry is installed, but you have opted out of "

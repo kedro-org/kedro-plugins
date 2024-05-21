@@ -37,6 +37,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
         >>> llm = ChatAnthropicDataset(
         ...     credentials={
+        ...         "anthropic_api_url": "xxx"
         ...         "anthropic_api_key": "xxx",
         ...     },
         ...     kwargs={
@@ -56,8 +57,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
             credentials: must contain `anthropic_api_url` and `anthropic_api_key`.
             kwargs: keyword arguments passed to the ChatAnthropic constructor.
         """
-        # self.anthropic_api_url = credentials["anthropic_api_url"]
-        self.anthropic_api_key = credentials["anthropic_api_key"]
+        self.anthropic_api_url = credentials.get("anthropic_api_url")
+        self.anthropic_api_key = credentials.get("anthropic_api_key")
         self.kwargs = kwargs or {}
 
     def _describe(self) -> dict[str, Any]:
@@ -68,7 +69,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     def _load(self) -> ChatAnthropic:
         return ChatAnthropic(
-            # anthropic_api_url=self.anthropic_api_url,
+            anthropic_api_url=self.anthropic_api_url,
             anthropic_api_key=self.anthropic_api_key,
             **self.kwargs,
         )

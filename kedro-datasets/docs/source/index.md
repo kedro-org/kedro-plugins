@@ -14,6 +14,7 @@ Browse the complete list of datasets:
    :recursive:
 
    kedro_datasets
+   kedro_datasets_experimental
 ```
 
 # Indices and tables

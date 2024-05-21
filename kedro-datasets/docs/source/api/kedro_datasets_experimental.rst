@@ -1,5 +1,5 @@
 kedro_datasets_experimental
-==============
+===========================
 
 .. rubric:: Description
 

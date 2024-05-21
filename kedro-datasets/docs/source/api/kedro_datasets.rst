@@ -51,7 +51,6 @@ kedro_datasets
    kedro_datasets.polars.EagerPolarsDataset
    kedro_datasets.polars.LazyPolarsDataset
    kedro_datasets.redis.PickleDataset
-   kedro_datasets.snowflake.SnowparkTableDataset
    kedro_datasets.spark.DeltaTableDataset
    kedro_datasets.spark.SparkDataset
    kedro_datasets.spark.SparkHiveDataset

@@ -3,7 +3,7 @@
 from typing import Any, NoReturn
 
 from kedro.io import AbstractDataset, DatasetError
-from langchain.chat_models import ChatAnthropic
+from langchain_anthropic import ChatAnthropic
 
 
 class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
@@ -35,10 +35,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     .. code-block:: python
         >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
-        >>> from langchain.schema import HumanMessage
         >>> llm = ChatAnthropicDataset(
         ...     credentials={
-        ...         "anthropic_api_url": "xxx",
         ...         "anthropic_api_key": "xxx",
         ...     },
         ...     kwargs={
@@ -48,7 +46,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         ... ).load()
         >>>
         >>> # See: https://python.langchain.com/docs/integrations/chat/anthropic
-        >>> llm([HumanMessage(content="Hello world!")])
+        >>> llm.invoke("Hello world!")
     """
 
     def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
@@ -58,7 +56,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
             credentials: must contain `anthropic_api_url` and `anthropic_api_key`.
             kwargs: keyword arguments passed to the ChatAnthropic constructor.
         """
-        self.anthropic_api_url = credentials["anthropic_api_url"]
+        # self.anthropic_api_url = credentials["anthropic_api_url"]
         self.anthropic_api_key = credentials["anthropic_api_key"]
         self.kwargs = kwargs or {}
 
@@ -70,7 +68,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     def _load(self) -> ChatAnthropic:
         return ChatAnthropic(
-            anthropic_api_url=self.anthropic_api_url,
+            # anthropic_api_url=self.anthropic_api_url,
             anthropic_api_key=self.anthropic_api_key,
             **self.kwargs,
         )

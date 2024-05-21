@@ -165,6 +165,7 @@ extras_require["test"] = [
     "biopython~=1.73",
     "blacken-docs==1.9.2",
     "black~=22.0",
+    "boto3==1.24.59",
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",

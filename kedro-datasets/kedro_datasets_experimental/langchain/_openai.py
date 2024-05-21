@@ -1,12 +1,11 @@
 """Defines an interface to common OpenAI models."""
 
 from abc import abstractmethod
-from typing import Any, Dict, NoReturn, TypeVar, Generic
+from typing import Any, Generic, NoReturn, TypeVar
 
 from kedro.io import AbstractDataset, DatasetError
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
-
 
 OPENAI_TYPE = TypeVar("OPENAI_TYPE")
 
@@ -19,7 +18,7 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
     def constructor(self) -> OPENAI_TYPE:
         """Return the OpenAI class to construct in the _load method."""
 
-    def __init__(self, credentials: Dict[str, str], kwargs: Dict[str, Any] = None):
+    def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
         """Constructor.
 
         Args:
@@ -70,7 +69,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: python
-        >>> from kedro_datasets.langchain import OpenAIEmbeddingsDataset
+        >>> from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
         >>>
         >>> embeddings = OpenAIEmbeddingsDataset(
         ...     credentials={

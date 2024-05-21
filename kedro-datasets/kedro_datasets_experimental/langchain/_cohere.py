@@ -2,7 +2,7 @@
 Cohere dataset definition.
 """
 
-from typing import Any, Dict, NoReturn
+from typing import Any, NoReturn
 
 from cohere import AsyncClient, Client
 from kedro.io import AbstractDataset, DatasetError
@@ -37,7 +37,7 @@ class CohereDataset(AbstractDataset[None, Cohere]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: python
-        >>> from kedro_datasets.langchain import CohereDataset
+        >>> from kedro_datasets_experimental.langchain import CohereDataset
         >>> llm = CohereDataset(
         ...     credentials={
         ...         "cohere_api_url": "xxx",
@@ -53,7 +53,7 @@ class CohereDataset(AbstractDataset[None, Cohere]):
         >>> llm("Hello world!")
     """
 
-    def __init__(self, credentials: Dict[str, str], kwargs: Dict[str, Any] = None):
+    def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
         """Constructor.
 
         Args:

@@ -1,6 +1,6 @@
 """Defines an interface to common Anthropic models."""
 
-from typing import Any, Dict, NoReturn
+from typing import Any, NoReturn
 
 from kedro.io import AbstractDataset, DatasetError
 from langchain.chat_models import ChatAnthropic
@@ -34,7 +34,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: python
-        >>> from kedro_datasets.langchain import ChatAnthropicDataset
+        >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
         >>> from langchain.schema import HumanMessage
         >>> llm = ChatAnthropicDataset(
         ...     credentials={
@@ -50,8 +50,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         >>> # See: https://python.langchain.com/docs/integrations/chat/anthropic
         >>> llm([HumanMessage(content="Hello world!")])
     """
-    
-    def __init__(self, credentials: Dict[str, str], kwargs: Dict[str, Any] = None):
+
+    def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
         """Constructor.
 
         Args:

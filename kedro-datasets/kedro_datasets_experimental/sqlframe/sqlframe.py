@@ -110,6 +110,7 @@ class TableDataset(AbstractDataset[_BaseDataFrame, _BaseDataFrame]):
             load_args: Arbitrary load args provided to ``session.read.table``
             save_args: Arbitrary save args provided  ``DataFrame.write.saveAsTable``
         """
+        self.backend = backend
         module = importlib.import_module(f"sqlframe.{backend}")
         session_class = _getattr_case_insensitive(module, f"{backend}session")
         self._connection = connection
@@ -132,12 +133,84 @@ class TableDataset(AbstractDataset[_BaseDataFrame, _BaseDataFrame]):
 
     def _describe(self) -> dict[str, str]:
         return {
-            "session": str(self.session.__class__.__name__),
+            "backend": str(self.session.__class__.__name__),
             "load_args": self._load_args,
             "save_args": self._save_args,
+            "table": self._table_name,
         }
 
 
 class FileDataset(AbstractDataset[_BaseDataFrame, _BaseDataFrame]):
-    def __init__(self) -> None:
-        raise NotImplementedError()
+    """``FileDataSet`` loads/saves data from/to filepaths using various DataFrame
+    back-ends
+
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog_yaml_examples.html>`_:
+
+    .. code-block:: yaml
+
+        my_csv:
+            type: kedro_datasets_experimental.sqlframe.FileDataset
+            backend: duckdb
+            filepath: "01_data/raw/post_count.csv"
+            file_format: csv
+            save_args:
+                mode: 'w'
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: pycon
+
+        >>> from kedro_datasets_experimental.sqlframe import FileDataset
+        >>>
+        >>> FileDataset(
+        >>>     backend='duckdb',
+        >>>     filepath='l_post_count.csv',
+        >>>     file_format='csv'
+        >>> ).load().show()
+
+    """
+
+    def __init__(
+        self,
+        backend: str,
+        filepath: str,
+        file_format: str = "parquet",
+        connection: Optional[Generator] = None,
+        load_args: Optional[dict[str, any]] = None,
+        save_args: Optional[dict[str, any]] = None,
+    ) -> None:
+        self.backend = backend
+        module = importlib.import_module(f"sqlframe.{backend}")
+        session_class = _getattr_case_insensitive(module, f"{backend}session")
+        self._connection = connection
+        self._filepath = filepath
+        self._file_format = file_format
+        self._load_args = load_args if load_args else {}
+        self._save_args = save_args if save_args else {}
+        if connection:
+            self.session: _BaseSession = session_class(next(self._connection()))
+        else:
+            self.session: _BaseSession = session_class()
+
+    def _load(self) -> _BaseDataFrame:
+        """Read path from backend"""
+        reader = getattr(self.session.read, self._file_format.lower())
+        return reader(path=self._filepath, **self._load_args)
+
+    def _save(self, data: _BaseDataFrame) -> None:
+        """Write path from backend"""
+        writer = getattr(data.write, self._file_format)
+        writer(path=self._file_format, **self._save_args)
+
+    def _describe(self) -> dict[str, str]:
+        return {
+            "backend": self.backend,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "filepath": self._filepath,
+            "file_format": self._file_format,
+        }

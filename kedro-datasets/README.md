@@ -17,6 +17,30 @@ Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will 
 pip install kedro-datasets
 ```
 
+### Install dependencies at a group-level
+
+Datasets are organised into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of datasets, e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
+
+```bash
+pip install "kedro-datasets[<group>]"
+```
+
+This installs Kedro-Datasets and dependencies related to the dataset group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install 'kedro-datasets[pandas]'` to install Kedro-Datasets and the dependencies for the datasets in the [`pandas` group](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets/pandas).
+
+### Install dependencies at a type-level
+
+To limit installation to dependencies specific to a dataset:
+
+```bash
+pip install "kedro-datasets[<group>-<dataset>]"
+```
+
+For example, your workflow might require the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.
+
+```{note}
+From `kedro-datasets` version 3.0.0 onwards, the names of the optional dataset-level dependencies have been normalised to follow [PEP 685](https://peps.python.org/pep-0685/). The '.' character has been replaced with a '-' character and the names are in lowercase. For example, if you had `kedro-datasets[pandas.ExcelDataset]` in your requirements file, it would have to be changed to `kedro-datasets[pandas-exceldataset]`.
+```
+
 ## What `AbstractDataset` implementations are supported?
 
 We support a range of data connectors, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. We even allow support for working with images.

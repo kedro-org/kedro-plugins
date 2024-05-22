@@ -183,6 +183,22 @@ class FileDataset(AbstractDataset[_BaseDataFrame, _BaseDataFrame]):
         load_args: Optional[dict[str, any]] = None,
         save_args: Optional[dict[str, any]] = None,
     ) -> None:
+        """``FileDataset`` creates a spark-like session for the associated
+        database backend e.g. DuckDB or BigQuery. The connection Generator is used
+        to provide a live connection object. It needs to be a generator if provided
+        since this allows us to initialise lazily with OmegaConf and pass through the
+        DataCatalog initialization process which includes a non-picklable deepcopy.
+
+        Args:
+            backend: The SQL backend to use
+            filepath: The filepath in question
+            file_format: csv, json, parquet or others provided as attributes 
+                of the writer object
+            connection: The lazily defined connection object
+                e.g. duckdb.DuckDBPyConnection or similar
+            load_args: Arbitrary load args provided to ``session.read.{file_format}``
+            save_args: Arbitrary save args provided  ``DataFrame.write.{file_format}``
+        """
         self.backend = backend
         module = importlib.import_module(f"sqlframe.{backend}")
         session_class = _getattr_case_insensitive(module, f"{backend}session")

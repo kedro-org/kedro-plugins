@@ -1,5 +1,5 @@
 """``ManagedTableDataset`` implementation to access managed delta tables
-in Databricks. test
+in Databricks.
 """
 from __future__ import annotations
 
@@ -388,18 +388,18 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 "'save' can not be used in read-only mode. "
                 "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
             )
-        # Check if the data is a Pandas DataFrame and convert to Spark DataFrame
-        if isinstance(data, pd.DataFrame):
-            if self._table.schema():
-                schema = self._table.schema()
-                data = _get_spark().createDataFrame(data, schema=schema)
+        # filter columns specified in schema and match their ordering
+        schema = self._table.schema()
+        if schema:
+            cols = schema.fieldNames()
+            if self._table.dataframe_type == "pandas":
+                data = _get_spark().createDataFrame(
+                    data.loc[:, cols], schema=self._table.schema()
+                )
             else:
-                data = _get_spark().createDataFrame(data)
-
-        if self._table.schema() and not isinstance(data, pd.DataFrame):
-            cols = self._table.schema().fieldNames()
-            data = data.select(*cols)
-
+                data = data.select(*cols)
+        elif self._table.dataframe_type == "pandas":
+            data = _get_spark().createDataFrame(data)
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":

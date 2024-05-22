@@ -1,4 +1,5 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
+
 from __future__ import annotations
 
 import logging
@@ -56,7 +57,7 @@ class NetCDFDataset(AbstractDataset):
         ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
-        ...     filepath="path/to/folder",
+        ...     filepath=tmp_path / "data.nc",
         ...     save_args={"mode": "w"},
         ... )
         >>> dataset.save(ds)
@@ -168,11 +169,15 @@ class NetCDFDataset(AbstractDataset):
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )
         else:
-            save_path = self._filepath
-            bytes_buffer = data.to_netcdf(**self._save_args)
-
-            with self._fs.open(save_path, mode="wb") as fs_file:
-                fs_file.write(bytes_buffer)
+            if self._protocol == "file":
+                data.to_netcdf(path=self._filepath, **self._save_args)
+            else:
+                if self._temppath is None:
+                    raise DatasetError("_temppath should have been set in __init__")
+                temp_save_path = self._temppath / PurePosixPath(self._filepath).name
+                data.to_netcdf(path=str(temp_save_path), **self._save_args)
+                # Sync to remote storage
+                self._fs.put_file(str(temp_save_path), self._filepath)
 
             self._invalidate_cache()
 

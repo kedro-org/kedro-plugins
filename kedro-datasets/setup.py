@@ -18,7 +18,7 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataset": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataset": ["biopython~=1.73"]}
 dask_require = {
-    "dask.ParquetDataset": ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+    "dask.ParquetDataset": ["dask[complete]>=2021.10, <2024.3", "triad>=0.6.7, <1.0"]
 }
 databricks_require = {"databricks.ManagedTableDataset": [SPARK, PANDAS, DELTA]}
 geopandas_require = {
@@ -169,7 +169,7 @@ extras_require["test"] = [
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]>=2021.10",
+    "dask[complete]>=2021.10, <2024.3",
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0, <0.15.2",  # temporary pin as 0.15.2 breaks some of our tests
     "dill~=0.3.1",

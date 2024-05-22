@@ -3,8 +3,12 @@
 
 ## Bug fixes and other changes
 * Removed arbitrary upper bound for `s3fs`.
+* `NetCDFDataset` support for NetCDF4 via `engine="netcdf4"` and `engine="h5netcdf"`
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Charles Guan](https://github.com/charlesbmi)
+
 
 # Release 3.0.0
 ## Major features and improvements

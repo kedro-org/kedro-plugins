@@ -389,17 +389,20 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
             )
 
-        # Convert pandas DataFrame to Spark DataFrame if needed
-        if self._table.dataframe_type == "pandas" and isinstance(data, pd.DataFrame):
-            schema = self._table.schema()
-            if schema:
+        # filter columns specified in schema and match their ordering
+        schema = self._table.schema()
+        if schema:
+            cols = schema.fieldNames()  # Get the column names from the schema
+            if self._table.dataframe_type == "pandas":
                 # Ensure the DataFrame columns match the schema columns
-                cols = schema.fieldNames()
                 data = _get_spark().createDataFrame(
                     data[cols].to_dict(orient='records'), schema=schema
                 )
             else:
-                data = _get_spark().createDataFrame(data.to_dict(orient='records'))
+                data = data.select(*cols)
+        elif self._table.dataframe_type == "pandas":
+            # Convert the pandas DataFrame to a Spark DataFrame
+            data = _get_spark().createDataFrame(data.to_dict(orient='records'))
 
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)

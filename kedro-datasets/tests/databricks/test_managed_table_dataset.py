@@ -484,8 +484,8 @@ class TestManagedTableDataset:
         pandas_ds = ManagedTableDataset(
             database="test", table="test_load_pandas", dataframe_type="pandas"
         )
-        pandas_df = pandas_ds.load().sort_values("name", ignore_index=True)
+        pandas_df = pandas_ds.load().sort_values(by=sample_pandas_df.columns.tolist()).reset_index(drop=True)
+        sample_pandas_df_sorted = sample_pandas_df.sort_values(by=sample_pandas_df.columns.tolist()).reset_index(
+            drop=True)
 
-        assert isinstance(pandas_df, pd.DataFrame) and pandas_df.equals(
-            sample_pandas_df
-        )
+        assert isinstance(pandas_df, pd.DataFrame) and pandas_df.equals(sample_pandas_df_sorted)

@@ -373,10 +373,10 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._invalidate_caches()
 
     async def _filesystem_exists(self, path: str) -> bool:
-        return await self._filesystem.exists(path)
+        return self._filesystem.exists(path)
 
     async def _filesystem_rm(self, path: str, recursive: bool) -> None:
-        await self._filesystem.rm(path, recursive=recursive)
+        self._filesystem.rm(path, recursive=recursive)
 
     async def _dataset_save(self, dataset: AbstractDataset, data: Any) -> None:
         dataset.save(data)

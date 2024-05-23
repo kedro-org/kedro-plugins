@@ -321,10 +321,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             partition_id = self._path_to_partition(partition)
             partitions[partition_id] = dataset.load
 
-        await asyncio.gather(*[
-            load_partition(partition)
-            for partition in self._list_partitions()
-        ])
+        await asyncio.gather(
+            *[load_partition(partition) for partition in self._list_partitions()]
+        )
 
         if not partitions:
             raise DatasetError(f"No partitions found in '{self._path}'")
@@ -365,10 +364,12 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 partition_data = partition_data()  # noqa: PLW2901
             await self._dataset_save(dataset, partition_data)
 
-        await asyncio.gather(*[
-            save_partition(partition_id, partition_data)
-            for partition_id, partition_data in sorted(data.items())
-        ])
+        await asyncio.gather(
+            *[
+                save_partition(partition_id, partition_data)
+                for partition_id, partition_data in sorted(data.items())
+            ]
+        )
         self._invalidate_caches()
 
     async def _filesystem_exists(self, path: str) -> bool:

@@ -388,18 +388,18 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 "'save' can not be used in read-only mode. "
                 "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
             )
-        # filter columns specified in schema and match their ordering
-        schema = self._table.schema()
-        if schema:
-            cols = schema.fieldNames()
-            if self._table.dataframe_type == "pandas":
+
+        # Convert pandas DataFrame to Spark DataFrame if needed
+        if self._table.dataframe_type == "pandas" and isinstance(data, pd.DataFrame):
+            schema = self._table.schema()
+            if schema:
+                # Ensure the DataFrame columns match the schema columns
+                cols = schema.fieldNames()
                 data = _get_spark().createDataFrame(
                     data[cols].to_dict(orient='records'), schema=schema
                 )
             else:
-                data = data.select(*cols)
-        elif self._table.dataframe_type == "pandas":
-            data = _get_spark().createDataFrame(data.to_dict(orient='records'))
+                data = _get_spark().createDataFrame(data.to_dict(orient='records'))
 
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)

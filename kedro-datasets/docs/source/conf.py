@@ -220,10 +220,7 @@ texinfo_documents = [
 todo_include_todos = False
 
 # -- Kedro specific configuration -----------------------------------------
-KEDRO_MODULES = [
-    "kedro_datasets",
-    "kedro_datasets_experimental"
-]
+KEDRO_MODULES = ["kedro_datasets", "kedro_datasets_experimental"]
 
 
 def get_classes(module):

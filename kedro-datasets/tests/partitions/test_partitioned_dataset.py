@@ -63,10 +63,19 @@ class TestPartitionedDatasetLocal:
     )
     @pytest.mark.parametrize("use_async", [True, False])
     def test_load(
-        self, dataset, local_csvs, partitioned_data_pandas, suffix, expected_num_parts, use_async
+        self,
+        dataset,
+        local_csvs,
+        partitioned_data_pandas,
+        suffix,
+        expected_num_parts,
+        use_async,
     ):
         pds = PartitionedDataset(
-            path=str(local_csvs), dataset=dataset, filename_suffix=suffix, use_async=use_async
+            path=str(local_csvs),
+            dataset=dataset,
+            filename_suffix=suffix,
+            use_async=use_async,
         )
         loaded_partitions = pds.load()
 
@@ -82,7 +91,10 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_save(self, dataset, local_csvs, suffix, use_async):
         pds = PartitionedDataset(
-            path=str(local_csvs), dataset=dataset, filename_suffix=suffix, use_async=use_async
+            path=str(local_csvs),
+            dataset=dataset,
+            filename_suffix=suffix,
+            use_async=use_async,
         )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data"
@@ -99,7 +111,10 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_lazy_save(self, dataset, local_csvs, suffix, use_async):
         pds = PartitionedDataset(
-            path=str(local_csvs), dataset=dataset, filename_suffix=suffix, use_async=use_async
+            path=str(local_csvs),
+            dataset=dataset,
+            filename_suffix=suffix,
+            use_async=use_async,
         )
 
         def original_data():
@@ -117,7 +132,9 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_save_invalidates_cache(self, local_csvs, mocker, use_async):
         """Test that save calls invalidate partition cache"""
-        pds = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async
+        )
         mocked_fs_invalidate = mocker.patch.object(pds._filesystem, "invalidate_cache")
         first_load = pds.load()
         assert pds._partition_cache.currsize == 1
@@ -142,7 +159,10 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_overwrite(self, local_csvs, overwrite, expected_num_parts, use_async):
         pds = PartitionedDataset(
-            path=str(local_csvs), dataset="pandas.CSVDataset", overwrite=overwrite, use_async=use_async
+            path=str(local_csvs),
+            dataset="pandas.CSVDataset",
+            overwrite=overwrite,
+            use_async=use_async,
         )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data"
@@ -155,9 +175,13 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_release_instance_cache(self, local_csvs, use_async):
         """Test that cache invalidation does not affect other instances"""
-        ds_a = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async)
+        ds_a = PartitionedDataset(
+            path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async
+        )
         ds_a.load()
-        ds_b = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async)
+        ds_b = PartitionedDataset(
+            path=str(local_csvs), dataset="pandas.CSVDataset", use_async=use_async
+        )
         ds_b.load()
 
         assert ds_a._partition_cache.currsize == 1
@@ -172,18 +196,26 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.ParquetDataset"])
     @pytest.mark.parametrize("use_async", [True, False])
     def test_exists(self, local_csvs, dataset, use_async):
-        assert PartitionedDataset(path=str(local_csvs), dataset=dataset, use_async=use_async).exists()
+        assert PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, use_async=use_async
+        ).exists()
 
         empty_folder = local_csvs / "empty" / "folder"
-        assert not PartitionedDataset(path=str(empty_folder), dataset=dataset, use_async=use_async).exists()
+        assert not PartitionedDataset(
+            path=str(empty_folder), dataset=dataset, use_async=use_async
+        ).exists()
         empty_folder.mkdir(parents=True)
-        assert not PartitionedDataset(path=str(empty_folder), dataset=dataset, use_async=use_async).exists()
+        assert not PartitionedDataset(
+            path=str(empty_folder), dataset=dataset, use_async=use_async
+        ).exists()
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize("use_async", [True, False])
     def test_release(self, dataset, local_csvs, use_async):
         partition_to_remove = "p2.csv"
-        pds = PartitionedDataset(path=str(local_csvs), dataset=dataset, use_async=use_async)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, use_async=use_async
+        )
         initial_load = pds.load()
         assert partition_to_remove in initial_load
 
@@ -215,7 +247,10 @@ class TestPartitionedDatasetLocal:
         path = str(Path.cwd())
         load_args = {"maxdepth": 42, "withdirs": True}
         pds = PartitionedDataset(
-            path=path, dataset="pandas.CSVDataset", load_args=load_args, use_async=use_async
+            path=path,
+            dataset="pandas.CSVDataset",
+            load_args=load_args,
+            use_async=use_async,
         )
         mocker.patch.object(pds, "_path_to_partition", return_value=fake_partition_name)
 
@@ -233,7 +268,10 @@ class TestPartitionedDatasetLocal:
         mocked_filesystem = mocker.patch("fsspec.filesystem")
         path = str(Path.cwd())
         pds = PartitionedDataset(
-            path=path, dataset="pandas.CSVDataset", credentials=credentials, use_async=use_async
+            path=path,
+            dataset="pandas.CSVDataset",
+            credentials=credentials,
+            use_async=use_async,
         )
 
         assert mocked_filesystem.call_count == 2
@@ -272,7 +310,9 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataset", ParquetDataset])
     @pytest.mark.parametrize("use_async", [True, False])
     def test_invalid_dataset(self, dataset, local_csvs, use_async):
-        pds = PartitionedDataset(path=str(local_csvs), dataset=dataset, use_async=use_async)
+        pds = PartitionedDataset(
+            path=str(local_csvs), dataset=dataset, use_async=use_async
+        )
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
@@ -305,7 +345,9 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("use_async", [True, False])
     def test_invalid_dataset_config(self, dataset_config, error_pattern, use_async):
         with pytest.raises(DatasetError, match=error_pattern):
-            PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config, use_async=use_async)
+            PartitionedDataset(
+                path=str(Path.cwd()), dataset=dataset_config, use_async=use_async
+            )
 
     @pytest.mark.parametrize(
         "dataset_config",
@@ -335,13 +377,16 @@ class TestPartitionedDatasetLocal:
         mock_ts = mocker.patch(
             "kedro.io.core.generate_timestamp", return_value=save_version
         )
-        PartitionedDataset(path=filepath_csvs, dataset=dataset_config, use_async=use_async).save(
-            partitioned_data_pandas
-        )
+        PartitionedDataset(
+            path=filepath_csvs, dataset=dataset_config, use_async=use_async
+        ).save(partitioned_data_pandas)
         mock_ts.assert_called_once()
 
         pds = PartitionedDataset(
-            path=filepath_csvs, dataset=dataset_config, filename_suffix=suffix, use_async=use_async
+            path=filepath_csvs,
+            dataset=dataset_config,
+            filename_suffix=suffix,
+            use_async=use_async,
         )
         loaded_partitions = pds.load()
 
@@ -383,7 +428,9 @@ class TestPartitionedDatasetLocal:
 
     @pytest.mark.parametrize("use_async", [True, False])
     def test_no_partitions(self, tmpdir, use_async):
-        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset", use_async=use_async)
+        pds = PartitionedDataset(
+            path=str(tmpdir), dataset="pandas.CSVDataset", use_async=use_async
+        )
 
         pattern = re.escape(f"No partitions found in '{tmpdir}'")
         with pytest.raises(DatasetError, match=pattern):
@@ -492,9 +539,13 @@ class TestPartitionedDatasetLocal:
         ],
     )
     @pytest.mark.parametrize("use_async", [True, False])
-    def test_dataset_creds(self, pds_config, expected_ds_creds, global_creds, use_async):
+    def test_dataset_creds(
+        self, pds_config, expected_ds_creds, global_creds, use_async
+    ):
         """Check that global credentials do not interfere dataset credentials."""
-        pds = PartitionedDataset(path=str(Path.cwd()), **pds_config, use_async=use_async)
+        pds = PartitionedDataset(
+            path=str(Path.cwd()), **pds_config, use_async=use_async
+        )
         assert pds._dataset_config["credentials"] == expected_ds_creds
         assert pds._credentials == global_creds
 
@@ -541,7 +592,9 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     @pytest.mark.parametrize("use_async", [True, False])
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas, use_async):
-        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async)
+        pds = PartitionedDataset(
+            path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async
+        )
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
@@ -550,12 +603,16 @@ class TestPartitionedDatasetS3:
             assert_frame_equal(df, partitioned_data_pandas[partition_id])
 
     @pytest.mark.parametrize("use_async", [True, False])
-    def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker, use_async):
+    def test_load_s3a(
+        self, mocked_csvs_in_s3, partitioned_data_pandas, mocker, use_async
+    ):
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
-        pds = PartitionedDataset(path=s3a_path, dataset="pandas.CSVDataset", use_async=use_async)
+        pds = PartitionedDataset(
+            path=s3a_path, dataset="pandas.CSVDataset", use_async=use_async
+        )
         assert pds._protocol == "s3a"
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
@@ -573,7 +630,9 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     @pytest.mark.parametrize("use_async", [True, False])
     def test_save(self, dataset, mocked_csvs_in_s3, use_async):
-        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async)
+        pds = PartitionedDataset(
+            path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async
+        )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data.csv"
         pds.save({part_id: original_data})
@@ -594,7 +653,10 @@ class TestPartitionedDatasetS3:
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
         pds = PartitionedDataset(
-            path=s3a_path, dataset="pandas.CSVDataset", filename_suffix=".csv", use_async=use_async
+            path=s3a_path,
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            use_async=use_async,
         )
         assert pds._protocol == "s3a"
 
@@ -610,19 +672,27 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.HDFDataset"])
     @pytest.mark.parametrize("use_async", [True, False])
     def test_exists(self, dataset, mocked_csvs_in_s3, use_async):
-        assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async).exists()
+        assert PartitionedDataset(
+            path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async
+        ).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataset(path=empty_folder, dataset=dataset, use_async=use_async).exists()
+        assert not PartitionedDataset(
+            path=empty_folder, dataset=dataset, use_async=use_async
+        ).exists()
 
         s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataset(path=empty_folder, dataset=dataset, use_async=use_async).exists()
+        assert not PartitionedDataset(
+            path=empty_folder, dataset=dataset, use_async=use_async
+        ).exists()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     @pytest.mark.parametrize("use_async", [True, False])
     def test_release(self, dataset, mocked_csvs_in_s3, use_async):
         partition_to_remove = "p2.csv"
-        pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async)
+        pds = PartitionedDataset(
+            path=mocked_csvs_in_s3, dataset=dataset, use_async=use_async
+        )
         initial_load = pds.load()
         assert partition_to_remove in initial_load
 

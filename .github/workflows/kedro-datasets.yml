@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd kedro-datasets
-          uv pip install --system "kedro-datasets[docs,test] @ ."
+          uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
       - name: Documentation check for kedro-datasets
         run: |
           make check-datasets-docs

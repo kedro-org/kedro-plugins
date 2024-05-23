@@ -379,7 +379,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         await self._filesystem.rm(path, recursive=recursive)
 
     async def _dataset_save(self, dataset: AbstractDataset, data: Any) -> None:
-        await dataset.save(data)
+        dataset.save(data)
 
     def _describe(self) -> dict[str, Any]:
         clean_dataset_config = (

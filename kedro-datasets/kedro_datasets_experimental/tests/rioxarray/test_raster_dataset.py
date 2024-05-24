@@ -6,7 +6,7 @@ import rioxarray
 import xarray as xr
 from kedro.io import DatasetError
 
-from kedro_datasets_experimental.rioxarray import RasterDataset
+from kedro_datasets_experimental.rioxarray.raster_dataset import RasterDataset
 
 
 @pytest.fixture

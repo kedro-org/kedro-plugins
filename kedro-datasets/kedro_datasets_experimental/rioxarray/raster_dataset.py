@@ -1,5 +1,5 @@
 """GeoTiff loads and saves data to a local geoiff file. The
-underlying functionality is supported by rioxarray and xarray. A read geotiff file
+underlying functionality is supported by rioxarray and xarray. A read rasterdata file
 returns a xarray.DataArray object.
 """
 
@@ -14,15 +14,15 @@ from kedro.io import AbstractVersionedDataset, DatasetError
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 
 
-class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    """``GeoTiffDataset``  loads and saves geotiff files and reads them as xarray
+class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
+    """``RasterDataset``  loads and saves rasterdata files and reads them as xarray
     DataArrays.
 
 
     .. code-block:: yaml
 
         avalanches:
-          type: xarray.GeoTiffDataset
+          type: rioxarray.RasterDataset
           filepath: avalanches.tif
 
     Example usage for the
@@ -31,7 +31,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets.xarray import GeoTiffDataset
+        >>> from kedro_datasets.rioxarray import RasterDataset
         >>> import xarray as xr
         >>> import numpy as np
         >>>
@@ -42,7 +42,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         ... )
         >>> data_crs = data.rio.write_crs("epsg:4326")
         >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
-        >>> dataset = GeoTiffDataset(filepath="test.tif")
+        >>> dataset = RasterDataset(filepath="test.tif")
         >>> dataset.save(data_spatial_dims)
         >>> reloaded = dataset.load()
         >>> xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
@@ -60,17 +60,17 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         version: Version = None,
         metadata: dict[str, Any] = None,
     ):
-        """Creates a new instance of ``GeoTiffDataset`` pointing to a concrete
-        tiff or tif file with geospatial data.
+        """Creates a new instance of ``RasterDataset`` pointing to a concrete
+        geospatial raster data file. It supports all formats supported by GDAL: https://gdal.org/drivers/raster/index.html
 
         Args:
-            filepath: Filepath in POSIX format to a geotiff file.
+            filepath: Filepath in POSIX format to a rasterdata file.
                 The prefix should be any protocol supported by ``fsspec``.
-            load_args: rioxarray options for loading geotiff files.
+            load_args: rioxarray options for loading rasterdata files.
                 Here you can find all available arguments:
                 https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray-open-rasterio
                 All defaults are preserved.
-            save_args: rioxarray options for saving to raster file in geotiff format.
+            save_args: rioxarray options for saving to a geotiff file.
                 Here you can find all available arguments:
                 https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster
                 All defaults are preserved, but "index", which is set to False.
@@ -84,7 +84,7 @@ class GeoTiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol)
-        self._format = "GEOTIFF"
+        self._format = "RASTERDATASET"
         self.metadata = metadata
 
         super().__init__(

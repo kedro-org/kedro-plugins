@@ -1,4 +1,4 @@
-"""GeoTiff loads and saves data to a local geoiff file. The
+"""RasterDataset loads geospatial raster data and saves it to a local geoiff file. The
 underlying functionality is supported by rioxarray and xarray. A read rasterdata file
 returns a xarray.DataArray object.
 """

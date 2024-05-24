@@ -20,8 +20,11 @@ kedro_datasets
    kedro_datasets.holoviews.HoloviewsWriter
    kedro_datasets.huggingface.HFDataset
    kedro_datasets.huggingface.HFTransformerPipelineDataset
+   kedro_datasets.ibis.TableDataset
    kedro_datasets.json.JSONDataset
+   kedro_datasets.matlab.MatlabDataset
    kedro_datasets.matplotlib.MatplotlibWriter
+   kedro_datasets.netcdf.NetCDFDataset
    kedro_datasets.networkx.GMLDataset
    kedro_datasets.networkx.GraphMLDataset
    kedro_datasets.networkx.JSONDataset

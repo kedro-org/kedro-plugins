@@ -1,9 +1,12 @@
 """``GBQTableDataset`` loads and saves data from/to Google BigQuery. It uses pandas-gbq
 to read and write from/to BigQuery table.
 """
+
+from __future__ import annotations
+
 import copy
 from pathlib import PurePosixPath
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
@@ -51,7 +54,9 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
-        >>> dataset = GBQTableDataset(dataset="dataset", table_name="table_name", project="my-project")
+        >>> dataset = GBQTableDataset(
+        ...     dataset="dataset", table_name="table_name", project="my-project"
+        ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>
@@ -67,11 +72,11 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         *,
         dataset: str,
         table_name: str,
-        project: str = None,
-        credentials: Union[dict[str, Any], Credentials] = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        project: str | None = None,
+        credentials: dict[str, Any] | Credentials | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataset``.
 
@@ -209,13 +214,13 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
-        sql: str = None,
-        project: str = None,
-        credentials: Union[dict[str, Any], Credentials] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        filepath: str = None,
-        metadata: dict[str, Any] = None,
+        sql: str | None = None,
+        project: str | None = None,
+        credentials: dict[str, Any] | Credentials | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        filepath: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
 

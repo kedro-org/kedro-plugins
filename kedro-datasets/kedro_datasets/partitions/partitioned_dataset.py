@@ -1,6 +1,7 @@
 """``PartitionedDataset`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
+
 from __future__ import annotations
 
 import operator
@@ -146,11 +147,11 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         dataset: str | type[AbstractDataset] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
         overwrite: bool = False,
-        metadata: dict[str, Any] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
 

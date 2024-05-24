@@ -2,6 +2,8 @@
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
+from __future__ import annotations
+
 import copy
 from pathlib import PurePosixPath
 from typing import Any, Union
@@ -54,12 +56,12 @@ class GeoJSONDataset(
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GeoJSONDataset`` pointing to a concrete GeoJSON file
         on a specific filesystem fsspec.
@@ -124,7 +126,7 @@ class GeoJSONDataset(
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> Union[gpd.GeoDataFrame, dict[str, gpd.GeoDataFrame]]:
+    def _load(self) -> gpd.GeoDataFrame | dict[str, gpd.GeoDataFrame]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return gpd.read_file(fs_file, **self._load_args)

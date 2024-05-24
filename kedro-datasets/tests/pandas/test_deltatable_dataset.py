@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
@@ -66,7 +68,7 @@ class TestDeltaTableDataset:
         """Test saving by appending new data."""
         deltatable_dataset_from_path.save(dummy_df)
         new_df = pd.DataFrame({"col1": [0, 0], "col2": [1, 1], "col3": [2, 2]})
-        appended = pd.concat([dummy_df, new_df], ignore_index=True)
+        appended = pd.concat([new_df, dummy_df], ignore_index=True)
         deltatable_dataset_from_path.save(new_df)
         reloaded = deltatable_dataset_from_path.load()
         assert_frame_equal(appended, reloaded)
@@ -103,7 +105,7 @@ class TestDeltaTableDataset:
         """Test the schema property to return the underlying delta table schema."""
         deltatable_dataset_from_path.save(dummy_df)
         s1 = deltatable_dataset_from_path.schema
-        s2 = deltatable_dataset_from_path._delta_table.schema().json()
+        s2 = deltatable_dataset_from_path._delta_table.schema().to_json()
         assert s1 == s2
 
     def test_describe(self, filepath):

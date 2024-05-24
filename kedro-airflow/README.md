@@ -1,7 +1,7 @@
 # Kedro-Airflow
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro-airflow/)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-airflow/)
 [![PyPI Version](https://badge.fury.io/py/kedro-airflow.svg)](https://pypi.org/project/kedro-airflow/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
@@ -153,6 +153,19 @@ You can set the operator to use by providing a custom template.
 See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 The [rich offering](https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/index.html) of operators means that the `kedro-airflow` plugin is providing templates for specific operators.
 The default template provided by `kedro-airflow` uses the `BaseOperator`.
+
+### Can I group nodes together?
+
+When running Kedro nodes using Airflow, MemoryDatasets are often not shared across operators.
+This will cause the DAG run to fail.
+
+MemoryDatasets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).
+
+Nodes that are connected through MemoryDatasets are grouped together via the `--group-in-memory` flag.
+This preserves the option to have logical separation in Kedro, with little computational overhead.
+
+It is possible to use [task groups](https://docs.astronomer.io/learn/task-groups) by changing the template.
+See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 
 ## Can I contribute?
 

@@ -1,9 +1,11 @@
 """``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+from __future__ import annotations
+
 import json as json_  # make pylint happy
 from copy import deepcopy
-from typing import Any, Union
+from typing import Any
 
 import requests
 from kedro.io.core import AbstractDataset, DatasetError
@@ -60,7 +62,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>> dataset = APIDataset(
         ...     method="POST",
-        ...     url="https://httpbin.org/post",
+        ...     url="https://dummyjson.com/products/add",
         ...     save_args={"chunk_size": 1},
         ... )
         >>> dataset.save(example_table)
@@ -92,10 +94,10 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         *,
         url: str,
         method: str = "GET",
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        credentials: Union[tuple[str, str], list[str], AuthBase] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
@@ -218,7 +220,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def _save(self, data: Any) -> requests.Response:
+    def _save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
                 return self._execute_save_with_chunks(json_data=data)

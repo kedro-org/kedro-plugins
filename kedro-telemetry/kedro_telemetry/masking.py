@@ -1,5 +1,7 @@
 """Module containing command masking functionality."""
-from typing import Any, Dict, Iterator, List, Set, Union
+from __future__ import annotations
+
+from typing import Any, Iterator
 
 import click
 
@@ -7,9 +9,9 @@ MASK = "*****"
 
 
 def _recurse_cli(
-    cli_element: Union[click.Command, click.Group, click.CommandCollection],
+    cli_element: click.Command | (click.Group | (click.CommandCollection | None)),
     ctx: click.Context,
-    io_dict: Dict[str, Any],
+    io_dict: dict[str | None, Any],
     get_help: bool = False,
 ) -> None:
     """
@@ -38,12 +40,19 @@ def _recurse_cli(
         element_name = cli_element.name or "kedro"
         io_dict[element_name] = {}
         for command_name in cli_element.list_commands(ctx):
-            _recurse_cli(  # type: ignore
+            _recurse_cli(
                 cli_element.get_command(ctx, command_name),
                 ctx,
                 io_dict[element_name],
                 get_help,
             )
+        if not get_help:
+            nested_parameter_list = [
+                option.opts for option in cli_element.get_params(ctx)
+            ]
+            for item in (item for sublist in nested_parameter_list for item in sublist):
+                if item not in io_dict[element_name]:
+                    io_dict[element_name][item] = None
 
     elif isinstance(cli_element, click.Command):
         if get_help:  # gets formatted CLI help incl params for printing
@@ -58,48 +67,58 @@ def _recurse_cli(
 
 
 def _get_cli_structure(
-    cli_obj: Union[click.Command, click.Group, click.CommandCollection],
+    cli_obj: click.Command | (click.Group | click.CommandCollection),
     get_help: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str | None, Any]:
     """Code copied over from kedro.tools.cli to maintain backwards compatibility
     with previous versions of kedro (<0.17.5).
     Convenience wrapper function for `_recurse_cli` to work within
     `click.Context` and return a `dict`.
     """
-    output: Dict[str, Any] = {}
+    output: dict[str | None, Any] = {}
     with click.Context(cli_obj) as ctx:  # type: ignore
         _recurse_cli(cli_obj, ctx, output, get_help)
     return output
 
 
-def _mask_kedro_cli(cli_struct: Dict[str, Any], command_args: List[str]) -> List[str]:
+def _mask_kedro_cli(
+    cli_struct: dict[str | None, Any], command_args: list[str]
+) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
-    vocabulary = _get_vocabulary(cli_struct)
-    for arg in command_args:
+
+    # Preserve the initial part of the command until parameters sections begin
+    arg_index = 0
+    current_CLI = cli_struct.get("kedro", {})
+    while (
+        arg_index < len(command_args)
+        and not command_args[arg_index].startswith("-")
+        and command_args[arg_index] in current_CLI
+    ):
+        output.append(command_args[arg_index])
+        current_CLI = current_CLI[command_args[arg_index]]
+        arg_index += 1
+
+    # Mask everything except parameter keywords
+    for arg in command_args[arg_index:]:
         if arg.startswith("-"):
-            for arg_part in arg.split("="):
-                if arg_part in vocabulary:
-                    output.append(arg_part)
-                elif arg_part:
-                    output.append(MASK)
-        elif arg in vocabulary:
-            output.append(arg)
-        elif arg:
+            if "=" in arg:
+                arg_left = arg.split("=")[0]
+                if arg_left in current_CLI:
+                    output.append(arg_left)
+                output.append(MASK)
+            elif arg in current_CLI:
+                output.append(arg)
+            else:
+                output.append(MASK)
+        else:
             output.append(MASK)
+
     return output
 
 
-def _get_vocabulary(cli_struct: Dict[str, Any]) -> Set[str]:
-    """Builds a unique whitelist of terms - a vocabulary"""
-    vocabulary = {"-h", "--version"}  # -h help and version args are not in by default
-    cli_dynamic_vocabulary = set(_recursive_items(cli_struct)) - {None}
-    vocabulary.update(cli_dynamic_vocabulary)
-    return vocabulary
-
-
-def _recursive_items(dictionary: Dict[Any, Any]) -> Iterator[Any]:
+def _recursive_items(dictionary: dict[Any, Any]) -> Iterator[Any]:
     for key, value in dictionary.items():
         if isinstance(value, dict):
             yield key

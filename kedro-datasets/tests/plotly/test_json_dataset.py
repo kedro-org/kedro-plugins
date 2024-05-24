@@ -1,3 +1,4 @@
+import inspect
 from pathlib import PurePosixPath
 
 import plotly.express as px
@@ -98,3 +99,12 @@ class TestJSONDataset:
         dataset = JSONDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_preview(self, json_dataset, dummy_plot):
+        json_dataset.save(dummy_plot)
+        preview = json_dataset.preview()
+        assert (
+            inspect.signature(json_dataset.preview).return_annotation == "PlotlyPreview"
+        )
+        assert "data" in preview
+        assert "layout" in preview

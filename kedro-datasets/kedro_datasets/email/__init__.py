@@ -1,4 +1,5 @@
 """``AbstractDataset`` implementations for managing email messages."""
+
 from typing import Any
 
 import lazy_loader as lazy

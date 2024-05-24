@@ -1,6 +1,8 @@
 """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the JSON file.
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from io import BytesIO
@@ -17,6 +19,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +71,12 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``JSONDataset`` pointing to a concrete JSON file
         on a specific filesystem.
@@ -187,3 +191,24 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows,
+        including handling for both flat and nested JSON structures.
+
+        Args:
+            nrows: Number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary in a split format for preview, if possible.
+        """
+        # Create a copy, so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        dataset_copy._load_args.setdefault("lines", True)  # type: ignore[attr-defined]
+        dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
+        preview_df = dataset_copy._load()
+
+        preview_dict = preview_df.to_dict(orient="split")
+
+        return preview_dict

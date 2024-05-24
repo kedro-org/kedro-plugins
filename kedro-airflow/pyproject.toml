@@ -11,7 +11,7 @@ description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
 requires-python = ">=3.8"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "kedro>=0.17.5",
+    "kedro>=0.19.0",
     "python-slugify>=4.0",
     "semver>=2.10",  # Needs to be at least 2.10.0 to make use of `VersionInfo.match`.
 ]
@@ -24,13 +24,13 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<2.7.0", # TODO: Temporary fix, to be reverted
+    "apache-airflow<3.0",
     "bandit",
     "behave",
     "black~=22.0",
-    "connexion<3.0.0", # TODO: Temporary fix, connexion has changed their API, but airflow hasn't caught up yet
+    "coverage>=7.2.0",
     "kedro-datasets",
-    "pendulum<3.0.0", # TODO: Also to be removed
+    "mypy~=1.0",
     "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",
@@ -38,7 +38,11 @@ test = [
     "pytest-xdist",
     "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
-    "wheel"
+    "wheel",
+    # mypy requirements
+    "types-PyYAML",
+    "types-cachetools",
+    "types-toml",
 ]
 
 [project.entry-points."kedro.project_commands"]
@@ -72,7 +76,7 @@ exclude=".*template.py"
 fail_under = 100
 show_missing = true
 omit = ["tests/*"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_also = ["raise NotImplementedError"]
 
 [tool.ruff]
 line-length = 88

@@ -1,6 +1,8 @@
 """``ExcelDataset`` loads/saves data from/to a Excel file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from io import BytesIO
@@ -17,6 +19,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -113,12 +117,12 @@ class ExcelDataset(
         *,
         filepath: str,
         engine: str = "openpyxl",
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``ExcelDataset`` pointing to a concrete Excel file
         on a specific filesystem.
@@ -213,7 +217,7 @@ class ExcelDataset(
             "version": self._version,
         }
 
-    def _load(self) -> Union[pd.DataFrame, dict[str, pd.DataFrame]]:
+    def _load(self) -> pd.DataFrame | dict[str, pd.DataFrame]:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -227,7 +231,7 @@ class ExcelDataset(
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def _save(self, data: Union[pd.DataFrame, dict[str, pd.DataFrame]]) -> None:
+    def _save(self, data: pd.DataFrame | dict[str, pd.DataFrame]) -> None:
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
@@ -262,10 +266,19 @@ class ExcelDataset(
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _preview(self, nrows: int = 40) -> dict:
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args["nrows"] = nrows
+        dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         data = dataset_copy.load()
 
         return data.to_dict(orient="split")

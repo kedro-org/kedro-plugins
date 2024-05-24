@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -11,7 +12,7 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version, generate_timestamp
-from moto import mock_s3
+from moto import mock_aws
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
@@ -58,7 +59,7 @@ def partitioned_data_pandas():
 @pytest.fixture
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
-    with mock_s3():
+    with mock_aws():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
@@ -174,10 +175,13 @@ class TestCSVDataset:
         ],
     )
     def test_preview(self, csv_dataset, dummy_dataframe, nrows, expected):
-        """Test _preview returns the correct data structure."""
+        """Test preview returns the correct data structure."""
         csv_dataset.save(dummy_dataframe)
-        previewed = csv_dataset._preview(nrows=nrows)
+        previewed = csv_dataset.preview(nrows=nrows)
         assert previewed == expected
+        assert (
+            inspect.signature(csv_dataset.preview).return_annotation == "TablePreview"
+        )
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""

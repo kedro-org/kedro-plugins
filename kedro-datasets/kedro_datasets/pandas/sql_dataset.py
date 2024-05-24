@@ -1,4 +1,5 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+
 from __future__ import annotations
 
 import copy
@@ -15,8 +16,10 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import MetaData, Table, create_engine, inspect, select
 from sqlalchemy.exc import NoSuchModuleError
+
+from kedro_datasets._typing import TablePreview
 
 __all__ = ["SQLTableDataset", "SQLQueryDataset"]
 
@@ -126,6 +129,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
+          pool_size: 10 # additional parameters
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
@@ -159,9 +163,9 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         *,
         table_name: str,
         credentials: dict[str, Any],
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``SQLTableDataset``.
 
@@ -174,6 +178,8 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
                 through credentials.
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
+                Additional parameters for the sqlalchemy engine can be provided
+                alongside the 'con' parameter.
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.
                 To find all supported arguments, see here:
@@ -215,17 +221,23 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         self._save_args["name"] = table_name
 
         self._connection_str = credentials["con"]
+        self._connection_args = {
+            k: credentials[k] for k in credentials.keys() if k != "con"
+        }
 
         self.metadata = metadata
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of ``SQLTableDataset`` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
-            engine = create_engine(connection_str)
+            engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
@@ -239,7 +251,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         cls = type(self)
 
         if self._connection_str not in cls.engines:
-            self.create_connection(self._connection_str)
+            self.create_connection(self._connection_str, self._connection_args)
 
         return cls.engines[self._connection_str]
 
@@ -264,6 +276,31 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         insp = inspect(self.engine)
         schema = self._load_args.get("schema", None)
         return insp.has_table(self._load_args["table_name"], schema)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+
+        table_name = self._load_args["table_name"]
+
+        metadata = MetaData()
+        table_ref = Table(table_name, metadata, autoload_with=self.engine)
+
+        query = select(table_ref).limit(nrows)  # type: ignore[arg-type]
+
+        with self.engine.connect() as conn:
+            result = conn.execute(query)
+            data_preview = pd.DataFrame(result.fetchall(), columns=result.keys())
+
+        preview_data = data_preview.to_dict(orient="split")
+        return preview_data
 
 
 class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
@@ -309,6 +346,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
+          pool_size: 10 # additional parameters
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
@@ -394,13 +432,13 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
-        sql: str = None,
-        credentials: dict[str, Any] = None,
-        load_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        filepath: str = None,
+        sql: str | None = None,
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        filepath: str | None = None,
         execution_options: dict[str, Any] | None = None,
-        metadata: dict[str, Any] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -412,6 +450,8 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 ``load_args`` and ``save_args`` in case it is provided. To find
                 all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
+                Additional parameters for the sqlalchemy engine can be provided
+                alongside the 'con' parameter.
             load_args: Provided to underlying pandas ``read_sql_query``
                 function along with the connection string.
                 To find all supported arguments, see here:
@@ -480,18 +520,24 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
         self._connection_str = credentials["con"]
+        self._connection_args = {
+            k: credentials[k] for k in credentials.keys() if k != "con"
+        }
         self._execution_options = execution_options or {}
         if "mssql" in self._connection_str:
             self.adapt_mssql_date_params()
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> None:
+    def create_connection(
+        cls, connection_str: str, connection_args: dict | None = None
+    ) -> None:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataset` that
         need to connect to the same source.
         """
+        connection_args = connection_args or {}
         try:
-            engine = create_engine(connection_str)
+            engine = create_engine(connection_str, **connection_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
@@ -505,7 +551,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         cls = type(self)
 
         if self._connection_str not in cls.engines:
-            self.create_connection(self._connection_str)
+            self.create_connection(self._connection_str, self._connection_args)
 
         return cls.engines[self._connection_str]
 
@@ -554,4 +600,4 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             except (TypeError, ValueError):
                 new_load_args.append(value)
         if new_load_args:
-            self._load_args["params"] = new_load_args
+            self._load_args["params"] = tuple(new_load_args)

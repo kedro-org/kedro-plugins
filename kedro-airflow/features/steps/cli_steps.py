@@ -12,7 +12,7 @@ OK_EXIT_CODE = 0
 def init_airflow(context, home_dir):
     context.airflow_dir = context.temp_dir / home_dir
     context.env["AIRFLOW_HOME"] = str(context.airflow_dir)
-    res = run([context.airflow, "db", "init"], env=context.env)
+    res = run(["airflow", "db", "migrate"], env=context.env)
     assert res.returncode == 0
 
 
@@ -93,7 +93,7 @@ def create_project_from_config_file(context):
             "-c",
             str(context.config_file),
             "--starter",
-            "spaceflights-pandas",
+            "astro-airflow-iris",
         ],
         env=context.env,
         cwd=str(context.temp_dir),

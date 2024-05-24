@@ -1,6 +1,8 @@
 """BioSequenceDataset loads and saves data to/from bio-sequence objects to
 file.
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -47,11 +49,11 @@ class BioSequenceDataset(AbstractDataset[list, list]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """
         Creates a new instance of ``BioSequenceDataset`` pointing

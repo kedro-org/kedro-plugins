@@ -1,3 +1,4 @@
+import inspect
 from pathlib import PosixPath
 from unittest.mock import ANY
 
@@ -5,7 +6,9 @@ import pandas as pd
 import pytest
 import sqlalchemy
 from kedro.io.core import DatasetError
+from sqlalchemy.exc import SQLAlchemyError
 
+import kedro_datasets
 from kedro_datasets.pandas import SQLQueryDataset, SQLTableDataset
 
 TABLE_NAME = "table_a"
@@ -57,6 +60,19 @@ def query_file_dataset(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLQueryDataset(**kwargs)
+
+
+@pytest.fixture
+def sql_dataset(tmp_path):
+    connection_string = "sqlite:///:memory:"
+    table_name = "test_table"
+
+    engine = sqlalchemy.create_engine(connection_string)
+    test_data = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
+    test_data.to_sql(table_name, engine, index=False)
+
+    credentials = {"con": connection_string}
+    return SQLTableDataset(table_name=table_name, credentials=credentials)
 
 
 class TestSQLTableDataset:
@@ -197,6 +213,40 @@ class TestSQLTableDataset:
         dummy_dataframe.to_sql.assert_called_once_with(
             name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
         )
+
+    def test_additional_params(self, mocker):
+        """Check additional parametes are sent to engine"""
+        mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.create_engine",
+        )
+        additional_params = {"param1": "1", "param2": "2"}
+        credentials = {"con": CONNECTION, **additional_params}
+        SQLTableDataset(table_name=TABLE_NAME, credentials=credentials).engine
+        kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
+            CONNECTION, **additional_params
+        )
+
+    def test_preview_normal_scenario(self, sql_dataset):
+        engine = sql_dataset.engine
+        expected_df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
+        expected_df.to_sql(sql_dataset._load_args["table_name"], engine, index=False)
+        preview = sql_dataset.preview(nrows=3)
+
+        assert "columns" in preview
+        assert "data" in preview
+        assert len(preview["data"]) == len(expected_df)
+
+        return_annotation = inspect.signature(sql_dataset.preview).return_annotation
+        assert return_annotation == "TablePreview"
+
+    def test_preview_sql_error(self, table_dataset, mocker):
+        mocker.patch(
+            "pandas.read_sql_query",
+            side_effect=SQLAlchemyError("Mocked SQL error", "", ""),
+        )
+
+        with pytest.raises(SQLAlchemyError):
+            table_dataset.preview(nrows=3)
 
 
 class TestSQLTableDatasetSingleConnection:
@@ -474,14 +524,16 @@ class TestSQLQueryDataset:
         ds = SQLQueryDataset(
             sql=SQL_QUERY, credentials={"con": MSSQL_CONNECTION}, load_args=load_args
         )
-        assert ds._load_args["params"] == [
-            "2023-01-01T00:00:00",
-            "2023-01-01T20:26",
-            "2023",
-            "test",
-            1.0,
-            100,
-        ]
+        assert ds._load_args["params"] == tuple(
+            [
+                "2023-01-01T00:00:00",
+                "2023-01-01T20:26",
+                "2023",
+                "test",
+                1.0,
+                100,
+            ]
+        )
 
     def test_adapt_mssql_date_params_wrong_input(self, mocker):
         """Test that the adapt_mssql_date_params
@@ -500,3 +552,15 @@ class TestSQLQueryDataset:
                 credentials={"con": MSSQL_CONNECTION},
                 load_args=load_args,
             )
+
+    def test_additional_params(self, mocker):
+        """Check additional parametes are sent to engine"""
+        mocker.patch(
+            "kedro_datasets.pandas.sql_dataset.create_engine",
+        )
+        additional_params = {"param1": "1", "param2": "2"}
+        credentials = {"con": CONNECTION, **additional_params}
+        SQLQueryDataset(sql=SQL_QUERY, credentials=credentials).engine
+        kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
+            CONNECTION, **additional_params
+        )

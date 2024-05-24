@@ -3,6 +3,7 @@ We disable execution of tests that require real Snowflake instance
 to run by default. Providing -m snowflake option explicitly to
 pytest will make these and only these tests run
 """
+
 import pytest
 
 

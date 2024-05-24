@@ -1,6 +1,8 @@
 """``YAMLDataset`` loads/saves data from/to a YAML file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -53,11 +55,11 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         self,
         *,
         filepath: str,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``YAMLDataset`` pointing to a concrete YAML file
         on a specific filesystem.

@@ -2,6 +2,8 @@
 using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 ``email`` package in the standard library to manage email messages.
 """
+from __future__ import annotations
+
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
@@ -58,12 +60,12 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
         self,
         *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``EmailMessageDataset`` pointing to a concrete text file
         on a specific filesystem.

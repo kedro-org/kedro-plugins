@@ -45,6 +45,7 @@ KNOWN_CI_ENV_VAR_KEYS = {
 }
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
+PYPROJECT_CONFIG_NAME = "pyproject.toml"
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,13 @@ def _get_or_create_uuid() -> str:
     except Exception as e:
         logging.error(f"Failed to retrieve UUID: {e}")
         return ""
+
+
+def _get_or_create_project_uuid() -> str:
+    """
+    Reads a UUID from a configuration file or generates and saves a new one if not present.
+    """
+    pass
 
 
 def _generate_new_uuid(full_path: str) -> str:
@@ -126,7 +134,7 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
             user_uuid = _get_or_create_uuid()
             project_properties = _get_project_properties(
-                user_uuid, project_metadata.project_path
+                user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
             )
             cli_properties = _format_user_cli_data(
                 project_properties, masked_command_args
@@ -177,7 +185,9 @@ class KedroTelemetryProjectHooks:
         default_pipeline = pipelines.get("__default__")  # __default__
         user_uuid = _get_or_create_uuid()
 
-        project_properties = _get_project_properties(user_uuid, self.project_path)
+        project_properties = _get_project_properties(
+            user_uuid, self.project_path / PYPROJECT_CONFIG_NAME
+        )
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines
@@ -197,7 +207,7 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
+def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
     hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
     properties = {
         "username": user_uuid,
@@ -208,7 +218,7 @@ def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
         "os": sys.platform,
         "is_ci_env": _is_known_ci_env(),
     }
-    pyproject_path = Path(project_path) / "pyproject.toml"
+
     if pyproject_path.exists():
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)

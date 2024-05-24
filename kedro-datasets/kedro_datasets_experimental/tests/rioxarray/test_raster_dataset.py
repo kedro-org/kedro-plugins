@@ -6,7 +6,7 @@ import rioxarray
 import xarray as xr
 from kedro.io import DatasetError
 
-from kedro_datasets_experimental.xarray import GeoTiffDataset
+from kedro_datasets_experimental.rioxarray import RasterDataset
 
 
 @pytest.fixture
@@ -21,8 +21,8 @@ def cog_xarray(cog_file_path) -> xr.DataArray:
 
 
 @pytest.fixture
-def cog_geotiff_dataset(cog_file_path, save_args) -> GeoTiffDataset:
-    return GeoTiffDataset(filepath=cog_file_path, save_args=save_args)
+def cog_geotiff_dataset(cog_file_path, save_args) -> RasterDataset:
+    return RasterDataset(filepath=cog_file_path, save_args=save_args)
 
 
 @pytest.fixture
@@ -32,10 +32,10 @@ def filepath_geotiff(tmp_path):
 
 @pytest.fixture
 def geotiff_dataset(filepath_geotiff, load_args, save_args):
-    return GeoTiffDataset(filepath=filepath_geotiff, load_args=load_args, save_args=save_args)
+    return RasterDataset(filepath=filepath_geotiff, load_args=load_args, save_args=save_args)
 
 
-class TestGeoTiffDataset:
+class TestRasterDataset:
     def test_load(self, cog_geotiff_dataset):
         """Test saving and reloading the data set."""
         loaded_tiff = cog_geotiff_dataset.load()
@@ -67,7 +67,7 @@ class TestGeoTiffDataset:
         # Add spatial coordinates and CRS information
         data = data.rio.write_crs("epsg:4326")
         data = data.rio.set_spatial_dims("x", "y")
-        dataset = GeoTiffDataset(filepath=tmp_path.joinpath("test.tif").as_posix())
+        dataset = RasterDataset(filepath=tmp_path.joinpath("test.tif").as_posix())
         dataset.save(data)
         reloaded = dataset.load()
         xr.testing.assert_allclose(data, reloaded, rtol=1e-5)
@@ -90,6 +90,6 @@ class TestGeoTiffDataset:
 
     def test_load_missing_file(self, geotiff_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set GeoTiffDataset\(.*\)"
+        pattern = r"Failed while loading data from data set RasterDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             geotiff_dataset.load()

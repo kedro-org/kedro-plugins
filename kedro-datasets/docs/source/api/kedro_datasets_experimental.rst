@@ -1,5 +1,5 @@
 kedro_datasets_experimental
-==============
+===========================
 
 .. rubric:: Description
 
@@ -11,4 +11,4 @@ kedro_datasets_experimental
    :toctree:
    :template: autosummary/class.rst
 
-   kedro_datasets_experimental.xarray.GeoTiffDataset
+   kedro_datasets_experimental.rioxarray.RasterDataset

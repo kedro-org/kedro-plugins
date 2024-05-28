@@ -189,7 +189,7 @@ class TestKedroTelemetryCLIHooks:
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
             "username": "user_uuid",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -237,7 +237,7 @@ class TestKedroTelemetryCLIHooks:
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
             "username": "user_uuid",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -309,7 +309,7 @@ class TestKedroTelemetryCLIHooks:
         expected_properties = {
             "username": "",
             "command": "kedro --version",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,

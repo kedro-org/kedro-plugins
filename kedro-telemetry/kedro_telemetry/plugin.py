@@ -236,12 +236,12 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _is_known_ci_env():
+def _is_known_ci_env(known_ci_env_var_keys: set[str]):
     # Most CI tools will set the CI environment variable to true
     if os.getenv("CI") == "true":
         return True
     # Not all CI tools follow this convention, we can check through those that don't
-    return any(os.getenv(key) for key in KNOWN_CI_ENV_VAR_KEYS)
+    return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
 def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
@@ -256,7 +256,7 @@ def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
-        "is_ci_env": _is_known_ci_env(),
+        "is_ci_env": _is_known_ci_env(KNOWN_CI_ENV_VAR_KEYS),
     }
 
     properties = _add_tool_properties(properties, pyproject_path)

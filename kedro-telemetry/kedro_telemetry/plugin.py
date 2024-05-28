@@ -46,6 +46,8 @@ KNOWN_CI_ENV_VAR_KEYS = {
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
+UNDEFINED_PROJECT_UUID = "undefined_project_uuid"
+UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 
 logger = logging.getLogger(__name__)
 
@@ -79,11 +81,23 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
-def _get_or_create_project_uuid() -> str:
+def _get_or_create_project_uuid(pyproject_path: Path) -> str:
     """
-    Reads a UUID from a configuration file or generates and saves a new one if not present.
+    Reads a project UUID from a configuration file or generates and saves a new one if not present.
     """
-    pass
+    if pyproject_path.exists():
+        with open(pyproject_path) as file:
+            pyproject_data = toml.load(file)
+
+            if "project" not in pyproject_data:
+                pyproject_data["project"] = {}
+            if "project_uuid" not in pyproject_data["project"]:
+                pyproject_data["project"]["project_uuid"] = uuid.uuid4().hex
+                toml.dump(pyproject_data, file)
+
+            return pyproject_data["project"]["project_uuid"]
+
+    return UNDEFINED_PROJECT_UUID
 
 
 def _generate_new_uuid(full_path: str) -> str:
@@ -208,10 +222,13 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
 
 
 def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
-    hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
+    project_uuid = _get_or_create_project_uuid(pyproject_path)
+    package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
+    hashed_project_uuid = _hash(f"{project_uuid}{package_name}")
+
     properties = {
         "username": user_uuid,
-        "package_name": hashed_package_name,
+        "project_uuid": hashed_project_uuid,
         "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
@@ -219,6 +236,7 @@ def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
         "is_ci_env": _is_known_ci_env(),
     }
 
+    # TODO: Move to a separate function
     if pyproject_path.exists():
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)

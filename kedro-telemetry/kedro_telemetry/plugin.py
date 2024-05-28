@@ -86,14 +86,16 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str:
     Reads a project UUID from a configuration file or generates and saves a new one if not present.
     """
     if pyproject_path.exists():
-        pyproject_data = toml.load(pyproject_path)
+        with open(pyproject_path, "r+") as file:
+            pyproject_data = toml.load(file)
 
-        if "project" not in pyproject_data:
-            pyproject_data["project"] = {}
-        if "project_uuid" not in pyproject_data["project"]:
-            pyproject_data["project"]["project_uuid"] = uuid.uuid4().hex
-            with open(pyproject_path, "w") as file:
+            if "project" not in pyproject_data:
+                pyproject_data["project"] = {}
+            if "project_uuid" not in pyproject_data["project"]:
+                pyproject_data["project"]["project_uuid"] = uuid.uuid4().hex
+                file.seek(0)
                 toml.dump(pyproject_data, file)
+                file.truncate()
 
         return pyproject_data["project"]["project_uuid"]
 

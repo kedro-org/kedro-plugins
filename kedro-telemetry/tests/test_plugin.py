@@ -134,6 +134,10 @@ class TestKedroTelemetryCLIHooks:
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
         )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
+        )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         telemetry_hook = KedroTelemetryCLIHooks()
@@ -179,6 +183,10 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
+        )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -229,6 +237,10 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
+        )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
@@ -481,6 +493,10 @@ class TestKedroTelemetryProjectHooks:
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
         )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
+        )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.open")
@@ -537,6 +553,10 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch(
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
+        )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.toml.load")
@@ -598,6 +618,10 @@ class TestKedroTelemetryProjectHooks:
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
         )
+        mocker.patch(
+            "kedro_telemetry.plugin._get_or_create_project_uuid",
+            return_value="project_uuid",
+        )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
         mocker.patch("pathlib.Path.exists", return_value=True)
@@ -635,7 +659,9 @@ class TestKedroTelemetryProjectHooks:
             identity="user_uuid",
             properties=expected_properties,
         )
-
+        print(mocked_heap_call.call_args_list[2])
+        print("-" * 50)
+        print(expected_call)
         # CLI hook makes the first 2 calls, the 3rd one is the Project hook
         assert mocked_heap_call.call_args_list[2] == expected_call
 

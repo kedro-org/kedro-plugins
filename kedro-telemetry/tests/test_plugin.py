@@ -494,7 +494,7 @@ class TestKedroTelemetryProjectHooks:
 
         project_properties = {
             "username": "user_uuid",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -553,7 +553,7 @@ class TestKedroTelemetryProjectHooks:
 
         project_properties = {
             "username": "user_uuid",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
@@ -614,7 +614,7 @@ class TestKedroTelemetryProjectHooks:
 
         project_properties = {
             "username": "user_uuid",
-            "package_name": "digested",
+            "project_uuid": "digested",
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,

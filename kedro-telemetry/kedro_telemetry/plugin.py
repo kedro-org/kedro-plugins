@@ -100,10 +100,33 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str:
     return UNDEFINED_PROJECT_UUID
 
 
+def _add_tool_properties(
+    properties: dict[str, Any], pyproject_path: Path
+) -> dict[str, Any]:
+    """
+    Extends project properties with tool's properties.
+    """
+    if pyproject_path.exists():
+        with open(pyproject_path) as file:
+            pyproject_data = toml.load(file)
+
+        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
+            if "tools" in pyproject_data["tool"]["kedro"]:
+                # convert list of tools to comma-separated string
+                properties["tools"] = ", ".join(
+                    pyproject_data["tool"]["kedro"]["tools"]
+                )
+            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
+                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
+                    "example_pipeline"
+                ]
+
+    return properties
+
+
 def _generate_new_uuid(full_path: str) -> str:
     try:
-        config: dict[str, dict[str, Any]] = {}
-        config["telemetry"] = {}
+        config: dict[str, dict[str, Any]] = {"telemetry": {}}
         new_uuid = uuid.uuid4().hex
         config["telemetry"]["uuid"] = new_uuid
 
@@ -213,12 +236,12 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
+def _is_known_ci_env():
     # Most CI tools will set the CI environment variable to true
     if os.getenv("CI") == "true":
         return True
     # Not all CI tools follow this convention, we can check through those that don't
-    return any(os.getenv(key) for key in known_ci_env_var_keys)
+    return any(os.getenv(key) for key in KNOWN_CI_ENV_VAR_KEYS)
 
 
 def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
@@ -236,21 +259,7 @@ def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
         "is_ci_env": _is_known_ci_env(),
     }
 
-    # TODO: Move to a separate function
-    if pyproject_path.exists():
-        with open(pyproject_path) as file:
-            pyproject_data = toml.load(file)
-
-        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
-            if "tools" in pyproject_data["tool"]["kedro"]:
-                # convert list of tools to comma-separated string
-                properties["tools"] = ", ".join(
-                    pyproject_data["tool"]["kedro"]["tools"]
-                )
-            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
-                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
-                    "example_pipeline"
-                ]
+    properties = _add_tool_properties(properties, pyproject_path)
 
     return properties
 

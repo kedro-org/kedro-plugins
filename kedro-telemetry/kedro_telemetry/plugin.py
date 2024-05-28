@@ -99,6 +99,10 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str:
 
         return pyproject_data["project"]["project_uuid"]
 
+    logging.debug(
+        f"Failed to retrieve UUID or save project UUID: {str(pyproject_path)} does not exist"
+    )
+
     return UNDEFINED_PROJECT_UUID
 
 

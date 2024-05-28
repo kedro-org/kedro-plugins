@@ -659,9 +659,6 @@ class TestKedroTelemetryProjectHooks:
             identity="user_uuid",
             properties=expected_properties,
         )
-        print(mocked_heap_call.call_args_list[2])
-        print("-" * 50)
-        print(expected_call)
         # CLI hook makes the first 2 calls, the 3rd one is the Project hook
         assert mocked_heap_call.call_args_list[2] == expected_call
 

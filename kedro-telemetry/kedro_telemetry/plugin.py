@@ -112,16 +112,14 @@ def _add_tool_properties(
         with open(pyproject_path) as file:
             pyproject_data = toml.load(file)
 
-        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
-            if "tools" in pyproject_data["tool"]["kedro"]:
-                # convert list of tools to comma-separated string
-                properties["tools"] = ", ".join(
-                    pyproject_data["tool"]["kedro"]["tools"]
-                )
-            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
-                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
-                    "example_pipeline"
-                ]
+        try:
+            tool_kedro = pyproject_data["tool"]["kedro"]
+            if "tools" in tool_kedro:
+                properties["tools"] = ", ".join(tool_kedro["tools"])
+            if "example_pipeline" in tool_kedro:
+                properties["example_pipeline"] = tool_kedro["example_pipeline"]
+        except KeyError:
+            pass
 
     return properties
 

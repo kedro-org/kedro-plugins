@@ -481,9 +481,11 @@ class TestKedroTelemetryProjectHooks:
             "kedro_telemetry.plugin._get_or_create_uuid",
             return_value="user_uuid",
         )
+
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.open")
         mocker.patch("kedro_telemetry.plugin.toml.load")
+        mocker.patch("kedro_telemetry.plugin.toml.dump")
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryProjectHooks()
@@ -505,7 +507,6 @@ class TestKedroTelemetryProjectHooks:
             "number_of_pipelines": 2,
         }
         expected_properties = {**project_properties, **project_statistics}
-
         expected_call = mocker.call(
             event_name="Kedro Project Statistics",
             identity="user_uuid",
@@ -539,6 +540,7 @@ class TestKedroTelemetryProjectHooks:
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.toml.load")
+        mocker.patch("kedro_telemetry.plugin.toml.dump")
         # CLI run first
         telemetry_cli_hook = KedroTelemetryCLIHooks()
         command_args = ["--version"]

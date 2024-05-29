@@ -4,8 +4,7 @@ from abc import abstractmethod
 from typing import Any, Generic, NoReturn, TypeVar
 
 from kedro.io import AbstractDataset, DatasetError
-from langchain.chat_models import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 OPENAI_TYPE = TypeVar("OPENAI_TYPE")
 
@@ -25,7 +24,7 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
             credentials: must contain `openai_api_base` and `openai_api_key`.
             kwargs: keyword arguments passed to the underlying constructor.
         """
-        # self.openai_api_base = credentials["openai_api_base"]
+        self.openai_api_base = credentials["openai_api_base"]
         self.openai_api_key = credentials["openai_api_key"]
         self.kwargs = kwargs or {}
 
@@ -37,7 +36,7 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
 
     def _load(self) -> OPENAI_TYPE:
         return self.constructor(
-            # openai_api_base=self.openai_api_base,
+            openai_api_base=self.openai_api_base,
             openai_api_key=self.openai_api_key,
             **self.kwargs,
         )
@@ -118,8 +117,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: python
-        >>> from kedro_datasets.langchain import ChatOpenAIDataset
-        >>> from langchain.schema import HumanMessage
+        >>> from kedro_datasets_experimental.langchain import ChatOpenAIDataset
         >>>
         >>> llm = ChatOpenAIDataset(
         ...     credentials={
@@ -133,7 +131,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         ... ).load()
         >>>
         >>> # See: https://python.langchain.com/docs/integrations/chat/openai
-        >>> llm([HumanMessage(content="Hello world!")])
+        >>> llm.invoke("Hello world!")
     """
 
     @property

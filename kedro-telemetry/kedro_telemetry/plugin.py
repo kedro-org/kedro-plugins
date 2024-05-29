@@ -11,7 +11,7 @@ import uuid
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import click
 import requests
@@ -80,7 +80,7 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
-def _get_or_create_project_uuid(pyproject_path: Path) -> Optional[str]:
+def _get_or_create_project_uuid(pyproject_path: Path) -> str | None:
     """
     Reads a project UUID from a configuration file or generates and saves a new one if not present.
     """

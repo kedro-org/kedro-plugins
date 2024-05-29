@@ -168,8 +168,8 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 langchain-chatopenaidataset = ["langchain-openai"]
 langchain-openaiembeddingsdataset = ["langchain-openai"]
 langchain-chatanthropicdataset = ["langchain-anthropic", "langchain-community"]
-langchain-coheredataset = ["langchain-cohere", "langchain-community"]
-langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-coheredataset ]"]
+langchain-chatcoheredataset = ["langchain-cohere", "langchain-community"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
 
 # Docs requirements
 docs = [

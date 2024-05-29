@@ -4,12 +4,12 @@ Cohere dataset definition.
 
 from typing import Any, NoReturn
 
-from cohere import AsyncClient, Client
 from kedro.io import AbstractDataset, DatasetError
+from langchain_cohere import ChatCohere
 from langchain_cohere.llms import Cohere
 
 
-class CohereDataset(AbstractDataset[None, Cohere]):
+class ChatCohereDataset(AbstractDataset[None, Cohere]):
     """``CohereDataset`` loads a Cohere `langchain <https://python.langchain.com/>`_ model.
 
     Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
@@ -37,8 +37,8 @@ class CohereDataset(AbstractDataset[None, Cohere]):
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: python
-        >>> from kedro_datasets_experimental.langchain import CohereDataset
-        >>> llm = CohereDataset(
+        >>> from kedro_datasets_experimental.langchain import ChatCohereDataset
+        >>> llm = ChatCohereDataset(
         ...     credentials={
         ...         "cohere_api_key": "xxx",
         ...         "cohere_api_url": "xxx",
@@ -70,14 +70,5 @@ class CohereDataset(AbstractDataset[None, Cohere]):
     def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
 
-    def _load(self) -> Cohere:
-        llm = Cohere(cohere_api_key="_", **self.kwargs)
-
-        client_kwargs = {
-            "api_key": self.cohere_api_key,
-            "base_url": self.cohere_api_url,
-        }
-        llm.client = Client(**client_kwargs, client_name=llm.user_agent)
-        llm.async_client = AsyncClient(**client_kwargs, client_name=llm.user_agent)
-
-        return llm
+    def _load(self) -> ChatCohere:
+        return ChatCohere(cohere_api_key=self.cohere_api_key, base_url=self.cohere_api_url, **self.kwargs)

@@ -88,15 +88,16 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str | None:
         with open(pyproject_path, "r+") as file:
             pyproject_data = toml.load(file)
 
-            if "project" not in pyproject_data:
-                pyproject_data["project"] = {}
-            if "project_uuid" not in pyproject_data["project"]:
-                pyproject_data["project"]["project_uuid"] = uuid.uuid4().hex
-                file.seek(0)
-                toml.dump(pyproject_data, file)
-                file.truncate()
+            try:
+                project_uuid = pyproject_data["tool"]["kedro_telemetry"]["project_uuid"]
+            except KeyError:
+                project_uuid = uuid.uuid4().hex
+                toml_string = (
+                    f'\n[tool.kedro_telemetry]\nproject_uuid = "{project_uuid}"\n'
+                )
+                file.write(toml_string)
 
-        return pyproject_data["project"]["project_uuid"]
+            return project_uuid
 
     logging.debug(
         f"Failed to retrieve UUID or save project UUID: {str(pyproject_path)} does not exist"

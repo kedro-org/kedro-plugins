@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added async functionality for loading and saving data in `PartitionedDataset` via `use_async` argument.
 
 # Release 3.0.1
 
@@ -10,6 +11,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Charles Guan](https://github.com/charlesbmi)
+* [Puneet Saini](https://github.com/puneeter)
 
 # Release 3.0.0
 ## Major features and improvements

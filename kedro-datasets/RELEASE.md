@@ -7,6 +7,8 @@
 | -------------------------- | ---------------------------------------------------- | --------------------------------------- |
 | `rioxarray.GeotiffDataset` | A dataset for loading and saving geotiff data files. | `kedro_datasets_experimental.rioxarray` |
 
+# Release 3.0.1
+
 ## Bug fixes and other changes
 
 * Removed arbitrary upper bound for `s3fs`.

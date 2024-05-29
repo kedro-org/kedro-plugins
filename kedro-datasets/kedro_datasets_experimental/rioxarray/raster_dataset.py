@@ -12,6 +12,7 @@ import rioxarray as rxr
 import xarray
 from kedro.io import AbstractVersionedDataset, DatasetError
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
+from rasterio.crs import CRS
 
 
 class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
@@ -104,7 +105,10 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
 
     def _load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
-        return rxr.open_rasterio(load_path, **self._load_args)
+        read_xr = rxr.open_rasterio(load_path, **self._load_args)
+        if not isinstance(read_xr.rio.crs, CRS):
+            raise ValueError("Dataset lacks a coordinate reference system.")
+        return read_xr
 
     def _save(self, data: xarray.DataArray) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

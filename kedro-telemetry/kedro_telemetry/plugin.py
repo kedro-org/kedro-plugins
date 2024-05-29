@@ -11,7 +11,7 @@ import uuid
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import click
 import requests
@@ -46,7 +46,6 @@ KNOWN_CI_ENV_VAR_KEYS = {
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
-UNDEFINED_PROJECT_UUID = "undefined_project_uuid"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 
 logger = logging.getLogger(__name__)
@@ -81,7 +80,7 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
-def _get_or_create_project_uuid(pyproject_path: Path) -> str:
+def _get_or_create_project_uuid(pyproject_path: Path) -> Optional[str]:
     """
     Reads a project UUID from a configuration file or generates and saves a new one if not present.
     """
@@ -103,7 +102,7 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str:
         f"Failed to retrieve UUID or save project UUID: {str(pyproject_path)} does not exist"
     )
 
-    return UNDEFINED_PROJECT_UUID
+    return None
 
 
 def _add_tool_properties(
@@ -251,7 +250,9 @@ def _is_known_ci_env(known_ci_env_var_keys: set[str]):
 def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
     project_uuid = _get_or_create_project_uuid(pyproject_path)
     package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
-    hashed_project_uuid = _hash(f"{project_uuid}{package_name}")
+    hashed_project_uuid = (
+        _hash(f"{project_uuid}{package_name}") if project_uuid is not None else None
+    )
 
     properties = {
         "username": user_uuid,

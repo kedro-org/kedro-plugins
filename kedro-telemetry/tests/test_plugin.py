@@ -321,7 +321,7 @@ class TestKedroTelemetryCLIHooks:
         expected_properties = {
             "username": "",
             "command": "kedro --version",
-            "project_uuid": "digested",
+            "project_uuid": None,
             "project_version": kedro_version,
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,

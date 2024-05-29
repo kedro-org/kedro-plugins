@@ -8,6 +8,7 @@ from cohere import AsyncClient, Client
 from kedro.io import AbstractDataset, DatasetError
 from langchain_cohere.llms import Cohere
 
+
 class CohereDataset(AbstractDataset[None, Cohere]):
     """``CohereDataset`` loads a Cohere `langchain <https://python.langchain.com/>`_ model.
 
@@ -40,6 +41,7 @@ class CohereDataset(AbstractDataset[None, Cohere]):
         >>> llm = CohereDataset(
         ...     credentials={
         ...         "cohere_api_key": "xxx",
+        ...         "cohere_api_url": "xxx",
         ...     },
         ...     kwargs={
         ...         "model": "command",
@@ -58,8 +60,8 @@ class CohereDataset(AbstractDataset[None, Cohere]):
             credentials: must contain `cohere_api_url` and `cohere_api_key`.
             kwargs: keyword arguments passed to the underlying constructor.
         """
-        self.cohere_api_url = credentials["cohere_api_url"]
-        self.cohere_api_key = credentials["cohere_api_key"]
+        self.cohere_api_url = credentials.get("cohere_api_url")
+        self.cohere_api_key = credentials.get("cohere_api_key")
         self.kwargs = kwargs or {}
 
     def _describe(self) -> dict[str, Any]:
@@ -73,6 +75,7 @@ class CohereDataset(AbstractDataset[None, Cohere]):
 
         client_kwargs = {
             "api_key": self.cohere_api_key,
+            "base_url": self.cohere_api_url,
         }
         llm.client = Client(**client_kwargs, client_name=llm.user_agent)
         llm.async_client = AsyncClient(**client_kwargs, client_name=llm.user_agent)

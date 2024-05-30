@@ -80,7 +80,7 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
-def _get_or_create_project_uuid(pyproject_path: Path) -> str | None:
+def _get_or_create_project_id(pyproject_path: Path) -> str | None:
     """
     Reads a project UUID from a configuration file or generates and saves a new one if not present.
     """
@@ -89,15 +89,13 @@ def _get_or_create_project_uuid(pyproject_path: Path) -> str | None:
             pyproject_data = toml.load(file)
 
             try:
-                project_uuid = pyproject_data["tool"]["kedro_telemetry"]["project_uuid"]
+                project_id = pyproject_data["tool"]["kedro_telemetry"]["project_id"]
             except KeyError:
-                project_uuid = uuid.uuid4().hex
-                toml_string = (
-                    f'\n[tool.kedro_telemetry]\nproject_uuid = "{project_uuid}"\n'
-                )
+                project_id = uuid.uuid4().hex
+                toml_string = f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
                 file.write(toml_string)
 
-            return project_uuid
+            return project_id
 
     logging.debug(
         f"Failed to retrieve UUID or save project UUID: {str(pyproject_path)} does not exist"
@@ -249,15 +247,15 @@ def _is_known_ci_env(known_ci_env_var_keys: set[str]):
 
 
 def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
-    project_uuid = _get_or_create_project_uuid(pyproject_path)
+    project_id = _get_or_create_project_id(pyproject_path)
     package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
-    hashed_project_uuid = (
-        _hash(f"{project_uuid}{package_name}") if project_uuid is not None else None
+    hashed_project_id = (
+        _hash(f"{project_id}{package_name}") if project_id is not None else None
     )
 
     properties = {
         "username": user_uuid,
-        "project_uuid": hashed_project_uuid,
+        "project_id": hashed_project_id,
         "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,

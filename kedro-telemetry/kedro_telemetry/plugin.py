@@ -99,10 +99,11 @@ class KedroTelemetryCLIHooks:
     """Hook to send CLI command data to Heap"""
 
     @cli_hook_impl
-    def before_command_run(
+    def after_command_run(
         self, project_metadata: ProjectMetadata, command_args: list[str]
     ):
         """Hook implementation to send command run data to Heap"""
+        print("after_command_run")
         try:
             if not project_metadata:  # in package mode
                 return

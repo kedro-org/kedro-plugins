@@ -7,13 +7,13 @@ import lazy_loader as lazy
 ChatOpenAIDataset: Any
 OpenAIEmbeddingsDataset: Any
 ChatAnthropicDataset: Any
-CohereDataset: Any
+ChatCohereDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "_openai": ["ChatOpenAIDataset", "OpenAIEmbeddingsDataset"],
         "_anthropic": ["ChatAnthropicDataset"],
-        "_cohere": ["CohereDataset"],
+        "_cohere": ["ChatCohereDataset"],
     },
 )

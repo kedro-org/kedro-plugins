@@ -6,11 +6,10 @@ from typing import Any, NoReturn
 
 from kedro.io import AbstractDataset, DatasetError
 from langchain_cohere import ChatCohere
-from langchain_cohere.llms import Cohere
 
 
-class ChatCohereDataset(AbstractDataset[None, Cohere]):
-    """``CohereDataset`` loads a Cohere `langchain <https://python.langchain.com/>`_ model.
+class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
+    """``ChatCohereDataset`` loads a ChatCohere `langchain <https://python.langchain.com/>`_ model.
 
     Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
 
@@ -18,7 +17,7 @@ class ChatCohereDataset(AbstractDataset[None, Cohere]):
 
     .. code-block:: yaml
        command:
-         type: langchain.CohereDataset
+         type: langchain.ChatCohereDataset
          kwargs:
            model: "command"
            temperature: 0.0
@@ -49,7 +48,7 @@ class ChatCohereDataset(AbstractDataset[None, Cohere]):
         ...     }
         ... ).load()
         >>>
-        >>> # See: https://python.langchain.com/docs/integrations/llms/cohere
+        >>> # See: https://python.langchain.com/v0.1/docs/integrations/chat/cohere/
         >>> llm.invoke("Hello world!")
     """
 
@@ -60,8 +59,8 @@ class ChatCohereDataset(AbstractDataset[None, Cohere]):
             credentials: must contain `cohere_api_url` and `cohere_api_key`.
             kwargs: keyword arguments passed to the underlying constructor.
         """
-        self.cohere_api_url = credentials.get("cohere_api_url")
-        self.cohere_api_key = credentials.get("cohere_api_key")
+        self.cohere_api_url = credentials["cohere_api_url"]
+        self.cohere_api_key = credentials["cohere_api_key"]
         self.kwargs = kwargs or {}
 
     def _describe(self) -> dict[str, Any]:

@@ -41,9 +41,11 @@ class HFDataset(AbstractVersionedDataset):
         *,
         dataset_name: str,
         dataset_kwargs: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         self.dataset_name = dataset_name
         self._dataset_kwargs = dataset_kwargs or {}
+        self.metadata = metadata
 
     def _load(self):
         return load_dataset(self.dataset_name, **self._dataset_kwargs)

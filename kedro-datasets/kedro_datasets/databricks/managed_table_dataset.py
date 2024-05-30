@@ -229,6 +229,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         schema: dict[str, Any] | None = None,
         partition_columns: list[str] | None = None,
         owner_group: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
 
@@ -258,6 +259,8 @@ class ManagedTableDataset(AbstractVersionedDataset):
             owner_group: if table access control is enabled in your workspace,
                 specifying owner_group will transfer ownership of the table and database to
                 this owner. All databases should have the same owner_group. Defaults to None.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
             DatasetError: Invalid configuration supplied (through ManagedTable validation)
         """
@@ -275,6 +278,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         )
 
         self._version = version
+        self.metadata = metadata
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]

@@ -42,13 +42,14 @@ class SparkStreamingDataset(AbstractDataset):
     DEFAULT_LOAD_ARGS = {}  # type: dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: dict[str, Any]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         filepath: str = "",
         file_format: str = "",
         save_args: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of SparkStreamingDataset.
 
@@ -73,10 +74,13 @@ class SparkStreamingDataset(AbstractDataset):
                 respectively. You can find a list of options for each selected format in
                 Spark DataFrame write documentation, see
                 https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._file_format = file_format
         self._save_args = save_args
         self._load_args = load_args
+        self.metadata = metadata
 
         fs_prefix, filepath = _split_filepath(filepath)
 

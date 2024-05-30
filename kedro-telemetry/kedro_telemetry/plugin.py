@@ -82,25 +82,34 @@ def _get_or_create_uuid() -> str:
 
 def _get_or_create_project_id(pyproject_path: Path) -> str | None:
     """
-    Reads a project UUID from a configuration file or generates and saves a new one if not present.
+    Reads a project id from a configuration file or generates and saves a new one if not present.
+    Returns None if configuration file does not exist or does not relate to Kedro.
     """
     if pyproject_path.exists():
         with open(pyproject_path, "r+") as file:
             pyproject_data = toml.load(file)
 
+            # Check if pyproject related to kedro
             try:
-                project_id = pyproject_data["tool"]["kedro_telemetry"]["project_id"]
+                _ = pyproject_data["tool"]["kedro"]
+                try:
+                    project_id = pyproject_data["tool"]["kedro_telemetry"]["project_id"]
+                except KeyError:
+                    project_id = uuid.uuid4().hex
+                    toml_string = (
+                        f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
+                    )
+                    file.write(toml_string)
+                return project_id
             except KeyError:
-                project_id = uuid.uuid4().hex
-                toml_string = f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
-                file.write(toml_string)
-
-            return project_id
+                logging.debug(
+                    f"Failed to retrieve project id or save project id: {str(pyproject_path)} does not relate to Kedro"
+                )
+                return None
 
     logging.debug(
-        f"Failed to retrieve UUID or save project UUID: {str(pyproject_path)} does not exist"
+        f"Failed to retrieve project id or save project id: {str(pyproject_path)} does not exist"
     )
-
     return None
 
 

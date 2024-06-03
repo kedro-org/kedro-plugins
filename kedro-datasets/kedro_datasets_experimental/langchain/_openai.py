@@ -50,6 +50,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     catalog.yml:
 
     .. code-block:: yaml
+
        text_embedding_ada_002:
          type: langchain.OpenAIEmbeddingsDataset
          kwargs:
@@ -59,6 +60,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     credentials.yml:
 
     .. code-block:: yaml
+
        openai:
          openai_api_base: <openai-api-base>
          openai_api_key: <openai-api-key>
@@ -67,7 +69,8 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
+
         >>> from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
         >>>
         >>> embeddings = OpenAIEmbeddingsDataset(
@@ -98,6 +101,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     catalog.yml:
 
     .. code-block:: yaml
+
        gpt_3_5_turbo:
          type: langchain.ChatOpenAIDataset
          kwargs:
@@ -108,6 +112,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     credentials.yml:
 
     .. code-block:: yaml
+
        openai:
          openai_api_base: <openai-api-base>
          openai_api_key: <openai-api-key>
@@ -116,7 +121,8 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
+
         >>> from kedro_datasets_experimental.langchain import ChatOpenAIDataset
         >>>
         >>> llm = ChatOpenAIDataset(
@@ -126,7 +132,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         ...     },
         ...     kwargs={
         ...         "model": "gpt-3.5-turbo",
-        ...         "temperature": 0,
+        ...         "temperature": 0.0,
         ...     },
         ... ).load()
         >>>

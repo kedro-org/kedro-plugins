@@ -14,6 +14,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     catalog.yml:
 
     .. code-block:: yaml
+
        claude_instant_1:
          type: langchain.ChatAnthropicDataset
          kwargs:
@@ -25,6 +26,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     credentials.yml:
 
     .. code-block:: yaml
+
        anthropic:
          anthropic_api_url: <anthropic-api-base>
          anthropic_api_key: <anthropic-api-key>
@@ -33,7 +35,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
+
         >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
         >>> llm = ChatAnthropicDataset(
         ...     credentials={

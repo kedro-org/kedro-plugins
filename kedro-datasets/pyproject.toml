@@ -266,10 +266,10 @@ test = [
 
 # Experimental dataset requirements
 experimental = [
-    "langchain-openai~=0.1.7",
-    "langchain-cohere~=0.1.0",
-    "langchain-anthropic~=0.1.13",
-    "langchain-community~=0.2.0",
+    "langchain-openai",
+    "langchain-cohere",
+    "langchain-anthropic",
+    "langchain-community",
 ]
 
 # All requirements

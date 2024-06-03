@@ -99,7 +99,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
 
     .. code-block:: yaml
        gpt_3_5_turbo:
-         type: langchain.ChatOpenAIDataSet
+         type: langchain.ChatOpenAIDataset
          kwargs:
            model: "gpt-3.5-turbo"
            temperature: 0.0

@@ -106,6 +106,7 @@ type_targets = {
         "deltalake.table.Metadata",
         "DataCatalog",
         "ibis.backends.BaseBackend",
+        "langchain_openai.chat_models.base.ChatOpenAI",
     ),
     "py:data": (
         "typing.Any",

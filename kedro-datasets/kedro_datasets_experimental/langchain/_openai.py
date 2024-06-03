@@ -132,7 +132,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         ...     },
         ...     kwargs={
         ...         "model": "gpt-3.5-turbo",
-        ...         "temperature": 0,
+        ...         "temperature": 0.0,
         ...     },
         ... ).load()
         >>>

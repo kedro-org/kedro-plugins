@@ -47,7 +47,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         ...     },
         ...     kwargs={
         ...         "model": "command",
-        ...         "temperature": 0,
+        ...         "temperature": 0.0,
         ...     }
         ... ).load()
         >>>

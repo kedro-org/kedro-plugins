@@ -376,3 +376,18 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
         "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
         in result.stdout
     )
+
+
+def test_create_airflow_conf_source(cli_runner, metadata):
+    command = ["airflow", "create", "--conf-source", "conf/"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 0
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+
+    assert dag_file.exists()
+
+    expected_airflow_dag = f'conf_source = "{metadata.project_path}/conf"'
+    with dag_file.open(encoding="utf-8") as f:
+        dag_code = [line.strip() for line in f.read().splitlines()]
+        assert expected_airflow_dag in dag_code
+    dag_file.unlink()

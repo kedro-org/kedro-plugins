@@ -31,7 +31,7 @@ class KedroOperator(BaseOperator):
 
     def execute(self, context):
         configure_project(self.package_name)
-        with KedroSession.create(self.project_path, env=self.env) as session:
+        with KedroSession.create(self.project_path, env=self.env, conf_source=self.conf_source) as session:
             if isinstance(self.node_name, str):
                 self.node_name = [self.node_name]
             session.run(self.pipeline_name, node_names=self.node_name)
@@ -41,6 +41,8 @@ env = "{{ env }}"
 pipeline_name = "{{ pipeline_name }}"
 project_path = Path.cwd()
 package_name = "{{ package_name }}"
+conf_source = "{{ conf_source }}"
+
 
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(

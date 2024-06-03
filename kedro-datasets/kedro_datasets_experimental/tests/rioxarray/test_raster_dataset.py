@@ -19,12 +19,23 @@ def cog_file_path() -> str:
 def synthetic_xarray():
     """Create a synthetic xarray.DataArray with CRS information."""
     data = xr.DataArray(
-        np.random.rand(10, 100, 100),  # 10 bands, 100x100 pixels
+        np.random.rand(100, 100),
+        dims=("y", "x"),
+        coords={"x": np.linspace(0, 100, 100), "y": np.linspace(0, 100, 100)}
+    )
+    data.rio.write_crs("epsg:4326", inplace=True)
+    return data.to_dataset(name="synthetic")
+
+@pytest.fixture
+def synthetic_xarray_multiband():
+    """Create a synthetic xarray.DataArray with CRS information."""
+    data = xr.DataArray(
+        np.random.rand(10, 100, 100),
         dims=("band", "y", "x"),
         coords={"x": np.linspace(0, 100, 100), "y": np.linspace(0, 100, 100)}
     )
     data.rio.write_crs("epsg:4326", inplace=True)
-    return data
+    return data.to_dataset(name="synthetic")
 
 @pytest.fixture
 def cog_xarray(cog_file_path) -> xr.DataArray:
@@ -34,55 +45,42 @@ def cog_xarray(cog_file_path) -> xr.DataArray:
 def cog_geotiff_dataset(cog_file_path, save_args) -> RasterDataset:
     return RasterDataset(filepath=cog_file_path, save_args=save_args)
 
-@pytest.fixture
-def synthetic_dataset(tmp_path, synthetic_xarray):
-    """Create a RasterDataset from the synthetic xarray.DataArray."""
-    file_path = tmp_path / "synthetic.nc"
-    synthetic_xarray.to_netcdf(file_path)
-    return RasterDataset(filepath=file_path.as_posix())
-
-class TestRasterDataset:
-    def test_load_cog_geotiff(self, cog_geotiff_dataset):
-        """Test saving and reloading the data set."""
-        loaded_xr = cog_geotiff_dataset.load()
-        assert isinstance(loaded_xr.rio.crs, CRS)
-        assert isinstance(loaded_xr, xr.DataArray)
-        assert loaded_xr.shape == (1, 500, 500)
-        assert loaded_xr.dims == ("band", "y", "x")
-
-    def test_load_synthetic_nc(self, synthetic_dataset):
-        """Test loading a synthetic dataset with a CRS."""
-        loaded_xr = synthetic_dataset.load()
-        assert isinstance(loaded_xr.rio.crs, CRS)
-        assert isinstance(loaded_xr, xr.DataArray)
-
-    def test_exists(self, tmp_path, synthetic_xarray):
-        """Test `exists` method invocation for both existing and
-        nonexistent data set."""
-        dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
-        assert not dataset.exists()
-        dataset.save(synthetic_xarray)
-        assert dataset.exists()
-
-    def test_save_and_load_geotiff(self, cog_geotiff_dataset, cog_xarray):
-        """Test saving and reloading the data set."""
-        cog_geotiff_dataset.save(cog_xarray)
-        reloaded = cog_geotiff_dataset.load()
-        assert reloaded.shape == cog_xarray.shape
-        assert reloaded.dims == cog_xarray.dims
-        #assert reloaded.equals(cog_xarray)
-
-    def test_save_and_load_synthetic(self, synthetic_dataset, synthetic_xarray):
-        """Test saving and reloading the synthetic dataset."""
-        synthetic_dataset.save(synthetic_xarray)
-        reloaded = synthetic_dataset.load()
-        #assert reloaded.equals(synthetic_xarray)
 
 
-    def test_load_missing_file(self, tmp_path):
-        """Check the error when trying to load missing file."""
-        dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
-        assert not dataset._exists(), "File unexpectedly exists"
-        pattern = r"Failed while loading data from data set RasterDataset\(.*\)"
-        with pytest.raises(DatasetError, match=pattern):
-            dataset.load()
+def test_load_cog_geotiff(cog_geotiff_dataset):
+    """Test saving and reloading the data set."""
+    loaded_xr = cog_geotiff_dataset.load()
+    assert isinstance(loaded_xr.rio.crs, CRS)
+    assert isinstance(loaded_xr, xr.DataArray)
+    assert loaded_xr.shape == (1, 500, 500)
+    assert loaded_xr.dims == ("band", "y", "x")
+
+def test_exists(tmp_path, synthetic_xarray):
+    """Test `exists` method invocation for both existing and
+    nonexistent data set."""
+    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    assert not dataset.exists()
+    dataset.save(synthetic_xarray)
+    assert dataset.exists()
+@pytest.mark.parametrize("xarray_fixture", [
+    "synthetic_xarray",           # Single-band synthetic data
+    "cog_xarray",                 # COG file data, may also be multiband depending on the fixture setup
+    "synthetic_xarray_multiband"  # Explicitly multiband synthetic data
+])
+def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
+    """Test saving and reloading the data set."""
+    xarray_data = request.getfixturevalue(xarray_fixture)
+    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset.save(xarray_data)
+    reloaded = dataset.load()
+    assert isinstance(reloaded, xr.DataArray)
+    assert isinstance(reloaded.rio.crs, CRS)
+    assert reloaded.equals(xarray_data)
+
+def test_load_missing_file(tmp_path):
+    """Check the error when trying to load missing file."""
+    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    assert not dataset._exists(), "File unexpectedly exists"
+    pattern = r"Failed while loading data from data set RasterDataset\(.*\)"
+    with pytest.raises(DatasetError, match=pattern):
+        dataset.load()

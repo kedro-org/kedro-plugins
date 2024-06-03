@@ -85,7 +85,7 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
     Reads a project id from a configuration file or generates and saves a new one if not present.
     Returns None if configuration file does not exist or does not relate to Kedro.
     """
-    if pyproject_path.exists():
+    try:
         with open(pyproject_path, "r+") as file:
             pyproject_data = toml.load(file)
 
@@ -102,15 +102,13 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                     file.write(toml_string)
                 return project_id
             except KeyError:
-                logging.debug(
+                logging.error(
                     f"Failed to retrieve project id or save project id: "
                     f"{str(pyproject_path)} does not contain a [tool.kedro] section"
                 )
                 return None
-
-    logging.debug(
-        f"Failed to retrieve project id or save project id: {str(pyproject_path)} does not exist"
-    )
+    except OSError as exc:
+        logging.error(f"Failed to read the file: {str(pyproject_path)}.\n{str(exc)}")
     return None
 
 

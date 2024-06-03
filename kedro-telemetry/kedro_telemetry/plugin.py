@@ -103,7 +103,8 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                 return project_id
             except KeyError:
                 logging.debug(
-                    f"Failed to retrieve project id or save project id: {str(pyproject_path)} does not relate to Kedro"
+                    f"Failed to retrieve project id or save project id: "
+                    f"{str(pyproject_path)} does not contain a [tool.kedro] section"
                 )
                 return None
 

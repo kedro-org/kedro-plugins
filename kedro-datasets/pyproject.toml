@@ -165,6 +165,11 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
@@ -263,7 +268,12 @@ test = [
 ]
 
 # Experimental dataset requirements
-experimental = []
+experimental = [
+    "langchain-openai",
+    "langchain-cohere",
+    "langchain-anthropic",
+    "langchain-community",
+]
 
 # All requirements
 all = ["kedro-datasets[test,docs]"]

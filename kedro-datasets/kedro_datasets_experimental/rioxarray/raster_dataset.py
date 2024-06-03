@@ -2,7 +2,7 @@
 underlying functionality is supported by rioxarray and xarray. A read rasterdata file
 returns a xarray.DataArray object.
 """
-
+import logging
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -14,6 +14,9 @@ from kedro.io import AbstractVersionedDataset, DatasetError
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from rasterio.crs import CRS
 
+logger = logging.getLogger(__name__)
+
+SUPPORTED_DIMS = [("band", "x", "y"), ("x", "y")]
 
 class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     """``RasterDataset``  loads and saves rasterdata files and reads them as xarray
@@ -106,11 +109,12 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
     def _load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
         read_xr = rxr.open_rasterio(load_path, **self._load_args)
-        if not isinstance(read_xr.rio.crs, CRS):
-            raise ValueError("Dataset lacks a coordinate reference system.")
+        self._sanity_check(read_xr)
+        logger.info(f"found coordinate rerence system {read_xr.rio.crs}")
         return read_xr
 
     def _save(self, data: xarray.DataArray) -> None:
+        self._sanity_check(data)
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         data.rio.to_raster(save_path, **self._save_args)
         self._fs.invalidate_cache(save_path)
@@ -135,3 +139,14 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def _sanity_check(self, data: xarray.DataArray) -> None:
+        """Perform sanity checks on the data to ensure it meets the requirements."""
+        if not isinstance(data, xarray.DataArray):
+            raise NotImplementedError("Currently only supporting xarray.DataArray while saving raster data.")
+
+        if not isinstance(data.rio.crs, CRS):
+            raise ValueError("Dataset lacks a coordinate reference system.")
+
+        if all(set(data.dims) != set(dims) for dims in SUPPORTED_DIMS):
+            raise ValueError(f"Data has unsupported dimensions: {data.dims}. Supported dimensions are: {SUPPORTED_DIMS}")

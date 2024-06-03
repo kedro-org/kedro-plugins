@@ -24,7 +24,7 @@ def synthetic_xarray():
         coords={"x": np.linspace(0, 100, 100), "y": np.linspace(0, 100, 100)}
     )
     data.rio.write_crs("epsg:4326", inplace=True)
-    return data.to_dataset(name="synthetic")
+    return data
 
 @pytest.fixture
 def synthetic_xarray_multiband():
@@ -35,7 +35,7 @@ def synthetic_xarray_multiband():
         coords={"x": np.linspace(0, 100, 100), "y": np.linspace(0, 100, 100)}
     )
     data.rio.write_crs("epsg:4326", inplace=True)
-    return data.to_dataset(name="synthetic")
+    return data
 
 @pytest.fixture
 def cog_xarray(cog_file_path) -> xr.DataArray:
@@ -63,9 +63,9 @@ def test_exists(tmp_path, synthetic_xarray):
     dataset.save(synthetic_xarray)
     assert dataset.exists()
 @pytest.mark.parametrize("xarray_fixture", [
-    "synthetic_xarray",           # Single-band synthetic data
-    "cog_xarray",                 # COG file data, may also be multiband depending on the fixture setup
-    "synthetic_xarray_multiband"  # Explicitly multiband synthetic data
+    "synthetic_xarray",
+    "cog_xarray",
+    "synthetic_xarray_multiband"
 ])
 def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
     """Test saving and reloading the data set."""
@@ -75,6 +75,7 @@ def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
     reloaded = dataset.load()
     assert isinstance(reloaded, xr.DataArray)
     assert isinstance(reloaded.rio.crs, CRS)
+    assert reloaded.dims == ("band", "y", "x")
     assert reloaded.equals(xarray_data)
 
 def test_load_missing_file(tmp_path):

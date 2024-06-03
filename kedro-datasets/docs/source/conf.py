@@ -107,6 +107,7 @@ type_targets = {
         "DataCatalog",
         "ibis.backends.BaseBackend",
         "langchain_openai.chat_models.base.ChatOpenAI",
+        "langchain_openai.embeddings.base.OpenAIEmbeddings",
     ),
     "py:data": (
         "typing.Any",
@@ -222,7 +223,6 @@ todo_include_todos = False
 
 # -- Kedro specific configuration -----------------------------------------
 KEDRO_MODULES = [
-    "kedro_datasets",
     "kedro_datasets_experimental"
 ]
 

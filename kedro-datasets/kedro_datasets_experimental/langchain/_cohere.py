@@ -16,6 +16,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     catalog.yml:
 
     .. code-block:: yaml
+
        command:
          type: langchain.ChatCohereDataset
          kwargs:
@@ -27,6 +28,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     credentials.yml:
 
     .. code-block:: yaml
+
        cohere:
          cohere_api_url: <cohere-api-base>
          cohere_api_key: <cohere-api-key>
@@ -35,7 +37,8 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: python
+    .. code-block:: pycon
+
         >>> from kedro_datasets_experimental.langchain import ChatCohereDataset
         >>> llm = ChatCohereDataset(
         ...     credentials={

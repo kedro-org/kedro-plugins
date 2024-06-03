@@ -42,7 +42,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         ...     },
         ...     kwargs={
         ...         "model": "claude-instant-1",
-        ...         "temperature": 0,
+        ...         "temperature": 0.0,
         ...     }
         ... ).load()
         >>>

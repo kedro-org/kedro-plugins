@@ -8,11 +8,14 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
+import rasterio
 import rioxarray as rxr
 import xarray
+import numpy as np
 from kedro.io import AbstractVersionedDataset, DatasetError
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from rasterio.crs import CRS
+from rasterio.transform import from_bounds
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +119,40 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
     def _save(self, data: xarray.DataArray) -> None:
         self._sanity_check(data)
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        data.rio.to_raster(save_path, **self._save_args)
+        if "band" in data.dims:
+            self._save_multiband(data, save_path)
+        else:
+            data.rio.to_raster(save_path, **self._save_args)
         self._fs.invalidate_cache(save_path)
+
+    def _save_multiband(self, data, save_path):
+        if len(data.band) > 1:
+            bands_data = [data.sel(band=band) for band in data.band.values]
+            transform = from_bounds(
+                west=data.x.min(),
+                south=data.y.min(),
+                east=data.x.max(),
+                north=data.y.max(),
+                width=data[0].shape[1],
+                height=data[0].shape[0],
+            )
+
+            nodata_value = np.nan
+            crs = data.rio.crs
+
+            meta = {
+                    "driver": "GTiff",
+                    "height": bands_data[0].shape[0],
+                    "width": bands_data[0].shape[1],
+                    "count": len(bands_data),
+                    "dtype": str(bands_data[0].dtype),
+                    "crs": crs,
+                    "transform": transform,
+                    "nodata": nodata_value,
+                }
+            with rasterio.open(save_path, "w", **meta) as dst:
+                for idx, band in enumerate(bands_data, start=1):
+                    dst.write(band.data, idx)
 
     def _exists(self) -> bool:
         try:

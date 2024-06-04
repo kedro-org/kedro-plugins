@@ -1,7 +1,8 @@
 # Upcoming release
+* Updated the plugin to generate a unique project UUID for kedro project and store it in `pyproject.toml`.
 
 # Release 0.4.0
-* Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`.
+* Updated the plugin to generate a unique UUID for each user of `kedro-telemetry`.
 * Added support for Python 3.12.
 
 # Release 0.3.2

@@ -386,8 +386,11 @@ def test_create_airflow_conf_source(cli_runner, metadata):
 
     assert dag_file.exists()
 
-    expected_airflow_dag = f'conf_source = "{metadata.project_path}/conf"'
+    expected_airflow_dag = (
+        f'conf_source = "{metadata.project_path}/conf" or Path.cwd() / "conf"'
+    )
     with dag_file.open(encoding="utf-8") as f:
         dag_code = [line.strip() for line in f.read().splitlines()]
+        print(dag_code)
         assert expected_airflow_dag in dag_code
     dag_file.unlink()

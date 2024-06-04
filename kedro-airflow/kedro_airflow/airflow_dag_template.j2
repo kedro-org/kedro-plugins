@@ -72,6 +72,7 @@ with DAG(
             node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
+            conf_source=conf_source,
         ),
 {% endfor %}    }
 

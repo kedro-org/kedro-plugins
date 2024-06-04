@@ -22,12 +22,12 @@ SUPPORTED_DIMS = [("band", "x", "y"), ("x", "y")]
 DEFAULT_NO_DATA_VALUE = -9999
 SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
+
 class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     """``GeotiffDataset`` loads and saves rasterdata files and reads them as xarray
     DataArrays. The underlying functionality is supported by rioxarray, rasterio and xarray.
 
-    Reading and writing of single and multiband geotiffs data is supported. There are sanity checks to
-    ensure that a coordinate reference system (CRS) is present.
+    Reading and writing of single and multiband geotiffs data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
 
     Arbitrary xarray.DataArray objects can not be saved to a geotiff file. Have a look at netcdf if this is what you need.
 
@@ -73,7 +73,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
-        fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``GeotiffDataset`` pointing to a concrete
@@ -87,9 +86,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
                 Here you can find all available arguments:
                 https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray-open-rasterio
                 All defaults are preserved.
-            save_args: rioxarray options for saving to a geotiff file.
-                Here you can find all available arguments:
-                https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_dataset.GeotiffDataset.to_raster
+            save_args: options for rioxarray for data without the band dimension and rasterio otherwhise.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -163,7 +160,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-
     def _save_multiband(self, data: xarray.DataArray, save_path: str):
         """Saving multiband raster data to a geotiff file."""
         bands_data = [data.sel(band=band) for band in data.band.values]
@@ -176,7 +172,9 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             height=data[0].shape[0],
         )
 
-        nodata_value = data.rio.nodata if data.rio.nodata is not None else DEFAULT_NO_DATA_VALUE
+        nodata_value = (
+            data.rio.nodata if data.rio.nodata is not None else DEFAULT_NO_DATA_VALUE
+        )
         crs = data.rio.crs
 
         meta = {

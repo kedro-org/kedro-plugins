@@ -95,7 +95,7 @@ def test_load_save_multi1(tmp_path,multi1_file_path):
 def test_load_no_crs(multi2_file_path):
     """Test loading a multiband raster file."""
     dataset = RasterDataset(filepath=multi2_file_path)
-    with pytest.raises(ValueError):
+    with pytest.raises(DatasetError):
         dataset.load()
 
 

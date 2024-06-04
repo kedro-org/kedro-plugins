@@ -165,8 +165,8 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-rioxarray-rasterdataset = ["rioxarray>=0.15.0"]
-rioxarray = ["kedro-datasets[rioxarray-rasterdataset]"]
+rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
+rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
 
 # Docs requirements

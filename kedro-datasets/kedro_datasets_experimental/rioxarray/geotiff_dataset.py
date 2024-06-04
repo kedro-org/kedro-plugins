@@ -1,4 +1,4 @@
-"""RasterDataset loads geospatial raster data and saves it to a local geoiff file. The
+"""GeotiffDataset loads geospatial raster data and saves it to a local geoiff file. The
 underlying functionality is supported by rioxarray and xarray. A read rasterdata file
 returns a xarray.DataArray object.
 """
@@ -22,15 +22,15 @@ SUPPORTED_DIMS = [("band", "x", "y"), ("x", "y")]
 DEFAULT_NO_DATA_VALUE = -9999
 SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
-class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    """``RasterDataset``  loads and saves rasterdata files and reads them as xarray
+class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
+    """``GeotiffDataset``  loads and saves rasterdata files and reads them as xarray
     DataArrays.
 
 
     .. code-block:: yaml
 
         avalanches:
-          type: rioxarray.RasterDataset
+          type: rioxarray.GeotiffDataset
           filepath: avalanches.tif
 
     Example usage for the
@@ -39,7 +39,7 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets.rioxarray import RasterDataset
+        >>> from kedro_datasets.rioxarray import GeotiffDataset
         >>> import xarray as xr
         >>> import numpy as np
         >>>
@@ -50,7 +50,7 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
         ... )
         >>> data_crs = data.rio.write_crs("epsg:4326")
         >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
-        >>> dataset = RasterDataset(filepath="test.tif")
+        >>> dataset = GeotiffDataset(filepath="test.tif")
         >>> dataset.save(data_spatial_dims)
         >>> reloaded = dataset.load()
         >>> xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
@@ -71,8 +71,9 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
-        """Creates a new instance of ``RasterDataset`` pointing to a concrete
-        geospatial raster data file. It supports all formats supported by GDAL: https://gdal.org/drivers/raster/index.html
+        """Creates a new instance of ``GeotiffDataset`` pointing to a concrete
+        geospatial raster data file.
+
 
         Args:
             filepath: Filepath in POSIX format to a rasterdata file.
@@ -83,7 +84,7 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
                 All defaults are preserved.
             save_args: rioxarray options for saving to a geotiff file.
                 Here you can find all available arguments:
-                https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_dataset.RasterDataset.to_raster
+                https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_dataset.GeotiffDataset.to_raster
                 All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

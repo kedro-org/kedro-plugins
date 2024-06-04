@@ -7,7 +7,7 @@ import xarray as xr
 from kedro.io import DatasetError
 from rasterio.crs import CRS
 
-from kedro_datasets_experimental.rioxarray.raster_dataset import RasterDataset
+from kedro_datasets_experimental.rioxarray.geotiff_dataset import GeotiffDataset
 
 
 @pytest.fixture
@@ -60,8 +60,8 @@ def synthetic_xarray_many_vars_no_band():
 
 
 @pytest.fixture
-def cog_geotiff_dataset(cog_file_path, save_args) -> RasterDataset:
-    return RasterDataset(filepath=cog_file_path, save_args=save_args)
+def cog_geotiff_dataset(cog_file_path, save_args) -> GeotiffDataset:
+    return GeotiffDataset(filepath=cog_file_path, save_args=save_args)
 
 
 def test_load_cog_geotiff(cog_geotiff_dataset):
@@ -74,11 +74,11 @@ def test_load_cog_geotiff(cog_geotiff_dataset):
 
 def test_load_save_cog(tmp_path,cog_file_path):
     """Test loading a multiband raster file."""
-    dataset = RasterDataset(filepath=cog_file_path)
+    dataset = GeotiffDataset(filepath=cog_file_path)
     loaded_xr = dataset.load()
     band1_data = loaded_xr.sel(band=1)
     target_file = tmp_path / "tmp22.tif"
-    dataset_to = RasterDataset(filepath=str(target_file))
+    dataset_to = GeotiffDataset(filepath=str(target_file))
     dataset_to.save(loaded_xr)
     reloaded_xr = dataset_to.load()
     assert target_file.exists()
@@ -92,8 +92,8 @@ def test_load_save_cog(tmp_path,cog_file_path):
 
 def test_load_save_multi1(tmp_path,multi1_file_path):
     """Test loading a multiband raster file."""
-    dataset = RasterDataset(filepath=multi1_file_path)
-    dataset_to = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset = GeotiffDataset(filepath=multi1_file_path)
+    dataset_to = GeotiffDataset(filepath=str(tmp_path / "tmp.tif"))
     loaded_xr = dataset.load()
     band1_data = loaded_xr.sel(band=1)
     assert isinstance(loaded_xr.rio.crs, CRS)
@@ -108,13 +108,13 @@ def test_load_save_multi1(tmp_path,multi1_file_path):
 
 def test_load_no_crs(multi2_file_path):
     """Test loading a multiband raster file."""
-    dataset = RasterDataset(filepath=multi2_file_path)
+    dataset = GeotiffDataset(filepath=multi2_file_path)
     with pytest.raises(DatasetError):
         dataset.load()
 
 def test_load_not_tif():
     """Test loading a multiband raster file."""
-    dataset = RasterDataset(filepath="whatever.nc")
+    dataset = GeotiffDataset(filepath="whatever.nc")
     with pytest.raises(DatasetError):
         dataset.load()
 
@@ -122,7 +122,7 @@ def test_load_not_tif():
 def test_exists(tmp_path, synthetic_xarray):
     """Test `exists` method invocation for both existing and
     nonexistent data set."""
-    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset = GeotiffDataset(filepath=str(tmp_path / "tmp.tif"))
     assert not dataset.exists()
     dataset.save(synthetic_xarray)
     assert dataset.exists()
@@ -134,7 +134,7 @@ def test_exists(tmp_path, synthetic_xarray):
 def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
     """Test saving and reloading the data set."""
     xarray_data = request.getfixturevalue(xarray_fixture)
-    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset = GeotiffDataset(filepath=str(tmp_path / "tmp.tif"))
     dataset.save(xarray_data)
     assert dataset.exists()
     reloaded_xr = dataset.load()
@@ -145,14 +145,14 @@ def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
 
 def test_save_and_load_geotiff_no_band(tmp_path, synthetic_xarray_many_vars_no_band):
     """this test should fail because the data array has no band dimension"""
-    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset = GeotiffDataset(filepath=str(tmp_path / "tmp.tif"))
     with pytest.raises(DatasetError):
         dataset.save(synthetic_xarray_many_vars_no_band)
 
 def test_load_missing_file(tmp_path):
     """Check the error when trying to load missing file."""
-    dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
+    dataset = GeotiffDataset(filepath=str(tmp_path / "tmp.tif"))
     assert not dataset._exists(), "File unexpectedly exists"
-    pattern = r"Failed while loading data from data set RasterDataset\(.*\)"
+    pattern = r"Failed while loading data from data set GeotiffDataset\(.*\)"
     with pytest.raises(DatasetError, match=pattern):
         dataset.load()

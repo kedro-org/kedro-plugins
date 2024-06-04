@@ -11,4 +11,4 @@ kedro_datasets_experimental
    :toctree:
    :template: autosummary/class.rst
 
-   kedro_datasets_experimental.rioxarray.RasterDataset
+   kedro_datasets_experimental.rioxarray.GeotiffDataset

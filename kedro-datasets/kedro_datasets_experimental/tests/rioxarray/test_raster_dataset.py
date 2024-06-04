@@ -51,7 +51,7 @@ def synthetic_xarray_multiband():
 def synthetic_xarray_many_vars_no_band():
     """Create a synthetic xarray.DataArray with CRS information."""
     data = xr.DataArray(
-        np.random.rand(10, 100, 100),
+        np.random.rand(2,3,4, 100, 100),
         dims=("var1","var2","var3","y", "x"),
         coords={"x": np.linspace(0, 100, 100), "y": np.linspace(0, 100, 100)}
     )
@@ -126,7 +126,7 @@ def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
 def test_save_and_load_geotiff_no_band(tmp_path, synthetic_xarray_many_vars_no_band):
     """this test should fail because the data array has no band dimension"""
     dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
-    with pytest.raises(ValueError):
+    with pytest.raises(DatasetError):
         dataset.save(synthetic_xarray_many_vars_no_band)
 
 def test_load_missing_file(tmp_path):

@@ -137,7 +137,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=True, resolve_path=True),
+    type=click.Path(exists=False, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
     default=None,
 )

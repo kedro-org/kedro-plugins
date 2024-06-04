@@ -76,7 +76,7 @@ def test_load_cog_geotiff(cog_geotiff_dataset):
     assert loaded_xr.shape == (1, 500, 500)
     assert loaded_xr.dims == ("band", "y", "x")
 
-def test_load_multi1(tmp_path,multi1_file_path):
+def test_load_save_multi1(tmp_path,multi1_file_path):
     """Test loading a multiband raster file."""
     dataset = RasterDataset(filepath=multi1_file_path)
     dataset_to = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
@@ -87,10 +87,17 @@ def test_load_multi1(tmp_path,multi1_file_path):
     assert len(loaded_xr.band) == 2
     assert loaded_xr.shape == (2, 5, 5)
     assert loaded_xr.dims == ("band", "y", "x")
-    assert band1_data.values.std() == 0.015918046
+    assert np.isclose(band1_data.values.std(), 0.015918046)
     dataset_to.save(loaded_xr)
-    reloaded = dataset.load()
-    assert reloaded.equals(loaded_xr)
+    reloaded_xr = dataset_to.load()
+    assert (loaded_xr.values == reloaded_xr.values).all()
+
+def test_load_no_crs(multi2_file_path):
+    """Test loading a multiband raster file."""
+    dataset = RasterDataset(filepath=multi2_file_path)
+    with pytest.raises(ValueError):
+        dataset.load()
+
 
 def test_exists(tmp_path, synthetic_xarray):
     """Test `exists` method invocation for both existing and

@@ -112,6 +112,12 @@ def test_load_no_crs(multi2_file_path):
     with pytest.raises(DatasetError):
         dataset.load()
 
+def test_load_not_tif():
+    """Test loading a multiband raster file."""
+    dataset = RasterDataset(filepath="whatever.nc")
+    with pytest.raises(DatasetError):
+        dataset.load()
+
 
 def test_exists(tmp_path, synthetic_xarray):
     """Test `exists` method invocation for both existing and

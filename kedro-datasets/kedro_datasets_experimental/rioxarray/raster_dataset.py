@@ -8,7 +8,6 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-import numpy as np
 import rasterio
 import rioxarray as rxr
 import xarray
@@ -21,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_DIMS = [("band", "x", "y"), ("x", "y")]
 DEFAULT_NO_DATA_VALUE = -9999
+SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
 class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     """``RasterDataset``  loads and saves rasterdata files and reads them as xarray
@@ -134,6 +134,10 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
     def _save(self, data: xarray.DataArray) -> None:
         self._sanity_check(data)
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        if not save_path.endswith(tuple(SUPPORTED_FILE_FORMATS)):
+            raise ValueError(
+                f"Unsupported file format. Supported formats are: {SUPPORTED_FILE_FORMATS}"
+            )
         if "band" in data.dims:
             self._save_multiband(data, save_path)
         else:

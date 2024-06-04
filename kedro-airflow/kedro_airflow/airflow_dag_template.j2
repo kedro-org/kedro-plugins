@@ -43,7 +43,7 @@ env = "{{ env }}"
 pipeline_name = "{{ pipeline_name }}"
 project_path = Path.cwd()
 package_name = "{{ package_name }}"
-conf_source = "{{ conf_source }}"
+conf_source = "{{ conf_source }}" or Path.cwd() / "conf"
 
 
 # Using a DAG context manager, you don't have to specify the dag property of each task

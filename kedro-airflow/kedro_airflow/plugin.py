@@ -139,6 +139,7 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--conf-source",
     type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
+    default=None,
 )
 @click.pass_obj
 def create(  # noqa: PLR0913, PLR0912
@@ -154,6 +155,9 @@ def create(  # noqa: PLR0913, PLR0912
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
+
+    if conf_source is None:
+        conf_source = ""
     if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."

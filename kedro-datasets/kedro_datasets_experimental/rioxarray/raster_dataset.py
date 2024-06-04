@@ -8,10 +8,10 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
+import numpy as np
 import rasterio
 import rioxarray as rxr
 import xarray
-import numpy as np
 from kedro.io import AbstractVersionedDataset, DatasetError
 from kedro.io.core import Version, get_filepath_str, get_protocol_and_path
 from rasterio.crs import CRS
@@ -20,6 +20,7 @@ from rasterio.transform import from_bounds
 logger = logging.getLogger(__name__)
 
 SUPPORTED_DIMS = [("band", "x", "y"), ("x", "y")]
+DEFAULT_NO_DATA_VALUE = -9999
 
 class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     """``RasterDataset``  loads and saves rasterdata files and reads them as xarray
@@ -61,11 +62,14 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        metadata: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``RasterDataset`` pointing to a concrete
         geospatial raster data file. It supports all formats supported by GDAL: https://gdal.org/drivers/raster/index.html
@@ -88,10 +92,12 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
+        _fs_args = deepcopy(fs_args) or {}
+        _credentials = deepcopy(credentials) or {}
+
         protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol)
-        self._format = "RASTERDATASET"
         self.metadata = metadata
 
         super().__init__(
@@ -109,6 +115,15 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
         if save_args is not None:
             self._save_args.update(save_args)
 
+    def _describe(self) -> dict[str, Any]:
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
+
     def _load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
         read_xr = rxr.open_rasterio(load_path, **self._load_args)
@@ -125,35 +140,6 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
             data.rio.to_raster(save_path, **self._save_args)
         self._fs.invalidate_cache(save_path)
 
-    def _save_multiband(self, data, save_path):
-        if len(data.band) > 1:
-            bands_data = [data.sel(band=band) for band in data.band.values]
-            transform = from_bounds(
-                west=data.x.min(),
-                south=data.y.min(),
-                east=data.x.max(),
-                north=data.y.max(),
-                width=data[0].shape[1],
-                height=data[0].shape[0],
-            )
-
-            nodata_value = np.nan
-            crs = data.rio.crs
-
-            meta = {
-                    "driver": "GTiff",
-                    "height": bands_data[0].shape[0],
-                    "width": bands_data[0].shape[1],
-                    "count": len(bands_data),
-                    "dtype": str(bands_data[0].dtype),
-                    "crs": crs,
-                    "transform": transform,
-                    "nodata": nodata_value,
-                }
-            with rasterio.open(save_path, "w", **meta) as dst:
-                for idx, band in enumerate(bands_data, start=1):
-                    dst.write(band.data, idx)
-
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -162,26 +148,60 @@ class RasterDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]
 
         return self._fs.exists(load_path)
 
-    def _describe(self) -> dict[str, Any]:
-        return {
-            "filepath": self._filepath,
-            "load_args": self._load_args,
-            "save_args": self._save_args,
-            "version": self._version,
-        }
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
 
     def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)
+
+    def _save_multiband(self, data: xarray.DataArray, save_path: str):
+        """Saving multiband raster data to a geotiff file."""
+        bands_data = [data.sel(band=band) for band in data.band.values]
+        transform = from_bounds(
+            west=data.x.min(),
+            south=data.y.min(),
+            east=data.x.max(),
+            north=data.y.max(),
+            width=data[0].shape[1],
+            height=data[0].shape[0],
+        )
+
+        nodata_value = data.rio.nodata if data.rio.nodata is not None else DEFAULT_NO_DATA_VALUE
+        crs = data.rio.crs
+
+        meta = {
+            "driver": "GTiff",
+            "height": bands_data[0].shape[0],
+            "width": bands_data[0].shape[1],
+            "count": len(bands_data),
+            "dtype": str(bands_data[0].dtype),
+            "crs": crs,
+            "transform": transform,
+            "nodata": nodata_value,
+        }
+        with rasterio.open(save_path, "w", **meta) as dst:
+            for idx, band in enumerate(bands_data, start=1):
+                dst.write(band.data, idx)
+
     def _sanity_check(self, data: xarray.DataArray) -> None:
         """Perform sanity checks on the data to ensure it meets the requirements."""
         if not isinstance(data, xarray.DataArray):
-            raise NotImplementedError("Currently only supporting xarray.DataArray while saving raster data.")
+            raise NotImplementedError(
+                "Currently only supporting xarray.DataArray while saving raster data."
+            )
 
         if not isinstance(data.rio.crs, CRS):
             raise ValueError("Dataset lacks a coordinate reference system.")
 
         if all(set(data.dims) != set(dims) for dims in SUPPORTED_DIMS):
-            raise ValueError(f"Data has unsupported dimensions: {data.dims}. Supported dimensions are: {SUPPORTED_DIMS}")
+            raise ValueError(
+                f"Data has unsupported dimensions: {data.dims}. Supported dimensions are: {SUPPORTED_DIMS}"
+            )

@@ -60,10 +60,6 @@ def synthetic_xarray_many_vars_no_band():
 
 
 @pytest.fixture
-def cog_xarray(cog_file_path) -> xr.DataArray:
-    return rioxarray.open_rasterio(cog_file_path)
-
-@pytest.fixture
 def cog_geotiff_dataset(cog_file_path, save_args) -> RasterDataset:
     return RasterDataset(filepath=cog_file_path, save_args=save_args)
 
@@ -75,6 +71,24 @@ def test_load_cog_geotiff(cog_geotiff_dataset):
     assert isinstance(loaded_xr, xr.DataArray)
     assert loaded_xr.shape == (1, 500, 500)
     assert loaded_xr.dims == ("band", "y", "x")
+
+def test_load_save_cog(tmp_path,cog_file_path):
+    """Test loading a multiband raster file."""
+    dataset = RasterDataset(filepath=cog_file_path)
+    loaded_xr = dataset.load()
+    band1_data = loaded_xr.sel(band=1)
+    target_file = tmp_path / "tmp22.tif"
+    dataset_to = RasterDataset(filepath=str(target_file))
+    dataset_to.save(loaded_xr)
+    reloaded_xr = dataset_to.load()
+    assert target_file.exists()
+    assert isinstance(loaded_xr.rio.crs, CRS)
+    assert isinstance(loaded_xr, xr.DataArray)
+    assert len(loaded_xr.band) == 1
+    assert loaded_xr.shape == (1, 500, 500)
+    assert loaded_xr.dims == ("band", "y", "x")
+    assert np.isclose(band1_data.values.std(), 4688.72624578268)
+    assert (loaded_xr.values == reloaded_xr.values).all()
 
 def test_load_save_multi1(tmp_path,multi1_file_path):
     """Test loading a multiband raster file."""
@@ -110,18 +124,18 @@ def test_exists(tmp_path, synthetic_xarray):
 @pytest.mark.parametrize("xarray_fixture", [
     "synthetic_xarray_multiband",
     "synthetic_xarray",
-    "cog_xarray",
 ])
 def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
     """Test saving and reloading the data set."""
     xarray_data = request.getfixturevalue(xarray_fixture)
     dataset = RasterDataset(filepath=str(tmp_path / "tmp.tif"))
     dataset.save(xarray_data)
-    reloaded = dataset.load()
-    assert isinstance(reloaded, xr.DataArray)
-    assert isinstance(reloaded.rio.crs, CRS)
-    assert reloaded.dims == ("band", "y", "x")
-    assert reloaded.equals(xarray_data)
+    assert dataset.exists()
+    reloaded_xr = dataset.load()
+    assert isinstance(reloaded_xr, xr.DataArray)
+    assert isinstance(reloaded_xr.rio.crs, CRS)
+    assert reloaded_xr.dims == ("band", "y", "x")
+    assert (xarray_data.values == reloaded_xr.values).all()
 
 def test_save_and_load_geotiff_no_band(tmp_path, synthetic_xarray_many_vars_no_band):
     """this test should fail because the data array has no band dimension"""

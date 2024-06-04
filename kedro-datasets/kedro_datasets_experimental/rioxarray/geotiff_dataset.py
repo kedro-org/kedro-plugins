@@ -23,15 +23,21 @@ DEFAULT_NO_DATA_VALUE = -9999
 SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
 class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    """``GeotiffDataset``  loads and saves rasterdata files and reads them as xarray
-    DataArrays.
+    """``GeotiffDataset`` loads and saves rasterdata files and reads them as xarray
+    DataArrays. The underlying functionality is supported by rioxarray, rasterio and xarray.
 
+    Reading and writing of single and multiband geotiffs data is supported. There are sanity checks to
+    ensure that a coordinate reference system (CRS) is present.
+
+    Arbitrary xarray.DataArray objects can not be saved to a geotiff file. Have a look at netcdf if this is what you need.
+
+    Dimensions supported are: ("band", "x", "y") and ("x", "y").
 
     .. code-block:: yaml
 
-        avalanches:
+        sentinal_data:
           type: rioxarray.GeotiffDataset
-          filepath: avalanches.tif
+          filepath: sentinal_data.tif
 
     Example usage for the
         `Python API <https://kedro.readthedocs.io/en/stable/data/\
@@ -67,7 +73,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
-        credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
@@ -85,7 +90,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             save_args: rioxarray options for saving to a geotiff file.
                 Here you can find all available arguments:
                 https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_dataset.GeotiffDataset.to_raster
-                All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -93,9 +97,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
-        _credentials = deepcopy(credentials) or {}
-
         protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol)
@@ -162,10 +163,6 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
-    def _invalidate_cache(self) -> None:
-        """Invalidate underlying filesystem caches."""
-        filepath = get_filepath_str(self._filepath, self._protocol)
-        self._fs.invalidate_cache(filepath)
 
     def _save_multiband(self, data: xarray.DataArray, save_path: str):
         """Saving multiband raster data to a geotiff file."""
@@ -194,7 +191,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         }
         with rasterio.open(save_path, "w", **meta) as dst:
             for idx, band in enumerate(bands_data, start=1):
-                dst.write(band.data, idx)
+                dst.write(band.data, idx, **self._save_args)
 
     def _sanity_check(self, data: xarray.DataArray) -> None:
         """Perform sanity checks on the data to ensure it meets the requirements."""

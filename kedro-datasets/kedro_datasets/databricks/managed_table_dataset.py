@@ -394,7 +394,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
                 data = _get_spark().createDataFrame(
-                    data.loc[:, cols], schema=self._table.schema()
+                    data[cols], schema=schema
                 )
             else:
                 data = data.select(*cols)
@@ -452,4 +452,3 @@ class ManagedTableDataset(AbstractVersionedDataset):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
-        

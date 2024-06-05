@@ -314,7 +314,7 @@ class TestManagedTableDataset:
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_schema_pandas(
-            self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
+        self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
     ):
         unity_ds = ManagedTableDataset(
             database="test",
@@ -343,11 +343,9 @@ class TestManagedTableDataset:
         saved_ds = ManagedTableDataset(
             database="test",
             table="test_save_pd_schema",
-            dataframe_type="pandas"
         )
-        saved_table = saved_ds.load().toPandas().sort_values("name").reset_index(drop=True)
-        expected_table = subset_expected_df.toPandas().sort_values("name").reset_index(drop=True)
-        assert saved_table.equals(expected_table)
+        saved_table = saved_ds.load()
+        assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_overwrite(
         self, sample_spark_df: DataFrame, append_spark_df: DataFrame
@@ -486,7 +484,8 @@ class TestManagedTableDataset:
         pandas_ds = ManagedTableDataset(
             database="test", table="test_load_pandas", dataframe_type="pandas"
         )
-        pandas_df = pandas_ds.load().toPandas().sort_values("name", ignore_index=True)
-        expected_df = sample_pandas_df.sort_values("name", ignore_index=True)
+        pandas_df = pandas_ds.load().sort_values("name", ignore_index=True)
 
-        assert isinstance(pandas_df, pd.DataFrame) and pandas_df.equals(expected_df)
+        assert isinstance(pandas_df, pd.DataFrame) and pandas_df.equals(
+            sample_pandas_df
+        )

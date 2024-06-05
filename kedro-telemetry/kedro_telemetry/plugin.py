@@ -45,6 +45,8 @@ KNOWN_CI_ENV_VAR_KEYS = {
 }
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
+PYPROJECT_CONFIG_NAME = "pyproject.toml"
+UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +80,63 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
+def _get_or_create_project_id(pyproject_path: Path) -> str | None:
+    """
+    Reads a project id from a configuration file or generates and saves a new one if not present.
+    Returns None if configuration file does not exist or does not relate to Kedro.
+    """
+    try:
+        with open(pyproject_path, "r+") as file:
+            pyproject_data = toml.load(file)
+
+            # Check if pyproject related to kedro
+            try:
+                _ = pyproject_data["tool"]["kedro"]
+                try:
+                    project_id = pyproject_data["tool"]["kedro_telemetry"]["project_id"]
+                except KeyError:
+                    project_id = uuid.uuid4().hex
+                    toml_string = (
+                        f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
+                    )
+                    file.write(toml_string)
+                return project_id
+            except KeyError:
+                logging.error(
+                    f"Failed to retrieve project id or save project id: "
+                    f"{str(pyproject_path)} does not contain a [tool.kedro] section"
+                )
+                return None
+    except OSError as exc:
+        logging.error(f"Failed to read the file: {str(pyproject_path)}.\n{str(exc)}")
+    return None
+
+
+def _add_tool_properties(
+    properties: dict[str, Any], pyproject_path: Path
+) -> dict[str, Any]:
+    """
+    Extends project properties with tool's properties.
+    """
+    if pyproject_path.exists():
+        with open(pyproject_path) as file:
+            pyproject_data = toml.load(file)
+
+        try:
+            tool_kedro = pyproject_data["tool"]["kedro"]
+            if "tools" in tool_kedro:
+                properties["tools"] = ", ".join(tool_kedro["tools"])
+            if "example_pipeline" in tool_kedro:
+                properties["example_pipeline"] = tool_kedro["example_pipeline"]
+        except KeyError:
+            pass
+
+    return properties
+
+
 def _generate_new_uuid(full_path: str) -> str:
     try:
-        config: dict[str, dict[str, Any]] = {}
-        config["telemetry"] = {}
+        config: dict[str, dict[str, Any]] = {"telemetry": {}}
         new_uuid = uuid.uuid4().hex
         config["telemetry"]["uuid"] = new_uuid
 
@@ -126,7 +181,7 @@ class KedroTelemetryCLIHooks:
             logger.debug("You have opted into product usage analytics.")
             user_uuid = _get_or_create_uuid()
             project_properties = _get_project_properties(
-                user_uuid, project_metadata.project_path
+                user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
             )
             cli_properties = _format_user_cli_data(
                 project_properties, masked_command_args
@@ -177,7 +232,9 @@ class KedroTelemetryProjectHooks:
         default_pipeline = pipelines.get("__default__")  # __default__
         user_uuid = _get_or_create_uuid()
 
-        project_properties = _get_project_properties(user_uuid, self.project_path)
+        project_properties = _get_project_properties(
+            user_uuid, self.project_path / PYPROJECT_CONFIG_NAME
+        )
 
         project_statistics_properties = _format_project_statistics_data(
             project_properties, catalog, default_pipeline, pipelines
@@ -189,7 +246,7 @@ class KedroTelemetryProjectHooks:
         )
 
 
-def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
+def _is_known_ci_env(known_ci_env_var_keys: set[str]):
     # Most CI tools will set the CI environment variable to true
     if os.getenv("CI") == "true":
         return True
@@ -197,32 +254,24 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
-    hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
+def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
+    project_id = _get_or_create_project_id(pyproject_path)
+    package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
+    hashed_project_id = (
+        _hash(f"{project_id}{package_name}") if project_id is not None else None
+    )
+
     properties = {
         "username": user_uuid,
-        "package_name": hashed_package_name,
+        "project_id": hashed_project_id,
         "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
-        "is_ci_env": _is_known_ci_env(),
+        "is_ci_env": _is_known_ci_env(KNOWN_CI_ENV_VAR_KEYS),
     }
-    pyproject_path = Path(project_path) / "pyproject.toml"
-    if pyproject_path.exists():
-        with open(pyproject_path) as file:
-            pyproject_data = toml.load(file)
 
-        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
-            if "tools" in pyproject_data["tool"]["kedro"]:
-                # convert list of tools to comma-separated string
-                properties["tools"] = ", ".join(
-                    pyproject_data["tool"]["kedro"]["tools"]
-                )
-            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
-                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
-                    "example_pipeline"
-                ]
+    properties = _add_tool_properties(properties, pyproject_path)
 
     return properties
 

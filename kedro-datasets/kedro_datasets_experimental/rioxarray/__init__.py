@@ -9,5 +9,5 @@ import lazy_loader as lazy
 GeotiffDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"raster_dataset": ["GeotiffDataset"]}
+    __name__, submod_attrs={"geotiff_dataset": ["GeotiffDataset"]}
 )

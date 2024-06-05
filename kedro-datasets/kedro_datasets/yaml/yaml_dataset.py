@@ -1,8 +1,10 @@
 """``YAMLDataset`` loads/saves data from/to a YAML file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
+
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -16,6 +18,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import JSONPreview
 
 
 class YAMLDataset(AbstractVersionedDataset[dict, dict]):
@@ -157,3 +161,14 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self) -> JSONPreview:
+        """
+        Generate a preview of the YAML dataset with a specified number of items.
+
+        Returns:
+            A string representing the YAML data for previewing.
+        """
+        data = self._load()
+
+        return JSONPreview(json.dumps(data))

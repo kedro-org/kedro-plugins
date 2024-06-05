@@ -394,12 +394,12 @@ class ManagedTableDataset(AbstractVersionedDataset):
             cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
                 data = _get_spark().createDataFrame(
-                    data[cols], schema=schema
+                    data[cols].to_dict(orient='records'), schema=schema
                 )
             else:
                 data = data.select(*cols)
         elif self._table.dataframe_type == "pandas":
-            data = _get_spark().createDataFrame(data)
+            data = _get_spark().createDataFrame(data.to_dict(orient='records'))
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)
         elif self._table.write_mode == "upsert":

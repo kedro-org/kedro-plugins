@@ -393,18 +393,28 @@ class ManagedTableDataset(AbstractVersionedDataset):
         if schema:
             cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
-                data = _get_spark().createDataFrame(
-                    data[cols].to_dict(orient="records"), schema=schema
-                )
+                if isinstance(data, pd.DataFrame):
+                    data = _get_spark().createDataFrame(
+                        data[cols].to_dict(orient="records"), schema=schema
+                    )
+                else:
+                    raise DatasetError(
+                        "Data must be a pandas DataFrame when dataframe_type is 'pandas'"
+                    )
             else:
                 data = data.select(*cols)
         elif self._table.dataframe_type == "pandas":
-            cols = data.columns.tolist()
-            data = (
-                _get_spark()
-                .createDataFrame(data.to_dict(orient="records"))
-                .select(*cols)
-            )
+            if isinstance(data, pd.DataFrame):
+                cols = data.columns.tolist()
+                data = (
+                    _get_spark()
+                    .createDataFrame(data.to_dict(orient="records"))
+                    .select(*cols)
+                )
+            else:
+                raise DatasetError(
+                    "Data must be a pandas DataFrame when dataframe_type is 'pandas'"
+                )
 
         if self._table.write_mode == "overwrite":
             self._save_overwrite(data)

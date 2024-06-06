@@ -1,10 +1,10 @@
 import inspect
 import json
 from pathlib import Path, PurePosixPath
-import yaml
 
 import pandas as pd
 import pytest
+import yaml
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem

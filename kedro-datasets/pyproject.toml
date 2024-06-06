@@ -173,7 +173,6 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
-
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.4.0",

@@ -6,7 +6,7 @@
 * Added the following new **experimental** datasets:
 
 | Type                                | Description                                               | Location                                |
-| ----------------------------------- | --------------------------------------------------------- | --------------------------------------- |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
 | `langchain.ChatAnthropicDataset`    | A dataset for loading a ChatAnthropic langchain model.    | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
@@ -16,12 +16,124 @@
 
 # Release 3.0.1
 
-## Bug fixes and other changes
 
+## Bug fixes and other changes
 * Removed arbitrary upper bound for `s3fs`.
 * `NetCDFDataset` support for NetCDF4 via `engine="netcdf4"` and `engine="h5netcdf"`
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Charles Guan](https://github.com/charlesbmi)
+
+# Release 3.0.0
+## Major features and improvements
+
+* Added the following new datasets:
+
+| Type                    | Description                                               | Location                |
+|-------------------------|-----------------------------------------------------------|-------------------------|
+| `netcdf.NetCDFDataset`  | A dataset for loading and saving `*.nc` files.            | `kedro_datasets.netcdf` |
+| `ibis.TableDataset`     | A dataset for loading and saving using Ibis's backends.   | `kedro_datasets.ibis`   |
+
+* Added support for Python 3.12.
+* Normalised optional dependencies names for datasets to follow [PEP 685](https://peps.python.org/pep-0685/). The `.` characters have been replaced with `-` in the optional dependencies names. Note that this might be breaking for some users. For example, users should now install optional dependencies for `pandas.ParquetDataset` from `kedro-datasets` like this:
+```bash
+pip install kedro-datasets[pandas-parquetdataset]
+```
+* Removed `setup.py` and move to `pyproject.toml` completely for `kedro-datasets`.
+
+## Bug fixes and other changes
+* If using MSSQL, `load_args:params` will be typecasted as tuple.
+* Fixed bug with loading datasets from Hugging Face. Now allows passing parameters to the load_dataset function.
+* Made `connection_args` argument optional when calling `create_connection()` in `sql_dataset.py`.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Riley Brady](https://github.com/riley-brady)
+* [Andrew Cao](https://github.com/andrewcao1)
+* [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
+* [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
+
+# Release 2.1.0
+## Major features and improvements
+
+* Added the following new datasets:
+
+| Type                   | Description                                                 | Location                |
+|------------------------|-------------------------------------------------------------|-------------------------|
+| `matlab.MatlabDataset` | A dataset which uses `scipy` to save and load `.mat` files. | `kedro_datasets.matlab` |
+
+* Extended preview feature for matplotlib, plotly and tracking datasets.
+* Allowed additional parameters for sqlalchemy engine when using sql datasets.
+
+## Bug fixes and other changes
+* Removed Windows specific conditions in `pandas.HDFDataset` extra dependencies
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Samuel Lee SJ](https://github.com/samuel-lee-sj)
+* [Felipe Monroy](https://github.com/felipemonroy)
+* [Manuel Spierenburg](https://github.com/mjspier)
+
+# Release 2.0.0
+## Major features and improvements
+
+* Added the following new datasets:
+
+| Type                                       | Description                                                                                                                     | Location                     |
+|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| `huggingface.HFDataset`                    | A dataset to load Hugging Face datasets using the [datasets](https://pypi.org/project/datasets) library.                        | `kedro_datasets.huggingface` |
+| `huggingface.HFTransformerPipelineDataset` | A dataset to load pretrained Hugging Face transformers using the [transformers](https://pypi.org/project/transformers) library. | `kedro_datasets.huggingface` |
+
+* Removed Dataset classes ending with "DataSet", use the "Dataset" spelling instead.
+* Removed support for Python 3.7 and 3.8.
+* Added [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html) support for Spark- and Databricks-based datasets.
+* Bumped `s3fs` to latest calendar-versioned release.
+* `PartitionedDataset` and `IncrementalDataset` now both support versioning of the underlying dataset.
+
+## Bug fixes and other changes
+* Fixed bug with loading models saved with `TensorFlowModelDataset`.
+* Made dataset parameters keyword-only.
+* Corrected pandas-gbq as py311 dependency.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Edouard59](https://github.com/Edouard59)
+* [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+* [felixscherz](https://github.com/felixscherz)
+* [Onur Kuru](https://github.com/kuruonur1)
+
+# Release 1.8.0
+## Major features and improvements
+
+* Added the following new datasets:
+
+| Type                         | Description                                                            | Location                |
+|------------------------------|------------------------------------------------------------------------|-------------------------|
+| `polars.LazyPolarsDataset`   | A `LazyPolarsDataset` using [polars](https://www.pola.rs/)'s Lazy API. | `kedro_datasets.polars` |
+
+* Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
+* Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflect the difference between the two dataset classes.
+* Added a deprecation warning when using `polars.GenericDataSet` or `polars.GenericDataset` that these have been renamed to `polars.EagerPolarsDataset`
+* Delayed backend connection for `pandas.SQLTableDataset`, `pandas.SQLQueryDataset`, and `snowflake.SnowparkTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used.
+
+## Bug fixes and other changes
+* Fixed erroneous warning when using an cloud protocol file path with SparkDataSet on Databricks.
+* Updated `PickleDataset` to explicitly mention `cloudpickle` support.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [PtrBld](https://github.com/PtrBld)
+* [Alistair McKelvie](https://github.com/alamastor)
+* [Felix Wittmann](https://github.com/hfwittmann)
+* [Matthias Roels](https://github.com/MatthiasRoels)
+
+# Release 1.7.1
+## Bug fixes and other changes
+* Pinned `tables` version on `kedro-datasets` for Python < 3.8.
+
+## Upcoming deprecations for Kedro-Datasets 2.0.0
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
@@ -167,9 +279,10 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * Added the following new datasets:
 
-| Type                    | Description                                                                                                                | Location                |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+| Type                      | Description                                                                                                                | Location                |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------|-------------------------|
+| `polars.GenericDataSet`   | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+
 
 ## Bug fixes and other changes
 
@@ -219,7 +332,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added the following new datasets:
 
 | Type                       | Description                          | Location                |
-| -------------------------- | ------------------------------------ | ----------------------- |
+| -------------------------- |--------------------------------------|-------------------------|
 | `pandas.DeltaTableDataSet` | A dataset to work with delta tables. | `kedro_datasets.pandas` |
 
 * Implemented lazy loading of dataset subpackages and classes.
@@ -259,7 +372,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added the following new datasets:
 
 | Type                          | Description                                         | Location               |
-| ----------------------------- | --------------------------------------------------- | ---------------------- |
+|-------------------------------|-----------------------------------------------------|------------------------|
 | `spark.SparkStreamingDataSet` | A dataset to work with PySpark Streaming DataFrame. | `kedro_datasets.spark` |
 
 ## Bug fixes and other changes
@@ -273,7 +386,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added the following new datasets:
 
 | Type                             | Description                                             | Location                    |
-| -------------------------------- | ------------------------------------------------------- | --------------------------- |
+|----------------------------------|---------------------------------------------------------|-----------------------------|
 | `databricks.ManagedTableDataSet` | A dataset to access managed delta tables in Databricks. | `kedro_datasets.databricks` |
 
 * Added pandas 2.0 support.

@@ -1,4 +1,4 @@
-"""GeotiffDataset loads geospatial raster data and saves it to a local geoiff file. The
+"""GeoTIFFDataset loads geospatial raster data and saves it to a local geoiff file. The
 underlying functionality is supported by rioxarray and xarray. A read rasterdata file
 returns a xarray.DataArray object.
 """
@@ -23,8 +23,8 @@ DEFAULT_NO_DATA_VALUE = -9999
 SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
 
-class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    """``GeotiffDataset`` loads and saves rasterdata files and reads them as xarray
+class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
+    """``GeoTIFFDataset`` loads and saves rasterdata files and reads them as xarray
     DataArrays. The underlying functionality is supported by rioxarray, rasterio and xarray.
 
     Reading and writing of single and multiband geotiffs data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
@@ -36,7 +36,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
     .. code-block:: yaml
 
         sentinal_data:
-          type: rioxarray.GeotiffDataset
+          type: rioxarray.GeoTIFFDataset
           filepath: sentinal_data.tif
 
     Example usage for the
@@ -45,7 +45,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets.rioxarray import GeotiffDataset
+        >>> from kedro_datasets.rioxarray import GeoTIFFDataset
         >>> import xarray as xr
         >>> import numpy as np
         >>>
@@ -56,7 +56,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         ... )
         >>> data_crs = data.rio.write_crs("epsg:4326")
         >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
-        >>> dataset = GeotiffDataset(filepath="test.tif")
+        >>> dataset = GeoTIFFDataset(filepath="test.tif")
         >>> dataset.save(data_spatial_dims)
         >>> reloaded = dataset.load()
         >>> xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
@@ -75,7 +75,7 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         version: Version | None = None,
         metadata: dict[str, Any] | None = None,
     ):
-        """Creates a new instance of ``GeotiffDataset`` pointing to a concrete
+        """Creates a new instance of ``GeoTIFFDataset`` pointing to a concrete
         geospatial raster data file.
 
 

@@ -16,4 +16,4 @@ kedro_datasets_experimental
    kedro_datasets_experimental.langchain.ChatCohereDataset
    kedro_datasets_experimental.langchain.ChatOpenAIDataset
    kedro_datasets_experimental.langchain.OpenAIEmbeddingsDataset
-   kedro_datasets_experimental.rioxarray.GeotiffDataset
+   kedro_datasets_experimental.rioxarray.GeoTIFFDataset

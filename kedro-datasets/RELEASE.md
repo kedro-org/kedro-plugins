@@ -1,5 +1,7 @@
 # Upcoming Release
+
 ## Major features and improvements
+
 
 * Added the following new **experimental** datasets:
 
@@ -9,7 +11,8 @@
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
-| `rioxarray.GeotiffDataset`          | A dataset for loading and saving geotiff data files.      | `kedro_datasets_experimental.rioxarray` |
+| `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
+
 
 # Release 3.0.1
 
@@ -23,6 +26,8 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Charles Guan](https://github.com/charlesbmi)
+* [Thomas Gölles](https://github.com/tgoelles)
+
 
 # Release 3.0.0
 

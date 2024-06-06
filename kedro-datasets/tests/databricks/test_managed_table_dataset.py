@@ -484,13 +484,8 @@ class TestManagedTableDataset:
         pandas_ds = ManagedTableDataset(
             database="test", table="test_load_pandas", dataframe_type="pandas"
         )
-        pandas_df = pandas_ds.load()
-        # Ensure the DataFrame columns are in the same order as the expected DataFrame
-        pandas_df = pandas_df[sample_pandas_df.columns.tolist()]
-        pandas_df = pandas_df.sort_values("name", ignore_index=True)
-        expected_df = sample_pandas_df.sort_values("name", ignore_index=True)
+        pandas_df = pandas_ds.load().sort_values("name", ignore_index=True)
 
-        assert isinstance(pandas_df, pd.DataFrame)
-        assert pandas_df.equals(
-            expected_df
-        ), f"DataFrames are not equal.\nLoaded DataFrame:\n{pandas_df}\nExpected DataFrame:\n{expected_df}"
+        assert isinstance(pandas_df, pd.DataFrame) and pandas_df.equals(
+            sample_pandas_df
+        )

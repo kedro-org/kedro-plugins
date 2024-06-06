@@ -27,11 +27,10 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
     """``GeoTIFFDataset`` loads and saves rasterdata files and reads them as xarray
     DataArrays. The underlying functionality is supported by rioxarray, rasterio and xarray.
 
-    Reading and writing of single and multiband geotiffs data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
+    Reading and writing of single and multiband GeoTIFFs data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
+    Supported dimensions are ("band", "x", "y") and ("x", "y") and xarray.DataArray with other dimension can not be saved to a GeoTIFF file.
+    Have a look at netcdf if this is what you need.
 
-    Arbitrary xarray.DataArray objects can not be saved to a geotiff file. Have a look at netcdf if this is what you need.
-
-    Dimensions supported are: ("band", "x", "y") and ("x", "y").
 
     .. code-block:: yaml
 

@@ -378,7 +378,6 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     )
 
 
-
 def test_create_airflow_conf_source(cli_runner, metadata):
     command = ["airflow", "create", "--conf-source", "conf"]
     result = cli_runner.invoke(commands, command, obj=metadata)
@@ -392,4 +391,3 @@ def test_create_airflow_conf_source(cli_runner, metadata):
         dag_code = [line.strip() for line in f.read().splitlines()]
         assert expected_airflow_dag in dag_code
     dag_file.unlink()
-

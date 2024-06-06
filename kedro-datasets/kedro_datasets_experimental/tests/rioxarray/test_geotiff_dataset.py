@@ -2,9 +2,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import rasterio
 import xarray as xr
 from kedro.io import DatasetError
 from rasterio.crs import CRS
+from rasterio.transform import from_origin
 
 from kedro_datasets_experimental.rioxarray.geotiff_dataset import GeotiffDataset
 
@@ -107,6 +109,26 @@ def test_load_save_multi1(tmp_path,multi1_file_path):
     dataset_to.save(loaded_xr)
     reloaded_xr = dataset_to.load()
     assert (loaded_xr.values == reloaded_xr.values).all()
+
+def test_load_geotiff_with_tags(tmp_path, synthetic_xarray):
+    filepath = tmp_path / "test_with_tags.tif"
+    tags = {"TAG_KEY": "TAG_VALUE", "ANOTHER_TAG": "ANOTHER_VALUE"}
+    with rasterio.open(
+        filepath, "w", driver="GTiff", height=100, width=100, count=1, dtype=str(synthetic_xarray.dtype),
+        crs="EPSG:4326"
+    ) as dst:
+        dst.write(synthetic_xarray.values, 1)
+        dst.update_tags(**tags)
+
+    dataset = GeotiffDataset(filepath=str(filepath))
+    loaded_xr = dataset.load()
+
+    assert loaded_xr.attrs["TAG_KEY"] == "TAG_VALUE"
+    assert loaded_xr.attrs["ANOTHER_TAG"] == "ANOTHER_VALUE"
+
+    assert isinstance(loaded_xr, xr.DataArray)
+    assert isinstance(loaded_xr.rio.crs, CRS)
+    assert loaded_xr.shape == (1, 100, 100)
 
 def test_load_no_crs(multi2_file_path):
     """Test loading a multiband raster file."""

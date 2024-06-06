@@ -125,10 +125,13 @@ class GeotiffDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
 
     def _load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
-        read_xr = rxr.open_rasterio(load_path, **self._load_args)
-        self._sanity_check(read_xr)
-        logger.info(f"found coordinate rerence system {read_xr.rio.crs}")
-        return read_xr
+        with rasterio.open(load_path) as data:
+            tags = data.tags()
+        data = rxr.open_rasterio(load_path, **self._load_args)
+        data.attrs.update(tags)
+        self._sanity_check(data)
+        logger.info(f"found coordinate rerence system {data.rio.crs}")
+        return data
 
     def _save(self, data: xarray.DataArray) -> None:
         self._sanity_check(data)

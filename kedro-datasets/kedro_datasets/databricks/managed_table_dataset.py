@@ -22,7 +22,6 @@ from pyspark.sql.utils import AnalysisException, ParseException
 from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
-pd.DataFrame.iteritems = pd.DataFrame.items
 
 
 @dataclass(frozen=True)

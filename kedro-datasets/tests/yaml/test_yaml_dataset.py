@@ -1,6 +1,7 @@
 import inspect
 import json
 from pathlib import Path, PurePosixPath
+import yaml
 
 import pandas as pd
 import pytest
@@ -217,7 +218,7 @@ class TestYAMLDatasetVersioned:
 
         # Load the data directly for comparison
         with yaml_dataset._fs.open(yaml_dataset._get_load_path(), mode="r") as fs_file:
-            full_data = json.load(fs_file)
+            full_data = yaml.safe_load(fs_file)
 
         expected_data = json.dumps(full_data)
 

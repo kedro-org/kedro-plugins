@@ -272,6 +272,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "rioxarray",
 ]
 
 # All requirements

@@ -240,7 +240,6 @@ def create(  # noqa: PLR0913, PLR0912
             package_name=package_name,
             pipeline=pipeline,
             conf_source=conf_source,
-
             **dag_config,
         ).dump(str(dag_filename))
 

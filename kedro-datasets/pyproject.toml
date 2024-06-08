@@ -133,6 +133,8 @@ polars-genericdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2cs
 polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
 polars = ["kedro-datasets[polars-genericdataset]"]
 
+prophet = ["kedro-datasets[prophet]"]
+
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
 

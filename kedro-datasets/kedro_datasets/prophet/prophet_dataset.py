@@ -38,11 +38,16 @@ class ProphetModelDataset(JSONDataset):
 
     .. code-block:: pycon
 
-        >>> from custom_datasets import ProphetModelDataset
+        >>> from prophet_dataset import ProphetModelDataset
         >>> from prophet import Prophet
         >>>
+        >>> df = pd.DataFrame({
+        >>>     "ds": ["2024-01-01", "2024-01-02", "2024-01-03"],
+        >>>     "y": [100, 200, 300]
+        >>> })
+        >>>
         >>> model = Prophet()
-        >>> # Fit your model with data here
+        >>> model.fit(df)
         >>> dataset = ProphetModelDataset(filepath="path/to/model.json")
         >>> dataset.save(model)
         >>> reloaded_model = dataset.load()

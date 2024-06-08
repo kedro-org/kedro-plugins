@@ -51,7 +51,6 @@ class ProphetModelDataset(JSONDataset):
         >>> dataset = ProphetModelDataset(filepath="path/to/model.json")
         >>> dataset.save(model)
         >>> reloaded_model = dataset.load()
-        >>> assert isinstance(reloaded_model, Prophet)
 
     """
 

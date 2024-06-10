@@ -1,6 +1,18 @@
 # Upcoming Release
 ## Major features and improvements
 
+* Added the following new **experimental** datasets:
+
+| Type                                | Description                                               | Location                                |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
+| `langchain.ChatAnthropicDataset`    | A dataset for loading a ChatAnthropic langchain model.    | `kedro_datasets_experimental.langchain` |
+| `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
+| `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
+| `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
+
+
+# Release 3.0.1
+
 ## Bug fixes and other changes
 * Removed arbitrary upper bound for `s3fs`.
 * `NetCDFDataset` support for NetCDF4 via `engine="netcdf4"` and `engine="h5netcdf"`
@@ -8,7 +20,6 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Charles Guan](https://github.com/charlesbmi)
-
 
 # Release 3.0.0
 ## Major features and improvements

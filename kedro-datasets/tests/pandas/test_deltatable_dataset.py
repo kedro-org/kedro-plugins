@@ -52,7 +52,7 @@ class TestDeltaTableDataset:
         with pytest.raises(DatasetError, match=pattern):
             deltatable_dataset_from_path.save(new_df)
 
-    @pytest.mark.parametrize("save_args", [{"overwrite_schema": True}], indirect=True)
+    @pytest.mark.parametrize("save_args", [{"schema_mode": "overwrite"}], indirect=True)
     def test_overwrite_both_data_and_schema(
         self, deltatable_dataset_from_path, dummy_df
     ):

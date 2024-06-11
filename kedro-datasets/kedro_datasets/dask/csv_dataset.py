@@ -39,13 +39,14 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
 
         >>> from kedro_datasets.dask import CSVDataset
         >>> import pandas as pd
+        >>> import numpy as np
         >>> import dask.dataframe as dd
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=1)
         >>> dataset = CSVDataset(filepath="path/to/folder/*.csv")
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
-        >>> assert ddf.compute().equals(reloaded.compute())
+        >>> assert np.array_equal(ddf.compute(), reloaded.compute())
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

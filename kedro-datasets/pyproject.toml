@@ -165,7 +165,11 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-
+langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
 
 # Docs requirements
 docs = [
@@ -222,7 +226,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
     "pyproj~=3.0",
-    "pyspark>=3.0, <3.4; python_version < '3.11'",
+    "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
@@ -261,7 +265,12 @@ test = [
 ]
 
 # Experimental dataset requirements
-experimental = []
+experimental = [
+    "langchain-openai",
+    "langchain-cohere",
+    "langchain-anthropic",
+    "langchain-community",
+]
 
 # All requirements
 all = ["kedro-datasets[test,docs]"]
@@ -282,7 +291,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/netcdf/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "kedro_datasets/databricks/*"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/netcdf/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

@@ -34,6 +34,7 @@ Multiple tags are supported. Use the following format:
 `--tags tag1,tag2`."""
 DEFAULT_RUN_ENV = "local"
 DEFAULT_PIPELINE = "__default__"
+CONF_SOURCE_HELP = """Path to the configuration folder or archived file to be used in the Airflow DAG."""
 
 
 @click.group(name="Kedro-Airflow")
@@ -134,6 +135,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "--conf-source",
+    type=click.Path(exists=False, file_okay=True, resolve_path=False),
+    help=CONF_SOURCE_HELP,
+    default=None,
+)
 @click.pass_obj
 def create(  # noqa: PLR0913, PLR0912
     metadata: ProjectMetadata,
@@ -144,9 +151,13 @@ def create(  # noqa: PLR0913, PLR0912
     group_in_memory,
     tags,
     params,
+    conf_source,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
+
+    if conf_source is None:
+        conf_source = ""
     if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
@@ -228,6 +239,7 @@ def create(  # noqa: PLR0913, PLR0912
             pipeline_name=name,
             package_name=package_name,
             pipeline=pipeline,
+            conf_source=conf_source,
             **dag_config,
         ).dump(str(dag_filename))
 

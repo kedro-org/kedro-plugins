@@ -40,14 +40,11 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> from kedro_datasets.dask import CSVDataset
         >>> import pandas as pd
         >>> import dask.dataframe as dd
-        >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=1)
-        >>>
         >>> dataset = CSVDataset(filepath=tmppath / "path/to/folder/*.csv")
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
-        >>>
         >>> assert ddf.compute().equals(reloaded.compute())
     """
 

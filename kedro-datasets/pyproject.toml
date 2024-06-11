@@ -226,7 +226,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
     "pyproj~=3.0",
-    "pyspark>=3.0, <3.4; python_version < '3.11'",
+    "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",

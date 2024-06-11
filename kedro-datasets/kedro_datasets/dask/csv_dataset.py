@@ -44,9 +44,9 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=1)
         >>>
-        >>> data_set = CSVDataset(filepath=tmppath / "path/to/folder/*.csv")
-        >>> data_set.save(ddf)
-        >>> reloaded = data_set.load()
+        >>> dataset = CSVDataset(filepath=tmppath / "path/to/folder/*.csv")
+        >>> dataset.save(ddf)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert ddf.compute().equals(reloaded.compute())
     """
@@ -57,10 +57,10 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         filepath: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``CSVDataset`` pointing to concrete

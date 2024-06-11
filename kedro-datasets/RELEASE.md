@@ -10,14 +10,15 @@
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
 | `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
+* Extended preview feature to `yaml.YAMLDataset`.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [Ian Whalen](https://github.com/ianwhale)
 * [Charles Guan](https://github.com/charlesbmi)
 * [Thomas Gölles](https://github.com/tgoelles)
+* [Lukas Innig](https://github.com/derluke)
 
 
 # Release 3.0.1

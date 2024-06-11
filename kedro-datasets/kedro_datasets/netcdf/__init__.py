@@ -7,7 +7,6 @@ from typing import Any
 import lazy_loader as lazy
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-NetCDFDataset: type[NetCDFDataset]
 NetCDFDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(

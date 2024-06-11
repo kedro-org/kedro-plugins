@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 import pytest
 from deltalake import DataCatalog, Metadata
@@ -50,7 +52,7 @@ class TestDeltaTableDataset:
         with pytest.raises(DatasetError, match=pattern):
             deltatable_dataset_from_path.save(new_df)
 
-    @pytest.mark.parametrize("save_args", [{"overwrite_schema": True}], indirect=True)
+    @pytest.mark.parametrize("save_args", [{"schema_mode": "overwrite"}], indirect=True)
     def test_overwrite_both_data_and_schema(
         self, deltatable_dataset_from_path, dummy_df
     ):
@@ -103,7 +105,7 @@ class TestDeltaTableDataset:
         """Test the schema property to return the underlying delta table schema."""
         deltatable_dataset_from_path.save(dummy_df)
         s1 = deltatable_dataset_from_path.schema
-        s2 = deltatable_dataset_from_path._delta_table.schema().json()
+        s2 = deltatable_dataset_from_path._delta_table.schema().to_json()
         assert s1 == s2
 
     def test_describe(self, filepath):

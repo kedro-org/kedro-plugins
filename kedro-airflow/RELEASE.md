@@ -1,7 +1,11 @@
 # Upcoming Release
+* Added support to specify `--conf-source` which would point to the runtime configuration directory to be used for running the DAG in airflow. This configuration path is added to the generated DAG.
+
+# Release 0.9.0
 * Sort DAGs to make sure `kedro airflow create` is deterministic.
 * Option to group MemoryDatasets in the same Airflow task (breaking change for custom template via `--jinja-file`).
 * Include the environment name in the DAG file name when different from the default.
+* Added support for Python 3.12
 
 # Release 0.8.0
 * Added support for Kedro 0.19.x

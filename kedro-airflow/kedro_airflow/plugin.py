@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +34,7 @@ Multiple tags are supported. Use the following format:
 `--tags tag1,tag2`."""
 DEFAULT_RUN_ENV = "local"
 DEFAULT_PIPELINE = "__default__"
+CONF_SOURCE_HELP = """Path to the configuration folder or archived file to be used in the Airflow DAG."""
 
 
 @click.group(name="Kedro-Airflow")
@@ -135,6 +135,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "--conf-source",
+    type=click.Path(exists=False, file_okay=True, resolve_path=False),
+    help=CONF_SOURCE_HELP,
+    default=None,
+)
 @click.pass_obj
 def create(  # noqa: PLR0913, PLR0912
     metadata: ProjectMetadata,
@@ -145,9 +151,13 @@ def create(  # noqa: PLR0913, PLR0912
     group_in_memory,
     tags,
     params,
+    conf_source,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
+
+    if conf_source is None:
+        conf_source = ""
     if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
@@ -176,7 +186,7 @@ def create(  # noqa: PLR0913, PLR0912
 
     if convert_all:
         # Convert all pipelines
-        conversion_pipelines = pipelines
+        conversion_pipelines = dict(pipelines)
     else:
         conversion_pipelines = {
             pipeline_name: pipelines.get(pipeline_name)
@@ -202,30 +212,34 @@ def create(  # noqa: PLR0913, PLR0912
         if tags:
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
-        # group memory nodes
+        # Group memory nodes
         if group_in_memory:
+            # The order of nodes and dependencies is deterministic and based on the
+            # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
+            # implementation
             nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
         else:
-            nodes = {node.name: [node] for node in pipeline.nodes}
-
-            dependencies = defaultdict(list)
+            # To keep the order of nodes and dependencies deterministic - nodes are
+            # iterated in the topological sort order obtained from pipeline.nodes and
+            # appended to the corresponding dictionaries
+            nodes = {}
+            dependencies = {}
+            for node in pipeline.nodes:
+                nodes[node.name] = [node]
+                dependencies[node.name] = []
             for node, parent_nodes in pipeline.node_dependencies.items():
                 for parent in parent_nodes:
                     dependencies[parent.name].append(node.name)
 
-        # Sort both parent and child nodes to make sure it's deterministic
-        sorted_dependencies = {}
-        for parent in sorted(dependencies.keys()):
-            sorted_dependencies[parent] = sorted(dependencies[parent])
-
         template.stream(
             dag_name=package_name,
             nodes=nodes,
-            dependencies=sorted_dependencies,
+            dependencies=dependencies,
             env=env,
             pipeline_name=name,
             package_name=package_name,
             pipeline=pipeline,
+            conf_source=conf_source,
             **dag_config,
         ).dump(str(dag_filename))
 

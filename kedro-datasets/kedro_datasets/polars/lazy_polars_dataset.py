@@ -2,12 +2,13 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+from __future__ import annotations
 
 import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Union
 
 import fsspec
 import polars as pl
@@ -79,12 +80,12 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         *,
         filepath: str,
         file_format: str,
-        load_args: Optional[dict[str, Any]] = None,
-        save_args: Optional[dict[str, Any]] = None,
-        version: Version = None,
-        credentials: Optional[dict[str, Any]] = None,
-        fs_args: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``LazyPolarsDataset`` pointing to a concrete
         data file on a specific filesystem.
@@ -195,7 +196,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         if self._protocol == "file":
             # With local filesystems, we can use Polar's build-in I/O method:
             load_method = getattr(pl, f"scan_{self._file_format}", None)
-            return load_method(load_path, **self._load_args)
+            return load_method(load_path, **self._load_args)  # type: ignore[misc]
 
         # For object storage, we use pyarrow for I/O:
         dataset = ds.dataset(
@@ -203,7 +204,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         )
         return pl.scan_pyarrow_dataset(dataset)
 
-    def _save(self, data: Union[pl.DataFrame, pl.LazyFrame]) -> None:
+    def _save(self, data: pl.DataFrame | pl.LazyFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         collected_data = None

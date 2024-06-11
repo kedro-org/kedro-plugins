@@ -2,6 +2,9 @@
 filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
 
+from __future__ import annotations
+
+import json
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -15,6 +18,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import JSONPreview
 
 
 class YAMLDataset(AbstractVersionedDataset[dict, dict]):
@@ -54,11 +59,11 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         self,
         *,
         filepath: str,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``YAMLDataset`` pointing to a concrete YAML file
         on a specific filesystem.
@@ -156,3 +161,14 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self) -> JSONPreview:
+        """
+        Generate a preview of the YAML dataset with a specified number of items.
+
+        Returns:
+            A string representing the YAML data for previewing.
+        """
+        data = self._load()
+
+        return JSONPreview(json.dumps(data))

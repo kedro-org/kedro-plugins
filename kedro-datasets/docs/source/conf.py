@@ -14,7 +14,6 @@
 from __future__ import annotations
 
 import importlib
-import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -93,7 +92,7 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
-    "python": ("https://docs.python.org/3.9/", None)
+    "python": ("https://docs.python.org/3.9/", None),
 }
 
 type_targets = {
@@ -105,7 +104,10 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
-        "DataCatalog"
+        "DataCatalog",
+        "ibis.backends.BaseBackend",
+        "langchain_openai.chat_models.base.ChatOpenAI",
+        "langchain_openai.embeddings.base.OpenAIEmbeddings",
     ),
     "py:data": (
         "typing.Any",
@@ -113,9 +115,7 @@ type_targets = {
         "typing.Optional",
         "typing.Tuple",
     ),
-    "py:exc": (
-        "DatasetError",
-    ),
+    "py:exc": ("DatasetError",),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
@@ -128,7 +128,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "kedro-sphinx-theme"
 here = Path(__file__).parent.absolute()
 
 # Theme options are theme-specific and customise the look and feel of a theme
@@ -223,7 +223,7 @@ todo_include_todos = False
 
 # -- Kedro specific configuration -----------------------------------------
 KEDRO_MODULES = [
-    "kedro_datasets",
+    "kedro_datasets_experimental"
 ]
 
 
@@ -386,39 +386,9 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
     remove_arrows_in_examples(lines)
 
 
-def env_override(default_appid):
-    build_version = os.getenv("READTHEDOCS_VERSION")
-
-    if build_version == "latest":
-        return os.environ["HEAP_APPID_QA"]
-    if build_version == "stable":
-        return os.environ["HEAP_APPID_PROD"]
-
-    return default_appid  # default to Development for local builds
-
-
-def _add_jinja_filters(app):
-    # https://github.com/crate/crate/issues/10833
-    from sphinx.builders.latex import LaTeXBuilder
-    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
-
-    # LaTeXBuilder is used in the PDF docs build,
-    # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
-        app.builder.templates.environment.filters["env_override"] = env_override
-
-
-def _override_permalinks_icon(app):
-    # https://github.com/readthedocs/sphinx_rtd_theme/issues/98#issuecomment-1503211439
-    app.config.html_permalinks_icon = "¶"
-
-
 def setup(app):
-    app.connect("builder-inited", _add_jinja_filters)
-    app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
+
 
 # (regex, restructuredText link replacement, object) list
 replacements = []

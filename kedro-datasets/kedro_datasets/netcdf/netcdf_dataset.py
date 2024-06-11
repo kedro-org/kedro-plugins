@@ -1,5 +1,7 @@
 """NetCDFDataset loads and saves data to a local netcdf (.nc) file."""
 
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from glob import glob
@@ -55,7 +57,7 @@ class NetCDFDataset(AbstractDataset):
         ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
         ... ).to_dataset()
         >>> dataset = NetCDFDataset(
-        ...     filepath=tmp_path / "test.nc",
+        ...     filepath=tmp_path / "data.nc",
         ...     save_args={"mode": "w"},
         ... )
         >>> dataset.save(ds)
@@ -70,12 +72,12 @@ class NetCDFDataset(AbstractDataset):
         self,
         *,
         filepath: str,
-        temppath: str = None,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
-        credentials: dict[str, Any] = None,
-        metadata: dict[str, Any] = None,
+        temppath: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``NetCDFDataset`` pointing to a concrete NetCDF
         file on a specific filesystem
@@ -141,6 +143,7 @@ class NetCDFDataset(AbstractDataset):
 
     def _load(self) -> xr.Dataset:
         load_path = self._filepath
+        multi_load_path = load_path
 
         # If NetCDF(s) are on any type of remote storage, need to sync to local to open.
         # Kerchunk could be implemented here in the future for direct remote reading.
@@ -148,13 +151,13 @@ class NetCDFDataset(AbstractDataset):
             logger.info("Syncing remote NetCDF file to local storage.")
 
             if self._is_multifile:
-                load_path = sorted(self._fs.glob(load_path))
+                multi_load_path = sorted(self._fs.glob(load_path))  # type: ignore[assignment]
 
             self._fs.get(load_path, f"{self._temppath}/")
-            load_path = f"{self._temppath}/{self._filepath.stem}.nc"
+            load_path = f"{self._temppath}/{str(Path(self._filepath).stem)}.nc"
 
-        if self._is_multifile:
-            data = xr.open_mfdataset(str(load_path), **self._load_args)
+        if self._is_multifile and multi_load_path:
+            data = xr.open_mfdataset(multi_load_path, **self._load_args)
         else:
             data = xr.open_dataset(load_path, **self._load_args)
 
@@ -167,11 +170,15 @@ class NetCDFDataset(AbstractDataset):
                 + "Create an alternate NetCDFDataset with a single .nc output file."
             )
         else:
-            save_path = self._filepath
-            bytes_buffer = data.to_netcdf(**self._save_args)
-
-            with self._fs.open(save_path, mode="wb") as fs_file:
-                fs_file.write(bytes_buffer)
+            if self._protocol == "file":
+                data.to_netcdf(path=self._filepath, **self._save_args)
+            else:
+                if self._temppath is None:
+                    raise DatasetError("_temppath should have been set in __init__")
+                temp_save_path = self._temppath / PurePosixPath(self._filepath).name
+                data.to_netcdf(path=str(temp_save_path), **self._save_args)
+                # Sync to remote storage
+                self._fs.put_file(str(temp_save_path), self._filepath)
 
             self._invalidate_cache()
 

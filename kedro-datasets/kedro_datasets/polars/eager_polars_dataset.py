@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+from __future__ import annotations
 
 from copy import deepcopy
 from io import BytesIO
@@ -54,19 +55,19 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS = {}  # type: dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: dict[str, Any]
 
     def __init__(  # noqa: PLR0913
         self,
         *,
         filepath: str,
         file_format: str,
-        load_args: dict[str, Any] = None,
-        save_args: dict[str, Any] = None,
-        version: Version = None,
-        credentials: dict[str, Any] = None,
-        fs_args: dict[str, Any] = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        credentials: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``EagerPolarsDataset`` pointing to a concrete data file
         on a specific filesystem. The appropriate polars load/save methods are dynamically

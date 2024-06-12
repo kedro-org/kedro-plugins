@@ -117,7 +117,7 @@ class TestCSVDataset:
     def test_load_data(self, s3_dataset, dummy_dd_dataframe, mocked_s3_object):
         """Test loading the data from S3."""
         loaded_data = s3_dataset.load()
-        np.array_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
+        np.array_equal(loaded_data, dummy_dd_dataframe.compute())
 
     def test_exists(self, s3_dataset, dummy_dd_dataframe, mocked_s3_bucket):
         """Test `exists` method invocation for both existing and

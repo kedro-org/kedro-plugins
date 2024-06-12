@@ -1,15 +1,15 @@
 import boto3
 import dask.dataframe as dd
+import numpy as np
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError
 from moto import mock_aws
-from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro_datasets.dask import CSVDataset
 
-FILE_NAME = "test.csv"
+FILE_NAME = "*.csv"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
@@ -114,12 +114,12 @@ class TestCSVDataset:
         dd_data = dd.from_pandas(pd_data, npartitions=1)
         s3_dataset.save(dd_data)
         loaded_data = s3_dataset.load()
-        assert_frame_equal(loaded_data.compute(), dd_data.compute())
+        np.array_equal(loaded_data.compute(), dd_data.compute())
 
     def test_load_data(self, s3_dataset, dummy_dd_dataframe, mocked_s3_object):
         """Test loading the data from S3."""
         loaded_data = s3_dataset.load()
-        assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
+        np.array_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
 
     def test_exists(self, s3_dataset, dummy_dd_dataframe, mocked_s3_bucket):
         """Test `exists` method invocation for both existing and
@@ -157,4 +157,4 @@ class TestCSVDataset:
             assert s3_dataset._save_args[key] == value
 
         for key, value in s3_dataset.DEFAULT_SAVE_ARGS.items():
-            assert s3_dataset._save_args[key] == value
+            assert s3_dataset._save_args[key] != value

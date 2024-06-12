@@ -42,10 +42,8 @@ def dummy_dd_dataframe() -> dd.DataFrame:
 def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFrame):
     """Creates test data and adds it to mocked S3 bucket."""
     pandas_df = dummy_dd_dataframe.compute()
-    # table = pa.Table.from_pandas(pandas_df)
     temporary_path = tmp_path / FILE_NAME
     pandas_df.to_csv(str(temporary_path))
-    # pq.write_table(table, str(temporary_path))
 
     mocked_s3_bucket.put_object(
         Bucket=BUCKET_NAME, Key=FILE_NAME, Body=temporary_path.read_bytes()

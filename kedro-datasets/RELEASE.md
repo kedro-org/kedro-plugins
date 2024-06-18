@@ -9,6 +9,8 @@
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
+| `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models  | `kedro_datasets_experimental.pytorch`   |
+
 * Extended preview feature to `yaml.YAMLDataset`.
 
 ## Community contributions
@@ -26,6 +28,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Charles Guan](https://github.com/charlesbmi)
+* [Brandon Meek](https://github.com/bpmeek)
 
 # Release 3.0.0
 ## Major features and improvements

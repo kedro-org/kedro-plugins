@@ -80,9 +80,6 @@ matlab = ["kedro-datasets[matlab-matlabdataset]"]
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
 
-netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
-netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
-
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
@@ -170,6 +167,8 @@ langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
+netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
+netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
 # Docs requirements
 docs = [
@@ -198,7 +197,6 @@ test = [
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
-    "h5netcdf>=1.2.0",
     "ibis-framework[duckdb,examples]",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
@@ -212,7 +210,6 @@ test = [
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
     "mypy~=1.0",
-    "netcdf4>=1.6.4",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -270,6 +267,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "netcdf-netcdfdataset",
 ]
 
 # All requirements
@@ -291,7 +289,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/netcdf/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

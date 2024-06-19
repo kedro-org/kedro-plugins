@@ -267,7 +267,9 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
-    "netcdf-netcdfdataset",
+    "h5netcdf>=1.2.0",
+    "netcdf4>=1.6.4",
+    "xarray>=2023.1.0",
 ]
 
 # All requirements

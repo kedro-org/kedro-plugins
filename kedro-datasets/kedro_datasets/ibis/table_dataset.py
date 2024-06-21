@@ -80,6 +80,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``TableDataset`` pointing to a table (or file).
 
@@ -117,6 +118,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
                 `materialized` in `save_args`.
+            metadata: Any arbitrary metadata. This is ignored by Kedro,
+                but may be consumed by users or external plugins.
         """
         if filepath is None and table_name is None:
             raise DatasetError(
@@ -127,6 +130,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         self._file_format = file_format
         self._table_name = table_name
         self._connection_config = connection
+        self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

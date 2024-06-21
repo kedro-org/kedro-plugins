@@ -42,7 +42,7 @@ def dummy_dd_dataframe() -> dd.DataFrame:
 def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFrame):
     """Creates test data and adds it to mocked S3 bucket."""
     pandas_df = dummy_dd_dataframe.compute()
-    temporary_path = tmp_path / FILE_NAME
+    temporary_path = tmp_path / "test.csv"
     pandas_df.to_csv(str(temporary_path))
 
     mocked_s3_bucket.put_object(

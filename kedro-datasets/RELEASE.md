@@ -11,12 +11,19 @@
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
 | `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf` |
 * `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
+
+* Added the following new core datasets:
+| Type                                | Description                                               | Location                                |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
+| `dask.CSVDataset`    | A dataset for loading a CSV files using `dask`    | `kedro_datasets.dask` |
+
 * Extended preview feature to `yaml.YAMLDataset`.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Lukas Innig](https://github.com/derluke)
+* [Michael Sexton](https://github.com/michaelsexton)
 
 
 # Release 3.0.1
@@ -57,6 +64,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Andrew Cao](https://github.com/andrewcao1)
 * [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
 * [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
+
 
 # Release 2.1.0
 ## Major features and improvements

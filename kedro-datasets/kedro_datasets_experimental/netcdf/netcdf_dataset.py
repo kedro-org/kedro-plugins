@@ -62,6 +62,7 @@ class NetCDFDataset(AbstractDataset):
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()
+        >>> assert ds.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

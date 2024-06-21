@@ -122,4 +122,4 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         files = file_system.glob(self._filepath)
-        return True if files else False
+        return bool(files)

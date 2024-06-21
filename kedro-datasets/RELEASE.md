@@ -9,6 +9,8 @@
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
+| `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf` |
+* `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
 * Extended preview feature to `yaml.YAMLDataset`.
 
 ## Community contributions

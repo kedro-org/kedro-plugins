@@ -53,6 +53,11 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    'sphinx_favicon',
+]
+
+favicons = [
+    "https://kedro.org/images/favicon.ico",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

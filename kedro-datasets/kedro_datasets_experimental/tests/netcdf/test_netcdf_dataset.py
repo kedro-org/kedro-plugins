@@ -8,7 +8,7 @@ from moto import mock_aws
 from s3fs import S3FileSystem
 from xarray.testing import assert_equal
 
-from kedro_datasets.netcdf import NetCDFDataset
+from kedro_datasets_experimental.netcdf import NetCDFDataset
 
 FILE_NAME = "test.nc"
 MULTIFILE_NAME = "test*.nc"

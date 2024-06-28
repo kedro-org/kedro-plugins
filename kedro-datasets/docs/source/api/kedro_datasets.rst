@@ -13,6 +13,7 @@ kedro_datasets
 
    kedro_datasets.api.APIDataset
    kedro_datasets.biosequence.BioSequenceDataset
+   kedro_datasets.dask.CSVDataset
    kedro_datasets.dask.ParquetDataset
    kedro_datasets.databricks.ManagedTableDataset
    kedro_datasets.email.EmailMessageDataset
@@ -24,7 +25,6 @@ kedro_datasets
    kedro_datasets.json.JSONDataset
    kedro_datasets.matlab.MatlabDataset
    kedro_datasets.matplotlib.MatplotlibWriter
-   kedro_datasets.netcdf.NetCDFDataset
    kedro_datasets.networkx.GMLDataset
    kedro_datasets.networkx.GraphMLDataset
    kedro_datasets.networkx.JSONDataset

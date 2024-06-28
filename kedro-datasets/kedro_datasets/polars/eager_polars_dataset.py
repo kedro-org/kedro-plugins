@@ -68,6 +68,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``EagerPolarsDataset`` pointing to a concrete data file
         on a specific filesystem. The appropriate polars load/save methods are dynamically
@@ -124,6 +125,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),

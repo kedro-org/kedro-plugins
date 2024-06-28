@@ -1,4 +1,6 @@
 # Upcoming release
+
+# Release 0.5.0
 * Updated the plugin to generate a unique project UUID for kedro project and store it in `pyproject.toml`.
 
 # Release 0.4.0

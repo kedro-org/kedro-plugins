@@ -347,50 +347,23 @@ def _send_heap_event(
 
 
 def _check_for_telemetry_consent(project_path: Path) -> bool:
+    """
+    Use a telemetry consent from ".telemetry" file if it exists and has a valid format.
+    Telemetry is considered as opt-in otherwise.
+    """
     telemetry_file_path = project_path / ".telemetry"
-    if not telemetry_file_path.exists():
-        return _confirm_consent(telemetry_file_path)
-    with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
-        telemetry = yaml.safe_load(telemetry_file)
-        if _is_valid_syntax(telemetry):
-            return telemetry["consent"]
-        return _confirm_consent(telemetry_file_path)
+    if telemetry_file_path.exists():
+        with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
+            telemetry = yaml.safe_load(telemetry_file)
+            if _is_valid_syntax(telemetry):
+                return telemetry["consent"]
+    return True
 
 
 def _is_valid_syntax(telemetry: Any) -> bool:
     return isinstance(telemetry, dict) and isinstance(
         telemetry.get("consent", None), bool
     )
-
-
-def _confirm_consent(telemetry_file_path: Path) -> bool:
-    try:
-        with telemetry_file_path.open("w") as telemetry_file:
-            confirm_msg = (
-                "As an open-source project, we collect usage analytics. \n"
-                "We cannot see nor store information contained in "
-                "a Kedro project. \nYou can find out more by reading our "
-                "privacy notice: \n"
-                "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry#"
-                "privacy-notice \n"
-                "Do you opt into usage analytics? "
-            )
-            if click.confirm(confirm_msg):
-                yaml.dump({"consent": True}, telemetry_file)
-                click.secho("You have opted into product usage analytics.", fg="green")
-                return True
-            click.secho(
-                "You have opted out of product usage analytics, so none will be collected.",
-                fg="green",
-            )
-            yaml.dump({"consent": False}, telemetry_file)
-            return False
-    except Exception as exc:
-        logger.warning(
-            "Failed to confirm consent. No data was sent to Heap. Exception: %s",
-            exc,
-        )
-        return False
 
 
 cli_hooks = KedroTelemetryCLIHooks()

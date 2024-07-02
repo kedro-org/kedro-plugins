@@ -9,10 +9,13 @@
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
+| `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
 | `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf` |
+
 * `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
 
 * Added the following new core datasets:
+
 | Type                                | Description                                               | Location                                |
 |-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
 | `dask.CSVDataset`    | A dataset for loading a CSV files using `dask`    | `kedro_datasets.dask` |
@@ -22,6 +25,9 @@
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
+* [Ian Whalen](https://github.com/ianwhale)
+* [Charles Guan](https://github.com/charlesbmi)
+* [Thomas Gölles](https://github.com/tgoelles)
 * [Lukas Innig](https://github.com/derluke)
 * [Michael Sexton](https://github.com/michaelsexton)
 

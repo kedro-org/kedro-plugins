@@ -33,7 +33,7 @@ repos:
         exclude: ^(?!kedro-datasets/kedro_datasets/).*\.py$
         pass_filenames: false
         stages: [ manual ]
-        entry: ruff kedro-datasets --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-datasets --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-airflow
         name: "Ruff on kedro_airflow/*"

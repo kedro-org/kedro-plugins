@@ -123,7 +123,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         }
 
     def _load(self) -> xarray.DataArray:
-        load_path = self._get_load_path().as_posix()
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with rasterio.open(load_path) as data:
             tags = data.tags()
         data = rxr.open_rasterio(load_path, **self._load_args)

@@ -11,7 +11,7 @@ build:
     python: "3.10"
   jobs:
     pre_install:
-      - python -m pip install "uv==0.1.13"
+      - python -m pip install "uv==0.2.21"
       - UV_HTTP_TIMEOUT=1000 uv pip install --system --upgrade sphinx readthedocs-sphinx-ext "kedro-datasets[docs,test,experimental] @ ./kedro-datasets"
       - uv pip freeze
     pre_build:

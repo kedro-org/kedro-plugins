@@ -338,9 +338,6 @@ def _send_heap_event(
                 resp.status_code,
                 resp.reason,
             )
-
-        print(resp.status_code, resp.reason)
-        print(data)
     except requests.exceptions.RequestException as exc:
         logger.warning(
             "Failed to send data to Heap. Exception of type '%s' was raised.",

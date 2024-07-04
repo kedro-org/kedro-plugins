@@ -338,6 +338,9 @@ def _send_heap_event(
                 resp.status_code,
                 resp.reason,
             )
+
+        print(resp.status_code, resp.reason)
+        print(data)
     except requests.exceptions.RequestException as exc:
         logger.warning(
             "Failed to send data to Heap. Exception of type '%s' was raised.",
@@ -347,7 +350,7 @@ def _send_heap_event(
 
 def _check_for_telemetry_consent(project_path: Path) -> bool:
     """
-    Use a telemetry consent from ".telemetry" file if it exists and has a valid format.
+    Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
     """
     telemetry_file_path = project_path / ".telemetry"

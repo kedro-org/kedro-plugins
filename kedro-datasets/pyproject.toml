@@ -249,7 +249,7 @@ test = [
     "xlsxwriter~=1.0",
     # huggingface
     "datasets",
-    "huggingface_hub~=0.23.0",
+    "huggingface_hub~=0.23.4",
     "transformers[torch]",
     # mypy related dependencies
     "types-cachetools",

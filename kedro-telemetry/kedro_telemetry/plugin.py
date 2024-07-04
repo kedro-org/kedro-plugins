@@ -349,7 +349,6 @@ def _check_for_telemetry_consent(project_path: Path) -> bool:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
-
     """
     telemetry_file_path = project_path / ".telemetry"
     if telemetry_file_path.exists():

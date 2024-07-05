@@ -31,6 +31,7 @@
 
 ## Breaking Changes
 * `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:

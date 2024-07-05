@@ -17,7 +17,6 @@ from kedro_telemetry.plugin import (
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
     _check_for_telemetry_consent,
-    _confirm_consent,
     _is_known_ci_env,
 )
 
@@ -371,8 +370,6 @@ class TestKedroTelemetryCLIHooks:
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({"consent": True}, telemetry_file)
 
-        mock_create_file = mocker.patch("kedro_telemetry.plugin._confirm_consent")
-        mock_create_file.assert_not_called()
         assert _check_for_telemetry_consent(fake_metadata.project_path)
 
     def test_check_for_telemetry_consent_not_given(self, mocker, fake_metadata):
@@ -381,29 +378,16 @@ class TestKedroTelemetryCLIHooks:
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({"consent": False}, telemetry_file)
 
-        mock_create_file = mocker.patch("kedro_telemetry.plugin._confirm_consent")
-        mock_create_file.assert_not_called()
         assert not _check_for_telemetry_consent(fake_metadata.project_path)
 
     def test_check_for_telemetry_consent_empty_file(self, mocker, fake_metadata):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
-        mock_create_file = mocker.patch(
-            "kedro_telemetry.plugin._confirm_consent", return_value=True
-        )
+
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({}, telemetry_file)
 
         assert _check_for_telemetry_consent(fake_metadata.project_path)
-        mock_create_file.assert_called_once_with(telemetry_file_path)
-
-    def test_check_for_telemetry_no_consent_empty_file(self, mocker, fake_metadata):
-        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
-        telemetry_file_path = fake_metadata.project_path / ".telemetry"
-        mock_create_file = mocker.patch(
-            "kedro_telemetry.plugin._confirm_consent", return_value=False
-        )
-
-        assert not _check_for_telemetry_consent(fake_metadata.project_path)
-        mock_create_file.assert_called_once_with(telemetry_file_path)
 
     def test_check_for_telemetry_consent_file_no_consent_field(
         self, mocker, fake_metadata
@@ -413,37 +397,14 @@ class TestKedroTelemetryCLIHooks:
         with open(telemetry_file_path, "w", encoding="utf8") as telemetry_file:
             yaml.dump({"nonsense": "bla"}, telemetry_file)
 
-        mock_create_file = mocker.patch(
-            "kedro_telemetry.plugin._confirm_consent", return_value=True
-        )
-
         assert _check_for_telemetry_consent(fake_metadata.project_path)
-        mock_create_file.assert_called_once_with(telemetry_file_path)
 
     def test_check_for_telemetry_consent_file_invalid_yaml(self, mocker, fake_metadata):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         telemetry_file_path.write_text("invalid_ yaml")
 
-        mock_create_file = mocker.patch(
-            "kedro_telemetry.plugin._confirm_consent", return_value=True
-        )
-
         assert _check_for_telemetry_consent(fake_metadata.project_path)
-        mock_create_file.assert_called_once_with(telemetry_file_path)
-
-    def test_confirm_consent_yaml_dump_error(self, mocker, fake_metadata, caplog):
-        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
-        telemetry_file_path = fake_metadata.project_path / ".telemetry"
-        mocker.patch("yaml.dump", side_efyfect=Exception)
-
-        assert not _confirm_consent(telemetry_file_path)
-
-        msg = (
-            "Failed to confirm consent. No data was sent to Heap. Exception: "
-            "pytest: reading from stdin while output is captured!  Consider using `-s`."
-        )
-        assert msg in caplog.messages[-1]
 
     @mark.parametrize(
         "env_vars,result",

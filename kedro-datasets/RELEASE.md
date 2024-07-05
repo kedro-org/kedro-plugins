@@ -1,5 +1,11 @@
 # Upcoming Release
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking Changes
+## Community contributions
+
+# Release 4.0.0
+## Major features and improvements
 
 * Added the following new **experimental** datasets:
 
@@ -12,8 +18,6 @@
 | `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
 | `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf` |
 
-* `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
-
 * Added the following new core datasets:
 
 | Type                                | Description                                               | Location                                |
@@ -21,6 +25,12 @@
 | `dask.CSVDataset`    | A dataset for loading a CSV files using `dask`    | `kedro_datasets.dask` |
 
 * Extended preview feature to `yaml.YAMLDataset`.
+
+## Bug fixes and other changes
+* Added `metadata` parameter for a few datasets
+
+## Breaking Changes
+* `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
 
 ## Community contributions
 
@@ -30,6 +40,9 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Thomas Gölles](https://github.com/tgoelles)
 * [Lukas Innig](https://github.com/derluke)
 * [Michael Sexton](https://github.com/michaelsexton)
+* [michal-mmm](https://github.com/michal-mmm)
+
+
 
 
 # Release 3.0.1

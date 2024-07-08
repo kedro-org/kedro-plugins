@@ -36,6 +36,7 @@ def spark_session():
                 .enableHiveSupport()
                 .getOrCreate()
             )
+            spark.conf.set("spark.sql.catalogImplementation", "hive")
             spark.sparkContext.setCheckpointDir(
                 str((Path(tmpdir) / "spark_checkpoint").absolute())
             )

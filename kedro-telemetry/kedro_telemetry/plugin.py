@@ -47,7 +47,7 @@ CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 
-logger = logging.getLogger("kedro.telemetry")
+logger = logging.getLogger(__name__)
 
 
 def _hash(string: str) -> str:

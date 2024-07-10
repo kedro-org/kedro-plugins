@@ -391,8 +391,6 @@ class TestKedroTelemetryCLIHooks:
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({"consent": True}, telemetry_file)
 
-        mock_create_file = mocker.patch("kedro_telemetry.plugin._confirm_consent")
-        mock_create_file.assert_not_called()
         assert not _check_for_telemetry_consent(fake_metadata.project_path)
 
     def test_check_for_telemetry_consent_empty_file(self, mocker, fake_metadata):

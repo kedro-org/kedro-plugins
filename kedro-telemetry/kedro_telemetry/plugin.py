@@ -42,7 +42,7 @@ KNOWN_CI_ENV_VAR_KEYS = {
     "TRAVIS",  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
 }
-_SKIP_TELEMETRY_ENV_VAR_KEYS = {"DO_NOT_TRACK", "KEDRO_DISABLE_TELEMETRY"}
+_SKIP_TELEMETRY_ENV_VAR_KEYS = ("DO_NOT_TRACK", "KEDRO_DISABLE_TELEMETRY",)
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"

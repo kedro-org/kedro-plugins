@@ -383,7 +383,7 @@ class TestKedroTelemetryCLIHooks:
 
     @mark.parametrize("env_var", _SKIP_TELEMETRY_ENV_VAR_KEYS)
     def test_check_for_telemetry_consent_skip_telemetry_with_env_var(
-        self, mocker, monkeypatch, fake_metadata, env_var
+        self, monkeypatch, fake_metadata, env_var
     ):
         monkeypatch.setenv(env_var, "True")
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)

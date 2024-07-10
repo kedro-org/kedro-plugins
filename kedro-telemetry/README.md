@@ -45,6 +45,7 @@ To withdraw consent, you can change the `consent` variable to `false` in `.telem
 ```yaml
 consent: false
 ```
+You can also set `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` environment variable to `True`.
 
 Or you can uninstall the plugin:
 

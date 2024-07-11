@@ -174,7 +174,7 @@ class KedroTelemetryCLIHooks:
                 "No personal data or IP addresses are stored on our side. "
                 "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
                 "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-                "Read more at https://docs.kedro.org/en/latest/configuration/telemetry.html"
+                "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
             )
 
             # get KedroCLI and its structure from actual project root

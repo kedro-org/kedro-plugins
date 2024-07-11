@@ -45,8 +45,8 @@ test = [
 [project.entry-points."kedro.cli_hooks"]
 kedro-telemetry = "kedro_telemetry.plugin:cli_hooks"
 
-[project.entry-points."kedro.hooks"]
-kedro-telemetry = "kedro_telemetry.plugin:project_hooks"
+# [project.entry-points."kedro.hooks"]
+# kedro-telemetry = "kedro_telemetry.plugin:project_hooks"
 
 [tool.setuptools]
 include-package-data = true

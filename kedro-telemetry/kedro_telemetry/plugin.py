@@ -207,10 +207,6 @@ class KedroTelemetryCLIHooks:
                 exc,
             )
 
-
-class KedroTelemetryProjectHooks:
-    """Hook to send project statistics data to Heap"""
-
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
@@ -366,4 +362,3 @@ def _is_valid_syntax(telemetry: Any) -> bool:
 
 
 cli_hooks = KedroTelemetryCLIHooks()
-project_hooks = KedroTelemetryProjectHooks()

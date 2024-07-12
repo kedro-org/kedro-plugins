@@ -149,7 +149,7 @@ def _generate_new_uuid(full_path: str) -> str:
         return ""
 
 
-class KedroTelemetryCLIHooks:
+class KedroTelemetryHook:
     """Hook to send CLI command data to Heap"""
 
     @cli_hook_impl
@@ -361,4 +361,4 @@ def _is_valid_syntax(telemetry: Any) -> bool:
     )
 
 
-cli_hooks = KedroTelemetryCLIHooks()
+telemetry_hook = KedroTelemetryHook()

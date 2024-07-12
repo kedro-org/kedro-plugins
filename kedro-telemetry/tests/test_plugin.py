@@ -14,8 +14,7 @@ from pytest import fixture, mark
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     KNOWN_CI_ENV_VAR_KEYS,
-    KedroTelemetryCLIHooks,
-    KedroTelemetryProjectHooks,
+    KedroTelemetryHook,
     _check_for_telemetry_consent,
     _is_known_ci_env,
 )
@@ -120,7 +119,7 @@ def fake_sub_pipeline():
     return mock_sub_pipeline
 
 
-class TestKedroTelemetryCLIHooks:
+class TestKedroTelemetryHook:
     def test_before_command_run(self, mocker, fake_metadata):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
@@ -139,7 +138,7 @@ class TestKedroTelemetryCLIHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
@@ -191,7 +190,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
         mocker.patch("pathlib.Path.exists", return_value=True)
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
@@ -243,7 +242,7 @@ class TestKedroTelemetryCLIHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = []
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
@@ -282,7 +281,7 @@ class TestKedroTelemetryCLIHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
 
@@ -292,7 +291,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
 
         mocked_post_request = mocker.patch(
@@ -314,7 +313,7 @@ class TestKedroTelemetryCLIHooks:
         mocker.patch("builtins.open", side_effect=OSError)
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
@@ -353,7 +352,7 @@ class TestKedroTelemetryCLIHooks:
         mocked_heap_call = mocker.patch(
             "kedro_telemetry.plugin._send_heap_event", side_effect=Exception
         )
-        telemetry_hook = KedroTelemetryCLIHooks()
+        telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
 
         telemetry_hook.before_command_run(fake_metadata, command_args)
@@ -431,8 +430,6 @@ class TestKedroTelemetryCLIHooks:
         known_ci_vars.discard("GITHUB_ACTION")
         assert _is_known_ci_env(known_ci_vars) == result
 
-
-class TestKedroTelemetryProjectHooks:
     def test_after_context_created_without_kedro_run(  # noqa: PLR0913
         self,
         mocker,
@@ -465,7 +462,7 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin.toml.dump")
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
-        telemetry_hook = KedroTelemetryProjectHooks()
+        telemetry_hook = KedroTelemetryHook()
         telemetry_hook.after_context_created(fake_context)
         telemetry_hook.after_catalog_created(fake_catalog)
 
@@ -523,12 +520,12 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("kedro_telemetry.plugin.toml.load")
         mocker.patch("kedro_telemetry.plugin.toml.dump")
         # CLI run first
-        telemetry_cli_hook = KedroTelemetryCLIHooks()
+        telemetry_cli_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_cli_hook.before_command_run(fake_metadata, command_args)
 
         # Follow by project run
-        telemetry_hook = KedroTelemetryProjectHooks()
+        telemetry_hook = KedroTelemetryHook()
         telemetry_hook.after_context_created(fake_context)
         telemetry_hook.after_catalog_created(fake_catalog)
 
@@ -588,12 +585,12 @@ class TestKedroTelemetryProjectHooks:
         mocker.patch("pathlib.Path.exists", return_value=True)
 
         # CLI run first
-        telemetry_cli_hook = KedroTelemetryCLIHooks()
+        telemetry_cli_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_cli_hook.before_command_run(fake_metadata, command_args)
 
         # Follow by project run
-        telemetry_hook = KedroTelemetryProjectHooks()
+        telemetry_hook = KedroTelemetryHook()
         telemetry_hook.after_context_created(fake_context)
         telemetry_hook.after_catalog_created(fake_catalog)
 
@@ -630,7 +627,7 @@ class TestKedroTelemetryProjectHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryProjectHooks()
+        telemetry_hook = KedroTelemetryHook()
         telemetry_hook.after_context_created(fake_context)
 
         mocked_heap_call.assert_not_called()

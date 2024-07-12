@@ -151,18 +151,23 @@ def _generate_new_uuid(full_path: str) -> str:
 
 class KedroTelemetryHook:
     """Hook to send CLI command data to Heap"""
+    def __init__(self):
+        self.consent=None
+        self._sent = False
+        self.event_properties = None
 
     @cli_hook_impl
     def before_command_run(
         self, project_metadata: ProjectMetadata, command_args: list[str]
     ):
         """Hook implementation to send command run data to Heap"""
+
         try:
             if not project_metadata:  # in package mode
                 return
 
             consent = _check_for_telemetry_consent(project_metadata.project_path)
-            if not consent:
+            if consent is False:
                 logger.debug(
                     "Kedro-Telemetry is installed, but you have opted out of "
                     "sharing usage analytics so none will be collected.",
@@ -170,7 +175,10 @@ class KedroTelemetryHook:
                 return
 
             # get KedroCLI and its structure from actual project root
+
             cli = KedroCLI(project_path=project_metadata.project_path)
+
+
             cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
             masked_command_args = _mask_kedro_cli(
                 cli_struct=cli_struct, command_args=command_args
@@ -189,11 +197,8 @@ class KedroTelemetryHook:
             # send generic event too, so it's easier in data processing
             generic_properties = deepcopy(cli_properties)
             generic_properties["main_command"] = main_command
-            _send_heap_event(
-                event_name="CLI command",
-                identity=user_uuid,
-                properties=generic_properties,
-            )
+            self.event_properties = generic_properties
+
         except Exception as exc:
             logger.warning(
                 "Something went wrong in hook implementation to send command run data to Heap. "
@@ -201,15 +206,35 @@ class KedroTelemetryHook:
                 exc,
             )
 
+    @cli_hook_impl
+    def after_command_run(self):
+        if self.consent and not self._sent:
+            try:
+                user_uuid = _get_or_create_uuid()
+                _send_heap_event(
+                    event_name="CLI command",
+                    identity=user_uuid,
+                    properties=self.event_properties,
+                )
+                self._sent = True
+            except Exception as exc:
+                logger.warning(
+                    "Something went wrong in hook implementation to send command run data to Heap. "
+                    "Exception: %s",
+                    exc,
+                )
+
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
-        self.consent = _check_for_telemetry_consent(context.project_path)
+
+        if self.consent is None:
+            self.consent = _check_for_telemetry_consent(context.project_path)
         self.project_path = context.project_path
 
     @hook_impl
     def after_catalog_created(self, catalog):
-        if not self.consent:
+        if self.consent is False:
             logger.debug(
                 "Kedro-Telemetry is installed, but you have opted out of "
                 "sharing usage analytics so none will be collected.",
@@ -221,18 +246,23 @@ class KedroTelemetryHook:
         default_pipeline = pipelines.get("__default__")  # __default__
         user_uuid = _get_or_create_uuid()
 
-        project_properties = _get_project_properties(
-            user_uuid, self.project_path / PYPROJECT_CONFIG_NAME
-        )
+        if not self.event_properties:
+            event_properties = _get_project_properties(
+                user_uuid, self.project_path / PYPROJECT_CONFIG_NAME
+            )
+        else:
+            event_properties = self.event_properties
 
-        project_statistics_properties = _format_project_statistics_data(
-            project_properties, catalog, default_pipeline, pipelines
+        enriched_properties = _format_project_statistics_data(
+            event_properties, catalog, default_pipeline, pipelines
         )
+        self.event_properties = enriched_properties
         _send_heap_event(
-            event_name="Kedro Project Statistics",
+            event_name="CLI command",
             identity=user_uuid,
-            properties=project_statistics_properties,
+            properties=enriched_properties,
         )
+        self._sent = True
 
 
 def _is_known_ci_env(known_ci_env_var_keys: set[str]):

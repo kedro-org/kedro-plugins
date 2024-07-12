@@ -13,13 +13,17 @@ def dummy_project_path():
 class TestKedroTelemetryHookIntegration:
     def test_telemetry_sent_once_with_kedro_run(self, mocker, dummy_project_path):
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocked_consent_check_call = mocker.patch("kedro_telemetry.plugin._check_for_telemetry_consent")
         kedro_cli = KedroCLI(dummy_project_path)
-        result = CliRunner().invoke(kedro_cli, [])
+        CliRunner().invoke(kedro_cli, [])
         mocked_heap_call.assert_called_once()
+        mocked_consent_check_call.assert_called_once()
 
     def test_telemetry_sent_once_with_session_run(self, mocker, dummy_project_path):
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+        mocked_consent_check_call = mocker.patch("kedro_telemetry.plugin._check_for_telemetry_consent")
+
         with KedroSession.create(project_path=dummy_project_path) as session:
             session.run()
             mocked_heap_call.assert_called_once()
-
+            mocked_consent_check_call.assert_called_once()

@@ -186,12 +186,6 @@ class KedroTelemetryHook:
                 project_properties, masked_command_args
             )
 
-            _send_heap_event(
-                event_name=f"Command run: {main_command}",
-                identity=user_uuid,
-                properties=cli_properties,
-            )
-
             # send generic event too, so it's easier in data processing
             generic_properties = deepcopy(cli_properties)
             generic_properties["main_command"] = main_command

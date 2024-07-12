@@ -151,8 +151,9 @@ def _generate_new_uuid(full_path: str) -> str:
 
 class KedroTelemetryHook:
     """Hook to send CLI command data to Heap"""
+
     def __init__(self):
-        self.consent=None
+        self.consent = None
         self._sent = False
         self.event_properties = None
 
@@ -177,7 +178,6 @@ class KedroTelemetryHook:
             # get KedroCLI and its structure from actual project root
 
             cli = KedroCLI(project_path=project_metadata.project_path)
-
 
             cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
             masked_command_args = _mask_kedro_cli(
@@ -257,11 +257,12 @@ class KedroTelemetryHook:
             event_properties, catalog, default_pipeline, pipelines
         )
         self.event_properties = enriched_properties
-        _send_heap_event(
-            event_name="CLI command",
-            identity=user_uuid,
-            properties=enriched_properties,
-        )
+        if not self._sent:
+            _send_heap_event(
+                event_name="CLI command",
+                identity=user_uuid,
+                properties=enriched_properties,
+            )
         self._sent = True
 
 

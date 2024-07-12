@@ -156,6 +156,7 @@ class KedroTelemetryHook:
         self.consent = None
         self._sent = False
         self.event_properties = None
+        self.project_path = None
 
     @cli_hook_impl
     def before_command_run(

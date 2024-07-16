@@ -23,7 +23,6 @@ def spark_session():
             "spark.sql.catalog.spark_catalog",
             "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
-        .enableHiveSupport()
         .getOrCreate()
     )
     spark.sql("create database if not exists test")

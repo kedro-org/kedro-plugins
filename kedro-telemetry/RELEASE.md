@@ -1,4 +1,5 @@
 # Upcoming release
+* Added `DO_NOT_TRACK` and `KEDRO_DISABLE_TELEMETRY` environment variables to skip telemetry.
 
 # Release 0.5.0
 * Updated the plugin to generate a unique project UUID for kedro project and store it in `pyproject.toml`.

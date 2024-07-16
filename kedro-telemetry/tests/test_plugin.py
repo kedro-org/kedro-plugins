@@ -14,6 +14,7 @@ from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
+    _SKIP_TELEMETRY_ENV_VAR_KEYS,
     KNOWN_CI_ENV_VAR_KEYS,
     KedroTelemetryCLIHooks,
     KedroTelemetryProjectHooks,
@@ -408,6 +409,18 @@ class TestKedroTelemetryCLIHooks:
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({"consent": False}, telemetry_file)
+
+        assert not _check_for_telemetry_consent(fake_metadata.project_path)
+
+    @mark.parametrize("env_var", _SKIP_TELEMETRY_ENV_VAR_KEYS)
+    def test_check_for_telemetry_consent_skip_telemetry_with_env_var(
+        self, monkeypatch, fake_metadata, env_var
+    ):
+        monkeypatch.setenv(env_var, "True")
+        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
+        telemetry_file_path = fake_metadata.project_path / ".telemetry"
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({"consent": True}, telemetry_file)
 
         assert not _check_for_telemetry_consent(fake_metadata.project_path)
 

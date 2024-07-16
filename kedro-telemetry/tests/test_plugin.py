@@ -1,3 +1,4 @@
+import logging
 import sys
 from pathlib import Path
 
@@ -122,7 +123,7 @@ def fake_sub_pipeline():
 
 
 class TestKedroTelemetryCLIHooks:
-    def test_before_command_run(self, mocker, fake_metadata):
+    def test_before_command_run(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
@@ -140,9 +141,10 @@ class TestKedroTelemetryCLIHooks:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
-        command_args = ["--version"]
-        telemetry_hook.before_command_run(fake_metadata, command_args)
+        with caplog.at_level(logging.INFO):
+            telemetry_hook = KedroTelemetryCLIHooks()
+            command_args = ["--version"]
+            telemetry_hook.before_command_run(fake_metadata, command_args)
         expected_properties = {
             "username": "user_uuid",
             "project_id": "digested",
@@ -171,6 +173,20 @@ class TestKedroTelemetryCLIHooks:
             ),
         ]
         assert mocked_heap_call.call_args_list == expected_calls
+        assert any(
+            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+            "No personal data or IP addresses are stored on our side. "
+            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            in record.message
+            for record in caplog.records
+        )
+        assert not any(
+            "Kedro-Telemetry is installed, but you have opted out of "
+            "sharing usage analytics so none will be collected." in record.message
+            for record in caplog.records
+        )
 
     def test_before_command_run_with_tools(self, mocker, fake_metadata):
         mocker.patch(
@@ -277,17 +293,32 @@ class TestKedroTelemetryCLIHooks:
 
         assert mocked_heap_call.call_args_list == expected_calls
 
-    def test_before_command_run_no_consent_given(self, mocker, fake_metadata):
+    def test_before_command_run_no_consent_given(self, mocker, fake_metadata, caplog):
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=False
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        telemetry_hook = KedroTelemetryCLIHooks()
-        command_args = ["--version"]
-        telemetry_hook.before_command_run(fake_metadata, command_args)
+        with caplog.at_level(logging.INFO):
+            telemetry_hook = KedroTelemetryCLIHooks()
+            command_args = ["--version"]
+            telemetry_hook.before_command_run(fake_metadata, command_args)
 
         mocked_heap_call.assert_not_called()
+        assert not any(
+            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+            "No personal data or IP addresses are stored on our side. "
+            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+            "Read more at https://docs.kedro.org/en/latest/configuration/telemetry.html"
+            in record.message
+            for record in caplog.records
+        )
+        assert any(
+            "Kedro-Telemetry is installed, but you have opted out of "
+            "sharing usage analytics so none will be collected." in record.message
+            for record in caplog.records
+        )
 
     def test_before_command_run_connection_error(self, mocker, fake_metadata, caplog):
         mocker.patch(

@@ -42,6 +42,10 @@ KNOWN_CI_ENV_VAR_KEYS = {
     "TRAVIS",  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
 }
+_SKIP_TELEMETRY_ENV_VAR_KEYS = (
+    "DO_NOT_TRACK",
+    "KEDRO_DISABLE_TELEMETRY",
+)
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
@@ -169,12 +173,21 @@ class KedroTelemetryHook:
                 return
 
             consent = _check_for_telemetry_consent(project_metadata.project_path)
+            
             if consent is False:
-                logger.debug(
+                logger.info(
                     "Kedro-Telemetry is installed, but you have opted out of "
                     "sharing usage analytics so none will be collected.",
                 )
                 return
+
+            logger.info(
+                "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+                "No personal data or IP addresses are stored on our side. "
+                "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+                "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+                "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            )
 
             # get KedroCLI and its structure from actual project root
 
@@ -186,7 +199,6 @@ class KedroTelemetryHook:
             )
             main_command = masked_command_args[0] if masked_command_args else "kedro"
 
-            logger.debug("You have opted into product usage analytics.")
             user_uuid = _get_or_create_uuid()
             project_properties = _get_project_properties(
                 user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
@@ -240,9 +252,9 @@ class KedroTelemetryHook:
                 "Kedro-Telemetry is installed, but you have opted out of "
                 "sharing usage analytics so none will be collected.",
             )
-            return
+        # The user notification message is sent only once per command during the before_command_run hook
 
-        logger.debug("You have opted into product usage analytics.")
+            return
 
         default_pipeline = pipelines.get("__default__")  # __default__
         user_uuid = _get_or_create_uuid()
@@ -373,6 +385,10 @@ def _check_for_telemetry_consent(project_path: Path) -> bool:
     Telemetry is considered as opt-in otherwise.
     """
     telemetry_file_path = project_path / ".telemetry"
+
+    for env_var in _SKIP_TELEMETRY_ENV_VAR_KEYS:
+        if os.environ.get(env_var):
+            return False
     if telemetry_file_path.exists():
         with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
             telemetry = yaml.safe_load(telemetry_file)

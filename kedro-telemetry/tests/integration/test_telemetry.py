@@ -11,13 +11,16 @@ from pytest import fixture
 def dummy_project_path():
     return Path(__file__).parent / "dummy-project"
 
+
 @fixture(autouse=True)
 def reset_telemetry():
     from kedro_telemetry.plugin import telemetry_hook
+
     telemetry_hook.consent = None
     telemetry_hook._sent = False
     telemetry_hook.event_properties = None
     telemetry_hook.project_path = None
+
 
 class TestKedroTelemetryHookIntegration:
     def test_telemetry_sent_once_with_kedro_run(self, mocker, dummy_project_path):
@@ -34,6 +37,7 @@ class TestKedroTelemetryHookIntegration:
         self, mocker, dummy_project_path
     ):
         from kedro_telemetry.plugin import telemetry_hook
+
         telemetry_hook.consent = None
         telemetry_hook._sent = False
         telemetry_hook.event_properties = None
@@ -50,11 +54,12 @@ class TestKedroTelemetryHookIntegration:
 
     def test_telemetry_sent_once_with_session_run(self, mocker, dummy_project_path):
         from kedro_telemetry.plugin import telemetry_hook
+
         telemetry_hook.consent = None
         telemetry_hook._sent = False
         telemetry_hook.event_properties = None
         telemetry_hook.project_path = None
-        
+
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocked_consent_check_call = mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True

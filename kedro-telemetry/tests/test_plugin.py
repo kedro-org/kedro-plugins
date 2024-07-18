@@ -140,10 +140,12 @@ class TestKedroTelemetryHook:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
+
         with caplog.at_level(logging.INFO):
             telemetry_hook = KedroTelemetryHook()
             command_args = ["--version"]
             telemetry_hook.before_command_run(fake_metadata, command_args)
+            telemetry_hook.after_command_run()
         expected_properties = {
             "username": "user_uuid",
             "project_id": "digested",
@@ -151,8 +153,8 @@ class TestKedroTelemetryHook:
             "telemetry_version": TELEMETRY_VERSION,
             "python_version": sys.version,
             "os": sys.platform,
-            "command": "kedro --version",
             "is_ci_env": True,
+            "command": "kedro --version",
         }
         generic_properties = {
             **expected_properties,
@@ -160,11 +162,6 @@ class TestKedroTelemetryHook:
         }
 
         expected_calls = [
-            mocker.call(
-                event_name="Command run: --version",
-                identity="user_uuid",
-                properties=expected_properties,
-            ),
             mocker.call(
                 event_name="CLI command",
                 identity="user_uuid",
@@ -210,6 +207,7 @@ class TestKedroTelemetryHook:
         telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        telemetry_hook.after_command_run()
         expected_properties = {
             "username": "user_uuid",
             "project_id": "digested",
@@ -228,11 +226,6 @@ class TestKedroTelemetryHook:
         }
 
         expected_calls = [
-            mocker.call(
-                event_name="Command run: --version",
-                identity="user_uuid",
-                properties=expected_properties,
-            ),
             mocker.call(
                 event_name="CLI command",
                 identity="user_uuid",
@@ -262,6 +255,7 @@ class TestKedroTelemetryHook:
         telemetry_hook = KedroTelemetryHook()
         command_args = []
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        telemetry_hook.after_command_run()
         expected_properties = {
             "username": "user_uuid",
             "project_id": "digested",
@@ -278,11 +272,6 @@ class TestKedroTelemetryHook:
         }
 
         expected_calls = [
-            mocker.call(
-                event_name="Command run: kedro",
-                identity="user_uuid",
-                properties=expected_properties,
-            ),
             mocker.call(
                 event_name="CLI command",
                 identity="user_uuid",
@@ -330,6 +319,7 @@ class TestKedroTelemetryHook:
             "requests.post", side_effect=requests.exceptions.ConnectionError()
         )
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        telemetry_hook.after_command_run()
         msg = "Failed to send data to Heap. Exception of type 'ConnectionError' was raised."
         assert msg in caplog.messages[-1]
         mocked_post_request.assert_called()
@@ -348,6 +338,7 @@ class TestKedroTelemetryHook:
         telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        telemetry_hook.after_command_run()
         expected_properties = {
             "username": "",
             "command": "kedro --version",
@@ -364,11 +355,6 @@ class TestKedroTelemetryHook:
         }
 
         expected_calls = [
-            mocker.call(
-                event_name="Command run: --version",
-                identity="",
-                properties=expected_properties,
-            ),
             mocker.call(
                 event_name="CLI command",
                 identity="",
@@ -388,6 +374,7 @@ class TestKedroTelemetryHook:
         command_args = ["--version"]
 
         telemetry_hook.before_command_run(fake_metadata, command_args)
+        telemetry_hook.after_command_run()
         msg = (
             "Something went wrong in hook implementation to send command run data to"
             " Heap. Exception:"
@@ -595,8 +582,7 @@ class TestKedroTelemetryHook:
             properties=expected_properties,
         )
 
-        # CLI hook makes the first 2 calls, the 3rd one is the Project hook
-        assert mocked_heap_call.call_args_list[2] == expected_call
+        assert mocked_heap_call.call_args_list[0] == expected_call
 
     def test_after_context_created_with_kedro_run_and_tools(  # noqa: PLR0913
         self,
@@ -661,8 +647,8 @@ class TestKedroTelemetryHook:
             identity="user_uuid",
             properties=expected_properties,
         )
-        # CLI hook makes the first 2 calls, the 3rd one is the Project hook
-        assert mocked_heap_call.call_args_list[2] == expected_call
+
+        assert mocked_heap_call.call_args_list[0] == expected_call
 
     def test_after_context_created_no_consent_given(self, mocker):
         fake_context = mocker.Mock()

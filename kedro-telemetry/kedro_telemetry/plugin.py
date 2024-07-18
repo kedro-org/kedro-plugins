@@ -8,7 +8,6 @@ import logging
 import os
 import sys
 import uuid
-from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -233,7 +232,7 @@ class KedroTelemetryHook:
         )
         self.event_properties.update(project_properties)
 
-        self._send_telemetry_heap_event("Project statistics")
+        self._send_telemetry_heap_event("Kedro Project Statistics")
 
     def _opt_out_notification(self):
         logger.info(
@@ -310,7 +309,7 @@ def _format_project_statistics_data(
         if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None
+        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
     )
     project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
     return project_statistics_properties

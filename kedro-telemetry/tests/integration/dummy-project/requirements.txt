@@ -1,9 +1,0 @@
-ipython>=8.10
-jupyterlab>=3.0
-kedro~=0.19.6
-kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3.0; python_version >= "3.9"
-kedro-datasets[pandas.CSVDataset, pandas.ExcelDataset, pandas.ParquetDataset]>=1.0; python_version < "3.9"
-kedro-telemetry>=0.3.1
-kedro-viz>=6.7.0
-notebook
-scikit-learn~=1.0

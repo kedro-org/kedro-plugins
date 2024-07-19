@@ -156,11 +156,11 @@ class KedroTelemetryHook:
     """Hook to send CLI command data to Heap"""
 
     def __init__(self):
-        self.consent = None
+        self._consent = None
         self._sent = False
-        self.event_properties = None
-        self.project_path = None
-        self.user_uuid = None
+        self._event_properties = None
+        self._project_path = None
+        self._user_uuid = None
 
     @cli_hook_impl
     def before_command_run(
@@ -171,8 +171,8 @@ class KedroTelemetryHook:
         if not project_metadata:  # in package mode
             return
 
-        self.consent = _check_for_telemetry_consent(project_metadata.project_path)
-        if not self.consent:
+        self._consent = _check_for_telemetry_consent(project_metadata.project_path)
+        if not self._consent:
             self._opt_out_notification()
             return
 
@@ -183,10 +183,10 @@ class KedroTelemetryHook:
             cli_struct=cli_struct, command_args=command_args
         )
 
-        self.user_uuid = _get_or_create_uuid()
+        self._user_uuid = _get_or_create_uuid()
 
         event_properties = _get_project_properties(
-            self.user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
+            self._user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
         )
         event_properties["command"] = (
             f"kedro {' '.join(masked_command_args)}" if masked_command_args else "kedro"
@@ -195,42 +195,42 @@ class KedroTelemetryHook:
             masked_command_args[0] if masked_command_args else "kedro"
         )
 
-        self.event_properties = event_properties
+        self._event_properties = event_properties
 
     @cli_hook_impl
     def after_command_run(self):
-        if self.consent and not self._sent:
+        if self._consent and not self._sent:
             self._send_telemetry_heap_event("CLI command")
 
     @hook_impl
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
 
-        if self.consent is None:
-            self.consent = _check_for_telemetry_consent(context.project_path)
-            if not self.consent:
+        if self._consent is None:
+            self._consent = _check_for_telemetry_consent(context.project_path)
+            if not self._consent:
                 self._opt_out_notification()
-        self.project_path = context.project_path
+        self._project_path = context.project_path
 
     @hook_impl
     def after_catalog_created(self, catalog):
-        if self.consent is False:
+        if self._consent is False:
             return
 
         default_pipeline = pipelines.get("__default__")  # __default__
 
-        if not self.user_uuid:
-            self.user_uuid = _get_or_create_uuid()
+        if not self._user_uuid:
+            self._user_uuid = _get_or_create_uuid()
 
-        if not self.event_properties:
-            self.event_properties = _get_project_properties(
-                self.user_uuid, self.project_path / PYPROJECT_CONFIG_NAME
+        if not self._event_properties:
+            self._event_properties = _get_project_properties(
+                self._user_uuid, self._project_path / PYPROJECT_CONFIG_NAME
             )
 
         project_properties = _format_project_statistics_data(
             catalog, default_pipeline, pipelines
         )
-        self.event_properties.update(project_properties)
+        self._event_properties.update(project_properties)
 
         self._send_telemetry_heap_event("Kedro Project Statistics")
 
@@ -254,8 +254,8 @@ class KedroTelemetryHook:
         try:
             _send_heap_event(
                 event_name=event_name,
-                identity=self.user_uuid,
-                properties=self.event_properties,
+                identity=self._user_uuid,
+                properties=self._event_properties,
             )
             self._sent = True
         except Exception as exc:

@@ -189,7 +189,7 @@ class KedroTelemetryHook:
             self.user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
         )
         event_properties["command"] = (
-            f"kedro {' '.join(command_args)}" if command_args else "kedro"
+            f"kedro {' '.join(masked_command_args)}" if masked_command_args else "kedro"
         )
         event_properties["main_command"] = (
             masked_command_args[0] if masked_command_args else "kedro"

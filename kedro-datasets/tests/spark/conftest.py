@@ -40,3 +40,6 @@ def spark_session(tmp_path_factory):
         spark = _setup_spark_session()
     yield spark
     spark.stop()
+    # Ensure that the spark session is not used after it is stopped
+    # https://stackoverflow.com/a/41512072
+    spark._instantiatedContext = None

@@ -1,13 +1,11 @@
 import pytest
 from kedro.io import MemoryDataset
 from pyspark.sql import DataFrame as SparkDataFrame
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
 
 
-def _update_spark_df(data, idx, jdx, value):
-    session = SparkSession.builder.getOrCreate()
-    data = session.createDataFrame(data.rdd.zipWithIndex()).select(
+def _update_spark_df(spark_session, data, idx, jdx, value):
+    data = spark_session.createDataFrame(data.rdd.zipWithIndex()).select(
         col("_1.*"), col("_2").alias("__id")
     )
     cname = data.columns[idx]
@@ -34,19 +32,21 @@ def memory_dataset(spark_data_frame):
     return MemoryDataset(data=spark_data_frame)
 
 
-def test_load_modify_original_data(memory_dataset, spark_data_frame):
+def test_load_modify_original_data(spark_session, memory_dataset, spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
-    spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, -5)
+    spark_data_frame = _update_spark_df(spark_session, spark_data_frame, 1, 1, -5)
     assert not _check_equals(memory_dataset.load(), spark_data_frame)
 
 
-def test_save_modify_original_data(spark_data_frame):
+def test_save_modify_original_data(spark_session, spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
     memory_dataset = MemoryDataset()
     memory_dataset.save(spark_data_frame)
-    spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, "new value")
+    spark_data_frame = _update_spark_df(
+        spark_session, spark_data_frame, 1, 1, "new value"
+    )
 
     assert not _check_equals(memory_dataset.load(), spark_data_frame)
 

@@ -6,7 +6,6 @@ from kedro.io.core import DatasetError
 from moto import mock_aws
 from packaging.version import Version
 from pyspark import __version__
-from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
@@ -43,15 +42,13 @@ def sample_spark_df_schema() -> StructType:
 
 
 @pytest.fixture
-def sample_spark_streaming_df(tmp_path, sample_spark_df_schema):
+def sample_spark_streaming_df(spark_session, tmp_path, sample_spark_df_schema):
     """Create a sample dataframe for streaming"""
     data = [("0001", 2), ("0001", 7), ("0002", 4)]
     schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(sample_spark_df_schema.jsonValue(), f)
-    return SparkSession.builder.getOrCreate().createDataFrame(
-        data, sample_spark_df_schema
-    )
+    return spark_session.createDataFrame(data, sample_spark_df_schema)
 
 
 @pytest.fixture

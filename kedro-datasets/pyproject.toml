@@ -167,8 +167,12 @@ langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
+
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
+rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
 # Docs requirements
 docs = [
@@ -179,6 +183,7 @@ docs = [
 
 # Test requirements
 test = [
+    "accelerate<0.32", # Temporary pin
     "adlfs~=2023.1",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
@@ -270,6 +275,7 @@ experimental = [
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
+    "rioxarray",
 ]
 
 # All requirements

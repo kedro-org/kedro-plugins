@@ -11,8 +11,9 @@ kedro_datasets_experimental
    :toctree:
    :template: autosummary/class.rst
 
-    kedro_datasets_experimental.langchain.ChatAnthropicDataset
-    kedro_datasets_experimental.langchain.ChatCohereDataset
-    kedro_datasets_experimental.langchain.ChatOpenAIDataset
-    kedro_datasets_experimental.langchain.OpenAIEmbeddingsDataset
-    kedro_datasets_experimental.netcdf.NetCDFDataset
+   langchain.ChatAnthropicDataset
+   langchain.ChatCohereDataset
+   langchain.ChatOpenAIDataset
+   langchain.OpenAIEmbeddingsDataset
+   netcdf.NetCDFDataset
+   rioxarray.GeoTIFFDataset

@@ -333,7 +333,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         # Dummy object to call _pretty_repr
         # Only clean_dataset_config parameters are exposed
         kwargs = deepcopy(self._dataset_config)
-        kwargs[self._filepath_arg] = self._join_protocol("")
+        kwargs[self._filepath_arg] = ""
         dataset = self._dataset_type(**kwargs)  # type: ignore
 
         object_description_repr = {

@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Improved PartitionedDataset representation when printing.
+
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions

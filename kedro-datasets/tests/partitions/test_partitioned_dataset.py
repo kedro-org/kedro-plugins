@@ -62,7 +62,7 @@ class TestPartitionedDatasetLocal:
         pds = PartitionedDataset(path="", dataset=dataset)
         assert (
             repr(pds)
-            == f"""kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
+            == """kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
             """dataset='kedro_datasets.pandas.parquet_dataset.ParquetDataset()')"""
         )
 

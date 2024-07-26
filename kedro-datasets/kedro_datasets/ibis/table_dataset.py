@@ -186,7 +186,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             "filepath": self._filepath,
             "file_format": self._file_format,
             "table_name": self._table_name,
-            "connection_config": self._connection_config,
+            "connection_config": self._connection_config.get("backend"),
             "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,

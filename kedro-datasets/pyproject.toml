@@ -121,8 +121,9 @@ pillow-imagedataset = ["Pillow~=9.0"]
 pillow = ["kedro-datasets[pillow-imagedataset]"]
 
 plotly-jsondataset = ["kedro-datasets[plotly-base]"]
+plotly-htmldataset = ["kedro-datasets[plotly-base]"]
 plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
-plotly = ["kedro-datasets[plotly-jsondataset,plotly-plotlydataset]"]
+plotly = ["kedro-datasets[plotly-jsondataset,plotly-htmldataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
 polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]

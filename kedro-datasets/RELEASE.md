@@ -1,5 +1,12 @@
 # Upcoming Release
 ## Major features and improvements
+
+* Added the following new core datasets:
+
+| Type                 | Description                                    | Location                |
+|----------------------|------------------------------------------------|-------------------------|
+| `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
+
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions

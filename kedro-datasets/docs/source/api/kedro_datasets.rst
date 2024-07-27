@@ -46,6 +46,7 @@ kedro_datasets
    pickle.PickleDataset
    pillow.ImageDataset
    plotly.JSONDataset
+   plotly.HTMLDataset
    plotly.PlotlyDataset
    polars.CSVDataset
    polars.EagerPolarsDataset

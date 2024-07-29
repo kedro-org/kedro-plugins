@@ -271,7 +271,7 @@ def _is_known_ci_env(known_ci_env_var_keys: set[str]):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
+def _get_project_properties(user_uuid: str, project_path: Path | None) -> dict:
     if project_path:
         pyproject_path = project_path / PYPROJECT_CONFIG_NAME
         project_id = _get_or_create_project_id(pyproject_path)

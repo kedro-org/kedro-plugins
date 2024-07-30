@@ -29,30 +29,31 @@ Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`re
 Data collection for telemetry is enabled by default. To withdraw consent, you have a few options:
 
 1. **Set Environment Variables**:
-   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
+   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
 
 2. **CLI Option When Creating a New Project**:
    When creating a new project, you can use the command:
 
    ```console
-   kedro new --telemetry=yes/no
+   kedro new --telemetry=no
    ```
-   This will create a new project with a `.telemetry` file in its root folder, containing `consent: true/false` accordingly. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
+   This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
 
    >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
-3. **Modify or Create the .telemetry File**:
+3. **Modify or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
      ```yaml
      consent: false
      ```
 
-4. **Uninstall the Plugin**:
+4. **Uninstall the plugin**:
    Remove the `kedro-telemetry` plugin:
 
    ```console
    pip uninstall kedro-telemetry
    ```
+   >*Note:* This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
 
 ## What happens when I withdraw consent?
 

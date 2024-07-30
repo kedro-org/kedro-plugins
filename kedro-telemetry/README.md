@@ -20,12 +20,16 @@ for further information on the intent of the data collection and what data is co
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).
 
+## How is the data collected
+
+Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/). Project maintainers have access to the data and can create dashboards that show adoption and feature usage.
+
 ## How do I withdraw consent?
 
-To withdraw consent, you have a few options:
+Data collection for telemetry is enabled by default. To withdraw consent, you have a few options:
 
 1. **Set Environment Variables**:
-   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of these environment variables will disable telemetry for all Kedro projects in that environment.
+   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
 
 2. **CLI Option When Creating a New Project**:
    When creating a new project, you can use the command:
@@ -33,7 +37,7 @@ To withdraw consent, you have a few options:
    ```console
    kedro new --telemetry=yes/no
    ```
-   This will create a `.telemetry` file inside the new project's folder with `consent: true/false` accordingly. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
+   This will create a new project with a `.telemetry` file in its root folder, containing `consent: true/false` accordingly. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
 
    >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
@@ -52,15 +56,11 @@ To withdraw consent, you have a few options:
 
 ## What happens when I withdraw consent?
 
-Data collection for telemetry is enabled by default. If consent was explicitly denied or withdrawn, the message below will be printed out on every Kedro CLI invocation. If you explicitly deny consent from the beginning, no data will be collected. If you withdraw consent later, the processing of data will be stopped from that moment on.
+If consent was explicitly denied or withdrawn, the message below will be printed out on every Kedro CLI invocation. If you explicitly deny consent from the beginning, no data will be collected. If you withdraw consent later, the processing of data will be stopped from that moment on.
 
 ```
 Kedro-Telemetry is installed, but you have opted out of sharing usage analytics so none will be collected.
 ```
-
-## How is the data collected
-
-Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/). Project maintainers have access to the data and can create dashboards that show adoption and feature usage.
 
 ## What licence do you use?
 

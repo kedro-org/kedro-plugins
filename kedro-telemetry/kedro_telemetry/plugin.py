@@ -175,7 +175,7 @@ class KedroTelemetryHook:
         if not self._consent:
             self._opt_out_notification()
             return
-
+        
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_metadata.project_path)
         cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
@@ -206,10 +206,9 @@ class KedroTelemetryHook:
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
 
-        if self._consent is None:
-            self._consent = _check_for_telemetry_consent(context.project_path)
-            if not self._consent:
-                self._opt_out_notification()
+        self._consent = _check_for_telemetry_consent(context.project_path)
+        if not self._consent:
+            self._opt_out_notification()
         self._project_path = context.project_path
 
     @hook_impl
@@ -242,7 +241,7 @@ class KedroTelemetryHook:
 
     def _send_telemetry_heap_event(self, event_name: str):
         """Hook implementation to send command run data to Heap"""
-
+        
         logger.info(
             "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
             "No personal data or IP addresses are stored on our side. "

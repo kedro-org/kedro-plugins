@@ -173,7 +173,6 @@ class KedroTelemetryHook:
 
         self._consent = _check_for_telemetry_consent(project_metadata.project_path)
         if not self._consent:
-            self._opt_out_notification()
             return
 
         # get KedroCLI and its structure from actual project root
@@ -232,12 +231,6 @@ class KedroTelemetryHook:
         self._event_properties.update(project_properties)
 
         self._send_telemetry_heap_event("Kedro Project Statistics")
-
-    def _opt_out_notification(self):
-        logger.info(
-            "Kedro-Telemetry is installed, but you have opted out of "
-            "sharing usage analytics so none will be collected.",
-        )
 
     def _send_telemetry_heap_event(self, event_name: str):
         """Hook implementation to send command run data to Heap"""

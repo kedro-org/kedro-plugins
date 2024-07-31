@@ -57,11 +57,7 @@ Data collection for telemetry is enabled by default. To withdraw consent, you ha
 
 ## What happens when I withdraw consent?
 
-If consent was explicitly denied or withdrawn, the message below will be printed out on every Kedro CLI invocation. If you explicitly deny consent from the beginning, no data will be collected. If you withdraw consent later, the processing of data will be stopped from that moment on.
-
-```
-Kedro-Telemetry is installed, but you have opted out of sharing usage analytics so none will be collected.
-```
+If you explicitly deny consent from the beginning, no data will be collected. If you withdraw consent later, the processing of data will be stopped from that moment on.
 
 ## What licence do you use?
 

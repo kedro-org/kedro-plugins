@@ -327,6 +327,22 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             "dataset_config": clean_dataset_config,
         }
 
+    def __repr__(self) -> str:
+        object_description = self._describe()
+
+        # Dummy object to call _pretty_repr
+        # Only clean_dataset_config parameters are exposed
+        kwargs = deepcopy(self._dataset_config)
+        kwargs[self._filepath_arg] = ""
+        dataset = self._dataset_type(**kwargs)  # type: ignore
+
+        object_description_repr = {
+            "filepath": object_description["path"],
+            "dataset": dataset._pretty_repr(object_description["dataset_config"]),
+        }
+
+        return self._pretty_repr(object_description_repr)
+
     def _invalidate_caches(self) -> None:
         self._partition_cache.clear()
         self._filesystem.invalidate_cache(self._normalized_path)

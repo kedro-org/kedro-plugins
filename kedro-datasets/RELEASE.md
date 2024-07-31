@@ -6,6 +6,14 @@
 ## Breaking Changes
 ## Community contributions
 
+# Release 4.0.1
+## Major features and improvements
+## Bug fixes and other changes
+- Updated `ibis.TableDataset` to make sure credentials are not printed in interactive environment.
+
+## Breaking Changes
+## Community contributions
+
 # Release 4.0.0
 ## Major features and improvements
 

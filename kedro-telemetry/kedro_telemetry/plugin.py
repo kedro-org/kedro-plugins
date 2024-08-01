@@ -202,8 +202,7 @@ class KedroTelemetryHook:
     def after_context_created(self, context):
         """Hook implementation to send project statistics data to Heap"""
 
-        if self._consent is None:
-            self._consent = _check_for_telemetry_consent(context.project_path)
+        self._consent = _check_for_telemetry_consent(context.project_path)
         self._project_path = context.project_path
 
     @hook_impl

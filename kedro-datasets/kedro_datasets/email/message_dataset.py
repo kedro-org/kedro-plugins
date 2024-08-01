@@ -157,13 +157,13 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
             "version": self._version,
         }
 
-    def _load(self) -> Message:
+    def load(self) -> Message:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return Parser(**self._parser_args).parse(fs_file, **self._load_args)
 
-    def _save(self, data: Message) -> None:
+    def save(self, data: Message) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

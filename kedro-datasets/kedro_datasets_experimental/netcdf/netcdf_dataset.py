@@ -141,7 +141,7 @@ class NetCDFDataset(AbstractDataset):
             True if "*" in str(PurePosixPath(self._filepath).stem) else False
         )
 
-    def _load(self) -> xr.Dataset:
+    def load(self) -> xr.Dataset:
         load_path = self._filepath
         multi_load_path = load_path
 
@@ -163,7 +163,7 @@ class NetCDFDataset(AbstractDataset):
 
         return data
 
-    def _save(self, data: xr.Dataset):
+    def save(self, data: xr.Dataset):
         if self._is_multifile:
             raise DatasetError(
                 "Globbed multifile datasets with '*' in filepath cannot be saved. "

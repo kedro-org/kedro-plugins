@@ -132,13 +132,13 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
             "version": self._version,
         }
 
-    def _load(self) -> dict:
+    def load(self) -> dict:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return yaml.safe_load(fs_file)
 
-    def _save(self, data: dict) -> None:
+    def save(self, data: dict) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             yaml.dump(data, fs_file, **self._save_args)

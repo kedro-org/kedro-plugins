@@ -168,12 +168,12 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             "version": self._version,
         }
 
-    def _load(self) -> _DO:
+    def load(self) -> _DO:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_svmlight_file(fs_file, **self._load_args)
 
-    def _save(self, data: _DI) -> None:
+    def save(self, data: _DI) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             dump_svmlight_file(data[0], data[1], fs_file, **self._save_args)

@@ -223,10 +223,10 @@ class DeltaTableDataset(AbstractDataset):
         """Returns the version of the DeltaTableDataset that is currently loaded."""
         return self._delta_table.version() if self._delta_table else None
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         return self._delta_table.to_pandas() if self._delta_table else None
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         if self.is_empty_dir:
             # first time creation of delta table
             write_deltalake(

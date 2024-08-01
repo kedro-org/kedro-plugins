@@ -148,10 +148,10 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             **self._save_args,
         )
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         return _get_spark().read.table(self._full_table_address)
 
-    def _save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrame) -> None:
         self._validate_save(data)
         if self._write_mode == "upsert":
             # check if _table_pk is a subset of df columns

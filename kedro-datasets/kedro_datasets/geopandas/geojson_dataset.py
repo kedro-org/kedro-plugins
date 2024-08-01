@@ -126,12 +126,12 @@ class GeoJSONDataset(
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> gpd.GeoDataFrame | dict[str, gpd.GeoDataFrame]:
+    def load(self) -> gpd.GeoDataFrame | dict[str, gpd.GeoDataFrame]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return gpd.read_file(fs_file, **self._load_args)
 
-    def _save(self, data: gpd.GeoDataFrame) -> None:
+    def save(self, data: gpd.GeoDataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             data.to_file(fs_file, **self._save_args)

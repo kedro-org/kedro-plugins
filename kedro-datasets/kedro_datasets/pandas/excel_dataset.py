@@ -217,7 +217,7 @@ class ExcelDataset(
             "version": self._version,
         }
 
-    def _load(self) -> pd.DataFrame | dict[str, pd.DataFrame]:
+    def load(self) -> pd.DataFrame | dict[str, pd.DataFrame]:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -231,7 +231,7 @@ class ExcelDataset(
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def _save(self, data: pd.DataFrame | dict[str, pd.DataFrame]) -> None:
+    def save(self, data: pd.DataFrame | dict[str, pd.DataFrame]) -> None:
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 

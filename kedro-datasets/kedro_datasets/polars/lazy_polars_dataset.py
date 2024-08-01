@@ -190,7 +190,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             "version": self._version,
         }
 
-    def _load(self) -> pl.LazyFrame:
+    def load(self) -> pl.LazyFrame:
         load_path = str(self._get_load_path())
 
         if self._protocol == "file":
@@ -204,7 +204,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         )
         return pl.scan_pyarrow_dataset(dataset)
 
-    def _save(self, data: pl.DataFrame | pl.LazyFrame) -> None:
+    def save(self, data: pl.DataFrame | pl.LazyFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         collected_data = None

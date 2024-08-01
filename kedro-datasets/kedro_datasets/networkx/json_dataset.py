@@ -112,14 +112,14 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> networkx.Graph:
+    def load(self) -> networkx.Graph:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             json_payload = json.load(fs_file)
 
         return networkx.node_link_graph(json_payload, **self._load_args)
 
-    def _save(self, data: networkx.Graph) -> None:
+    def save(self, data: networkx.Graph) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         json_graph = networkx.node_link_data(data, **self._save_args)

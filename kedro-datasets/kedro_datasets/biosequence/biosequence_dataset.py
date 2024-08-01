@@ -119,12 +119,12 @@ class BioSequenceDataset(AbstractDataset[list, list]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> list:
+    def load(self) -> list:
         load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return list(SeqIO.parse(handle=fs_file, **self._load_args))
 
-    def _save(self, data: list) -> None:
+    def save(self, data: list) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

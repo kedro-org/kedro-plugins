@@ -133,13 +133,13 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
             "version": self._version,
         }
 
-    def _load(self) -> Any:
+    def load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return json.load(fs_file)
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

@@ -115,13 +115,13 @@ class TextDataset(AbstractVersionedDataset[str, str]):
             "version": self._version,
         }
 
-    def _load(self) -> str:
+    def load(self) -> str:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return fs_file.read()
 
-    def _save(self, data: str) -> None:
+    def save(self, data: str) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

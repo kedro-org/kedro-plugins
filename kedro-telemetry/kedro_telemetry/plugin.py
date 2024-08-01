@@ -168,15 +168,14 @@ class KedroTelemetryHook:
     ):
         """Hook implementation to send command run data to Heap"""
 
-        if not project_metadata:  # in package mode
-            return
+        project_path = project_metadata.project_path if project_metadata else None
 
-        self._consent = _check_for_telemetry_consent(project_metadata.project_path)
+        self._consent = _check_for_telemetry_consent(project_path)
         if not self._consent:
             return
 
         # get KedroCLI and its structure from actual project root
-        cli = KedroCLI(project_path=project_metadata.project_path)
+        cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
         cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
         masked_command_args = _mask_kedro_cli(
             cli_struct=cli_struct, command_args=command_args
@@ -184,9 +183,7 @@ class KedroTelemetryHook:
 
         self._user_uuid = _get_or_create_uuid()
 
-        event_properties = _get_project_properties(
-            self._user_uuid, project_metadata.project_path / PYPROJECT_CONFIG_NAME
-        )
+        event_properties = _get_project_properties(self._user_uuid, project_path)
         event_properties["command"] = (
             f"kedro {' '.join(masked_command_args)}" if masked_command_args else "kedro"
         )
@@ -221,7 +218,7 @@ class KedroTelemetryHook:
 
         if not self._event_properties:
             self._event_properties = _get_project_properties(
-                self._user_uuid, self._project_path / PYPROJECT_CONFIG_NAME
+                self._user_uuid, self._project_path
             )
 
         project_properties = _format_project_statistics_data(
@@ -265,12 +262,16 @@ def _is_known_ci_env(known_ci_env_var_keys: set[str]):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
-    project_id = _get_or_create_project_id(pyproject_path)
-    package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
-    hashed_project_id = (
-        _hash(f"{project_id}{package_name}") if project_id is not None else None
-    )
+def _get_project_properties(user_uuid: str, project_path: Path | None) -> dict:
+    if project_path:
+        pyproject_path = project_path / PYPROJECT_CONFIG_NAME
+        project_id = _get_or_create_project_id(pyproject_path)
+        package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
+        hashed_project_id = (
+            _hash(f"{project_id}{package_name}") if project_id is not None else None
+        )
+    else:
+        hashed_project_id = None
 
     properties = {
         "username": user_uuid,
@@ -282,7 +283,8 @@ def _get_project_properties(user_uuid: str, pyproject_path: Path) -> dict:
         "is_ci_env": _is_known_ci_env(KNOWN_CI_ENV_VAR_KEYS),
     }
 
-    properties = _add_tool_properties(properties, pyproject_path)
+    if project_path:
+        properties = _add_tool_properties(properties, pyproject_path)
 
     return properties
 
@@ -344,21 +346,23 @@ def _send_heap_event(
         )
 
 
-def _check_for_telemetry_consent(project_path: Path) -> bool:
+def _check_for_telemetry_consent(project_path: Path | None) -> bool:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
     """
-    telemetry_file_path = project_path / ".telemetry"
 
     for env_var in _SKIP_TELEMETRY_ENV_VAR_KEYS:
         if os.environ.get(env_var):
             return False
-    if telemetry_file_path.exists():
-        with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
-            telemetry = yaml.safe_load(telemetry_file)
-            if _is_valid_syntax(telemetry):
-                return telemetry["consent"]
+
+    if project_path:
+        telemetry_file_path = project_path / ".telemetry"
+        if telemetry_file_path.exists():
+            with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
+                telemetry = yaml.safe_load(telemetry_file)
+                if _is_valid_syntax(telemetry):
+                    return telemetry["consent"]
     return True
 
 

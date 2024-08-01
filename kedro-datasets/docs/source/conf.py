@@ -116,6 +116,7 @@ type_targets = {
         "langchain_openai.embeddings.base.OpenAIEmbeddings",
         "dask_expr._collection.DataFrame",
         "DataFrame",
+        "pd.DataFrame",
     ),
     "py:data": (
         "typing.Any",

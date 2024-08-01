@@ -120,6 +120,7 @@ type_targets = {
         "geopandas.geodataframe.GeoDataFrame",
         "transformers.pipelines.base.Pipeline",
         "ibis.expr.types.relations.Table",
+        "numpy.ndarray",
     ),
     "py:data": (
         "typing.Any",

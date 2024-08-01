@@ -5,7 +5,7 @@
 ## Breaking Changes
 ## Community contributions
 
-# Release 4.0.1
+# Release 4.1.0
 ## Major features and improvements
 * Improved PartitionedDataset representation when printing.
 

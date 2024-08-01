@@ -207,7 +207,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         dataset_copy = self._copy()
         dataset_copy._load_args.setdefault("lines", True)  # type: ignore[attr-defined]
         dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
-        preview_df = dataset_copy._load()  # type: ignore
+        preview_df = dataset_copy.load.__wrapped__(dataset_copy)  # type: ignore[attr-defined]
 
         preview_dict = preview_df.to_dict(orient="split")
 

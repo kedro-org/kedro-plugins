@@ -169,6 +169,6 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         Returns:
             A string representing the YAML data for previewing.
         """
-        data = self._load()
+        data = self.load.__wrapped__()  # type: ignore[attr-defined]
 
         return JSONPreview(json.dumps(data))

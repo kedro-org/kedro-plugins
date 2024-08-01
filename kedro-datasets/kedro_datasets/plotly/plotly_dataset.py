@@ -143,7 +143,7 @@ class PlotlyDataset(JSONDataset):
 
     def save(self, data: pd.DataFrame) -> None:
         fig = self._plot_dataframe(data)
-        super()._save(fig)
+        super().save.__wrapped__(self, fig)  # type: ignore[attr-defined]
 
     def _plot_dataframe(self, data: pd.DataFrame) -> go.Figure:
         plot_type = self._plotly_args.get("type")

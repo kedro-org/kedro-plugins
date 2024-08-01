@@ -126,6 +126,7 @@ type_targets = {
         "pandas.core.frame.DataFrame",
         "PIL.Image.Image",
         "plotly.graph_objs._figure.Figure",
+        "plotly.graph_objs._figurewidget.FigureWidget",
     ),
     "py:data": (
         "typing.Any",

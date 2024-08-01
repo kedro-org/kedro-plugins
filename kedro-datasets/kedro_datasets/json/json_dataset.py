@@ -171,6 +171,6 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
         Returns:
             A string representing the JSON data for previewing.
         """
-        data = self.load.__wrapped__()  # type: ignore[attr-defined]
+        data = self.load.__wrapped__(self)  # type: ignore[attr-defined]
 
         return JSONPreview(json.dumps(data))

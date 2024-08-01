@@ -119,6 +119,7 @@ type_targets = {
         "pd.DataFrame",
         "geopandas.geodataframe.GeoDataFrame",
         "transformers.pipelines.base.Pipeline",
+        "ibis.expr.types.relations.Table",
     ),
     "py:data": (
         "typing.Any",

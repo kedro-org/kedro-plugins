@@ -113,6 +113,7 @@ type_targets = {
         "ibis.backends.BaseBackend",
         "langchain_openai.chat_models.base.ChatOpenAI",
         "langchain_openai.embeddings.base.OpenAIEmbeddings",
+        "requests.models.Response",
     ),
     "py:data": (
         "typing.Any",

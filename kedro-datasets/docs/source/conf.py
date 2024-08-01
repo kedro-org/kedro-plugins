@@ -107,6 +107,7 @@ type_targets = {
         "AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
+        "requests.models.Response",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
         "DataCatalog",

@@ -122,7 +122,10 @@ type_targets = {
         "typing.Optional",
         "typing.Tuple",
     ),
-    "py:exc": ("DatasetError",),
+    "py:exc": (
+        "DatasetError",
+        "VersionNotFoundError",
+    ),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]

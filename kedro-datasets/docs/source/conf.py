@@ -114,6 +114,7 @@ type_targets = {
         "ibis.backends.BaseBackend",
         "langchain_openai.chat_models.base.ChatOpenAI",
         "langchain_openai.embeddings.base.OpenAIEmbeddings",
+        "dask_expr._collection.DataFrame",
     ),
     "py:data": (
         "typing.Any",

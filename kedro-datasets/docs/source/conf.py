@@ -125,6 +125,7 @@ type_targets = {
         "networkx.classes.graph.Graph",
         "pandas.core.frame.DataFrame",
         "PIL.Image.Image",
+        "plotly.graph_objs._figure.Figure",
     ),
     "py:data": (
         "typing.Any",

@@ -115,6 +115,7 @@ type_targets = {
         "langchain_openai.chat_models.base.ChatOpenAI",
         "langchain_openai.embeddings.base.OpenAIEmbeddings",
         "dask_expr._collection.DataFrame",
+        "DataFrame",
     ),
     "py:data": (
         "typing.Any",

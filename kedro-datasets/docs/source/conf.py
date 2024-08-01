@@ -117,6 +117,7 @@ type_targets = {
         "dask_expr._collection.DataFrame",
         "DataFrame",
         "pd.DataFrame",
+        "geopandas.geodataframe.GeoDataFrame",
     ),
     "py:data": (
         "typing.Any",

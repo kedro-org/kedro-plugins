@@ -122,6 +122,7 @@ type_targets = {
         "ibis.expr.types.relations.Table",
         "numpy.ndarray",
         "matplotlib.figure.Figure",
+        "networkx.classes.graph.Graph",
     ),
     "py:data": (
         "typing.Any",

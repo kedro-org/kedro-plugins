@@ -118,6 +118,7 @@ type_targets = {
         "DataFrame",
         "pd.DataFrame",
         "geopandas.geodataframe.GeoDataFrame",
+        "transformers.pipelines.base.Pipeline",
     ),
     "py:data": (
         "typing.Any",

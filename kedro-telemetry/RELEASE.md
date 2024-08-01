@@ -1,4 +1,7 @@
 # Upcoming release
+
+# Release 0.6.0
+* Moved to an opt-out model for telemetry.
 * Added `DO_NOT_TRACK` and `KEDRO_DISABLE_TELEMETRY` environment variables to skip telemetry.
 
 # Release 0.5.0

@@ -127,6 +127,7 @@ type_targets = {
         "PIL.Image.Image",
         "plotly.graph_objs._figure.Figure",
         "plotly.graph_objs._figurewidget.FigureWidget",
+        "polars.dataframe.frame.DataFrame",
     ),
     "py:data": (
         "typing.Any",

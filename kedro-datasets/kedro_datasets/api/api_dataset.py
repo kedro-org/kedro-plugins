@@ -185,7 +185,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def _load(self) -> requests.models.Response:
+    def _load(self) -> requests.Response:
         if self._request_args["method"] == "GET":
             with sessions.Session() as session:
                 return self._execute_request(session)

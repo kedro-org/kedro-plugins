@@ -124,6 +124,7 @@ type_targets = {
         "matplotlib.figure.Figure",
         "networkx.classes.graph.Graph",
         "pandas.core.frame.DataFrame",
+        "PIL.Image.Image",
     ),
     "py:data": (
         "typing.Any",

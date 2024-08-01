@@ -123,6 +123,7 @@ type_targets = {
         "numpy.ndarray",
         "matplotlib.figure.Figure",
         "networkx.classes.graph.Graph",
+        "pandas.core.frame.DataFrame",
     ),
     "py:data": (
         "typing.Any",

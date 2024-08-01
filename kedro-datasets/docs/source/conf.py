@@ -121,6 +121,7 @@ type_targets = {
         "transformers.pipelines.base.Pipeline",
         "ibis.expr.types.relations.Table",
         "numpy.ndarray",
+        "matplotlib.figure.Figure",
     ),
     "py:data": (
         "typing.Any",

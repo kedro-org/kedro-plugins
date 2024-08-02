@@ -129,6 +129,7 @@ type_targets = {
         "plotly.graph_objs._figurewidget.FigureWidget",
         "polars.dataframe.frame.DataFrame",
         "polars.lazyframe.frame.LazyFrame",
+        "snowflake.snowpark.dataframe.DataFrame",
     ),
     "py:data": (
         "typing.Any",

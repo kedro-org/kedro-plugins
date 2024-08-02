@@ -137,6 +137,7 @@ type_targets = {
         "kedro_datasets.video.video_dataset.AbstractVideo",
         "langchain_anthropic.chat_models.ChatAnthropic",
         "langchain_cohere.chat_models.ChatCohere",
+        "xarray.core.dataset.Dataset",
     ),
     "py:data": (
         "typing.Any",

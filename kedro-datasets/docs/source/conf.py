@@ -136,6 +136,7 @@ type_targets = {
         "keras.src.models.model.Model",
         "kedro_datasets.video.video_dataset.AbstractVideo",
         "langchain_anthropic.chat_models.ChatAnthropic",
+        "langchain_cohere.chat_models.ChatCohere",
     ),
     "py:data": (
         "typing.Any",

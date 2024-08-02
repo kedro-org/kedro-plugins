@@ -135,6 +135,7 @@ type_targets = {
         "scipy.sparse._csr.csr_matrix",
         "keras.src.models.model.Model",
         "kedro_datasets.video.video_dataset.AbstractVideo",
+        "langchain_anthropic.chat_models.ChatAnthropic",
     ),
     "py:data": (
         "typing.Any",

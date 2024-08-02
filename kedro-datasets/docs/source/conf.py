@@ -134,6 +134,7 @@ type_targets = {
         "pyspark.sql.dataframe.DataFrame",
         "scipy.sparse._csr.csr_matrix",
         "keras.src.models.model.Model",
+        "kedro_datasets.video.video_dataset.AbstractVideo",
     ),
     "py:data": (
         "typing.Any",

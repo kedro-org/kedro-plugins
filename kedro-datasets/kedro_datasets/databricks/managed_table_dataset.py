@@ -45,10 +45,12 @@ class ManagedTable:
 
     def __post_init__(self):
         """Run validation methods if declared.
+
         The validation method can be a simple check
         that raises DatasetError.
-        The validation is performed by calling a function named:
-            `validate_<field_name>(self, value) -> raises DatasetError`
+
+        The validation is performed by calling a function with the signature
+        `validate_<field_name>(self, value) -> raises DatasetError`.
         """
         for name in self.__dataclass_fields__.keys():
             method = getattr(self, f"_validate_{name}", None)
@@ -293,11 +295,11 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         Raises:
             VersionNotFoundError: if the version defined in
-            the init doesn't exist
+                the init doesn't exist
 
         Returns:
             Union[DataFrame, pd.DataFrame]: Returns a dataframe
-            in the format defined in the init
+                in the format defined in the init
         """
         if self._version and self._version.load >= 0:
             try:

@@ -266,10 +266,10 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             "save_args": save_args,
         }
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         return pd.read_sql_table(con=self.engine, **self._load_args)
 
-    def save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         data.to_sql(con=self.engine, **self._save_args)
 
     def _exists(self) -> bool:
@@ -564,7 +564,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             "execution_options": str(self._execution_options),
         }
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
 
         if self._filepath:
@@ -576,7 +576,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             con=self.engine.execution_options(**self._execution_options), **load_args
         )
 
-    def save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on SQLQueryDataset")
 
     # For mssql only

@@ -45,7 +45,7 @@ class JSONDataset(json_dataset.JSONDataset):
 
     versioned = True
 
-    def load(self) -> NoReturn:
+    def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def preview(self) -> JSONTrackingPreview:  # type: ignore[override]

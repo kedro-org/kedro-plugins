@@ -144,7 +144,7 @@ class JSONDataset(
             "version": self._version,
         }
 
-    def load(self) -> go.Figure | go.FigureWidget:
+    def _load(self) -> go.Figure | go.FigureWidget:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
@@ -152,7 +152,7 @@ class JSONDataset(
             # the file, decode it manually and pass to the low-level from_json instead.
             return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
 
-    def save(self, data: go.Figure) -> None:
+    def _save(self, data: go.Figure) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

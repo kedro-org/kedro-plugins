@@ -151,7 +151,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "version": self._version,
         }
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
@@ -170,7 +170,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             ) as store:
                 return store[self._key]
 
-    def save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with HDFDataset._lock:

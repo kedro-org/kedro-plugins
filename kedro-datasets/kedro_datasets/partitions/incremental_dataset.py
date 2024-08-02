@@ -215,7 +215,7 @@ class IncrementalDataset(PartitionedDataset):
         except DatasetError:
             return None
 
-    def load(self) -> dict[str, Callable[[], Any]]:
+    def _load(self) -> dict[str, Callable[[], Any]]:
         partitions: dict[str, Any] = {}
 
         for partition in self._list_partitions():

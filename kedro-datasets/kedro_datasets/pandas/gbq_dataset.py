@@ -140,7 +140,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             "save_args": self._save_args,
         }
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
         self._load_args.setdefault("query", sql)
         return pd.read_gbq(
@@ -149,7 +149,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             **self._load_args,
         )
 
-    def save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         data.to_gbq(
             f"{self._dataset}.{self._table_name}",
             project_id=self._project_id,
@@ -303,7 +303,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         return desc
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
 
         if self._filepath:
@@ -317,5 +317,5 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             **load_args,
         )
 
-    def save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")

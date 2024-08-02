@@ -87,11 +87,11 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         self._filepath = PurePosixPath(filepath)
         self.metadata = metadata
 
-    def load(self) -> DeltaTable:
+    def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)
         return DeltaTable.forPath(_get_spark(), load_path)
 
-    def save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:

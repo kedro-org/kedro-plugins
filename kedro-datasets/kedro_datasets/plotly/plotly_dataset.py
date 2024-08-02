@@ -141,9 +141,9 @@ class PlotlyDataset(JSONDataset):
     def _describe(self) -> dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}
 
-    def save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         fig = self._plot_dataframe(data)
-        super().save.__wrapped__(self, fig)  # type: ignore[attr-defined]
+        super()._save(fig)
 
     def _plot_dataframe(self, data: pd.DataFrame) -> go.Figure:
         plot_type = self._plotly_args.get("type")

@@ -40,13 +40,13 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
         >>> llm = ChatAnthropicDataset(
         ...     credentials={
-        ...         "anthropic_api_url": "xxx",
+        ...         "anthropic_api_url": "xxx"
         ...         "anthropic_api_key": "xxx",
         ...     },
         ...     kwargs={
         ...         "model": "claude-instant-1",
         ...         "temperature": 0.0,
-        ...     },
+        ...     }
         ... ).load()
         >>>
         >>> # See: https://python.langchain.com/docs/integrations/chat/anthropic
@@ -67,10 +67,10 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     def _describe(self) -> dict[str, Any]:
         return {**self.kwargs}
 
-    def save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
 
-    def load(self) -> ChatAnthropic:
+    def _load(self) -> ChatAnthropic:
         return ChatAnthropic(
             anthropic_api_url=self.anthropic_api_url,
             anthropic_api_key=self.anthropic_api_key,

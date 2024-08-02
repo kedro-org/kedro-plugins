@@ -124,7 +124,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             "version": self._version,
         }
 
-    def load(self) -> np.ndarray:
+    def _load(self) -> np.ndarray:
         """
         Access the specific variable in the .mat file, e.g, data['variable_name']
         """
@@ -133,7 +133,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             data = io.loadmat(f)
             return data
 
-    def save(self, data: np.ndarray) -> None:
+    def _save(self, data: np.ndarray) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             io.savemat(f, {"data": data})

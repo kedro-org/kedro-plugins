@@ -47,10 +47,10 @@ class HFDataset(AbstractVersionedDataset):
         self._dataset_kwargs = dataset_kwargs or {}
         self.metadata = metadata
 
-    def load(self):
+    def _load(self):
         return load_dataset(self.dataset_name, **self._dataset_kwargs)
 
-    def save(self):
+    def _save(self):
         raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, Any]:

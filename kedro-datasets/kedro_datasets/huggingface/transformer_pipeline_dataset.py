@@ -62,10 +62,10 @@ class HFTransformerPipelineDataset(AbstractDataset):
             self._pipeline_kwargs.pop("task", None)
             self._pipeline_kwargs.pop("model", None)
 
-    def load(self) -> Pipeline:
+    def _load(self) -> Pipeline:
         return pipeline(self._task, model=self._model_name, **self._pipeline_kwargs)
 
-    def save(self, pipeline: Pipeline) -> None:
+    def _save(self, pipeline: Pipeline) -> None:
         raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, t.Any]:

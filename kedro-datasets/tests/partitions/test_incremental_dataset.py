@@ -49,10 +49,10 @@ class DummyDataset(AbstractDataset):  # pragma: no cover
     def _describe(self) -> dict[str, Any]:
         return {"dummy": True}
 
-    def load(self) -> Any:
+    def _load(self) -> Any:
         pass
 
-    def save(self, data: Any) -> None:
+    def _save(self, data: Any) -> None:
         pass
 
 

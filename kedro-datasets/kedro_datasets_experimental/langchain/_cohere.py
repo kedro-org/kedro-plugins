@@ -48,7 +48,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         ...     kwargs={
         ...         "model": "command",
         ...         "temperature": 0.0,
-        ...     },
+        ...     }
         ... ).load()
         >>>
         >>> # See: https://python.langchain.com/v0.1/docs/integrations/chat/cohere/
@@ -69,8 +69,8 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     def _describe(self) -> dict[str, Any]:
         return {**self.kwargs}
 
-    def save(self, data: None) -> NoReturn:
+    def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
 
-    def load(self) -> ChatCohere:
+    def _load(self) -> ChatCohere:
         return ChatCohere(cohere_api_key=self.cohere_api_key, base_url=self.cohere_api_url, **self.kwargs)

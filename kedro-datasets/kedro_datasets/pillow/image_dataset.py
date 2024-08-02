@@ -123,13 +123,13 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
             "version": self._version,
         }
 
-    def load(self) -> Image.Image:
+    def _load(self) -> Image.Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return Image.open(fs_file).copy()
 
-    def save(self, data: Image.Image) -> None:
+    def _save(self, data: Image.Image) -> None:
         save_path = self._get_save_path()
 
         with self._fs.open(

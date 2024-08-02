@@ -302,7 +302,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
         self.metadata = metadata
 
-    def load(self) -> AbstractVideo:
+    def _load(self) -> AbstractVideo:
         """Loads data from the video file.
 
         Returns:
@@ -315,7 +315,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ) as fs_file:
             return FileVideo(fs_file.name)
 
-    def save(self, data: AbstractVideo) -> None:
+    def _save(self, data: AbstractVideo) -> None:
         """Saves video data to the specified filepath."""
         if self._protocol == "file":
             # Write directly to the local file destination

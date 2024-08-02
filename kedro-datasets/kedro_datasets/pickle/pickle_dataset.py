@@ -214,14 +214,14 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
             "version": self._version,
         }
 
-    def load(self) -> Any:
+    def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             imported_backend = importlib.import_module(self._backend)
             return imported_backend.load(fs_file, **self._load_args)  # type: ignore
 
-    def save(self, data: Any) -> None:
+    def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

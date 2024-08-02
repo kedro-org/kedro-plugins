@@ -200,10 +200,10 @@ class MatplotlibWriter(
             "version": self._version,
         }
 
-    def load(self) -> NoReturn:
+    def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
+    def _save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
         save_path = self._get_save_path()
 
         if isinstance(data, (list, dict)) and self._overwrite and self._exists():

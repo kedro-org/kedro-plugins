@@ -110,7 +110,7 @@ class SparkStreamingDataset(AbstractDataset):
             "save_args": self._save_args,
         }
 
-    def load(self) -> DataFrame:
+    def _load(self) -> DataFrame:
         """Loads data from filepath.
         If the connector type is kafka then no file_path is required, schema needs to be
         seperated from load_args.
@@ -126,7 +126,7 @@ class SparkStreamingDataset(AbstractDataset):
         )
         return data_stream_reader.load(load_path)
 
-    def save(self, data: DataFrame) -> None:
+    def _save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
         Args:
             data: PySpark streaming dataframe for saving

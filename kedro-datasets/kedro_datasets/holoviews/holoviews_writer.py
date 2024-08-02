@@ -112,10 +112,10 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
             "version": self._version,
         }
 
-    def load(self) -> NoReturn:
+    def _load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def save(self, data: HoloViews) -> None:
+    def _save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()
         hv.save(data, bytes_buffer, **self._save_args)
 

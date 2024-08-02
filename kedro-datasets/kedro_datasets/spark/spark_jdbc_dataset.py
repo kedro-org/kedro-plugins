@@ -171,8 +171,8 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             "save_args": save_args,
         }
 
-    def load(self) -> DataFrame:
+    def _load(self) -> DataFrame:
         return _get_spark().read.jdbc(self._url, self._table, **self._load_args)
 
-    def save(self, data: DataFrame) -> None:
+    def _save(self, data: DataFrame) -> None:
         return data.write.jdbc(self._url, self._table, **self._save_args)

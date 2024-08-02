@@ -301,7 +301,7 @@ class TestAPIDataset:
                 status_code=requests.codes.ok,
                 json=json_callback,
             )
-            response = api_dataset.save.__wrapped__(api_dataset, data)
+            response = api_dataset._save(data)
             assert isinstance(response, requests.Response)
             assert response.json() == TEST_SAVE_DATA
 
@@ -312,7 +312,7 @@ class TestAPIDataset:
                 save_args={"params": TEST_PARAMS, "headers": TEST_HEADERS},
             )
             with pytest.raises(DatasetError, match="Use PUT or POST methods for save"):
-                api_dataset.save.__wrapped__(api_dataset, TEST_SAVE_DATA)
+                api_dataset._save(TEST_SAVE_DATA)
         else:
             with pytest.raises(
                 ValueError,
@@ -343,16 +343,16 @@ class TestAPIDataset:
             headers=TEST_HEADERS,
             json=json_callback,
         )
-        response_list = api_dataset.save.__wrapped__(api_dataset, TEST_SAVE_DATA)
+        response_list = api_dataset._save(TEST_SAVE_DATA)
         assert isinstance(response_list, requests.Response)
         # check that the data was sent in the correct format
         assert response_list.json() == TEST_SAVE_DATA
 
-        response_dict = api_dataset.save.__wrapped__(api_dataset, {"item1": "key1"})
+        response_dict = api_dataset._save({"item1": "key1"})
         assert isinstance(response_dict, requests.Response)
         assert response_dict.json() == {"item1": "key1"}
 
-        response_json = api_dataset.save.__wrapped__(api_dataset, TEST_SAVE_DATA[0])
+        response_json = api_dataset._save(TEST_SAVE_DATA[0])
         assert isinstance(response_json, requests.Response)
         assert response_json.json() == TEST_SAVE_DATA[0]
 

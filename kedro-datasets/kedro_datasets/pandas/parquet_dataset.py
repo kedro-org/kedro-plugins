@@ -165,7 +165,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "version": self._version,
         }
 
-    def load(self) -> pd.DataFrame:
+    def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -179,7 +179,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         if Path(save_path).is_dir():

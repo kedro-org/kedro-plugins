@@ -145,7 +145,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def load(self) -> pl.DataFrame:
+    def _load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
 
@@ -160,7 +160,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_method(fs_file, **self._load_args)
 
-    def save(self, data: pl.DataFrame) -> None:
+    def _save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = getattr(data, f"write_{self._file_format}", None)
 

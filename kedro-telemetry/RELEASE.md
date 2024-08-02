@@ -1,5 +1,10 @@
 # Upcoming release
+
+# Release 0.6.0
+* Moved to an opt-out model for telemetry, enabling it by default without requiring prior consent.
 * Added `DO_NOT_TRACK` and `KEDRO_DISABLE_TELEMETRY` environment variables to skip telemetry.
+* Reduced the number of events sent to Heap by eliminating duplicate events, improving efficiency.
+* Enhanced telemetry functionality to support Kedro commands executed outside of Kedro project folders.
 
 # Release 0.5.0
 * Updated the plugin to generate a unique project UUID for kedro project and store it in `pyproject.toml`.

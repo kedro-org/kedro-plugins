@@ -138,6 +138,7 @@ type_targets = {
         "langchain_anthropic.chat_models.ChatAnthropic",
         "langchain_cohere.chat_models.ChatCohere",
         "xarray.core.dataset.Dataset",
+        "xarray.core.dataarray.DataArray",
     ),
     "py:data": (
         "typing.Any",

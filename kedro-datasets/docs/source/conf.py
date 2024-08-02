@@ -133,6 +133,7 @@ type_targets = {
         "delta.tables.DeltaTable",
         "pyspark.sql.dataframe.DataFrame",
         "scipy.sparse._csr.csr_matrix",
+        "keras.src.models.model.Model",
     ),
     "py:data": (
         "typing.Any",

@@ -132,6 +132,7 @@ type_targets = {
         "snowflake.snowpark.dataframe.DataFrame",
         "delta.tables.DeltaTable",
         "pyspark.sql.dataframe.DataFrame",
+        "scipy.sparse._csr.csr_matrix",
     ),
     "py:data": (
         "typing.Any",

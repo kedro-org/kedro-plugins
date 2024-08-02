@@ -108,7 +108,12 @@ def _generate_spark_df_one():
         ]
     )
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return (
+        SparkSession.builder.getOrCreate()
+        .createDataFrame(data, schema)
+        .coalesce(1)
+        .enableHiveSupport()
+    )
 
 
 def _generate_spark_df_upsert():
@@ -119,7 +124,12 @@ def _generate_spark_df_upsert():
         ]
     )
     data = [("Alex", 99), ("Jeremy", 55)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return (
+        SparkSession.builder.getOrCreate()
+        .createDataFrame(data, schema)
+        .coalesce(1)
+        .enableHiveSupport()
+    )
 
 
 def _generate_spark_df_upsert_expected():
@@ -130,7 +140,12 @@ def _generate_spark_df_upsert_expected():
         ]
     )
     data = [("Alex", 99), ("Bob", 12), ("Clarke", 65), ("Dave", 29), ("Jeremy", 55)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return (
+        SparkSession.builder.getOrCreate()
+        .createDataFrame(data, schema)
+        .coalesce(1)
+        .enableHiveSupport()
+    )
 
 
 class TestSparkHiveDataset:

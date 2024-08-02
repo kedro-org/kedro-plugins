@@ -130,6 +130,7 @@ type_targets = {
         "polars.dataframe.frame.DataFrame",
         "polars.lazyframe.frame.LazyFrame",
         "snowflake.snowpark.dataframe.DataFrame",
+        "delta.tables.DeltaTable",
     ),
     "py:data": (
         "typing.Any",

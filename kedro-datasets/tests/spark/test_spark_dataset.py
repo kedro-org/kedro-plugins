@@ -15,7 +15,6 @@ from kedro.runner import ParallelRunner, SequentialRunner
 from moto import mock_aws
 from packaging.version import Version as PackagingVersion
 from pyspark import __version__
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import (
     FloatType,
@@ -102,7 +101,7 @@ def versioned_dataset_s3(version):
 
 
 @pytest.fixture
-def sample_spark_df():
+def sample_spark_df(spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -112,7 +111,7 @@ def sample_spark_df():
 
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+    return spark_session.createDataFrame(data, schema)
 
 
 @pytest.fixture

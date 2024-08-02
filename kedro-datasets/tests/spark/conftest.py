@@ -27,7 +27,7 @@ def _setup_spark_session():
     ).getOrCreate()
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def spark_session(tmp_path_factory):
     # When running these spark tests with pytest-xdist, we need to make sure
     # that the spark session setup on each test process don't interfere with each other.
@@ -40,3 +40,6 @@ def spark_session(tmp_path_factory):
         spark = _setup_spark_session()
     yield spark
     spark.stop()
+    # Ensure that the spark session is not used after it is stopped
+    # https://stackoverflow.com/a/41512072
+    spark._instantiatedContext = None

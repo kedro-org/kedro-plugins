@@ -45,6 +45,9 @@ def spark_session():
             # in this module so that it always exits last and stops the spark session
             # after tests are finished.
             spark.stop()
+            # Ensure that the spark session is not used after it is stopped
+            # https://stackoverflow.com/a/41512072
+            spark._instantiatedContext = None
     except PermissionError:  # pragma: no cover
         # On Windows machine TemporaryDirectory can't be removed because some
         # files are still used by Java process.
@@ -68,7 +71,7 @@ def spark_session():
 @pytest.fixture(scope="module", autouse=True)
 def spark_test_databases(spark_session):
     """Setup spark test databases for all tests in this module."""
-    dataset = _generate_spark_df_one()
+    dataset = _generate_spark_df_one(spark_session)
     dataset.createOrReplaceTempView("tmp")
     databases = ["default_1", "default_2"]
 
@@ -100,7 +103,7 @@ def assert_df_equal(expected, result):
     )
 
 
-def _generate_spark_df_one():
+def _generate_spark_df_one(spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -108,10 +111,10 @@ def _generate_spark_df_one():
         ]
     )
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return spark_session.createDataFrame(data, schema).coalesce(1)
 
 
-def _generate_spark_df_upsert():
+def _generate_spark_df_upsert(spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -119,10 +122,10 @@ def _generate_spark_df_upsert():
         ]
     )
     data = [("Alex", 99), ("Jeremy", 55)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return spark_session.createDataFrame(data, schema).coalesce(1)
 
 
-def _generate_spark_df_upsert_expected():
+def _generate_spark_df_upsert_expected(spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -130,7 +133,7 @@ def _generate_spark_df_upsert_expected():
         ]
     )
     data = [("Alex", 99), ("Bob", 12), ("Clarke", 65), ("Dave", 29), ("Jeremy", 55)]
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
+    return spark_session.createDataFrame(data, schema).coalesce(1)
 
 
 class TestSparkHiveDataset:
@@ -144,11 +147,11 @@ class TestSparkHiveDataset:
                 )
             )
 
-    def test_read_existing_table(self):
+    def test_read_existing_table(self, spark_session):
         dataset = SparkHiveDataset(
             database="default_1", table="table_1", write_mode="overwrite", save_args={}
         )
-        assert_df_equal(_generate_spark_df_one(), dataset.load())
+        assert_df_equal(_generate_spark_df_one(spark_session), dataset.load())
 
     def test_overwrite_empty_table(self, spark_session):
         spark_session.sql(
@@ -159,8 +162,8 @@ class TestSparkHiveDataset:
             table="test_overwrite_empty_table",
             write_mode="overwrite",
         )
-        dataset.save(_generate_spark_df_one())
-        assert_df_equal(dataset.load(), _generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
+        assert_df_equal(dataset.load(), _generate_spark_df_one(spark_session))
 
     def test_overwrite_not_empty_table(self, spark_session):
         spark_session.sql(
@@ -171,9 +174,9 @@ class TestSparkHiveDataset:
             table="test_overwrite_full_table",
             write_mode="overwrite",
         )
-        dataset.save(_generate_spark_df_one())
-        dataset.save(_generate_spark_df_one())
-        assert_df_equal(dataset.load(), _generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
+        dataset.save(_generate_spark_df_one(spark_session))
+        assert_df_equal(dataset.load(), _generate_spark_df_one(spark_session))
 
     def test_insert_not_empty_table(self, spark_session):
         spark_session.sql(
@@ -184,10 +187,13 @@ class TestSparkHiveDataset:
             table="test_insert_not_empty_table",
             write_mode="append",
         )
-        dataset.save(_generate_spark_df_one())
-        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
+        dataset.save(_generate_spark_df_one(spark_session))
         assert_df_equal(
-            dataset.load(), _generate_spark_df_one().union(_generate_spark_df_one())
+            dataset.load(),
+            _generate_spark_df_one(spark_session).union(
+                _generate_spark_df_one(spark_session)
+            ),
         )
 
     def test_upsert_config_err(self):
@@ -207,9 +213,10 @@ class TestSparkHiveDataset:
             write_mode="upsert",
             table_pk=["name"],
         )
-        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
         assert_df_equal(
-            dataset.load().sort("name"), _generate_spark_df_one().sort("name")
+            dataset.load().sort("name"),
+            _generate_spark_df_one(spark_session).sort("name"),
         )
 
     def test_upsert_not_empty_table(self, spark_session):
@@ -222,15 +229,15 @@ class TestSparkHiveDataset:
             write_mode="upsert",
             table_pk=["name"],
         )
-        dataset.save(_generate_spark_df_one())
-        dataset.save(_generate_spark_df_upsert())
+        dataset.save(_generate_spark_df_one(spark_session))
+        dataset.save(_generate_spark_df_upsert(spark_session))
 
         assert_df_equal(
             dataset.load().sort("name"),
-            _generate_spark_df_upsert_expected().sort("name"),
+            _generate_spark_df_upsert_expected(spark_session).sort("name"),
         )
 
-    def test_invalid_pk_provided(self):
+    def test_invalid_pk_provided(self, spark_session):
         _test_columns = ["column_doesnt_exist"]
         dataset = SparkHiveDataset(
             database="default_1",
@@ -245,7 +252,7 @@ class TestSparkHiveDataset:
                 f"not found in table default_1.table_1",
             ),
         ):
-            dataset.save(_generate_spark_df_one())
+            dataset.save(_generate_spark_df_one(spark_session))
 
     def test_invalid_write_mode_provided(self):
         pattern = (
@@ -277,15 +284,16 @@ class TestSparkHiveDataset:
             r"Present on insert only: \[\('age', 'int'\)\]\n"
             r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]",
         ):
-            dataset.save(_generate_spark_df_one())
+            dataset.save(_generate_spark_df_one(spark_session))
 
-    def test_insert_to_non_existent_table(self):
+    def test_insert_to_non_existent_table(self, spark_session):
         dataset = SparkHiveDataset(
             database="default_1", table="table_not_yet_created", write_mode="append"
         )
-        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
         assert_df_equal(
-            dataset.load().sort("name"), _generate_spark_df_one().sort("name")
+            dataset.load().sort("name"),
+            _generate_spark_df_one(spark_session).sort("name"),
         )
 
     def test_read_from_non_existent_table(self):
@@ -300,12 +308,12 @@ class TestSparkHiveDataset:
         ):
             dataset.load()
 
-    def test_save_delta_format(self, mocker):
+    def test_save_delta_format(self, mocker, spark_session):
         dataset = SparkHiveDataset(
             database="default_1", table="delta_table", save_args={"format": "delta"}
         )
         mocked_save = mocker.patch("pyspark.sql.DataFrameWriter.saveAsTable")
-        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_one(spark_session))
         mocked_save.assert_called_with(
             "default_1.delta_table", mode="errorifexists", format="delta"
         )

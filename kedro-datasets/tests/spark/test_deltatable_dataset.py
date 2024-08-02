@@ -7,7 +7,6 @@ from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
 from packaging.version import Version
 from pyspark import __version__
-from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
@@ -17,7 +16,7 @@ SPARK_VERSION = Version(__version__)
 
 
 @pytest.fixture
-def sample_spark_df():
+def sample_spark_df(spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -27,7 +26,7 @@ def sample_spark_df():
 
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+    return spark_session.createDataFrame(data, schema)
 
 
 class TestDeltaTableDataset:

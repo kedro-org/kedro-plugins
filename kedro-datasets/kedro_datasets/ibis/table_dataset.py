@@ -15,8 +15,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -42,7 +41,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             database: company.db
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

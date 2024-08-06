@@ -23,7 +23,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

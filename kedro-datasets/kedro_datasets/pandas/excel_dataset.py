@@ -35,8 +35,7 @@ class ExcelDataset(
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -56,7 +55,7 @@ class ExcelDataset(
           filepath: data/01_raw/shuttles.xlsx
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -76,8 +75,7 @@ class ExcelDataset(
     keys are your sheet names.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_
     for a multi-sheet Excel file:
 
     .. code-block:: yaml
@@ -89,7 +87,7 @@ class ExcelDataset(
             sheet_name: [Sheet1, Sheet2, Sheet3]
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_
     for a multi-sheet Excel file:
 

@@ -27,7 +27,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     It uses pandas-gbq to read and write from/to BigQuery table.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -44,7 +44,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             chunk_size: 100
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

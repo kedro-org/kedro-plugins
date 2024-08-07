@@ -69,7 +69,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False, "mode": "wb"}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -175,7 +175,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        with self._fs.open(save_path, mode=self._save_args.get("mode")) as fs_file:
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

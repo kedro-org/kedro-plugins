@@ -22,8 +22,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     filesystem (e.g.: local, S3, GCS)
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -32,7 +31,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
           filepath: data/01_raw/alice.txt
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

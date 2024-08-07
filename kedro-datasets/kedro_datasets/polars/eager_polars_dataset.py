@@ -25,7 +25,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
     appropriate type of read/write on a best effort basis.
 
-    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml

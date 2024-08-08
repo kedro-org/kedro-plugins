@@ -71,6 +71,13 @@ ibis-sqlite = ["ibis-framework[sqlite]"]
 ibis-trino = ["ibis-framework[trino]"]
 ibis = ["ibis-framework"]
 
+sqlframe = ["sqlframe"]
+sqlframe-duckdb = ["sqlframe[duckdb]"]
+sqlframe-postgres = ["sqlframe[postgres]"]
+sqlframe-redshift = ["sqlframe[redshift]"]
+sqlframe-snowflake = ["sqlframe[snowflake]"]
+sqlframe-spark = ["sqlframe[spark]"]
+
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
 

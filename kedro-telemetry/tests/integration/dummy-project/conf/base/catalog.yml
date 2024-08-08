@@ -1,0 +1,3 @@
+dummy:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/dummy.csv

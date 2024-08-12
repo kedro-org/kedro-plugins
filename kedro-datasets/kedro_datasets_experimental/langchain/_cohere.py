@@ -34,7 +34,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
          cohere_api_key: <cohere-api-key>
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

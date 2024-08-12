@@ -30,7 +30,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -47,7 +47,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             lines: True
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -207,7 +207,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         dataset_copy = self._copy()
         dataset_copy._load_args.setdefault("lines", True)  # type: ignore[attr-defined]
         dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
-        preview_df = dataset_copy._load()
+        preview_df = dataset_copy._load()  # type: ignore
 
         preview_dict = preview_df.to_dict(orient="split")
 

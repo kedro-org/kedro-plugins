@@ -34,7 +34,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can
     save both Lazy and Eager Polars DataFrames.
 
-    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -55,7 +55,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
           credentials: dev_s3
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

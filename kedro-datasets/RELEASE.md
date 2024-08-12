@@ -1,6 +1,17 @@
 # Upcoming Release
 ## Major features and improvements
+
 ## Bug fixes and other changes
+## Breaking Changes
+## Community contributions
+
+# Release 4.1.0
+## Major features and improvements
+* Improved `partitions.PartitionedDataset` representation when printing.
+
+## Bug fixes and other changes
+* Updated `ibis.TableDataset` to make sure credentials are not printed in interactive environment.
+
 ## Breaking Changes
 ## Community contributions
 

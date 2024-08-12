@@ -108,7 +108,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     symmetric.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -132,7 +132,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
           pool_size: 10 # additional parameters
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -317,7 +317,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     To save data to a SQL server use ``SQLTableDataset``.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -349,7 +349,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
           pool_size: 10 # additional parameters
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

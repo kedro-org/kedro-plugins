@@ -178,11 +178,6 @@ class TestKedroTelemetryHook:
             in record.message
             for record in caplog.records
         )
-        assert not any(
-            "Kedro-Telemetry is installed, but you have opted out of "
-            "sharing usage analytics so none will be collected." in record.message
-            for record in caplog.records
-        )
 
     def test_before_command_run_with_tools(self, mocker, fake_metadata):
         mocker.patch(
@@ -300,11 +295,6 @@ class TestKedroTelemetryHook:
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
             "Read more at https://docs.kedro.org/en/latest/configuration/telemetry.html"
             in record.message
-            for record in caplog.records
-        )
-        assert any(
-            "Kedro-Telemetry is installed, but you have opted out of "
-            "sharing usage analytics so none will be collected." in record.message
             for record in caplog.records
         )
 

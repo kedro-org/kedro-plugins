@@ -66,7 +66,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {"rechunk": True}
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"mode": "wb"}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -97,7 +97,8 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
             save_args: Polars options for saving CSV files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_csv.html
-                All defaults are preserved.
+                All defaults are preserved, apart from "mode", which is set to "wb".
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -175,7 +176,8 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         buf = BytesIO()
         data.write_csv(file=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        save_mode = self._save_args.get("mode")
+        with self._fs.open(save_path, mode=save_mode) as fs_file:
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

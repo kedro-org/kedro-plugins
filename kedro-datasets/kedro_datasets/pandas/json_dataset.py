@@ -65,7 +65,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"mode": "wb"}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -93,7 +93,8 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving JSON files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
-                All defaults are preserved, but "index", which is set to False.
+                All defaults are preserved, apart from "mode", which is set to "wb".
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -166,11 +167,12 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_mode = self._save_args.get("mode")
 
         buf = BytesIO()
         data.to_json(path_or_buf=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        with self._fs.open(save_path, mode=save_mode) as fs_file:
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

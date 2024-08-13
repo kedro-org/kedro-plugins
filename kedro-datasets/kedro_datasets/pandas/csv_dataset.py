@@ -97,7 +97,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving CSV files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-                All defaults are preserved, but "index", which is set to False.
+                Defaults are preserved, apart from "index", which is set to False and "mode" which is set to "wb".
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -106,7 +107,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
-            metadata: Any Any arbitrary metadata.
+            metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
@@ -175,7 +176,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode=self._save_args.get("mode")) as fs_file:
+        save_mode = self._save_args.get("mode")
+        with self._fs.open(save_path, mode=save_mode) as fs_file:
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

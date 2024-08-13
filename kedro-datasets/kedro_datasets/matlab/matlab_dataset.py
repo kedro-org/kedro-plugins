@@ -52,7 +52,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
 
     """
 
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2, "mode": "wb"}
 
     def __init__(  # noqa = PLR0913
         self,
@@ -71,6 +71,8 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             save_args: .mat options for saving .mat files.
+                All defaults are preserved, apart from "indent", which is set to 2 and "mode", which is set to "wb".
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -134,7 +136,9 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
 
     def _save(self, data: np.ndarray) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(save_path, mode="wb") as f:
+        save_mode = self._save_args.get("mode")
+
+        with self._fs.open(save_path, mode=save_mode) as f:
             io.savemat(f, {"data": data})
         self._invalidate_cache()
 

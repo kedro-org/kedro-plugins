@@ -108,7 +108,7 @@ class ExcelDataset(
     """
 
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
-    DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False, "mode": "wb"}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -140,7 +140,8 @@ class ExcelDataset(
             save_args: Pandas options for saving Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
-                All defaults are preserved, but "index", which is set to False.
+                Defaults are preserved, apart from "index", which is set to False and "mode" which is set to "wb".
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
                 If you would like to specify options for the `ExcelWriter`,
                 you can include them under the "writer" key. Here you can
                 find all available arguments:
@@ -232,6 +233,7 @@ class ExcelDataset(
     def _save(self, data: pd.DataFrame | dict[str, pd.DataFrame]) -> None:
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_mode = self._save_args.get("mode")
 
         with pd.ExcelWriter(output, **self._writer_args) as writer:
             if isinstance(data, dict):
@@ -242,7 +244,7 @@ class ExcelDataset(
             else:
                 data.to_excel(writer, **self._save_args)
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        with self._fs.open(save_path, mode=save_mode) as fs_file:
             fs_file.write(output.getvalue())
 
         self._invalidate_cache()

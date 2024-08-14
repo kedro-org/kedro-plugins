@@ -69,7 +69,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False, "mode": "wb"}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -97,8 +98,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving CSV files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-                Defaults are preserved, apart from "index", which is set to False and "mode" which is set to "wb".
-                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
+                Defaults are preserved, apart from "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -107,20 +107,24 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                Defaults are preserved, apart from the `open_args_save` `mode` which is set to `wb`.
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(self.DEFAULT_FS_ARGS)
+        if fs_args is not None:
+            self._fs_args.update(fs_args)
+
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
-            _fs_args.setdefault("auto_mkdir", True)
+            self._fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._storage_options = {**_credentials, **_fs_args}
+        self._storage_options = {**_credentials, **self._fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
-
         self.metadata = metadata
 
         super().__init__(
@@ -176,7 +180,10 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        save_mode = self._save_args.get("mode")
+        fs_open_args_save = self._fs_args.get("open_args_save", {})
+        save_mode = fs_open_args_save.get(
+            "mode", self.DEFAULT_FS_ARGS["open_args_save"]["mode"]
+        )
         with self._fs.open(save_path, mode=save_mode) as fs_file:
             fs_file.write(buf.getvalue())
 

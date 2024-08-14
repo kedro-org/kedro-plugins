@@ -73,7 +73,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
     """
 
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
-    DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {"mode": "wb"}
+    DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -113,8 +113,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             save_args: Polars options for saving files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/io.html
-                All defaults are preserved, apart from "mode", which is set to "wb".
-                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -221,9 +220,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         if save_method:
             buf = BytesIO()
             save_method(file=buf, **self._save_args)
-            save_mode = self._save_args.get("mode")
-
-            with self._fs.open(save_path, mode=save_mode) as fs_file:
+            with self._fs.open(save_path, mode="wb") as fs_file:
                 fs_file.write(buf.getvalue())
                 self._invalidate_cache()
         # How the LazyPolarsDataset logic is currently written with

@@ -243,8 +243,8 @@ class TestCSVDatasetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
         # Default save_args
-        assert "save_args={'index': False, 'mode': wb}" in str(ds)
-        assert "save_args={'index': False, 'mode': wb}" in str(ds_versioned)
+        assert "save_args={'index': False}" in str(ds)
+        assert "save_args={'index': False}" in str(ds_versioned)
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
@@ -408,7 +408,7 @@ class TestCSVDatasetS3:
         if sys.version_info[1] >= 10:
             read_patch = mocker.patch("pandas.read_csv", return_value=mocked_dataframe)
             df.load()
-            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={})
+            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={'open_args_save': {'mode': 'wb'}})
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)

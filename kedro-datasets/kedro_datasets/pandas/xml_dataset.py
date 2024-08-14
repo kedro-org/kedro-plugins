@@ -46,7 +46,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False, "mode": "wb"}
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -74,8 +74,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving XML files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_xml.html
-                Defaults are preserved, apart from "index", which is set to False and "mode" which is set to "wb".
-                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
+                All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -149,12 +148,11 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        save_mode = self._save_args.get("mode")
 
         buf = BytesIO()
         data.to_xml(path_or_buffer=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode=save_mode) as fs_file:
+        with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

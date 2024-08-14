@@ -112,14 +112,16 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
-        if fs_args is not None:
-            _fs_args.update(fs_args)
+        _fs_args = deepcopy(fs_args) or {}
+        # Handle default fs load and save arguments
+        self._fs_open_args_load = _fs_args.pop(
+            "open_args_load", self.DEFAULT_FS_ARGS.get("open_args_load", {})
+        )
+        self._fs_open_args_save = _fs_args.pop(
+            "open_args_save", self.DEFAULT_FS_ARGS.get("open_args_save", {})
+        )
 
-        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
-        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
-
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)
@@ -137,12 +139,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         )
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(

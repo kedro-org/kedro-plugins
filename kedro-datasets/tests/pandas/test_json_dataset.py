@@ -84,6 +84,16 @@ class TestJSONDataset:
             assert json_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"k1": "v1"}, "open_args_save": {"index": "value"}}],
+        indirect=True,
+    )
+    def test_fs_extra_params(self, json_dataset, fs_args):
+        """Test overriding the default fs arguments."""
+        assert json_dataset._fs_open_args_load == {"k1": "v1"}
+        assert json_dataset._fs_open_args_save == {"index": "value"}
+
+    @pytest.mark.parametrize(
         "load_args,save_args",
         [
             ({"storage_options": {"a": "b"}}, {}),

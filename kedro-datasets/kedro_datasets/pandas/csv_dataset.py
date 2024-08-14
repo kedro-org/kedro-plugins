@@ -112,18 +112,20 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        self._fs_args = deepcopy(self.DEFAULT_FS_ARGS)
+        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
         if fs_args is not None:
-            self._fs_args.update(fs_args)
+            _fs_args.update(fs_args)
 
+        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
+        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
-            self._fs_args.setdefault("auto_mkdir", True)
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._storage_options = {**_credentials, **self._fs_args}
+        self._storage_options = {**_credentials, **_fs_args}
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
         self.metadata = metadata
 
@@ -180,7 +182,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        fs_open_args_save = self._fs_args.get("open_args_save", {})
+        fs_open_args_save = self._fs_open_args_save or {}
         save_mode = fs_open_args_save.get(
             "mode", self.DEFAULT_FS_ARGS["open_args_save"]["mode"]
         )

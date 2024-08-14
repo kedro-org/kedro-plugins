@@ -408,9 +408,7 @@ class TestCSVDatasetS3:
         if sys.version_info[1] >= 10:
             read_patch = mocker.patch("pandas.read_csv", return_value=mocked_dataframe)
             df.load()
-            read_patch.assert_called_once_with(
-                mocked_csv_in_s3, storage_options={"open_args_save": {"mode": "wb"}}
-            )
+            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={})
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)

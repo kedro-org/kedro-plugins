@@ -39,7 +39,7 @@ dask = ["kedro-datasets[dask-parquetdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+geopandas-geojsondataset = ["geopandas>=0.6.0, <2.0", "pyproj~=3.0"]
 geopandas = ["kedro-datasets[geopandas-geojsondataset]"]
 
 holoviews-holoviewswriter = ["holoviews~=1.13.0"]

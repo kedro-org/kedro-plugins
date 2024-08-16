@@ -199,7 +199,7 @@ test = [
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",
-    "geopandas>=0.6.0, <1.0",
+    "geopandas>=0.6.0, <2.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",

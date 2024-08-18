@@ -2,7 +2,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Add support for `geopandas < 2.0`
+* Add support for `geopandas~=1.0`
 
 ## Breaking Changes
 ## Community contributions

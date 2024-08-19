@@ -110,7 +110,7 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                 )
                 return None
     except OSError as exc:
-        logging.error(f"Failed to read the file: {str(pyproject_path)}.\n{str(exc)}")
+        logging.debug(f"Failed to read the file: {str(pyproject_path)}.\n{str(exc)}")
     return None
 
 

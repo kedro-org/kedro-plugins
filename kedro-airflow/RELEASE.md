@@ -1,4 +1,6 @@
 # Upcoming Release
+
+# Release 0.9.1
 * Added support to specify `--conf-source` which would point to the runtime configuration directory to be used for running the DAG in airflow. This configuration path is added to the generated DAG.
 
 # Release 0.9.0

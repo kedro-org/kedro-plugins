@@ -17,8 +17,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -34,7 +33,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             year: 2000
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

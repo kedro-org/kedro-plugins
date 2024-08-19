@@ -24,7 +24,7 @@ class NetCDFDataset(AbstractDataset):
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -46,7 +46,7 @@ class NetCDFDataset(AbstractDataset):
             parallel: True
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -62,6 +62,7 @@ class NetCDFDataset(AbstractDataset):
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()
+        >>> assert ds.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

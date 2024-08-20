@@ -41,7 +41,7 @@ class TestMatlabDataset:
         reloaded = matlab_dataset.load()
         assert (dummy_data == reloaded["data"]).all()
         assert matlab_dataset._fs_open_args_load == {}
-        assert matlab_dataset._fs_open_args_save == {"mode": "w"}
+        assert matlab_dataset._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, matlab_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -65,7 +65,7 @@ class TestMatlabDataset:
     )
     def test_open_extra_args(self, matlab_dataset, fs_args):
         assert matlab_dataset._fs_open_args_load == fs_args["open_args_load"]
-        assert matlab_dataset._fs_open_args_save == {"mode": "w"}  # default unchanged
+        assert matlab_dataset._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, matlab_dataset):
         """Check the error when trying to load missing file."""

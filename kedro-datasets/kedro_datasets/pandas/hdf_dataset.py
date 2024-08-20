@@ -103,7 +103,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set `wb` when saving.
+                All defaults are preserved, except `open_args_save` `mode`, which is set `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -133,7 +133,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         self._key = key
 
-        # Handle default load argument
+        # Handle default load and save arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 

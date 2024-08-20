@@ -8,6 +8,7 @@ from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
 from email.parser import Parser
+from email.policy import default
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -134,7 +135,11 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
 
         # Handle default load and save and fs arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._parser_args = self._load_args.pop("parser", {"policy": default})
+
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._generator_args = self._save_args.pop("generator", {})
+
         self._fs_open_args_load = {
             **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
             **(_fs_open_args_load or {}),

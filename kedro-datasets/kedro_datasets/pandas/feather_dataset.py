@@ -69,6 +69,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -105,10 +106,18 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                Defaults are preserved, apart from the `open_args_save` `mode` which is set to `wb`.
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
+        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
+        if fs_args is not None:
+            _fs_args.update(fs_args)
+
+        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
+        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
+
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -129,12 +138,8 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         )
 
         # Handle default load argument
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
@@ -172,8 +177,12 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         buf = BytesIO()
         data.to_feather(buf, **self._save_args)
-
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        fs_open_args_save = self._fs_open_args_save or {}
+        save_mode = fs_open_args_save.get(
+            "mode", self.DEFAULT_FS_ARGS["open_args_save"]["mode"]
+        )
+        with self._fs.open(save_path, mode=save_mode) as fs_file:
+            # data.to_feather(fs_file, **self._save_args)
             fs_file.write(buf.getvalue())
 
         self._invalidate_cache()

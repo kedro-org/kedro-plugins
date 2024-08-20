@@ -116,6 +116,16 @@ class TestCSVDataset:
             assert csv_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"k1": "v1"}, "open_args_save": {"index": "value"}}],
+        indirect=True,
+    )
+    def test_fs_extra_params(self, csv_dataset, fs_args):
+        """Test overriding the default fs arguments."""
+        assert csv_dataset._fs_open_args_load == {"k1": "v1"}
+        assert csv_dataset._fs_open_args_save == {"index": "value"}
+
+    @pytest.mark.parametrize(
         "load_args,save_args",
         [
             ({"storage_options": {"a": "b"}}, {}),
@@ -243,8 +253,8 @@ class TestCSVDatasetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
         # Default save_args
-        assert "save_args={'index': False, 'mode': w}" in str(ds)
-        assert "save_args={'index': False, 'mode': w}" in str(ds_versioned)
+        assert "save_args={'index': False}" in str(ds)
+        assert "save_args={'index': False}" in str(ds_versioned)
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for

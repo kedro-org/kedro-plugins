@@ -195,6 +195,9 @@ class TestJSONDatasetVersioned:
         assert "JSONDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
+        # Default save_args
+        assert "save_args={'mode': w}" in str(ds)
+        assert "save_args={'mode': w}" in str(ds_versioned)
 
     def test_save_and_load(self, versioned_json_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for

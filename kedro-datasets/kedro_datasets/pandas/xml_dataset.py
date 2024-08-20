@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -47,6 +46,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -83,10 +83,17 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                Defaults are preserved, apart from the `open_args_save` `mode` which is set to `wb`.
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
+        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
+        if fs_args is not None:
+            _fs_args.update(fs_args)
+
+        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
+        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -106,13 +113,9 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        # Handle default load argument
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
@@ -149,11 +152,8 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        buf = BytesIO()
-        data.to_xml(path_or_buffer=buf, **self._save_args)
-
-        with self._fs.open(save_path, mode="wb") as fs_file:
-            fs_file.write(buf.getvalue())
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            data.to_xml(path_or_buffer=fs_file, **self._save_args)
 
         self._invalidate_cache()
 

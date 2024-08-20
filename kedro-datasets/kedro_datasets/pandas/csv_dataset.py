@@ -173,11 +173,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        fs_open_args_save = self._fs_open_args_save or {}
-        save_mode = fs_open_args_save.get(
-            "mode", self.DEFAULT_FS_ARGS["open_args_save"]["mode"]
-        )
-        with self._fs.open(save_path, mode=save_mode) as fs_file:
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             data.to_csv(path_or_buf=fs_file, **self._save_args)
 
         self._invalidate_cache()

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -117,7 +116,6 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         self._fs_open_args_load = _fs_args.pop("open_args_load", {})
         self._fs_open_args_save = _fs_args.pop("open_args_save", {})
-
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -137,7 +135,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load argument
+        # Handle default load and save arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
@@ -175,15 +173,8 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        buf = BytesIO()
-        data.to_feather(buf, **self._save_args)
-        fs_open_args_save = self._fs_open_args_save or {}
-        save_mode = fs_open_args_save.get(
-            "mode", self.DEFAULT_FS_ARGS["open_args_save"]["mode"]
-        )
-        with self._fs.open(save_path, mode=save_mode) as fs_file:
-            # data.to_feather(fs_file, **self._save_args)
-            fs_file.write(buf.getvalue())
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            data.to_feather(fs_file, **self._save_args)
 
         self._invalidate_cache()
 

@@ -60,6 +60,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     _lock = Lock()
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -106,9 +107,12 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
-        _fs_open_args_load = _fs_args.pop("open_args_load", {})
-        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
+        if fs_args is not None:
+            _fs_args.update(fs_args)
+
+        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
+        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -129,17 +133,9 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         self._key = key
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load argument
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     def _describe(self) -> dict[str, Any]:
         return {

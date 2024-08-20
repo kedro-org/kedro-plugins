@@ -1,6 +1,8 @@
 # Upcoming Release
 ## Major features and improvements
 
+* Added experiment `GoogleSheetsDataset` to read/write data to Google Sheet
+
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions

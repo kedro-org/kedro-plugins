@@ -8,7 +8,6 @@ from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
 from email.parser import Parser
-from email.policy import default
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -55,6 +54,10 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w"},
+        "open_args_load": {"mode": "r"},
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -129,22 +132,17 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._parser_args = self._load_args.pop("parser", {"policy": default})
-
-        # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-        self._generator_args = self._save_args.pop("generator", {})
-
-        _fs_open_args_load.setdefault("mode", "r")
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

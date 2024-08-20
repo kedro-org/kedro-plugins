@@ -107,12 +107,9 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
-        if fs_args is not None:
-            _fs_args.update(fs_args)
-
-        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
-        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -133,9 +130,17 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         self._key = key
 
-        # Handle default load and save arguments
+        # Handle default load and save and fs arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

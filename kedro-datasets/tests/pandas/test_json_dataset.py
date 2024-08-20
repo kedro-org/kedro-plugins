@@ -91,7 +91,7 @@ class TestJSONDataset:
     def test_fs_extra_params(self, json_dataset, fs_args):
         """Test overriding the default fs arguments."""
         assert json_dataset._fs_open_args_load == {"k1": "v1"}
-        assert json_dataset._fs_open_args_save == {"index": "value"}
+        assert json_dataset._fs_open_args_save == {"index": "value", "mode": "w"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",

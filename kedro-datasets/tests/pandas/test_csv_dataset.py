@@ -123,7 +123,7 @@ class TestCSVDataset:
     def test_fs_extra_params(self, csv_dataset, fs_args):
         """Test overriding the default fs arguments."""
         assert csv_dataset._fs_open_args_load == {"k1": "v1"}
-        assert csv_dataset._fs_open_args_save == {"index": "value"}
+        assert csv_dataset._fs_open_args_save == {"mode": "w", "index": "value"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",

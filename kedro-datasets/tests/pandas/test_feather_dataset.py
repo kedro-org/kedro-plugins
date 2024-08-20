@@ -66,7 +66,7 @@ class TestFeatherDataset:
     def test_fs_extra_params(self, feather_dataset, fs_args):
         """Test overriding the default fs arguments."""
         assert feather_dataset._fs_open_args_load == {"k1": "v1"}
-        assert feather_dataset._fs_open_args_save == {"index": "value"}
+        assert feather_dataset._fs_open_args_save == {"index": "value", "mode": "wb"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",

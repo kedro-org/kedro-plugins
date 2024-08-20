@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses OpenCV VideoCapture to read
 and decode videos and OpenCV VideoWriter to encode and write video.
 """
+
 from __future__ import annotations
 
 import itertools

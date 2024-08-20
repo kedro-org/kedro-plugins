@@ -2,6 +2,7 @@
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
+
 from __future__ import annotations
 
 import copy

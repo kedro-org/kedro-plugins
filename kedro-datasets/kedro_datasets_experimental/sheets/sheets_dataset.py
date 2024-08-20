@@ -23,7 +23,7 @@ class GoogleSheetsDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     Reading and writing of specific columns is suported to enable iterative engineering/translator interaction. Currently,
     authentication is done through a GCP service account, added to a GCP project with the sheets and drive APIs enabled. The
     email of the service account should be added as an editor to the Sheet.
-    
+
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
@@ -36,6 +36,7 @@ class GoogleSheetsDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           key: <add key of sheet here>
           service_file:  conf/local/service-account.json
 
+          # NOTE: Columns being written should exist in the sheet.
           save_args:
             sheet_name: data
             write_columns:  ["list", "of", "cols", "to", "write", "here"]

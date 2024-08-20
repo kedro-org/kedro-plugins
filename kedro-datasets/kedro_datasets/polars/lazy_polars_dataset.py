@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+
 from __future__ import annotations
 
 import logging

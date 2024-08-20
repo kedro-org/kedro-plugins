@@ -1,5 +1,6 @@
 """``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
 """
+
 from __future__ import annotations
 
 import logging

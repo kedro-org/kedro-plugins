@@ -23,7 +23,7 @@ hdfs-base = ["hdfs>=2.5.8, <3.0",]
 s3fs-base = ["s3fs>=2021.04",]
 polars-base = ["polars>=0.18.0",]
 plotly-base = ["plotly>=4.8.0, <6.0"]
-delta-base = ["delta-spark~=1.2.1",]
+delta-base = ["delta-spark>=1.0, <3.0",]
 networkx-base = ["networkx~=2.4"]
 
 # Individual Datasets
@@ -137,7 +137,7 @@ redis = ["kedro-datasets[redis-pickledataset]"]
 snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
-spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]", "delta-spark>=1.0, <3.0"]
+spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
 spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkjdbcdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]

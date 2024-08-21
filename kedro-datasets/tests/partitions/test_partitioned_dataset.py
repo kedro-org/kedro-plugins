@@ -57,6 +57,15 @@ class FakeDataset:  # pylint: disable=too-few-public-methods
 
 
 class TestPartitionedDatasetLocal:
+    @pytest.mark.parametrize("dataset", ["pandas.ParquetDataset", ParquetDataset])
+    def test_repr(self, dataset):
+        pds = PartitionedDataset(path="", dataset=dataset)
+        assert (
+            repr(pds)
+            == """kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
+            """dataset='kedro_datasets.pandas.parquet_dataset.ParquetDataset()')"""
+        )
+
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize(
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]

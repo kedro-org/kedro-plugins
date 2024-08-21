@@ -21,8 +21,7 @@ class SparkStreamingDataset(AbstractDataset):
     """``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 

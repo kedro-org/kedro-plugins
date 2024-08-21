@@ -13,6 +13,18 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [yury-fedotov](https://github.com/yury-fedotov)
 
+
+# Release 4.1.0
+## Major features and improvements
+* Improved `partitions.PartitionedDataset` representation when printing.
+
+## Bug fixes and other changes
+* Updated `ibis.TableDataset` to make sure credentials are not printed in interactive environment.
+
+## Breaking Changes
+## Community contributions
+
+
 # Release 4.0.0
 ## Major features and improvements
 

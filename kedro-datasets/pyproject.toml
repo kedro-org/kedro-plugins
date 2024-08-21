@@ -36,7 +36,7 @@ biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset]"]
 
-databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base]"]
+databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
 geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]

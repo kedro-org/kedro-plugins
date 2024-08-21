@@ -89,8 +89,8 @@ pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
-pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
-pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
+pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
+pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
 pandas-genericdataset = ["kedro-datasets[pandas-base]"]
 pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
 pandas-jsondataset = ["kedro-datasets[pandas-base]"]
@@ -170,6 +170,9 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pytorch-dataset = ["torch"]
+pytorch = ["kedro-datasets[pytorch-dataset]"]
 
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
@@ -276,6 +279,7 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
+    "torch"
 ]
 
 # All requirements

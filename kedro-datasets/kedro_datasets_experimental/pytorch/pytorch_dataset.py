@@ -33,7 +33,7 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
         >>>
         >>> model: torch.nn.Module
         >>> model = torch.nn.Sequential(torch.nn.Linear(10, 10), torch.nn.ReLU())
-        >>> dataset = PyTorchDataset(filepath="data/06_models/model.pt")
+        >>> dataset = PyTorchDataset(filepath=tmp_path / "model.pt")
         >>> dataset.save(model)
         >>> reloaded = TheModelClass(*args, **kwargs)
         >>> reloaded.load_state_dict(dataset.load())

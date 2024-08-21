@@ -9,6 +9,9 @@
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Brandon Meek](https://github.com/bpmeek)
+
 
 # Release 4.1.0
 ## Major features and improvements
@@ -70,7 +73,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Charles Guan](https://github.com/charlesbmi)
-* [Brandon Meek](https://github.com/bpmeek)
 
 # Release 3.0.0
 ## Major features and improvements

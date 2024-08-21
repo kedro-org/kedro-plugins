@@ -171,6 +171,9 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
+pytorch-dataset = ["torch"]
+pytorch = ["kedro-datasets[pytorch-dataset]"]
+
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
@@ -276,6 +279,7 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
+    "torch"
 ]
 
 # All requirements

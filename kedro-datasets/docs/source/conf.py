@@ -139,6 +139,7 @@ type_targets = {
         "langchain_cohere.chat_models.ChatCohere",
         "xarray.core.dataset.Dataset",
         "xarray.core.dataarray.DataArray",
+        "torch.nn.modules.module.Module",
     ),
     "py:data": (
         "typing.Any",

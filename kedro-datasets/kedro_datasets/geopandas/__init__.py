@@ -8,5 +8,9 @@ import lazy_loader as lazy
 GeoJSONDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"geojson_dataset": ["GeoJSONDataset"]}
+    __name__,
+    submod_attrs={
+        "geojson_dataset": ["GeoJSONDataset"],
+        "parquet_dataset": ["ParquetDataset"],
+    },
 )

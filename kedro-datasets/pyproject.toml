@@ -25,6 +25,7 @@ polars-base = ["polars>=0.18.0",]
 plotly-base = ["plotly>=4.8.0, <6.0"]
 delta-base = ["delta-spark>=1.0, <4.0",]
 networkx-base = ["networkx~=2.4"]
+geopandas-base = ["geopandas>=0.8.0, <1.0"]
 
 # Individual Datasets
 api-apidataset = ["requests~=2.20"]
@@ -40,8 +41,9 @@ dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
-geopandas = ["kedro-datasets[geopandas-geojsondataset]"]
+geopandas-geojsondataset = ["kedro-datasets[geopandas-base]", "pyproj~=3.0"]
+geopandas-parquetdataset = ["kedro-datasets[geopandas-base]"]
+geopandas = ["kedro-datasets[geopandas-geojsondataset,geopandas-parquetdataset]"]
 
 holoviews-holoviewswriter = ["holoviews~=1.13.0"]
 holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
@@ -216,7 +218,7 @@ test = [
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2023.1, <2023.3",
-    "geopandas>=0.6.0, <1.0",
+    "geopandas>=0.8.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",

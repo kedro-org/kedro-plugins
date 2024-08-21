@@ -1,9 +1,17 @@
 # Upcoming Release
 ## Major features and improvements
+* Added the following new **experimental** datasets:
+
+| Type                                | Description                                               | Location                                |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
+| `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models  | `kedro_datasets_experimental.pytorch`   |
 
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Brandon Meek](https://github.com/bpmeek)
+
 
 # Release 4.1.0
 ## Major features and improvements
@@ -27,13 +35,13 @@
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
 | `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
-| `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf` |
+| `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf`    |
 
 * Added the following new core datasets:
 
 | Type                                | Description                                               | Location                                |
 |-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
-| `dask.CSVDataset`    | A dataset for loading a CSV files using `dask`    | `kedro_datasets.dask` |
+| `dask.CSVDataset`                   | A dataset for loading a CSV files using `dask`            | `kedro_datasets.dask`                   |
 
 * Extended preview feature to `yaml.YAMLDataset`.
 

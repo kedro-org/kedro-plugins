@@ -72,7 +72,7 @@ class TestParquetDataset:
     @pytest.mark.parametrize("parquet_dataset", [{"index": False}], indirect=True)
     def test_load_missing_file(self, parquet_dataset):
         """Check the error while trying to load from missing source."""
-        pattern = r"Failed while loading data from data set ParquetDataSet"
+        pattern = r"Failed while loading data from data set ParquetDataset"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load()
 

@@ -13,8 +13,8 @@ HTMLDataset: Any
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
+        "html_dataset": ["HTMLDataset"],
         "json_dataset": ["JSONDataset"],
         "plotly_dataset": ["PlotlyDataset"],
-        "html_dataset": ["HTMLDataset"],
     },
 )

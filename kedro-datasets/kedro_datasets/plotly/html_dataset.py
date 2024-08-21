@@ -46,11 +46,14 @@ class HTMLDataset(
         >>> import plotly.express as px
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html", fs_args={"open_args_save":{"encoding":"utf-8"}})
+        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html")
         >>> dataset.save(fig)
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w", "encoding": "utf-8"}
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -111,13 +114,12 @@ class HTMLDataset(
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default save and fs arguments
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

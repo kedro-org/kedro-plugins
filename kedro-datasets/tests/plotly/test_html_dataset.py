@@ -35,7 +35,7 @@ class TestHTMLDataset:
     def test_save(self, html_dataset, dummy_plot):
         """Test saving and reloading the data set."""
         html_dataset.save(dummy_plot)
-        assert html_dataset._fs_open_args_save == {"mode": "w"}
+        assert html_dataset._fs_open_args_save == {"mode": "w", "encoding": "utf-8"}
 
     def test_exists(self, html_dataset, dummy_plot):
         """Test `exists` method invocation for both existing and

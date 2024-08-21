@@ -14,6 +14,11 @@
 |----------------------|------------------------------------------------|-------------------------|
 | `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
 
+- Added the following new datasets:
+  | Type | Description | Location |
+  | ---- | ----------- | -------- |
+  | `geopandas.ParquetDataset` | A dataset for loading and saving geopandas dataframe. | `kedro_datasets.geopandas` |
+
 ## Bug fixes and other changes
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
 * Fixed bug related to loading/saving models from/to remote storage using `TensorFlowModelDataset`.

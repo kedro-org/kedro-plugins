@@ -143,12 +143,9 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
 
-        _fs_args = deepcopy(self.DEFAULT_FS_ARGS)
-        if fs_args is not None:
-            _fs_args.update(fs_args)
-
-        self._fs_open_args_load = _fs_args.pop("open_args_load", {})
-        self._fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -168,9 +165,17 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
+        # Handle default load and save and fs arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(

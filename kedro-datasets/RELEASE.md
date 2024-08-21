@@ -10,6 +10,8 @@
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [yury-fedotov](https://github.com/yury-fedotov)
 
 # Release 4.0.0
 ## Major features and improvements

@@ -46,7 +46,7 @@ class HTMLDataset(
         >>> import plotly.express as px
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html")
+        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html", fs_args={"open_args_save":{"encoding":"utf-8"}})
         >>> dataset.save(fig)
     """
 

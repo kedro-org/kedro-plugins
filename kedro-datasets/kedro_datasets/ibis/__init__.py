@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from typing import Any
 
 import lazy_loader as lazy

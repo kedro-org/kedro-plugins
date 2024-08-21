@@ -1,6 +1,7 @@
 """``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy

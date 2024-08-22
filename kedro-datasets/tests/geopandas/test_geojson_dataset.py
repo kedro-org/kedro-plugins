@@ -43,6 +43,11 @@ def filepath_postgis(tmp_path):
     return (tmp_path / "test.sql").as_posix()
 
 
+@pytest.fixture
+def filepath_abc(tmp_path):
+    return tmp_path / "test.abc"
+
+
 @pytest.fixture(params=[None])
 def load_args(request):
     return request.param
@@ -115,6 +120,17 @@ def postgis_dataset(filepath_postgis, load_args, save_args, fs_args):
 
 
 @pytest.fixture
+def abc_dataset(filepath_abc, load_args, save_args, fs_args):
+    return GeoJSONDataset(
+        filepath=filepath_abc,
+        file_format="abc",
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
 def versioned_geojson_dataset(filepath_geojson, load_version, save_version):
     return GeoJSONDataset(
         filepath=filepath_geojson, version=Version(load_version, save_version)
@@ -165,6 +181,16 @@ class TestGeoJSONDataset:
         pattern = "Cannot create a dataset of file_format 'postgis' as it does not support a filepath target/source."
         with pytest.raises(DatasetError, match=pattern):
             postgis_dataset.save(dummy_dataframe)
+
+    def test_unknown_file_format(self, abc_dataset, dummy_dataframe, filepath_abc):
+        pattern = "Unable to retrieve 'geopandas.DataFrame.to_abc' method"
+        with pytest.raises(DatasetError, match=pattern):
+            abc_dataset.save(dummy_dataframe)
+
+        filepath_abc.write_bytes(b"")
+        pattern = "Unable to retrieve 'geopandas.read_abc' method"
+        with pytest.raises(DatasetError, match=pattern):
+            abc_dataset.load()
 
     @pytest.mark.parametrize(
         "load_args", [{"crs": "init:4326"}, {"crs": "init:2154", "driver": "GeoJSON"}]

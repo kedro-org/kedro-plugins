@@ -94,7 +94,7 @@ class TestSparkStreamingDataset:
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataset(
-            filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
+            filepath=filepath, file_format="json", save_args={"mode": "overwrite"}
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
@@ -115,7 +115,7 @@ class TestSparkStreamingDataset:
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataset(
-            filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
+            filepath=filepath, file_format="json", save_args={"mode": "overwrite"}
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
@@ -144,7 +144,7 @@ class TestSparkStreamingDataset:
         spark_json_ds = SparkDataset(
             filepath=filepath_json,
             file_format="json",
-            save_args=[{"mode", "overwrite"}],
+            save_args={"mode": "overwrite"},
         )
         spark_json_ds.save(sample_spark_streaming_df)
 

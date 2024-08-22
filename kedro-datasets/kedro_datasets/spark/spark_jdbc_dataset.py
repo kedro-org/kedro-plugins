@@ -1,7 +1,6 @@
 """SparkJDBCDataset to load and save a PySpark DataFrame via JDBC."""
 from __future__ import annotations
 
-from copy import deepcopy
 from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError
@@ -126,12 +125,8 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:

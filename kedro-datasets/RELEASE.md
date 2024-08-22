@@ -13,6 +13,8 @@
 | `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
 
 ## Bug fixes and other changes
+* Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
+
 ## Breaking Changes
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

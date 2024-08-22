@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any, Union
 
@@ -109,6 +108,7 @@ class ExcelDataset(
 
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -153,6 +153,8 @@ class ExcelDataset(
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                Defaults are preserved, apart from the `open_args_save` `mode` which is set to `wb`.
+                Note that the save method requires bytes, so any save mode provided should include "b" for bytes.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
@@ -160,6 +162,8 @@ class ExcelDataset(
             DatasetError: If versioning is enabled while in append mode.
         """
         _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -179,15 +183,18 @@ class ExcelDataset(
             glob_function=self._fs.glob,
         )
 
-        # Handle default load arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
-        # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
         self._writer_args = self._save_args.pop("writer", {})  # type: ignore
         self._writer_args.setdefault("engine", engine or "openpyxl")  # type: ignore
 
@@ -230,20 +237,17 @@ class ExcelDataset(
         )
 
     def _save(self, data: pd.DataFrame | dict[str, pd.DataFrame]) -> None:
-        output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with pd.ExcelWriter(output, **self._writer_args) as writer:
-            if isinstance(data, dict):
-                for sheet_name, sheet_data in data.items():
-                    sheet_data.to_excel(
-                        writer, sheet_name=sheet_name, **self._save_args
-                    )
-            else:
-                data.to_excel(writer, **self._save_args)
-
-        with self._fs.open(save_path, mode="wb") as fs_file:
-            fs_file.write(output.getvalue())
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            with pd.ExcelWriter(fs_file, **self._writer_args) as writer:
+                if isinstance(data, dict):
+                    for sheet_name, sheet_data in data.items():
+                        sheet_data.to_excel(
+                            writer, sheet_name=sheet_name, **self._save_args
+                        )
+                else:
+                    data.to_excel(writer, **self._save_args)
 
         self._invalidate_cache()
 

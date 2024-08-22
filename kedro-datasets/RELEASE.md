@@ -2,6 +2,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
+
 ## Breaking Changes
 ## Community contributions
 

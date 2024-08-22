@@ -23,7 +23,7 @@ hdfs-base = ["hdfs>=2.5.8, <3.0",]
 s3fs-base = ["s3fs>=2021.04",]
 polars-base = ["polars>=0.18.0",]
 plotly-base = ["plotly>=4.8.0, <6.0"]
-delta-base = ["delta-spark~=1.2.1",]
+delta-base = ["delta-spark>=1.0, <3.0",]
 networkx-base = ["networkx~=2.4"]
 
 # Individual Datasets
@@ -89,8 +89,8 @@ pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
-pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
-pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
+pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
+pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
 pandas-genericdataset = ["kedro-datasets[pandas-base]"]
 pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
 pandas-jsondataset = ["kedro-datasets[pandas-base]"]
@@ -120,9 +120,10 @@ pickle = ["kedro-datasets[pickle-pickledataset]"]
 pillow-imagedataset = ["Pillow~=9.0"]
 pillow = ["kedro-datasets[pillow-imagedataset]"]
 
+plotly-htmldataset = ["kedro-datasets[plotly-base]"]
 plotly-jsondataset = ["kedro-datasets[plotly-base]"]
 plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
-plotly = ["kedro-datasets[plotly-jsondataset,plotly-plotlydataset]"]
+plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
 polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
@@ -136,7 +137,7 @@ redis = ["kedro-datasets[redis-pickledataset]"]
 snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
-spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]", "delta-spark>=1.0, <3.0"]
+spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
 spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkjdbcdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
@@ -170,6 +171,9 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pytorch-dataset = ["torch"]
+pytorch = ["kedro-datasets[pytorch-dataset]"]
 
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
@@ -276,6 +280,7 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
+    "torch"
 ]
 
 # All requirements

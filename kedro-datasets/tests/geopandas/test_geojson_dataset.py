@@ -24,8 +24,23 @@ def save_version(request):
 
 
 @pytest.fixture
-def filepath(tmp_path):
+def filepath_geojson(tmp_path):
     return (tmp_path / "test.geojson").as_posix()
+
+
+@pytest.fixture
+def filepath_parquet(tmp_path):
+    return (tmp_path / "test.parquet").as_posix()
+
+
+@pytest.fixture
+def filepath_feather(tmp_path):
+    return (tmp_path / "test.feather").as_posix()
+
+
+@pytest.fixture
+def filepath_postgis(tmp_path):
+    return (tmp_path / "test.sql").as_posix()
 
 
 @pytest.fixture(params=[None])
@@ -33,7 +48,7 @@ def load_args(request):
     return request.param
 
 
-@pytest.fixture(params=[{"driver": "GeoJSON"}])
+@pytest.fixture(params=[None])
 def save_args(request):
     return request.param
 
@@ -47,16 +62,62 @@ def dummy_dataframe():
 
 
 @pytest.fixture
-def geojson_dataset(filepath, load_args, save_args, fs_args):
+def geojson_dataset(filepath_geojson, load_args, save_args, fs_args):
     return GeoJSONDataset(
-        filepath=filepath, load_args=load_args, save_args=save_args, fs_args=fs_args
+        filepath=filepath_geojson,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
 @pytest.fixture
-def versioned_geojson_dataset(filepath, load_version, save_version):
+def parquet_dataset(filepath_parquet, load_args, save_args, fs_args):
     return GeoJSONDataset(
-        filepath=filepath, version=Version(load_version, save_version)
+        filepath=filepath_parquet,
+        file_format="parquet",
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def parquet_dataset_bad_config(filepath_parquet, load_args, save_args, fs_args):
+    return GeoJSONDataset(
+        filepath=filepath_parquet,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def feather_dataset(filepath_feather, load_args, save_args, fs_args):
+    return GeoJSONDataset(
+        filepath=filepath_feather,
+        file_format="feather",
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def postgis_dataset(filepath_postgis, load_args, save_args, fs_args):
+    return GeoJSONDataset(
+        filepath=filepath_postgis,
+        file_format="postgis",
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def versioned_geojson_dataset(filepath_geojson, load_version, save_version):
+    return GeoJSONDataset(
+        filepath=filepath_geojson, version=Version(load_version, save_version)
     )
 
 
@@ -81,6 +142,29 @@ class TestGeoJSONDataset:
         assert not geojson_dataset.exists()
         geojson_dataset.save(dummy_dataframe)
         assert geojson_dataset.exists()
+
+    def test_load_parquet_dataset(self, parquet_dataset, dummy_dataframe):
+        parquet_dataset.save(dummy_dataframe)
+        reloaded_df = parquet_dataset.load()
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_load_feather_dataset(self, feather_dataset, dummy_dataframe):
+        feather_dataset.save(dummy_dataframe)
+        reloaded_df = feather_dataset.load()
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_bad_load(
+        self, parquet_dataset_bad_config, dummy_dataframe, filepath_parquet
+    ):
+        dummy_dataframe.to_parquet(filepath_parquet)
+        pattern = r"not recognized as a supported file format"
+        with pytest.raises(DatasetError, match=pattern):
+            parquet_dataset_bad_config.load()
+
+    def test_none_file_system_target(self, postgis_dataset, dummy_dataframe):
+        pattern = "Cannot create a dataset of file_format 'postgis' as it does not support a filepath target/source."
+        with pytest.raises(DatasetError, match=pattern):
+            postgis_dataset.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
         "load_args", [{"crs": "init:4326"}, {"crs": "init:2154", "driver": "GeoJSON"}]

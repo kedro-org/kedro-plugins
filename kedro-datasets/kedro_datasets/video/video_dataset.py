@@ -202,7 +202,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     of PIL.Image.Image using OpenCV.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -217,7 +217,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
           credentials: dev_s3
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

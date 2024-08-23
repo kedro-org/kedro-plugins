@@ -48,11 +48,11 @@ class TestDeltaTableDataset:
         """Test saving with the default overwrite mode with new data of diff schema."""
         deltatable_dataset_from_path.save(dummy_df)
         new_df = pd.DataFrame({"new_col": [1, 2]})
-        pattern = "Schema of data does not match table schema"
+        pattern = "Cannot cast schema, number of fields does not match: 1 vs 3"
         with pytest.raises(DatasetError, match=pattern):
             deltatable_dataset_from_path.save(new_df)
 
-    @pytest.mark.parametrize("save_args", [{"overwrite_schema": True}], indirect=True)
+    @pytest.mark.parametrize("save_args", [{"schema_mode": "overwrite"}], indirect=True)
     def test_overwrite_both_data_and_schema(
         self, deltatable_dataset_from_path, dummy_df
     ):
@@ -167,4 +167,4 @@ class TestDeltaTableDataset:
         deltatable_dataset_from_path.save(dummy_df)
         history = deltatable_dataset_from_path.history
         assert isinstance(history, list)
-        assert history[0]["operation"] == "CREATE TABLE"
+        assert history[0]["operation"] == "WRITE"

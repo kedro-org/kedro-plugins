@@ -1,7 +1,10 @@
+import inspect
+import json
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
+import yaml
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -207,3 +210,21 @@ class TestYAMLDatasetVersioned:
         Path(yaml_dataset._filepath.as_posix()).unlink()
         versioned_yaml_dataset.save(dummy_data)
         assert versioned_yaml_dataset.exists()
+
+    def test_preview(self, yaml_dataset, dummy_data):
+        """Test the preview method."""
+        yaml_dataset.save(dummy_data)
+        preview_data = yaml_dataset.preview()
+
+        # Load the data directly for comparison
+        with yaml_dataset._fs.open(yaml_dataset._get_load_path(), mode="r") as fs_file:
+            full_data = yaml.safe_load(fs_file)
+
+        expected_data = json.dumps(full_data)
+
+        assert (
+            preview_data == expected_data
+        ), "The preview data does not match the expected data."
+        assert (
+            inspect.signature(yaml_dataset.preview).return_annotation == "JSONPreview"
+        )

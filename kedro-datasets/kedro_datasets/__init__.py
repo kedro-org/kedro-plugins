@@ -1,7 +1,7 @@
 """``kedro_datasets`` is where you can find all of Kedro's data connectors."""
 
 __all__ = ["KedroDeprecationWarning"]
-__version__ = "3.0.0"
+__version__ = "4.1.0"
 
 import sys
 import warnings

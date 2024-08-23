@@ -8,12 +8,10 @@ import logging
 import os
 import sys
 import uuid
-from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import click
 import requests
 import toml
 import yaml
@@ -43,8 +41,14 @@ KNOWN_CI_ENV_VAR_KEYS = {
     "TRAVIS",  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     "BUILDKITE",  # https://buildkite.com/docs/pipelines/environment-variables
 }
+_SKIP_TELEMETRY_ENV_VAR_KEYS = (
+    "DO_NOT_TRACK",
+    "KEDRO_DISABLE_TELEMETRY",
+)
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
+PYPROJECT_CONFIG_NAME = "pyproject.toml"
+UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +82,63 @@ def _get_or_create_uuid() -> str:
         return ""
 
 
+def _get_or_create_project_id(pyproject_path: Path) -> str | None:
+    """
+    Reads a project id from a configuration file or generates and saves a new one if not present.
+    Returns None if configuration file does not exist or does not relate to Kedro.
+    """
+    try:
+        with open(pyproject_path, "r+") as file:
+            pyproject_data = toml.load(file)
+
+            # Check if pyproject related to kedro
+            try:
+                _ = pyproject_data["tool"]["kedro"]
+                try:
+                    project_id = pyproject_data["tool"]["kedro_telemetry"]["project_id"]
+                except KeyError:
+                    project_id = uuid.uuid4().hex
+                    toml_string = (
+                        f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
+                    )
+                    file.write(toml_string)
+                return project_id
+            except KeyError:
+                logging.error(
+                    f"Failed to retrieve project id or save project id: "
+                    f"{str(pyproject_path)} does not contain a [tool.kedro] section"
+                )
+                return None
+    except OSError as exc:
+        logging.debug(f"Failed to read the file: {str(pyproject_path)}.\n{str(exc)}")
+    return None
+
+
+def _add_tool_properties(
+    properties: dict[str, Any], pyproject_path: Path
+) -> dict[str, Any]:
+    """
+    Extends project properties with tool's properties.
+    """
+    if pyproject_path.exists():
+        with open(pyproject_path) as file:
+            pyproject_data = toml.load(file)
+
+        try:
+            tool_kedro = pyproject_data["tool"]["kedro"]
+            if "tools" in tool_kedro:
+                properties["tools"] = ", ".join(tool_kedro["tools"])
+            if "example_pipeline" in tool_kedro:
+                properties["example_pipeline"] = tool_kedro["example_pipeline"]
+        except KeyError:
+            pass
+
+    return properties
+
+
 def _generate_new_uuid(full_path: str) -> str:
     try:
-        config: dict[str, dict[str, Any]] = {}
-        config["telemetry"] = {}
+        config: dict[str, dict[str, Any]] = {"telemetry": {}}
         new_uuid = uuid.uuid4().hex
         config["telemetry"]["uuid"] = new_uuid
 
@@ -95,57 +152,99 @@ def _generate_new_uuid(full_path: str) -> str:
         return ""
 
 
-class KedroTelemetryCLIHooks:
+class KedroTelemetryHook:
     """Hook to send CLI command data to Heap"""
+
+    def __init__(self):
+        self._consent = None
+        self._sent = False
+        self._event_properties = None
+        self._project_path = None
+        self._user_uuid = None
 
     @cli_hook_impl
     def before_command_run(
         self, project_metadata: ProjectMetadata, command_args: list[str]
     ):
         """Hook implementation to send command run data to Heap"""
+
+        project_path = project_metadata.project_path if project_metadata else None
+
+        self._consent = _check_for_telemetry_consent(project_path)
+        if not self._consent:
+            return
+
+        # get KedroCLI and its structure from actual project root
+        cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
+        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
+        masked_command_args = _mask_kedro_cli(
+            cli_struct=cli_struct, command_args=command_args
+        )
+
+        self._user_uuid = _get_or_create_uuid()
+
+        event_properties = _get_project_properties(self._user_uuid, project_path)
+        event_properties["command"] = (
+            f"kedro {' '.join(masked_command_args)}" if masked_command_args else "kedro"
+        )
+        event_properties["main_command"] = (
+            masked_command_args[0] if masked_command_args else "kedro"
+        )
+
+        self._event_properties = event_properties
+
+    @cli_hook_impl
+    def after_command_run(self):
+        if self._consent and not self._sent:
+            self._send_telemetry_heap_event("CLI command")
+
+    @hook_impl
+    def after_context_created(self, context):
+        """Hook implementation to send project statistics data to Heap"""
+
+        self._consent = _check_for_telemetry_consent(context.project_path)
+        self._project_path = context.project_path
+
+    @hook_impl
+    def after_catalog_created(self, catalog):
+        if self._consent is False:
+            return
+
+        default_pipeline = pipelines.get("__default__")  # __default__
+
+        if not self._user_uuid:
+            self._user_uuid = _get_or_create_uuid()
+
+        if not self._event_properties:
+            self._event_properties = _get_project_properties(
+                self._user_uuid, self._project_path
+            )
+
+        project_properties = _format_project_statistics_data(
+            catalog, default_pipeline, pipelines
+        )
+        self._event_properties.update(project_properties)
+
+        self._send_telemetry_heap_event("Kedro Project Statistics")
+
+    def _send_telemetry_heap_event(self, event_name: str):
+        """Hook implementation to send command run data to Heap"""
+
+        logger.info(
+            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+            "No personal data or IP addresses are stored on our side. "
+            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+        )
+
         try:
-            if not project_metadata:  # in package mode
-                return
-
-            consent = _check_for_telemetry_consent(project_metadata.project_path)
-            if not consent:
-                logger.debug(
-                    "Kedro-Telemetry is installed, but you have opted out of "
-                    "sharing usage analytics so none will be collected.",
-                )
-                return
-
-            # get KedroCLI and its structure from actual project root
-            cli = KedroCLI(project_path=project_metadata.project_path)
-            cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-            masked_command_args = _mask_kedro_cli(
-                cli_struct=cli_struct, command_args=command_args
-            )
-            main_command = masked_command_args[0] if masked_command_args else "kedro"
-
-            logger.debug("You have opted into product usage analytics.")
-            user_uuid = _get_or_create_uuid()
-            project_properties = _get_project_properties(
-                user_uuid, project_metadata.project_path
-            )
-            cli_properties = _format_user_cli_data(
-                project_properties, masked_command_args
-            )
-
             _send_heap_event(
-                event_name=f"Command run: {main_command}",
-                identity=user_uuid,
-                properties=cli_properties,
+                event_name=event_name,
+                identity=self._user_uuid,
+                properties=self._event_properties,
             )
-
-            # send generic event too, so it's easier in data processing
-            generic_properties = deepcopy(cli_properties)
-            generic_properties["main_command"] = main_command
-            _send_heap_event(
-                event_name="CLI command",
-                identity=user_uuid,
-                properties=generic_properties,
-            )
+            self._sent = True
         except Exception as exc:
             logger.warning(
                 "Something went wrong in hook implementation to send command run data to Heap. "
@@ -154,42 +253,7 @@ class KedroTelemetryCLIHooks:
             )
 
 
-class KedroTelemetryProjectHooks:
-    """Hook to send project statistics data to Heap"""
-
-    @hook_impl
-    def after_context_created(self, context):
-        """Hook implementation to send project statistics data to Heap"""
-        self.consent = _check_for_telemetry_consent(context.project_path)
-        self.project_path = context.project_path
-
-    @hook_impl
-    def after_catalog_created(self, catalog):
-        if not self.consent:
-            logger.debug(
-                "Kedro-Telemetry is installed, but you have opted out of "
-                "sharing usage analytics so none will be collected.",
-            )
-            return
-
-        logger.debug("You have opted into product usage analytics.")
-
-        default_pipeline = pipelines.get("__default__")  # __default__
-        user_uuid = _get_or_create_uuid()
-
-        project_properties = _get_project_properties(user_uuid, self.project_path)
-
-        project_statistics_properties = _format_project_statistics_data(
-            project_properties, catalog, default_pipeline, pipelines
-        )
-        _send_heap_event(
-            event_name="Kedro Project Statistics",
-            identity=user_uuid,
-            properties=project_statistics_properties,
-        )
-
-
-def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
+def _is_known_ci_env(known_ci_env_var_keys: set[str]):
     # Most CI tools will set the CI environment variable to true
     if os.getenv("CI") == "true":
         return True
@@ -197,63 +261,47 @@ def _is_known_ci_env(known_ci_env_var_keys=KNOWN_CI_ENV_VAR_KEYS):
     return any(os.getenv(key) for key in known_ci_env_var_keys)
 
 
-def _get_project_properties(user_uuid: str, project_path: Path) -> dict:
-    hashed_package_name = _hash(str(PACKAGE_NAME)) if PACKAGE_NAME else "undefined"
+def _get_project_properties(user_uuid: str, project_path: Path | None) -> dict:
+    if project_path:
+        pyproject_path = project_path / PYPROJECT_CONFIG_NAME
+        project_id = _get_or_create_project_id(pyproject_path)
+        package_name = PACKAGE_NAME or UNDEFINED_PACKAGE_NAME
+        hashed_project_id = (
+            _hash(f"{project_id}{package_name}") if project_id is not None else None
+        )
+    else:
+        hashed_project_id = None
+
     properties = {
         "username": user_uuid,
-        "package_name": hashed_package_name,
+        "project_id": hashed_project_id,
         "project_version": KEDRO_VERSION,
         "telemetry_version": TELEMETRY_VERSION,
         "python_version": sys.version,
         "os": sys.platform,
-        "is_ci_env": _is_known_ci_env(),
+        "is_ci_env": _is_known_ci_env(KNOWN_CI_ENV_VAR_KEYS),
     }
-    pyproject_path = Path(project_path) / "pyproject.toml"
-    if pyproject_path.exists():
-        with open(pyproject_path) as file:
-            pyproject_data = toml.load(file)
 
-        if "tool" in pyproject_data and "kedro" in pyproject_data["tool"]:
-            if "tools" in pyproject_data["tool"]["kedro"]:
-                # convert list of tools to comma-separated string
-                properties["tools"] = ", ".join(
-                    pyproject_data["tool"]["kedro"]["tools"]
-                )
-            if "example_pipeline" in pyproject_data["tool"]["kedro"]:
-                properties["example_pipeline"] = pyproject_data["tool"]["kedro"][
-                    "example_pipeline"
-                ]
+    if project_path:
+        properties = _add_tool_properties(properties, pyproject_path)
 
     return properties
 
 
-def _format_user_cli_data(
-    properties: dict,
-    command_args: list[str],
-):
-    """Add format CLI command data to send to Heap."""
-    cli_properties = properties.copy()
-    cli_properties["command"] = (
-        f"kedro {' '.join(command_args)}" if command_args else "kedro"
-    )
-    return cli_properties
-
-
 def _format_project_statistics_data(
-    properties: dict,
     catalog: DataCatalog,
     default_pipeline: Pipeline,
     project_pipelines: dict,
 ):
     """Add project statistics to send to Heap."""
-    project_statistics_properties = properties.copy()
+    project_statistics_properties = {}
     project_statistics_properties["number_of_datasets"] = sum(
         1
         for c in catalog.list()
         if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None
+        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
     )
     project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
     return project_statistics_properties
@@ -297,15 +345,24 @@ def _send_heap_event(
         )
 
 
-def _check_for_telemetry_consent(project_path: Path) -> bool:
-    telemetry_file_path = project_path / ".telemetry"
-    if not telemetry_file_path.exists():
-        return _confirm_consent(telemetry_file_path)
-    with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
-        telemetry = yaml.safe_load(telemetry_file)
-        if _is_valid_syntax(telemetry):
-            return telemetry["consent"]
-        return _confirm_consent(telemetry_file_path)
+def _check_for_telemetry_consent(project_path: Path | None) -> bool:
+    """
+    Use telemetry consent from ".telemetry" file if it exists and has a valid format.
+    Telemetry is considered as opt-in otherwise.
+    """
+
+    for env_var in _SKIP_TELEMETRY_ENV_VAR_KEYS:
+        if os.environ.get(env_var):
+            return False
+
+    if project_path:
+        telemetry_file_path = project_path / ".telemetry"
+        if telemetry_file_path.exists():
+            with open(telemetry_file_path, encoding="utf-8") as telemetry_file:
+                telemetry = yaml.safe_load(telemetry_file)
+                if _is_valid_syntax(telemetry):
+                    return telemetry["consent"]
+    return True
 
 
 def _is_valid_syntax(telemetry: Any) -> bool:
@@ -314,35 +371,4 @@ def _is_valid_syntax(telemetry: Any) -> bool:
     )
 
 
-def _confirm_consent(telemetry_file_path: Path) -> bool:
-    try:
-        with telemetry_file_path.open("w") as telemetry_file:
-            confirm_msg = (
-                "As an open-source project, we collect usage analytics. \n"
-                "We cannot see nor store information contained in "
-                "a Kedro project. \nYou can find out more by reading our "
-                "privacy notice: \n"
-                "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry#"
-                "privacy-notice \n"
-                "Do you opt into usage analytics? "
-            )
-            if click.confirm(confirm_msg):
-                yaml.dump({"consent": True}, telemetry_file)
-                click.secho("You have opted into product usage analytics.", fg="green")
-                return True
-            click.secho(
-                "You have opted out of product usage analytics, so none will be collected.",
-                fg="green",
-            )
-            yaml.dump({"consent": False}, telemetry_file)
-            return False
-    except Exception as exc:
-        logger.warning(
-            "Failed to confirm consent. No data was sent to Heap. Exception: %s",
-            exc,
-        )
-        return False
-
-
-cli_hooks = KedroTelemetryCLIHooks()
-project_hooks = KedroTelemetryProjectHooks()
+telemetry_hook = KedroTelemetryHook()

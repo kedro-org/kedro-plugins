@@ -22,6 +22,7 @@ from pyspark.sql.utils import AnalysisException, ParseException
 from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
+pd.DataFrame.iteritems = pd.DataFrame.items
 
 
 @dataclass(frozen=True)
@@ -44,10 +45,12 @@ class ManagedTable:
 
     def __post_init__(self):
         """Run validation methods if declared.
+
         The validation method can be a simple check
         that raises DatasetError.
-        The validation is performed by calling a function named:
-            `validate_<field_name>(self, value) -> raises DatasetError`
+
+        The validation is performed by calling a function with the signature
+        `validate_<field_name>(self, value) -> raises DatasetError`.
         """
         for name in self.__dataclass_fields__.keys():
             method = getattr(self, f"_validate_{name}", None)
@@ -160,8 +163,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
     setup your project for this dataset.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -175,7 +177,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
           dataframe_type: pandas
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -229,6 +231,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         schema: dict[str, Any] | None = None,
         partition_columns: list[str] | None = None,
         owner_group: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``ManagedTableDataset``.
 
@@ -258,6 +261,8 @@ class ManagedTableDataset(AbstractVersionedDataset):
             owner_group: if table access control is enabled in your workspace,
                 specifying owner_group will transfer ownership of the table and database to
                 this owner. All databases should have the same owner_group. Defaults to None.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
             DatasetError: Invalid configuration supplied (through ManagedTable validation)
         """
@@ -275,6 +280,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
         )
 
         self._version = version
+        self.metadata = metadata
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
@@ -288,11 +294,11 @@ class ManagedTableDataset(AbstractVersionedDataset):
 
         Raises:
             VersionNotFoundError: if the version defined in
-            the init doesn't exist
+                the init doesn't exist
 
         Returns:
             Union[DataFrame, pd.DataFrame]: Returns a dataframe
-            in the format defined in the init
+                in the format defined in the init
         """
         if self._version and self._version.load >= 0:
             try:

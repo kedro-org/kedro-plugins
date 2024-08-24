@@ -1,6 +1,4 @@
-image:
-  file: .gitpod.Dockerfile
-
+image: gitpod/workspace-python-3.11
 
 tasks:
   # We want packages installed during the pre-build init steps to go to /workspace
@@ -12,22 +10,14 @@ tasks:
       echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
     init: |
       make sign-off
+      pip install uv
+      make install install-test-requirements
     command: |
       pre-commit install --install-hooks
       clear
 
-
-github:
-  prebuilds:
-    # enable for the master/default branch (defaults to true)
-    master: true
-    # enable for all branches in this repo (defaults to false)
-    branches: true
-    # enable for pull requests coming from this repo (defaults to true)
-    pullRequests: true
-    # enable for pull requests coming from forks (defaults to false)
-    pullRequestsFromForks: true
-    # add a "Review in Gitpod" button as a comment to pull requests (defaults to true)
-    addComment: false
-    # add a "Review in Gitpod" button to pull requests (defaults to false)
-    addBadge: true
+  - name: system
+    init: |
+      RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
+      RUN sudo apt-get install make
+      RUN sudo apt-get install -y --no-install-recommends libatk-bridge2.0-0 libcups2 ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils

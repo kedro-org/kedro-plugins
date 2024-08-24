@@ -11,7 +11,10 @@ tasks:
     init: |
       make sign-off
       pip install uv
-      make install install-test-requirements
+      uv venv
+      echo source .venv/bin/activate >> ~/.bashrc
+      source ~/.bashrc
+      make install-test-requirements plugin=kedro-datasets
     command: |
       pre-commit install --install-hooks
       clear

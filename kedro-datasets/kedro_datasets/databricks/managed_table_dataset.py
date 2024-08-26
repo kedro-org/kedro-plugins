@@ -4,23 +4,19 @@ in Databricks.
 from __future__ import annotations
 
 import logging
-import re
 from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
 from kedro.io.core import (
-    AbstractVersionedDataset,
     DatasetError,
     Version,
     VersionNotFoundError,
 )
 from pyspark.sql import DataFrame
-from pyspark.sql.types import StructType
-from pyspark.sql.utils import AnalysisException, ParseException
 
-from kedro_datasets.spark.spark_dataset import _get_spark
 from kedro_datasets.databricks._base_table_dataset import BaseTable, BaseTableDataset
+from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items

@@ -43,7 +43,6 @@ class BaseTable:
     table: str
     write_mode: str | None
     dataframe_type: str
-    primary_key: str | list[str] | None
     owner_group: str | None
     partition_columns: str | list[str] | None
     json_schema: dict[str, Any] | None = None

@@ -31,8 +31,9 @@ class ManagedTable(BaseTable):
     """Stores the definition of a managed table"""
 
     _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
+    _VALID_FORMATS = ["delta"]
+    format: str = "delta"
     primary_key: str | list[str] | None
-    owner_group: str | None
 
 
 class ManagedTableDataset(BaseTableDataset):
@@ -194,4 +195,3 @@ class ManagedTableDataset(BaseTableDataset):
             _get_spark().sql(upsert_sql)
         else:
             self._save_append(update_data)
-

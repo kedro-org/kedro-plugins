@@ -35,7 +35,7 @@ class ManagedTable(BaseTable):
     owner_group: str | None
 
 
-class ManagedTableDataset(AbstractVersionedDataset):
+class ManagedTableDataset(BaseTableDataset):
     """``ManagedTableDataset`` loads and saves data into managed delta tables on Databricks.
     Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
     When saving data, you can specify one of three modes: overwrite(default), append,
@@ -92,13 +92,6 @@ class ManagedTableDataset(AbstractVersionedDataset):
         >>> reloaded = dataset.load()
         >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
-
-    # this dataset cannot be used with ``ParallelRunner``,
-    # therefore it has the attribute ``_SINGLE_PROCESS = True``
-    # for parallelism within a Spark pipeline please consider
-    # using ``ThreadRunner`` instead
-    _SINGLE_PROCESS = True
-
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -149,80 +142,19 @@ class ManagedTableDataset(AbstractVersionedDataset):
         Raises:
             DatasetError: Invalid configuration supplied (through ManagedTable validation)
         """
-
-        self._table = ManagedTable(
-            database=database,
-            catalog=catalog,
+        super().__init__(
             table=table,
+            catalog=catalog,
+            database=database,
             write_mode=write_mode,
             dataframe_type=dataframe_type,
+            version=version,
+            schema=schema,
+            partition_columns=partition_columns,
+            metadata=metadata,
             primary_key=primary_key,
             owner_group=owner_group,
-            partition_columns=partition_columns,
-            json_schema=schema,
         )
-
-        self._version = version
-        self.metadata = metadata
-
-        super().__init__(
-            filepath=None,  # type: ignore[arg-type]
-            version=version,
-            exists_function=self._exists,  # type: ignore[arg-type]
-        )
-
-    def _load(self) -> DataFrame | pd.DataFrame:
-        """Loads the version of data in the format defined in the init
-        (spark|pandas dataframe)
-
-        Raises:
-            VersionNotFoundError: if the version defined in
-                the init doesn't exist
-
-        Returns:
-            Union[DataFrame, pd.DataFrame]: Returns a dataframe
-                in the format defined in the init
-        """
-        if self._version and self._version.load >= 0:
-            try:
-                data = (
-                    _get_spark()
-                    .read.format("delta")
-                    .option("versionAsOf", self._version.load)
-                    .table(self._table.full_table_location())
-                )
-            except Exception as exc:
-                raise VersionNotFoundError(self._version.load) from exc
-        else:
-            data = _get_spark().table(self._table.full_table_location())
-        if self._table.dataframe_type == "pandas":
-            data = data.toPandas()
-        return data
-
-    def _save_append(self, data: DataFrame) -> None:
-        """Saves the data to the table by appending it
-        to the location defined in the init
-
-        Args:
-            data (DataFrame): the Spark dataframe to append to the table
-        """
-        data.write.format("delta").mode("append").saveAsTable(
-            self._table.full_table_location() or ""
-        )
-
-    def _save_overwrite(self, data: DataFrame) -> None:
-        """Overwrites the data in the table with the data provided.
-        (this is the default save mode)
-
-        Args:
-            data (DataFrame): the Spark dataframe to overwrite the table with.
-        """
-        delta_table = data.write.format("delta")
-        if self._table.write_mode == "overwrite":
-            delta_table = delta_table.mode("overwrite").option(
-                "overwriteSchema", "true"
-            )
-        delta_table.saveAsTable(self._table.full_table_location() or "")
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
@@ -263,81 +195,3 @@ class ManagedTableDataset(AbstractVersionedDataset):
         else:
             self._save_append(update_data)
 
-    def _save(self, data: DataFrame | pd.DataFrame) -> None:
-        """Saves the data based on the write_mode and dataframe_type in the init.
-        If write_mode is pandas, Spark dataframe is created first.
-        If schema is provided, data is matched to schema before saving
-        (columns will be sorted and truncated).
-
-        Args:
-            data (Any): Spark or pandas dataframe to save to the table location
-        """
-        if self._table.write_mode is None:
-            raise DatasetError(
-                "'save' can not be used in read-only mode. "
-                "Change 'write_mode' value to `overwrite`, `upsert` or `append`."
-            )
-        # filter columns specified in schema and match their ordering
-        schema = self._table.schema()
-        if schema:
-            cols = schema.fieldNames()
-            if self._table.dataframe_type == "pandas":
-                data = _get_spark().createDataFrame(
-                    data.loc[:, cols], schema=self._table.schema()
-                )
-            else:
-                data = data.select(*cols)
-        elif self._table.dataframe_type == "pandas":
-            data = _get_spark().createDataFrame(data)
-        if self._table.write_mode == "overwrite":
-            self._save_overwrite(data)
-        elif self._table.write_mode == "upsert":
-            self._save_upsert(data)
-        elif self._table.write_mode == "append":
-            self._save_append(data)
-
-    def _describe(self) -> dict[str, str | list | None]:
-        """Returns a description of the instance of ManagedTableDataset
-
-        Returns:
-            Dict[str, str]: Dict with the details of the dataset
-        """
-        return {
-            "catalog": self._table.catalog,
-            "database": self._table.database,
-            "table": self._table.table,
-            "write_mode": self._table.write_mode,
-            "dataframe_type": self._table.dataframe_type,
-            "primary_key": self._table.primary_key,
-            "version": str(self._version),
-            "owner_group": self._table.owner_group,
-            "partition_columns": self._table.partition_columns,
-        }
-
-    def _exists(self) -> bool:
-        """Checks to see if the table exists
-
-        Returns:
-            bool: boolean of whether the table defined
-            in the dataset instance exists in the Spark session
-        """
-        if self._table.catalog:
-            try:
-                _get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
-            except (ParseException, AnalysisException) as exc:
-                logger.warning(
-                    "catalog %s not found or unity not enabled. Error message: %s",
-                    self._table.catalog,
-                    exc,
-                )
-        try:
-            return (
-                _get_spark()
-                .sql(f"SHOW TABLES IN `{self._table.database}`")
-                .filter(f"tableName = '{self._table.table}'")
-                .count()
-                > 0
-            )
-        except (ParseException, AnalysisException) as exc:
-            logger.warning("error occured while trying to find table: %s", exc)
-            return False

@@ -157,6 +157,35 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group=owner_group,
         )
 
+        self._version = version
+
+    def _load(self) -> DataFrame | pd.DataFrame:
+        """Loads the version of data in the format defined in the init
+        (spark|pandas dataframe)
+
+        Raises:
+            VersionNotFoundError: if the version defined in
+                the init doesn't exist
+
+        Returns:
+            Union[DataFrame, pd.DataFrame]: Returns a dataframe
+                in the format defined in the init
+        """
+        if self._version and self._version.load >= 0:
+            try:
+                data = (
+                    _get_spark()
+                    .read.format("delta")
+                    .option("versionAsOf", self._version.load)
+                    .table(self._table.full_table_location())
+                )
+            except Exception as exc:
+                raise VersionNotFoundError(self._version.load) from exc
+        else:
+            data = super()._load()
+
+        return data
+
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
         If table doesn't exist at save, the data is inserted to a new table.

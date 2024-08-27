@@ -11,6 +11,8 @@ from typing import Any, ClassVar, List
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
+    Version,
+    VersionNotFoundError,
     DatasetError
 )
 from pyspark.sql import DataFrame
@@ -35,10 +37,10 @@ class BaseTable:
     _VALID_DATAFRAME_TYPES: ClassVar[List[str]] = field(default=["spark", "pandas"])
     _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv"])
 
-    format: str
     database: str
     catalog: str | None
     table: str
+    format: str
     write_mode: str | None
     dataframe_type: str
     owner_group: str | None
@@ -188,6 +190,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         database: str = "default",
         write_mode: str | None = "overwrite",
         dataframe_type: str = "spark",
+        version: Version | None = None,
         # the following parameters are used by project hooks
         # to create or update table properties
         schema: dict[str, Any] | None = None,
@@ -239,11 +242,12 @@ class BaseTableDataset(AbstractVersionedDataset):
         )
 
         self.metadata = metadata
+        self._version = version
         self.kwargs = kwargs
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
-            version=kwargs.get("version"),
+            version=version,
             exists_function=self._exists,  # type: ignore[arg-type]
         )
 
@@ -259,14 +263,29 @@ class BaseTableDataset(AbstractVersionedDataset):
         raise NotImplementedError
     
     def _load(self) -> DataFrame | pd.DataFrame:
-        """Loads the data from the table location defined in the init.
+        """Loads the version of data in the format defined in the init
         (spark|pandas dataframe)
+
+        Raises:
+            VersionNotFoundError: if the version defined in
+                the init doesn't exist
 
         Returns:
             Union[DataFrame, pd.DataFrame]: Returns a dataframe
                 in the format defined in the init
         """
-        data = _get_spark().table(self._table.full_table_location())
+        if self._version and self._version.load >= 0:
+            try:
+                data = (
+                    _get_spark()
+                    .read.format("delta")
+                    .option("versionAsOf", self._version.load)
+                    .table(self._table.full_table_location())
+                )
+            except Exception as exc:
+                raise VersionNotFoundError(self._version.load) from exc
+        else:
+            data = _get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data

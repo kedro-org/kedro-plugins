@@ -2,13 +2,14 @@ import inspect
 from pathlib import Path, PurePosixPath
 
 import pytest
-from custom_datasets import ProphetModelDataset
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from prophet import Prophet
 from s3fs.core import S3FileSystem
+
+from kedro_datasets_experimental.prophet import ProphetModelDataset
 
 
 @pytest.fixture

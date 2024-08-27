@@ -2,14 +2,13 @@ import inspect
 from pathlib import Path, PurePosixPath
 
 import pytest
+from custom_datasets import ProphetModelDataset
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from prophet import Prophet
 from s3fs.core import S3FileSystem
-
-from custom_datasets import ProphetModelDataset
 
 
 @pytest.fixture
@@ -19,7 +18,9 @@ def filepath_json(tmp_path):
 
 @pytest.fixture
 def prophet_model_dataset(filepath_json, save_args, fs_args):
-    return ProphetModelDataset(filepath=filepath_json, save_args=save_args, fs_args=fs_args)
+    return ProphetModelDataset(
+        filepath=filepath_json, save_args=save_args, fs_args=fs_args
+    )
 
 
 @pytest.fixture
@@ -52,9 +53,7 @@ class TestProphetModelDataset:
         prophet_model_dataset.save(dummy_model)
         assert prophet_model_dataset.exists()
 
-    @pytest.mark.parametrize(
-        "save_args", [{"k1": "v1", "indent": 4}], indirect=True
-    )
+    @pytest.mark.parametrize("save_args", [{"k1": "v1", "indent": 4}], indirect=True)
     def test_save_extra_params(self, prophet_model_dataset, save_args):
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
@@ -67,7 +66,9 @@ class TestProphetModelDataset:
     )
     def test_open_extra_args(self, prophet_model_dataset, fs_args):
         assert prophet_model_dataset._fs_open_args_load == fs_args["open_args_load"]
-        assert prophet_model_dataset._fs_open_args_save == {"mode": "w"}  # default unchanged
+        assert prophet_model_dataset._fs_open_args_save == {
+            "mode": "w"
+        }  # default unchanged
 
     def test_load_missing_file(self, prophet_model_dataset):
         """Check the error when trying to load missing file."""
@@ -189,7 +190,9 @@ class TestProphetModelDatasetVersioned:
         already existing (non-versioned) dataset."""
         prophet_model_dataset.save(dummy_model)
         assert prophet_model_dataset.exists()
-        assert prophet_model_dataset._filepath == versioned_prophet_model_dataset._filepath
+        assert (
+            prophet_model_dataset._filepath == versioned_prophet_model_dataset._filepath
+        )
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_prophet_model_dataset._filepath.parent.as_posix()})"
@@ -208,9 +211,13 @@ class TestProphetModelDatasetVersioned:
         preview_data = prophet_model_dataset.preview()
 
         # Load the data directly for comparison
-        with prophet_model_dataset._fs.open(prophet_model_dataset._get_load_path(), mode="r") as fs_file:
+        with prophet_model_dataset._fs.open(
+            prophet_model_dataset._get_load_path(), mode="r"
+        ) as fs_file:
             full_data = fs_file.read()
 
         assert preview_data == full_data
-        assert inspect.signature(prophet_model_dataset.preview).return_annotation == "JSONPreview"
-
+        assert (
+            inspect.signature(prophet_model_dataset.preview).return_annotation
+            == "JSONPreview"
+        )

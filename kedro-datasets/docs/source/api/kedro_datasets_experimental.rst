@@ -16,5 +16,6 @@ kedro_datasets_experimental
    langchain.ChatOpenAIDataset
    langchain.OpenAIEmbeddingsDataset
    netcdf.NetCDFDataset
+   prophet.ProphetModelDataset
    pytorch.PyTorchDataset
    rioxarray.GeoTIFFDataset

@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-import json
-from copy import deepcopy
-from pathlib import PurePosixPath
 from typing import Any
 
-import fsspec
-from kedro.io.core import (AbstractVersionedDataset, DatasetError, Version,
-                           get_filepath_str, get_protocol_and_path)
-from kedro_datasets.json import JSONDataset
-
+from kedro.io.core import Version, get_filepath_str
 from prophet import Prophet
 from prophet.serialize import model_from_json, model_to_json
+
+from kedro_datasets.json import JSONDataset
 
 
 class ProphetModelDataset(JSONDataset):
@@ -88,8 +83,6 @@ class ProphetModelDataset(JSONDataset):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -125,4 +118,3 @@ class ProphetModelDataset(JSONDataset):
             fs_file.write(model_to_json(data))
 
         self._invalidate_cache()
-

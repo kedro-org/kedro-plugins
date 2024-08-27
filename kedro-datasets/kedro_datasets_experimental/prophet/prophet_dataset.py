@@ -33,8 +33,9 @@ class ProphetModelDataset(JSONDataset):
 
     .. code-block:: pycon
 
-        >>> from prophet_dataset import ProphetModelDataset
+        >>> from kedro_datasets_experimental.prophet import ProphetModelDataset
         >>> from prophet import Prophet
+        >>> import pandas as pd
         >>>
         >>> df = pd.DataFrame({
         >>>     "ds": ["2024-01-01", "2024-01-02", "2024-01-03"],

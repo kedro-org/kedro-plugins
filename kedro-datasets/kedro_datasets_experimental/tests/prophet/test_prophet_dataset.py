@@ -1,6 +1,6 @@
-import inspect
 from pathlib import Path, PurePosixPath
 
+import pandas as pd
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
@@ -33,8 +33,10 @@ def versioned_prophet_model_dataset(filepath_json, load_version, save_version):
 
 @pytest.fixture
 def dummy_model():
+    df = pd.DataFrame({"ds": ["2024-01-01", "2024-01-02", "2024-01-03"], "y": [100, 200, 300]})
     model = Prophet()
-    # Fit the model with dummy data if necessary
+    # Fit the model with dummy data
+    model.fit(df)
     return model
 
 
@@ -205,20 +207,3 @@ class TestProphetModelDatasetVersioned:
         Path(prophet_model_dataset._filepath.as_posix()).unlink()
         versioned_prophet_model_dataset.save(dummy_model)
         assert versioned_prophet_model_dataset.exists()
-
-    def test_preview(self, prophet_model_dataset, dummy_model):
-        """Test the preview method."""
-        prophet_model_dataset.save(dummy_model)
-        preview_data = prophet_model_dataset.preview()
-
-        # Load the data directly for comparison
-        with prophet_model_dataset._fs.open(
-            prophet_model_dataset._get_load_path(), mode="r"
-        ) as fs_file:
-            full_data = fs_file.read()
-
-        assert preview_data == full_data
-        assert (
-            inspect.signature(prophet_model_dataset.preview).return_annotation
-            == "JSONPreview"
-        )

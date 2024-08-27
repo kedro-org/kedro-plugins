@@ -70,6 +70,8 @@ class PlotlyDataset(JSONDataset):
 
     """
 
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
+
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -131,10 +133,16 @@ class PlotlyDataset(JSONDataset):
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _fs_open_args_save.setdefault("mode", "w")
 
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default fs arguments
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         self.metadata = metadata
 

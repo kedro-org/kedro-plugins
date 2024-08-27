@@ -178,9 +178,7 @@ class MatplotlibWriter(
         self._fs_open_args_save = _fs_open_args_save
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if overwrite and version is not None:
             warn(

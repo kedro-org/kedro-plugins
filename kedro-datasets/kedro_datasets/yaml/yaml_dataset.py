@@ -54,6 +54,7 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"default_flow_style": False}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -89,8 +90,7 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `w` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -116,13 +116,15 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
         )
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

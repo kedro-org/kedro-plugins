@@ -54,6 +54,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -89,16 +90,15 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `w` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _credentials = deepcopy(credentials) or {}
 
+        _credentials = deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath, version)
 
         self._protocol = protocol
@@ -115,14 +115,16 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default save and fs arguments
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

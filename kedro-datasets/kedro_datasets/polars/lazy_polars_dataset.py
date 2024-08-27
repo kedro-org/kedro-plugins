@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any, ClassVar, Union
 
@@ -74,6 +73,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
 
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -126,8 +126,7 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
@@ -145,6 +144,8 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             )
 
         _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -164,13 +165,17 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
@@ -218,10 +223,9 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
         # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
         save_method = getattr(collected_data, f"write_{self._file_format}", None)
         if save_method:
-            buf = BytesIO()
-            save_method(file=buf, **self._save_args)
-            with self._fs.open(save_path, mode="wb") as fs_file:
-                fs_file.write(buf.getvalue())
+            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+                save_method(file=fs_file, **self._save_args)
+
                 self._invalidate_cache()
         # How the LazyPolarsDataset logic is currently written with
         # ACCEPTED_FILE_FORMATS and a check in the `__init__` method,

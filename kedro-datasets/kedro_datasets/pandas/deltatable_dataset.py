@@ -144,13 +144,9 @@ class DeltaTableDataset(AbstractDataset):
         self.is_empty_dir: bool = False
         self._delta_table: DeltaTable | None = None
 
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args:
-            self._load_args.update(load_args)
-
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args:
-            self._save_args.update(save_args)
+        # Handle default load and save arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         write_mode = self._save_args.get("mode", None)
         if write_mode not in self.ACCEPTED_WRITE_MODES:

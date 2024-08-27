@@ -4,8 +4,8 @@ in Databricks.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, ClassVar, List
 
 import pandas as pd
 from kedro.io.core import (
@@ -22,13 +22,13 @@ logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ManagedTable(BaseTable):
     """Stores the definition of a managed table"""
 
-    _VALID_WRITE_MODES = ["overwrite", "upsert", "append"]
-    _VALID_FORMATS = ["delta"]
-    format: str = "delta"
+    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "upsert", "append"])
+    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta"])
+
     primary_key: str | list[str] | None
 
 
@@ -95,7 +95,7 @@ class ManagedTableDataset(BaseTableDataset):
         table: str,
         catalog: str | None = None,
         database: str = "default",
-        write_mode: str | None = None,
+        write_mode: str | None = "overwrite",
         dataframe_type: str = "spark",
         primary_key: str | list[str] | None = None,
         version: Version | None = None,
@@ -154,6 +154,28 @@ class ManagedTableDataset(BaseTableDataset):
         )
 
         self._version = version
+
+    def _create_table(self, **kwargs: Any) -> ManagedTable:
+        """Creates a new ManagedTable instance with the provided kwargs.
+
+        Args:
+            **kwargs: the parameters to create the table with
+
+        Returns:
+            ManagedTable: the new ManagedTable instance
+        """
+        return ManagedTable(
+            table=kwargs["table"],
+            catalog=kwargs["catalog"],
+            database=kwargs["database"],
+            write_mode=kwargs["write_mode"],
+            dataframe_type=kwargs["dataframe_type"],
+            json_schema=kwargs["schema"],
+            partition_columns=kwargs["partition_columns"],
+            owner_group=kwargs["owner_group"],
+            primary_key=kwargs["primary_key"],
+            format="delta"
+        )
 
     def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init

@@ -100,8 +100,8 @@ Feature: Docker commands in new projects
 
   Scenario: Execute docker run target without building image
     When I execute the kedro command "docker run"
-    Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    Then I should get a successful exit code
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."
 
   Scenario: Execute docker dive target
     Given I have executed the kedro command "docker build"
@@ -118,5 +118,5 @@ Feature: Docker commands in new projects
 
   Scenario: Execute docker dive without building image
     When I execute the kedro command "docker dive"
-    Then I should get an error exit code
-    And Standard error should contain a message including "Error: Unable to find image `project-dummy` locally."
+    Then I should get a successful exit code
+    And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."

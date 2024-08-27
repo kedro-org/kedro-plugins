@@ -20,6 +20,7 @@ REPO_NAME = "cli_tools_dummy_project"
 PACKAGE_NAME = "cli_tools_dummy_package"
 DEFAULT_KEDRO_COMMANDS = [
     "catalog",
+    "info",
     "ipython",
     "jupyter",
     "micropkg",

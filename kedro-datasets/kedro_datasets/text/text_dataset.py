@@ -22,8 +22,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     filesystem (e.g.: local, S3, GCS)
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -32,7 +31,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
           filepath: data/01_raw/alice.txt
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -47,6 +46,11 @@ class TextDataset(AbstractVersionedDataset[str, str]):
         >>> assert string_to_write == reloaded
 
     """
+
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w"},
+        "open_args_load": {"mode": "r"},
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -103,10 +107,15 @@ class TextDataset(AbstractVersionedDataset[str, str]):
             glob_function=self._fs.glob,
         )
 
-        _fs_open_args_load.setdefault("mode", "r")
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default fs arguments
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {

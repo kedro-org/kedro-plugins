@@ -23,7 +23,7 @@ hdfs-base = ["hdfs>=2.5.8, <3.0",]
 s3fs-base = ["s3fs>=2021.04",]
 polars-base = ["polars>=0.18.0",]
 plotly-base = ["plotly>=4.8.0, <6.0"]
-delta-base = ["delta-spark~=1.2.1",]
+delta-base = ["delta-spark>=1.0, <4.0",]
 networkx-base = ["networkx~=2.4"]
 
 # Individual Datasets
@@ -36,7 +36,7 @@ biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset]"]
 
-databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base]"]
+databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
 geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
@@ -80,9 +80,6 @@ matlab = ["kedro-datasets[matlab-matlabdataset]"]
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
 
-netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
-netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
-
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
@@ -92,8 +89,8 @@ pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
-pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
-pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'", "pandas-gbq>=0.18.0; python_version >= '3.11'"]
+pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
+pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
 pandas-genericdataset = ["kedro-datasets[pandas-base]"]
 pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
 pandas-jsondataset = ["kedro-datasets[pandas-base]"]
@@ -123,9 +120,10 @@ pickle = ["kedro-datasets[pickle-pickledataset]"]
 pillow-imagedataset = ["Pillow~=9.0"]
 pillow = ["kedro-datasets[pillow-imagedataset]"]
 
+plotly-htmldataset = ["kedro-datasets[plotly-base]"]
 plotly-jsondataset = ["kedro-datasets[plotly-base]"]
 plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
-plotly = ["kedro-datasets[plotly-jsondataset,plotly-plotlydataset]"]
+plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
 polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
@@ -141,7 +139,7 @@ redis = ["kedro-datasets[redis-pickledataset]"]
 snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
-spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]", "delta-spark>=1.0, <3.0"]
+spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
 spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkjdbcdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
@@ -173,6 +171,15 @@ langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-comm
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset ]"]
 
+netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
+netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pytorch-dataset = ["torch"]
+pytorch = ["kedro-datasets[pytorch-dataset]"]
+
+rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
+rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
+
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.4.0",
@@ -182,6 +189,7 @@ docs = [
 
 # Test requirements
 test = [
+    "accelerate<0.32", # Temporary pin
     "adlfs~=2023.1",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
@@ -200,7 +208,6 @@ test = [
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
-    "h5netcdf>=1.2.0",
     "ibis-framework[duckdb,examples]",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
@@ -214,7 +221,6 @@ test = [
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
     "mypy~=1.0",
-    "netcdf4>=1.6.4",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -229,7 +235,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
     "pyproj~=3.0",
-    "pyspark>=3.0, <3.4; python_version < '3.11'",
+    "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
@@ -273,6 +279,11 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "h5netcdf>=1.2.0",
+    "netcdf4>=1.6.4",
+    "xarray>=2023.1.0",
+    "rioxarray",
+    "torch"
 ]
 
 # All requirements
@@ -294,7 +305,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/netcdf/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

@@ -1,5 +1,40 @@
 # Upcoming Release
 ## Major features and improvements
+* Added the following new **experimental** datasets:
+
+| Type                                | Description                                               | Location                                |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
+| `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models  | `kedro_datasets_experimental.pytorch`   |
+
+* Added the following new core datasets:
+
+| Type                 | Description                                    | Location                |
+|----------------------|------------------------------------------------|-------------------------|
+| `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
+
+## Bug fixes and other changes
+* Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
+
+## Breaking Changes
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Brandon Meek](https://github.com/bpmeek)
+* [yury-fedotov](https://github.com/yury-fedotov)
+
+
+# Release 4.1.0
+## Major features and improvements
+* Improved `partitions.PartitionedDataset` representation when printing.
+
+## Bug fixes and other changes
+* Updated `ibis.TableDataset` to make sure credentials are not printed in interactive environment.
+
+## Breaking Changes
+## Community contributions
+
+
+# Release 4.0.0
+## Major features and improvements
 
 * Added the following new **experimental** datasets:
 
@@ -9,6 +44,34 @@
 | `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere langchain model.       | `kedro_datasets_experimental.langchain` |
 | `langchain.OpenAIEmbeddingsDataset` | A dataset for loading a OpenAIEmbeddings langchain model. | `kedro_datasets_experimental.langchain` |
 | `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI langchain model.       | `kedro_datasets_experimental.langchain` |
+| `rioxarray.GeoTIFFDataset`          | A dataset for loading and saving geotiff raster data      | `kedro_datasets_experimental.rioxarray` |
+| `netcdf.NetCDFDataset`              | A dataset for loading and saving "*.nc" files.            | `kedro_datasets_experimental.netcdf`    |
+
+* Added the following new core datasets:
+
+| Type                                | Description                                               | Location                                |
+|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
+| `dask.CSVDataset`                   | A dataset for loading a CSV files using `dask`            | `kedro_datasets.dask`                   |
+
+* Extended preview feature to `yaml.YAMLDataset`.
+
+## Bug fixes and other changes
+* Added `metadata` parameter for a few datasets
+
+## Breaking Changes
+* `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Ian Whalen](https://github.com/ianwhale)
+* [Charles Guan](https://github.com/charlesbmi)
+* [Thomas Gölles](https://github.com/tgoelles)
+* [Lukas Innig](https://github.com/derluke)
+* [Michael Sexton](https://github.com/michaelsexton)
+* [michal-mmm](https://github.com/michal-mmm)
+
+
 
 
 # Release 3.0.1
@@ -49,6 +112,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Andrew Cao](https://github.com/andrewcao1)
 * [Eduardo Romero Lopez](https://github.com/eromerobilbomatica)
 * [Jerome Asselin](https://github.com/jerome-asselin-buspatrol)
+
 
 # Release 2.1.0
 ## Major features and improvements

@@ -5,15 +5,13 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, ClassVar, List
 
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
-    DatasetError,
-    Version,
-    VersionNotFoundError,
+    DatasetError
 )
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
@@ -25,18 +23,18 @@ logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BaseTable:
     """Stores the definition of a base table.
     
     Acts as a base class for `ManagedTable` and `ExternalTable`.
     """
-
     # regex for tables, catalogs and schemas
-    _NAMING_REGEX = r"\b[0-9a-zA-Z_-]{1,}\b"
-    _VALID_WRITE_MODES = ["overwrite", "append"]
-    _VALID_DATAFRAME_TYPES = ["spark", "pandas"]
-    _VALID_FORMATS = ["delta", "parquet", "csv"]
+    _NAMING_REGEX: ClassVar[str] = r"\b[0-9a-zA-Z_-]{1,}\b"
+    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "append"])
+    _VALID_DATAFRAME_TYPES: ClassVar[List[str]] = field(default=["spark", "pandas"])
+    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv"])
+
     format: str
     database: str
     catalog: str | None
@@ -188,7 +186,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         table: str,
         catalog: str | None = None,
         database: str = "default",
-        write_mode: str | None = None,
+        write_mode: str | None = "overwrite",
         dataframe_type: str = "spark",
         # the following parameters are used by project hooks
         # to create or update table properties
@@ -245,14 +243,18 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
+            version=kwargs.get("version"),
             exists_function=self._exists,  # type: ignore[arg-type]
         )
 
-    def _create_table(self, **kwargs: Any) -> None:
+    def _create_table(self, **kwargs: Any) -> BaseTable:
         """Creates a table object and assign it to the _table attribute.
 
         Args:
             **kwargs: Arguments to pass to the table object.
+
+        Returns:
+            BaseTable: the table object.
         """
         raise NotImplementedError
     

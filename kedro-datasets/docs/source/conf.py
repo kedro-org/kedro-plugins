@@ -140,6 +140,7 @@ type_targets = {
         "xarray.core.dataset.Dataset",
         "xarray.core.dataarray.DataArray",
         "torch.nn.modules.module.Module",
+        "Prophet",
     ),
     "py:data": (
         "typing.Any",

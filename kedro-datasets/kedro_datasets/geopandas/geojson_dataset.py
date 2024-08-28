@@ -19,7 +19,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-
 NON_FILE_SYSTEM_TARGETS = ["postgis"]
 
 

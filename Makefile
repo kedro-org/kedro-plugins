@@ -5,13 +5,6 @@ package:
 	rm -Rf dist;\
 	python -m build
 
-pypi:
-	python -m pip install twine -U
-	python -m twine upload $(plugin)/dist/*
-
-install: package
-	cd $(plugin) && pip install -U dist/*.whl
-
 install-pip-setuptools:
 	python -m pip install -U pip setuptools wheel
 
@@ -24,6 +17,43 @@ mypy:
 
 test:
 	cd $(plugin) && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
+
+e2e-tests:
+	cd $(plugin) && behave
+
+secret-scan:
+	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
+
+install-test-requirements:
+	cd $(plugin) && uv pip install ".[test]"
+
+install-pre-commit:
+	pre-commit install --install-hooks
+
+uninstall-pre-commit:
+	pre-commit uninstall
+	pre-commit uninstall --hook-type pre-push
+
+sign-off:
+	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
+	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
+	echo '--in-place "$$1"' >> .git/hooks/commit-msg
+	chmod +x .git/hooks/commit-msg
+
+## kedro-datasets specific
+
+# kedro-datasets related only
+test-no-spark: dataset-doctests-no-spark
+	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
+
+
+# kedro-datasets/snowflake tests skipped from default scope
+test-snowflake-only:
+	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
+
+check-datasets-docs:
+	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
@@ -47,49 +77,3 @@ dataset-doctest%:
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  $(extra_pytest_arg${*})
-
-test-sequential:
-	cd $(plugin) && pytest tests --cov-config pyproject.toml
-
-e2e-tests:
-	cd $(plugin) && behave
-
-secret-scan:
-	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
-
-clean:
-	cd $(plugin);\
-	rm -rf build dist pip-wheel-metadata .pytest_cache;\
-	find . -regex ".*/__pycache__" -exec rm -rf {} +;\
-	find . -regex ".*\.egg-info" -exec rm -rf {} +;\
-
-install-test-requirements:
-	cd $(plugin) && pip install ".[test]"
-
-install-pre-commit:
-	pre-commit install --install-hooks
-
-uninstall-pre-commit:
-	pre-commit uninstall
-	pre-commit uninstall --hook-type pre-push
-
-sign-off:
-	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
-	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
-	echo '--in-place "$$1"' >> .git/hooks/commit-msg
-	chmod +x .git/hooks/commit-msg
-
-# kedro-datasets related only
-test-no-spark: dataset-doctests-no-spark
-	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
-
-test-no-spark-sequential: dataset-doctests-no-spark
-	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks
-
-# kedro-datasets/snowflake tests skipped from default scope
-test-snowflake-only:
-	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
-	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
-
-check-datasets-docs:
-	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck

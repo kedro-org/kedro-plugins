@@ -19,12 +19,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-from kedro_datasets.pandas.generic_dataset import (
-    NON_FILE_SYSTEM_TARGETS as PANDAS_NON_FILE_SYSTEM_TARGETS,
-)
 
-# Unofficially GeoPandas also supports pandas io-methods, such as read_csv.
-NON_FILE_SYSTEM_TARGETS = ["postgis"] + PANDAS_NON_FILE_SYSTEM_TARGETS
+NON_FILE_SYSTEM_TARGETS = ["postgis"]
 
 
 class GeoJSONDataset(

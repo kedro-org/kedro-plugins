@@ -9,13 +9,10 @@ from typing import Any, ClassVar, List
 
 import pandas as pd
 from kedro.io.core import (
-    DatasetError,
     Version
 )
-from pyspark.sql import DataFrame
 
 from kedro_datasets.databricks._base_table_dataset import BaseTable, BaseTableDataset
-from kedro_datasets.spark.spark_dataset import _get_spark
 
 logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
@@ -25,10 +22,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 class ManagedTable(BaseTable):
     """Stores the definition of a managed table"""
 
-    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "upsert", "append"])
     _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta"])
-
-    primary_key: str | list[str] | None
 
 
 class ManagedTableDataset(BaseTableDataset):
@@ -152,63 +146,46 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group=owner_group,
         )
 
-    def _create_table(self, **kwargs: Any) -> ManagedTable:
-        """Creates a new ManagedTable instance with the provided kwargs.
+    def _create_table(
+        self,
+        table: str,
+        catalog: str | None,
+        database: str,
+        format: str,
+        write_mode: str | None,
+        dataframe_type: str,
+        primary_key: str | list[str] | None,
+        json_schema: dict[str, Any] | None,
+        partition_columns: list[str] | None,
+        owner_group: str | None
+    ) -> ManagedTable:
+        """Creates a new ManagedTable instance with the provided attributes.
 
         Args:
-            **kwargs: the parameters to create the table with
+            table: The name of the table.
+            catalog: The catalog of the table.
+            database: The database of the table.
+            format: The format of the table.
+            write_mode: The write mode for the table.
+            dataframe_type: The type of dataframe.
+            primary_key: The primary key of the table.
+            json_schema: The JSON schema of the table.
+            partition_columns: The partition columns of the table.
+            owner_group: The owner group of the table.
 
         Returns:
             ManagedTable: the new ManagedTable instance
         """
         return ManagedTable(
-            table=kwargs["table"],
-            catalog=kwargs["catalog"],
-            database=kwargs["database"],
-            write_mode=kwargs["write_mode"],
-            dataframe_type=kwargs["dataframe_type"],
-            json_schema=kwargs["schema"],
-            partition_columns=kwargs["partition_columns"],
-            owner_group=kwargs["owner_group"],
-            primary_key=kwargs["primary_key"],
-            format="delta"
+            table=table,
+            catalog=catalog,
+            database=database,
+            write_mode=write_mode,
+            dataframe_type=dataframe_type,
+            json_schema=json_schema,
+            partition_columns=partition_columns,
+            owner_group=owner_group,
+            primary_key=primary_key,
+            format=format
         )
 
-    def _save_upsert(self, update_data: DataFrame) -> None:
-        """Upserts the data by joining on primary_key columns or column.
-        If table doesn't exist at save, the data is inserted to a new table.
-
-        Args:
-            update_data (DataFrame): the Spark dataframe to upsert
-        """
-        if self._exists():
-            base_data = _get_spark().table(self._table.full_table_location())
-            base_columns = base_data.columns
-            update_columns = update_data.columns
-
-            if set(update_columns) != set(base_columns):
-                raise DatasetError(
-                    f"Upsert requires tables to have identical columns. "
-                    f"Delta table {self._table.full_table_location()} "
-                    f"has columns: {base_columns}, whereas "
-                    f"dataframe has columns {update_columns}"
-                )
-
-            where_expr = ""
-            if isinstance(self._table.primary_key, str):
-                where_expr = (
-                    f"base.{self._table.primary_key}=update.{self._table.primary_key}"
-                )
-            elif isinstance(self._table.primary_key, list):
-                where_expr = " AND ".join(
-                    f"base.{col}=update.{col}" for col in self._table.primary_key
-                )
-
-            update_data.createOrReplaceTempView("update")
-            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
-            _get_spark().conf.set("whereExpr", where_expr)
-            upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
-                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
-            _get_spark().sql(upsert_sql)
-        else:
-            self._save_append(update_data)

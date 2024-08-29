@@ -33,18 +33,19 @@ class BaseTable:
     """
     # regex for tables, catalogs and schemas
     _NAMING_REGEX: ClassVar[str] = r"\b[0-9a-zA-Z_-]{1,}\b"
-    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "append"])
+    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "upsert", "append"])
     _VALID_DATAFRAME_TYPES: ClassVar[List[str]] = field(default=["spark", "pandas"])
     _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv"])
 
     database: str
     catalog: str | None
     table: str
-    format: str
     write_mode: str | None
     dataframe_type: str
+    primary_key: str | list[str] | None
     owner_group: str | None
     partition_columns: str | list[str] | None
+    format: str = "delta",
     json_schema: dict[str, Any] | None = None
 
     def __post_init__(self):
@@ -188,16 +189,17 @@ class BaseTableDataset(AbstractVersionedDataset):
         table: str,
         catalog: str | None = None,
         database: str = "default",
+        format: str = "delta",
         write_mode: str | None = "overwrite",
         dataframe_type: str = "spark",
+        primary_key: str | list[str] | None = None,
         version: Version | None = None,
         # the following parameters are used by project hooks
         # to create or update table properties
         schema: dict[str, Any] | None = None,
         partition_columns: list[str] | None = None,
         owner_group: str | None = None,
-        metadata: dict[str, Any] | None = None,
-        **kwargs: Any,
+        metadata: dict[str, Any] | None = None
     ) -> None:
         """Creates a new instance of ``BaseTableDataset``.
 
@@ -214,6 +216,8 @@ class BaseTableDataset(AbstractVersionedDataset):
                 Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
                 Defaults to "spark".
+            primary_key: the primary key of the table.
+                Can be in the form of a list. Defaults to None.
             schema: the schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
                 Used by the hooks to create the table if the schema is provided
@@ -233,17 +237,17 @@ class BaseTableDataset(AbstractVersionedDataset):
             table=table,
             catalog=catalog,
             database=database,
+            format=format,
             write_mode=write_mode,
             dataframe_type=dataframe_type,
-            schema=schema,
+            primary_key=primary_key,
+            json_schema=schema,
             partition_columns=partition_columns,
             owner_group=owner_group,
-            **kwargs,
         )
 
         self.metadata = metadata
         self._version = version
-        self.kwargs = kwargs
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
@@ -251,11 +255,32 @@ class BaseTableDataset(AbstractVersionedDataset):
             exists_function=self._exists,  # type: ignore[arg-type]
         )
 
-    def _create_table(self, **kwargs: Any) -> BaseTable:
+    def _create_table(
+        self,
+        table: str,
+        catalog: str | None,
+        database: str,
+        format: str,
+        write_mode: str | None,
+        dataframe_type: str,
+        primary_key: str | list[str] | None,
+        json_schema: dict[str, Any] | None,
+        partition_columns: list[str] | None,
+        owner_group: str | None
+    ) -> BaseTable:
         """Creates a table object and assign it to the _table attribute.
 
         Args:
-            **kwargs: Arguments to pass to the table object.
+            table: The name of the table.
+            catalog: The catalog of the table.
+            database: The database of the table.
+            format: The format of the table.
+            write_mode: The write mode for the table.
+            dataframe_type: The type of dataframe.
+            primary_key: The primary key of the table.
+            json_schema: The JSON schema of the table.
+            partition_columns: The partition columns of the table.
+            owner_group: The owner group of the table.
 
         Returns:
             BaseTable: the table object.
@@ -352,6 +377,45 @@ class BaseTableDataset(AbstractVersionedDataset):
             )
         table.saveAsTable(self._table.full_table_location() or "")
 
+    def _save_upsert(self, update_data: DataFrame) -> None:
+        """Upserts the data by joining on primary_key columns or column.
+        If table doesn't exist at save, the data is inserted to a new table.
+
+        Args:
+            update_data (DataFrame): the Spark dataframe to upsert
+        """
+        if self._exists():
+            base_data = _get_spark().table(self._table.full_table_location())
+            base_columns = base_data.columns
+            update_columns = update_data.columns
+
+            if set(update_columns) != set(base_columns):
+                raise DatasetError(
+                    f"Upsert requires tables to have identical columns. "
+                    f"Delta table {self._table.full_table_location()} "
+                    f"has columns: {base_columns}, whereas "
+                    f"dataframe has columns {update_columns}"
+                )
+
+            where_expr = ""
+            if isinstance(self._table.primary_key, str):
+                where_expr = (
+                    f"base.{self._table.primary_key}=update.{self._table.primary_key}"
+                )
+            elif isinstance(self._table.primary_key, list):
+                where_expr = " AND ".join(
+                    f"base.{col}=update.{col}" for col in self._table.primary_key
+                )
+
+            update_data.createOrReplaceTempView("update")
+            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
+            _get_spark().conf.set("whereExpr", where_expr)
+            upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
+                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+            _get_spark().sql(upsert_sql)
+        else:
+            self._save_append(update_data)
+
     def _describe(self) -> dict[str, str | list | None]:
         """Returns a description of the instance of the dataset.
 
@@ -364,9 +428,10 @@ class BaseTableDataset(AbstractVersionedDataset):
             "table": self._table.table,
             "write_mode": self._table.write_mode,
             "dataframe_type": self._table.dataframe_type,
+            "primary_key": self._table.primary_key,
+            "version": str(self._version),
             "owner_group": self._table.owner_group,
             "partition_columns": self._table.partition_columns,
-            **self.kwargs
         }
 
     def _exists(self) -> bool:

@@ -35,7 +35,7 @@ class BaseTable:
     _NAMING_REGEX: ClassVar[str] = r"\b[0-9a-zA-Z_-]{1,}\b"
     _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "upsert", "append"])
     _VALID_DATAFRAME_TYPES: ClassVar[List[str]] = field(default=["spark", "pandas"])
-    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv"])
+    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv", "json", "orc", "avro", "text"])
 
     database: str
     catalog: str | None

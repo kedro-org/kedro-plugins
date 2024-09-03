@@ -6,8 +6,12 @@ import lazy_loader as lazy
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 ManagedTableDataset: Any
+ExternalTableDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
-    submod_attrs={"managed_table_dataset": ["ManagedTableDataset"]},
+    submod_attrs={
+        "managed_table_dataset": ["ManagedTableDataset"],
+        "external_table_dataset": ["ExternalTableDataset"],
+    },
 )

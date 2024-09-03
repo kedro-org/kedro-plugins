@@ -17,7 +17,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 
 @dataclass(frozen=True, kw_only=True)
 class ExternalTable(BaseTable):
-    """Stores the definition of an external table"""
+    """Stores the definition of an external table."""
 
 
 class ExternalTableDataset(BaseTableDataset):
@@ -53,7 +53,7 @@ class ExternalTableDataset(BaseTableDataset):
             owner_group: The owner group of the table.
 
         Returns:
-            ExternalTable: the new ExternalTable instance
+            ExternalTable: The new ExternalTable instance.
         """
         return ExternalTable(
             table=table,

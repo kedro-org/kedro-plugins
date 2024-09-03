@@ -20,7 +20,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 
 @dataclass(frozen=True, kw_only=True)
 class ManagedTable(BaseTable):
-    """Stores the definition of a managed table"""
+    """Stores the definition of a managed table."""
 
     _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta"])
 
@@ -174,7 +174,7 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group: The owner group of the table.
 
         Returns:
-            ManagedTable: the new ManagedTable instance
+            ManagedTable: The new ManagedTable instance.
         """
         return ManagedTable(
             table=table,

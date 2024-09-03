@@ -29,7 +29,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 class BaseTable:
     """Stores the definition of a base table.
     
-    Acts as a base class for `ManagedTable` and `ExternalTable`.
+    Acts as the base class for `ManagedTable` and `ExternalTable`.
     """
     # regex for tables, catalogs and schemas
     _NAMING_REGEX: ClassVar[str] = r"\b[0-9a-zA-Z_-]{1,}\b"
@@ -135,7 +135,7 @@ class BaseTable:
         """Validates the dataframe type.
 
         Raises:
-            DatasetError: If an invalid `dataframe_type` is passed
+            DatasetError: If an invalid `dataframe_type` is passed.
         """
         if self.dataframe_type not in self._VALID_DATAFRAME_TYPES:
             valid_types = ", ".join(self._VALID_DATAFRAME_TYPES)
@@ -158,7 +158,7 @@ class BaseTable:
         """Returns the full table location.
 
         Returns:
-            str | None : table location in the format catalog.database.table or None if database and table aren't defined
+            str | None : table location in the format catalog.database.table or None if database and table aren't defined.
         """
         full_table_location = None
         if self.catalog and self.database and self.table:
@@ -171,7 +171,7 @@ class BaseTable:
         """Returns the Spark schema of the table if it exists.
 
         Returns:
-            StructType:
+            StructType: the schema of the table.
         """
         schema = None
         try:
@@ -186,13 +186,13 @@ class BaseTableDataset(AbstractVersionedDataset):
     """``BaseTableDataset`` loads and saves data into managed delta tables or external tables on Databricks.
     Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
 
-    This dataaset is not meant to be used directly. It is a base class for ``ManagedTableDataset`` and ``ExternalTableDataset``.
+    This dataset is not meant to be used directly. It is a base class for ``ManagedTableDataset`` and ``ExternalTableDataset``.
     """
 
-    # this dataset cannot be used with ``ParallelRunner``,
+    # datasets that inherit from this class cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
     # for parallelism within a Spark pipeline please consider
-    # using ``ThreadRunner`` instead
+    # using ``ThreadRunner`` instead.
     _SINGLE_PROCESS = True
 
     def __init__(  # noqa: PLR0913
@@ -301,15 +301,15 @@ class BaseTableDataset(AbstractVersionedDataset):
     
     def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init
-        (spark|pandas dataframe)
+        (spark|pandas dataframe).
 
         Raises:
             VersionNotFoundError: if the version defined in
-                the init doesn't exist
+                the init doesn't exist.
 
         Returns:
             Union[DataFrame, pd.DataFrame]: Returns a dataframe
-                in the format defined in the init
+                in the format defined in the init.
         """
         if self._version and self._version.load >= 0:
             try:
@@ -334,7 +334,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         (columns will be sorted and truncated).
 
         Args:
-            data (Any): Spark or pandas dataframe to save to the table location
+            data (Any): Spark or pandas dataframe to save to the table location.
         """
         if self._table.write_mode is None:
             raise DatasetError(
@@ -376,8 +376,8 @@ class BaseTableDataset(AbstractVersionedDataset):
         )
 
     def _save_overwrite(self, data: DataFrame) -> None:
-        """Overwrites the data in the table with the data provided.
-        (this is the default save mode)
+        """Overwrites the data in the table with the data provided
+        (this is the default save mode).
 
         Args:
             data (DataFrame): the Spark dataframe to overwrite the table with.
@@ -394,7 +394,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         If table doesn't exist at save, the data is inserted to a new table.
 
         Args:
-            update_data (DataFrame): the Spark dataframe to upsert
+            update_data (DataFrame): the Spark dataframe to upsert.
         """
         if self._exists():
             base_data = _get_spark().table(self._table.full_table_location())
@@ -432,7 +432,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """Returns a description of the instance of the dataset.
 
         Returns:
-            Dict[str, str]: Dict with the details of the dataset
+            Dict[str, str]: Dict with the details of the dataset.
         """
         return {
             "catalog": self._table.catalog,

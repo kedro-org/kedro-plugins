@@ -438,6 +438,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             "catalog": self._table.catalog,
             "database": self._table.database,
             "table": self._table.table,
+            "format": self._table.format,
             "write_mode": self._table.write_mode,
             "dataframe_type": self._table.dataframe_type,
             "primary_key": self._table.primary_key,

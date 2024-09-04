@@ -202,7 +202,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         catalog: str | None = None,
         database: str = "default",
         format: str = "delta",
-        write_mode: str | None = "overwrite",
+        write_mode: str | None = None,
         dataframe_type: str = "spark",
         primary_key: str | list[str] | None = None,
         version: Version | None = None,

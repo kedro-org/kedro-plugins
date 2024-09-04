@@ -78,7 +78,7 @@ def _get_or_create_uuid() -> str:
         return new_uuid
 
     except Exception as e:
-        logging.error(f"Failed to retrieve UUID: {e}")
+        logging.debug(f"Failed to retrieve UUID: {e}")
         return ""
 
 
@@ -104,7 +104,7 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                     file.write(toml_string)
                 return project_id
             except KeyError:
-                logging.error(
+                logging.debug(
                     f"Failed to retrieve project id or save project id: "
                     f"{str(pyproject_path)} does not contain a [tool.kedro] section"
                 )
@@ -148,7 +148,7 @@ def _generate_new_uuid(full_path: str) -> str:
 
         return new_uuid
     except Exception as e:
-        logging.error(f"Failed to create UUID: {e}")
+        logging.debug(f"Failed to create UUID: {e}")
         return ""
 
 
@@ -200,13 +200,15 @@ class KedroTelemetryHook:
 
     @hook_impl
     def after_context_created(self, context):
-        """Hook implementation to send project statistics data to Heap"""
+        """Hook implementation to read metadata"""
 
         self._consent = _check_for_telemetry_consent(context.project_path)
         self._project_path = context.project_path
 
     @hook_impl
     def after_catalog_created(self, catalog):
+        """Hook implementation to send project statistics data to Heap"""
+
         if self._consent is False:
             return
 
@@ -246,7 +248,7 @@ class KedroTelemetryHook:
             )
             self._sent = True
         except Exception as exc:
-            logger.warning(
+            logger.debug(
                 "Something went wrong in hook implementation to send command run data to Heap. "
                 "Exception: %s",
                 exc,
@@ -333,13 +335,13 @@ def _send_heap_event(
             url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
         if resp.status_code != 200:  # noqa: PLR2004
-            logger.warning(
+            logger.debug(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
                 resp.status_code,
                 resp.reason,
             )
     except requests.exceptions.RequestException as exc:
-        logger.warning(
+        logger.debug(
             "Failed to send data to Heap. Exception of type '%s' was raised.",
             type(exc).__name__,
         )

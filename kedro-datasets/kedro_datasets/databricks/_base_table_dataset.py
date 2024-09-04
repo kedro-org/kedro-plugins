@@ -371,9 +371,14 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): the Spark dataframe to append to the table.
         """
-        data.write.format(self._table.format).mode("append").saveAsTable(
-            self._table.full_table_location() or ""
-        )
+        if self._table.partition_columns:
+            data.write.format(self._table.format).mode("append").partitionBy(
+                *self._table.partition_columns
+            ).saveAsTable(self._table.full_table_location() or "")
+        else:
+            data.write.format(self._table.format).mode("append").saveAsTable(
+                self._table.full_table_location() or ""
+            )
 
     def _save_overwrite(self, data: DataFrame) -> None:
         """Overwrites the data in the table with the data provided
@@ -382,12 +387,16 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): the Spark dataframe to overwrite the table with.
         """
-        table = data.write.format(self._table.format)
-        if self._table.write_mode == "overwrite":
-            table = table.mode("overwrite").option(
+        if self._table.partition_columns:
+            data.write.format(self._table.format).mode("overwrite").partitionBy(
+                *self._table.partition_columns
+            ).option(
                 "overwriteSchema", "true"
+            ).saveAsTable(self._table.full_table_location() or "")
+        else:
+            data.write.format(self._table.format).mode("overwrite").saveAsTable(
+                self._table.full_table_location() or ""
             )
-        table.saveAsTable(self._table.full_table_location() or "")
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.

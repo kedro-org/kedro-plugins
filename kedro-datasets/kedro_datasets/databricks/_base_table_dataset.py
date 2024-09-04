@@ -118,13 +118,8 @@ class BaseTable:
                 f"Invalid `write_mode` provided: {self.write_mode}. "
                 f"`write_mode` must be one of: {valid_modes}"
             )
-        
-    def _validate_format_for_upsert(self) -> None:
-        """Validates the format for upserts.
 
-        Raises:
-            DatasetError: If the format is not supported for upserts, i.e. not 'delta'.
-        """
+        # Upserts are only supported for delta tables.
         if self.write_mode == "upsert" and self.format != "delta":
             raise DatasetError(
                 f"Format '{self.format}' is not supported for upserts. "

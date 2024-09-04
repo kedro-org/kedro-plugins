@@ -81,16 +81,17 @@ def _get_cli_structure(
     return output
 
 
-def _mask_kedro_cli(
-    cli_struct: dict[str | None, Any], command_args: list[str]
-) -> list[str]:
+def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
+    cli_struct = _get_cli_structure(
+        KedroCLI.get_command(ctx=None, cmd_name=command_args[0])
+    )
 
     # Preserve the initial part of the command until parameters sections begin
     arg_index = 0
-    current_CLI = cli_struct.get("kedro", {})
+    current_CLI = cli_struct
     while (
         arg_index < len(command_args)
         and not command_args[arg_index].startswith("-")

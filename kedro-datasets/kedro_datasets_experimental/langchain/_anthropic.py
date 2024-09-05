@@ -32,7 +32,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
          anthropic_api_key: <anthropic-api-key>
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

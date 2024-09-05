@@ -16,8 +16,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -32,7 +31,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               aws_secret_access_key: YOUR_SECRET
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -85,12 +84,8 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     @property
     def fs_args(self) -> dict[str, Any]:

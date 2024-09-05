@@ -3,7 +3,6 @@ underlying functionality is supported by rioxarray and xarray. A read rasterdata
 returns a xarray.DataArray object.
 """
 import logging
-from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -39,7 +38,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
           filepath: sentinal_data.tif
 
     Example usage for the
-        `Python API <https://kedro.readthedocs.io/en/stable/data/\
+        `Python API <https://docs.kedro.org/en/stable/data/\
         advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -106,12 +105,8 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         )
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     def _describe(self) -> dict[str, Any]:
         return {

@@ -30,8 +30,7 @@ class MatplotlibWriter(
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -42,7 +41,7 @@ class MatplotlibWriter(
             format: png
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -179,9 +178,7 @@ class MatplotlibWriter(
         self._fs_open_args_save = _fs_open_args_save
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if overwrite and version is not None:
             warn(

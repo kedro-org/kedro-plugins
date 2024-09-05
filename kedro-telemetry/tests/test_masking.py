@@ -177,69 +177,48 @@ class TestCLIMasking:
         assert len(list(_recursive_items({}))) == 0
 
     @pytest.mark.parametrize(
-        "input_cli_structure, input_command_args, expected_masked_args",
+        "input_command_args, expected_masked_args",
         [
-            ({}, [], []),
+            ([], []),
             (
-                {"kedro": {"command_a": None, "command_b": None}},
-                ["command_a"],
-                ["command_a"],
+                ["info"],
+                ["info"],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param1": None, "--param2": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "--param1=foo"],
-                ["command_a", "--param1", MASK],
+                ["run", "--pipeline=data_science"],
+                ["run", "--pipeline", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param1": None, "--param2": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "--param1= foo"],
-                ["command_a", "--param1", MASK],
+                ["catalog", "list"],
+                ["catalog", "list"],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "-p", "bar"],
-                ["command_a", "-p", MASK],
+                ["pipeline", "create", "mypipeline"],
+                ["pipeline", "create", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "-xyz", "bar"],
-                ["command_a", MASK, MASK],
+                ["run", "-p", "bar"],
+                ["run", "-p", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "should", "be", "seen", "only"],
-                ["command_a", MASK, MASK, MASK, MASK],
+                ["run", "--params=hello=4", "--pipeline=my_pipeline"],
+                ["run", "--params", MASK, "--pipeline", MASK],
             ),
         ],
     )
     def test_mask_kedro_cli(
-        self, input_cli_structure, input_command_args, expected_masked_args
+        self, input_command_args, expected_masked_args, fake_metadata, mocker
     ):
+        Module = namedtuple("Module", ["cli"])
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
+        )
+        kedro_cli = KedroCLI(fake_metadata.project_path)
         assert expected_masked_args == _mask_kedro_cli(
-            cli_struct=input_cli_structure, command_args=input_command_args
+            kedro_cli, command_args=input_command_args
         )

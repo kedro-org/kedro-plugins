@@ -308,8 +308,11 @@ class TestKedroTelemetryHook:
         mocked_post_request = mocker.patch(
             "requests.post", side_effect=requests.exceptions.ConnectionError()
         )
-        telemetry_hook.before_command_run(fake_metadata, command_args)
-        telemetry_hook.after_command_run()
+        with caplog.at_level(logging.DEBUG):
+            telemetry_hook.before_command_run(fake_metadata, command_args)
+            telemetry_hook.after_command_run()
+        msg = "Failed to send data to Heap. Exception of type 'ConnectionError' was raised."
+        assert msg in caplog.messages[-1]
         mocked_post_request.assert_called()
 
     def test_before_command_run_anonymous(self, mocker, fake_metadata):
@@ -358,11 +361,17 @@ class TestKedroTelemetryHook:
         mocked_heap_call = mocker.patch(
             "kedro_telemetry.plugin._send_heap_event", side_effect=Exception
         )
-        telemetry_hook = KedroTelemetryHook()
-        command_args = ["--version"]
+        with caplog.at_level(logging.DEBUG):
+            telemetry_hook = KedroTelemetryHook()
+            command_args = ["--version"]
 
-        telemetry_hook.before_command_run(fake_metadata, command_args)
-        telemetry_hook.after_command_run()
+            telemetry_hook.before_command_run(fake_metadata, command_args)
+            telemetry_hook.after_command_run()
+        msg = (
+            "Something went wrong in hook implementation to send command run data to"
+            " Heap. Exception:"
+        )
+        assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
     def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):

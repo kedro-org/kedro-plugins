@@ -76,8 +76,7 @@ def _get_cli_structure(
     `click.Context` and return a `dict`.
     """
     output: dict[str | None, Any] = {}
-    with click.Context(cli_obj) as ctx:  # type: ignore
-        _recurse_cli(cli_obj, ctx, output, get_help)
+    _recurse_cli(cli_obj, None, output, get_help)
     return output
 
 
@@ -85,13 +84,15 @@ def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
-    cli_struct = _get_cli_structure(
-        KedroCLI.get_command(ctx=None, cmd_name=command_args[0])
-    )
-
-    # Preserve the initial part of the command until parameters sections begin
     arg_index = 0
-    current_CLI = cli_struct
+    cmd = command_args[0]
+    if cmd == "--help":
+        return command_args
+    click_cmd = KedroCLI.get_command(None, cmd)
+    if click_cmd is None:
+        return [MASK]
+
+    current_CLI = _get_cli_structure(click_cmd)
     while (
         arg_index < len(command_args)
         and not command_args[arg_index].startswith("-")

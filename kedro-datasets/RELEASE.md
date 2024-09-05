@@ -14,7 +14,7 @@
 |----------------------|------------------------------------------------|-------------------------|
 | `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
 
-- Add `file_format` to `geopandas.GeoJSONDataset` to support parquet and feather file formats.
+* Add `file_format` to `geopandas.GeoJSONDataset` to support parquet and feather file formats.
 
 ## Bug fixes and other changes
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
@@ -24,6 +24,7 @@
 
 ## Breaking Changes
 * Exposed `load` and `save` publicly for each dataset. This requires Kedro version 0.19.7 or higher.
+* Replaced the `geopandas.GeoJSONDataset` with `geopandas.GenericDataset` to support parquet and feather file formats.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
@@ -33,7 +34,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [janickspirig](https://github.com/janickspirig)
 * [Galen Seilis](https://github.com/galenseilis)
 * [Mariusz Wojakowski](https://github.com/mariusz89016)
-
+* [harm-matthias-harms](https://github.com/harm-matthias-harms)
 
 # Release 4.1.0
 ## Major features and improvements

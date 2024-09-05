@@ -1,4 +1,4 @@
-"""GeoJSONDataset loads and saves data to a local geojson file. The
+"""GenericDataset loads and saves data to a local file. The
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
@@ -22,29 +22,29 @@ from kedro.io.core import (
 NON_FILE_SYSTEM_TARGETS = ["postgis"]
 
 
-class GeoJSONDataset(
+class GenericDataset(
     AbstractVersionedDataset[
         gpd.GeoDataFrame, Union[gpd.GeoDataFrame, dict[str, gpd.GeoDataFrame]]
     ]
 ):
-    """``GeoJSONDataset`` loads/saves data to a GeoJSON file using an underlying filesystem
+    """``GenericDataset`` loads/saves data to a file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all
-    allowed geopandas (pandas) options for loading and saving GeoJSON files.
+    allowed geopandas (pandas) options for loading and saving files.
 
     Example:
 
     .. code-block:: pycon
 
         >>> import geopandas as gpd
-        >>> from kedro_datasets.geopandas import GeoJSONDataset
+        >>> from kedro_datasets.geopandas import GenericDataset
         >>> from shapely.geometry import Point
         >>>
         >>> data = gpd.GeoDataFrame(
         ...     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
         ...     geometry=[Point(1, 1), Point(2, 4)],
         ... )
-        >>> dataset = GeoJSONDataset(filepath=tmp_path / "test.geojson")
+        >>> dataset = GenericDataset(filepath=tmp_path / "test.geojson")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>>
@@ -67,12 +67,12 @@ class GeoJSONDataset(
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new instance of ``GeoJSONDataset`` pointing to a concrete GeoJSON file
+        """Creates a new instance of ``GenericDataset`` pointing to a concrete file
         on a specific filesystem fsspec.
 
         Args:
 
-            filepath: Filepath in POSIX format to a GeoJSON file prefixed with a protocol like
+            filepath: Filepath in POSIX format to a file prefixed with a protocol like
                 `s3://`. If prefix is not provided `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
@@ -81,13 +81,12 @@ class GeoJSONDataset(
                 `geopandas.DataFrame.to_parquet` will be identified. An error will be raised unless
                 at least one matching `read_{file_format}` or `to_{file_format}` method is
                 identified. Defaults to 'file'.
-            load_args: GeoPandas options for loading GeoJSON files.
+            load_args: GeoPandas options for loading files.
                 Here you can find all available arguments:
                 https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html
-            save_args: GeoPandas options for saving geojson files.
+            save_args: GeoPandas options for saving files.
                 Here you can find all available arguments:
                 https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.to_file.html
-                The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

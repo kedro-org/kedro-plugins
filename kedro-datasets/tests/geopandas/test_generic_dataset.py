@@ -10,7 +10,7 @@ from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 from shapely.geometry import Point
 
-from kedro_datasets.geopandas import GeoJSONDataset
+from kedro_datasets.geopandas import GenericDataset
 
 
 @pytest.fixture(params=[None])
@@ -68,7 +68,7 @@ def dummy_dataframe():
 
 @pytest.fixture
 def geojson_dataset(filepath_geojson, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_geojson,
         load_args=load_args,
         save_args=save_args,
@@ -78,7 +78,7 @@ def geojson_dataset(filepath_geojson, load_args, save_args, fs_args):
 
 @pytest.fixture
 def parquet_dataset(filepath_parquet, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_parquet,
         file_format="parquet",
         load_args=load_args,
@@ -89,7 +89,7 @@ def parquet_dataset(filepath_parquet, load_args, save_args, fs_args):
 
 @pytest.fixture
 def parquet_dataset_bad_config(filepath_parquet, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_parquet,
         load_args=load_args,
         save_args=save_args,
@@ -99,7 +99,7 @@ def parquet_dataset_bad_config(filepath_parquet, load_args, save_args, fs_args):
 
 @pytest.fixture
 def feather_dataset(filepath_feather, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_feather,
         file_format="feather",
         load_args=load_args,
@@ -110,7 +110,7 @@ def feather_dataset(filepath_feather, load_args, save_args, fs_args):
 
 @pytest.fixture
 def postgis_dataset(filepath_postgis, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_postgis,
         file_format="postgis",
         load_args=load_args,
@@ -121,7 +121,7 @@ def postgis_dataset(filepath_postgis, load_args, save_args, fs_args):
 
 @pytest.fixture
 def abc_dataset(filepath_abc, load_args, save_args, fs_args):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_abc,
         file_format="abc",
         load_args=load_args,
@@ -132,12 +132,12 @@ def abc_dataset(filepath_abc, load_args, save_args, fs_args):
 
 @pytest.fixture
 def versioned_geojson_dataset(filepath_geojson, load_version, save_version):
-    return GeoJSONDataset(
+    return GenericDataset(
         filepath=filepath_geojson, version=Version(load_version, save_version)
     )
 
 
-class TestGeoJSONDataset:
+class TestGenericDataset:
     def test_save_and_load(self, geojson_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one."""
         geojson_dataset.save(dummy_dataframe)
@@ -149,7 +149,7 @@ class TestGeoJSONDataset:
     @pytest.mark.parametrize("geojson_dataset", [{"index": False}], indirect=True)
     def test_load_missing_file(self, geojson_dataset):
         """Check the error while trying to load from missing source."""
-        pattern = r"Failed while loading data from data set GeoJSONDataset"
+        pattern = r"Failed while loading data from data set GenericDataset"
         with pytest.raises(DatasetError, match=pattern):
             geojson_dataset.load()
 
@@ -228,7 +228,7 @@ class TestGeoJSONDataset:
         ],
     )
     def test_protocol_usage(self, path, instance_type):
-        geojson_dataset = GeoJSONDataset(filepath=path)
+        geojson_dataset = GenericDataset(filepath=path)
         assert isinstance(geojson_dataset._fs, instance_type)
 
         path = path.split(PROTOCOL_DELIMITER, 1)[-1]
@@ -239,18 +239,18 @@ class TestGeoJSONDataset:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.geojson"
-        geojson_dataset = GeoJSONDataset(filepath=filepath)
+        geojson_dataset = GenericDataset(filepath=filepath)
         geojson_dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 
-class TestGeoJSONDatasetVersioned:
+class TestGenericDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
         filepath = "test.geojson"
-        ds = GeoJSONDataset(filepath=filepath)
-        ds_versioned = GeoJSONDataset(
+        ds = GenericDataset(filepath=filepath)
+        ds_versioned = GenericDataset(
             filepath=filepath, version=Version(load_version, save_version)
         )
         assert filepath in str(ds)
@@ -259,8 +259,8 @@ class TestGeoJSONDatasetVersioned:
         assert filepath in str(ds_versioned)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
-        assert "GeoJSONDataset" in str(ds_versioned)
-        assert "GeoJSONDataset" in str(ds)
+        assert "GenericDataset" in str(ds_versioned)
+        assert "GenericDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
@@ -273,7 +273,7 @@ class TestGeoJSONDatasetVersioned:
 
     def test_no_versions(self, versioned_geojson_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GeoJSONDataset\(.+\)"
+        pattern = r"Did not find any versions for GenericDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_geojson_dataset.load()
 
@@ -288,7 +288,7 @@ class TestGeoJSONDatasetVersioned:
         version."""
         versioned_geojson_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for GeoJSONDataset\(.+\) must not "
+            r"Save path \'.+\' for GenericDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -307,7 +307,7 @@ class TestGeoJSONDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for GeoJSONDataset\(.+\)"
+            rf"'{load_version}' for GenericDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_geojson_dataset.save(dummy_dataframe)
@@ -316,7 +316,7 @@ class TestGeoJSONDatasetVersioned:
         pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
-            GeoJSONDataset(
+            GenericDataset(
                 filepath="https://example/file.geojson", version=Version(None, None)
             )
 

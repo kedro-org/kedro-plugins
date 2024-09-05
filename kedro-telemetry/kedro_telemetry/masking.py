@@ -76,7 +76,8 @@ def _get_cli_structure(
     `click.Context` and return a `dict`.
     """
     output: dict[str | None, Any] = {}
-    _recurse_cli(cli_obj, None, output, get_help)
+    with click.Context(cli_obj) as ctx:  # type: ignore
+        _recurse_cli(cli_obj, ctx, output, get_help)
     return output
 
 
@@ -85,8 +86,8 @@ def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
     a masked CLI input"""
     output = []
     arg_index = 0
-    cmd = command_args[0]
-    if cmd == "--help":
+    cmd = command_args[0] if command_args else ""
+    if cmd in {"--help", "--version", "-h", "-v", ""}:
         return command_args
     click_cmd = KedroCLI.get_command(None, cmd)
     if click_cmd is None:

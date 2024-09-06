@@ -13,7 +13,6 @@ from kedro_telemetry.masking import (
     MASK,
     _get_cli_structure,
     _mask_kedro_cli,
-    _recursive_items,
 )
 
 REPO_NAME = "cli_tools_dummy_project"
@@ -152,31 +151,6 @@ class TestCLIMasking:
                 assert v.startswith("Usage:  [OPTIONS]")
 
     @pytest.mark.parametrize(
-        "input_dict, expected_output_count",
-        [
-            ({}, 0),
-            ({"a": "foo"}, 2),
-            ({"a": {"b": "bar"}, "c": {"baz"}}, 5),
-            (
-                {
-                    "a": {"b": "bar"},
-                    "c": None,
-                    "d": {"e": "fizz"},
-                    "f": {"g": {"h": "buzz"}},
-                },
-                12,
-            ),
-        ],
-    )
-    def test_recursive_items(self, input_dict, expected_output_count):
-        assert expected_output_count == len(
-            list(_recursive_items(dictionary=input_dict))
-        )
-
-    def test_recursive_items_empty(self):
-        assert len(list(_recursive_items({}))) == 0
-
-    @pytest.mark.parametrize(
         "input_command_args, expected_masked_args",
         [
             ([], []),
@@ -220,5 +194,5 @@ class TestCLIMasking:
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         assert expected_masked_args == _mask_kedro_cli(
-            kedro_cli, command_args=input_command_args
+            cli=kedro_cli, command_args=input_command_args
         )

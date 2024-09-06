@@ -1,7 +1,7 @@
 """Module containing command masking functionality."""
 from __future__ import annotations
 
-from typing import Any, Iterator
+from typing import Any
 
 import click
 
@@ -81,7 +81,7 @@ def _get_cli_structure(
     return output
 
 
-def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
+def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
@@ -89,7 +89,7 @@ def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
     cmd = command_args[0] if command_args else ""
     if cmd in {"--help", "--version", "-h", "-v", ""}:
         return command_args
-    click_cmd = KedroCLI.get_command(None, cmd)
+    click_cmd = cli.get_command(ctx=None, cmd_name=cmd)  # type: ignore
     if click_cmd is None:
         return [MASK]
 
@@ -119,13 +119,3 @@ def _mask_kedro_cli(KedroCLI, command_args: list[str]) -> list[str]:
             output.append(MASK)
 
     return output
-
-
-def _recursive_items(dictionary: dict[Any, Any]) -> Iterator[Any]:
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            yield key
-            yield from _recursive_items(value)
-        else:
-            yield key
-            yield value

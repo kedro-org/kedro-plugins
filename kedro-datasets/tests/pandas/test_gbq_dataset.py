@@ -148,7 +148,9 @@ class TestGBQDataset:
         )
         assert_frame_equal(dummy_dataframe, loaded_data)
 
-    @pytest.mark.parametrize("load_args", [{"query": "Select 1"}], indirect=True)
+    @pytest.mark.parametrize(
+        "load_args", [{"query_or_table": "Select 1"}], indirect=True
+    )
     def test_read_gbq_with_query(self, gbq_dataset, dummy_dataframe, mocker, load_args):
         """Test loading data set with query in the argument."""
         mocked_read_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd.read_gbq")
@@ -156,7 +158,7 @@ class TestGBQDataset:
         loaded_data = gbq_dataset.load()
 
         mocked_read_gbq.assert_called_once_with(
-            project_id=PROJECT, credentials=None, query=load_args["query"]
+            project_id=PROJECT, credentials=None, query=load_args["query_or_table"]
         )
 
         assert_frame_equal(dummy_dataframe, loaded_data)
@@ -245,7 +247,7 @@ class TestGBQQueryDataset:
         loaded_data = gbq_sql_dataset.load()
 
         mocked_read_gbq.assert_called_once_with(
-            project_id=PROJECT, credentials=None, query=SQL_QUERY
+            project_id=PROJECT, credentials=None, query_or_table=SQL_QUERY
         )
 
         assert_frame_equal(dummy_dataframe, loaded_data)
@@ -258,7 +260,7 @@ class TestGBQQueryDataset:
         loaded_data = gbq_sql_file_dataset.load()
 
         mocked_read_gbq.assert_called_once_with(
-            project_id=PROJECT, credentials=None, query=SQL_QUERY
+            project_id=PROJECT, credentials=None, query_or_table=SQL_QUERY
         )
 
         assert_frame_equal(dummy_dataframe, loaded_data)

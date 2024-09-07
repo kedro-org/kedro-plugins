@@ -139,7 +139,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
     def _load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
-        self._load_args.setdefault("query", sql)
+        self._load_args.setdefault("query_or_table", sql)
         return pd_gbq.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
@@ -276,7 +276,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         # load sql query from arg or from file
         if sql:
-            self._load_args["query"] = sql
+            self._load_args["query_or_table"] = sql
             self._filepath = None
         else:
             # filesystem for loading sql file
@@ -293,7 +293,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         desc = {}
-        desc["sql"] = str(load_args.pop("query", None))
+        desc["sql"] = str(load_args.pop("query_or_table", None))
         desc["filepath"] = str(self._filepath)
         desc["load_args"] = str(load_args)
 

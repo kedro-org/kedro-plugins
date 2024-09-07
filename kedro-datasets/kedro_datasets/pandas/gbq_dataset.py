@@ -10,6 +10,7 @@ from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
+import pandas_gbq as pd_gbq
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
@@ -139,15 +140,16 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     def _load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
         self._load_args.setdefault("query", sql)
-        return pd.read_gbq(
+        return pd_gbq.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
             **self._load_args,
         )
 
     def _save(self, data: pd.DataFrame) -> None:
-        data.to_gbq(
-            f"{self._dataset}.{self._table_name}",
+        pd_gbq.to_gbq(
+            dataframe=data,
+            destination_table=f"{self._dataset}.{self._table_name}",
             project_id=self._project_id,
             credentials=self._credentials,
             **self._save_args,
@@ -176,7 +178,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
 class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     """``GBQQueryDataset`` loads data from a provided SQL query from Google
-    BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
+    BigQuery. It uses ``pandas_gbq.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
@@ -303,9 +305,9 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
-                load_args["query"] = fs_file.read()
+                load_args["query_or_table"] = fs_file.read()
 
-        return pd.read_gbq(
+        return pd_gbq.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
             **load_args,

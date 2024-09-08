@@ -34,6 +34,18 @@ class ExternalTable(BaseTable):
                 "If the external table does not exists, the `location` parameter must be provided. "
                 "This should be valid path in an external location that has already been created."
             )
+        
+    def _validate_write_mode_for_format(self) -> None:
+        """Validates that the write mode is compatible with the format.
+        
+        Raises:
+            DatasetError: If the write mode is not compatible with the format.
+        """
+        if self.write_mode == "upsert" and self.format != "delta":
+            raise DatasetError(
+                f"Format '{self.format}' is not supported for upserts. "
+                f"Please use 'delta' format."
+            )
 
 
 class ExternalTableDataset(BaseTableDataset):

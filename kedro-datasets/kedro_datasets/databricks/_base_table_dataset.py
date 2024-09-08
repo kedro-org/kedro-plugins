@@ -216,6 +216,9 @@ class BaseTableDataset(AbstractVersionedDataset):
                 Defaults to None.
             database: the name of the database.
                 (also referred to as schema). Defaults to "default".
+            format: the format of the table.
+                Applicable only for external tables.
+                Defaults to "delta".
             write_mode: the mode to write the data into the table. If not
                 present, the data set is read-only.
                 Options are:["overwrite", "append", "upsert"].
@@ -225,6 +228,8 @@ class BaseTableDataset(AbstractVersionedDataset):
                 Defaults to "spark".
             primary_key: the primary key of the table.
                 Can be in the form of a list. Defaults to None.
+            version: kedro.io.core.Version instance to load the data.
+                Defaults to None.
             schema: the schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
                 Used by the hooks to create the table if the schema is provided.
@@ -237,9 +242,8 @@ class BaseTableDataset(AbstractVersionedDataset):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
-            DatasetError: Invalid configuration supplied (through BaseTable validation).
+            DatasetError: Invalid configuration supplied (through ``BaseTable`` validation).
         """
-
         self._table = self._create_table(
             table=table,
             catalog=catalog,
@@ -275,7 +279,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         partition_columns: list[str] | None,
         owner_group: str | None
     ) -> BaseTable:
-        """Creates a table object and assign it to the _table attribute.
+        """Creates a ``BaseTable`` instance with the provided attributes.
 
         Args:
             table: The name of the table.
@@ -290,7 +294,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             owner_group: The owner group of the table.
 
         Returns:
-            BaseTable: the table object.
+            ``BaseTable``: The new ``BaseTable`` instance.
         """
         raise NotImplementedError
     

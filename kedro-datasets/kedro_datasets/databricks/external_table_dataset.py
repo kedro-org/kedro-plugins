@@ -38,7 +38,7 @@ class ExternalTableDataset(BaseTableDataset):
         partition_columns: list[str] | None,
         owner_group: str | None
     ) -> ExternalTable:
-        """Creates a new ExternalTable instance with the provided attributes.
+        """Creates a new ``ExternalTable`` instance with the provided attributes.
 
         Args:
             table: The name of the table.
@@ -53,7 +53,7 @@ class ExternalTableDataset(BaseTableDataset):
             owner_group: The owner group of the table.
 
         Returns:
-            ExternalTable: The new ExternalTable instance.
+            ``ExternalTable``: The new ``ExternalTable`` instance.
         """
         return ExternalTable(
             table=table,

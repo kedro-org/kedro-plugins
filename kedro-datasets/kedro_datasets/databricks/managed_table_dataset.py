@@ -102,7 +102,7 @@ class ManagedTableDataset(BaseTableDataset):
         """Creates a new instance of ``ManagedTableDataset``.
 
         Args:
-            table: the name of the table
+            table: the name of the table.
             catalog: the name of the catalog in Unity.
                 Defaults to None.
             database: the name of the database.
@@ -120,7 +120,7 @@ class ManagedTableDataset(BaseTableDataset):
                 Defaults to None.
             schema: the schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
-                Used by the hooks to create the table if the schema is provided
+                Used by the hooks to create the table if the schema is provided.
                 Defaults to None.
             partition_columns: the columns to use for partitioning the table.
                 Used by the hooks. Defaults to None.
@@ -130,7 +130,7 @@ class ManagedTableDataset(BaseTableDataset):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         Raises:
-            DatasetError: Invalid configuration supplied (through ManagedTable validation)
+            DatasetError: Invalid configuration supplied (through ``ManagedTable`` validation).
         """
         super().__init__(
             table=table,
@@ -159,7 +159,7 @@ class ManagedTableDataset(BaseTableDataset):
         partition_columns: list[str] | None,
         owner_group: str | None
     ) -> ManagedTable:
-        """Creates a new ManagedTable instance with the provided attributes.
+        """Creates a new ``ManagedTable`` instance with the provided attributes.
 
         Args:
             table: The name of the table.
@@ -174,7 +174,7 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group: The owner group of the table.
 
         Returns:
-            ManagedTable: The new ManagedTable instance.
+            ``ManagedTable``: The new ``ManagedTable`` instance.
         """
         return ManagedTable(
             table=table,

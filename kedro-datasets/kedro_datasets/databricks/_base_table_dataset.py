@@ -211,7 +211,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """Creates a new instance of ``BaseTableDataset``.
 
         Args:
-            table: the name of the table
+            table: the name of the table.
             catalog: the name of the catalog in Unity.
                 Defaults to None.
             database: the name of the database.
@@ -227,7 +227,7 @@ class BaseTableDataset(AbstractVersionedDataset):
                 Can be in the form of a list. Defaults to None.
             schema: the schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
-                Used by the hooks to create the table if the schema is provided
+                Used by the hooks to create the table if the schema is provided.
                 Defaults to None.
             partition_columns: the columns to use for partitioning the table.
                 Used by the hooks. Defaults to None.
@@ -368,7 +368,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """
         if self._table.partition_columns:
             data.write.format(self._table.format).mode("append").partitionBy(
-                *self._table.partition_columns
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
             ).saveAsTable(self._table.full_table_location() or "")
         else:
             data.write.format(self._table.format).mode("append").saveAsTable(
@@ -384,7 +384,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """
         if self._table.partition_columns:
             data.write.format(self._table.format).mode("overwrite").partitionBy(
-                *self._table.partition_columns
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
             ).option(
                 "overwriteSchema", "true"
             ).saveAsTable(self._table.full_table_location() or "")

@@ -11,9 +11,9 @@ from typing import Any, ClassVar, List
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
+    DatasetError,
     Version,
-    VersionNotFoundError,
-    DatasetError
+    VersionNotFoundError
 )
 from pyspark.sql import DataFrame
 from pyspark.sql.readwriter import DataFrameWriter
@@ -84,7 +84,7 @@ class BaseTable:
             DatasetError: If the table name does not conform to naming constraints.
         """
         if not re.fullmatch(self._NAMING_REGEX, self.table):
-            raise DatasetError("table does not conform to naming")
+            raise DatasetError("Table does not conform to naming")
 
     def _validate_database(self):
         """Validates database name.
@@ -93,7 +93,7 @@ class BaseTable:
             DatasetError: If the dataset name does not conform to naming constraints.
         """
         if not re.fullmatch(self._NAMING_REGEX, self.database):
-            raise DatasetError("database does not conform to naming")
+            raise DatasetError("Database does not conform to naming")
 
     def _validate_catalog(self):
         """Validates catalog name.
@@ -103,7 +103,7 @@ class BaseTable:
         """
         if self.catalog:
             if not re.fullmatch(self._NAMING_REGEX, self.catalog):
-                raise DatasetError("catalog does not conform to naming")
+                raise DatasetError("Catalog does not conform to naming")
 
     def _validate_write_mode(self):
         """Validates the write mode.

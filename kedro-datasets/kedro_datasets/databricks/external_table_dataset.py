@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
+import pandas as pd
+from kedro.io.core import (
+    DatasetError
+)
 
 from kedro_datasets.databricks._base_table_dataset import BaseTable, BaseTableDataset
 
@@ -18,6 +22,18 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 @dataclass(frozen=True, kw_only=True)
 class ExternalTable(BaseTable):
     """Stores the definition of an external table."""
+
+    def _validate_existence_of_table(self) -> None:
+        """Validates that a location is provided if the table does not exist.
+        
+        Raises:
+            DatasetError: If the table does not exist and no location is provided.
+        """
+        if not self.exists() and not self.location:
+            raise DatasetError(
+                "If the external table does not exists, the `location` parameter must be provided. "
+                "This should be valid path in an external location that has already been created."
+            )
 
 
 class ExternalTableDataset(BaseTableDataset):

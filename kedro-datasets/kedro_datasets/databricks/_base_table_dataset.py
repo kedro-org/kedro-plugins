@@ -177,7 +177,34 @@ class BaseTable:
         except (KeyError, ValueError) as exc:
             raise DatasetError(exc) from exc
         return schema
-    
+
+    def exists(self) -> bool:
+        """Checks to see if the table exists.
+
+        Returns:
+            bool: boolean of whether the table exists in the Spark session.
+        """
+        if self.catalog:
+            try:
+                _get_spark().sql(f"USE CATALOG `{self.catalog}`")
+            except (ParseException, AnalysisException) as exc:
+                logger.warning(
+                    "catalog %s not found or unity not enabled. Error message: %s",
+                    self.catalog,
+                    exc,
+                )
+        try:
+            return (
+                _get_spark()
+                .sql(f"SHOW TABLES IN `{self.database}`")
+                .filter(f"tableName = '{self.table}'")
+                .count()
+                > 0
+            )
+        except (ParseException, AnalysisException) as exc:
+            logger.warning("error occured while trying to find table: %s", exc)
+            return False
+
 
 class BaseTableDataset(AbstractVersionedDataset):
     """``BaseTableDataset`` loads and saves data into managed delta tables or external tables on Databricks.
@@ -465,26 +492,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             bool: boolean of whether the table defined
             in the dataset instance exists in the Spark session.
         """
-        if self._table.catalog:
-            try:
-                _get_spark().sql(f"USE CATALOG `{self._table.catalog}`")
-            except (ParseException, AnalysisException) as exc:
-                logger.warning(
-                    "catalog %s not found or unity not enabled. Error message: %s",
-                    self._table.catalog,
-                    exc,
-                )
-        try:
-            return (
-                _get_spark()
-                .sql(f"SHOW TABLES IN `{self._table.database}`")
-                .filter(f"tableName = '{self._table.table}'")
-                .count()
-                > 0
-            )
-        except (ParseException, AnalysisException) as exc:
-            logger.warning("error occured while trying to find table: %s", exc)
-            return False
+        return self._table.exists()
         
     def _add_common_options_to_writer(self, writer: DataFrameWriter) -> DataFrameWriter:
         """Adds options to the writer based on the table properties.

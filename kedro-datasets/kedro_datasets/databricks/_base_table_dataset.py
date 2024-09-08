@@ -41,6 +41,7 @@ class BaseTable:
     catalog: str | None
     table: str
     write_mode: str | None
+    location: str | None
     dataframe_type: str
     primary_key: str | list[str] | None
     owner_group: str | None
@@ -198,6 +199,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         database: str = "default",
         format: str = "delta",
         write_mode: str | None = None,
+        location: str | None = None,
         dataframe_type: str = "spark",
         primary_key: str | list[str] | None = None,
         version: Version | None = None,
@@ -223,6 +225,10 @@ class BaseTableDataset(AbstractVersionedDataset):
                 present, the data set is read-only.
                 Options are:["overwrite", "append", "upsert"].
                 "upsert" mode requires primary_key field to be populated.
+                Defaults to None.
+            location: the location of the table.
+                Applicable only for external tables.
+                Should be a valid path in an external location that has already been created.
                 Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
                 Defaults to "spark".
@@ -250,6 +256,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             database=database,
             format=format,
             write_mode=write_mode,
+            location=location,
             dataframe_type=dataframe_type,
             primary_key=primary_key,
             json_schema=schema,
@@ -273,6 +280,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         database: str,
         format: str,
         write_mode: str | None,
+        location: str | None,
         dataframe_type: str,
         primary_key: str | list[str] | None,
         json_schema: dict[str, Any] | None,

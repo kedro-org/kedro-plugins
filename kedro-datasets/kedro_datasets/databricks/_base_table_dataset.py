@@ -16,6 +16,7 @@ from kedro.io.core import (
     DatasetError
 )
 from pyspark.sql import DataFrame
+from pyspark.sql.readwriter import DataFrameWriter
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
@@ -378,14 +379,11 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): the Spark dataframe to append to the table.
         """
-        if self._table.partition_columns:
-            data.write.format(self._table.format).mode("append").partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
-            ).saveAsTable(self._table.full_table_location() or "")
-        else:
-            data.write.format(self._table.format).mode("append").saveAsTable(
-                self._table.full_table_location() or ""
-            )
+        writer = data.write.format(self._table.format).mode("append")
+
+        writer = self._add_common_options_to_writer(writer)
+
+        writer.saveAsTable(self._table.full_table_location() or "")
 
     def _save_overwrite(self, data: DataFrame) -> None:
         """Overwrites the data in the table with the data provided
@@ -394,16 +392,13 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): the Spark dataframe to overwrite the table with.
         """
-        if self._table.partition_columns:
-            data.write.format(self._table.format).mode("overwrite").partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
-            ).option(
-                "overwriteSchema", "true"
-            ).saveAsTable(self._table.full_table_location() or "")
-        else:
-            data.write.format(self._table.format).mode("overwrite").saveAsTable(
-                self._table.full_table_location() or ""
-            )
+        writer = data.write.format(self._table.format).mode("overwrite").option(
+            "overwriteSchema", "true"
+        )
+        
+        writer = self._add_common_options_to_writer(writer)
+
+        writer.saveAsTable(self._table.full_table_location() or "")
 
     def _save_upsert(self, update_data: DataFrame) -> None:
         """Upserts the data by joining on primary_key columns or column.
@@ -490,3 +485,22 @@ class BaseTableDataset(AbstractVersionedDataset):
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+        
+    def _add_common_options_to_writer(self, writer: DataFrameWriter) -> DataFrameWriter:
+        """Adds options to the writer based on the table properties.
+
+        Args:
+            writer (DataFrameWriter): The DataFrameWriter instance.
+
+        Returns:
+            DataFrameWriter: The DataFrameWriter instance with the options added.
+        """
+        if self._table.partition_columns:
+            writer.partitionBy(
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+            )
+
+        if self._table.location:
+            writer.option("path", self._table.location)
+
+        return writer

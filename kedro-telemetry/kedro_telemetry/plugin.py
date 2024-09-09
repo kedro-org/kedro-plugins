@@ -26,7 +26,7 @@ from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
-from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
+from kedro_telemetry.masking import _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
@@ -176,10 +176,7 @@ class KedroTelemetryHook:
 
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
-        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-        masked_command_args = _mask_kedro_cli(
-            cli_struct=cli_struct, command_args=command_args
-        )
+        masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
 
         self._user_uuid = _get_or_create_uuid()
 

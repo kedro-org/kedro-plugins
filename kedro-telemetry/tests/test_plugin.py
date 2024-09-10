@@ -16,8 +16,8 @@ from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     _SKIP_TELEMETRY_ENV_VAR_KEYS,
     KNOWN_CI_ENV_VAR_KEYS,
-    KedroTelemetryHook,
     MISSING_USER_IDENTITY,
+    KedroTelemetryHook,
     _check_for_telemetry_consent,
     _is_known_ci_env,
 )

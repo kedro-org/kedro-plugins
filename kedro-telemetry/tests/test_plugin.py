@@ -17,6 +17,7 @@ from kedro_telemetry.plugin import (
     _SKIP_TELEMETRY_ENV_VAR_KEYS,
     KNOWN_CI_ENV_VAR_KEYS,
     KedroTelemetryHook,
+    MISSING_USER_IDENTITY,
     _check_for_telemetry_consent,
     _is_known_ci_env,
 )
@@ -347,7 +348,7 @@ class TestKedroTelemetryHook:
         expected_calls = [
             mocker.call(
                 event_name="CLI command",
-                identity="",
+                identity=MISSING_USER_IDENTITY,
                 properties=generic_properties,
             ),
         ]

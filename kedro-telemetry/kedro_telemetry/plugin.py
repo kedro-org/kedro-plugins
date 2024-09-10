@@ -49,6 +49,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
+MISSING_USER_IDENTITY = "missing_user_identity"
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ class KedroTelemetryHook:
         try:
             _send_heap_event(
                 event_name=event_name,
-                identity=self._user_uuid,
+                identity=self._user_uuid if self._user_uuid else MISSING_USER_IDENTITY,
                 properties=self._event_properties,
             )
             self._sent = True
@@ -323,9 +324,8 @@ def _send_heap_event(
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
+        "identity": identity,
     }
-    if identity:
-        data["identity"] = identity
 
     try:
         resp = requests.post(

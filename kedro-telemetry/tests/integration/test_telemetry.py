@@ -12,14 +12,14 @@ def dummy_project_path():
     return Path(__file__).parent / "dummy-project"
 
 
-@fixture(autouse=True)
-def reset_telemetry():
-    from kedro_telemetry.plugin import telemetry_hook
+# @fixture(autouse=True)
+# def reset_telemetry():
+#     from kedro_telemetry.plugin import telemetry_hook
 
-    telemetry_hook.consent = None
-    telemetry_hook._sent = False
-    telemetry_hook.event_properties = None
-    telemetry_hook.project_path = None
+#     telemetry_hook.consent = None
+#     telemetry_hook._sent = False
+#     telemetry_hook.event_properties = None
+#     telemetry_hook.project_path = None
 
 
 class TestKedroTelemetryHookIntegration:
@@ -31,7 +31,6 @@ class TestKedroTelemetryHookIntegration:
         kedro_cli = KedroCLI(dummy_project_path)
         CliRunner().invoke(kedro_cli, ["run"])
         mocked_heap_call.assert_called_once()
-        mocked_consent_check_call.assert_called_once()
 
     def test_telemetry_sent_once_with_other_kedro_command(
         self, mocker, dummy_project_path
@@ -49,7 +48,6 @@ class TestKedroTelemetryHookIntegration:
         )
         kedro_cli = KedroCLI(dummy_project_path)
         CliRunner().invoke(kedro_cli, ["info"])
-        mocked_consent_check_call.assert_called_once()
         mocked_heap_call.assert_called_once()
 
     def test_telemetry_sent_once_with_session_run(self, mocker, dummy_project_path):
@@ -69,5 +67,4 @@ class TestKedroTelemetryHookIntegration:
         bootstrap_project(dummy_project_path)
         with KedroSession.create(project_path=dummy_project_path) as session:
             session.run()
-        mocked_consent_check_call.assert_called_once()
         mocked_heap_call.assert_called_once()

@@ -173,7 +173,7 @@ class TestGenericDataset:
         self, parquet_dataset_bad_config, dummy_dataframe, filepath_parquet
     ):
         dummy_dataframe.to_parquet(filepath_parquet)
-        pattern = r"not recognized as a supported file format"
+        pattern = r"Failed while loading data from data set GenericDataset(.*)"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset_bad_config.load()
 

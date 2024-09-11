@@ -3,14 +3,29 @@
 These types are used to facilitate data rendering in the Kedro-viz front-end.
 """
 
-from typing import NewType
-
-TablePreview = NewType("TablePreview", dict)
-ImagePreview = NewType("ImagePreview", str)
-PlotlyPreview = NewType("PlotlyPreview", dict)
-JSONPreview = NewType("JSONPreview", str)
+from typing import TypedDict, TypeAlias
 
 
-# experiment tracking datasets types
-MetricsTrackingPreview = NewType("MetricsTrackingPreview", dict)
-JSONTrackingPreview = NewType("JSONTrackingPreview", dict)
+# Define a more structured TablePreview with TypedDict for IDE hinting
+class TablePreview(TypedDict):
+    index: list[int]  # Row indices as a list of integers
+    columns: list[str]  # Column names as a list of strings
+    data: list[list[float]]  # Nested lists representing rows of data (floats or other data types)
+
+
+# TypeAlias to keep ImagePreview simpler
+ImagePreview: TypeAlias = str
+
+
+# Define PlotlyPreview as a TypedDict for clearer structure (if necessary)
+class PlotlyPreview(TypedDict):
+    data: dict
+    layout: dict
+
+
+# JSONPreview is a simple dictionary, so we could keep the NewType here or use TypeAlias
+JSONPreview: TypeAlias = dict
+
+# Experiment tracking datasets types
+MetricsTrackingPreview: TypeAlias = dict
+JSONTrackingPreview: TypeAlias = dict

@@ -26,7 +26,7 @@ from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
-from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
+from kedro_telemetry.masking import _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
@@ -49,6 +49,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
+MISSING_USER_IDENTITY = "missing_user_identity"
 
 logger = logging.getLogger(__name__)
 
@@ -176,10 +177,7 @@ class KedroTelemetryHook:
 
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
-        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-        masked_command_args = _mask_kedro_cli(
-            cli_struct=cli_struct, command_args=command_args
-        )
+        masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
 
         self._user_uuid = _get_or_create_uuid()
 
@@ -243,7 +241,7 @@ class KedroTelemetryHook:
         try:
             _send_heap_event(
                 event_name=event_name,
-                identity=self._user_uuid,
+                identity=self._user_uuid if self._user_uuid else MISSING_USER_IDENTITY,
                 properties=self._event_properties,
             )
             self._sent = True
@@ -326,9 +324,8 @@ def _send_heap_event(
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
+        "identity": identity,
     }
-    if identity:
-        data["identity"] = identity
 
     try:
         resp = requests.post(

@@ -189,6 +189,7 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
+delta-sharing = ["kedro-datasets[delta-sharing-dataset]"]
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.4.0",
@@ -290,7 +291,8 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
-    "torch"
+    "torch",
+    "delta-sharing>=1.1.1"
 ]
 
 # All requirements

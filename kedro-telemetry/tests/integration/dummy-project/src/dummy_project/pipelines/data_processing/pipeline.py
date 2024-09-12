@@ -6,4 +6,4 @@ def one(x):
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline([node(one, "dummy", "dummy_output")])
+    return pipeline([node(one, [], "dummy_output")])

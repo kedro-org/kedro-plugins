@@ -15,7 +15,7 @@ def dummy_project_path():
 class TestKedroTelemetryHookIntegration:
     def test_telemetry_sent_once_with_kedro_run(self, mocker, dummy_project_path):
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocked_consent_check_call = mocker.patch(
+        mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         kedro_cli = KedroCLI(dummy_project_path)
@@ -33,7 +33,7 @@ class TestKedroTelemetryHookIntegration:
         telemetry_hook.project_path = None
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocked_consent_check_call = mocker.patch(
+        mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         kedro_cli = KedroCLI(dummy_project_path)
@@ -49,7 +49,7 @@ class TestKedroTelemetryHookIntegration:
         telemetry_hook.project_path = None
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocked_consent_check_call = mocker.patch(
+        mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
         )
         # Mock because all tests are sharing the kedro_telemetry.plugin.telemetry_hook object

@@ -1,7 +1,7 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
 
-def one(x):
+def one():
     return "dummy"
 
 

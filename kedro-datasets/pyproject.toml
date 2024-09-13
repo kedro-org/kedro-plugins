@@ -40,7 +40,7 @@ dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-genericdataset = ["geopandas>=0.8.0, <2.0"]
+geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona~=1.10; python_version < '3.11'"]
 geopandas = ["kedro-datasets[geopandas-genericdataset]"]
 
 holoviews-holoviewswriter = ["holoviews~=1.13.0"]
@@ -215,6 +215,7 @@ test = [
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
+    "fiona~=1.10; python_version < '3.11'",
     "gcsfs>=2023.1, <2023.3",
     "geopandas>=0.8.0, <2.0",
     "hdfs>=2.5.8, <3.0",

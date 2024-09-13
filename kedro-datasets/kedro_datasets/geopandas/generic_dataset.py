@@ -6,6 +6,7 @@ allowed geopandas (pandas) options for loading and saving geosjon files.
 from __future__ import annotations
 
 import copy
+import sys
 from pathlib import PurePosixPath
 from typing import Any, Union
 
@@ -20,6 +21,9 @@ from kedro.io.core import (
 )
 
 NON_FILE_SYSTEM_TARGETS = ["postgis"]
+
+if sys.version_info < (3, 11):
+    gpd.options.io_engine = "fiona"
 
 
 class GenericDataset(

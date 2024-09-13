@@ -21,6 +21,9 @@ from kedro.io.core import (
 
 NON_FILE_SYSTEM_TARGETS = ["postgis"]
 
+# pyogrio currently supports no alternate file handlers https://github.com/geopandas/pyogrio/issues/430
+gpd.options.io_engine = "fiona"
+
 
 class GenericDataset(
     AbstractVersionedDataset[

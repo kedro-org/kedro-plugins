@@ -60,7 +60,6 @@ class TestKedroTelemetryHookIntegration:
             session.run()
         mocked_heap_call.assert_called_once()
 
-    @pytest.mark.xfail
     def test_telemetry_sent_multi_with_other_kedro_command(
         self, mocker, dummy_project_path
     ):
@@ -80,3 +79,4 @@ class TestKedroTelemetryHookIntegration:
         CliRunner().invoke(kedro_cli, ["run"])
         CliRunner().invoke(kedro_cli, ["run"])
         mocked_heap_call.assert_called_once()
+        raise ValueError("It should fail!")

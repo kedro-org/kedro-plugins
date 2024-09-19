@@ -76,7 +76,8 @@ class TestKedroTelemetryHookIntegration:
         )
         kedro_cli = KedroCLI(dummy_project_path)
         CliRunner().invoke(kedro_cli, ["run"])
+        telemetry_hook._sent = False
         CliRunner().invoke(kedro_cli, ["run"])
+        telemetry_hook._sent = False
         CliRunner().invoke(kedro_cli, ["run"])
         mocked_heap_call.assert_called_once()
-        raise ValueError("It should fail!")

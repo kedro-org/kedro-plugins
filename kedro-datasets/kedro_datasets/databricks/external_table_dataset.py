@@ -104,8 +104,7 @@ class ExternalTableDataset(BaseTableDataset):
         )
     
     def _save_overwrite(self, data: DataFrame) -> None:
-        """Overwrites the data in the table with the data provided
-        (this is the default save mode).
+        """Overwrites the data in the table with the data provided.
 
         Args:
             data (DataFrame): the Spark dataframe to overwrite the table with.

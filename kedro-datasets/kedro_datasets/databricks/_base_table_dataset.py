@@ -148,7 +148,7 @@ class BaseTable:
         """Returns the full table location.
 
         Returns:
-            str | None : table location in the format catalog.database.table or None if database and table aren't defined.
+            str | None : Table location in the format catalog.database.table or None if database and table aren't defined.
         """
         full_table_location = None
         if self.catalog and self.database and self.table:
@@ -161,7 +161,7 @@ class BaseTable:
         """Returns the Spark schema of the table if it exists.
 
         Returns:
-            StructType: the schema of the table.
+            StructType: The schema of the table.
         """
         schema = None
         try:
@@ -175,7 +175,7 @@ class BaseTable:
         """Checks to see if the table exists.
 
         Returns:
-            bool: boolean of whether the table exists in the Spark session.
+            bool: Boolean of whether the table exists in the Spark session.
         """
         if self.catalog:
             try:
@@ -234,36 +234,36 @@ class BaseTableDataset(AbstractVersionedDataset):
         """Creates a new instance of ``BaseTableDataset``.
 
         Args:
-            table: the name of the table.
-            catalog: the name of the catalog in Unity.
+            table: The name of the table.
+            catalog: The name of the catalog in Unity.
                 Defaults to None.
-            database: the name of the database.
+            database: The name of the database.
                 (also referred to as schema). Defaults to "default".
-            format: the format of the table.
+            format: The format of the table.
                 Applicable only for external tables.
                 Defaults to "delta".
-            write_mode: the mode to write the data into the table. If not
+            write_mode: The mode to write the data into the table. If not
                 present, the data set is read-only.
                 Options are:["overwrite", "append", "upsert"].
                 "upsert" mode requires primary_key field to be populated.
                 Defaults to None.
-            location: the location of the table.
+            location: The location of the table.
                 Applicable only for external tables.
                 Should be a valid path in an external location that has already been created.
                 Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
                 Defaults to "spark".
-            primary_key: the primary key of the table.
+            primary_key: The primary key of the table.
                 Can be in the form of a list. Defaults to None.
             version: kedro.io.core.Version instance to load the data.
                 Defaults to None.
-            schema: the schema of the table in JSON form.
+            schema: The schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
                 Used by the hooks to create the table if the schema is provided.
                 Defaults to None.
-            partition_columns: the columns to use for partitioning the table.
+            partition_columns: The columns to use for partitioning the table.
                 Used by the hooks. Defaults to None.
-            owner_group: if table access control is enabled in your workspace,
+            owner_group: If table access control is enabled in your workspace,
                 specifying owner_group will transfer ownership of the table and database to
                 this owner. All databases should have the same owner_group. Defaults to None.
             metadata: Any arbitrary metadata.
@@ -332,7 +332,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         (spark|pandas dataframe).
 
         Raises:
-            VersionNotFoundError: if the version defined in
+            VersionNotFoundError: If the version defined in
                 the init doesn't exist.
 
         Returns:
@@ -397,7 +397,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         to the location defined in the init.
 
         Args:
-            data (DataFrame): the Spark dataframe to append to the table.
+            data (DataFrame): The Spark dataframe to append to the table.
         """
         writer = data.write.format(self._table.format).mode("append")
 
@@ -415,7 +415,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """Overwrites the data in the table with the data provided.
 
         Args:
-            data (DataFrame): the Spark dataframe to overwrite the table with.
+            data (DataFrame): The Spark dataframe to overwrite the table with.
         """
         writer = data.write.format(self._table.format).mode("overwrite").option(
             "overwriteSchema", "true"
@@ -436,7 +436,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         If table doesn't exist at save, the data is inserted to a new table.
 
         Args:
-            update_data (DataFrame): the Spark dataframe to upsert.
+            update_data (DataFrame): The Spark dataframe to upsert.
         """
         if self._exists():
             base_data = _get_spark().table(self._table.full_table_location())
@@ -493,7 +493,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         """Checks to see if the table exists.
 
         Returns:
-            bool: boolean of whether the table defined
+            bool: Boolean of whether the table defined
             in the dataset instance exists in the Spark session.
         """
         return self._table.exists()

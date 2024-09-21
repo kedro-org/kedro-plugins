@@ -102,29 +102,29 @@ class ManagedTableDataset(BaseTableDataset):
         """Creates a new instance of ``ManagedTableDataset``.
 
         Args:
-            table: the name of the table.
-            catalog: the name of the catalog in Unity.
+            table: The name of the table.
+            catalog: The name of the catalog in Unity.
                 Defaults to None.
-            database: the name of the database.
+            database: The name of the database.
                 (also referred to as schema). Defaults to "default".
-            write_mode: the mode to write the data into the table. If not
+            write_mode: The mode to write the data into the table. If not
                 present, the data set is read-only.
                 Options are:["overwrite", "append", "upsert"].
                 "upsert" mode requires primary_key field to be populated.
                 Defaults to None.
             dataframe_type: "pandas" or "spark" dataframe.
                 Defaults to "spark".
-            primary_key: the primary key of the table.
+            primary_key: The primary key of the table.
                 Can be in the form of a list. Defaults to None.
             version: kedro.io.core.Version instance to load the data.
                 Defaults to None.
-            schema: the schema of the table in JSON form.
+            schema: The schema of the table in JSON form.
                 Dataframes will be truncated to match the schema if provided.
                 Used by the hooks to create the table if the schema is provided.
                 Defaults to None.
-            partition_columns: the columns to use for partitioning the table.
+            partition_columns: The columns to use for partitioning the table.
                 Used by the hooks. Defaults to None.
-            owner_group: if table access control is enabled in your workspace,
+            owner_group: If table access control is enabled in your workspace,
                 specifying owner_group will transfer ownership of the table and database to
                 this owner. All databases should have the same owner_group. Defaults to None.
             metadata: Any arbitrary metadata.

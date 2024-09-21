@@ -12,6 +12,7 @@ import pandas as pd
 from kedro.io.core import (
     DatasetError
 )
+from pyspark.sql import DataFrame
 
 from kedro_datasets.databricks._base_table_dataset import BaseTable, BaseTableDataset
 
@@ -101,3 +102,24 @@ class ExternalTableDataset(BaseTableDataset):
             primary_key=primary_key,
             format=format
         )
+    
+    def _save_overwrite(self, data: DataFrame) -> None:
+        """Overwrites the data in the table with the data provided
+        (this is the default save mode).
+
+        Args:
+            data (DataFrame): the Spark dataframe to overwrite the table with.
+        """
+        writer = data.write.format(self._table.format).mode("overwrite").option(
+            "overwriteSchema", "true"
+        )
+        
+        if self._table.partition_columns:
+            writer.partitionBy(
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+            )
+
+        if self._table.location:
+            writer.option("path", self._table.location)
+
+        writer.save(self._table.location)

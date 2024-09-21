@@ -401,7 +401,13 @@ class BaseTableDataset(AbstractVersionedDataset):
         """
         writer = data.write.format(self._table.format).mode("append")
 
-        writer = self._add_common_options_to_writer(writer)
+        if self._table.partition_columns:
+            writer.partitionBy(
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+            )
+
+        if self._table.location:
+            writer.option("path", self._table.location)
 
         writer.saveAsTable(self._table.full_table_location() or "")
 
@@ -416,7 +422,13 @@ class BaseTableDataset(AbstractVersionedDataset):
             "overwriteSchema", "true"
         )
         
-        writer = self._add_common_options_to_writer(writer)
+        if self._table.partition_columns:
+            writer.partitionBy(
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+            )
+
+        if self._table.location:
+            writer.option("path", self._table.location)
 
         writer.saveAsTable(self._table.full_table_location() or "")
 
@@ -486,22 +498,3 @@ class BaseTableDataset(AbstractVersionedDataset):
             in the dataset instance exists in the Spark session.
         """
         return self._table.exists()
-        
-    def _add_common_options_to_writer(self, writer: DataFrameWriter) -> DataFrameWriter:
-        """Adds options to the writer based on the table properties.
-
-        Args:
-            writer (DataFrameWriter): The DataFrameWriter instance.
-
-        Returns:
-            DataFrameWriter: The DataFrameWriter instance with the options added.
-        """
-        if self._table.partition_columns:
-            writer.partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
-            )
-
-        if self._table.location:
-            writer.option("path", self._table.location)
-
-        return writer

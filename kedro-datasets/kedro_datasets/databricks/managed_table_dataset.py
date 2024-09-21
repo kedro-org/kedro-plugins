@@ -146,7 +146,7 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group=owner_group,
         )
 
-    def _create_table(
+    def _create_table(  # noqa: PLR0913
         self,
         table: str,
         catalog: str | None,

@@ -112,7 +112,7 @@ class ExternalTableDataset(BaseTableDataset):
         >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
 
-    def _create_table(
+    def _create_table(  # noqa: PLR0913
         self,
         table: str,
         catalog: str | None,

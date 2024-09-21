@@ -294,7 +294,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             exists_function=self._exists,  # type: ignore[arg-type]
         )
 
-    def _create_table(
+    def _create_table(  # noqa: PLR0913
         self,
         table: str,
         catalog: str | None,

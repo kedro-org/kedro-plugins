@@ -1,11 +1,14 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
+
+from kedro_datasets import KedroDeprecationWarning
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
@@ -21,15 +24,10 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         cars:
           type: ibis.TableDataset
-          filepath: data/01_raw/company/cars.csv
-          file_format: csv
           table_name: cars
           connection:
             backend: duckdb
             database: company.db
-          load_args:
-            sep: ","
-            nullstr: "#NA"
           save_args:
             materialized: table
 
@@ -91,12 +89,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
         #ibis.duckdb.connect>`_).
 
-        If ``filepath`` and ``file_format`` are given, the corresponding
-        read method (e.g. `read_csv() <https://ibis-project.org/backends/\
-        duckdb#ibis.backends.duckdb.Backend.read_csv>`_) is used to load
-        the file with the backend. Note that only the data is loaded; no
-        link to the underlying file exists past ``TableDataset.load()``.
-
         If ``table_name`` is given (and ``filepath`` isn't), the dataset
         establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute
@@ -105,9 +97,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         is saved, after running code defined across one more more nodes.
 
         Args:
-            filepath: Path to a file to register as a table. Most useful
-                for loading data into your data warehouse (for testing).
-            file_format: Specifies the input file format for `filepath`.
             table_name: The name of the table or view to read or create.
             connection: Configuration for connecting to an Ibis backend.
             load_args: Additional arguments passed to the Ibis backend's
@@ -123,6 +112,15 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         if filepath is None and table_name is None:
             raise DatasetError(
                 "Must provide at least one of `filepath` or `table_name`."
+            )
+
+        if filepath is not None or file_format is not None:
+            warnings.warn(
+                "Use 'FileDataset' to load and save files with an Ibis "
+                "backend; the functionality will be removed from 'Table"
+                "Dataset' in Kedro-Datasets 6.0.0",
+                KedroDeprecationWarning,
+                stacklevel=2,
             )
 
         self._filepath = filepath

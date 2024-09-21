@@ -46,6 +46,12 @@ class ExternalTable(BaseTable):
                 f"Format '{self.format}' is not supported for upserts. "
                 f"Please use 'delta' format."
             )
+        
+        if self.write_mode == "overwrite" and self.format != "delta" and not self.location:
+            raise DatasetError(
+                f"Format '{self.format}' is supported for overwrites only if the location is provided. "
+                f"Please provide a valid path in an external location."
+            )
 
 
 class ExternalTableDataset(BaseTableDataset):

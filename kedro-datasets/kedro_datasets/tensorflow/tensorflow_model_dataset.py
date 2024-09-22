@@ -144,7 +144,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
                 # We assume .keras
                 path = str(PurePath(tempdir) / TEMPORARY_KERAS_FILE)  # noqa: PLW2901
 
-            self._fs.copy(load_path, path)
+            self._fs.get(load_path, path)
 
             # Pass the local temporary directory/file path to keras.load_model
             device_name = self._load_args.pop("tf_device", None)
@@ -169,7 +169,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
             # Use fsspec to take from local tempfile directory/file and
             # put in ArbitraryFileSystem
-            self._fs.copy(path, save_path)
+            self._fs.put(path, save_path)
 
     def _exists(self) -> bool:
         try:

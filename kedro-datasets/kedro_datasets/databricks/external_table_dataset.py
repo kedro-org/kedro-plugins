@@ -175,4 +175,7 @@ class ExternalTableDataset(BaseTableDataset):
         if self._table.location:
             writer.option("path", self._table.location)
 
-        writer.save(self._table.location)
+        if self._table.format == "delta":
+            writer.saveAsTable(self._table.full_table_location() or "")
+        else:
+            writer.save(self._table.location)

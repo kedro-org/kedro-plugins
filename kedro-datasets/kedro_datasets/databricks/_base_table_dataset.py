@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True)
 class BaseTable:
     """Stores the definition of a base table.
     

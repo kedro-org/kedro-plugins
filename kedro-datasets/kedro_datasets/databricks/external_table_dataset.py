@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True)
 class ExternalTable(BaseTable):
     """Stores the definition of an external table."""
 
@@ -119,6 +119,7 @@ class ExternalTableDataset(BaseTableDataset):
         database: str,
         format: str,
         write_mode: str | None,
+        location: str | None,
         dataframe_type: str,
         primary_key: str | list[str] | None,
         json_schema: dict[str, Any] | None,
@@ -147,6 +148,7 @@ class ExternalTableDataset(BaseTableDataset):
             catalog=catalog,
             database=database,
             write_mode=write_mode,
+            location=location,
             dataframe_type=dataframe_type,
             json_schema=json_schema,
             partition_columns=partition_columns,

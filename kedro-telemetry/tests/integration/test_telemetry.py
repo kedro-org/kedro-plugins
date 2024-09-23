@@ -5,7 +5,6 @@ from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from pytest import fixture
-import pytest
 
 
 @fixture

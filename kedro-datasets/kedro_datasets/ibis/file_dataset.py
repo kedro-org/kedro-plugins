@@ -1,7 +1,6 @@
 """Provide file loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
-import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -119,7 +118,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
         super().__init__(
             filepath=PurePosixPath(filepath),
             version=version,
-            exists_function=os.path.exists,
+            exists_function=lambda filepath: Path(filepath).exists(),
         )
 
         # Set load and save arguments, overwriting defaults if provided.

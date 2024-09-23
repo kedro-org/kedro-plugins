@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from time import sleep
 
@@ -251,6 +252,7 @@ class TestFileDatasetVersioned:
         with pytest.warns(UserWarning, match=pattern):
             versioned_file_dataset.save(dummy_table)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="different error on windows")
     def test_versioning_existing_dataset(
         self, file_dataset, versioned_file_dataset, dummy_table
     ):

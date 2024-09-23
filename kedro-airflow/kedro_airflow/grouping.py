@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kedro.io import DataCatalog
+from kedro.io import CatalogProtocol
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
@@ -11,7 +11,7 @@ def _is_memory_dataset(catalog, dataset_name: str) -> bool:
     return False
 
 
-def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
+def get_memory_datasets(catalog: CatalogProtocol, pipeline: Pipeline) -> set[str]:
     """Gather all datasets in the pipeline that are of type MemoryDataset, excluding 'parameters'."""
     return {
         dataset_name
@@ -21,7 +21,7 @@ def get_memory_datasets(catalog: DataCatalog, pipeline: Pipeline) -> set[str]:
 
 
 def create_adjacency_list(
-    catalog: DataCatalog, pipeline: Pipeline
+    catalog: CatalogProtocol, pipeline: Pipeline
 ) -> tuple[dict[str, set], dict[str, set]]:
     """
     Builds adjacency list (adj_list) to search connected components - undirected graph,
@@ -48,7 +48,7 @@ def create_adjacency_list(
 
 
 def group_memory_nodes(
-    catalog: DataCatalog, pipeline: Pipeline
+    catalog: CatalogProtocol, pipeline: Pipeline
 ) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across

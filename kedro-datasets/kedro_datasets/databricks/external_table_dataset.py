@@ -24,7 +24,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 class ExternalTable(BaseTable):
     """Stores the definition of an external table."""
 
-    def _validate_existence_of_table(self) -> None:
+    def _validate_location(self) -> None:
         """Validates that a location is provided if the table does not exist.
         
         Raises:
@@ -36,12 +36,14 @@ class ExternalTable(BaseTable):
                 "This should be valid path in an external location that has already been created."
             )
         
-    def _validate_write_mode_for_format(self) -> None:
+    def _validate_write_mode(self) -> None:
         """Validates that the write mode is compatible with the format.
         
         Raises:
             DatasetError: If the write mode is not compatible with the format.
         """
+        super()._validate_write_mode()
+
         if self.write_mode == "upsert" and self.format != "delta":
             raise DatasetError(
                 f"Format '{self.format}' is not supported for upserts. "

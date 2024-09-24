@@ -174,10 +174,11 @@ class ExternalTableDataset(BaseTableDataset):
                 *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
             )
 
-        if self._table.location:
-            writer.option("path", self._table.location)
+        if self._table.format == "delta" or (not self._table.exists()):
+            if self._table.location:
+                writer.option("path", self._table.location)
 
-        if self._table.format == "delta":
             writer.saveAsTable(self._table.full_table_location() or "")
+
         else:
             writer.save(self._table.location)

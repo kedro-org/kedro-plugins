@@ -26,7 +26,7 @@ from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
-from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
+from kedro_telemetry.masking import _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
@@ -49,6 +49,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
+MISSING_USER_IDENTITY = "missing_user_identity"
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def _get_or_create_uuid() -> str:
         return new_uuid
 
     except Exception as e:
-        logging.error(f"Failed to retrieve UUID: {e}")
+        logging.debug(f"Failed to retrieve UUID: {e}")
         return ""
 
 
@@ -104,7 +105,7 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                     file.write(toml_string)
                 return project_id
             except KeyError:
-                logging.error(
+                logging.debug(
                     f"Failed to retrieve project id or save project id: "
                     f"{str(pyproject_path)} does not contain a [tool.kedro] section"
                 )
@@ -148,7 +149,7 @@ def _generate_new_uuid(full_path: str) -> str:
 
         return new_uuid
     except Exception as e:
-        logging.error(f"Failed to create UUID: {e}")
+        logging.debug(f"Failed to create UUID: {e}")
         return ""
 
 
@@ -176,10 +177,7 @@ class KedroTelemetryHook:
 
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
-        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-        masked_command_args = _mask_kedro_cli(
-            cli_struct=cli_struct, command_args=command_args
-        )
+        masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
 
         self._user_uuid = _get_or_create_uuid()
 
@@ -200,13 +198,15 @@ class KedroTelemetryHook:
 
     @hook_impl
     def after_context_created(self, context):
-        """Hook implementation to send project statistics data to Heap"""
+        """Hook implementation to read metadata"""
 
         self._consent = _check_for_telemetry_consent(context.project_path)
         self._project_path = context.project_path
 
     @hook_impl
     def after_catalog_created(self, catalog):
+        """Hook implementation to send project statistics data to Heap"""
+
         if self._consent is False:
             return
 
@@ -241,12 +241,12 @@ class KedroTelemetryHook:
         try:
             _send_heap_event(
                 event_name=event_name,
-                identity=self._user_uuid,
+                identity=self._user_uuid if self._user_uuid else MISSING_USER_IDENTITY,
                 properties=self._event_properties,
             )
             self._sent = True
         except Exception as exc:
-            logger.warning(
+            logger.debug(
                 "Something went wrong in hook implementation to send command run data to Heap. "
                 "Exception: %s",
                 exc,
@@ -324,22 +324,21 @@ def _send_heap_event(
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
+        "identity": identity,
     }
-    if identity:
-        data["identity"] = identity
 
     try:
         resp = requests.post(
             url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
         if resp.status_code != 200:  # noqa: PLR2004
-            logger.warning(
+            logger.debug(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
                 resp.status_code,
                 resp.reason,
             )
     except requests.exceptions.RequestException as exc:
-        logger.warning(
+        logger.debug(
             "Failed to send data to Heap. Exception of type '%s' was raised.",
             type(exc).__name__,
         )

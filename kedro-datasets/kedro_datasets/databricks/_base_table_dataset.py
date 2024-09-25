@@ -403,7 +403,7 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         if self._table.partition_columns:
             writer.partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else [self._table.partition_columns]
             )
 
         if self._table.location:
@@ -423,7 +423,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         
         if self._table.partition_columns:
             writer.partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else self._table.partition_columns
+                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else [self._table.partition_columns]
             )
 
         if self._table.location:

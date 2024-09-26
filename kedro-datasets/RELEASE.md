@@ -15,6 +15,7 @@
 ## Bug fixes and other changes
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
 * Fixed bug related to loading/saving models from/to remote storage using `TensorFlowModelDataset`.
+* Fixed deprecated load and save approaches of GBQTableDataset and GBQQueryDataset by invoking save and load directly over `pandas-gbq` lib
 
 ## Breaking Changes
 ## Community contributions
@@ -22,6 +23,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Brandon Meek](https://github.com/bpmeek)
 * [yury-fedotov](https://github.com/yury-fedotov)
 * [gitgud5000](https://github.com/gitgud5000)
+* [janickspirig](https://github.com/janickspirig)
+
 
 # Release 4.1.0
 ## Major features and improvements

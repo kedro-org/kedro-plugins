@@ -84,7 +84,7 @@ class TestProphetModelDataset:
         [
             ("s3://bucket/model.json", S3FileSystem),
             ("file:///tmp/test_model.json", LocalFileSystem),
-            ("/tmp/test_model.json", LocalFileSystem),
+            ("/tmp/test_model.json", LocalFileSystem),  #nosec: B108
             ("gcs://bucket/model.json", GCSFileSystem),
             ("https://example.com/model.json", HTTPFileSystem),
         ],

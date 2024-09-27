@@ -5,6 +5,8 @@
 | Type                                | Description                                               | Location                                |
 |-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
 | `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models  | `kedro_datasets_experimental.pytorch`   |
+| `prophet.ProphetModelDataset`       | A dataset for Meta's Prophet model for time series forecasting | `kedro_datasets_experimental.prophet`   |
+
 
 * Added the following new core datasets:
 
@@ -24,6 +26,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [yury-fedotov](https://github.com/yury-fedotov)
 * [gitgud5000](https://github.com/gitgud5000)
 * [janickspirig](https://github.com/janickspirig)
+* [Galen Seilis](https://github.com/galenseilis)
 
 
 # Release 4.1.0

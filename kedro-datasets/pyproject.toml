@@ -183,6 +183,8 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
+prophet-dataset = ["prophet>=1.1.5"]
+prophet = ["kedro-datasets[prophet]"]
 pytorch-dataset = ["torch"]
 pytorch = ["kedro-datasets[pytorch-dataset]"]
 
@@ -290,7 +292,8 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
-    "torch"
+    "torch",
+    "prophet>=1.1.5",
 ]
 
 # All requirements

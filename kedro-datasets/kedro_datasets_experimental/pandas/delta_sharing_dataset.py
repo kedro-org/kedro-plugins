@@ -129,9 +129,9 @@ class DeltaSharingDataset(AbstractDataset):
             data (pd.DataFrame): Data to save.
 
         Raises:
-            NotImplementedError: Saving to Delta Sharing shared tables is not supported.
+            DatasetError: Saving to Delta Sharing shared tables is not supported.
         """
-        raise NotImplementedError("Saving to Delta Sharing shared tables is not supported.")
+        raise DatasetError("Saving to Delta Sharing shared tables is not supported.")
 
     def preview(self, nrows: int = 5) -> TablePreview:
         """Generate a preview of the dataset with a specified number of rows.

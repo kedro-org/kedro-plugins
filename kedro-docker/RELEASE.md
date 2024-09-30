@@ -1,5 +1,7 @@
 # Upcoming Release
 
+# Release 0.6.1
+
 # Release 0.6.0
 ## Major features and improvements
 * Added support for Python 3.12

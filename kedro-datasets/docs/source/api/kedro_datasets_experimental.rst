@@ -18,3 +18,4 @@ kedro_datasets_experimental
    netcdf.NetCDFDataset
    pytorch.PyTorchDataset
    rioxarray.GeoTIFFDataset
+   pandas.DeltaSharingDataset

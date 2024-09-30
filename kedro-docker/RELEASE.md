@@ -1,6 +1,7 @@
 # Upcoming Release
 
 # Release 0.6.1
+* Unpinned pip version requirement
 
 # Release 0.6.0
 ## Major features and improvements

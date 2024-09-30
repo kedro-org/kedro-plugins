@@ -38,8 +38,7 @@ class DeltaSharingDataset(AbstractDataset):
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets import DeltaSharingDataset
-        >>> import pandas as pd
+        >>> from kedro_datasets_experimental.pandas import DeltaSharingDataset
         >>>
         >>> credentials = {
         ...     "profile_file": "conf/local/config.share"

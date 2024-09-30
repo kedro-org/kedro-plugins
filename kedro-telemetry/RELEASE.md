@@ -1,5 +1,10 @@
 # Upcoming release
 
+# Release 0.6.1
+* Changed Kedro CLI loading method to improve loading times.
+* Changed logging level from error to debug for most logging messages.
+* Set default value for the `identity` parameter, to prevent errors due to it being empty.
+
 # Release 0.6.0
 * Moved to an opt-out model for telemetry, enabling it by default without requiring prior consent.
 * Added `DO_NOT_TRACK` and `KEDRO_DISABLE_TELEMETRY` environment variables to skip telemetry.

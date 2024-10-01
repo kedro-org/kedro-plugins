@@ -38,9 +38,11 @@ def _get_spark() -> Any:
     extended configuration mechanisms and notebook compatibility,
     otherwise we use classic pyspark.
     """
+    MIN_DBCONNECT_V2_VERSION = 13
     if (
         "DATABRICKS_RUNTIME_VERSION" in os.environ
-        and int(os.environ["DATABRICKS_RUNTIME_VERSION"].split(".")[0]) >= 13
+        and int(os.environ["DATABRICKS_RUNTIME_VERSION"].split(".")[0])
+        >= MIN_DBCONNECT_V2_VERSION
     ):
         # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
         # the remote session is instantiated using the databricks module

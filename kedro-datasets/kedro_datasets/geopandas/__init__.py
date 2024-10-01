@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementations that produce geopandas GeoDataFrames."""
+"""``GenericDataset`` is an ``AbstractVersionedDataset`` to save and load GeoDataFrames."""
 
 from typing import Any
 

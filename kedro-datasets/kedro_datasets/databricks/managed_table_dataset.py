@@ -133,9 +133,9 @@ class ManagedTableDataset(BaseTableDataset):
             DatasetError: Invalid configuration supplied (through ``ManagedTable`` validation).
         """
         super().__init__(
-            table=table,
-            catalog=catalog,
             database=database,
+            catalog=catalog,
+            table=table,
             write_mode=write_mode,
             dataframe_type=dataframe_type,
             version=version,

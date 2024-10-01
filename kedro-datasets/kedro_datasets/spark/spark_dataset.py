@@ -32,25 +32,45 @@ from s3fs import S3FileSystem
 logger = logging.getLogger(__name__)
 
 
-def _get_spark() -> Any:
+def _get_spark(spark_mode: str = None) -> Any:
     """
-    Returns the SparkSession. In case databricks-connect is available we use it for
-    extended configuration mechanisms and notebook compatibility,
-    otherwise we use classic pyspark.
+    Returns the appropriate Spark session based on the spark_mode.
+    Supports 'spark' and 'databricks-connect'.
+    If spark_mode is None, it will use 'databricks-connect' if installed, otherwise 'spark'.
+
+    If you want to use spark connect you can set the SPARK_REMOTE environment variable
+    and use the 'spark' mode.
+
+    For configuring authentication you should use the corresponding environment variables
+
+    Args:
+        spark_mode: The mode to initialize the Spark session. Can be 'spark',
+                    or 'databricks-connect'. Defaults to None.
+
+    Returns:
+        A Spark session appropriate to the selected mode.
     """
-    try:
-        # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
-        # the remote session is instantiated using the databricks module
-        # If the databricks-connect module is installed, we use a remote session
+
+    # If the spark_mode is not specified, we will try to infer it
+    if not spark_mode:
+        # Try to use databricks-connect if available
+        try:
+            from databricks.connect import DatabricksSession
+
+            spark_mode = "databricks-connect"
+        except ImportError:
+            spark_mode = "spark"
+
+    if spark_mode == "spark":
+        spark = SparkSession.builder.getOrCreate()
+
+    elif spark_mode == "databricks-connect":
         from databricks.connect import DatabricksSession
 
-        # We can't test this as there's no Databricks test env available
-        spark = DatabricksSession.builder.getOrCreate()  # pragma: no cover
+        spark = DatabricksSession.builder.getOrCreate()
 
-    except ImportError:
-        # For "normal" spark sessions that don't use databricks-connect
-        # we get spark normally
-        spark = SparkSession.builder.getOrCreate()
+    else:
+        raise ValueError(f"Invalid spark_mode: {spark_mode}")
 
     return spark
 
@@ -272,6 +292,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
+        spark_mode: str = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``SparkDataset``.
@@ -304,14 +325,19 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
                 ``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.
                 Optional keyword arguments passed to ``hdfs.client.InsecureClient``
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
+            spark_mode: The mode to initialize the Spark session. Can be 'spark',
+                or 'databricks-connect'. Defaults to None.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
+
         """
+
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
         path = PurePosixPath(filepath)
         exists_function = None
         glob_function = None
+        self.spark_mode = spark_mode
         self.metadata = metadata
 
         if (
@@ -349,7 +375,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         elif filepath.startswith("/dbfs/"):
             # dbfs add prefix to Spark path by default
             # See https://github.com/kedro-org/kedro-plugins/issues/117
-            dbutils = _get_dbutils(_get_spark())
+            dbutils = _get_dbutils(_get_spark(self.spark_mode))
             if dbutils:
                 glob_function = partial(_dbfs_glob, dbutils=dbutils)
                 exists_function = partial(_dbfs_exists, dbutils=dbutils)
@@ -415,7 +441,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
 
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
-        read_obj = _get_spark().read
+        read_obj = _get_spark(self.spark_mode).read
 
         # Pass schema if defined
         if self._schema:
@@ -431,7 +457,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
-            _get_spark().read.load(load_path, self._file_format)
+            _get_spark(self.spark_mode).read.load(load_path, self._file_format)
         except AnalysisException as exception:
             # `AnalysisException.desc` is deprecated with pyspark >= 3.4
             message = exception.desc if hasattr(exception, "desc") else str(exception)

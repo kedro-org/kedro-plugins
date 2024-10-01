@@ -40,20 +40,14 @@ class DeltaSharingDataset(AbstractDataset):
 
         >>> from kedro_datasets_experimental.pandas import DeltaSharingDataset
         >>>
-        >>> credentials = {
-        ...     "profile_file": "conf/local/config.share"
-        ... }
-        >>> load_args = {
-        ...     "version": 1,
-        ...     "limit": 10,
-        ...     "use_delta_format": True
-        ... }
+        >>> credentials = {"profile_file": "conf/local/config.share"}
+        >>> load_args = {"version": 1, "limit": 10, "use_delta_format": True}
         >>> dataset = DeltaSharingDataset(
         ...     share="example_share",
         ...     schema="example_schema",
         ...     table="example_table",
         ...     credentials=credentials,
-        ...     load_args=load_args
+        ...     load_args=load_args,
         ... )
         >>> data = dataset.load()
         >>> print(data)
@@ -84,7 +78,7 @@ class DeltaSharingDataset(AbstractDataset):
                 - `profile_file` (str): Path to the Delta Sharing profile file.
             load_args (dict[str, Any], optional): Additional options for loading data.
                 - `version` (int, optional): A non-negative integer specifying the version of the table snapshot to load.
-                  Defaults to None, which loads the latest version. This parameter allows you to access historical versions of the shared table.
+                Defaults to None, which loads the latest version. This parameter allows you to access historical versions of the shared table.
                 - `limit` (int, optional): A non-negative integer specifying the maximum number of rows to load.
                 - `use_delta_format` (bool, optional): Whether to use the Delta format for loading data. Defaults to False.
 

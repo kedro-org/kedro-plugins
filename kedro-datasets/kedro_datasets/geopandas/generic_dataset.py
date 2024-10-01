@@ -145,7 +145,7 @@ class GenericDataset(
         # Fail fast if provided a known non-filesystem target
         if self._file_format in NON_FILE_SYSTEM_TARGETS:
             raise DatasetError(
-                f"Cannot create a dataset of file_format '{self._file_format}' as it "
+                f"Cannot load or save a dataset of file_format '{self._file_format}' as it "
                 f"does not support a filepath target/source."
             )
 

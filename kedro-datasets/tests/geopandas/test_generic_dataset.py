@@ -178,7 +178,7 @@ class TestGenericDataset:
             parquet_dataset_bad_config.load()
 
     def test_none_file_system_target(self, postgis_dataset, dummy_dataframe):
-        pattern = "Cannot create a dataset of file_format 'postgis' as it does not support a filepath target/source."
+        pattern = "Cannot load or save a dataset of file_format 'postgis' as it does not support a filepath target/source."
         with pytest.raises(DatasetError, match=pattern):
             postgis_dataset.save(dummy_dataframe)
 

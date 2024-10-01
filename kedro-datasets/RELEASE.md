@@ -14,8 +14,6 @@
 |----------------------|------------------------------------------------|-------------------------|
 | `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
 
-* Add `file_format` to `geopandas.GeoJSONDataset` to support parquet and feather file formats.
-
 ## Bug fixes and other changes
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
 * Fixed bug related to loading/saving models from/to remote storage using `TensorFlowModelDataset`.

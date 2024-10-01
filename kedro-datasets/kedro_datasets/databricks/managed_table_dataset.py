@@ -190,4 +190,16 @@ class ManagedTableDataset(BaseTableDataset):
             primary_key=primary_key,
             format=format
         )
+    
+    def _describe(self) -> dict[str, str | list | None]:
+        """Returns a description of the instance of the dataset.
+
+        Returns:
+            Dict[str, str]: Dict with the details of the dataset.
+        """
+        description = super()._describe()
+        del description["format"]
+        del description["location"]
+
+        return description
 

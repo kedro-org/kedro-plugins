@@ -105,7 +105,7 @@ pandas = [
     pandas-exceldataset,\
     pandas-featherdataset,\
     pandas-gbqquerydataset,\
-    pandas-gbqtabledataset.\
+    pandas-gbqtabledataset,\
     pandas-genericdataset,\
     pandas-hdfdataset,\
     pandas-jsondataset,\

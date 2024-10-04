@@ -51,7 +51,7 @@ class BaseTable:
     primary_key: str | list[str] | None
     owner_group: str | None
     partition_columns: str | list[str] | None
-    format: str = ("delta",)
+    format: str = "delta"
     json_schema: dict[str, Any] | None = None
 
     def __post_init__(self):

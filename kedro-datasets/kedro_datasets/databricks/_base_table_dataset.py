@@ -325,7 +325,19 @@ class BaseTableDataset(AbstractVersionedDataset):
         Returns:
             ``BaseTable``: The new ``BaseTable`` instance.
         """
-        raise NotImplementedError
+        return BaseTable(
+            table=table,
+            catalog=catalog,
+            database=database,
+            format=format,
+            write_mode=write_mode,
+            location=location,
+            dataframe_type=dataframe_type,
+            json_schema=json_schema,
+            partition_columns=partition_columns,
+            owner_group=owner_group,
+            primary_key=primary_key,
+        )
     
     def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init

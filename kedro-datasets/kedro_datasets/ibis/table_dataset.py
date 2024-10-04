@@ -143,6 +143,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     @property
     def connection(self) -> BaseBackend:
         def hashable(value):
+            """Return a hashable key for a potentially-nested object."""
             if isinstance(value, dict):
                 return tuple((k, hashable(v)) for k, v in sorted(value.items()))
             if isinstance(value, list):

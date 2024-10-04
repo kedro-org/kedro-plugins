@@ -5,12 +5,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, List
+from typing import Any, ClassVar
 
 import pandas as pd
-from kedro.io.core import (
-    Version
-)
+from kedro.io.core import Version
 
 from kedro_datasets.databricks._base_table_dataset import BaseTable, BaseTableDataset
 
@@ -22,7 +20,7 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 class ManagedTable(BaseTable):
     """Stores the definition of a managed table."""
 
-    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta"])
+    _VALID_FORMATS: ClassVar[list[str]] = field(default=["delta"])
 
 
 class ManagedTableDataset(BaseTableDataset):
@@ -82,6 +80,7 @@ class ManagedTableDataset(BaseTableDataset):
         >>> reloaded = dataset.load()
         >>> assert Row(name="Bob", age=12) in reloaded.take(4)
     """
+
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -158,7 +157,7 @@ class ManagedTableDataset(BaseTableDataset):
         primary_key: str | list[str] | None,
         json_schema: dict[str, Any] | None,
         partition_columns: list[str] | None,
-        owner_group: str | None
+        owner_group: str | None,
     ) -> ManagedTable:
         """Creates a new ``ManagedTable`` instance with the provided attributes.
 
@@ -188,9 +187,9 @@ class ManagedTableDataset(BaseTableDataset):
             partition_columns=partition_columns,
             owner_group=owner_group,
             primary_key=primary_key,
-            format=format
+            format=format,
         )
-    
+
     def _describe(self) -> dict[str, str | list | None]:
         """Returns a description of the instance of the dataset.
 
@@ -202,4 +201,3 @@ class ManagedTableDataset(BaseTableDataset):
         del description["location"]
 
         return description
-

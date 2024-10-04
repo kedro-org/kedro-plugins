@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
-from kedro.io.core import DatasetError, Version, VersionNotFoundError
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro_datasets.databricks import ManagedTableDataset
@@ -170,7 +169,6 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
 
 
 class TestManagedTableDataset:
-
     def test_describe(self):
         unity_ds = ManagedTableDataset(table="test")
         assert unity_ds._describe() == {

@@ -6,17 +6,16 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, List
+from typing import Any, ClassVar
 
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
     Version,
-    VersionNotFoundError
+    VersionNotFoundError,
 )
 from pyspark.sql import DataFrame
-from pyspark.sql.readwriter import DataFrameWriter
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
@@ -29,14 +28,19 @@ pd.DataFrame.iteritems = pd.DataFrame.items
 @dataclass(frozen=True)
 class BaseTable:
     """Stores the definition of a base table.
-    
+
     Acts as the base class for `ManagedTable` and `ExternalTable`.
     """
+
     # regex for tables, catalogs and schemas
     _NAMING_REGEX: ClassVar[str] = r"\b[0-9a-zA-Z_-]{1,}\b"
-    _VALID_WRITE_MODES: ClassVar[List[str]] = field(default=["overwrite", "upsert", "append"])
-    _VALID_DATAFRAME_TYPES: ClassVar[List[str]] = field(default=["spark", "pandas"])
-    _VALID_FORMATS: ClassVar[List[str]] = field(default=["delta", "parquet", "csv", "json", "orc", "avro", "text"])
+    _VALID_WRITE_MODES: ClassVar[list[str]] = field(
+        default=["overwrite", "upsert", "append"]
+    )
+    _VALID_DATAFRAME_TYPES: ClassVar[list[str]] = field(default=["spark", "pandas"])
+    _VALID_FORMATS: ClassVar[list[str]] = field(
+        default=["delta", "parquet", "csv", "json", "orc", "avro", "text"]
+    )
 
     database: str
     catalog: str | None
@@ -47,7 +51,7 @@ class BaseTable:
     primary_key: str | list[str] | None
     owner_group: str | None
     partition_columns: str | list[str] | None
-    format: str = "delta",
+    format: str = ("delta",)
     json_schema: dict[str, Any] | None = None
 
     def __post_init__(self):
@@ -229,7 +233,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         schema: dict[str, Any] | None = None,
         partition_columns: list[str] | None = None,
         owner_group: str | None = None,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``BaseTableDataset``.
 
@@ -306,7 +310,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         primary_key: str | list[str] | None,
         json_schema: dict[str, Any] | None,
         partition_columns: list[str] | None,
-        owner_group: str | None
+        owner_group: str | None,
     ) -> BaseTable:
         """Creates a ``BaseTable`` instance with the provided attributes.
 
@@ -315,6 +319,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             catalog: The catalog of the table.
             database: The database of the table.
             format: The format of the table.
+            location: The location of the table.
             write_mode: The write mode for the table.
             dataframe_type: The type of dataframe.
             primary_key: The primary key of the table.
@@ -338,7 +343,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             owner_group=owner_group,
             primary_key=primary_key,
         )
-    
+
     def _load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe).
@@ -366,7 +371,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data
-    
+
     def _save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves the data based on the write_mode and dataframe_type in the init.
         If write_mode is pandas, Spark dataframe is created first.
@@ -401,9 +406,9 @@ class BaseTableDataset(AbstractVersionedDataset):
                 f"Invalid `write_mode` provided: {self._table.write_mode}. "
                 f"`write_mode` must be one of: {self._table._VALID_WRITE_MODES}"
             )
-        
+
         method(data)
-    
+
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it
         to the location defined in the init.
@@ -415,7 +420,9 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         if self._table.partition_columns:
             writer.partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else [self._table.partition_columns]
+                *self._table.partition_columns
+                if isinstance(self._table.partition_columns, list)
+                else [self._table.partition_columns]
             )
 
         if self._table.location:
@@ -429,13 +436,17 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): The Spark dataframe to overwrite the table with.
         """
-        writer = data.write.format(self._table.format).mode("overwrite").option(
-            "overwriteSchema", "true"
+        writer = (
+            data.write.format(self._table.format)
+            .mode("overwrite")
+            .option("overwriteSchema", "true")
         )
-        
+
         if self._table.partition_columns:
             writer.partitionBy(
-                *self._table.partition_columns if isinstance(self._table.partition_columns, list) else [self._table.partition_columns]
+                *self._table.partition_columns
+                if isinstance(self._table.partition_columns, list)
+                else [self._table.partition_columns]
             )
 
         if self._table.location:

@@ -174,9 +174,7 @@ class TestBaseTableDataset:
         unity_ds = BaseTableDataset(catalog="test", database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test`.`test`.`test`"
 
-        unity_ds = BaseTableDataset(
-            catalog="test-test", database="test", table="test"
-        )
+        unity_ds = BaseTableDataset(catalog="test-test", database="test", table="test")
         assert unity_ds._table.full_table_location() == "`test-test`.`test`.`test`"
 
         unity_ds = BaseTableDataset(database="test", table="test")

@@ -33,8 +33,9 @@ api = ["kedro-datasets[api-apidataset]"]
 biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
+dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
-dask = ["kedro-datasets[dask-parquetdataset]"]
+dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
@@ -92,7 +93,7 @@ pandas-featherdataset = ["kedro-datasets[pandas-base]"]
 pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
 pandas-gbqquerydataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
 pandas-genericdataset = ["kedro-datasets[pandas-base]"]
-pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables~=3.6"]
+pandas-hdfdataset = ["kedro-datasets[pandas-base]", "tables>=3.6"]
 pandas-jsondataset = ["kedro-datasets[pandas-base]"]
 pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
 pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
@@ -104,7 +105,7 @@ pandas = [
     pandas-exceldataset,\
     pandas-featherdataset,\
     pandas-gbqquerydataset,\
-    pandas-gbqtabledataset.\
+    pandas-gbqtabledataset,\
     pandas-genericdataset,\
     pandas-hdfdataset,\
     pandas-jsondataset,\
@@ -127,9 +128,12 @@ plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydat
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
 polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
-polars-genericdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
 polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
-polars = ["kedro-datasets[polars-genericdataset]"]
+polars = [
+    """kedro-datasets[polars-csvdataset,\
+    polars-eagerpolarsdataset,\
+    polars-lazypolarsdataset]"""
+]
 
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
@@ -140,8 +144,15 @@ snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
 spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
 spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
-spark-sparkjdbcdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
-spark = ["kedro-datasets[spark-deltatabledataset]"]
+spark-sparkjdbcdataset = ["kedro-datasets[spark-base]"]
+spark-sparkstreamingdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
+spark = [
+    """kedro-datasets[spark-deltatabledataset,\
+    spark-sparkdataset,\
+    spark-sparkhivedataset,\
+    spark-sparkjdbcdataset,\
+    spark-sparkstreamingdataset]"""
+]
 
 svmlight-svmlightdataset = ["scikit-learn>=1.0.2", "scipy~=1.7.3"]
 svmlight = ["kedro-datasets[svmlight-svmlightdataset]"]
@@ -172,6 +183,8 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
+prophet-dataset = ["prophet>=1.1.5"]
+prophet = ["kedro-datasets[prophet]"]
 pytorch-dataset = ["torch"]
 pytorch = ["kedro-datasets[pytorch-dataset]"]
 
@@ -209,7 +222,7 @@ test = [
     "ibis-framework[duckdb,examples]",
     "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
-    "Jinja2<3.1.0",
+    "Jinja2<3.2.0",
     "joblib>=0.14",
     "jupyterlab>=3.0",
     "jupyter~=1.0",
@@ -248,8 +261,7 @@ test = [
     "scipy>=1.7.3",
     "packaging",
     "SQLAlchemy>=1.2",
-    "tables>=3.8.0; platform_system == 'Windows'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6; platform_system != 'Windows'",
+    "tables>=3.6",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
@@ -280,7 +292,8 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
-    "torch"
+    "torch",
+    "prophet>=1.1.5",
 ]
 
 # All requirements

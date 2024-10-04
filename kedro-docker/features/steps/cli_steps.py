@@ -305,7 +305,7 @@ def check_status_code(context):
         print(context.result.stderr)
         assert (
             False
-        ), f"Expected exit code {OK_EXIT_CODE} but got {context.result.returncode}"
+        ), f"Expected exit code /= {OK_EXIT_CODE} but got {context.result.returncode}"
 
 
 @then("I should get an error exit code")

@@ -209,7 +209,7 @@ class SnowparkTableDataset(AbstractDataset):
     def _session(self) -> sp.Session:
         return self._get_session(self._connection_parameters)
 
-    def _load(self) -> sp.DataFrame:
+    def load(self) -> sp.DataFrame:
         table_name: list = [
             self._database,
             self._schema,
@@ -219,7 +219,7 @@ class SnowparkTableDataset(AbstractDataset):
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
-    def _save(self, data: sp.DataFrame) -> None:
+    def save(self, data: sp.DataFrame) -> None:
         table_name = [
             self._database,
             self._schema,

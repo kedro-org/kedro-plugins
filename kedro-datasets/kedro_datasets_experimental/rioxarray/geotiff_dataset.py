@@ -50,7 +50,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         >>> data = xr.DataArray(
         ...     np.random.randn(2, 3, 2),
         ...     dims=("band", "y", "x"),
-        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]}
+        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
         ... )
         >>> data_crs = data.rio.write_crs("epsg:4326")
         >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
@@ -117,7 +117,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             "version": self._version,
         }
 
-    def _load(self) -> xarray.DataArray:
+    def load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
         with rasterio.open(load_path) as data:
             tags = data.tags()
@@ -127,7 +127,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         logger.info(f"found coordinate rerence system {data.rio.crs}")
         return data
 
-    def _save(self, data: xarray.DataArray) -> None:
+    def save(self, data: xarray.DataArray) -> None:
         self._sanity_check(data)
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         if not save_path.endswith(tuple(SUPPORTED_FILE_FORMATS)):

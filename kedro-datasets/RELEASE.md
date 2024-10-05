@@ -21,6 +21,8 @@
 * Fixed incorrect `pandas` optional dependency
 
 ## Breaking Changes
+* Exposed `load` and `save` publicly for each dataset. This requires Kedro version 0.19.7 or higher.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Brandon Meek](https://github.com/bpmeek)

@@ -166,7 +166,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.
-    def _load(self) -> Any:
+    def load(self) -> Any:
         if not self.exists():
             raise DatasetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
@@ -174,7 +174,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             self._redis_db.get(self._key), **self._load_args
         )  # type: ignore
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         try:
             imported_backend = importlib.import_module(self._backend)
             self._redis_db.set(

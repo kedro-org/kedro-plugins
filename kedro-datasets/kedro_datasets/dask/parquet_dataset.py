@@ -135,12 +135,12 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> dd.DataFrame:
+    def load(self) -> dd.DataFrame:
         return dd.read_parquet(
             self._filepath, storage_options=self.fs_args, **self._load_args
         )
 
-    def _save(self, data: dd.DataFrame) -> None:
+    def save(self, data: dd.DataFrame) -> None:
         self._process_schema()
         data.to_parquet(
             path=self._filepath, storage_options=self.fs_args, **self._save_args

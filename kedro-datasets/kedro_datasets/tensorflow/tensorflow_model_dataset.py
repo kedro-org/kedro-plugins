@@ -134,7 +134,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
         self._is_h5 = self._save_args.get("save_format") == "h5"
 
-    def _load(self) -> tf.keras.Model:
+    def load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:
@@ -155,7 +155,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
                 model = tf.keras.models.load_model(path, **self._load_args)
             return model
 
-    def _save(self, data: tf.keras.Model) -> None:
+    def save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:

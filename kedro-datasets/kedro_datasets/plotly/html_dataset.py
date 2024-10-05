@@ -129,10 +129,10 @@ class HTMLDataset(
             "version": self._version,
         }
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: go.Figure) -> None:
+    def save(self, data: go.Figure) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

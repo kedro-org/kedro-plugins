@@ -94,11 +94,11 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
             "version": self._version,
         }
 
-    def _load(self) -> Any:
+    def load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return torch.load(load_path, **self._fs_open_args_load)  #nosec: B614
 
-    def _save(self, data: torch.nn.Module) -> None:
+    def save(self, data: torch.nn.Module) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         torch.save(data.state_dict(), save_path, **self._fs_open_args_save)  #nosec: B614
 

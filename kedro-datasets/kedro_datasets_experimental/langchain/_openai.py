@@ -31,10 +31,10 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
     def _describe(self) -> dict[str, Any]:
         return {**self.kwargs}
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
 
-    def _load(self) -> OPENAI_TYPE:
+    def load(self) -> OPENAI_TYPE:
         return self.constructor(
             openai_api_base=self.openai_api_base,
             openai_api_key=self.openai_api_key,

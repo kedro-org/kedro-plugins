@@ -152,12 +152,12 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
 
         return cls._connections[key]
 
-    def _load(self) -> ir.Table:
+    def load(self) -> ir.Table:
         load_path = self._get_load_path()
         reader = getattr(self.connection, f"read_{self._file_format}")
         return reader(load_path, self._table_name, **self._load_args)
 
-    def _save(self, data: ir.Table) -> None:
+    def save(self, data: ir.Table) -> None:
         save_path = self._get_save_path()
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         writer = getattr(self.connection, f"to_{self._file_format}")

@@ -172,7 +172,7 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
 
 @pytest.fixture
 def external_location():
-    return os.environ.get("DATABRICKS_EXTERNAL_LOCATION", "s3://bucket/test_save_external")
+    return os.environ.get("DATABRICKS_EXTERNAL_LOCATION")
 
 
 class TestBaseTableDataset:
@@ -396,7 +396,7 @@ class TestBaseTableDataset:
             database="test",
             table="test_save_external",
             write_mode="overwrite",
-            location=external_location,
+            location=f"{external_location}/test_save_external",
         )
         unity_ds.save(sample_spark_df)
         unity_ds.save(append_spark_df)
@@ -451,7 +451,7 @@ class TestBaseTableDataset:
             database="test",
             table="test_save_append_external",
             write_mode="append",
-            location=external_location,
+            location=f"{external_location}/test_save_append_external",
         )
         unity_ds.save(sample_spark_df)
         unity_ds.save(append_spark_df)

@@ -155,9 +155,7 @@ class TestTensorFlowModelDataset:
 
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
-        pattern = (
-            r"Failed while loading data from dataset TensorFlowModelDataset\(.*\)"
-        )
+        pattern = r"Failed while loading data from dataset TensorFlowModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 

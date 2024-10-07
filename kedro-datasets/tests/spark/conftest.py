@@ -8,7 +8,6 @@ https://docs.pytest.org/en/latest/fixture.html
 import pytest
 from delta import configure_spark_with_delta_pip
 from filelock import FileLock
-
 from pyspark.sql import SparkSession
 
 

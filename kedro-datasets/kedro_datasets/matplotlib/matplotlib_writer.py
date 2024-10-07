@@ -203,7 +203,7 @@ class MatplotlibWriter(
     def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
         save_path = self._get_save_path()
 
-        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+        if isinstance(data, list | dict) and self._overwrite and self._exists():
             self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):

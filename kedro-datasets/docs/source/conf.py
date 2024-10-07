@@ -145,7 +145,6 @@ type_targets = {
     ),
     "py:data": (
         "typing.Any",
-        "typing.Union",
         "typing.Optional",
         "typing.Tuple",
     ),

@@ -401,12 +401,6 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         method = getattr(self, f"_save_{self._table.write_mode}", None)
 
-        if method is None:
-            raise DatasetError(
-                f"Invalid `write_mode` provided: {self._table.write_mode}. "
-                f"`write_mode` must be one of: {self._table._VALID_WRITE_MODES}"
-            )
-
         method(data)
 
     def _save_append(self, data: DataFrame) -> None:

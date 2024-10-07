@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError, Version, VersionNotFoundError
@@ -169,6 +170,11 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
     return spark_session.createDataFrame(data, schema)
 
 
+@pytest.fixture
+def external_location():
+    return os.environ.get("DATABRICKS_EXTERNAL_LOCATION", "s3://bucket/test_save_external")
+
+
 class TestBaseTableDataset:
     def test_full_table(self):
         unity_ds = BaseTableDataset(catalog="test", database="test", table="test")
@@ -225,6 +231,10 @@ class TestBaseTableDataset:
     def test_invalid_catalog(self):
         with pytest.raises(DatasetError):
             BaseTableDataset(table="test", catalog="invalid!")
+
+    def test_invalid_format(self):
+        with pytest.raises(DatasetError):
+            BaseTableDataset(table="test", format="invalid")
 
     def test_schema(self):
         unity_ds = BaseTableDataset(
@@ -360,6 +370,41 @@ class TestBaseTableDataset:
 
         assert append_spark_df.exceptAll(overwritten_table).count() == 0
 
+    def test_save_overwrite_partitioned(
+        self, sample_spark_df: DataFrame, append_spark_df: DataFrame
+    ):
+        unity_ds = BaseTableDataset(
+            database="test",
+            table="test_save_partitioned",
+            write_mode="overwrite",
+            partition_columns=["name"],
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        overwritten_table = unity_ds.load()
+
+        assert append_spark_df.exceptAll(overwritten_table).count() == 0
+
+    def test_save_overwrite_external(
+        self,
+        sample_spark_df: DataFrame,
+        append_spark_df: DataFrame,
+        external_location: str,
+    ):
+        unity_ds = BaseTableDataset(
+            database="test",
+            table="test_save_external",
+            write_mode="overwrite",
+            location=external_location,
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        overwritten_table = unity_ds.load()
+
+        assert append_spark_df.exceptAll(overwritten_table).count() == 0
+
     def test_save_append(
         self,
         sample_spark_df: DataFrame,
@@ -368,6 +413,45 @@ class TestBaseTableDataset:
     ):
         unity_ds = BaseTableDataset(
             database="test", table="test_save_append", write_mode="append"
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        appended_table = unity_ds.load()
+
+        assert expected_append_spark_df.exceptAll(appended_table).count() == 0
+
+    def test_save_append_partitioned(
+        self,
+        sample_spark_df: DataFrame,
+        append_spark_df: DataFrame,
+        expected_append_spark_df: DataFrame,
+    ):
+        unity_ds = BaseTableDataset(
+            database="test",
+            table="test_save_append_partitioned",
+            write_mode="append",
+            partition_columns=["name"],
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        appended_table = unity_ds.load()
+
+        assert expected_append_spark_df.exceptAll(appended_table).count() == 0
+
+    def test_save_append_external(
+        self,
+        sample_spark_df: DataFrame,
+        append_spark_df: DataFrame,
+        expected_append_spark_df: DataFrame,
+        external_location: str,
+    ):
+        unity_ds = BaseTableDataset(
+            database="test",
+            table="test_save_append_external",
+            write_mode="append",
+            location=external_location,
         )
         unity_ds.save(sample_spark_df)
         unity_ds.save(append_spark_df)

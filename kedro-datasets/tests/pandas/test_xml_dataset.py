@@ -42,14 +42,14 @@ def dummy_dataframe():
 
 class TestXMLDataset:
     def test_save_and_load(self, xml_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         xml_dataset.save(dummy_dataframe)
         reloaded = xml_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, xml_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not xml_dataset.exists()
         xml_dataset.save(dummy_dataframe)
         assert xml_dataset.exists()
@@ -94,7 +94,7 @@ class TestXMLDataset:
 
     def test_load_missing_file(self, xml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set XMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset XMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             xml_dataset.load()
 
@@ -165,7 +165,7 @@ class TestXMLDatasetVersioned:
 
     def test_save_and_load(self, versioned_xml_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_xml_dataset.save(dummy_dataframe)
         reloaded_df = versioned_xml_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -177,13 +177,13 @@ class TestXMLDatasetVersioned:
             versioned_xml_dataset.load()
 
     def test_exists(self, versioned_xml_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_xml_dataset.exists()
         versioned_xml_dataset.save(dummy_dataframe)
         assert versioned_xml_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_xml_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding hdf file for a given save version already exists."""
         versioned_xml_dataset.save(dummy_dataframe)
         pattern = (

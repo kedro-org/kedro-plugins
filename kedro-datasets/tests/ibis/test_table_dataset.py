@@ -52,7 +52,7 @@ def dummy_table(table_dataset_from_csv):
 
 class TestTableDataset:
     def test_save_and_load(self, table_dataset, dummy_table, database):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         table_dataset.save(dummy_table)
         reloaded = table_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
@@ -64,7 +64,7 @@ class TestTableDataset:
 
     def test_exists(self, table_dataset, dummy_table):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not table_dataset.exists()
         table_dataset.save(dummy_table)
         assert table_dataset.exists()

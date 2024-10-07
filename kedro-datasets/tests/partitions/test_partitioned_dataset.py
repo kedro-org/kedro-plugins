@@ -272,7 +272,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from data set ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -293,7 +293,7 @@ class TestPartitionedDatasetLocal:
             (
                 FakeDataset,
                 r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
-                r"is invalid\: all data set types must extend 'AbstractDataset'",
+                r"is invalid\: all dataset types must extend 'AbstractDataset'",
             ),
             ({}, "'type' is missing from dataset catalog configuration"),
         ],

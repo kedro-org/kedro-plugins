@@ -39,7 +39,7 @@ def dummy_data():
 
 class TestSVMLightDataset:
     def test_save_and_load(self, svm_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         svm_dataset.save(dummy_data)
         reloaded_features, reloaded_label = svm_dataset.load()
         original_features, original_label = dummy_data
@@ -50,7 +50,7 @@ class TestSVMLightDataset:
 
     def test_exists(self, svm_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not svm_dataset.exists()
         svm_dataset.save(dummy_data)
         assert svm_dataset.exists()
@@ -82,7 +82,7 @@ class TestSVMLightDataset:
 
     def test_load_missing_file(self, svm_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set SVMLightDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset SVMLightDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             svm_dataset.load()
 
@@ -135,7 +135,7 @@ class TestSVMLightDatasetVersioned:
 
     def test_save_and_load(self, versioned_svm_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_svm_dataset.save(dummy_data)
         reloaded_features, reloaded_label = versioned_svm_dataset.load()
         original_features, original_label = dummy_data
@@ -149,13 +149,13 @@ class TestSVMLightDatasetVersioned:
             versioned_svm_dataset.load()
 
     def test_exists(self, versioned_svm_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_svm_dataset.exists()
         versioned_svm_dataset.save(dummy_data)
         assert versioned_svm_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_svm_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding json file for a given save version already exists."""
         versioned_svm_dataset.save(dummy_data)
         pattern = (

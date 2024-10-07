@@ -284,7 +284,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             path = path[: -len(self._filename_suffix)]
         return path
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def load(self) -> dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():
@@ -300,7 +300,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         return partitions
 
-    def _save(self, data: dict[str, Any]) -> None:
+    def save(self, data: dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 

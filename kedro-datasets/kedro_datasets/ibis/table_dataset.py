@@ -163,7 +163,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         return cls._connections[key]
 
-    def _load(self) -> ir.Table:
+    def load(self) -> ir.Table:
         if self._filepath is not None:
             if self._file_format is None:
                 raise NotImplementedError
@@ -173,7 +173,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         else:
             return self.connection.table(self._table_name)
 
-    def _save(self, data: ir.Table) -> None:
+    def save(self, data: ir.Table) -> None:
         if self._table_name is None:
             raise DatasetError("Must provide `table_name` for materialization.")
 

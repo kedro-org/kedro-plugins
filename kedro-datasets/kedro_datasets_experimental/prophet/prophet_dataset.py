@@ -96,7 +96,7 @@ class ProphetModelDataset(JSONDataset):
             metadata=metadata,
         )
 
-    def _load(self) -> Prophet:
+    def load(self) -> Prophet:
         """Loads a Prophet model from a JSON file.
 
         Returns:
@@ -107,7 +107,7 @@ class ProphetModelDataset(JSONDataset):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return model_from_json(fs_file.read())
 
-    def _save(self, data: Prophet) -> None:
+    def save(self, data: Prophet) -> None:
         """Saves a Prophet model to a JSON file.
 
         Args:

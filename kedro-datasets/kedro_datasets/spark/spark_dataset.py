@@ -413,7 +413,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
             "version": self._version,
         }
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
         read_obj = _get_spark().read
 
@@ -423,7 +423,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
 
         return read_obj.load(load_path, self._file_format, **self._load_args)
 
-    def _save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
         data.write.save(save_path, self._file_format, **self._save_args)
 

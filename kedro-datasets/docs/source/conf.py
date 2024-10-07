@@ -97,7 +97,7 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
-    "python": ("https://docs.python.org/3.9/", None),
+    "python": ("https://docs.python.org/3.10/", None),
 }
 
 type_targets = {

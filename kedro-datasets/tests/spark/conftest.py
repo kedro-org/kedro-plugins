@@ -9,10 +9,7 @@ import pytest
 from delta import configure_spark_with_delta_pip
 from filelock import FileLock
 
-try:
-    from pyspark.sql import SparkSession
-except ImportError:  # pragma: no cover
-    pass  # this is only for test discovery to succeed on Python 3.8, 3.9
+from pyspark.sql import SparkSession
 
 
 def _setup_spark_session():

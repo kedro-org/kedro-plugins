@@ -109,7 +109,6 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
-        self._filepath = filepath
         self._file_format = file_format
         self._table_name = table_name
         self._connection_config = connection

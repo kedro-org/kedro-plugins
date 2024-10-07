@@ -6,17 +6,19 @@
 * Removed support for Python 3.9
 * Added the following new **experimental** datasets:
 
-| Type                                | Description                                               | Location                                |
-|-------------------------------------|-----------------------------------------------------------|-----------------------------------------|
-| `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models  | `kedro_datasets_experimental.pytorch`   |
-| `prophet.ProphetModelDataset`       | A dataset for Meta's Prophet model for time series forecasting | `kedro_datasets_experimental.prophet`   |
+| Type                                | Description                                                     | Location                                |
+|-------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `pytorch.PyTorchDataset`            | A dataset for securely saving and loading PyTorch models.       | `kedro_datasets_experimental.pytorch`   |
+| `prophet.ProphetModelDataset`       | A dataset for Meta's Prophet model for time series forecasting. | `kedro_datasets_experimental.prophet`   |
 
 
 * Added the following new core datasets:
 
-| Type                 | Description                                    | Location                |
-|----------------------|------------------------------------------------|-------------------------|
-| `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML | `kedro_datasets.plotly` |
+| Type                 | Description                                                   | Location                |
+|----------------------|---------------------------------------------------------------|-------------------------|
+| `plotly.HTMLDataset` | A dataset for saving a `plotly` figure as HTML.               | `kedro_datasets.plotly` |
+| `ibis.TableDataset`  | A dataset for loading and saving files using Ibis's backends. | `kedro_datasets.ibis`   |
+
 
 ## Bug fixes and other changes
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.

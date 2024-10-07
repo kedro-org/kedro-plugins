@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Removed support for Python 3.9
 * Added the following new **experimental** datasets:
 
 | Type                                | Description                                               | Location                                |

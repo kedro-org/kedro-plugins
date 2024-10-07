@@ -116,13 +116,13 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
             **(_fs_open_args_save or {}),
         }
 
-    def _load(self) -> networkx.Graph:
+    def load(self) -> networkx.Graph:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             data = networkx.read_gml(fs_file, **self._load_args)
         return data
 
-    def _save(self, data: networkx.Graph) -> None:
+    def save(self, data: networkx.Graph) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             networkx.write_gml(data, fs_file, **self._save_args)

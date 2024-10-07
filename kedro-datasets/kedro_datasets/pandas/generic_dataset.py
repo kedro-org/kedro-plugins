@@ -190,7 +190,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 f"does not support a filepath target/source."
             )
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -204,7 +204,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "https://pandas.pydata.org/docs/reference/io.html"
         )
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

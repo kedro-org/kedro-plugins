@@ -18,8 +18,11 @@
 * Refactored all datasets to set `fs_args` defaults in the same way as `load_args` and `save_args` and not have hardcoded values in the save methods.
 * Fixed bug related to loading/saving models from/to remote storage using `TensorFlowModelDataset`.
 * Fixed deprecated load and save approaches of GBQTableDataset and GBQQueryDataset by invoking save and load directly over `pandas-gbq` lib
+* Fixed incorrect `pandas` optional dependency
 
 ## Breaking Changes
+* Exposed `load` and `save` publicly for each dataset. This requires Kedro version 0.19.7 or higher.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Brandon Meek](https://github.com/bpmeek)
@@ -27,6 +30,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [gitgud5000](https://github.com/gitgud5000)
 * [janickspirig](https://github.com/janickspirig)
 * [Galen Seilis](https://github.com/galenseilis)
+* [Mariusz Wojakowski](https://github.com/mariusz89016)
 
 
 # Release 4.1.0

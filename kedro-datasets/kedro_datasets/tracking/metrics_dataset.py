@@ -46,10 +46,10 @@ class MetricsDataset(json_dataset.JSONDataset):
 
     versioned = True
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: dict[str, float]) -> None:
+    def save(self, data: dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataset`` to float to make sure
         they are numeric values which can be displayed in Kedro Viz and then saves the dataset.
         """

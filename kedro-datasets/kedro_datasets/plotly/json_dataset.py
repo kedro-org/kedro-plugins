@@ -21,9 +21,7 @@ from plotly import graph_objects as go
 from kedro_datasets._typing import PlotlyPreview
 
 
-class JSONDataset(
-    AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidget]
-):
+class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidget]):
     """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 

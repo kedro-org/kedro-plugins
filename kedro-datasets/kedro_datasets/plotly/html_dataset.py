@@ -18,9 +18,7 @@ from kedro.io.core import (
 from plotly import graph_objects as go
 
 
-class HTMLDataset(
-    AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidget]
-):
+class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidget]):
     """``HTMLDataset`` saves a plotly figure to an HTML file using an
     underlying filesystem (e.g.: local, S3, GCS).
 

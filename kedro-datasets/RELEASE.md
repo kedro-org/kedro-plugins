@@ -32,6 +32,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [janickspirig](https://github.com/janickspirig)
 * [Galen Seilis](https://github.com/galenseilis)
 * [Mariusz Wojakowski](https://github.com/mariusz89016)
+* [Felix Scherz](https://github.com/felixscherz)
 
 
 # Release 4.1.0

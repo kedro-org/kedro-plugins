@@ -142,6 +142,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
     @property
     def connection(self) -> BaseBackend:
+        """The ``Backend`` instance for the connection configuration."""
+
         def hashable(value):
             """Return a hashable key for a potentially-nested object."""
             if isinstance(value, dict):

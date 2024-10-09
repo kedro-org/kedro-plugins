@@ -118,7 +118,7 @@ pandas = [
 pickle-pickledataset = ["compress-pickle[lz4]~=2.1.0"]
 pickle = ["kedro-datasets[pickle-pickledataset]"]
 
-pillow-imagedataset = ["Pillow~=10.0"]
+pillow-imagedataset = ["Pillow>=9.0"]
 pillow = ["kedro-datasets[pillow-imagedataset]"]
 
 plotly-htmldataset = ["kedro-datasets[plotly-base]"]

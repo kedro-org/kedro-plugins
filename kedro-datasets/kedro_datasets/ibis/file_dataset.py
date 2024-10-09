@@ -66,7 +66,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
     def __init__(  # noqa: PLR0913
         self,
         filepath: str,
-        file_format: str,
+        file_format: str = "parquet",
         *,
         table_name: str | None = None,
         connection: dict[str, Any] | None = None,
@@ -96,6 +96,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
                 for loading data into your data warehouse (for testing).
                 On save, the backend exports data to the specified path.
             file_format: String specifying the file format for the file.
+                Defaults to writing execution results to a Parquet file.
             table_name: The name to use for the created table (on load).
             connection: Configuration for connecting to an Ibis backend.
             load_args: Additional arguments passed to the Ibis backend's

@@ -2,9 +2,9 @@
 
 import shlex
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 from sys import version_info
-from typing import Dict, Sequence
 
 import click
 from kedro import __version__ as kedro_version
@@ -191,7 +191,7 @@ def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):  # noqa:
     call(command)
 
 
-def _mount_info() -> Dict[str, Sequence[str]]:
+def _mount_info() -> dict[str, Sequence[str]]:
     res = {
         "host_root": str(Path.cwd()),
         "container_root": "/home/kedro_docker",

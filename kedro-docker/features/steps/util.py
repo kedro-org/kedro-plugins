@@ -6,7 +6,7 @@ import venv
 from pathlib import Path
 from threading import Thread
 from time import sleep, time
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import docker
 from kedro.framework.cli.utils import get_pkg_version
@@ -130,7 +130,7 @@ def init_docker_client(**kwargs) -> docker.client.DockerClient:
     return docker.from_env(**kwargs)
 
 
-def get_docker_containers(name: str) -> List[docker.models.containers.Container]:
+def get_docker_containers(name: str) -> list[docker.models.containers.Container]:
     """
     Get list of docker containers which contain `name` in their names.
 
@@ -164,7 +164,7 @@ def docker_prune():
     client.images.prune()
 
 
-def get_docker_images(name: str) -> List[docker.models.images.Image]:
+def get_docker_images(name: str) -> list[docker.models.images.Image]:
     """
     Get docker images with `name` in their names.
 

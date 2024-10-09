@@ -1,5 +1,8 @@
 # Upcoming release
 
+# Release 0.7.0
+* Removed support for Python 3.8
+
 # Release 0.6.1
 * Changed Kedro CLI loading method to improve loading times.
 * Changed logging level from error to debug for most logging messages.

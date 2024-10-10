@@ -140,7 +140,7 @@ class TestHoloviewsWriterVersioned:
         assert "save_args" in str(versioned_hv_writer)
 
     def test_prevent_overwrite(self, dummy_hv_object, versioned_hv_writer):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
@@ -185,7 +185,7 @@ class TestHoloviewsWriterVersioned:
             versioned_hv_writer.load()
 
     def test_exists(self, versioned_hv_writer, dummy_hv_object):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_hv_writer.exists()
         versioned_hv_writer.save(dummy_hv_object)
         assert versioned_hv_writer.exists()

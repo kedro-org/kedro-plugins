@@ -16,7 +16,7 @@ from kedro_datasets.spark.spark_dataset import _get_spark
 
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     """``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
-    This data set also handles some incompatible file types such as using partitioned parquet on
+    This dataset also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
     of the existing file/partition.
 

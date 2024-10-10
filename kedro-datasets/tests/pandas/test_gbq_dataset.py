@@ -94,7 +94,7 @@ class TestGBQDataset:
 
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
-        pattern = r"Failed while loading data from data set GBQTableDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset GBQTableDataset\(.*\)"
         mocked_read_gbq = mocker.patch(
             "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
         )
@@ -121,7 +121,7 @@ class TestGBQDataset:
     @pytest.mark.parametrize("save_args", [{"option1": "value1"}], indirect=True)
     @pytest.mark.parametrize("load_args", [{"option2": "value2"}], indirect=True)
     def test_str_representation(self, gbq_dataset, save_args, load_args):
-        """Test string representation of the data set instance."""
+        """Test string representation of the dataset instance."""
         str_repr = str(gbq_dataset)
         assert "GBQTableDataset" in str_repr
         assert TABLE_NAME in str_repr
@@ -132,7 +132,7 @@ class TestGBQDataset:
             assert k in str_repr
 
     def test_save_load_data(self, gbq_dataset, dummy_dataframe, mocker):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         sql = f"select * from {DATASET}.{TABLE_NAME}"
         table_id = f"{DATASET}.{TABLE_NAME}"
         mocked_to_gbq = mocker.patch("kedro_datasets.pandas.gbq_dataset.pd_gbq.to_gbq")
@@ -161,7 +161,7 @@ class TestGBQDataset:
         "load_args", [{"query_or_table": "Select 1"}], indirect=True
     )
     def test_read_gbq_with_query(self, gbq_dataset, dummy_dataframe, mocker, load_args):
-        """Test loading data set with query in the argument."""
+        """Test loading dataset with query in the argument."""
         mocked_read_gbq = mocker.patch(
             "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
         )
@@ -283,13 +283,13 @@ class TestGBQQueryDataset:
         assert_frame_equal(dummy_dataframe, loaded_data)
 
     def test_save_error(self, gbq_sql_dataset, dummy_dataframe):
-        """Check the error when trying to save to the data set"""
+        """Check the error when trying to save to the dataset"""
         pattern = r"'save' is not supported on GBQQueryDataset"
         with pytest.raises(DatasetError, match=pattern):
             gbq_sql_dataset.save(dummy_dataframe)
 
     def test_str_representation_sql(self, gbq_sql_dataset, sql_file):
-        """Test the data set instance string representation"""
+        """Test the dataset instance string representation"""
         str_repr = str(gbq_sql_dataset)
         assert (
             f"GBQQueryDataset(filepath=None, load_args={{}}, sql={SQL_QUERY})"
@@ -298,7 +298,7 @@ class TestGBQQueryDataset:
         assert sql_file not in str_repr
 
     def test_str_representation_filepath(self, gbq_sql_file_dataset, sql_file):
-        """Test the data set instance string representation with filepath arg."""
+        """Test the dataset instance string representation with filepath arg."""
         str_repr = str(gbq_sql_file_dataset)
         assert (
             f"GBQQueryDataset(filepath={str(sql_file)}, load_args={{}}, sql=None)"

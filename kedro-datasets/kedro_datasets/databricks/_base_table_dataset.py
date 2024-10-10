@@ -400,8 +400,8 @@ class BaseTableDataset(AbstractVersionedDataset):
             data = _get_spark().createDataFrame(data)
 
         method = getattr(self, f"_save_{self._table.write_mode}", None)
-
-        method(data)
+        if method:
+            method(data)
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

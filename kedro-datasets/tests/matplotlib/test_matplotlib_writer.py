@@ -282,7 +282,7 @@ class TestMatplotlibWriterVersioned:
         assert ver_str in str(chart_versioned)
 
     def test_prevent_overwrite(self, mock_single_plot, versioned_plot_writer):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding matplotlib file for a given save version already exists."""
         versioned_plot_writer.save(mock_single_plot)
         pattern = (
@@ -341,13 +341,13 @@ class TestMatplotlibWriterVersioned:
             versioned_plot_writer.load()
 
     def test_exists(self, versioned_plot_writer, mock_single_plot):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_plot_writer.exists()
         versioned_plot_writer.save(mock_single_plot)
         assert versioned_plot_writer.exists()
 
     def test_exists_multiple(self, versioned_plot_writer, mock_list_plot):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_plot_writer.exists()
         versioned_plot_writer.save(mock_list_plot)
         assert versioned_plot_writer.exists()

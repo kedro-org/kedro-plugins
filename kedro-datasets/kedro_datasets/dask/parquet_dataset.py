@@ -1,4 +1,4 @@
-"""``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
+"""``ParquetDataset`` is a dataset used to load and save data to parquet files using Dask
 dataframe"""
 from __future__ import annotations
 

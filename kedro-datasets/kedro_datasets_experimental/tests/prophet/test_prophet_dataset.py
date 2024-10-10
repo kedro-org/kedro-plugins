@@ -75,7 +75,7 @@ class TestProphetModelDataset:
 
     def test_load_missing_file(self, prophet_model_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ProphetModelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset ProphetModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             prophet_model_dataset.load()
 

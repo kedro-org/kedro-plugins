@@ -68,7 +68,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         return {**self.kwargs}
 
     def save(self, data: None) -> NoReturn:
-        raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
+        raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def load(self) -> ChatAnthropic:
         return ChatAnthropic(

@@ -17,7 +17,7 @@ kedro_datasets
    dask.ParquetDataset
    databricks.ManagedTableDataset
    email.EmailMessageDataset
-   geopandas.GeoJSONDataset
+   geopandas.GenericDataset
    holoviews.HoloviewsWriter
    huggingface.HFDataset
    huggingface.HFTransformerPipelineDataset

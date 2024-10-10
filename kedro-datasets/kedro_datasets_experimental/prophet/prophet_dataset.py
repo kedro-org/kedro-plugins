@@ -37,10 +37,9 @@ class ProphetModelDataset(JSONDataset):
         >>> from prophet import Prophet
         >>> import pandas as pd
         >>>
-        >>> df = pd.DataFrame({
-        >>>     "ds": ["2024-01-01", "2024-01-02", "2024-01-03"],
-        >>>     "y": [100, 200, 300]
-        >>> })
+        >>> df = pd.DataFrame(
+        ...     {"ds": ["2024-01-01", "2024-01-02", "2024-01-03"], "y": [100, 200, 300]}
+        ... )
         >>>
         >>> model = Prophet()
         >>> model.fit(df)

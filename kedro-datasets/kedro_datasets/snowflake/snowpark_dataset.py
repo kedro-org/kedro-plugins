@@ -1,10 +1,11 @@
-"""``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
-"""
+"""``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes"""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
+import pandas as pd
 import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataset, DatasetError
 
@@ -220,12 +221,14 @@ class SnowparkTableDataset(AbstractDataset):
         return sp_df
 
     def save(self, data: sp.DataFrame) -> None:
+        if isinstance(data, pd.DataFrame):
+            data = data.to_pandas()
+
         table_name = [
             self._database,
             self._schema,
             self._table_name,
         ]
-
         data.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:

@@ -138,7 +138,7 @@ polars = [
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
 
-snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
+snowflake-snowparktabledataset = ["snowflake-snowpark-python"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
 spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]

@@ -297,7 +297,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
                 the init doesn't exist
 
         Returns:
-            Union[DataFrame, pd.DataFrame]: Returns a dataframe
+            DataFrame | pd.DataFrame: Returns a dataframe
                 in the format defined in the init
         """
         if self._version and self._version.load >= 0:

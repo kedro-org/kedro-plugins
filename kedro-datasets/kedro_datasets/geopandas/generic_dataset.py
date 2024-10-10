@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any
 
 import fsspec
 import geopandas as gpd
@@ -27,7 +27,7 @@ NON_FILE_SYSTEM_TARGETS = ["postgis"]
 
 class GenericDataset(
     AbstractVersionedDataset[
-        gpd.GeoDataFrame, Union[gpd.GeoDataFrame, dict[str, gpd.GeoDataFrame]]
+        gpd.GeoDataFrame, gpd.GeoDataFrame | dict[str, gpd.GeoDataFrame]
     ]
 ):
     """``GenericDataset`` loads/saves data to a file using an underlying filesystem

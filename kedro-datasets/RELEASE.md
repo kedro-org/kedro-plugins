@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Removed support for Python 3.9
 * Added the following new **experimental** datasets:
 
 | Type                                | Description                                               | Location                                |
@@ -33,6 +34,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Galen Seilis](https://github.com/galenseilis)
 * [Mariusz Wojakowski](https://github.com/mariusz89016)
 * [harm-matthias-harms](https://github.com/harm-matthias-harms)
+* [Felix Scherz](https://github.com/felixscherz)
+
 
 # Release 4.1.0
 ## Major features and improvements

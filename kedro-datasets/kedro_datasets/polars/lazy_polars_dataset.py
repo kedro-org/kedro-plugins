@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, ClassVar, Union
+from typing import Any, ClassVar
 
 import fsspec
 import polars as pl
@@ -22,7 +22,7 @@ from kedro.io.core import (
 
 ACCEPTED_FILE_FORMATS = ["csv", "parquet"]
 
-PolarsFrame = Union[pl.LazyFrame, pl.DataFrame]
+PolarsFrame = pl.LazyFrame | pl.DataFrame
 
 logger = logging.getLogger(__name__)
 

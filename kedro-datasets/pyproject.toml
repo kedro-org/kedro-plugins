@@ -118,7 +118,7 @@ pandas = [
 pickle-pickledataset = ["compress-pickle[lz4]~=2.1.0"]
 pickle = ["kedro-datasets[pickle-pickledataset]"]
 
-pillow-imagedataset = ["Pillow~=9.0"]
+pillow-imagedataset = ["Pillow>=9.0"]
 pillow = ["kedro-datasets[pillow-imagedataset]"]
 
 plotly-htmldataset = ["kedro-datasets[plotly-base]"]
@@ -237,7 +237,7 @@ test = [
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
     "pandas>=2.0",
-    "Pillow~=9.0",
+    "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
     "pre-commit>=2.9.2",

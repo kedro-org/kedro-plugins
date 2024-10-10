@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any
 
 import fsspec
 import pandas as pd
@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 class ExcelDataset(
     AbstractVersionedDataset[
-        Union[pd.DataFrame, dict[str, pd.DataFrame]],
-        Union[pd.DataFrame, dict[str, pd.DataFrame]],
+        pd.DataFrame | dict[str, pd.DataFrame],
+        pd.DataFrame | dict[str, pd.DataFrame],
     ]
 ):
     """``ExcelDataset`` loads/saves data from/to a Excel file using an underlying

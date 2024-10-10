@@ -1,6 +1,7 @@
 """dummy_project file for ensuring the package is executable
 as `dummy-project` and `python -m dummy_project`
 """
+
 import importlib
 from pathlib import Path
 

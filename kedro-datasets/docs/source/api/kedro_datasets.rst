@@ -21,6 +21,7 @@ kedro_datasets
    holoviews.HoloviewsWriter
    huggingface.HFDataset
    huggingface.HFTransformerPipelineDataset
+   ibis.FileDataset
    ibis.TableDataset
    json.JSONDataset
    matlab.MatlabDataset

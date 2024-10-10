@@ -179,7 +179,7 @@ class TestGBQDataset:
     @pytest.mark.parametrize(
         "dataset,table_name",
         [
-            ("dataset", TABLE_NAME),
+            ("data set", TABLE_NAME),
             ("data;set", TABLE_NAME),
             (DATASET, "table name"),
             (DATASET, "table;name"),

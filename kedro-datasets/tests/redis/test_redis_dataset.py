@@ -77,7 +77,7 @@ class TestPickleDataset:
         serialised_dummy_object,
         key,
     ):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         set_mocker = mocker.patch("redis.StrictRedis.set")
         get_mocker = mocker.patch(
             "redis.StrictRedis.get", return_value=serialised_dummy_object
@@ -94,7 +94,7 @@ class TestPickleDataset:
 
     def test_exists(self, mocker, pickle_dataset, dummy_object, key):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         mocker.patch("redis.StrictRedis.exists", return_value=False)
         assert not pickle_dataset.exists()
         mocker.patch("redis.StrictRedis.set")

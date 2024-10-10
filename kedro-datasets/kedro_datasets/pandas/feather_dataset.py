@@ -1,4 +1,4 @@
-"""``FeatherDataset`` is a data set used to load and save data to feather files
+"""``FeatherDataset`` is a dataset used to load and save data to feather files
 using an underlying filesystem (e.g.: local, S3, GCS). The underlying functionality
 is supported by pandas, so it supports all operations the pandas supports.
 """

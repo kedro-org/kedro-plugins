@@ -1,6 +1,6 @@
 # Kedro-Docker
 
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-docker/)
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-docker/)
 [![PyPI version](https://badge.fury.io/py/kedro-docker.svg)](https://pypi.org/project/kedro-docker/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
@@ -63,7 +63,7 @@ Behind the scenes Kedro does the following:
 
 > *Note:* By default, `kedro docker build` creates an image without Spark and Hadoop.
 
-> *Note:* By default, when calling `kedro docker build` image is built with `python:VERSION-buster` image, where VERSION is Python (major + minor) version from the current environment. By specifying `--base-image` option, different base image can be used. For example `kedro docker build --base-image="python:3.8-buster"`.
+> *Note:* By default, when calling `kedro docker build` image is built with `python:VERSION-buster` image, where VERSION is Python (major + minor) version from the current environment. By specifying `--base-image` option, different base image can be used. For example `kedro docker build --base-image="python:3.9-buster"`.
 
 > *Note:* You can generate the `Dockerfile`, `.dockerignore` or `.dive-ci` files without building the image by running `kedro docker init`. This might be of use in case you would like to modify these files before the first build.
 

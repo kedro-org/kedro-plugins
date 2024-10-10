@@ -309,7 +309,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    It does not support save method so it is a read only data set.
+    It does not support save method so it is a read only dataset.
     To save data to a SQL server use ``SQLTableDataset``.
 
     Example usage for the

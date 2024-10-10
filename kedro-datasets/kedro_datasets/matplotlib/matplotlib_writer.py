@@ -6,7 +6,7 @@ import base64
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn
 from warnings import warn
 
 import fsspec
@@ -24,7 +24,7 @@ from kedro_datasets._typing import ImagePreview
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataset[Union[Figure, list[Figure], dict[str, Figure]], NoReturn]
+    AbstractVersionedDataset[Figure | list[Figure] | dict[str, Figure], NoReturn]
 ):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
@@ -203,7 +203,7 @@ class MatplotlibWriter(
     def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
         save_path = self._get_save_path()
 
-        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+        if isinstance(data, list | dict) and self._overwrite and self._exists():
             self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):

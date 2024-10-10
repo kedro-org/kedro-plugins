@@ -42,7 +42,7 @@ repos:
         exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
         pass_filenames: false
         stages: [ manual ]
-        entry: ruff kedro-airflow --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-airflow --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-docker
         name: "Ruff on kedro_docker/*"
@@ -51,7 +51,7 @@ repos:
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
         pass_filenames: false
         stages: [ manual ]
-        entry: ruff kedro-docker --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-docker --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-telemetry
         name: "Ruff on kedro_telemetry/*"
@@ -60,7 +60,7 @@ repos:
         exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: ruff kedro-telemetry --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-telemetry --fix --exit-non-zero-on-fix
 
       - id: black-kedro-datasets
         name: "Black"

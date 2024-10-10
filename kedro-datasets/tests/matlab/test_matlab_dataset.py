@@ -36,7 +36,7 @@ def dummy_data():
 
 class TestMatlabDataset:
     def test_save_and_load(self, matlab_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         matlab_dataset.save(dummy_data)
         reloaded = matlab_dataset.load()
         assert (dummy_data == reloaded["data"]).all()
@@ -45,7 +45,7 @@ class TestMatlabDataset:
 
     def test_exists(self, matlab_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not matlab_dataset.exists()
         matlab_dataset.save(dummy_data)
         assert matlab_dataset.exists()
@@ -69,7 +69,7 @@ class TestMatlabDataset:
 
     def test_load_missing_file(self, matlab_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set MatlabDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset MatlabDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             matlab_dataset.load()
 
@@ -125,7 +125,7 @@ class TestMatlabDatasetVersioned:
 
     def test_save_and_load(self, versioned_matlab_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_matlab_dataset.save(dummy_data)
         reloaded = versioned_matlab_dataset.load()
         assert (dummy_data == reloaded["data"]).all()
@@ -137,13 +137,13 @@ class TestMatlabDatasetVersioned:
             versioned_matlab_dataset.load()
 
     def test_exists(self, versioned_matlab_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_matlab_dataset.exists()
         versioned_matlab_dataset.save(dummy_data)
         assert versioned_matlab_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_matlab_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding json file for a given save version already exists."""
         versioned_matlab_dataset.save(dummy_data)
         pattern = (

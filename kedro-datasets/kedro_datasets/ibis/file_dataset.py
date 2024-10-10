@@ -21,7 +21,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
     .. code-block:: yaml
 
         cars:
-          type: ibis.TableDataset
+          type: ibis.FileDataset
           filepath: data/01_raw/company/cars.csv
           file_format: csv
           table_name: cars
@@ -34,6 +34,14 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
           save_args:
             sep: ","
             nullstr: "#NA"
+
+        motorbikes:
+          type: ibis.FileDataset
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes/
+          file_format: delta
+          table_name: motorbikes
+          connection:
+            backend: polars
 
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\

@@ -1,15 +1,12 @@
 import datetime
 import os
 
+import pandas as pd
 import pytest
+import snowflake.snowpark as sp
 from kedro.io.core import DatasetError
 
-try:
-    import snowflake.snowpark as sp
-
-    from kedro_datasets.snowflake import SnowparkTableDataset as spds
-except ImportError:
-    pass  # this is only for test discovery to succeed on Python <> 3.8
+from kedro_datasets.snowflake import SnowparkTableDataset as spds
 
 
 def get_connection():
@@ -124,6 +121,22 @@ def sample_sp_df(sf_session):
 
 
 @pytest.fixture
+def sample_pd_df():
+    return pd.DataFrame(
+        {
+            "name": ["Alice", "Bob"],
+            "age": [30, 40],
+            "bday": [datetime.date(1993, 1, 1), datetime.date(1983, 2, 2)],
+            "height": [5.5, 6.0],
+            "insert_dttm": [
+                datetime.datetime(2023, 1, 1, 10, 0),
+                datetime.datetime(2023, 1, 1, 12, 0),
+            ],
+        }
+    )
+
+
+@pytest.fixture
 def sf_session():
     sf_session = sp.Session.builder.configs(get_connection()).create()
 
@@ -142,6 +155,18 @@ class TestSnowparkTableDataset:
         sp_df = spds(table_name="KEDRO_PYTEST_TESTSAVE", credentials=get_connection())
         sp_df._save(sample_sp_df)
         sp_df_saved = sf_session.table("KEDRO_PYTEST_TESTSAVE")
+        assert sp_df_saved.count() == 2
+
+    @pytest.mark.snowflake
+    def test_save_with_pandas(self, sample_pd_df, sf_session):
+        sp_df = spds(
+            table_name="KEDRO_PYTEST_TESTSAVEPANDAS", credentials=get_connection()
+        )
+        sp_df.save(sample_pd_df)
+
+        sp_df_saved = sf_session.table("KEDRO_PYTEST_TESTSAVEPANDAS")
+
+        # Assert the count matches
         assert sp_df_saved.count() == 2
 
     @pytest.mark.snowflake

@@ -242,7 +242,7 @@ class ManagedTableDataset(AbstractVersionedDataset):
             database: the name of the database.
                 (also referred to as schema). Defaults to "default".
             write_mode: the mode to write the data into the table. If not
-                present, the data set is read-only.
+                present, the dataset is read-only.
                 Options are:["overwrite", "append", "upsert"].
                 "upsert" mode requires primary_key field to be populated.
                 Defaults to None.

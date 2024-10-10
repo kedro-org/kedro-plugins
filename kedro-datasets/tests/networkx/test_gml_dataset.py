@@ -51,7 +51,7 @@ def dummy_graph_data():
 
 class TestGMLDataset:
     def test_save_and_load(self, gml_dataset, dummy_graph_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         gml_dataset.save(dummy_graph_data)
         reloaded = gml_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
@@ -60,7 +60,7 @@ class TestGMLDataset:
 
     def test_load_missing_file(self, gml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set GMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset GMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert gml_dataset.load()
 
@@ -100,7 +100,7 @@ class TestGMLDataset:
 class TestGMLDatasetVersioned:
     def test_save_and_load(self, versioned_gml_dataset, dummy_graph_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_gml_dataset.save(dummy_graph_data)
         reloaded = versioned_gml_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
@@ -114,13 +114,13 @@ class TestGMLDatasetVersioned:
             versioned_gml_dataset.load()
 
     def test_exists(self, versioned_gml_dataset, dummy_graph_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_gml_dataset.exists()
         versioned_gml_dataset.save(dummy_graph_data)
         assert versioned_gml_dataset.exists()
 
     def test_prevent_override(self, versioned_gml_dataset, dummy_graph_data):
-        """Check the error when attempt to override the same data set
+        """Check the error when attempt to override the same dataset
         version."""
         versioned_gml_dataset.save(dummy_graph_data)
         pattern = (

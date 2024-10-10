@@ -72,7 +72,7 @@ class TestGeoJSONDataset:
     @pytest.mark.parametrize("geojson_dataset", [{"index": False}], indirect=True)
     def test_load_missing_file(self, geojson_dataset):
         """Check the error while trying to load from missing source."""
-        pattern = r"Failed while loading data from data set GeoJSONDataset"
+        pattern = r"Failed while loading data from dataset GeoJSONDataset"
         with pytest.raises(DatasetError, match=pattern):
             geojson_dataset.load()
 
@@ -156,7 +156,7 @@ class TestGeoJSONDatasetVersioned:
 
     def test_save_and_load(self, versioned_geojson_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_geojson_dataset.save(dummy_dataframe)
         reloaded_df = versioned_geojson_dataset.load()
         assert_frame_equal(reloaded_df, dummy_dataframe)
@@ -168,13 +168,13 @@ class TestGeoJSONDatasetVersioned:
             versioned_geojson_dataset.load()
 
     def test_exists(self, versioned_geojson_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_geojson_dataset.exists()
         versioned_geojson_dataset.save(dummy_dataframe)
         assert versioned_geojson_dataset.exists()
 
     def test_prevent_override(self, versioned_geojson_dataset, dummy_dataframe):
-        """Check the error when attempt to override the same data set
+        """Check the error when attempt to override the same dataset
         version."""
         versioned_geojson_dataset.save(dummy_dataframe)
         pattern = (

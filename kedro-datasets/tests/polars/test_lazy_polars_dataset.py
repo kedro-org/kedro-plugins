@@ -111,7 +111,7 @@ class TestLazyCSVDataset:
 
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set.
+        nonexistent dataset.
         """
         assert not csv_dataset.exists()
         csv_dataset.save(dummy_dataframe)
@@ -137,7 +137,7 @@ class TestLazyCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set LazyPolarsDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 
@@ -229,7 +229,7 @@ class TestLazyParquetDatasetVersioned:
         assert df.shape == (2, 3)
 
     def test_save_and_load(self, versioned_parquet_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         versioned_parquet_dataset.save(dummy_dataframe.lazy())
         reloaded_df = versioned_parquet_dataset.load().collect()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -350,7 +350,7 @@ class TestLazyParquetDatasetVersioned:
             versioned_parquet_dataset.load()
 
     def test_prevent_overwrite(self, versioned_parquet_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Generic (parquet) file for a given save version already exists."""
         versioned_parquet_dataset.save(dummy_dataframe)
         pattern = (

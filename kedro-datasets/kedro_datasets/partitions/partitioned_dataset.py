@@ -5,9 +5,10 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 from __future__ import annotations
 
 import operator
+from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 

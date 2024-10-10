@@ -427,7 +427,7 @@ class TestSparkDataset:
         catalog = DataCatalog({"spark_in": spark_in})
         pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
-            r"The following data sets cannot be used with "
+            r"The following datasets cannot be used with "
             r"multiprocessing: \['spark_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):

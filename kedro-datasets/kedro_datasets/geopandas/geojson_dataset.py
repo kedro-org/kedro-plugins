@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any
 
 import fsspec
 import geopandas as gpd
@@ -21,7 +21,7 @@ from kedro.io.core import (
 
 class GeoJSONDataset(
     AbstractVersionedDataset[
-        gpd.GeoDataFrame, Union[gpd.GeoDataFrame, dict[str, gpd.GeoDataFrame]]
+        gpd.GeoDataFrame, gpd.GeoDataFrame | dict[str, gpd.GeoDataFrame]
     ]
 ):
     """``GeoJSONDataset`` loads/saves data to a GeoJSON file using an underlying filesystem

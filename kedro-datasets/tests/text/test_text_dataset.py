@@ -31,7 +31,7 @@ def versioned_txt_dataset(filepath_txt, load_version, save_version):
 
 class TestTextDataset:
     def test_save_and_load(self, txt_dataset):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         txt_dataset.save(STRING)
         reloaded = txt_dataset.load()
         assert STRING == reloaded
@@ -40,7 +40,7 @@ class TestTextDataset:
 
     def test_exists(self, txt_dataset):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not txt_dataset.exists()
         txt_dataset.save(STRING)
         assert txt_dataset.exists()
@@ -56,7 +56,7 @@ class TestTextDataset:
 
     def test_load_missing_file(self, txt_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set TextDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset TextDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             txt_dataset.load()
 
@@ -109,7 +109,7 @@ class TestTextDatasetVersioned:
 
     def test_save_and_load(self, versioned_txt_dataset):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_txt_dataset.save(STRING)
         reloaded_df = versioned_txt_dataset.load()
         assert STRING == reloaded_df
@@ -121,13 +121,13 @@ class TestTextDatasetVersioned:
             versioned_txt_dataset.load()
 
     def test_exists(self, versioned_txt_dataset):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_txt_dataset.exists()
         versioned_txt_dataset.save(STRING)
         assert versioned_txt_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_txt_dataset):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding text file for a given save version already exists."""
         versioned_txt_dataset.save(STRING)
         pattern = (

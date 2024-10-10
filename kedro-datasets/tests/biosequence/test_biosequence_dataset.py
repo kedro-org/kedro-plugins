@@ -38,7 +38,7 @@ def dummy_data():
 
 class TestBioSequenceDataset:
     def test_save_and_load(self, biosequence_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         biosequence_dataset.save(dummy_data)
         reloaded = biosequence_dataset.load()
         assert dummy_data[0].id, reloaded[0].id
@@ -49,7 +49,7 @@ class TestBioSequenceDataset:
 
     def test_exists(self, biosequence_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not biosequence_dataset.exists()
         biosequence_dataset.save(dummy_data)
         assert biosequence_dataset.exists()
@@ -75,7 +75,7 @@ class TestBioSequenceDataset:
 
     def test_load_missing_file(self, biosequence_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set BioSequenceDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset BioSequenceDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             biosequence_dataset.load()
 

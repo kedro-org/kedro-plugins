@@ -9,8 +9,9 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any
 
 from cachetools import cachedmethod
 from kedro.io.core import (

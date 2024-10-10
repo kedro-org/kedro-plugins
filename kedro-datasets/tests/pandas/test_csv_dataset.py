@@ -87,14 +87,14 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe):
 
 class TestCSVDataset:
     def test_save_and_load(self, csv_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         csv_dataset.save(dummy_dataframe)
         reloaded = csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not csv_dataset.exists()
         csv_dataset.save(dummy_dataframe)
         assert csv_dataset.exists()
@@ -195,7 +195,7 @@ class TestCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set CSVDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset CSVDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 
@@ -258,7 +258,7 @@ class TestCSVDatasetVersioned:
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_csv_dataset.save(dummy_dataframe)
         reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -337,13 +337,13 @@ class TestCSVDatasetVersioned:
             versioned_csv_dataset.load()
 
     def test_exists(self, versioned_csv_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_csv_dataset.exists()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding CSV file for a given save version already exists."""
         versioned_csv_dataset.save(dummy_dataframe)
         pattern = (

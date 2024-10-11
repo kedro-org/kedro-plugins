@@ -214,19 +214,16 @@ class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
 
         collected_data = None
         if isinstance(data, pl.LazyFrame):
-            collected_data = data.collect()
+            collected_data = data.collect(streaming=True)
         else:
             collected_data = data
 
-        # Note: polars does support writing partitioned parquet file
-        # it is leveraging Arrow to do so, see e.g.
+        # Note: polars supports writing partitioned parquet file using rust libraries
+        # or it supports delegating to pyarrow in C++
         # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
         save_method = getattr(collected_data, f"write_{self._file_format}", None)
         if save_method:
-            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                save_method(file=fs_file, **self._save_args)
-
-                self._invalidate_cache()
+            save_method(file=save_path, **self._save_args)
         # How the LazyPolarsDataset logic is currently written with
         # ACCEPTED_FILE_FORMATS and a check in the `__init__` method,
         # this else loop is never reached, hence we exclude it from coverage report

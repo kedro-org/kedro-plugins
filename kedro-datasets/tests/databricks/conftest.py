@@ -13,7 +13,6 @@ import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-
 DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 

@@ -2,7 +2,9 @@ import pytest
 from kedro.io.core import DatasetError
 from pyspark.sql import DataFrame
 
-from kedro_datasets_experimental.databricks.external_table_dataset import ExternalTableDataset
+from kedro_datasets_experimental.databricks.external_table_dataset import (
+    ExternalTableDataset,
+)
 
 
 class TestExternalTableDataset:

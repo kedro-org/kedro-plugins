@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError, Version, VersionNotFoundError

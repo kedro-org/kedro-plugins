@@ -126,6 +126,7 @@ class ExternalTableDataset(BaseTableDataset):
             database: The database of the table.
             format: The format of the table.
             write_mode: The write mode for the table.
+            location: The location of the table.
             dataframe_type: The type of dataframe.
             primary_key: The primary key of the table.
             json_schema: The JSON schema of the table.

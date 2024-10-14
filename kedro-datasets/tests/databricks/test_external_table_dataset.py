@@ -33,6 +33,7 @@ class TestExternalTableDataset:
         unity_ds = ExternalTableDataset(
             database="test",
             table="test_save",
+            format="parquet",
             write_mode="overwrite",
             location=f"{external_location}/test_save_overwrite_external",
         )

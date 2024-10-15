@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
-requires-python = ">=3.11, <3.12"
+requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=0.19.7",
@@ -40,8 +40,8 @@ dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona >=1.8, <2.0"]
-geopandas = ["kedro-datasets[geopandas-genericdataset]"]
+geopandas-geojsondataset = ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
+geopandas = ["kedro-datasets[geopandas-geojsondataset]"]
 
 holoviews-holoviewswriter = ["holoviews>=1.13.0"]
 holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
@@ -57,7 +57,7 @@ ibis-datafusion = ["ibis-framework[datafusion]"]
 ibis-druid = ["ibis-framework[druid]"]
 ibis-duckdb = ["ibis-framework[duckdb]"]
 ibis-exasol = ["ibis-framework[exasol]"]
-# ibis-flink = ["ibis-framework", "apache-flink"]
+ibis-flink = ["ibis-framework", "apache-flink"]
 ibis-impala = ["ibis-framework[impala]"]
 ibis-mssql = ["ibis-framework[mssql]"]
 ibis-mysql = ["ibis-framework[mysql]"]
@@ -138,7 +138,7 @@ polars = [
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
 
-snowflake-snowparktabledataset = ["snowflake-snowpark-python"]
+snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
 spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
@@ -174,11 +174,11 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-# langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
-# langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
-# langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
-# langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
-# langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -193,7 +193,7 @@ rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
 # Docs requirements
 docs = [
-    "kedro-sphinx-theme==2024.10.2",
+    "kedro-sphinx-theme==2024.4.0",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
 ]
@@ -215,9 +215,8 @@ test = [
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.3",
-    "geopandas>=0.8.0, <2.0",
+    "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",
@@ -244,6 +243,7 @@ test = [
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
+    "pyproj~=3.0",
     "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",

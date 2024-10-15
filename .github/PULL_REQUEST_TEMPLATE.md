@@ -10,3 +10,4 @@
 - [ ] Updated the documentation to reflect the code changes
 - [ ] Added a description of this change in the relevant `RELEASE.md` file
 - [ ] Added tests to cover my changes
+- [ ] Is this a PR to contribute a dataset to the core datasets? Then it requires a TSC vote.

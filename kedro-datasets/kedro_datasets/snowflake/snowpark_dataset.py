@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark dataframes.
 
-    As of Mar-2023, the snowpark connector only works with Python 3.8.
+    As of Oct-2023, the snowpark connector only works with Python 3.11.
 
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/\

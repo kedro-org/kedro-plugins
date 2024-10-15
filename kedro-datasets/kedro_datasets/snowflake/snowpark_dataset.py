@@ -26,7 +26,7 @@ class SnowparkTableDataset(AbstractDataset):
         weather:
           type: kedro_datasets.snowflake.SnowparkTableDataset
           table_name: "weather_data"
-          database: "meteorology"
+          databasereak: "meteorology"
           schema: "observations"
           credentials: db_credentials
           save_args:
@@ -224,11 +224,7 @@ class SnowparkTableDataset(AbstractDataset):
         if isinstance(data, pd.DataFrame):
             data = data.to_pandas()
 
-        table_name = [
-            self._database,
-            self._schema,
-            self._table_name,
-        ]
+        table_name = ".".join([self._database, self._schema, self._table_name])
         data.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:

@@ -1,10 +1,11 @@
-"""``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes
-"""
+"""``AbstractDataset`` implementation to access Snowflake using Snowpark dataframes"""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
+import pandas as pd
 import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataset, DatasetError
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark dataframes.
 
-    As of Mar-2023, the snowpark connector only works with Python 3.8.
+    As of Oct-2023, the snowpark connector only works with Python 3.11.
 
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/\
@@ -220,12 +221,10 @@ class SnowparkTableDataset(AbstractDataset):
         return sp_df
 
     def save(self, data: sp.DataFrame) -> None:
-        table_name = [
-            self._database,
-            self._schema,
-            self._table_name,
-        ]
+        if isinstance(data, pd.DataFrame):
+            data = data.to_pandas()
 
+        table_name = ".".join([self._database, self._schema, self._table_name])
         data.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:

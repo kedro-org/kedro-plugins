@@ -26,7 +26,7 @@ class SnowparkTableDataset(AbstractDataset):
         weather:
           type: kedro_datasets.snowflake.SnowparkTableDataset
           table_name: "weather_data"
-          databasereak: "meteorology"
+          database: "meteorology"
           schema: "observations"
           credentials: db_credentials
           save_args:

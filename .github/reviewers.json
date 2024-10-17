@@ -1,0 +1,17 @@
+{
+    "teams": {
+      "everyone": {
+        "description": "a team that contains all users",
+        "users": [
+          "merelcht"
+        ]
+      }
+    },
+    "reviewers": {
+        "kedro-datasets/kedro_datasets": {
+            "description": "Require at least 1/2 TSC approval on new core dataset contributions.",
+            "teams": ["everyone"],
+            "requiredApproverCount": 1
+        }
+    }
+}

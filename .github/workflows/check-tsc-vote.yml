@@ -1,0 +1,15 @@
+name: Required Reviews
+on:
+  pull_request: {}
+  pull_request_review: {}
+jobs:
+  required-reviews:
+    name: Required Reviews
+    runs-on: ubuntu-latest
+    steps:
+      - name: required-reviewers
+        uses: theoremlp/required-reviews@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: post a review on the PR instead of failing the task when requirements haven't been satisfied
+          # post-review: true

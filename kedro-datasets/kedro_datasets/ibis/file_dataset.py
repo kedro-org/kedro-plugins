@@ -157,7 +157,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
 
             config = deepcopy(self._connection_config)
             backend_attr = config.pop("backend") if config else None
-            backend = getattr(ibis, backend_attr)
+            backend = getattr(ibis, str(backend_attr))
             cls._connections[key] = backend.connect(**config)
 
         return cls._connections[key]

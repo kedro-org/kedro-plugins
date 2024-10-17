@@ -1,0 +1,36 @@
+{
+    "teams": {
+      "everyone": {
+        "description": "A team that contains all TSC members.",
+        "users": [
+          "ankatiyar",
+          "astrojuanlu",
+          "datajoely",
+          "deepyaman",
+          "DimedS",
+          "Galileo-Galilei",
+          "Huongg",
+          "idanov",
+          "jitu5",
+          "lrcouto",
+          "marrrcin",
+          "merelcht",
+          "noklam",
+          "rashidakanchwala",
+          "ravi-kumar-pilla",
+          "SajidAlamQB",
+          "sbrugman",
+          "stephkaiser",
+          "tynandebold",
+          "yetudada"
+        ]
+      }
+    },
+    "reviewers": {
+        "kedro-datasets/kedro_datasets/": {
+            "description": "Require at least 1/2 TSC approval on new core dataset contributions.",
+            "teams": ["everyone"],
+            "requiredApproverCount": 10
+        }
+    }
+}

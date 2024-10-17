@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Union
 
 import pandas as pd
 import snowflake.snowpark as sp
@@ -220,9 +220,9 @@ class SnowparkTableDataset(AbstractDataset):
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
-    def save(self, data: sp.DataFrame) -> None:
+    def save(self, data: Union[pd.DataFrame, sp.DataFrame) -> None:
         if isinstance(data, pd.DataFrame):
-            data = data.to_pandas()
+            data = self._session.create_dataframe(data)
 
         table_name = ".".join([self._database, self._schema, self._table_name])
         data.write.save_as_table(table_name, **self._save_args)

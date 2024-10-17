@@ -89,7 +89,7 @@ def count_truthy(elements: List[Any]) -> int:
     return sum(1 for elem in elements if elem)
 ```
 
-> *Note:* We only accept contributions under the [Apache 2.0](https://opensource.org/license/Apache-2-0) license, and you should have permission to share the submitted code.
+> *Note:* We only accept contributions under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) license, and you should have permission to share the submitted code.
 
 ### Branching conventions
 

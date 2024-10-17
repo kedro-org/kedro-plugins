@@ -136,7 +136,7 @@ class SparkStreamingDataset(AbstractDataset):
         (
             output_constructor.option("checkpointLocation", checkpoint)
             .option("path", save_path)
-            .outputMode(output_mode)
+            .outputMode(str(output_mode))
             .options(**self._save_args or {})
             .start()
         )

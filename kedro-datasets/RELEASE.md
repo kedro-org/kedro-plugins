@@ -1,8 +1,8 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added async functionality for loading and saving data in `PartitionedDataset` via `use_async` argument.
 
+- Added async functionality for saving data in `PartitionedDataset` via `use_async` argument.
 - Added the following new core datasets:
 
 | Type                | Description                                                   | Location              |

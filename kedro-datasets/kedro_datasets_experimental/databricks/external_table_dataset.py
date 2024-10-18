@@ -57,6 +57,7 @@ class ExternalTable(BaseTable):
 class ExternalTableDataset(BaseTableDataset):
     """``ExternalTableDataset`` loads and saves data into external tables in Databricks.
     Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
+
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
     .. code-block:: yaml
@@ -64,11 +65,13 @@ class ExternalTableDataset(BaseTableDataset):
           type: databricks.ExternalTableDataset
           format: parquet
           table: names_and_ages
+
         names_and_ages@pandas:
           type: databricks.ExternalTableDataset
           format: parquet
           table: names_and_ages
           dataframe_type: pandas
+
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:

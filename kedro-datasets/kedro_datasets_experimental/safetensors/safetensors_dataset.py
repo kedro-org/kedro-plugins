@@ -84,7 +84,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
                 imported_backend = importlib.import_module(f"safetensors.{self._backend}")
-                imported_backend.save_file(data, fs_file)
+                imported_backend.save_file(data, fs_file.name)
             except Exception as exc:
                 raise DatasetError(
                     f"{data.__class__} was not serialised due to: {exc}"

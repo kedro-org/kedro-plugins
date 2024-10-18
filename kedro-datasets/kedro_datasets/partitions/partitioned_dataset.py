@@ -291,12 +291,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:
-        if self._use_async:
-            return asyncio.run(self._async_load())
-        else:
-            return self._sync_load()
-
-    def _sync_load(self) -> dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():
@@ -306,25 +300,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             dataset = self._dataset_type(**kwargs)  # type: ignore
             partition_id = self._path_to_partition(partition)
             partitions[partition_id] = dataset.load
-
-        if not partitions:
-            raise DatasetError(f"No partitions found in '{self._path}'")
-
-        return partitions
-
-    async def _async_load(self) -> dict[str, Callable[[], Any]]:
-        partitions = {}
-
-        async def load_partition(partition: str) -> None:
-            kwargs = deepcopy(self._dataset_config)
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
-            dataset = self._dataset_type(**kwargs)  # type: ignore
-            partition_id = self._path_to_partition(partition)
-            partitions[partition_id] = dataset.load
-
-        await asyncio.gather(
-            *[load_partition(partition) for partition in self._list_partitions()]
-        )
 
         if not partitions:
             raise DatasetError(f"No partitions found in '{self._path}'")

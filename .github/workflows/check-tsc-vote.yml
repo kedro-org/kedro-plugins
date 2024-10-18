@@ -2,7 +2,7 @@ name: Required Reviews
 on:
   pull_request:
     paths:
-      - 'kedro-datasets/kedro_datasets/'
+      - 'kedro-datasets/kedro_datasets/*'
 jobs:
   required-reviews:
     name: Required Reviews

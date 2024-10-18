@@ -107,6 +107,10 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
             return False
 
         return self._fs.exists(load_path)
+    
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
 
     def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""

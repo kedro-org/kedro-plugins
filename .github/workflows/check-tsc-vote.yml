@@ -1,0 +1,14 @@
+name: Required Reviews
+on:
+  pull_request:
+    paths:
+      - 'kedro-datasets/kedro_datasets/*'
+jobs:
+  required-reviews:
+    name: Required Reviews
+    runs-on: ubuntu-latest
+    steps:
+      - name: required-reviewers
+        uses: theoremlp/required-reviews@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

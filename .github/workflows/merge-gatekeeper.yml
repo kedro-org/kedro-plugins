@@ -24,4 +24,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           timeout: 2400
           interval: 30
-          ignored: 'Required Reviews / Required Reviews'
+          ignored: 'Required Reviews'

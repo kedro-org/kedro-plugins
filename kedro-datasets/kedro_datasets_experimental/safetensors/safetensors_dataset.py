@@ -76,7 +76,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             imported_backend = importlib.import_module(f"safetensors.{self._backend}")
-            return imported_backend.load(fs_file)
+            return imported_backend.load(fs_file.read())
 
     def save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

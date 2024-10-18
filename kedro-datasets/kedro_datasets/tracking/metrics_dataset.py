@@ -20,7 +20,7 @@ class MetricsDataset(json_dataset.JSONDataset):
     it is versioned by default and only takes metrics of numeric values.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -30,7 +30,7 @@ class MetricsDataset(json_dataset.JSONDataset):
           filepath: data/09_tracking/cars.json
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -46,10 +46,10 @@ class MetricsDataset(json_dataset.JSONDataset):
 
     versioned = True
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: dict[str, float]) -> None:
+    def save(self, data: dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataset`` to float to make sure
         they are numeric values which can be displayed in Kedro Viz and then saves the dataset.
         """

@@ -43,12 +43,14 @@ class HFTransformerPipelineDataset(AbstractDataset):
         task: str | None = None,
         model_name: str | None = None,
         pipeline_kwargs: dict[str, t.Any] | None = None,
+        metadata: dict[str, t.Any] | None = None,
     ):
         if task is None and model_name is None:
             raise ValueError("At least 'task' or 'model_name' are needed")
         self._task = task if task else None
         self._model_name = model_name
         self._pipeline_kwargs = pipeline_kwargs or {}
+        self.metadata = metadata
 
         if self._pipeline_kwargs and (
             "task" in self._pipeline_kwargs or "model" in self._pipeline_kwargs
@@ -60,10 +62,10 @@ class HFTransformerPipelineDataset(AbstractDataset):
             self._pipeline_kwargs.pop("task", None)
             self._pipeline_kwargs.pop("model", None)
 
-    def _load(self) -> Pipeline:
+    def load(self) -> Pipeline:
         return pipeline(self._task, model=self._model_name, **self._pipeline_kwargs)
 
-    def _save(self, pipeline: Pipeline) -> None:
+    def save(self, pipeline: Pipeline) -> None:
         raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, t.Any]:

@@ -16,7 +16,7 @@ from kedro_datasets.spark.spark_dataset import _get_spark
 
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
     """``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
-    This data set also handles some incompatible file types such as using partitioned parquet on
+    This dataset also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
     of the existing file/partition.
 
@@ -29,7 +29,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
       leveraging Spark DataFrame execution plan checkpointing.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -41,7 +41,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
           write_mode: overwrite
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -148,14 +148,14 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             **self._save_args,
         )
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         return _get_spark().read.table(self._full_table_address)
 
-    def _save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrame) -> None:
         self._validate_save(data)
         if self._write_mode == "upsert":
             # check if _table_pk is a subset of df columns
-            if not set(self._table_pk) <= set(self._load().columns):
+            if not set(self._table_pk) <= set(self.load.__wrapped__(self).columns):  # type: ignore[attr-defined]
                 raise DatasetError(
                     f"Columns {str(self._table_pk)} selected as primary key(s) not found in "
                     f"table {self._full_table_address}"
@@ -165,13 +165,13 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             self._create_hive_table(data=data)
 
     def _upsert_save(self, data: DataFrame) -> None:
-        if not self._exists() or self._load().rdd.isEmpty():
+        if not self._exists() or self.load.__wrapped__(self).rdd.isEmpty():  # type: ignore[attr-defined]
             self._create_hive_table(data=data, mode="overwrite")
         else:
             _tmp_colname = "tmp_colname"
             _tmp_row = "tmp_row"
             _w = Window.partitionBy(*self._table_pk).orderBy(col(_tmp_colname).desc())
-            df_old = self._load().select("*", lit(1).alias(_tmp_colname))
+            df_old = self.load.__wrapped__(self).select("*", lit(1).alias(_tmp_colname))  # type: ignore[attr-defined]
             df_new = data.select("*", lit(2).alias(_tmp_colname))
             df_stacked = df_new.unionByName(df_old).select(
                 "*", row_number().over(_w).alias(_tmp_row)
@@ -188,7 +188,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         # or if the `write_mode` is set to overwrite
         if (not self._exists()) or self._write_mode == "overwrite":
             return
-        hive_dtypes = set(self._load().dtypes)
+        hive_dtypes = set(self.load.__wrapped__(self).dtypes)  # type: ignore[attr-defined]
         data_dtypes = set(data.dtypes)
         if data_dtypes != hive_dtypes:
             new_cols = data_dtypes - hive_dtypes

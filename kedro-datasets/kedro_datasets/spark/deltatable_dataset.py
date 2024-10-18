@@ -21,7 +21,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataset`` loads data into DeltaTable objects.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -36,7 +36,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
           filepath: data/02_intermediate/data.parquet
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -87,11 +87,11 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         self._filepath = PurePosixPath(filepath)
         self.metadata = metadata
 
-    def _load(self) -> DeltaTable:
+    def load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)
         return DeltaTable.forPath(_get_spark(), load_path)
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:

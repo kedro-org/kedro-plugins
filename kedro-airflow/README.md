@@ -1,7 +1,7 @@
 # Kedro-Airflow
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-airflow/)
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-airflow/)
 [![PyPI Version](https://badge.fury.io/py/kedro-airflow.svg)](https://pypi.org/project/kedro-airflow/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
@@ -42,7 +42,7 @@ The Airflow DAG configuration can be customized by editing this file.
 ### Step 3: Package and install the Kedro pipeline in the Airflow executor's environment
 
 After generating and deploying the DAG file, you will then need to package and install the Kedro pipeline into the Airflow executor's environment.
-Please visit the guide to [deploy Kedro as a Python package](https://docs.kedro.org/en/stable/deployment/single_machine.html#package-based) for more details.
+Please visit the guide to [Apache Airflow deployment](https://docs.kedro.org/en/stable/deployment/airflow.html) for more details.
 
 ### FAQ
 

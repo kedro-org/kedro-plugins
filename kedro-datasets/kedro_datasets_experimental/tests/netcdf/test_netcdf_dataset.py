@@ -8,7 +8,7 @@ from moto import mock_aws
 from s3fs import S3FileSystem
 from xarray.testing import assert_equal
 
-from kedro_datasets.netcdf import NetCDFDataset
+from kedro_datasets_experimental.netcdf import NetCDFDataset
 
 FILE_NAME = "test.nc"
 MULTIFILE_NAME = "test*.nc"
@@ -153,7 +153,7 @@ class TestNetCDFDataset:
         netcdf_dataset = NetCDFDataset(
             filepath=S3_PATH, temppath=tmp_path, credentials=bad_credentials
         )
-        pattern = r"Failed while loading data from data set NetCDFDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset NetCDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             netcdf_dataset.load()
 
@@ -165,7 +165,7 @@ class TestNetCDFDataset:
         s3_dataset = NetCDFDataset(
             filepath=S3_PATH, temppath=tmp_path, credentials=AWS_CREDENTIALS
         )
-        pattern = r"Failed while loading data from data set NetCDFDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset NetCDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset.load()
 

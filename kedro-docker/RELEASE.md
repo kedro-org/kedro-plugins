@@ -1,5 +1,12 @@
 # Upcoming Release
 
+# Release 0.7.0
+## Major features and improvements
+* Removed support for python 3.8
+
+# Release 0.6.1
+* Unpinned pip version requirement
+
 # Release 0.6.0
 ## Major features and improvements
 * Added support for Python 3.12

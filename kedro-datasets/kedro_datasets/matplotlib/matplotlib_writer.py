@@ -6,7 +6,7 @@ import base64
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn
 from warnings import warn
 
 import fsspec
@@ -24,14 +24,13 @@ from kedro_datasets._typing import ImagePreview
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataset[Union[Figure, list[Figure], dict[str, Figure]], NoReturn]
+    AbstractVersionedDataset[Figure | list[Figure] | dict[str, Figure], NoReturn]
 ):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -42,7 +41,7 @@ class MatplotlibWriter(
             format: png
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -179,9 +178,7 @@ class MatplotlibWriter(
         self._fs_open_args_save = _fs_open_args_save
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if overwrite and version is not None:
             warn(
@@ -200,13 +197,13 @@ class MatplotlibWriter(
             "version": self._version,
         }
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
+    def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
         save_path = self._get_save_path()
 
-        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+        if isinstance(data, list | dict) and self._overwrite and self._exists():
             self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):

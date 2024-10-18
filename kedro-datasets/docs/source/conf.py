@@ -53,6 +53,11 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    'sphinx_favicon',
+]
+
+favicons = [
+    "https://kedro.org/images/favicon.ico",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -92,7 +97,7 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
-    "python": ("https://docs.python.org/3.9/", None),
+    "python": ("https://docs.python.org/3.10/", None),
 }
 
 type_targets = {
@@ -102,18 +107,51 @@ type_targets = {
         "AbstractDataset",
         "kedro.io.core.Version",
         "requests.auth.AuthBase",
+        "requests.models.Response",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
         "DataCatalog",
         "ibis.backends.BaseBackend",
+        "langchain_openai.chat_models.base.ChatOpenAI",
+        "langchain_openai.embeddings.base.OpenAIEmbeddings",
+        "dask_expr._collection.DataFrame",
+        "DataFrame",
+        "pd.DataFrame",
+        "geopandas.geodataframe.GeoDataFrame",
+        "transformers.pipelines.base.Pipeline",
+        "ibis.expr.types.relations.Table",
+        "numpy.ndarray",
+        "matplotlib.figure.Figure",
+        "networkx.classes.graph.Graph",
+        "pandas.core.frame.DataFrame",
+        "PIL.Image.Image",
+        "plotly.graph_objs._figure.Figure",
+        "plotly.graph_objs._figurewidget.FigureWidget",
+        "polars.dataframe.frame.DataFrame",
+        "polars.lazyframe.frame.LazyFrame",
+        "snowflake.snowpark.dataframe.DataFrame",
+        "delta.tables.DeltaTable",
+        "pyspark.sql.dataframe.DataFrame",
+        "scipy.sparse._csr.csr_matrix",
+        "keras.src.models.model.Model",
+        "kedro_datasets.video.video_dataset.AbstractVideo",
+        "langchain_anthropic.chat_models.ChatAnthropic",
+        "langchain_cohere.chat_models.ChatCohere",
+        "xarray.core.dataset.Dataset",
+        "xarray.core.dataarray.DataArray",
+        "torch.nn.modules.module.Module",
+        "prophet.forecaster.Prophet",
+        "Prophet",
     ),
     "py:data": (
         "typing.Any",
-        "typing.Union",
         "typing.Optional",
         "typing.Tuple",
     ),
-    "py:exc": ("DatasetError",),
+    "py:exc": (
+        "DatasetError",
+        "VersionNotFoundError",
+    ),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
@@ -220,7 +258,9 @@ texinfo_documents = [
 todo_include_todos = False
 
 # -- Kedro specific configuration -----------------------------------------
-KEDRO_MODULES = ["kedro_datasets", "kedro_datasets_experimental"]
+KEDRO_MODULES = [
+    "kedro_datasets_experimental"
+]
 
 
 def get_classes(module):

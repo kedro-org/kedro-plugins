@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from copy import deepcopy
 from typing import Any
 
 import snowflake.snowpark as sp
@@ -18,7 +17,7 @@ class SnowparkTableDataset(AbstractDataset):
     As of Mar-2023, the snowpark connector only works with Python 3.8.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -156,12 +155,8 @@ class SnowparkTableDataset(AbstractDataset):
                 )
             schema = credentials["schema"]
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         self._table_name = table_name
         self._database = database
@@ -214,7 +209,7 @@ class SnowparkTableDataset(AbstractDataset):
     def _session(self) -> sp.Session:
         return self._get_session(self._connection_parameters)
 
-    def _load(self) -> sp.DataFrame:
+    def load(self) -> sp.DataFrame:
         table_name: list = [
             self._database,
             self._schema,
@@ -224,7 +219,7 @@ class SnowparkTableDataset(AbstractDataset):
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
-    def _save(self, data: sp.DataFrame) -> None:
+    def save(self, data: sp.DataFrame) -> None:
         table_name = [
             self._database,
             self._schema,

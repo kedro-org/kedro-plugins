@@ -1,7 +1,24 @@
 # Upcoming release
 
+# Release 0.7.0
+* Removed support for Python 3.8
+
+# Release 0.6.1
+* Changed Kedro CLI loading method to improve loading times.
+* Changed logging level from error to debug for most logging messages.
+* Set default value for the `identity` parameter, to prevent errors due to it being empty.
+
+# Release 0.6.0
+* Moved to an opt-out model for telemetry, enabling it by default without requiring prior consent.
+* Added `DO_NOT_TRACK` and `KEDRO_DISABLE_TELEMETRY` environment variables to skip telemetry.
+* Reduced the number of events sent to Heap by eliminating duplicate events, improving efficiency.
+* Enhanced telemetry functionality to support Kedro commands executed outside of Kedro project folders.
+
+# Release 0.5.0
+* Updated the plugin to generate a unique project UUID for kedro project and store it in `pyproject.toml`.
+
 # Release 0.4.0
-* Updated the plugin to generate an unique UUID for each user of `kedro-telemetry`.
+* Updated the plugin to generate a unique UUID for each user of `kedro-telemetry`.
 * Added support for Python 3.12.
 
 # Release 0.3.2

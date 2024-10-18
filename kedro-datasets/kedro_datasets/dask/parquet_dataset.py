@@ -1,4 +1,4 @@
-"""``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
+"""``ParquetDataset`` is a dataset used to load and save data to parquet files using Dask
 dataframe"""
 from __future__ import annotations
 
@@ -17,8 +17,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -33,7 +32,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               aws_secret_access_key: YOUR_SECRET
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -115,12 +114,8 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     @property
     def fs_args(self) -> dict[str, Any]:
@@ -140,12 +135,12 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> dd.DataFrame:
+    def load(self) -> dd.DataFrame:
         return dd.read_parquet(
             self._filepath, storage_options=self.fs_args, **self._load_args
         )
 
-    def _save(self, data: dd.DataFrame) -> None:
+    def save(self, data: dd.DataFrame) -> None:
         self._process_schema()
         data.to_parquet(
             path=self._filepath, storage_options=self.fs_args, **self._save_args

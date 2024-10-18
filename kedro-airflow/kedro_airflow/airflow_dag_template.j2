@@ -20,6 +20,7 @@ class KedroOperator(BaseOperator):
         node_name: str | list[str],
         project_path: str | Path,
         env: str,
+        conf_source: str,
         *args, **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
@@ -28,10 +29,11 @@ class KedroOperator(BaseOperator):
         self.node_name = node_name
         self.project_path = project_path
         self.env = env
+        self.conf_source = conf_source
 
     def execute(self, context):
         configure_project(self.package_name)
-        with KedroSession.create(self.project_path, env=self.env) as session:
+        with KedroSession.create(self.project_path, env=self.env, conf_source=self.conf_source) as session:
             if isinstance(self.node_name, str):
                 self.node_name = [self.node_name]
             session.run(self.pipeline_name, node_names=self.node_name)
@@ -41,6 +43,8 @@ env = "{{ env }}"
 pipeline_name = "{{ pipeline_name }}"
 project_path = Path.cwd()
 package_name = "{{ package_name }}"
+conf_source = "{{ conf_source }}" or Path.cwd() / "conf"
+
 
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
@@ -68,6 +72,7 @@ with DAG(
             node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
+            conf_source=conf_source,
         ),
 {% endfor %}    }
 

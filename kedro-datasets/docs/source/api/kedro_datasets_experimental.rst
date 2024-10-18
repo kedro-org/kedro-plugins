@@ -10,3 +10,12 @@ kedro_datasets_experimental
 .. autosummary::
    :toctree:
    :template: autosummary/class.rst
+
+   langchain.ChatAnthropicDataset
+   langchain.ChatCohereDataset
+   langchain.ChatOpenAIDataset
+   langchain.OpenAIEmbeddingsDataset
+   netcdf.NetCDFDataset
+   prophet.ProphetModelDataset
+   pytorch.PyTorchDataset
+   rioxarray.GeoTIFFDataset

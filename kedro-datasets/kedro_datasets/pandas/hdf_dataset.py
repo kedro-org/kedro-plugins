@@ -26,7 +26,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -38,7 +38,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           key: data
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -60,6 +60,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     _lock = Lock()
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -102,7 +103,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set `wb` when saving.
+                All defaults are preserved, except `open_args_save` `mode`, which is set `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -129,17 +130,17 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
         self._key = key
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -151,7 +152,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "version": self._version,
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
@@ -170,7 +171,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             ) as store:
                 return store[self._key]
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with HDFDataset._lock:

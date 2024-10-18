@@ -10,6 +10,7 @@ from typing import Any, NoReturn
 
 import fsspec
 import pandas as pd
+import pandas_gbq as pd_gbq
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
@@ -27,7 +28,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
     It uses pandas-gbq to read and write from/to BigQuery table.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -44,7 +45,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             chunk_size: 100
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -107,12 +108,8 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
                 are different.
         """
         # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         self._validate_location()
         validate_on_forbidden_chars(dataset=dataset, table_name=table_name)
@@ -140,18 +137,19 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
-        self._load_args.setdefault("query", sql)
-        return pd.read_gbq(
+        self._load_args.setdefault("query_or_table", sql)
+        return pd_gbq.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
             **self._load_args,
         )
 
-    def _save(self, data: pd.DataFrame) -> None:
-        data.to_gbq(
-            f"{self._dataset}.{self._table_name}",
+    def save(self, data: pd.DataFrame) -> None:
+        pd_gbq.to_gbq(
+            dataframe=data,
+            destination_table=f"{self._dataset}.{self._table_name}",
             project_id=self._project_id,
             credentials=self._credentials,
             **self._save_args,
@@ -180,7 +178,7 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
 class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     """``GBQQueryDataset`` loads data from a provided SQL query from Google
-    BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
+    BigQuery. It uses ``pandas_gbq.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
@@ -262,9 +260,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             )
 
         # Handle default load arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
 
         self._project_id = project
 
@@ -280,7 +276,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         # load sql query from arg or from file
         if sql:
-            self._load_args["query"] = sql
+            self._load_args["query_or_table"] = sql
             self._filepath = None
         else:
             # filesystem for loading sql file
@@ -297,25 +293,25 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         desc = {}
-        desc["sql"] = str(load_args.pop("query", None))
+        desc["sql"] = str(load_args.pop("query_or_table", None))
         desc["filepath"] = str(self._filepath)
         desc["load_args"] = str(load_args)
 
         return desc
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
-                load_args["query"] = fs_file.read()
+                load_args["query_or_table"] = fs_file.read()
 
-        return pd.read_gbq(
+        return pd_gbq.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
             **load_args,
         )
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on GBQQueryDataset")

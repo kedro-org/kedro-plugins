@@ -24,7 +24,7 @@ class NetCDFDataset(AbstractDataset):
     filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -46,7 +46,7 @@ class NetCDFDataset(AbstractDataset):
             parallel: True
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -62,6 +62,7 @@ class NetCDFDataset(AbstractDataset):
         ... )
         >>> dataset.save(ds)
         >>> reloaded = dataset.load()
+        >>> assert ds.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -128,19 +129,15 @@ class NetCDFDataset(AbstractDataset):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Determine if multiple NetCDF files are being loaded in.
         self._is_multifile = (
             True if "*" in str(PurePosixPath(self._filepath).stem) else False
         )
 
-    def _load(self) -> xr.Dataset:
+    def load(self) -> xr.Dataset:
         load_path = self._filepath
         multi_load_path = load_path
 
@@ -162,7 +159,7 @@ class NetCDFDataset(AbstractDataset):
 
         return data
 
-    def _save(self, data: xr.Dataset):
+    def save(self, data: xr.Dataset):
         if self._is_multifile:
             raise DatasetError(
                 "Globbed multifile datasets with '*' in filepath cannot be saved. "

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -30,7 +29,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -47,7 +46,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             lines: True
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -66,6 +65,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -93,7 +93,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving JSON files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
-                All defaults are preserved, but "index", which is set to False.
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -102,10 +102,14 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 E.g. for ``GCSFileSystem`` it should look like `{'token': None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                Defaults are preserved, apart from the `open_args_save` `mode` which is set to `w`.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+
         _credentials = deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
@@ -124,13 +128,17 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
@@ -150,7 +158,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "version": self._version,
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -164,14 +172,11 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        buf = BytesIO()
-        data.to_json(path_or_buf=buf, **self._save_args)
-
-        with self._fs.open(save_path, mode="wb") as fs_file:
-            fs_file.write(buf.getvalue())
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            data.to_json(path_or_buf=fs_file, **self._save_args)
 
         self._invalidate_cache()
 
@@ -207,7 +212,7 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         dataset_copy = self._copy()
         dataset_copy._load_args.setdefault("lines", True)  # type: ignore[attr-defined]
         dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
-        preview_df = dataset_copy._load()
+        preview_df = dataset_copy.load.__wrapped__(dataset_copy)  # type: ignore[attr-defined]
 
         preview_dict = preview_df.to_dict(orient="split")
 

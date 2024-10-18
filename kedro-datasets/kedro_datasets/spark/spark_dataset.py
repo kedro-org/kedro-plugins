@@ -196,7 +196,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     """``SparkDataset`` loads and saves Spark dataframes.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -230,7 +230,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
           file_format: parquet
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -366,12 +366,8 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         )
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Handle schema load argument
         self._schema = self._load_args.pop("schema", None)
@@ -417,7 +413,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
             "version": self._version,
         }
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
         read_obj = _get_spark().read
 
@@ -427,7 +423,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
 
         return read_obj.load(load_path, self._file_format, **self._load_args)
 
-    def _save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
         data.write.save(save_path, self._file_format, **self._save_args)
 

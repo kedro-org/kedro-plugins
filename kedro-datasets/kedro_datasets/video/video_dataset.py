@@ -202,7 +202,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     of PIL.Image.Image using OpenCV.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -217,7 +217,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
           credentials: dev_s3
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -302,7 +302,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
         self.metadata = metadata
 
-    def _load(self) -> AbstractVideo:
+    def load(self) -> AbstractVideo:
         """Loads data from the video file.
 
         Returns:
@@ -315,7 +315,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         ) as fs_file:
             return FileVideo(fs_file.name)
 
-    def _save(self, data: AbstractVideo) -> None:
+    def save(self, data: AbstractVideo) -> None:
         """Saves video data to the specified filepath."""
         if self._protocol == "file":
             # Write directly to the local file destination

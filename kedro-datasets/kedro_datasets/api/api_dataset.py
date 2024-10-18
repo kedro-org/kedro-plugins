@@ -17,8 +17,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -34,7 +33,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             year: 2000
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -185,7 +184,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def _load(self) -> requests.Response:
+    def load(self) -> requests.Response:
         if self._request_args["method"] == "GET":
             with sessions.Session() as session:
                 return self._execute_request(session)
@@ -220,7 +219,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def _save(self, data: Any) -> requests.Response:  # type: ignore[override]
+    def save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
                 return self._execute_save_with_chunks(json_data=data)

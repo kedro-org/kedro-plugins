@@ -108,7 +108,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     symmetric.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -132,7 +132,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
           pool_size: 10 # additional parameters
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -210,12 +210,8 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             )
 
         # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         self._load_args["table_name"] = table_name
         self._save_args["name"] = table_name
@@ -266,10 +262,10 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             "save_args": save_args,
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         return pd.read_sql_table(con=self.engine, **self._load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         data.to_sql(con=self.engine, **self._save_args)
 
     def _exists(self) -> bool:
@@ -313,11 +309,11 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    It does not support save method so it is a read only data set.
+    It does not support save method so it is a read only dataset.
     To save data to a SQL server use ``SQLTableDataset``.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -349,7 +345,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
           pool_size: 10 # additional parameters
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -564,7 +560,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             "execution_options": str(self._execution_options),
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
 
         if self._filepath:
@@ -576,7 +572,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             con=self.engine.execution_options(**self._execution_options), **load_args
         )
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on SQLQueryDataset")
 
     # For mssql only

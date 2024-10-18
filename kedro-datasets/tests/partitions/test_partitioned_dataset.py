@@ -57,6 +57,15 @@ class FakeDataset:  # pylint: disable=too-few-public-methods
 
 
 class TestPartitionedDatasetLocal:
+    @pytest.mark.parametrize("dataset", ["pandas.ParquetDataset", ParquetDataset])
+    def test_repr(self, dataset):
+        pds = PartitionedDataset(path="", dataset=dataset)
+        assert (
+            repr(pds)
+            == """kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
+            """dataset='kedro_datasets.pandas.parquet_dataset.ParquetDataset()')"""
+        )
+
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize(
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
@@ -316,7 +325,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from data set ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -337,7 +346,7 @@ class TestPartitionedDatasetLocal:
             (
                 FakeDataset,
                 r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
-                r"is invalid\: all data set types must extend 'AbstractDataset'",
+                r"is invalid\: all dataset types must extend 'AbstractDataset'",
             ),
             ({}, "'type' is missing from dataset catalog configuration"),
         ],

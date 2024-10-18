@@ -58,7 +58,7 @@ class TestVideoDataset:
         assert_videos_equal(loaded_video, mp4_object)
 
     def test_save_and_load_mp4(self, empty_dataset_mp4, mp4_object):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         empty_dataset_mp4.save(mp4_object)
         reloaded_video = empty_dataset_mp4.load()
         assert_videos_equal(mp4_object, reloaded_video)
@@ -109,7 +109,7 @@ class TestVideoDataset:
 
     def test_exists(self, empty_dataset_mp4, mp4_object):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not empty_dataset_mp4.exists()
         empty_dataset_mp4.save(mp4_object)
         assert empty_dataset_mp4.exists()
@@ -123,7 +123,7 @@ class TestVideoDataset:
 
     def test_load_missing_file(self, empty_dataset_mp4):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set VideoDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset VideoDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             empty_dataset_mp4.load()
 

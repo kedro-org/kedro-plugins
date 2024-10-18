@@ -41,7 +41,7 @@ Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](h
 3. Must have working doctests (unless complex cloud/DB setup required, which can be discussed in the review).
 4. Must run as part of the regular CI/CD jobs.
 5. Must have 100% test coverage.
-6. Should support all Python versions under NEP 29 (3.9+ currently).
+6. Should support all Python versions under NEP 29 (3.10+ currently).
 7. Should work on Linux, macOS, and Windows.
 
 #### Experimental datasets
@@ -89,7 +89,7 @@ def count_truthy(elements: List[Any]) -> int:
     return sum(1 for elem in elements if elem)
 ```
 
-> *Note:* We only accept contributions under the [Apache 2.0](https://opensource.org/licenses/Apache-2.0) license, and you should have permission to share the submitted code.
+> *Note:* We only accept contributions under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) license, and you should have permission to share the submitted code.
 
 ### Branching conventions
 

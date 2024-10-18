@@ -6,9 +6,10 @@ from __future__ import annotations
 
 import asyncio
 import operator
+from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -49,11 +50,11 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     https://github.com/intake/filesystem_spec.
 
     It also supports advanced features like
-    `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
+    `lazy saving <https://docs.kedro.org/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -71,7 +72,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
           filename_suffix: '.dat'
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -186,7 +187,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -289,7 +290,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             path = path[: -len(self._filename_suffix)]
         return path
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def load(self) -> dict[str, Callable[[], Any]]:
         if self._use_async:
             return asyncio.run(self._async_load())
         else:
@@ -330,7 +331,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         return partitions
 
-    def _save(self, data: dict[str, Any]) -> None:
+    def save(self, data: dict[str, Any]) -> None:
         if self._use_async:
             asyncio.run(self._async_save(data))
         else:
@@ -392,6 +393,22 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             "dataset_type": self._dataset_type.__name__,
             "dataset_config": clean_dataset_config,
         }
+
+    def __repr__(self) -> str:
+        object_description = self._describe()
+
+        # Dummy object to call _pretty_repr
+        # Only clean_dataset_config parameters are exposed
+        kwargs = deepcopy(self._dataset_config)
+        kwargs[self._filepath_arg] = ""
+        dataset = self._dataset_type(**kwargs)  # type: ignore
+
+        object_description_repr = {
+            "filepath": object_description["path"],
+            "dataset": dataset._pretty_repr(object_description["dataset_config"]),
+        }
+
+        return self._pretty_repr(object_description_repr)
 
     def _invalidate_caches(self) -> None:
         self._partition_cache.clear()

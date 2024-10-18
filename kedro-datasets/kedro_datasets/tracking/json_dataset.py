@@ -19,7 +19,7 @@ class JSONDataset(json_dataset.JSONDataset):
     The dataset is write-only and it is versioned by default.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -29,7 +29,7 @@ class JSONDataset(json_dataset.JSONDataset):
           filepath: data/09_tracking/cars.json
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -45,7 +45,7 @@ class JSONDataset(json_dataset.JSONDataset):
 
     versioned = True
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def preview(self) -> JSONTrackingPreview:  # type: ignore[override]

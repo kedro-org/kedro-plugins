@@ -35,7 +35,7 @@ def dummy_data():
 
 class TestJSONDataset:
     def test_save(self, filepath_json, dummy_data, tmp_path, save_version):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         json_dataset = JSONDataset(
             filepath=filepath_json, version=Version(None, save_version)
         )
@@ -68,7 +68,7 @@ class TestJSONDataset:
 
     def test_exists(self, json_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not json_dataset.exists()
         json_dataset.save(dummy_data)
         assert json_dataset.exists()
@@ -143,7 +143,7 @@ class TestJSONDataset:
         assert "save_args={'indent': 2}" in str(ds_versioned)
 
     def test_prevent_overwrite(self, explicit_versioned_json_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding json file for a given save version already exists."""
         explicit_versioned_json_dataset.save(dummy_data)
         pattern = (

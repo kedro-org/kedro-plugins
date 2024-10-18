@@ -1,11 +1,14 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
+
+from kedro_datasets import KedroDeprecationWarning
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
@@ -15,22 +18,16 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         cars:
           type: ibis.TableDataset
-          filepath: data/01_raw/company/cars.csv
-          file_format: csv
           table_name: cars
           connection:
             backend: duckdb
             database: company.db
-          load_args:
-            sep: ","
-            nullstr: "#NA"
           save_args:
             materialized: table
 
@@ -42,7 +39,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             database: company.db
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -80,6 +77,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``TableDataset`` pointing to a table (or file).
 
@@ -91,12 +89,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
         #ibis.duckdb.connect>`_).
 
-        If ``filepath`` and ``file_format`` are given, the corresponding
-        read method (e.g. `read_csv() <https://ibis-project.org/backends/\
-        duckdb#ibis.backends.duckdb.Backend.read_csv>`_) is used to load
-        the file with the backend. Note that only the data is loaded; no
-        link to the underlying file exists past ``TableDataset.load()``.
-
         If ``table_name`` is given (and ``filepath`` isn't), the dataset
         establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute
@@ -105,9 +97,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         is saved, after running code defined across one more more nodes.
 
         Args:
-            filepath: Path to a file to register as a table. Most useful
-                for loading data into your data warehouse (for testing).
-            file_format: Specifies the input file format for `filepath`.
             table_name: The name of the table or view to read or create.
             connection: Configuration for connecting to an Ibis backend.
             load_args: Additional arguments passed to the Ibis backend's
@@ -117,16 +106,28 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
                 `materialized` in `save_args`.
+            metadata: Any arbitrary metadata. This is ignored by Kedro,
+                but may be consumed by users or external plugins.
         """
         if filepath is None and table_name is None:
             raise DatasetError(
                 "Must provide at least one of `filepath` or `table_name`."
             )
 
+        if filepath is not None or file_format is not None:
+            warnings.warn(
+                "Use 'FileDataset' to load and save files with an Ibis "
+                "backend; the functionality will be removed from 'Table"
+                "Dataset' in Kedro-Datasets 6.0.0",
+                KedroDeprecationWarning,
+                stacklevel=2,
+            )
+
         self._filepath = filepath
         self._file_format = file_format
         self._table_name = table_name
         self._connection_config = connection
+        self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -141,7 +142,10 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
     @property
     def connection(self) -> BaseBackend:
+        """The ``Backend`` instance for the connection configuration."""
+
         def hashable(value):
+            """Return a hashable key for a potentially-nested object."""
             if isinstance(value, dict):
                 return tuple((k, hashable(v)) for k, v in sorted(value.items()))
             if isinstance(value, list):
@@ -155,12 +159,12 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
             config = deepcopy(self._connection_config)
             backend_attr = config.pop("backend") if config else None
-            backend = getattr(ibis, backend_attr)
+            backend = getattr(ibis, str(backend_attr))
             cls._connections[key] = backend.connect(**config)
 
         return cls._connections[key]
 
-    def _load(self) -> ir.Table:
+    def load(self) -> ir.Table:
         if self._filepath is not None:
             if self._file_format is None:
                 raise NotImplementedError
@@ -170,7 +174,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         else:
             return self.connection.table(self._table_name)
 
-    def _save(self, data: ir.Table) -> None:
+    def save(self, data: ir.Table) -> None:
         if self._table_name is None:
             raise DatasetError("Must provide `table_name` for materialization.")
 
@@ -182,7 +186,9 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             "filepath": self._filepath,
             "file_format": self._file_format,
             "table_name": self._table_name,
-            "connection_config": self._connection_config,
+            "backend": self._connection_config.get("backend")
+            if self._connection_config
+            else None,
             "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,

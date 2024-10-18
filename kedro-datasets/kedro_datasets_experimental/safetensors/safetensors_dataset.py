@@ -25,7 +25,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         self,
         *,
         filepath: str,
-        backend: str = "pickle",
+        backend: str = "torch",
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

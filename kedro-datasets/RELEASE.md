@@ -1,5 +1,7 @@
 # Upcoming Release
 
+# Release 5.1.0
+
 ## Major features and improvements
 
 - Added the following new **experimental** datasets:
@@ -10,9 +12,13 @@
 
 - Added the following new core datasets:
 
-| Type                | Description                                                   | Location              |
-| ------------------- | ------------------------------------------------------------- | --------------------- |
-| `ibis.TableDataset` | A dataset for loading and saving files using Ibis's backends. | `kedro_datasets.ibis` |
+| Type               | Description                                                   | Location              |
+| ------------------ | ------------------------------------------------------------- | --------------------- |
+| `ibis.FileDataset` | A dataset for loading and saving files using Ibis's backends. | `kedro_datasets.ibis` |
+
+## Bug fixes and other changes
+
+- Changed Ibis datasets to connect to an in-memory DuckDB database if connection configuration is not provided.
 
 ## Community contributions
 

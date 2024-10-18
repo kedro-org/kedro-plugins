@@ -60,6 +60,10 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
     """
 
+    DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {
+        "backend": "duckdb",
+        "database": ":memory:",
+    }
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
@@ -99,6 +103,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         Args:
             table_name: The name of the table or view to read or create.
             connection: Configuration for connecting to an Ibis backend.
+                If not provided, connect to DuckDB in in-memory mode.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -126,7 +131,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         self._filepath = filepath
         self._file_format = file_format
         self._table_name = table_name
-        self._connection_config = connection
+        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
@@ -158,8 +163,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             import ibis
 
             config = deepcopy(self._connection_config)
-            backend_attr = config.pop("backend") if config else None
-            backend = getattr(ibis, str(backend_attr))
+            backend = getattr(ibis, config.pop("backend"))
             cls._connections[key] = backend.connect(**config)
 
         return cls._connections[key]
@@ -186,9 +190,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             "filepath": self._filepath,
             "file_format": self._file_format,
             "table_name": self._table_name,
-            "backend": self._connection_config.get("backend")
-            if self._connection_config
-            else None,
+            "backend": self._connection_config["backend"],
             "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,

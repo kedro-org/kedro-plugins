@@ -92,8 +92,21 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
             
         self._invalidate_cache()
 
+    def _describe(self) -> dict[str, Any]:
+        return {
+            "filepath": self._filepath,
+            "backend": self._backend,
+            "protocol": self._protocol,
+            "version": self._version,
+        }
+
     def _exists(self) -> bool:
-        pass
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DatasetError:
+            return False
+
+        return self._fs.exists(load_path)
 
     def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""

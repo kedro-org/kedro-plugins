@@ -195,7 +195,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             overwrite: If True, any existing partitions will be removed.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
-            use_async: If True, the dataset will be loaded and saved asynchronously.
+            use_async: If True, the dataset will be saved asynchronously.
                 Defaults to False.
 
         Raises:

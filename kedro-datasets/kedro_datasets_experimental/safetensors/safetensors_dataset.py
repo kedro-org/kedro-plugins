@@ -109,7 +109,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
                 f"Selected backend '{backend}' could not be imported. "
                 "Make sure it is installed and importable."
             ) from exc
-        
+
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
@@ -160,7 +160,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
                 raise DatasetError(
                     f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
-            
+
         self._invalidate_cache()
 
     def _describe(self) -> dict[str, Any]:
@@ -178,7 +178,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
             return False
 
         return self._fs.exists(load_path)
-    
+
     def _release(self) -> None:
         super()._release()
         self._invalidate_cache()

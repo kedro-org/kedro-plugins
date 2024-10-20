@@ -116,7 +116,7 @@ class TestSafetensorsDataset:
         )
         mocker.patch(
             "kedro_datasets_experimental.safetensors.safetensors_dataset.importlib.import_module",
-            return_value=object,
+            side_effect=ImportError,
         )
         with pytest.raises(ImportError, match=pattern):
             SafetensorsDataset(filepath="test.safetensors", backend="invalid")

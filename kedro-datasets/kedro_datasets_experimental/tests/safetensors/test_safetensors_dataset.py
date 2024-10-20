@@ -1,12 +1,12 @@
 from pathlib import Path, PurePosixPath
 
+import pytest
+import torch
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import DatasetError, PROTOCOL_DELIMITER, Version
-import pytest
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
-import torch
 
 from kedro_datasets_experimental.safetensors import SafetensorsDataset
 
@@ -154,7 +154,7 @@ class TestSafetensorsDatasetVersioned:
         the versioned dataset."""
         versioned_safetensors_dataset.save(dummy_data)
         reloaded_df = versioned_safetensors_dataset.load()
-        
+
         assert torch.equal(dummy_data["embeddings"], reloaded_df["embeddings"])
 
     def test_no_versions(self, versioned_safetensors_dataset):

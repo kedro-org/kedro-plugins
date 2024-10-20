@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -87,8 +88,8 @@ class TestSafetensorsDataset:
         "filepath,instance_type",
         [
             ("s3://bucket/file.safetensors", S3FileSystem),
-            ("file:///tmp/test.safetensors", LocalFileSystem),
-            ("/tmp/test.safetensors", LocalFileSystem),
+            (tempfile.NamedTemporaryFile(suffix=".safetensors").name, LocalFileSystem),
+            (tempfile.NamedTemporaryFile(suffix=".safetensors").name, LocalFileSystem),
             ("gcs://bucket/file.safetensors", GCSFileSystem),
             ("https://example.com/file.safetensors", HTTPFileSystem),
         ],

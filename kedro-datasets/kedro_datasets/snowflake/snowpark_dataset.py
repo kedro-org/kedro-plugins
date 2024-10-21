@@ -229,9 +229,7 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             sp.DataFrame: The loaded data as a Snowpark DataFrame.
         """
-        table_name = [self._database, self._schema, self._table_name]
-        sp_df = self._session.table(".".join(table_name))
-        return sp_df
+        return self._session.table(self._validate_and_get_table_name())
 
     def save(self, data: pd.DataFrame | sp.DataFrame) -> None:
         """
@@ -240,11 +238,11 @@ class SnowparkTableDataset(AbstractDataset):
         Args:
             data (pd.DataFrame | sp.DataFrame): The data to save.
         """
+        breakpoint()
         if isinstance(data, pd.DataFrame):
             data = self._session.create_dataframe(data)
 
-        table_name = [self._database, self._schema, self._table_name]
-        data.write.save_as_table(table_name, **self._save_args)
+        data.write.save_as_table(self._validate_and_get_table_name(), **self._save_args)
 
     def _exists(self) -> bool:
         """
@@ -261,3 +259,22 @@ class SnowparkTableDataset(AbstractDataset):
         except Exception as e:
             logger.debug(f"Table {self._table_name} does not exist: {e}")
             return False
+
+    def _validate_and_get_table_name(self) -> str:
+        """
+        Validate that all parts of the table name are not None and join them into a string.
+
+        Args:
+            parts (list[str | None]): The list containing database, schema, and table name.
+
+        Returns:
+            str: The joined table name in the format 'database.schema.table'.
+
+        Raises:
+            ValueError: If any part of the table name is None.
+        """
+        parts = [self._database, self._schema, self._table_name]
+        if any(part is None for part in parts):
+            raise ValueError(f"Table name parts cannot be None: {parts}")
+
+        return ".".join(parts)

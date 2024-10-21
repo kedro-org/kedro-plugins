@@ -19,4 +19,4 @@ kedro_datasets_experimental
    prophet.ProphetModelDataset
    pytorch.PyTorchDataset
    rioxarray.GeoTIFFDataset
-   safetensors.SafeTensorsDataset
+   safetensors.SafetensorsDataset

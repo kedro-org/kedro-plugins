@@ -202,11 +202,8 @@ docs = [
 test = [
     "accelerate<0.32", # Temporary pin
     "adlfs~=2023.1",
-    "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "biopython~=1.73",
-    "blacken-docs==1.9.2",
-    "black~=22.0",
     "cloudpickle<=2.0.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
@@ -221,7 +218,6 @@ test = [
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",
-    "import-linter[toml]==1.2.6",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.2.0",
     "joblib>=0.14",
@@ -231,7 +227,6 @@ test = [
     "matplotlib>=3.5, <3.6",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
-    "mypy~=1.0",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
@@ -240,7 +235,6 @@ test = [
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
     "polars[xlsx2csv, deltalake]~=0.18.0",
-    "pre-commit>=2.9.2",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
@@ -253,7 +247,6 @@ test = [
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",
-    "ruff~=0.0.290",
     "s3fs>=2021.04",
     "snowflake-snowpark-python~=1.0; python_version < '3.11'",
     "scikit-learn>=1.0.2,<2",
@@ -264,13 +257,24 @@ test = [
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "triad>=0.6.7, <1.0",
-    "trufflehog~=2.1",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
     "datasets",
     "huggingface_hub",
     "transformers[torch]",
+]
+
+# Lint requirements
+lint = [
+    "bandit>=1.6.2, <2.0",
+    "blacken-docs==1.9.2",
+    "black~=22.0",
+    "import-linter[toml]==1.2.6",
+    "mypy~=1.0",
+    "pre-commit>=2.9.2",
+    "ruff~=0.0.290",
+    "trufflehog~=2.1",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",

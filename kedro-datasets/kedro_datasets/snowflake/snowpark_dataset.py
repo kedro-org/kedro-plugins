@@ -238,7 +238,6 @@ class SnowparkTableDataset(AbstractDataset):
         Args:
             data (pd.DataFrame | sp.DataFrame): The data to save.
         """
-        breakpoint()
         if isinstance(data, pd.DataFrame):
             data = self._session.create_dataframe(data)
 

@@ -60,7 +60,9 @@ class ExternalTableDataset(BaseTableDataset):
 
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+
     .. code-block:: yaml
+
         names_and_ages@spark:
           type: databricks.ExternalTableDataset
           format: parquet
@@ -73,9 +75,10 @@ class ExternalTableDataset(BaseTableDataset):
           dataframe_type: pandas
 
     Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    `Python API <https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html>`_:
+
     .. code-block:: pycon
+
         >>> from kedro_datasets.databricks import ExternalTableDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Union
+from typing import Any
 
 import pandas as pd
 import snowflake.snowpark as sp
@@ -111,9 +111,11 @@ class SnowparkTableDataset(AbstractDataset):
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
+        session: sp.Session | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new instance of ``SnowparkTableDataset``.
+        """
+        Creates a new instance of ``SnowparkTableDataset``.
 
         Args:
             table_name: The table name to load or save data to.
@@ -162,6 +164,7 @@ class SnowparkTableDataset(AbstractDataset):
         self._table_name = table_name
         self._database = database
         self._schema = schema
+        self.__session = session or self._get_session(credentials)  # for testing
 
         connection_parameters = credentials
         connection_parameters.update(
@@ -180,7 +183,8 @@ class SnowparkTableDataset(AbstractDataset):
 
     @staticmethod
     def _get_session(connection_parameters) -> sp.Session:
-        """Given a connection string, create singleton connection
+        """
+        Given a connection string, create singleton connection
         to be used across all instances of `SnowparkTableDataset` that
         need to connect to the same source.
         connection_parameters is a dictionary of any values
@@ -208,35 +212,52 @@ class SnowparkTableDataset(AbstractDataset):
 
     @property
     def _session(self) -> sp.Session:
-        return self._get_session(self._connection_parameters)
+        """
+        Retrieve or create a session.
+
+        Returns:
+            sp.Session: The current session associated with the object.
+        """
+        if not self.__session:
+            self.__session = self._get_session(self._connection_parameters)
+        return self.__session
 
     def load(self) -> sp.DataFrame:
-        table_name: list = [
-            self._database,
-            self._schema,
-            self._table_name,
-        ]
+        """
+        Load data from a specified database table.
 
+        Returns:
+            sp.DataFrame: The loaded data as a Snowpark DataFrame.
+        """
+        table_name = [self._database, self._schema, self._table_name]
         sp_df = self._session.table(".".join(table_name))
         return sp_df
 
-    def save(self, data: Union[pd.DataFrame, sp.DataFrame) -> None:
+    def save(self, data: pd.DataFrame | sp.DataFrame) -> None:
+        """
+        Save data to a specified database table.
+
+        Args:
+            data (pd.DataFrame | sp.DataFrame): The data to save.
+        """
         if isinstance(data, pd.DataFrame):
             data = self._session.create_dataframe(data)
 
-        table_name = ".".join([self._database, self._schema, self._table_name])
+        table_name = [self._database, self._schema, self._table_name]
         data.write.save_as_table(table_name, **self._save_args)
 
     def _exists(self) -> bool:
-        session = self._session
-        query = "SELECT COUNT(*) FROM {database}.INFORMATION_SCHEMA.TABLES \
-                WHERE TABLE_SCHEMA = '{schema}' \
-                AND TABLE_NAME = '{table_name}'"
-        rows = session.sql(
-            query.format(
-                database=self._database,
-                schema=self._schema,
-                table_name=self._table_name,
-            )
-        ).collect()
-        return rows[0][0] == 1
+        """
+        Check if a specified table exists in the database.
+
+        Returns:
+            bool: True if the table exists, False otherwise.
+        """
+        try:
+            self._session.table(
+                f"{self._database}.{self._schema}.{self._table_name}"
+            ).show()
+            return True
+        except Exception as e:
+            logger.debug(f"Table {self._table_name} does not exist: {e}")
+            return False

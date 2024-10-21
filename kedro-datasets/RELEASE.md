@@ -1,5 +1,23 @@
 # Upcoming Release
 
+## Major features and improvements
+
+- Added the following new **experimental** datasets:
+
+| Type                              | Description                                            | Location                                 |
+| --------------------------------- | ------------------------------------------------------ | ---------------------------------------- |
+| `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
+
+## Bug fixes and other changes
+
+## Breaking Changes
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+
 # Release 5.1.0
 
 ## Major features and improvements

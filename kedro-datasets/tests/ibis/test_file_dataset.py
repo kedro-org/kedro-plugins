@@ -10,6 +10,8 @@ from pandas.testing import assert_frame_equal
 
 from kedro_datasets.ibis import FileDataset
 
+_SENTINEL = object()
+
 
 @pytest.fixture
 def filepath_csv(tmp_path):
@@ -21,9 +23,13 @@ def database(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture(params=[_SENTINEL])
 def connection_config(request, database):
-    return request.param or {"backend": "duckdb", "database": database}
+    return (
+        {"backend": "duckdb", "database": database}
+        if request.param is _SENTINEL  # `None` is a valid value to test
+        else request.param
+    )
 
 
 @pytest.fixture
@@ -103,12 +109,23 @@ class TestFileDataset:
                     ("query", (("driver", "ODBC Driver 17 for SQL Server"),)),
                 ),
             ),
+            # https://github.com/kedro-org/kedro-plugins/pull/893#discussion_r1804632435
+            (
+                None,
+                (
+                    ("backend", "duckdb"),
+                    ("database", ":memory:"),
+                ),
+            ),
         ],
         indirect=["connection_config"],
     )
     def test_connection_config(self, mocker, file_dataset, connection_config, key):
         """Test hashing of more complicated connection configuration."""
-        mocker.patch(f"ibis.{connection_config['backend']}")
+        backend = (
+            connection_config["backend"] if connection_config is not None else "duckdb"
+        )
+        mocker.patch(f"ibis.{backend}")
         file_dataset.load()
         assert key in file_dataset._connections
 

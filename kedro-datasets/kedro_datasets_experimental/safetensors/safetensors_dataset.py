@@ -19,7 +19,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     """``SafetensorsDataset`` loads/saves data from/to a Safetensors file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``torch`` library), so it
-    supports all allowed options for loading and Safetensors pickle files.
+    supports all allowed options for loading and Safetensors files.
 
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/\
@@ -77,7 +77,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
             * `numpy`
 
         Args:
-            filepath: Filepath in POSIX format to a Pickle file prefixed with a protocol like
+            filepath: Filepath in POSIX format to a Safetensors file prefixed with a protocol like
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.

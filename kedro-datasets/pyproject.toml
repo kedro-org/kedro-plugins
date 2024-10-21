@@ -191,6 +191,9 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
+safetensors-safetensorsdataset = ["safetensors"]
+safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
+
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.10.2",

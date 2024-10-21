@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 import snowflake.snowpark as sp
@@ -273,8 +273,9 @@ class SnowparkTableDataset(AbstractDataset):
         Raises:
             ValueError: If any part of the table name is None.
         """
-        parts = [self._database, self._schema, self._table_name]
+        parts: list[str | None] = [self._database, self._schema, self._table_name]
         if any(part is None for part in parts):
             raise ValueError(f"Table name parts cannot be None: {parts}")
 
-        return ".".join(parts)
+        parts_str = cast(list[str], parts)  # make linting happy
+        return ".".join(parts_str)

@@ -300,7 +300,7 @@ experimental = [
 ]
 
 # All requirements
-all = ["kedro-datasets[test,docs]"]
+all = ["kedro-datasets[test,docs,lint]"]
 
 [project.urls]
 Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets"

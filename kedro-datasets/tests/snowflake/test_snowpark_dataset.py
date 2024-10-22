@@ -1,4 +1,5 @@
 import datetime
+import sys
 
 import pandas as pd
 import pytest
@@ -120,6 +121,10 @@ def sample_pd_df() -> pd.DataFrame:
     )
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 12),
+    reason="Tests are not supported for Python versions >= 3.12",
+)
 class TestSnowparkTableDataset:
     """Tests for the SnowparkTableDataset functionality."""
 

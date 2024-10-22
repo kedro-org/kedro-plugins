@@ -204,8 +204,6 @@ test = [
     "adlfs~=2023.1",
     "behave==1.2.6",
     "biopython~=1.73",
-    "blacken-docs==1.9.2",
-    "black~=22.0",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",

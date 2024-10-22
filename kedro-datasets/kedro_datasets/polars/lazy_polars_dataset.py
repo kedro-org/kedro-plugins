@@ -27,7 +27,9 @@ PolarsFrame = pl.LazyFrame | pl.DataFrame
 logger = logging.getLogger(__name__)
 
 
-class LazyPolarsDataset(AbstractVersionedDataset[pl.LazyFrame, PolarsFrame]):
+class LazyPolarsDataset(
+    AbstractVersionedDataset[pl.LazyFrame, pl.LazyFrame | pl.DataFrame]
+):
     """``LazyPolarsDataset`` loads/saves data from/to a data file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses Polars to handle
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can

@@ -69,6 +69,7 @@ dataset-doctest%:
 	if [ "$$PYTHON_VERSION" = "3.12" ]; then \
 	  IGNORE_SNOWPARK="--ignore kedro_datasets/snowflake/snowpark_dataset.py"; \
 	fi; \
+	echo "IGNORE_SNOWPARK is set to: $IGNORE_SNOWPARK"; \
 	\
 	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \

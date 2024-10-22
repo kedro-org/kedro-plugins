@@ -7,14 +7,11 @@ from typing import Any, cast
 
 import pandas as pd
 from kedro.io.core import AbstractDataset, DatasetError
-
-logger = logging.getLogger(__name__)
-SNOWPARK_AVAILABLE = False
-
-
 from snowflake.snowpark import DataFrame, Session
 from snowflake.snowpark import context as sp_context
 from snowflake.snowpark import exceptions as sp_exceptions
+
+logger = logging.getLogger(__name__)
 
 
 class SnowparkTableDataset(AbstractDataset):

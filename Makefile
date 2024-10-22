@@ -72,12 +72,18 @@ dataset-doctest%:
 	echo "IGNORE_SNOWPARK is set to: $$IGNORE_SNOWPARK"; \
 	echo "PYTHON_VERSION is set to: $$PYTHON_VERSION"; \
 	\
-	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
-	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
+	# Build the pytest command
+	PYTEST_CMD="cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
-	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  $$IGNORE_SNOWPARK \
-	  $(extra_pytest_arg${*})
+	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py"; \
+	\
+	# Append IGNORE_SNOWPARK if it's set
+	if [ -n "$$IGNORE_SNOWPARK" ]; then \
+	  PYTEST_CMD="$$PYTEST_CMD $$IGNORE_SNOWPARK"; \
+	fi; \
+	\
+	# Run pytest with optional extra arguments
+	$$PYTEST_CMD $(extra_pytest_arg${*})

@@ -56,12 +56,20 @@ dataset-tests: dataset-doctests
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=
+
 dataset-doctest%:
 	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
 	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
 	  exit 2; \
 	fi; \
-    \
+	\
+	# Check the Python version
+	PYTHON_VERSION=$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'); \
+	IGNORE_SNOWPARK=""; \
+	if [ "$$PYTHON_VERSION" = "3.12" ]; then \
+	  IGNORE_SNOWPARK="--ignore kedro_datasets/snowflake/snowpark_dataset.py"; \
+	fi; \
+	\
 	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
 	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
@@ -69,4 +77,5 @@ dataset-doctest%:
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
+	  $$IGNORE_SNOWPARK \
 	  $(extra_pytest_arg${*})

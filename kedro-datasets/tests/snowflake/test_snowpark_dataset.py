@@ -3,18 +3,23 @@ import sys
 
 import pandas as pd
 import pytest
-from snowflake.snowpark import DataFrame
-from snowflake.snowpark.session import Session
-from snowflake.snowpark.types import (
-    DateType,
-    FloatType,
-    IntegerType,
-    StringType,
-    StructField,
-    StructType,
-    TimestampType,
-)
 
+# needed for pytest to skip tests for python versions >= 3.12
+try:
+    from snowflake.snowpark import DataFrame, Session
+    from snowflake.snowpark.types import (
+        DateType,
+        FloatType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
+        TimestampType,
+    )
+
+    SNOWPARK_AVAILABLE = True
+except ImportError:
+    SNOWPARK_AVAILABLE = False
 from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
 
 # Example dummy configuration for testing

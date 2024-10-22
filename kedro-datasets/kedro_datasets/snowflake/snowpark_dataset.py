@@ -8,7 +8,11 @@ from typing import Any, cast
 import pandas as pd
 import snowflake.snowpark as sp
 from kedro.io.core import AbstractDataset, DatasetError
+
+
 from snowflake.snowpark import DataFrame, Session
+from snowflake.snowpark import context as sp_context
+from snowflake.snowpark import exceptions as sp_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -205,10 +209,10 @@ class SnowparkTableDataset(AbstractDataset):
         """
         try:
             logger.debug("Trying to reuse active snowpark session...")
-            session = sp.context.get_active_session()
+            session = sp_context.get_active_session()
         except sp.exceptions.SnowparkSessionException:
             logger.debug("No active snowpark session found. Creating...")
-            session = sp.Session.builder.configs(connection_parameters).create()
+            session = Session.builder.configs(connection_parameters).create()
         return session
 
     @property

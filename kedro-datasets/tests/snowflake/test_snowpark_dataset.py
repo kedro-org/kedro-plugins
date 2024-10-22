@@ -16,11 +16,9 @@ try:
         StructType,
         TimestampType,
     )
-
-    SNOWPARK_AVAILABLE = True
-except ImportError:
-    SNOWPARK_AVAILABLE = False
-from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
+    from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
+except ImportError as e:
+    print(f"Snowpark not supported in Python version {sys.version_info} : {e}")
 
 # Example dummy configuration for testing
 DUMMY_CREDENTIALS = {

@@ -4,7 +4,8 @@ import sys
 import pandas as pd
 import pytest
 
-# needed for pytest to skip tests for python versions >= 3.12
+SNOWPARK_AVAILABLE = False
+
 try:
     from snowflake.snowpark import DataFrame, Session
     from snowflake.snowpark.types import (
@@ -16,113 +17,112 @@ try:
         StructType,
         TimestampType,
     )
+
     from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
-except ImportError as e:
-    print(f"Snowpark not supported in Python version {sys.version_info} : {e}")
 
-# Example dummy configuration for testing
-DUMMY_CREDENTIALS = {
-    "account": "DUMMY_ACCOUNT",
-    "warehouse": "DUMMY_WAREHOUSE",
-    "database": "DUMMY_DATABASE",
-    "schema": "DUMMY_SCHEMA",
-    "user": "DUMMY_USER",
-    "password": "DUMMY_PASSWORD",
-}
+    SNOWPARK_AVAILABLE = True
+except ImportError:
+    print(f"Snowpark not supported in Python version {sys.version_info}")
 
+if SNOWPARK_AVAILABLE:
+    # example dummy configuration for local testing
+    DUMMY_CREDENTIALS = {
+        "account": "DUMMY_ACCOUNT",
+        "warehouse": "DUMMY_WAREHOUSE",
+        "database": "DUMMY_DATABASE",
+        "schema": "DUMMY_SCHEMA",
+        "user": "DUMMY_USER",
+        "password": "DUMMY_PASSWORD",
+    }
 
-@pytest.fixture(scope="module")
-def local_snowpark_session() -> Session:
-    """
-    Creates a local Snowflake session for testing purposes.
-    See https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally
+    @pytest.fixture(scope="module")
+    def local_snowpark_session() -> Session:
+        """
+        Creates a local Snowflake session for testing purposes.
+        See
 
-    Returns:
-        Session: Snowflake session object configured for local testing.
-    """
-    return Session.builder.config("local_testing", True).create()
+        Returns:
+            Session: Snowflake session object configured for local testing.
+        """
+        return Session.builder.config("local_testing", True).create()
 
+    @pytest.fixture(scope="module")
+    def snowflake_dataset(local_snowpark_session: Session) -> SnowparkTableDataset:
+        """
+        Provides a SnowparkTableDataset fixture for testing.
 
-@pytest.fixture(scope="module")
-def snowflake_dataset(local_snowpark_session: Session) -> SnowparkTableDataset:
-    """
-    Provides a SnowparkTableDataset fixture for testing.
+        Args:
+            snowflake_session (Session): The Snowflake session used for this dataset.
 
-    Args:
-        snowflake_session (Session): The Snowflake session used for this dataset.
+        Returns:
+            SnowparkTableDataset: Dataset configuration for a Snowflake table.
+        """
+        return SnowparkTableDataset(
+            table_name="DUMMY_TABLE",
+            credentials=DUMMY_CREDENTIALS,
+            session=local_snowpark_session,
+            save_args={"mode": "overwrite"},
+        )
 
-    Returns:
-        SnowparkTableDataset: Dataset configuration for a Snowflake table.
-    """
-    return SnowparkTableDataset(
-        table_name="DUMMY_TABLE",
-        credentials=DUMMY_CREDENTIALS,
-        session=local_snowpark_session,
-        save_args={"mode": "overwrite"},
-    )
+    @pytest.fixture
+    def sample_sp_df(local_snowpark_session: Session) -> DataFrame:
+        """
+        Creates a sample Snowpark DataFrame for testing.
 
+        Args:
+            snowflake_session (Session): Session to create the DataFrame.
 
-@pytest.fixture
-def sample_sp_df(local_snowpark_session: Session) -> DataFrame:
-    """
-    Creates a sample Snowpark DataFrame for testing.
-
-    Args:
-        snowflake_session (Session): Session to create the DataFrame.
-
-    Returns:
-        snowpark.DataFrame: DataFrame with sample data and schema.
-    """
-    return local_snowpark_session.create_dataframe(
-        [
-            (
-                "John",
-                23,
-                datetime.date(1999, 12, 2),
-                6.5,
-                datetime.datetime(2022, 12, 2, 13, 20, 1),
-            ),
-            (
-                "Jane",
-                41,
-                datetime.date(1981, 1, 3),
-                5.7,
-                datetime.datetime(2022, 12, 2, 13, 21, 11),
-            ),
-        ],
-        schema=StructType(
+        Returns:
+            snowpark.DataFrame: DataFrame with sample data and schema.
+        """
+        return local_snowpark_session.create_dataframe(
             [
-                StructField("name", StringType()),
-                StructField("age", IntegerType()),
-                StructField("bday", DateType()),
-                StructField("height", FloatType()),
-                StructField("insert_dttm", TimestampType()),
-            ]
-        ),
-    )
-
-
-@pytest.fixture
-def sample_pd_df() -> pd.DataFrame:
-    """
-    Creates a sample Pandas DataFrame for testing.
-
-    Returns:
-        pd.DataFrame: DataFrame with sample data.
-    """
-    return pd.DataFrame(
-        {
-            "name": ["Alice", "Bob"],
-            "age": [30, 40],
-            "bday": [datetime.date(1993, 1, 1), datetime.date(1983, 2, 2)],
-            "height": [5.5, 6.0],
-            "insert_dttm": [
-                datetime.datetime(2023, 1, 1, 10, 0),
-                datetime.datetime(2023, 1, 1, 12, 0),
+                (
+                    "John",
+                    23,
+                    datetime.date(1999, 12, 2),
+                    6.5,
+                    datetime.datetime(2022, 12, 2, 13, 20, 1),
+                ),
+                (
+                    "Jane",
+                    41,
+                    datetime.date(1981, 1, 3),
+                    5.7,
+                    datetime.datetime(2022, 12, 2, 13, 21, 11),
+                ),
             ],
-        }
-    )
+            schema=StructType(
+                [
+                    StructField("name", StringType()),
+                    StructField("age", IntegerType()),
+                    StructField("bday", DateType()),
+                    StructField("height", FloatType()),
+                    StructField("insert_dttm", TimestampType()),
+                ]
+            ),
+        )
 
+    @pytest.fixture
+    def sample_pd_df() -> pd.DataFrame:
+        """
+        Creates a sample Pandas DataFrame for testing.
+
+        Returns:
+            pd.DataFrame: DataFrame with sample data.
+        """
+        return pd.DataFrame(
+            {
+                "name": ["Alice", "Bob"],
+                "age": [30, 40],
+                "bday": [datetime.date(1993, 1, 1), datetime.date(1983, 2, 2)],
+                "height": [5.5, 6.0],
+                "insert_dttm": [
+                    datetime.datetime(2023, 1, 1, 10, 0),
+                    datetime.datetime(2023, 1, 1, 12, 0),
+                ],
+            }
+        )
 
 @pytest.mark.skipif(
     sys.version_info >= (3, 12),

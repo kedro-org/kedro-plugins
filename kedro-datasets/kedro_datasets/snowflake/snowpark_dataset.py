@@ -160,6 +160,7 @@ class SnowparkTableDataset(AbstractDataset):
                     "'schema' must be provided by credentials or dataset."
                 )
             schema = credentials["schema"]
+
         # Handle default load and save arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
@@ -167,13 +168,13 @@ class SnowparkTableDataset(AbstractDataset):
         self._table_name = table_name
         self._database = database
         self._schema = schema
-        self.__session = session or self._get_session(credentials)  # for testing
 
         connection_parameters = credentials
         connection_parameters.update(
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
+        self.__session = None
 
         self.metadata = metadata
 
@@ -224,6 +225,10 @@ class SnowparkTableDataset(AbstractDataset):
         if not self.__session:
             self.__session = self._get_session(self._connection_parameters)
         return self.__session
+
+    # @_session.setter
+    # def _session(self, session: Session) -> None:
+    #     self.__session = session
 
     def load(self) -> DataFrame:
         """
@@ -276,8 +281,7 @@ class SnowparkTableDataset(AbstractDataset):
             ValueError: If any part of the table name is None.
         """
         parts: list[str | None] = [self._database, self._schema, self._table_name]
-        if any(part is None for part in parts):
-            raise ValueError(f"Table name parts cannot be None: {parts}")
-
+        if any(part is None or part == "" for part in parts):
+            raise DatasetError("Database, schema or table name cannot be None or empty")
         parts_str = cast(list[str], parts)  # make linting happy
         return ".".join(parts_str)

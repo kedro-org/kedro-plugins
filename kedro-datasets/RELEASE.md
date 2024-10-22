@@ -17,10 +17,10 @@
 ## Breaking Changes
 
 ## Community contributions
-- [Thomas d'Hooghe](https://github.com/tdhooghe)
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
+- [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 
 # Release 5.1.0

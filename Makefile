@@ -27,6 +27,9 @@ secret-scan:
 install-test-requirements:
 	cd $(plugin) && uv pip install ".[test]"
 
+install-lint-requirements:
+	cd $(plugin) && uv pip install ".[lint]"
+
 install-pre-commit:
 	pre-commit install --install-hooks
 

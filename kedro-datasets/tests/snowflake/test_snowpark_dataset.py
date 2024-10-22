@@ -36,10 +36,6 @@ DUMMY_CREDENTIALS = {
 
 
 @pytest.fixture(scope="module")
-@pytest.mark.skipif(
-    sys.version_info > (3, 11),
-    reason="Snowpark is not supported in Python versions higher than 3.11",
-)
 def local_snowpark_session() -> Session:
     """
     Creates a local Snowflake session for testing purposes.
@@ -52,10 +48,6 @@ def local_snowpark_session() -> Session:
 
 
 @pytest.fixture(scope="module")
-@pytest.mark.skipif(
-    sys.version_info > (3, 11),
-    reason="Snowpark is not supported in Python versions higher than 3.11",
-)
 def snowflake_dataset(local_snowpark_session: Session) -> SnowparkTableDataset:
     """
     Provides a SnowparkTableDataset fixture for testing.
@@ -75,10 +67,6 @@ def snowflake_dataset(local_snowpark_session: Session) -> SnowparkTableDataset:
 
 
 @pytest.fixture(scope="module")
-@pytest.mark.skipif(
-    sys.version_info > (3, 11),
-    reason="Snowpark is not supported in Python versions higher than 3.11",
-)
 def sample_sp_df(local_snowpark_session: Session) -> DataFrame:
     """
     Creates a sample Snowpark DataFrame for testing.
@@ -119,10 +107,6 @@ def sample_sp_df(local_snowpark_session: Session) -> DataFrame:
 
 
 @pytest.fixture(scope="module")
-@pytest.mark.skipif(
-    sys.version_info > (3, 11),
-    reason="Snowpark is not supported in Python versions higher than 3.11",
-)
 def sample_pd_df() -> pd.DataFrame:
     """
     Creates a sample Pandas DataFrame for testing.
@@ -144,10 +128,6 @@ def sample_pd_df() -> pd.DataFrame:
     )
 
 
-@pytest.mark.skipif(
-    sys.version_info > (3, 11),
-    reason="Snowpark is not supported in Python versions higher than 3.11",
-)
 class TestSnowparkTableDataset:
     """Tests for the SnowparkTableDataset functionality."""
 

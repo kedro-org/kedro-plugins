@@ -46,6 +46,12 @@ sign-off:
 test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
+
+# kedro-datasets/snowflake tests skipped from default scope
+test-snowflake-only:
+	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
+
 check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
@@ -56,34 +62,18 @@ dataset-tests: dataset-doctests
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=
-
 dataset-doctest%:
 	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
 	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
 	  exit 2; \
 	fi; \
-	\
-	# Check the Python version
-	PYTHON_VERSION=$$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'); \
-	IGNORE_SNOWPARK=""; \
-	if [ "$$PYTHON_VERSION" = "3.12" ]; then \
-	  IGNORE_SNOWPARK="--ignore kedro_datasets/snowflake/snowpark_dataset.py"; \
-	fi; \
-	echo "IGNORE_SNOWPARK is set to: $$IGNORE_SNOWPARK"; \
-	echo "PYTHON_VERSION is set to: $$PYTHON_VERSION"; \
-	\
-	# Build the pytest command
-	PYTEST_CMD="cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
+    \
+	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
+	cd kedro-datasets && pytest kedro_datasets --doctest-modules --doctest-continue-on-failure --no-cov \
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
+	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
-	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py"; \
-	\
-	# Append IGNORE_SNOWPARK if it's set
-	if [ -n "$$IGNORE_SNOWPARK" ]; then \
-	  PYTEST_CMD="$$PYTEST_CMD $$IGNORE_SNOWPARK"; \
-	fi; \
-	\
-	# Run pytest with optional extra arguments
-	$$PYTEST_CMD $(extra_pytest_arg${*})
+	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
+	  $(extra_pytest_arg${*})

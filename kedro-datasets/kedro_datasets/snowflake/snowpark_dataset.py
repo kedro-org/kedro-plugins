@@ -16,6 +16,8 @@ try:
     from snowflake.snowpark import DataFrame, Session
     from snowflake.snowpark import context as sp_context
     from snowflake.snowpark import exceptions as sp_exceptions
+
+    SNOWPARK_AVAILABLE = True
 except ImportError as e:
     logger.error(
         f"Snowpark not supported in Python version {sys.version_info}. Error: {e}"

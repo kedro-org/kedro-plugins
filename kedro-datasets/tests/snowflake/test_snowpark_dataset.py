@@ -1,6 +1,14 @@
 import datetime
 import sys
 
+import pytest
+
+if sys.version_info > (3, 11):
+    pytest.skip(
+        "Snowpark is not supported in Python versions higher than 3.11",
+        allow_module_level=True,
+    )
+
 import pandas as pd
 import pytest
 from snowflake.snowpark import DataFrame, Session

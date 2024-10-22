@@ -129,7 +129,7 @@ def cleanup_plt():
 
 
 class TestMatplotlibWriter:
-    @pytest.mark.parametrize("save_args", [{"k1": "v1"}], indirect=True)
+    @pytest.mark.parametrize("save_args", [{"format": "png"}], indirect=True)
     def test_save_data(
         self, tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket, save_args
     ):

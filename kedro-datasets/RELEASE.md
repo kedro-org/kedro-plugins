@@ -2,14 +2,14 @@
 
 ## Major features and improvements
 
+- Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion
+- Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset
 - Added the following new **experimental** datasets:
 
 | Type                              | Description                                            | Location                                 |
 | --------------------------------- | ------------------------------------------------------ | ---------------------------------------- |
 | `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
 
-- Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion
-- Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset
 
 ## Bug fixes and other changes
 - Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes

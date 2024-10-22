@@ -63,36 +63,36 @@ class SnowparkTableDataset(AbstractDataset):
             table_type: ''
 
         polygons:
-        type: kedro_datasets.snowflake.SnowparkTableDataset
-        table_name: "geopolygons"
-        credentials: snowflake_client
-        schema: "geodata"
+            type: kedro_datasets.snowflake.SnowparkTableDataset
+            table_name: "geopolygons"
+            credentials: snowflake_client
+            schema: "geodata"
 
     credentials.yml
 
     .. code-block:: yaml
 
         snowflake_client:
-        account: 'ab12345.eu-central-1'
-        port: 443
-        warehouse: "datascience_wh"
-        database: "detailed_data"
-        schema: "observations"
-        user: "service_account_abc"
-        password: "supersecret"
+            account: 'ab12345.eu-central-1'
+            port: 443
+            warehouse: "datascience_wh"
+            database: "detailed_data"
+            schema: "observations"
+            user: "service_account_abc"
+            password: "supersecret"
 
     credentials.yml (with externalbrowser authenticator)
 
     .. code-block:: yaml
 
         snowflake_client:
-        account: 'ab12345.eu-central-1'
-        port: 443
-        warehouse: "datascience_wh"
-        database: "detailed_data"
-        schema: "observations"
-        user: "john_doe@wdomain.com"
-        authenticator: "externalbrowser"
+            account: 'ab12345.eu-central-1'
+            port: 443
+            warehouse: "datascience_wh"
+            database: "detailed_data"
+            schema: "observations"
+            user: "john_doe@wdomain.com"
+            authenticator: "externalbrowser"
 
     """
 

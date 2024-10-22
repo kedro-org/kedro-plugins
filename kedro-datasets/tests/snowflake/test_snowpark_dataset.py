@@ -24,7 +24,7 @@ try:
 except ImportError:
     print(f"Snowpark not supported in Python version {sys.version_info}")
 
-if SNOWPARK_AVAILABLE:
+if SNOWPARK_AVAILABLE and sys.version_info < (3, 12):
     # example dummy configuration for local testing
     DUMMY_CREDENTIALS = {
         "account": "DUMMY_ACCOUNT",
@@ -124,84 +124,89 @@ if SNOWPARK_AVAILABLE:
             }
         )
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 12),
-    reason="Tests are not supported for Python versions >= 3.12",
-)
-class TestSnowparkTableDataset:
-    """Tests for the SnowparkTableDataset functionality."""
+    class TestSnowparkTableDataset:
+        """Tests for the SnowparkTableDataset functionality."""
 
-    def test_save_with_snowpark(
-        self, sample_sp_df: DataFrame, snowflake_dataset: SnowparkTableDataset
-    ) -> None:
-        """Tests saving a Snowpark DataFrame to a Snowflake table.
+        def test_save_with_snowpark(
+            self, sample_sp_df: DataFrame, snowflake_dataset: SnowparkTableDataset
+        ) -> None:
+            """Tests saving a Snowpark DataFrame to a Snowflake table.
 
-        Args:
-            sample_sp_df (snowpark.DataFrame): Sample data to save.
-            snowflake_dataset (SnowparkTableDataset): Dataset to test.
+            Args:
+                sample_sp_df (snowpark.DataFrame): Sample data to save.
+                snowflake_dataset (SnowparkTableDataset): Dataset to test.
 
-        Asserts:
-            The count of the loaded DataFrame matches the saved DataFrame.
-        """
-        snowflake_dataset.save(sample_sp_df)
-        loaded_df = snowflake_dataset.load()
-        assert loaded_df.count() == sample_sp_df.count()
+            Asserts:
+                The count of the loaded DataFrame matches the saved DataFrame.
+            """
+            snowflake_dataset.save(sample_sp_df)
+            loaded_df = snowflake_dataset.load()
+            assert loaded_df.count() == sample_sp_df.count()
 
-    def test_save_with_pandas(
-        self, sample_pd_df: pd.DataFrame, snowflake_dataset: SnowparkTableDataset
-    ) -> None:
-        """
-        Tests saving a Pandas DataFrame to a Snowflake table.
+        def test_save_with_pandas(
+            self, sample_pd_df: pd.DataFrame, snowflake_dataset: SnowparkTableDataset
+        ) -> None:
+            """
+            Tests saving a Pandas DataFrame to a Snowflake table.
 
-        Args:
-            sample_pd_df (pd.DataFrame): Sample data to save.
-            snowflake_dataset (SnowparkTableDataset): Dataset to test.
+            Args:
+                sample_pd_df (pd.DataFrame): Sample data to save.
+                snowflake_dataset (SnowparkTableDataset): Dataset to test.
 
-        Asserts:
-            The count of the loaded DataFrame matches the number of rows in the Pandas DataFrame.
-        """
-        snowflake_dataset.save(sample_pd_df)
-        loaded_df = snowflake_dataset.load()
-        assert loaded_df.count() == len(sample_pd_df)
+            Asserts:
+                The count of the loaded DataFrame matches the number of rows in the Pandas DataFrame.
+            """
+            snowflake_dataset.save(sample_pd_df)
+            loaded_df = snowflake_dataset.load()
+            assert loaded_df.count() == len(sample_pd_df)
 
-    def test_load(
-        self, snowflake_dataset: SnowparkTableDataset, sample_sp_df: DataFrame
-    ) -> None:
-        """
-        Tests loading data from a Snowflake table.
+        def test_load(
+            self, snowflake_dataset: SnowparkTableDataset, sample_sp_df: DataFrame
+        ) -> None:
+            """
+            Tests loading data from a Snowflake table.
 
-        Args:
-            snowflake_dataset (SnowparkTableDataset): Dataset to load data from.
-            sample_sp_df (snowpark.DataFrame): Sample data for reference.
+            Args:
+                snowflake_dataset (SnowparkTableDataset): Dataset to load data from.
+                sample_sp_df (snowpark.DataFrame): Sample data for reference.
 
-        Asserts:
-            The count of the loaded DataFrame matches the reference sample DataFrame.
-        """
-        loaded_df = snowflake_dataset.load()
-        assert loaded_df.count() == sample_sp_df.count()
+            Asserts:
+                The count of the loaded DataFrame matches the reference sample DataFrame.
+            """
+            loaded_df = snowflake_dataset.load()
+            assert loaded_df.count() == sample_sp_df.count()
 
-    def test_exists(self, snowflake_dataset: SnowparkTableDataset) -> None:
-        """
-        Tests if a Snowflake table exists.
+        def test_exists(self, snowflake_dataset: SnowparkTableDataset) -> None:
+            """
+            Tests if a Snowflake table exists.
 
-        Args:
-            snowflake_dataset (SnowparkTableDataset): Dataset to check existence.
+            Args:
+                snowflake_dataset (SnowparkTableDataset): Dataset to check existence.
 
-        Asserts:
-            The dataset table exists in the Snowflake environment.
-        """
-        exists = snowflake_dataset._exists()
-        assert exists
+            Asserts:
+                The dataset table exists in the Snowflake environment.
+            """
+            exists = snowflake_dataset._exists()
+            assert exists
 
-    def test_not_exists(self, snowflake_dataset: SnowparkTableDataset) -> None:
-        """
-        Tests if a non-existent Snowflake table is detected.
-        Args:
-            snowflake_dataset (SnowparkTableDataset): Dataset to check existence.
+        def test_not_exists(self, snowflake_dataset: SnowparkTableDataset) -> None:
+            """
+            Tests if a non-existent Snowflake table is detected.
+            Args:
+                snowflake_dataset (SnowparkTableDataset): Dataset to check existence.
 
-        Asserts:
-            The dataset table does not exist in the Snowflake environment.
-        """
-        snowflake_dataset._table_name = "NON_EXISTENT_TABLE"
-        exists = snowflake_dataset._exists()
-        assert not exists
+            Asserts:
+                The dataset table does not exist in the Snowflake environment.
+            """
+            snowflake_dataset._table_name = "NON_EXISTENT_TABLE"
+            exists = snowflake_dataset._exists()
+            assert not exists
+
+elif sys.version_info >= (3, 12):
+
+    @pytest.mark.skip(
+        reason="Snowpark not supported in this Python versions higher than 3.11"
+    )
+    class TestSnowparkTableDataset:
+        def test_skip(self):
+            pass

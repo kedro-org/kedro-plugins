@@ -46,12 +46,6 @@ sign-off:
 test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
-
-# kedro-datasets/snowflake tests skipped from default scope
-test-snowflake-only:
-	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
-	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
-
 check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
@@ -73,7 +67,6 @@ dataset-doctest%:
 	  --ignore kedro_datasets/pandas/gbq_dataset.py \
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
-	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  $(extra_pytest_arg${*})

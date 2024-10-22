@@ -24,22 +24,25 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "bandit",
     "behave",
-    "black~=22.0",
     "coverage>=7.2.0",
     "docker",
-    "mypy~=1.0",
-    "pre-commit>=2.9.2",
     "psutil",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]~=2.2.1",
     "PyYAML>=5.1, <7.0",
-    "trufflehog>=2.0.99, <3.0",
+    "wheel==0.32.2",
+]
+
+lint = [
+    "bandit",
+    "black~=22.0",
+    "mypy~=1.0",
+    "pre-commit>=2.9.2",
+    "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
-    "wheel==0.32.2"
 ]
 
 [project.entry-points."kedro.project_commands"]

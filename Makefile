@@ -55,7 +55,7 @@ check-datasets-docs:
 # omit Snowpark from python 3.12 testing, as it is not supported
 PYTHON_VERSION := $(shell python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 ifeq ($(strip $(PYTHON_VERSION)),3.12)
-	IGNORE_OPTS := --ignore tests/tensorflow --ignore tests/snowflake/test_snowpark_dataset.py
+	IGNORE_OPTS := --ignore tests/tensorflow --ignore tests/snowflake
 else
 	IGNORE_OPTS := --ignore tests/tensorflow
 endif

@@ -320,6 +320,9 @@ show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
 omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_lines = [
+    "pragma: no cover - snowpark python 3.12"
+]
 
 [tool.pytest.ini_options]
 addopts = """

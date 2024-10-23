@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 if sys.version_info >= (3, 12):
-    pytest.skip(
+    pytest.skip(  # pragma: no cover - snowpark python 3.12
         "Snowpark is not supported in Python versions higher than 3.11",
         allow_module_level=True,
     )
@@ -346,7 +346,7 @@ class TestSnowparkTableDataset:
         assert session == mock_active_session
         mock_get_active_session.assert_called_once()
 
-    @patch("snowflake.snowpark.Session.builder", new_callable=MagicMock)
+    @patch("snowflake.snowpark.Session.builder")
     def test_get_session_no_existing_session(self, mock_builder, snowflake_dataset):
         """
         Test the `_get_session` method of `SnowparkTableDataset` when there is no existing session.

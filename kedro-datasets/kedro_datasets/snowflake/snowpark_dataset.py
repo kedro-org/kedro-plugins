@@ -226,10 +226,6 @@ class SnowparkTableDataset(AbstractDataset):
             self.__session = self._get_session(self._connection_parameters)
         return self.__session
 
-    # @_session.setter
-    # def _session(self, session: Session) -> None:
-    #     self.__session = session
-
     def load(self) -> DataFrame:
         """
         Load data from a specified database table.

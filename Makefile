@@ -49,21 +49,19 @@ sign-off:
 test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
 
+
+# kedro-datasets/snowflake tests skipped from default scope
+test-snowflake-only:
+	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
+	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
+
 check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
-# omit Snowpark from python 3.12 testing, as it is not supported
-PYTHON_VERSION := $(shell python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-ifeq ($(strip $(PYTHON_VERSION)),3.12)
-	IGNORE_OPTS := --ignore tests/tensorflow --ignore tests/snowflake
-else
-	IGNORE_OPTS := --ignore tests/tensorflow
-endif
-
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
-	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile $(IGNORE_OPTS)
-	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
+	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow
+	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py  --no-cov
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=

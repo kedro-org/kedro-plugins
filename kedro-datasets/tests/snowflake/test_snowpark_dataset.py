@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 if sys.version_info >= (3, 12):
-    pytest.skip(  # pragma: no cover - snowpark python 3.12
+    pytest.mark.xfail(
         "Snowpark is not supported in Python versions higher than 3.11",
         allow_module_level=True,
     )

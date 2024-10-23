@@ -53,7 +53,9 @@ check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
+# Omit Snowpark from python 3.12 testing, as it is not supported; while keeping coverage 100
 dataset-tests: dataset-doctests
+	PYTHON_VERSION=$(shell python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 	IGNORE_OPTS=""
 	@if [ "$(PYTHON_VERSION)" = "3.12" ]; then \
 		IGNORE_OPTS="--ignore tests/tensorflow --ignore tests/snowflake/test_snowpark_dataset.py"; \

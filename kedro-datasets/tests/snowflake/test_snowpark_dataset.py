@@ -129,18 +129,6 @@ def sample_pd_df() -> pd.DataFrame:
     )
 
 
-# @pytest.fixture
-# def mock_get_session(mocker):
-#     return mocker.patch(
-#         "kedro_datasets.snowflake.snowpark_dataset.SnowparkTableDataset._get_session"
-#     )
-
-
-# @pytest.fixture
-# def mock_session_create(mocker):
-#     return mocker.patch("snowflake.snowpark.Session.builder.configs.create")
-
-
 class TestSnowparkTableDataset:
     """Tests for the SnowparkTableDataset functionality."""
 

@@ -1,16 +1,6 @@
 import datetime
-import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-# if sys.version_info >= (3, 12):
-#     pytest.mark.xfail(
-#         "Snowpark is not supported in Python versions higher than 3.11",
-#         allow_module_level=True,
-#     )
-
-snowpark = pytest.importorskip("snowpark")
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError
@@ -27,6 +17,7 @@ from snowflake.snowpark.types import (
 
 from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
 
+snowpark = pytest.importorskip("snowpark")
 # example dummy configuration for local testing
 DUMMY_CREDENTIALS = {
     "account": "DUMMY_ACCOUNT",

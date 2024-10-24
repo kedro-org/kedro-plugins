@@ -1,8 +1,12 @@
+# ruff: noqa: E402
+import pytest
+
+snowpark = pytest.importorskip("snowpark")
+
 import datetime
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
-import pytest
 from kedro.io.core import DatasetError
 from snowflake.snowpark import DataFrame, Session
 from snowflake.snowpark.types import (
@@ -17,7 +21,6 @@ from snowflake.snowpark.types import (
 
 from kedro_datasets.snowflake.snowpark_dataset import SnowparkTableDataset
 
-snowpark = pytest.importorskip("snowpark")
 # example dummy configuration for local testing
 DUMMY_CREDENTIALS = {
     "account": "DUMMY_ACCOUNT",

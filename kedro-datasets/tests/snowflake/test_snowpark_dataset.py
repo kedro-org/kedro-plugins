@@ -1,9 +1,10 @@
+# ruff: noqa: E402
 import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-snoflake = pytest.importorskip("snowflake")
+snowflake = pytest.importorskip("snowflake")
 
 import pandas as pd
 import pytest

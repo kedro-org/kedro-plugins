@@ -174,7 +174,7 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self.__session = None
+        self._session = None
 
         self.metadata = metadata
 
@@ -215,16 +215,15 @@ class SnowparkTableDataset(AbstractDataset):
         return session
 
     @property
-    def _session(self) -> Session:
+    def session(self) -> Session:
         """
         Retrieve or create a session.
-
         Returns:
             Session: The current session associated with the object.
         """
-        if not self.__session:
-            self.__session = self._get_session(self._connection_parameters)
-        return self.__session
+        if not self._session:
+            self._session = self._get_session(self._connection_parameters)
+        return self._session
 
     def load(self) -> DataFrame:
         """

@@ -318,7 +318,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-snowpark = pytest.importorskip("snowpark")
+snoflake = pytest.importorskip("snowflake")
 
 import pandas as pd
 import pytest

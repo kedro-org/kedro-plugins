@@ -4,11 +4,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-if sys.version_info >= (3, 12):
-    pytest.mark.xfail(
-        "Snowpark is not supported in Python versions higher than 3.11",
-        allow_module_level=True,
-    )
+snowpark = pytest.importorskip("snowpark")
+# if sys.version_info >= (3, 12):
+#     pytest.mark.xfail(
+#         "Snowpark is not supported in Python versions higher than 3.11",
+#         allow_module_level=True,
+#     )
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError

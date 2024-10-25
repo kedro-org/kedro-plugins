@@ -106,6 +106,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             table_name: The name of the table or view to read or create.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            table_args: Additional arguments passed to the Ibis backend's
+                `create_{materialized}` method and `table` method.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's

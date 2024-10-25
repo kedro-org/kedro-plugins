@@ -69,6 +69,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         "materialized": "view",
         "overwrite": True,
     }
+    DEFAULT_TABLE_ARGS: ClassVar[dict[str, Any]] = {}
 
     _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
 
@@ -79,6 +80,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         file_format: str | None = None,
         table_name: str | None = None,
         connection: dict[str, Any] | None = None,
+        table_args: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -143,7 +145,12 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        self._table_args = deepcopy(self.DEFAULT_TABLE_ARGS)
+        if table_args is not None:
+            self._table_args.update(table_args)
+
         self._materialized = self._save_args.pop("materialized")
+        self._table_args = {**self._table_args, **self._save_args}
 
     @property
     def connection(self) -> BaseBackend:
@@ -176,14 +183,14 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             reader = getattr(self.connection, f"read_{self._file_format}")
             return reader(self._filepath, self._table_name, **self._load_args)
         else:
-            return self.connection.table(self._table_name)
+            return self.connection.table(self._table_name, **self._table_args)
 
     def save(self, data: ir.Table) -> None:
         if self._table_name is None:
             raise DatasetError("Must provide `table_name` for materialization.")
 
         writer = getattr(self.connection, f"create_{self._materialized}")
-        writer(self._table_name, data, **self._save_args)
+        writer(self._table_name, data, **self._table_args)
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -191,6 +198,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             "file_format": self._file_format,
             "table_name": self._table_name,
             "backend": self._connection_config["backend"],
+            "table_args": self._table_args,
             "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,

@@ -142,6 +142,7 @@ type_targets = {
         "torch.nn.modules.module.Module",
         "prophet.forecaster.Prophet",
         "Prophet",
+        "snowflake.snowpark.session.Session",
     ),
     "py:data": (
         "typing.Any",

@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 from kedro_datasets._utils.file_utils import parse_glob_pattern
 
 
-def _strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
+def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
     return path[len(prefix) :] if path.startswith(prefix) else path
 
 
@@ -23,7 +23,7 @@ def dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     Returns:
             List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
     """
-    pattern = _strip_dbfs_prefix(pattern)
+    pattern = strip_dbfs_prefix(pattern)
     prefix = parse_glob_pattern(pattern)
     matched = set()
     filename = pattern.split("/")[-1]
@@ -31,7 +31,7 @@ def dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     for file_info in dbutils.fs.ls(prefix):
         if file_info.isDir():
             path = str(
-                PurePosixPath(_strip_dbfs_prefix(file_info.path, "dbfs:")) / filename
+                PurePosixPath(strip_dbfs_prefix(file_info.path, "dbfs:")) / filename
             )
             if fnmatch(path, pattern):
                 path = "/dbfs" + path
@@ -72,7 +72,7 @@ def dbfs_exists(pattern: str, dbutils: Any) -> bool:
     Returns:
         Boolean value if filepath exists.
     """
-    pattern = _strip_dbfs_prefix(pattern)
+    pattern = strip_dbfs_prefix(pattern)
     file = parse_glob_pattern(pattern)
     try:
         dbutils.fs.ls(file)

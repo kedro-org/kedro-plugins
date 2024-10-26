@@ -8,12 +8,10 @@ from kedro.io.core import AbstractDataset
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark.spark_dataset import (
-    SparkDataset,
-    _get_spark,
-    _split_filepath,
-    _strip_dbfs_prefix,
-)
+from kedro_datasets._utils.databricks_utils import strip_dbfs_prefix
+from kedro_datasets._utils.file_utils import split_filepath
+from kedro_datasets._utils.spark_utils import get_spark
+from kedro_datasets.spark.spark_dataset import SparkDataset
 
 
 class SparkStreamingDataset(AbstractDataset):
@@ -80,7 +78,7 @@ class SparkStreamingDataset(AbstractDataset):
         self._load_args = load_args
         self.metadata = metadata
 
-        fs_prefix, filepath = _split_filepath(filepath)
+        fs_prefix, filepath = split_filepath(filepath)
 
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
@@ -111,9 +109,9 @@ class SparkStreamingDataset(AbstractDataset):
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         data_stream_reader = (
-            _get_spark()
+            get_spark()
             .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
@@ -125,7 +123,7 @@ class SparkStreamingDataset(AbstractDataset):
         Args:
             data: PySpark streaming dataframe for saving
         """
-        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        save_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         output_constructor = data.writeStream.format(self._file_format)
         output_mode = (
             self._save_args.pop("output_mode", None) if self._save_args else None
@@ -142,10 +140,10 @@ class SparkStreamingDataset(AbstractDataset):
         )
 
     def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            _get_spark().readStream.schema(self._schema).load(
+            get_spark().readStream.schema(self._schema).load(
                 load_path, self._file_format
             )
         except AnalysisException as exception:

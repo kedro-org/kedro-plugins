@@ -29,8 +29,8 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro_datasets._utils.file_utils import parse_glob_pattern, split_filepath
 from kedro_datasets._utils.databricks_utils import dbfs_glob, dbfs_exists, deployed_on_databricks, get_dbutils
+from kedro_datasets._utils.file_utils import parse_glob_pattern, split_filepath
 from kedro_datasets._utils.spark_utils import get_spark
 
 logger = logging.getLogger(__name__)

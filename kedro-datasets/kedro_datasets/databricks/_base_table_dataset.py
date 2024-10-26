@@ -19,7 +19,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
-from kedro_datasets.spark.spark_dataset import _get_spark
+from kedro_datasets._utils.spark_utils import get_spark
 
 logger = logging.getLogger(__name__)
 pd.DataFrame.iteritems = pd.DataFrame.items
@@ -183,7 +183,7 @@ class BaseTable:
         """
         if self.catalog:
             try:
-                _get_spark().sql(f"USE CATALOG `{self.catalog}`")
+                get_spark().sql(f"USE CATALOG `{self.catalog}`")
             except (ParseException, AnalysisException) as exc:
                 logger.warning(
                     "catalog %s not found or unity not enabled. Error message: %s",
@@ -192,7 +192,7 @@ class BaseTable:
                 )
         try:
             return (
-                _get_spark()
+                get_spark()
                 .sql(f"SHOW TABLES IN `{self.database}`")
                 .filter(f"tableName = '{self.table}'")
                 .count()
@@ -359,7 +359,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         if self._version and self._version.load >= 0:
             try:
                 data = (
-                    _get_spark()
+                    get_spark()
                     .read.format("delta")
                     .option("versionAsOf", self._version.load)
                     .table(self._table.full_table_location())
@@ -367,7 +367,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             except Exception as exc:
                 raise VersionNotFoundError(self._version.load) from exc
         else:
-            data = _get_spark().table(self._table.full_table_location())
+            data = get_spark().table(self._table.full_table_location())
         if self._table.dataframe_type == "pandas":
             data = data.toPandas()
         return data
@@ -391,13 +391,13 @@ class BaseTableDataset(AbstractVersionedDataset):
         if schema:
             cols = schema.fieldNames()
             if self._table.dataframe_type == "pandas":
-                data = _get_spark().createDataFrame(
+                data = get_spark().createDataFrame(
                     data.loc[:, cols], schema=self._table.schema()
                 )
             else:
                 data = data.select(*cols)
         elif self._table.dataframe_type == "pandas":
-            data = _get_spark().createDataFrame(data)
+            data = get_spark().createDataFrame(data)
 
         method = getattr(self, f"_save_{self._table.write_mode}", None)
         if method:
@@ -456,7 +456,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             update_data (DataFrame): The Spark dataframe to upsert.
         """
         if self._exists():
-            base_data = _get_spark().table(self._table.full_table_location())
+            base_data = get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
 
@@ -479,11 +479,11 @@ class BaseTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            _get_spark().conf.set("fullTableAddress", self._table.full_table_location())
-            _get_spark().conf.set("whereExpr", where_expr)
+            get_spark().conf.set("fullTableAddress", self._table.full_table_location())
+            get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
-            _get_spark().sql(upsert_sql)
+            get_spark().sql(upsert_sql)
         else:
             self._save_append(update_data)
 

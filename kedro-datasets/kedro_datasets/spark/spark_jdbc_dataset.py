@@ -6,7 +6,7 @@ from typing import Any
 from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql import DataFrame
 
-from kedro_datasets.spark.spark_dataset import _get_spark
+from kedro_datasets._utils.spark_utils import get_spark
 
 
 class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
@@ -167,7 +167,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         }
 
     def load(self) -> DataFrame:
-        return _get_spark().read.jdbc(self._url, self._table, **self._load_args)
+        return get_spark().read.jdbc(self._url, self._table, **self._load_args)
 
     def save(self, data: DataFrame) -> None:
         return data.write.jdbc(self._url, self._table, **self._save_args)

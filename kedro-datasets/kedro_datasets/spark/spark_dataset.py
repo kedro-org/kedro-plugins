@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -29,7 +28,13 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro_datasets._utils.databricks_utils import dbfs_glob, dbfs_exists, deployed_on_databricks, get_dbutils, strip_dbfs_prefix
+from kedro_datasets._utils.databricks_utils import (
+    dbfs_exists,
+    dbfs_glob,
+    deployed_on_databricks,
+    get_dbutils,
+    strip_dbfs_prefix,
+)
 from kedro_datasets._utils.file_utils import parse_glob_pattern, split_filepath
 from kedro_datasets._utils.spark_utils import get_spark
 

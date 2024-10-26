@@ -1,5 +1,5 @@
-from fnmatch import fnmatch
 import os
+from fnmatch import fnmatch
 from pathlib import PurePosixPath
 from typing import Any
 

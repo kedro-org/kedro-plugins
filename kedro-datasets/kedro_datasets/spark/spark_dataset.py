@@ -29,7 +29,7 @@ from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro_datasets._utils.databricks_utils import dbfs_glob, dbfs_exists, deployed_on_databricks, get_dbutils
+from kedro_datasets._utils.databricks_utils import dbfs_glob, dbfs_exists, deployed_on_databricks, get_dbutils, strip_dbfs_prefix
 from kedro_datasets._utils.file_utils import parse_glob_pattern, split_filepath
 from kedro_datasets._utils.spark_utils import get_spark
 
@@ -300,7 +300,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         }
 
     def load(self) -> DataFrame:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
         read_obj = get_spark().read
 
         # Pass schema if defined
@@ -310,11 +310,11 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         return read_obj.load(load_path, self._file_format, **self._load_args)
 
     def save(self, data: DataFrame) -> None:
-        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
+        save_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
         data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
             get_spark().read.load(load_path, self._file_format)

@@ -37,7 +37,7 @@ dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
-databricks-managedtabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
+databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
 geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona >=1.8, <2.0"]
@@ -174,7 +174,7 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-databricks-externaltabledataset = ["kedro-datasets[spark-base,pandas-base,delta-base,hdfs-base,s3fs-base]"]
+databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]

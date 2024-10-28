@@ -2,6 +2,9 @@
 
 ## Major features and improvements
 
+- Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion.
+- Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset.
+- Changed `ibis.TableDataset` to support passing arguments to `create_table`, `create_view`, and `table` via a `table_args` parameter which allows users to set catalog/database in a data cataog entry.
 - Added the following new **experimental** datasets:
 
 | Type                              | Description                                            | Location                                 |
@@ -9,7 +12,7 @@
 | `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
 
 ## Bug fixes and other changes
-- Changed ibis.TableDataset to support passing arguments to `create_table`, `create_view`, and `table` via a `table_args` parameter which allows users to set catalog / database in a data cataog entry
+- Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes.
 
 ## Breaking Changes
 
@@ -17,7 +20,9 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
+- [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+- [Mark Druffel](https://github.com/mark-druffel)
 
 # Release 5.1.0
 

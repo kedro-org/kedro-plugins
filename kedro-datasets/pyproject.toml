@@ -138,7 +138,7 @@ polars = [
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
 
-snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
+snowflake-snowparktabledataset = ["snowflake-snowpark-python>=1.23"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
 spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
@@ -205,7 +205,7 @@ test = [
     "adlfs~=2023.1",
     "behave==1.2.6",
     "biopython~=1.73",
-    "cloudpickle<=2.0.0",
+    "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
@@ -249,7 +249,7 @@ test = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
-    "snowflake-snowpark-python~=1.0; python_version < '3.11'",
+    "snowflake-snowpark-python>=1.23; python_version < '3.12'",
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",
     "packaging",
@@ -319,7 +319,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

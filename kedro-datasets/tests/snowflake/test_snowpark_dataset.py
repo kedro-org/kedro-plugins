@@ -1,14 +1,11 @@
+# ruff: noqa: E402
 import datetime
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-if sys.version_info >= (3, 12):
-    pytest.mark.xfail(
-        "Snowpark is not supported in Python versions higher than 3.11",
-        allow_module_level=True,
-    )
+snowflake = pytest.importorskip("snowflake")
+
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError
@@ -164,6 +161,27 @@ class TestSnowparkTableDataset:
         snowflake_dataset.save(sample_pd_df)
         loaded_df = snowflake_dataset.load()
         assert loaded_df.count() == len(sample_pd_df)
+
+    def test_save_invalid_data(self, snowflake_dataset):
+        """
+        Test the `save` method of `SnowparkTableDataset` with invalid data.
+
+        This test ensures that the `save` method raises a `DatasetError` when provided with
+        data that is neither a Pandas DataFrame nor a Snowpark DataFrame.
+
+        Args:
+            snowflake_dataset (SnowparkTableDataset): Instance of the dataset being tested.
+
+        Asserts:
+            A `DatasetError` is raised with the appropriate error message.
+        """
+        invalid_data = {"name": "Alice", "age": 30}
+
+        with pytest.raises(
+            DatasetError,
+            match="Data of type <class 'dict'> is not supported for saving.",
+        ):
+            snowflake_dataset.save(invalid_data)
 
     def test_load(
         self, snowflake_dataset: SnowparkTableDataset, sample_sp_df: DataFrame

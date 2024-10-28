@@ -174,7 +174,7 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self.__session = None
+        self._session = None
 
         self.metadata = metadata
 
@@ -215,16 +215,15 @@ class SnowparkTableDataset(AbstractDataset):
         return session
 
     @property
-    def _session(self) -> Session:
+    def session(self) -> Session:
         """
         Retrieve or create a session.
-
         Returns:
             Session: The current session associated with the object.
         """
-        if not self.__session:
-            self.__session = self._get_session(self._connection_parameters)
-        return self.__session
+        if not self._session:
+            self._session = self._get_session(self._connection_parameters)
+        return self._session
 
     def load(self) -> DataFrame:
         """
@@ -237,15 +236,24 @@ class SnowparkTableDataset(AbstractDataset):
 
     def save(self, data: pd.DataFrame | DataFrame) -> None:
         """
-        Save data to a specified database table.
+        Check if the data is a Snowpark DataFrame or a Pandas DataFrame,
+        convert it to a Snowpark DataFrame if needed, and save it to the specified table.
 
         Args:
             data (pd.DataFrame | DataFrame): The data to save.
         """
         if isinstance(data, pd.DataFrame):
-            data = self._session.create_dataframe(data)
+            snowpark_df = self._session.create_dataframe(data)
+        elif isinstance(data, DataFrame):
+            snowpark_df = data
+        else:
+            raise DatasetError(
+                f"Data of type {type(data)} is not supported for saving."
+            )
 
-        data.write.save_as_table(self._validate_and_get_table_name(), **self._save_args)
+        snowpark_df.write.save_as_table(
+            self._validate_and_get_table_name(), **self._save_args
+        )
 
     def _exists(self) -> bool:
         """

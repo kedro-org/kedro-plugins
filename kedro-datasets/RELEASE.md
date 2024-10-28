@@ -9,7 +9,7 @@
 | `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
 
 ## Bug fixes and other changes
-- Fixed ibis.TableDataset to support passing arguments to `create_table`, `create_view`, and `table` via a `table_args` parameter
+- Changed ibis.TableDataset to support passing arguments to `create_table`, `create_view`, and `table` via a `table_args` parameter which allows users to set catalog / database in a data cataog entry
 
 ## Breaking Changes
 

@@ -174,7 +174,7 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self._session = None
+        self._session = session
 
         self.metadata = metadata
 
@@ -232,7 +232,7 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             DataFrame: The loaded data as a Snowpark DataFrame.
         """
-        return self._session.table(self._validate_and_get_table_name())
+        return self._session.table(self._validate_and_get_table_name())  # type: ignore[union-attr]
 
     def save(self, data: pd.DataFrame | DataFrame) -> None:
         """
@@ -243,7 +243,7 @@ class SnowparkTableDataset(AbstractDataset):
             data (pd.DataFrame | DataFrame): The data to save.
         """
         if isinstance(data, pd.DataFrame):
-            snowpark_df = self._session.create_dataframe(data)
+            snowpark_df = self._session.create_dataframe(data)  # type: ignore[union-attr]
         elif isinstance(data, DataFrame):
             snowpark_df = data
         else:
@@ -263,7 +263,7 @@ class SnowparkTableDataset(AbstractDataset):
             bool: True if the table exists, False otherwise.
         """
         try:
-            self._session.table(
+            self._session.table(  # type: ignore[union-attr]
                 f"{self._database}.{self._schema}.{self._table_name}"
             ).show()
             return True

@@ -174,7 +174,7 @@ class SnowparkTableDataset(AbstractDataset):
             {"database": self._database, "schema": self._schema}
         )
         self._connection_parameters = connection_parameters
-        self._session = None
+        self._session = session
 
         self.metadata = metadata
 
@@ -232,6 +232,10 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             DataFrame: The loaded data as a Snowpark DataFrame.
         """
+        if self._session is None:
+            raise DatasetError(
+                "No active session. Please initialise a Snowpark session before loading data."
+            )
         return self._session.table(self._validate_and_get_table_name())
 
     def save(self, data: pd.DataFrame | DataFrame) -> None:
@@ -242,6 +246,10 @@ class SnowparkTableDataset(AbstractDataset):
         Args:
             data (pd.DataFrame | DataFrame): The data to save.
         """
+        if self._session is None:
+            raise DatasetError(
+                "No active session. Please initialise a Snowpark session before loading data."
+            )
         if isinstance(data, pd.DataFrame):
             snowpark_df = self._session.create_dataframe(data)
         elif isinstance(data, DataFrame):
@@ -262,6 +270,10 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             bool: True if the table exists, False otherwise.
         """
+        if self._session is None:
+            raise DatasetError(
+                "No active session. Please initialise a Snowpark session before loading data."
+            )
         try:
             self._session.table(
                 f"{self._database}.{self._schema}.{self._table_name}"

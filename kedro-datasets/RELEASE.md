@@ -15,7 +15,7 @@
 - Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes
 
 ## Breaking Changes
-- Demoted `video.VideoDataset` from core to experimental dataset.
+- Demoted `video.VideoDataset` from core to experimental dataset
 
 ## Community contributions
 

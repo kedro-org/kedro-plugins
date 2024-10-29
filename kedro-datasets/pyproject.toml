@@ -189,7 +189,7 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
-video-videodataset = ["opencv-python~=4.10.0.84"]
+video-videodataset = ["opencv-python~=4.5.5.64"]
 video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
@@ -296,7 +296,7 @@ experimental = [
     "xarray>=2023.1.0",
     "rioxarray",
     "torch",
-    "opencv-python~=4.10.0.84",
+    "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
 ]
 

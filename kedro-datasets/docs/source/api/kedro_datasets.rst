@@ -64,5 +64,4 @@ kedro_datasets
    text.TextDataset
    tracking.JSONDataset
    tracking.MetricsDataset
-   video.VideoDataset
    yaml.YAMLDataset

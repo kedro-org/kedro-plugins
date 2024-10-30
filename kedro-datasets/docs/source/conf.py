@@ -134,7 +134,7 @@ type_targets = {
         "pyspark.sql.dataframe.DataFrame",
         "scipy.sparse._csr.csr_matrix",
         "keras.src.models.model.Model",
-        "kedro_datasets.video.video_dataset.AbstractVideo",
+        "kedro_datasets_experimental.video.video_dataset.AbstractVideo",
         "langchain_anthropic.chat_models.ChatAnthropic",
         "langchain_cohere.chat_models.ChatCohere",
         "xarray.core.dataset.Dataset",
@@ -142,6 +142,7 @@ type_targets = {
         "torch.nn.modules.module.Module",
         "prophet.forecaster.Prophet",
         "Prophet",
+        "snowflake.snowpark.session.Session",
     ),
     "py:data": (
         "typing.Any",

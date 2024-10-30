@@ -138,7 +138,7 @@ polars = [
 redis-pickledataset = ["redis~=4.1"]
 redis = ["kedro-datasets[redis-pickledataset]"]
 
-snowflake-snowparktabledataset = ["snowflake-snowpark-python~=1.0"]
+snowflake-snowparktabledataset = ["snowflake-snowpark-python>=1.23"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
 spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
@@ -167,9 +167,6 @@ tracking-jsondataset = []
 tracking-metricsdataset = []
 tracking = ["kedro-datasets[tracking-jsondataset, tracking-metricsdataset]"]
 
-video-videodataset = ["opencv-python~=4.5.5.64"]
-video = ["kedro-datasets[video-videodataset]"]
-
 yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
@@ -192,6 +189,9 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
+video-videodataset = ["opencv-python~=4.5.5.64"]
+video = ["kedro-datasets[video-videodataset]"]
+
 # Docs requirements
 docs = [
     "kedro-sphinx-theme==2024.10.2",
@@ -205,7 +205,7 @@ test = [
     "adlfs~=2023.1",
     "behave==1.2.6",
     "biopython~=1.73",
-    "cloudpickle<=2.0.0",
+    "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
@@ -229,7 +229,7 @@ test = [
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
     "networkx~=2.4",
-    "opencv-python~=4.5.5.64",
+    "numpy<2",
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
     "pandas>=2.0",
@@ -249,7 +249,7 @@ test = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
-    "snowflake-snowpark-python~=1.0; python_version < '3.11'",
+    "snowflake-snowpark-python>=1.23; python_version < '3.12'",
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",
     "packaging",
@@ -297,6 +297,7 @@ experimental = [
     "xarray>=2023.1.0",
     "rioxarray",
     "torch",
+    "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
 ]
 
@@ -319,7 +320,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/snowflake/*", "kedro_datasets/tensorflow/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
@@ -348,7 +349,7 @@ select = [
 ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.ruff.per-file-ignores]
-"{tests,docs}/*" = ["PLR2004", "PLR0913", "T201"]
+"{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
 "*/{__init__.py}" = ["F821"] # temporarily ignore ruff undefined name errors for dataset aliases
 
 [tool.mypy]

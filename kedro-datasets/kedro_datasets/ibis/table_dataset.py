@@ -145,14 +145,14 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
+            if table_args is not None:
+                save_args['database'] = table_args.get("database", None)
             self._save_args.update(save_args)
 
         self._table_args = deepcopy(self.DEFAULT_TABLE_ARGS)
         if table_args is not None:
             self._table_args.update(table_args)
-
         self._materialized = self._save_args.pop("materialized")
-        self._table_args = {**self._table_args, **self._save_args}
 
     @property
     def connection(self) -> BaseBackend:
@@ -192,7 +192,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             raise DatasetError("Must provide `table_name` for materialization.")
 
         writer = getattr(self.connection, f"create_{self._materialized}")
-        writer(self._table_name, data, **self._table_args)
+        writer(self._table_name, data, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
         return {

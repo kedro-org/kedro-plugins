@@ -684,7 +684,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_get_dbutils_from_globals(self, mocker):
         mocker.patch(
-            "kedro_datasets.spark.spark_dataset.globals",
+            "kedro_datasets._utils.databricks_utils.globals",
             return_value={"dbutils": "dbutils_from_globals"},
         )
         assert get_dbutils("spark") == "dbutils_from_globals"

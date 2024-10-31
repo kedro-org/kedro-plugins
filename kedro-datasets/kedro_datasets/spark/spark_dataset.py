@@ -33,9 +33,10 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_glob,
     deployed_on_databricks,
     get_dbutils,
+    parse_glob_pattern,
+    split_filepath,
     strip_dbfs_prefix,
 )
-from kedro_datasets._utils.databricks_utils import parse_glob_pattern, split_filepath
 from kedro_datasets._utils.spark_utils import get_spark
 
 logger = logging.getLogger(__name__)

@@ -677,7 +677,7 @@ class TestSparkDatasetVersionedDBFS:
 
         get_dbutils_mock.assert_called_once()
         assert dataset._glob_function.__class__.__name__ == "partial"
-        assert dataset._glob_function.func.__name__ == "_dbfs_glob"
+        assert dataset._glob_function.func.__name__ == "dbfs_glob"
         assert dataset._glob_function.keywords == {
             "dbutils": get_dbutils_mock.return_value
         }

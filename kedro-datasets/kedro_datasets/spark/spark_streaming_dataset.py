@@ -8,8 +8,7 @@ from kedro.io.core import AbstractDataset
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets._utils.databricks_utils import strip_dbfs_prefix
-from kedro_datasets._utils.file_utils import split_filepath
+from kedro_datasets._utils.databricks_utils import strip_dbfs_prefix, split_filepath
 from kedro_datasets._utils.spark_utils import get_spark
 from kedro_datasets.spark.spark_dataset import SparkDataset
 

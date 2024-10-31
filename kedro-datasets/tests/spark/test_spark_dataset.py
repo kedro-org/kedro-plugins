@@ -658,7 +658,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset.get_dbutils",
             return_value=None,
         )
 
@@ -669,7 +669,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_ds_init_dbutils_available(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset.get_dbutils",
             return_value="mock",
         )
 

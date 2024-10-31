@@ -410,12 +410,12 @@ class TestSparkDataset:
         spark_dataset = SparkDataset(filepath="")
         if SPARK_VERSION >= PackagingVersion("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.spark_dataset._get_spark",
+                "kedro_datasets.spark.spark_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.spark_dataset._get_spark",
+                "kedro_datasets.spark.spark_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):
@@ -737,7 +737,7 @@ class TestSparkDatasetVersionedS3:
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
         mocked_glob = mocker.patch.object(versioned_dataset_s3, "_glob_function")
         mocked_glob.return_value = [
@@ -762,7 +762,7 @@ class TestSparkDatasetVersionedS3:
             version=Version(ts, None),
         )
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
         ds_s3.load()
 
@@ -857,7 +857,7 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
 
         versioned_hdfs.load()
@@ -876,7 +876,7 @@ class TestSparkDatasetVersionedHdfs:
             filepath=f"hdfs://{HDFS_PREFIX}", version=Version(ts, None)
         )
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
 
         versioned_hdfs.load()

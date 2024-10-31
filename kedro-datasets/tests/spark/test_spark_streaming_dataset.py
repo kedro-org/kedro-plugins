@@ -174,12 +174,12 @@ class TestSparkStreamingDataset:
 
         if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.spark_streaming_dataset._get_spark",
+                "kedro_datasets.spark.spark_streaming_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.spark_streaming_dataset._get_spark",
+                "kedro_datasets.spark.spark_streaming_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):

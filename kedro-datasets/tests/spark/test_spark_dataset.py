@@ -29,10 +29,10 @@ from pyspark.sql.utils import AnalysisException
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset
-from kedro_datasets.spark.spark_dataset import (
-    _dbfs_exists,
-    _dbfs_glob,
-    _get_dbutils,
+from kedro_datasets._utils.databricks_utils import (
+    dbfs_exists,
+    dbfs_glob,
+    get_dbutils,
 )
 
 FOLDER_NAME = "fake_folder"
@@ -636,7 +636,7 @@ class TestSparkDatasetVersionedDBFS:
         pattern = "/tmp/file/*/file"
         expected = ["/dbfs/tmp/file/date1/file", "/dbfs/tmp/file/date2/file"]
 
-        result = _dbfs_glob(pattern, dbutils_mock)
+        result = dbfs_glob(pattern, dbutils_mock)
         assert result == expected
         dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
 
@@ -650,11 +650,11 @@ class TestSparkDatasetVersionedDBFS:
             FileInfo("/tmp/file/"),
         ]
 
-        assert _dbfs_exists(test_path, dbutils_mock)
+        assert dbfs_exists(test_path, dbutils_mock)
 
         # add side effect to test that non-existence is handled
         dbutils_mock.fs.ls.side_effect = Exception()
-        assert not _dbfs_exists(test_path, dbutils_mock)
+        assert not dbfs_exists(test_path, dbutils_mock)
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
@@ -687,13 +687,13 @@ class TestSparkDatasetVersionedDBFS:
             "kedro_datasets.spark.spark_dataset.globals",
             return_value={"dbutils": "dbutils_from_globals"},
         )
-        assert _get_dbutils("spark") == "dbutils_from_globals"
+        assert get_dbutils("spark") == "dbutils_from_globals"
 
     def test_get_dbutils_from_pyspark(self, mocker):
         dbutils_mock = mocker.Mock()
         dbutils_mock.DBUtils.return_value = "dbutils_from_pyspark"
         mocker.patch.dict("sys.modules", {"pyspark.dbutils": dbutils_mock})
-        assert _get_dbutils("spark") == "dbutils_from_pyspark"
+        assert get_dbutils("spark") == "dbutils_from_pyspark"
         dbutils_mock.DBUtils.assert_called_once_with("spark")
 
     def test_get_dbutils_from_ipython(self, mocker):
@@ -702,13 +702,13 @@ class TestSparkDatasetVersionedDBFS:
             "dbutils": "dbutils_from_ipython"
         }
         mocker.patch.dict("sys.modules", {"IPython": ipython_mock})
-        assert _get_dbutils("spark") == "dbutils_from_ipython"
+        assert get_dbutils("spark") == "dbutils_from_ipython"
         ipython_mock.get_ipython.assert_called_once_with()
 
     def test_get_dbutils_no_modules(self, mocker):
         mocker.patch("kedro_datasets.spark.spark_dataset.globals", return_value={})
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
-        assert _get_dbutils("spark") is None
+        assert get_dbutils("spark") is None
 
     @pytest.mark.parametrize("os_name", ["nt", "posix"])
     def test_regular_path_in_different_os(self, os_name, mocker):

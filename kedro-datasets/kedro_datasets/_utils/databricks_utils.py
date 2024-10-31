@@ -5,7 +5,22 @@ from typing import Any
 
 from pyspark.sql import SparkSession
 
-from kedro_datasets._utils.file_utils import parse_glob_pattern
+
+def parse_glob_pattern(pattern: str) -> str:
+    special = ("*", "?", "[")
+    clean = []
+    for part in pattern.split("/"):
+        if any(char in part for char in special):
+            break
+        clean.append(part)
+    return "/".join(clean)
+
+
+def split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
+    split_ = str(filepath).split("://", 1)
+    if len(split_) == 2:  # noqa: PLR2004
+        return split_[0] + "://", split_[1]
+    return "", split_[0]
 
 
 def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:

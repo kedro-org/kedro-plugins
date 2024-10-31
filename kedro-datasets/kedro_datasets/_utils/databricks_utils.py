@@ -1,9 +1,12 @@
 import os
 from fnmatch import fnmatch
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from pyspark.sql import SparkSession
+
+if TYPE_CHECKING:
+    from databricks.connect import DatabricksSession
 
 
 def parse_glob_pattern(pattern: str) -> str:
@@ -54,7 +57,7 @@ def dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
     return sorted(matched)
 
 
-def get_dbutils(spark: SparkSession) -> Any:
+def get_dbutils(spark: SparkSession | "DatabricksSession") -> Any:
     """Get the instance of 'dbutils' or None if the one could not be found."""
     dbutils = globals().get("dbutils")
     if dbutils:

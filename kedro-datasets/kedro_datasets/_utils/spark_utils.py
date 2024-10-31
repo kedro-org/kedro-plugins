@@ -1,9 +1,12 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from pyspark.sql import SparkSession
 
+if TYPE_CHECKING:
+    from databricks.connect import DatabricksSession
 
-def get_spark() -> Any:
+
+def get_spark() -> SparkSession | "DatabricksSession":
     """
     Returns the SparkSession. In case databricks-connect is available we use it for
     extended configuration mechanisms and notebook compatibility,

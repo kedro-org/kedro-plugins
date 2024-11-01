@@ -24,7 +24,7 @@ s3fs-base = ["s3fs>=2021.4"]
 polars-base = ["polars>=0.18.0"]
 plotly-base = ["plotly>=4.8.0, <6.0"]
 delta-base = ["delta-spark>=1.0, <4.0"]
-networkx-base = ["networkx~=2.4"]
+networkx-base = ["networkx~=3.4"]
 
 # Individual Datasets
 api-apidataset = ["requests~=2.20"]
@@ -167,9 +167,6 @@ tracking-jsondataset = []
 tracking-metricsdataset = []
 tracking = ["kedro-datasets[tracking-jsondataset, tracking-metricsdataset]"]
 
-video-videodataset = ["opencv-python~=4.5.5.64"]
-video = ["kedro-datasets[video-videodataset]"]
-
 yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
@@ -191,6 +188,9 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
+
+video-videodataset = ["opencv-python~=4.5.5.64"]
+video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
 docs = [
@@ -228,9 +228,7 @@ test = [
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
-    "networkx~=2.4",
-    "numpy<2",
-    "opencv-python~=4.5.5.64",
+    "networkx~=3.4",
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
     "pandas>=2.0",
@@ -298,6 +296,7 @@ experimental = [
     "xarray>=2023.1.0",
     "rioxarray",
     "torch",
+    "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
 ]
 
@@ -349,7 +348,7 @@ select = [
 ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.ruff.per-file-ignores]
-"{tests,docs}/*" = ["PLR2004", "PLR0913", "T201"]
+"{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
 "*/{__init__.py}" = ["F821"] # temporarily ignore ruff undefined name errors for dataset aliases
 
 [tool.mypy]

@@ -1,4 +1,4 @@
-# Upcoming Release
+# Upcoming Release 6.0.0
 
 ## Major features and improvements
 
@@ -15,6 +15,7 @@
 - Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes.
 
 ## Breaking Changes
+- Demoted `video.VideoDataset` from core to experimental dataset.
 
 ## Community contributions
 

@@ -20,3 +20,4 @@ kedro_datasets_experimental
    prophet.ProphetModelDataset
    pytorch.PyTorchDataset
    rioxarray.GeoTIFFDataset
+   video.VideoDataset

@@ -39,9 +39,7 @@ def versioned_json_dataset(filepath_json, load_version, save_version):
 
 @pytest.fixture
 def json_dataset_args(filepath_json):
-    return JSONDataset(
-        filepath=filepath_json, load_args={"attrs": ATTRS}, save_args={"attrs": ATTRS}
-    )
+    return JSONDataset(filepath=filepath_json, load_args=ATTRS, save_args=ATTRS)
 
 
 @pytest.fixture()
@@ -70,7 +68,14 @@ class TestJSONDataset:
             "networkx.node_link_data", wraps=networkx.node_link_data
         )
         json_dataset_args.save(dummy_graph_data)
-        patched_save.assert_called_once_with(dummy_graph_data, attrs=ATTRS)
+        patched_save.assert_called_once_with(
+            dummy_graph_data,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
+        )
 
         patched_load = mocker.patch(
             "networkx.node_link_graph", wraps=networkx.node_link_graph
@@ -91,7 +96,11 @@ class TestJSONDataset:
                     {"from": 1, "to": 2},
                 ],
             },
-            attrs=ATTRS,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 

@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 import warnings
@@ -146,7 +147,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             if table_args is not None:
-                save_args['database'] = table_args.get("database", None)
+                save_args["database"] = table_args.get("database", None)
             self._save_args.update(save_args)
 
         self._table_args = deepcopy(self.DEFAULT_TABLE_ARGS)

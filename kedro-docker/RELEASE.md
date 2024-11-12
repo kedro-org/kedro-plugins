@@ -1,4 +1,8 @@
 # Upcoming Release
+* Switch dependency management to `uv`.
+
+## Thanks for supporting contributions
+[Minura Punchihewa](https://github.com/MinuraPunchihewa)
 
 # Release 0.7.0
 ## Major features and improvements

@@ -1,7 +1,10 @@
 # Upcoming Release
-
-# Release 0.10.0
 * Removed support for Python 3.8
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+[Felix Scherz](https://github.com/felixscherz)
 
 # Release 0.9.1
 * Added support to specify `--conf-source` which would point to the runtime configuration directory to be used for running the DAG in airflow. This configuration path is added to the generated DAG.

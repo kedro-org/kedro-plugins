@@ -1,12 +1,12 @@
 # Upcoming Release
+## Major features and improvements
+* Removed support for python 3.8
 * Switch dependency management to `uv`.
 
 ## Thanks for supporting contributions
+[Felix Scherz](https://github.com/felixscherz)
 [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 
-# Release 0.7.0
-## Major features and improvements
-* Removed support for python 3.8
 
 # Release 0.6.1
 * Unpinned pip version requirement

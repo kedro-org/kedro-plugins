@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion
 - Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset
 - Added the following new **experimental** datasets:

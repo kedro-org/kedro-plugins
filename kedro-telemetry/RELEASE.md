@@ -1,4 +1,5 @@
 # Upcoming release
+* Add official support for Python 3.13
 * Removed support for Python 3.8
 
 ## Thanks for supporting contributions

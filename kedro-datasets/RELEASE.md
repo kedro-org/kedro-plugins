@@ -1,6 +1,7 @@
 # Upcoming Release 6.0.0
 
 ## Major features and improvements
+- Add official support for Python 3.13
 - Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion
 - Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset
 - Added the following new **experimental** datasets:

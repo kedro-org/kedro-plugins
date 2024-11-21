@@ -1,4 +1,5 @@
 # Upcoming Release
+* Added support for Python 3.12
 * Removed support for Python 3.8
 
 ## Community contributions

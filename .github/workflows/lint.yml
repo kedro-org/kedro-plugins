@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@python3.13"
+          uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@main"
           uv pip install --system "${{inputs.plugin}}[lint] @ ."
           uv pip freeze --system
       - name: Install pre-commit hooks

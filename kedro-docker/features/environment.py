@@ -46,7 +46,6 @@ def before_all(context):
             "setuptools>=38.0",
             "wheel",
             ".",
-            "git+https://github.com/kedro-org/kedro.git@main",
         ],
         env=context.env,
     )

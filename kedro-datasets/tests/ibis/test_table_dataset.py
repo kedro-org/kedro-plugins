@@ -17,23 +17,24 @@ def filepath_csv(tmp_path_factory):
 
 
 @pytest.fixture
-def database(tmp_path):
+def database_path(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
 
 @pytest.fixture(params=[_SENTINEL])
-def connection_config(request, database):
+def connection_config(request, database_path):
     return (
-        {"backend": "duckdb", "database": database}
+        {"backend": "duckdb", "database": database_path}
         if request.param is _SENTINEL  # `None` is a valid value to test
         else request.param
     )
 
 
 @pytest.fixture
-def table_dataset(connection_config, load_args, save_args):
+def table_dataset(connection_config, database, load_args, save_args):
     return TableDataset(
         table_name="test",
+        database=database,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -57,14 +58,14 @@ def dummy_table(table_dataset_from_csv):
 
 
 class TestTableDataset:
-    def test_save_and_load(self, table_dataset, dummy_table, database):
+    def test_save_and_load(self, table_dataset, dummy_table, database_path):
         """Test saving and reloading the dataset."""
         table_dataset.save(dummy_table)
         reloaded = table_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
         # Verify that the appropriate materialization strategy was used.
-        con = duckdb.connect(database)
+        con = duckdb.connect(database_path)
         assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
@@ -81,16 +82,34 @@ class TestTableDataset:
         assert "filename" in table_dataset_from_csv.load()
 
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
-    def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
+    def test_save_extra_params(
+        self, table_dataset, save_args, dummy_table, database_path
+    ):
         """Test overriding the default save arguments."""
         table_dataset.save(dummy_table)
 
         # Verify that the appropriate materialization strategy was used.
-        con = duckdb.connect(database)
+        con = duckdb.connect(database_path)
         assert (
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
+
+    @pytest.mark.parametrize("database", ["test"], indirect=True)
+    def test_save_extra_params(
+        self, table_dataset, database, dummy_table, database_path
+    ):
+        """Test overriding the default database arguments."""
+        con = duckdb.connect(database_path)
+        con.sql(f"CREATE SCHEMA IF NOT EXISTS {database}")
+        con.close()
+        table_dataset.save(dummy_table)
+
+        # Verify that the appropriate matdatabase schema was written to.
+        con = duckdb.connect(database_path)
+        assert (
+            "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["schema_name"]
+        )
 
     def test_no_filepath_or_table_name(connection_config):
         pattern = r"Must provide at least one of `filepath` or `table_name`\."

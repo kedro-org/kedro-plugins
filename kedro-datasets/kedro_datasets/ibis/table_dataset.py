@@ -145,6 +145,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+        if database is not None:
+            self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
@@ -188,7 +190,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             return (
                 self.connection.table(self._table_name)
                 if self._database is None
-                else self.connection.table(self._table_name, database=self._database)
+                else self.connection.table(self._table_name, **self._save_args)
             )
 
     def save(self, data: ir.Table) -> None:

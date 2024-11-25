@@ -90,6 +90,11 @@ def save_version(request):
 
 
 @fixture(params=[None])
+def database(request):
+    return request.param
+
+
+@fixture(params=[None])
 def load_args(request):
     return request.param
 

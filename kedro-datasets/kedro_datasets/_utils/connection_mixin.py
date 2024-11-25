@@ -1,9 +1,18 @@
+from abc import ABC, abstractmethod
 from collections.abc import Hashable
 from typing import Any, ClassVar
 
 
-class ConnectionMixin:
+class ConnectionMixin(ABC):
+    _CONNECTION_GROUP: ClassVar[str]
+
+    _connection_config: dict[str, Any]
+
     _connections: ClassVar[dict[Hashable, Any]] = {}
+
+    @abstractmethod
+    def _connect(self) -> Any:
+        ...
 
     @property
     def _connection(self) -> Any:

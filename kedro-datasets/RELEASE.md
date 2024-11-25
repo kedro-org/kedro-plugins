@@ -4,7 +4,7 @@
 
 - Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset.
-- Changed `ibis.TableDataset` to support passing arguments to `create_table`, `create_view`, and `table` via a `table_args` parameter which allows users to set catalog/database in a data cataog entry.
+- Changed `ibis.TableDataset` to support passing `database` parameter to `create_table`, `create_view`, and `table` which allows users to set catalog/database in a data cataog entry.
 - Added the following new **experimental** datasets:
 
 | Type                              | Description                                            | Location                                 |

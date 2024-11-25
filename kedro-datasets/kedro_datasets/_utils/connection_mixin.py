@@ -12,7 +12,7 @@ class ConnectionMixin(ABC):
 
     @abstractmethod
     def _connect(self) -> Any:
-        ...
+        ...  # pragma: no cover
 
     @property
     def _connection(self) -> Any:

@@ -70,7 +70,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         "materialized": "view",
         "overwrite": True,
     }
-    DEFAULT_TABLE_ARGS: ClassVar[dict[str, Any]] = {}
 
     _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
 
@@ -80,8 +79,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         filepath: str | None = None,
         file_format: str | None = None,
         table_name: str | None = None,
+        database: str | None = None,
         connection: dict[str, Any] | None = None,
-        table_args: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -105,10 +104,12 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         Args:
             table_name: The name of the table or view to read or create.
+            database: The name of the database to read / write the table;
+                If not provided, the current database is used. For multi-
+                level hierarchies, provide a dotted string path like
+                "catalog.database"
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
-            table_args: Additional arguments passed to the Ibis backend's
-                `create_{materialized}` method and `table` method.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -136,6 +137,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         self._filepath = filepath
         self._file_format = file_format
         self._table_name = table_name
+        self._database = database
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
@@ -146,13 +148,10 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
-            if table_args is not None:
-                save_args["database"] = table_args.get("database", None)
             self._save_args.update(save_args)
+        if database is not None:
+            self._save_args["database"] = database
 
-        self._table_args = deepcopy(self.DEFAULT_TABLE_ARGS)
-        if table_args is not None:
-            self._table_args.update(table_args)
         self._materialized = self._save_args.pop("materialized")
 
     @property
@@ -186,7 +185,11 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             reader = getattr(self.connection, f"read_{self._file_format}")
             return reader(self._filepath, self._table_name, **self._load_args)
         else:
-            return self.connection.table(self._table_name, **self._table_args)
+            return (
+                self.connection.table(self._table_name)
+                if self._database is None
+                else self.connection.table(self._table_name, database=self._database)
+            )
 
     def save(self, data: ir.Table) -> None:
         if self._table_name is None:
@@ -200,8 +203,8 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             "filepath": self._filepath,
             "file_format": self._file_format,
             "table_name": self._table_name,
+            "database": self._database,
             "backend": self._connection_config["backend"],
-            "table_args": self._table_args,
             "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,

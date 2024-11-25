@@ -2,6 +2,7 @@
 using an underlying filesystem (e.g.: local, S3, GCS). The underlying functionality
 is supported by pandas, so it supports all operations the pandas supports.
 """
+
 from __future__ import annotations
 
 import logging

@@ -1,5 +1,6 @@
 # Upcoming release
 * Removed support for Python 3.8
+* Added support for Python 3.13
 
 ## Thanks for supporting contributions
 [Felix Scherz](https://github.com/felixscherz)

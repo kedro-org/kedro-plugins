@@ -96,7 +96,7 @@ class TestTableDataset:
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     @pytest.mark.parametrize("database", ["test"], indirect=True)
-    def test_save_extra_params(
+    def test_database_extra_params(
         self, table_dataset, database, dummy_table, database_path
     ):
         """Test overriding the default database arguments."""

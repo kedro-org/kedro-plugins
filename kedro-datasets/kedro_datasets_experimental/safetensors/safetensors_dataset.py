@@ -38,7 +38,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets.safetensors import SafetensorsDataset
+        >>> from kedro_datasets_experimental.safetensors import SafetensorsDataset
         >>> import torch
         >>>
         >>> data = {"embeddings": torch.zeros((10, 100)}

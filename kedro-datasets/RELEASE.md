@@ -1,7 +1,6 @@
 # Upcoming Release 6.0.0
 
 ## Major features and improvements
-
 - Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset.
 - Changed `ibis.TableDataset` to support passing `database` parameter to `create_table`, `create_view`, and `table` which allows users to set catalog/database in a data cataog entry.
@@ -12,7 +11,8 @@
 | `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
 
 ## Bug fixes and other changes
-- Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes.
+- Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes
+- Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 
 ## Breaking Changes
 - Demoted `video.VideoDataset` from core to experimental dataset.

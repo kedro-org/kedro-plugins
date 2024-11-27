@@ -12,7 +12,7 @@ from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets.spark.spark_dataset import _get_spark
+from kedro_datasets._utils.spark_utils import get_spark
 
 
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
@@ -150,7 +150,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         )
 
     def load(self) -> DataFrame:
-        return _get_spark().read.table(self._full_table_address)
+        return get_spark().read.table(self._full_table_address)
 
     def save(self, data: DataFrame) -> None:
         self._validate_save(data)
@@ -202,7 +202,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     def _exists(self) -> bool:
         return (
-            _get_spark()
+            get_spark()
             ._jsparkSession.catalog()
             .tableExists(self._database, self._table)
         )

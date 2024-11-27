@@ -190,7 +190,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             return (
                 self.connection.table(self._table_name)
                 if self._database is None
-                else self.connection.table(self._table_name, **self._save_args)
+                else self.connection.table(self._table_name, **self._load_args)
             )
 
     def save(self, data: ir.Table) -> None:

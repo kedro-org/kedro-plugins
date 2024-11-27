@@ -1,7 +1,11 @@
 # Upcoming release
 
-# Release 0.7.0
+# Release 0.6.2
 * Removed support for Python 3.8
+* Added support for Python 3.13
+
+## Thanks for supporting contributions
+* [Felix Scherz](https://github.com/felixscherz)
 
 # Release 0.6.1
 * Changed Kedro CLI loading method to improve loading times.

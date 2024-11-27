@@ -48,7 +48,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
+        >>> assert torch.equal(data["embeddings"], reloaded["embeddings"])
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

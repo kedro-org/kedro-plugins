@@ -3,6 +3,7 @@
 # Release 0.6.2
 
 ## Major features and improvements
+* Added support for Python 3.13
 * Removed support for python 3.8
 * Switch dependency management to `uv`.
 

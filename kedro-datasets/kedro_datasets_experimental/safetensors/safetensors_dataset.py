@@ -18,7 +18,7 @@ from kedro.io.core import (
 class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     """``SafetensorsDataset`` loads/saves data from/to a Safetensors file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-    the specified backend library passed in (defaults to the ``torch`` library), so it
+    the specified backend library passed in (defaults to the ``numpy`` library), so it
     supports all allowed options for loading and Safetensors files.
 
     Example usage for the
@@ -59,7 +59,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         self,
         *,
         filepath: str,
-        backend: str = "torch",
+        backend: str = "numpy",
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
@@ -70,11 +70,11 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         serialise/deserialise objects.
 
         The following backends are supported:
+            * `numpy`
             * `torch`
             * `tensorflow`
             * `paddle`
             * `flax`
-            * `numpy`
 
         Args:
             filepath: Filepath in POSIX format to a Safetensors file prefixed with a protocol like
@@ -82,7 +82,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             backend: The backend library to use for serialising/deserialising objects.
-                The default backend is 'torch'.
+                The default backend is 'numpy'.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

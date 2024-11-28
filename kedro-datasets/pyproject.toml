@@ -189,6 +189,9 @@ pytorch = ["kedro-datasets[pytorch-dataset]"]
 rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
+safetensors-safetensorsdataset = ["safetensors", "numpy"]
+safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
+
 video-videodataset = ["opencv-python~=4.5.5.64"]
 video = ["kedro-datasets[video-videodataset]"]
 

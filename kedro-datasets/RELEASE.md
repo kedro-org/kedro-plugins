@@ -9,6 +9,7 @@
 | Type                              | Description                                            | Location                                 |
 | --------------------------------- | ------------------------------------------------------ | ---------------------------------------- |
 | `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
+| `safetensors.SafetensorsDataset`  | A dataset for securely saving and loading files in the SafeTensors format. | `kedro_datasets_experimental.safetensors` |
 
 
 ## Bug fixes and other changes

@@ -186,7 +186,7 @@ prophet = ["kedro-datasets[prophet]"]
 pytorch-dataset = ["torch"]
 pytorch = ["kedro-datasets[pytorch-dataset]"]
 
-rioxarray-geotiffdataset = ["rioxarraπtey>=0.15.0"]
+rioxarray-geotiffdataset = ["rioxarray>=0.15.0"]
 rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 
 safetensors-safetensorsdataset = ["safetensors", "numpy"]

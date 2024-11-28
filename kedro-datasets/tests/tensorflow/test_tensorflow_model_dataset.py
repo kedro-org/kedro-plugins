@@ -14,6 +14,8 @@ if sys.platform == "win32":
         "TensorFlow tests have become inexplicably flaky in Windows CI",
         allow_module_level=True,
     )
+elif sys.version.minor < 13:
+    pytest.skip("Tensorflow is not available in Python 3.13 yet")
 
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped

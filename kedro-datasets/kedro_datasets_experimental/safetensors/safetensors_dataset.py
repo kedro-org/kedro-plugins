@@ -27,10 +27,9 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
 
     .. code-block:: yaml
 
-        test_model: # simple example without compression
+        test_model:
           type: safetensors.SafetensorsDataset
           filepath: data/07_model_output/test_model.safetensors
-          backend: torch
 
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\
@@ -39,16 +38,18 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     .. code-block:: pycon
 
         >>> from kedro_datasets_experimental.safetensors import SafetensorsDataset
-        >>> import torch
+        >>> import numpy as np
         >>>
-        >>> data = {"embeddings": torch.zeros((10, 100))}
+        >>> data = {
+        ...     "embedding": np.zeros((512, 1024)),
+        ...     "attention": np.zeros((256, 256))
+        ... }
         >>> dataset = SafetensorsDataset(
         ...     filepath="test.safetensors",
-        ...     backend="torch"
         ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert torch.equal(data["embeddings"], reloaded["embeddings"])
+        >>> assert all(np.array_equal(data[key], reloaded[key]) for key in data)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

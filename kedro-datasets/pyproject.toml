@@ -98,7 +98,7 @@ pandas-jsondataset = ["kedro-datasets[pandas-base]"]
 pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
 pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
 pandas-sqlquerydataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc>=4.0"]
-pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
+pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml"]
 pandas = [
     """kedro-datasets[pandas-csvdataset,\
     pandas-deltatabledataset,\
@@ -273,7 +273,7 @@ lint = [
     "bandit>=1.6.2, <2.0",
     "blacken-docs==1.9.2",
     "black~=22.0",
-    "import-linter[toml]==1.2.6",
+    "import-linter[toml]>=1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
     "ruff~=0.0.290",

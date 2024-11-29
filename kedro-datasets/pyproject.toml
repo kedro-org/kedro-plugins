@@ -115,7 +115,7 @@ pandas = [
     pandas-xmldataset]"""
 ]
 
-pickle-pickledataset = ["compress-pickle[lz4]~=2.1.0"]
+pickle-pickledataset = ["compress-pickle[lz4]>=2.1.0"]
 pickle = ["kedro-datasets[pickle-pickledataset]"]
 
 pillow-imagedataset = ["Pillow>=9.0"]
@@ -212,7 +212,7 @@ test = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
-    "delta-spark>=1.0, <3.0",
+    "delta-spark>=1.0, <4.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
@@ -237,7 +237,7 @@ test = [
     "pandas>=2.0",
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
-    "polars[xlsx2csv, deltalake]~=0.18.0",
+    "polars[xlsx2csv, deltalake]>=0.18.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",

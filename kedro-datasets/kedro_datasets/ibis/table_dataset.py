@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 import warnings
@@ -117,15 +118,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         if filepath is None and table_name is None:
             raise DatasetError(
                 "Must provide at least one of `filepath` or `table_name`."
-            )
-
-        if filepath is not None or file_format is not None:
-            warnings.warn(
-                "Use 'FileDataset' to load and save files with an Ibis "
-                "backend; the functionality will be removed from 'Table"
-                "Dataset' in Kedro-Datasets 6.0.0",
-                KedroDeprecationWarning,
-                stacklevel=2,
             )
 
         self._filepath = filepath

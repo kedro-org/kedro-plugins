@@ -14,6 +14,7 @@
 ## Bug fixes and other changes
 - Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
+- Removed deprecation warning to load and save files with Ibis backend from Table Dataset.
 
 ## Breaking Changes
 - Demoted `video.VideoDataset` from core to experimental dataset.

@@ -1,6 +1,5 @@
 """``HoloviewsWriter`` saves Holoviews objects as image file(s) to an underlying
 filesystem (e.g. local, S3, GCS)."""
-
 from __future__ import annotations
 
 import io

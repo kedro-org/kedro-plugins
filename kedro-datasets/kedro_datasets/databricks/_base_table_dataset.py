@@ -1,7 +1,6 @@
 """``BaseTableDataset`` implementation used to add the base for
 ``ManagedTableDataset`` and ``ExternalTableDataset``.
 """
-
 from __future__ import annotations
 
 import logging
@@ -415,11 +414,9 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         if self._table.partition_columns:
             writer.partitionBy(
-                *(
-                    self._table.partition_columns
-                    if isinstance(self._table.partition_columns, list)
-                    else [self._table.partition_columns]
-                )
+                *self._table.partition_columns
+                if isinstance(self._table.partition_columns, list)
+                else [self._table.partition_columns]
             )
 
         if self._table.location:
@@ -441,11 +438,9 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         if self._table.partition_columns:
             writer.partitionBy(
-                *(
-                    self._table.partition_columns
-                    if isinstance(self._table.partition_columns, list)
-                    else [self._table.partition_columns]
-                )
+                *self._table.partition_columns
+                if isinstance(self._table.partition_columns, list)
+                else [self._table.partition_columns]
             )
 
         if self._table.location:

@@ -2,7 +2,6 @@
 underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
 ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.
 """
-
 from __future__ import annotations
 
 from copy import deepcopy

@@ -1,7 +1,6 @@
 """``TensorFlowModelDataset`` is a dataset implementation which can save and load
 TensorFlow models.
 """
-
 from __future__ import annotations
 
 import copy

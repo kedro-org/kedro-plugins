@@ -2,7 +2,6 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the
 type of read/write target.
 """
-
 from __future__ import annotations
 
 from copy import deepcopy

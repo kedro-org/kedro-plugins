@@ -2,7 +2,6 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
-
 from __future__ import annotations
 
 import json

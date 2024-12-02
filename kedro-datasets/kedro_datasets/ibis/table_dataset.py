@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
-
-from kedro_datasets import KedroDeprecationWarning
 
 if TYPE_CHECKING:
     from ibis import BaseBackend

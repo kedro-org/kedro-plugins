@@ -1,10 +1,10 @@
 """Dataset implementations to save data for Kedro Experiment Tracking."""
 
+import warnings
 from typing import Any
 
 import lazy_loader as lazy
 
-import warnings
 from kedro_datasets import KedroDeprecationWarning
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901

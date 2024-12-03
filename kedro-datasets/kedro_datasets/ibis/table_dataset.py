@@ -145,9 +145,6 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         return self.connection.table(self._table_name)
 
     def save(self, data: ir.Table) -> None:
-        if self._table_name is None:
-            raise DatasetError("Must provide `table_name` for materialization.")
-
         writer = getattr(self.connection, f"create_{self._materialized}")
         writer(self._table_name, data, **self._save_args)
 

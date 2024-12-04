@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
+from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
 
 
-class TableDataset(AbstractDataset[ir.Table, ir.Table]):
+class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Example usage for the
@@ -67,7 +68,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         "overwrite": True,
     }
 
-    _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
+    _CONNECTION_GROUP: ClassVar[str] = "ibis"
 
     def __init__(  # noqa: PLR0913
         self,
@@ -118,28 +119,17 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         self._materialized = self._save_args.pop("materialized")
 
+    def _connect(self) -> BaseBackend:
+        import ibis
+
+        config = deepcopy(self._connection_config)
+        backend = getattr(ibis, config.pop("backend"))
+        return backend.connect(**config)
+
     @property
     def connection(self) -> BaseBackend:
         """The ``Backend`` instance for the connection configuration."""
-
-        def hashable(value):
-            """Return a hashable key for a potentially-nested object."""
-            if isinstance(value, dict):
-                return tuple((k, hashable(v)) for k, v in sorted(value.items()))
-            if isinstance(value, list):
-                return tuple(hashable(x) for x in value)
-            return value
-
-        cls = type(self)
-        key = hashable(self._connection_config)
-        if key not in cls._connections:
-            import ibis
-
-            config = deepcopy(self._connection_config)
-            backend = getattr(ibis, config.pop("backend"))
-            cls._connections[key] = backend.connect(**config)
-
-        return cls._connections[key]
+        return self._connection
 
     def load(self) -> ir.Table:
         return self.connection.table(self._table_name)

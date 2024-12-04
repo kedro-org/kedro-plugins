@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
+
 from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:

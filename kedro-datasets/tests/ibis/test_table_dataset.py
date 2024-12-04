@@ -2,6 +2,7 @@ import duckdb
 import ibis
 import pytest
 from kedro.io import DatasetError
+from packaging.version import Version
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.ibis import TableDataset
@@ -17,24 +18,29 @@ def filepath_csv(tmp_path_factory):
 
 
 @pytest.fixture
-def database_path(tmp_path):
+def database(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
 
+@pytest.fixture(params=[None])
+def database_name(request):
+    return request.param
+
+
 @pytest.fixture(params=[_SENTINEL])
-def connection_config(request, database_path):
+def connection_config(request, database):
     return (
-        {"backend": "duckdb", "database": database_path}
+        {"backend": "duckdb", "database": database}
         if request.param is _SENTINEL  # `None` is a valid value to test
         else request.param
     )
 
 
 @pytest.fixture
-def table_dataset(connection_config, database, load_args, save_args):
+def table_dataset(database_name, connection_config, load_args, save_args):
     return TableDataset(
         table_name="test",
-        database=database,
+        database=database_name,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -58,14 +64,14 @@ def dummy_table(table_dataset_from_csv):
 
 
 class TestTableDataset:
-    def test_save_and_load(self, table_dataset, dummy_table, database_path):
+    def test_save_and_load(self, table_dataset, dummy_table, database):
         """Test saving and reloading the dataset."""
         table_dataset.save(dummy_table)
         reloaded = table_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
         # Verify that the appropriate materialization strategy was used.
-        con = duckdb.connect(database_path)
+        con = duckdb.connect(database)
         assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
@@ -82,31 +88,56 @@ class TestTableDataset:
         assert "filename" in table_dataset_from_csv.load()
 
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
-    def test_save_extra_params(
-        self, table_dataset, save_args, dummy_table, database_path
-    ):
+    def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
         """Test overriding the default save arguments."""
         table_dataset.save(dummy_table)
 
         # Verify that the appropriate materialization strategy was used.
-        con = duckdb.connect(database_path)
+        con = duckdb.connect(database)
         assert (
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
-    @pytest.mark.parametrize("database", ["test"], indirect=True)
-    def test_database_extra_params(
-        self, table_dataset, database, dummy_table, database_path
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_external_database(
+        self, tmp_path, table_dataset, database_name, dummy_table, database
     ):
-        """Test overriding the default database arguments."""
-        con = duckdb.connect(database_path)
-        con.sql(f"CREATE SCHEMA IF NOT EXISTS {database}")
-        con.close()
-        table_dataset.save(dummy_table)
+        """Test passing the database name to read from and create in."""
+        # Attach another DuckDB database to the existing DuckDB session.
+        table_dataset.connection.attach(tmp_path / f"{database_name}.db")
 
-        # Verify that the appropriate matdatabase schema was written to.
-        con = duckdb.connect(database_path)
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+        # Verify that the attached database file was the one written to.
+        con = duckdb.connect(database)
+        assert (
+            "test"
+            in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["database_name"]
+        )
+
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_database(
+        self, tmp_path, table_dataset, database_name, dummy_table, database
+    ):
+        """Test passing the database name to read from and create in."""
+        # Create a database (meaning a collection of tables, or schema).
+        # To learn more about why Ibis uses "database" in this way, read
+        # https://ibis-project.org/posts/ibis-version-9.0.0-release/#what-does-schema-mean
+        table_dataset.connection.create_database(database_name)
+
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+        # Verify that the attached database file was the one written to.
+        con = duckdb.connect(database)
         assert (
             "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["schema_name"]
         )

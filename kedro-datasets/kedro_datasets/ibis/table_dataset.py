@@ -103,10 +103,12 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         Args:
             table_name: The name of the table or view to read or create.
-            database: The name of the database to read / write the table;
-                If not provided, the current database is used. For multi-
-                level hierarchies, provide a dotted string path like
-                "catalog.database"
+            database: The name of the database to read the table or view
+                from or create the table or view in. If not passed, then
+                the current database is used. Provide a tuple of strings
+                (e.g. `("catalog", "database")`) or a dotted string path
+                (e.g. `"catalog.database"`) to reference a table or view
+                in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
             load_args: Additional arguments passed to the Ibis backend's

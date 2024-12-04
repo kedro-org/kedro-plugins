@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
-from kedro.io import AbstractDataset, DatasetError
+from kedro.io import AbstractDataset
 
 from kedro_datasets._utils import ConnectionMixin
 
@@ -74,7 +74,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        table_name: str | None = None,
+        table_name: str,
         connection: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -107,8 +107,6 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
-        if table_name is None:
-            raise DatasetError("Must provide `table_name`.")
 
         self._table_name = table_name
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG

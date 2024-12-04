@@ -1,7 +1,6 @@
 import duckdb
 import ibis
 import pytest
-from kedro.io import DatasetError
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.ibis import FileDataset, TableDataset
@@ -78,11 +77,6 @@ class TestTableDataset:
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
-
-    def test_no_table_name(connection_config):
-        pattern = r"Must provide `table_name`\."
-        with pytest.raises(DatasetError, match=pattern):
-            TableDataset(connection=connection_config)
 
     @pytest.mark.parametrize(
         ("connection_config", "key"),

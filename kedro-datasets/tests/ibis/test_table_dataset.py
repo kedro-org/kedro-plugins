@@ -4,7 +4,7 @@ import pytest
 from kedro.io import DatasetError
 from pandas.testing import assert_frame_equal
 
-from kedro_datasets.ibis import TableDataset
+from kedro_datasets.ibis import FileDataset, TableDataset
 
 _SENTINEL = object()
 
@@ -54,6 +54,17 @@ def table_dataset_from_csv(filepath_csv, connection_config, load_args, save_args
 @pytest.fixture
 def dummy_table(table_dataset_from_csv):
     return table_dataset_from_csv.load()
+
+
+@pytest.fixture
+def file_dataset(filepath_csv, connection_config, load_args, save_args):
+    return FileDataset(
+        filepath=filepath_csv,
+        file_format="csv",
+        connection=connection_config,
+        load_args=load_args,
+        save_args=save_args,
+    )
 
 
 class TestTableDataset:
@@ -146,4 +157,11 @@ class TestTableDataset:
         )
         mocker.patch(f"ibis.{backend}")
         table_dataset.load()
-        assert key in table_dataset._connections
+        assert ("ibis", key) in table_dataset._connections
+
+    def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
+        """Test interoperability of Ibis datasets sharing a database."""
+        dummy_table = file_dataset.load()
+        assert not table_dataset.exists()
+        table_dataset.save(dummy_table)
+        assert table_dataset.exists()

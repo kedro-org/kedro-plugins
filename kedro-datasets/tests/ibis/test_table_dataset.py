@@ -8,6 +8,13 @@ from kedro_datasets.ibis import FileDataset, TableDataset
 _SENTINEL = object()
 
 
+@pytest.fixture(scope="session")
+def filepath_csv(tmp_path_factory):
+    path = (tmp_path_factory.mktemp("data") / "test.csv").as_posix()
+    ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}).to_csv(path)
+    return path
+
+
 @pytest.fixture
 def database(tmp_path):
     return (tmp_path / "file.db").as_posix()

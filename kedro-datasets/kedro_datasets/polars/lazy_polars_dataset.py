@@ -4,7 +4,9 @@ type of read/write target.
 """
 from __future__ import annotations
 
+import errno
 import logging
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, ClassVar
@@ -199,6 +201,8 @@ class LazyPolarsDataset(
 
     def load(self) -> pl.LazyFrame:
         load_path = str(self._get_load_path())
+        if not self._exists():
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), load_path)
 
         if self._protocol == "file":
             # With local filesystems, we can use Polar's build-in I/O method:

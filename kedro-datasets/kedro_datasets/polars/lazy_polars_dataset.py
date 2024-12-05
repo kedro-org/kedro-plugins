@@ -69,7 +69,7 @@ class LazyPolarsDataset(
         >>> dataset = LazyPolarsDataset(filepath=tmp_path / "test.csv", file_format="csv")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.frame_equal(reloaded.collect())
+        >>> assert data.equals(reloaded.collect())
 
     """
 

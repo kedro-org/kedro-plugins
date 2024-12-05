@@ -52,16 +52,15 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     .. code-block:: pycon
 
-        >>> import polars as pl
         >>> from kedro_datasets.polars import CSVDataset
-        >>> from polars.testing import assert_frame_equal
+        >>> import polars as pl
         >>>
         >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = CSVDataset(filepath=tmp_path / "test.csv")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert_frame_equal(data, reloaded)
+        >>> assert data.frame_equal(reloaded)
 
     """
 

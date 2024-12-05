@@ -178,11 +178,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             reader = getattr(self.connection, f"read_{self._file_format}")
             return reader(self._filepath, self._table_name, **self._load_args)
         else:
-            return (
-                self.connection.table(self._table_name)
-                if self._database is None
-                else self.connection.table(self._table_name, **self._load_args)
-            )
+            return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
         if self._table_name is None:
@@ -192,14 +188,18 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         writer(self._table_name, data, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
+        load_args = deepcopy(self._load_args)
+        save_args = deepcopy(self._save_args)
+        load_args.pop("database", None)
+        save_args.pop("database", None)
         return {
             "filepath": self._filepath,
             "file_format": self._file_format,
             "table_name": self._table_name,
             "database": self._database,
             "backend": self._connection_config["backend"],
-            "load_args": self._load_args,
-            "save_args": self._save_args,
+            "load_args": load_args,
+            "save_args": save_args,
             "materialized": self._materialized,
         }
 

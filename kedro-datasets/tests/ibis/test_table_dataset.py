@@ -86,6 +86,25 @@ class TestTableDataset:
         assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
+    @pytest.mark.parametrize(
+        "connection_config", [{"backend": "polars"}], indirect=True
+    )
+    @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
+    def test_save_and_load_polars(
+        self, table_dataset, connection_config, save_args, dummy_table
+    ):
+        """Test saving and reloading the dataset configured with Polars.
+
+        If and when the Polars backend handles the `database` parameter,
+        this test can be removed. Additionally, the `create_view` method
+        is supported since Ibis 9.1.0, so `save_args` doesn't need to be
+        overridden.
+
+        """
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
     def test_exists(self, table_dataset, dummy_table):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""

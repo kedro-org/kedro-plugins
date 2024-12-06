@@ -1,7 +1,6 @@
 import duckdb
 import ibis
 import pytest
-from kedro.io import DatasetError
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.ibis import FileDataset, TableDataset
@@ -41,19 +40,8 @@ def table_dataset(connection_config, load_args, save_args):
 
 
 @pytest.fixture
-def table_dataset_from_csv(filepath_csv, connection_config, load_args, save_args):
-    return TableDataset(
-        filepath=filepath_csv,
-        file_format="csv",
-        connection=connection_config,
-        load_args=load_args,
-        save_args=save_args,
-    )
-
-
-@pytest.fixture
-def dummy_table(table_dataset_from_csv):
-    return table_dataset_from_csv.load()
+def dummy_table():
+    return ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture
@@ -86,11 +74,6 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
 
-    @pytest.mark.parametrize("load_args", [{"filename": True}], indirect=True)
-    def test_load_extra_params(self, table_dataset_from_csv, load_args):
-        """Test overriding the default load arguments."""
-        assert "filename" in table_dataset_from_csv.load()
-
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
     def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
         """Test overriding the default save arguments."""
@@ -102,16 +85,6 @@ class TestTableDataset:
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
-
-    def test_no_filepath_or_table_name(connection_config):
-        pattern = r"Must provide at least one of `filepath` or `table_name`\."
-        with pytest.raises(DatasetError, match=pattern):
-            TableDataset(connection=connection_config)
-
-    def test_save_no_table_name(self, table_dataset_from_csv, dummy_table):
-        pattern = r"Must provide `table_name` for materialization\."
-        with pytest.raises(DatasetError, match=pattern):
-            table_dataset_from_csv.save(dummy_table)
 
     @pytest.mark.parametrize(
         ("connection_config", "key"),

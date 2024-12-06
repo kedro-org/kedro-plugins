@@ -30,10 +30,11 @@ def connection_config(request, database):
 
 
 @pytest.fixture
-def table_dataset(connection_config, save_args):
+def table_dataset(connection_config, load_args, save_args):
     return TableDataset(
         table_name="test",
         connection=connection_config,
+        load_args=load_args,
         save_args=save_args,
     )
 

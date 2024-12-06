@@ -64,6 +64,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         "backend": "duckdb",
         "database": ":memory:",
     }
+    DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
         "overwrite": True,
@@ -76,6 +77,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         *,
         table_name: str,
         connection: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
@@ -99,6 +101,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             table_name: The name of the table or view to read or create.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            load_args: Additional arguments passed to the Ibis backend's
+                `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
@@ -111,6 +115,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self._table_name = table_name
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
+
+        # Set load and save arguments, overwriting defaults if provided.
+        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
@@ -141,6 +150,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return {
             "table_name": self._table_name,
             "backend": self._connection_config["backend"],
+            "load_args": self._load_args,
             "save_args": self._save_args,
             "materialized": self._materialized,
         }

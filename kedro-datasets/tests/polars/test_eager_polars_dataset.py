@@ -98,6 +98,7 @@ def excel_dataset(dummy_dataframe: pl.DataFrame, filepath_excel):
     return EagerPolarsDataset(
         filepath=filepath_excel.as_posix(),
         file_format="excel",
+        load_args={"engine": "xlsx2csv"},
     )
 
 

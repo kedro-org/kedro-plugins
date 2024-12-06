@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Supported passing `database` to `ibis.TableDataset` for load and save operations.
 - Added functionality to save pandas DataFrames directly to Snowflake, facilitating seamless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for `snowflake.SnowflakeTableDataset`.
 - Enabled connection sharing between `ibis.FileDataset` and `ibis.TableDataset` instances, thereby allowing nodes to save data loaded by one to the other (as long as they share the same connection configuration).
@@ -28,6 +29,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+- [Mark Druffel](https://github.com/mark-druffel)
 
 # Release 5.1.0
 

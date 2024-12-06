@@ -2,6 +2,7 @@ import duckdb
 import ibis
 import pytest
 from kedro.io import DatasetError
+from packaging.version import Version
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.ibis import FileDataset, TableDataset
@@ -21,6 +22,11 @@ def database(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
 
+@pytest.fixture(params=[None])
+def database_name(request):
+    return request.param
+
+
 @pytest.fixture(params=[_SENTINEL])
 def connection_config(request, database):
     return (
@@ -31,9 +37,10 @@ def connection_config(request, database):
 
 
 @pytest.fixture
-def table_dataset(connection_config, load_args, save_args):
+def table_dataset(database_name, connection_config, load_args, save_args):
     return TableDataset(
         table_name="test",
+        database=database_name,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -79,6 +86,25 @@ class TestTableDataset:
         assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
+    @pytest.mark.parametrize(
+        "connection_config", [{"backend": "polars"}], indirect=True
+    )
+    @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
+    def test_save_and_load_polars(
+        self, table_dataset, connection_config, save_args, dummy_table
+    ):
+        """Test saving and reloading the dataset configured with Polars.
+
+        If and when the Polars backend handles the `database` parameter,
+        this test can be removed. Additionally, the `create_view` method
+        is supported since Ibis 9.1.0, so `save_args` doesn't need to be
+        overridden.
+
+        """
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
     def test_exists(self, table_dataset, dummy_table):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""
@@ -102,6 +128,49 @@ class TestTableDataset:
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
         assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
+
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_external_database(
+        self, tmp_path, table_dataset, database_name, dummy_table, database
+    ):
+        """Test passing the database name to read from and create in."""
+        # Attach another DuckDB database to the existing DuckDB session.
+        table_dataset.connection.attach(tmp_path / f"{database_name}.db")
+
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+        # Verify that the attached database file was the one written to.
+        con = duckdb.connect(database)
+        assert (
+            "test"
+            in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["database_name"]
+        )
+
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_database(
+        self, tmp_path, table_dataset, database_name, dummy_table, database
+    ):
+        """Test passing the database name to read from and create in."""
+        # Create a database (meaning a collection of tables, or schema).
+        # To learn more about why Ibis uses "database" in this way, read
+        # https://ibis-project.org/posts/ibis-version-9.0.0-release/#what-does-schema-mean
+        table_dataset.connection.create_database(database_name)
+
+        table_dataset.save(dummy_table)
+        reloaded = table_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+        # Verify that the attached database file was the one written to.
+        con = duckdb.connect(database)
+        assert (
+            "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["schema_name"]
+        )
 
     def test_no_filepath_or_table_name(connection_config):
         pattern = r"Must provide at least one of `filepath` or `table_name`\."

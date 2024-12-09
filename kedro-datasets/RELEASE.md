@@ -1,23 +1,26 @@
 # Upcoming Release 6.0.0
 
 ## Major features and improvements
+
 - Added support for Python 3.13
-- Added functionality to save Pandas DataFrame directly to Snowflake, facilitating seemless `.csv` ingestion
-- Added Python 3.9, 3.10 and 3.11 support for SnowflakeTableDataset
+- Added functionality to save pandas DataFrames directly to Snowflake, facilitating seamless `.csv` ingestion.
+- Added Python 3.9, 3.10 and 3.11 support for `snowflake.SnowflakeTableDataset`.
+- Enabled connection sharing between `ibis.FileDataset` and `ibis.TableDataset` instances, thereby allowing nodes to save data loaded by one to the other (as long as they share the same connection configuration).
 - Added the following new **experimental** datasets:
 
-| Type                              | Description                                            | Location                                 |
-| --------------------------------- | ------------------------------------------------------ | ---------------------------------------- |
-| `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks. | `kedro_datasets_experimental.databricks` |
+| Type                              | Description                                                                | Location                                  |
+| --------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------- |
+| `databricks.ExternalTableDataset` | A dataset for accessing external tables in Databricks.                     | `kedro_datasets_experimental.databricks`  |
 | `safetensors.SafetensorsDataset`  | A dataset for securely saving and loading files in the SafeTensors format. | `kedro_datasets_experimental.safetensors` |
 
-
 ## Bug fixes and other changes
-- Implemented Snowflake's (local testing framework)[https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally] for testing purposes
+
+- Implemented Snowflake's [local testing framework](https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally) for testing purposes.
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
-- Add deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
+- Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Breaking Changes
+
 - Demoted `video.VideoDataset` from core to experimental dataset.
 
 ## Community contributions

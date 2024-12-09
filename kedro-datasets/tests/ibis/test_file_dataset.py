@@ -59,7 +59,7 @@ def dummy_table():
 
 
 class TestFileDataset:
-    def test_save_and_load(self, file_dataset, dummy_table, database):
+    def test_save_and_load(self, file_dataset, dummy_table):
         """Test saving and reloading the data set."""
         file_dataset.save(dummy_table)
         reloaded = file_dataset.load()
@@ -127,7 +127,7 @@ class TestFileDataset:
         )
         mocker.patch(f"ibis.{backend}")
         file_dataset.load()
-        assert key in file_dataset._connections
+        assert ("ibis", key) in file_dataset._connections
 
 
 class TestFileDatasetVersioned:

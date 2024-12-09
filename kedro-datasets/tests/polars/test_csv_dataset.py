@@ -88,12 +88,14 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe: pl.DataFrame):
 
 
 class TestCSVDataset:
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_save_and_load(self, csv_dataset, dummy_dataframe):
         """Test saving and reloading the dataset."""
         csv_dataset.save(dummy_dataframe)
         reloaded = csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""
@@ -202,6 +204,7 @@ class TestCSVDatasetVersioned:
         assert "load_args={'rechunk': True}" in str(ds)
         assert "load_args={'rechunk': True}" in str(ds_versioned)
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned dataset."""
@@ -209,6 +212,7 @@ class TestCSVDatasetVersioned:
         reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_multiple_loads(self, versioned_csv_dataset, dummy_dataframe, filepath_csv):
         """Test that if a new version is created mid-run, by an
         external system, it won't be loaded in the current run."""
@@ -232,6 +236,7 @@ class TestCSVDatasetVersioned:
             ds_new.resolve_load_version() == v_new
         )  # new version is discoverable by a new instance
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_multiple_saves(self, dummy_dataframe, filepath_csv):
         """Test multiple cycles of save followed by load for the same dataset"""
         ds_versioned = CSVDataset(filepath=filepath_csv, version=Version(None, None))
@@ -254,6 +259,7 @@ class TestCSVDatasetVersioned:
         ds_new = CSVDataset(filepath=filepath_csv, version=Version(None, None))
         assert ds_new.resolve_load_version() == second_load_version
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
         """Test that cache invalidation does not affect other instances"""
         ds_a = CSVDataset(filepath=filepath_csv, version=Version(None, None))
@@ -282,12 +288,14 @@ class TestCSVDatasetVersioned:
         with pytest.raises(DatasetError, match=pattern):
             versioned_csv_dataset.load()
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_exists(self, versioned_csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for versioned dataset."""
         assert not versioned_csv_dataset.exists()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
         """Check the error when attempting to override the dataset if the
         corresponding CSV file for a given save version already exists."""
@@ -299,6 +307,7 @@ class TestCSVDatasetVersioned:
         with pytest.raises(DatasetError, match=pattern):
             versioned_csv_dataset.save(dummy_dataframe)
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
     )
@@ -325,6 +334,7 @@ class TestCSVDatasetVersioned:
                 filepath="https://example.com/file.csv", version=Version(None, None)
             )
 
+    @pytest.mark.xfail(sys.platform == "win32", reason="file encoding is not UTF-8")
     def test_versioning_existing_dataset(
         self, csv_dataset, versioned_csv_dataset, dummy_dataframe
     ):

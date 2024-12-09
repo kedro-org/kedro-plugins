@@ -237,7 +237,7 @@ test = [
     "pandas>=2.0",
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
-    "polars[xlsx2csv, deltalake]~=0.18.0",
+    "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",

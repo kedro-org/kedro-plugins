@@ -98,7 +98,7 @@ pandas-jsondataset = ["kedro-datasets[pandas-base]"]
 pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
 pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
 pandas-sqlquerydataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc>=4.0"]
-pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
+pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml"]
 pandas = [
     """kedro-datasets[pandas-csvdataset,\
     pandas-deltatabledataset,\
@@ -115,7 +115,7 @@ pandas = [
     pandas-xmldataset]"""
 ]
 
-pickle-pickledataset = ["compress-pickle[lz4]~=2.1.0"]
+pickle-pickledataset = ["compress-pickle[lz4]>=2.1.0"]
 pickle = ["kedro-datasets[pickle-pickledataset]"]
 
 pillow-imagedataset = ["Pillow>=9.0"]
@@ -212,7 +212,7 @@ test = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
-    "delta-spark>=1.0, <3.0",
+    "delta-spark>=1.0, <4.0",
     "deltalake>=0.10.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
@@ -258,8 +258,8 @@ test = [
     "pyOpenSSL>=22.1.0",  # Workaround for incorrect pin in the snowflake-connector-python package; see https://github.com/snowflakedb/snowflake-connector-python/issues/2109
     "SQLAlchemy>=1.2",
     "tables>=3.6",
-    "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
-    "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+    "tensorflow-macos~=2.12; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version < '3.13'",
+    "tensorflow~=2.12; (platform_system != 'Darwin' or platform_machine != 'arm64') and python_version < '3.13'",
     "triad>=0.6.7, <1.0",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
@@ -274,7 +274,7 @@ lint = [
     "bandit>=1.6.2, <2.0",
     "blacken-docs==1.9.2",
     "black~=22.0",
-    "import-linter[toml]==1.2.6",
+    "import-linter[toml]>=1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
     "ruff~=0.0.290",

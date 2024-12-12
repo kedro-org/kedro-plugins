@@ -18,6 +18,7 @@
 - Implemented Snowflake's [local testing framework](https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally) for testing purposes.
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
+- Moved `kedro-catalog` JSON schemas from Kedro core to `kedro-datasets`.
 
 ## Breaking Changes
 
@@ -30,6 +31,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 - [Mark Druffel](https://github.com/mark-druffel)
+- [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 5.1.0
 

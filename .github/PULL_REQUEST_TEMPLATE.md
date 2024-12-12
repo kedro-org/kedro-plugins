@@ -8,6 +8,7 @@
 
 - [ ] Opened this PR as a 'Draft Pull Request' if it is work-in-progress
 - [ ] Updated the documentation to reflect the code changes
+- [ ] Updated `jsonschema/kedro-catalog-X.XX.json` if necessary
 - [ ] Added a description of this change in the relevant `RELEASE.md` file
 - [ ] Added tests to cover my changes
 - [ ] Received approvals from at least half of the TSC (required for adding a new, non-experimental dataset)

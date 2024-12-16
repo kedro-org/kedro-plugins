@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Supported passing `database` to `ibis.TableDataset` for load and save operations.
 - Added functionality to save pandas DataFrames directly to Snowflake, facilitating seamless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for `snowflake.SnowflakeTableDataset`.
 - Enabled connection sharing between `ibis.FileDataset` and `ibis.TableDataset` instances, thereby allowing nodes to save data loaded by one to the other (as long as they share the same connection configuration).
@@ -17,6 +18,8 @@
 - Implemented Snowflake's [local testing framework](https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally) for testing purposes.
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
+- Moved `kedro-catalog` JSON schemas from Kedro core to `kedro-datasets`.
+- Removed file handling using Ibis's backends from `ibis.TableDataset`. `ibis.FileDataset` will handle loading and saving files using Ibis's backends.
 
 ## Breaking Changes
 
@@ -28,6 +31,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+- [Mark Druffel](https://github.com/mark-druffel)
+- [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 5.1.0
 

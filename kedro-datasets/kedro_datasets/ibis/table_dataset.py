@@ -1,5 +1,4 @@
 """Provide data loading and saving functionality for Ibis's backends."""
-
 from __future__ import annotations
 
 from copy import deepcopy
@@ -76,6 +75,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self,
         *,
         table_name: str,
+        database: str | None = None,
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -99,6 +99,12 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         Args:
             table_name: The name of the table or view to read or create.
+            database: The name of the database to read the table or view
+                from or create the table or view in. If not passed, then
+                the current database is used. Provide a tuple of strings
+                (e.g. `("catalog", "database")`) or a dotted string path
+                (e.g. `"catalog.database"`) to reference a table or view
+                in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
             load_args: Additional arguments passed to the Ibis backend's
@@ -113,6 +119,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         """
 
         self._table_name = table_name
+        self._database = database
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
@@ -120,10 +127,14 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+        if database is not None:
+            self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+        if database is not None:
+            self._save_args["database"] = database
 
         self._materialized = self._save_args.pop("materialized")
 
@@ -140,18 +151,23 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return self._connection
 
     def load(self) -> ir.Table:
-        return self.connection.table(self._table_name)
+        return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
         writer = getattr(self.connection, f"create_{self._materialized}")
         writer(self._table_name, data, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
+        load_args = deepcopy(self._load_args)
+        save_args = deepcopy(self._save_args)
+        load_args.pop("database", None)
+        save_args.pop("database", None)
         return {
             "table_name": self._table_name,
+            "database": self._database,
             "backend": self._connection_config["backend"],
-            "load_args": self._load_args,
-            "save_args": self._save_args,
+            "load_args": load_args,
+            "save_args": save_args,
             "materialized": self._materialized,
         }
 

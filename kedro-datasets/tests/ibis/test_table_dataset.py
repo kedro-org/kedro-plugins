@@ -1,7 +1,6 @@
 import duckdb
 import ibis
 import pytest
-from kedro.io import DatasetError
 from packaging.version import Version
 from pandas.testing import assert_frame_equal
 

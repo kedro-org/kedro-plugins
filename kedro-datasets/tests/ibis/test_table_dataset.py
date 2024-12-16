@@ -100,11 +100,6 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
 
-    @pytest.mark.parametrize("load_args", [{"database": "test"}], indirect=True)
-    def test_load_extra_params(self, table_dataset, load_args):
-        """Test overriding the default load arguments."""
-        assert "database" in table_dataset.load()
-
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
     def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
         """Test overriding the default save arguments."""

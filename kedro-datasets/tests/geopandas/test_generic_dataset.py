@@ -2,6 +2,7 @@ from pathlib import Path, PurePosixPath
 
 import geopandas as gpd
 import pytest
+import sys
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -11,6 +12,9 @@ from s3fs import S3FileSystem
 from shapely.geometry import Point
 
 from kedro_datasets.geopandas import GenericDataset
+
+if sys.version_info >= (3, 13):
+    pytest.skip("GeoPandas is not available in Python 3.13 yet")
 
 
 @pytest.fixture(params=[None])

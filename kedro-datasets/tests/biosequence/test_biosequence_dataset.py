@@ -1,6 +1,6 @@
 from io import StringIO
 from pathlib import PurePosixPath
-
+import sys
 import pytest
 from Bio import SeqIO
 from fsspec.implementations.http import HTTPFileSystem
@@ -13,6 +13,9 @@ from kedro_datasets.biosequence import BioSequenceDataset
 
 LOAD_ARGS = {"format": "fasta"}
 SAVE_ARGS = {"format": "fasta"}
+
+if sys.version_info >= (3, 13):
+    pytest.skip("BioPython is not available in Python 3.13 yet")
 
 
 @pytest.fixture

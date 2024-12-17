@@ -1,14 +1,12 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
-import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
-from kedro.io import AbstractDataset, DatasetError
+from kedro.io import AbstractDataset
 
-from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
@@ -76,16 +74,14 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
-        file_format: str | None = None,
-        table_name: str | None = None,
+        table_name: str,
         database: str | None = None,
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new ``TableDataset`` pointing to a table (or file).
+        """Creates a new ``TableDataset`` pointing to a table.
 
         ``TableDataset`` connects to the Ibis backend object constructed
         from the connection configuration. The `backend` key provided in
@@ -95,8 +91,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
         #ibis.duckdb.connect>`_).
 
-        If ``table_name`` is given (and ``filepath`` isn't), the dataset
-        establishes a connection to the relevant table for the execution
+        The dataset establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute
         is deferred until materialization, when the expression is saved.
         In practice, this happens when another ``TableDataset`` instance
@@ -122,22 +117,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
-        if filepath is None and table_name is None:
-            raise DatasetError(
-                "Must provide at least one of `filepath` or `table_name`."
-            )
 
-        if filepath is not None or file_format is not None:
-            warnings.warn(
-                "Use 'FileDataset' to load and save files with an Ibis "
-                "backend; the functionality will be removed from 'Table"
-                "Dataset' in Kedro-Datasets 6.0.0",
-                KedroDeprecationWarning,
-                stacklevel=2,
-            )
-
-        self._filepath = filepath
-        self._file_format = file_format
         self._table_name = table_name
         self._database = database
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
@@ -171,19 +151,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return self._connection
 
     def load(self) -> ir.Table:
-        if self._filepath is not None:
-            if self._file_format is None:
-                raise NotImplementedError
-
-            reader = getattr(self.connection, f"read_{self._file_format}")
-            return reader(self._filepath, self._table_name, **self._load_args)
-        else:
-            return self.connection.table(self._table_name, **self._load_args)
+        return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
-        if self._table_name is None:
-            raise DatasetError("Must provide `table_name` for materialization.")
-
         writer = getattr(self.connection, f"create_{self._materialized}")
         writer(self._table_name, data, **self._save_args)
 
@@ -193,8 +163,6 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         load_args.pop("database", None)
         save_args.pop("database", None)
         return {
-            "filepath": self._filepath,
-            "file_format": self._file_format,
             "table_name": self._table_name,
             "database": self._database,
             "backend": self._connection_config["backend"],

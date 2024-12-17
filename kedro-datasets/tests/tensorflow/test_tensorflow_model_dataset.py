@@ -15,7 +15,7 @@ if sys.platform == "win32":
         allow_module_level=True,
     )
 
-if sys.version_info >= (3, 13):
+if sys.version.minor >= 13:
     pytest.skip("Tensorflow is not available in Python 3.13 yet")
 
 

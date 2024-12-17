@@ -1,6 +1,5 @@
 from io import StringIO
 from pathlib import PurePosixPath
-
 import pytest
 from Bio import SeqIO
 from fsspec.implementations.http import HTTPFileSystem

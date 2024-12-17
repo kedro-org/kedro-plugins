@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added support for Python 3.13
 - Supported passing `database` to `ibis.TableDataset` for load and save operations.
 - Added functionality to save pandas DataFrames directly to Snowflake, facilitating seamless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for `snowflake.SnowflakeTableDataset`.

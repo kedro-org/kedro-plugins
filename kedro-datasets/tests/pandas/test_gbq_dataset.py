@@ -141,6 +141,7 @@ class TestGBQDataset:
         )
         mocked_read_gbq.return_value = dummy_dataframe
         mocked_df = mocker.Mock()
+        gbq_dataset._connection._credentials = None
 
         gbq_dataset.save(mocked_df)
         loaded_data = gbq_dataset.load()
@@ -205,8 +206,8 @@ class TestGBQDataset:
             credentials=credentials,
             project=PROJECT,
         )
+        dataset.exists()  # Do something to trigger the client creation.
 
-        assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
@@ -238,7 +239,6 @@ class TestGBQQueryDataset:
             "kedro_datasets.pandas.gbq_dataset.Credentials",
             return_value=credentials_obj,
         )
-        mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
         dataset = GBQQueryDataset(
             sql=SQL_QUERY,
@@ -248,9 +248,6 @@ class TestGBQQueryDataset:
 
         assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
-        mocked_bigquery.Client.assert_called_once_with(
-            project=PROJECT, credentials=credentials_obj, location=None
-        )
 
     def test_load(self, mocker, gbq_sql_dataset, dummy_dataframe):
         """Test `load` method invocation"""

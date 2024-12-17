@@ -16,6 +16,8 @@
 
 ## Bug fixes and other changes
 
+- Delayed backend connection for `pandas.GBQTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used. Furthermore, this makes the dataset object serializable (e.g. for use with `ParallelRunner`), because the unserializable client isn't part of it.
+- Removed the unused BigQuery client created in `pandas.GBQQueryDataset`. This makes the dataset object serializable (e.g. for use with `ParallelRunner`) by removing the unserializable object.
 - Implemented Snowflake's [local testing framework](https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally) for testing purposes.
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
@@ -24,6 +26,7 @@
 ## Breaking Changes
 
 - Demoted `video.VideoDataset` from core to experimental dataset.
+- Removed file handling capabilities from `ibis.TableDataset`. Use `ibis.FileDataset` to load and save files with an Ibis backend instead.
 
 ## Community contributions
 

@@ -19,11 +19,11 @@
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
 - Moved `kedro-catalog` JSON schemas from Kedro core to `kedro-datasets`.
-- Removed file handling using Ibis's backends from `ibis.TableDataset`. `ibis.FileDataset` will handle loading and saving files using Ibis's backends.
 
 ## Breaking Changes
 
 - Demoted `video.VideoDataset` from core to experimental dataset.
+- Removed file handling capabilities from `ibis.TableDataset`. Use `ibis.FileDataset` to load and save files with an Ibis backend instead.
 
 ## Community contributions
 

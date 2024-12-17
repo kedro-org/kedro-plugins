@@ -207,7 +207,7 @@ test = [
     "accelerate<0.32", # Temporary pin
     "adlfs~=2023.1",
     "behave==1.2.6",
-    "biopython~=1.73",
+    "biopython~=1.73; python_version < '3.13'",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
@@ -218,7 +218,7 @@ test = [
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.3",
-    "geopandas>=0.8.0, <2.0",
+    "geopandas>=0.8.0, <2.0; python_version < '3.13'",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",
@@ -227,7 +227,7 @@ test = [
     "joblib>=0.14",
     "jupyterlab>=3.0",
     "jupyter~=1.0",
-    "lxml~=4.6",
+    "lxml~=5.3",
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
@@ -239,7 +239,8 @@ test = [
     "plotly>=4.8.0, <6.0",
     "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
-    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyarrow>=7.0; python_version >= '3.11' and python_version < '3.13'",  # Adding to avoid numpy build errors
+    "pyarrow>=18.0; python_version >= '3.13'",
     "pyodbc~=5.0",
     "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
@@ -266,7 +267,7 @@ test = [
     # huggingface
     "datasets",
     "huggingface_hub",
-    "transformers[torch]",
+    "transformers[torch]; python_version < '3.13'",
 ]
 
 # Lint requirements

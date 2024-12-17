@@ -25,6 +25,7 @@
 ## Breaking Changes
 
 - Demoted `video.VideoDataset` from core to experimental dataset.
+- Removed file handling capabilities from `ibis.TableDataset`. Use `ibis.FileDataset` to load and save files with an Ibis backend instead.
 
 ## Community contributions
 

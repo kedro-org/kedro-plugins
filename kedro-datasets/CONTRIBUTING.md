@@ -27,7 +27,7 @@ If you have new ideas for Kedro-Datasets then please open a [GitHub issue](https
 
 If you're unsure where to begin contributing to Kedro-Datasets, please start by looking through the `good first issue` and `help wanted` on [GitHub](https://github.com/kedro-org/kedro-plugins/issues).
 If you want to contribute a new dataset, read the [tutorial to create and contribute a custom dataset](https://docs.kedro.org/en/stable/data/how_to_create_a_custom_dataset.html) in the Kedro documentation.
-Make sure to add the new dataset to `kedro_datasets.rst` so that it shows up in the API documentation and to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
+Make sure to add the new dataset to `kedro_datasets.rst` so that it shows up in the API documentation and to `kedro-datasets/static/jsonschema/kedro-catalog-X.json` for IDE validation.
 
 Below is a guide to help you understand the process of contributing a new dataset, whether it falls under the category of core or experimental datasets.
 

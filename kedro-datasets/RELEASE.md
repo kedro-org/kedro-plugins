@@ -1,4 +1,10 @@
-# Upcoming Release 6.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking Changes
+## Community contributions
+
+# Release 6.0.0
 
 ## Major features and improvements
 

@@ -62,6 +62,4 @@ kedro_datasets
    svmlight.SVMLightDataset
    tensorflow.TensorFlowModelDataset
    text.TextDataset
-   tracking.JSONDataset
-   tracking.MetricsDataset
    yaml.YAMLDataset

@@ -19,5 +19,6 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "spark_hive_dataset": ["SparkHiveDataset"],
         "spark_jdbc_dataset": ["SparkJDBCDataset"],
         "spark_streaming_dataset": ["SparkStreamingDataset"],
+        "spark_gbq_dataset": ["GBQQueryDataset"],
     },
 )

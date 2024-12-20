@@ -162,7 +162,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
 
     def save(self, data: None) -> NoReturn:
         raise NotImplementedError(
-            "Save method is not implemented for SparkGBQQueryDataset"
+            "Save method is not implemented for spark.GBQQueryDataset"
         )
 
     def _describe(self) -> dict[str, Any]:

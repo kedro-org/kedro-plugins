@@ -46,6 +46,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Major features and improvements
 
+- Added async functionality for saving data in `PartitionedDataset` via `use_async` argument.
 - Added the following new core datasets:
 
 | Type               | Description                                                   | Location              |
@@ -55,6 +56,12 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Bug fixes and other changes
 
 - Changed Ibis datasets to connect to an in-memory DuckDB database if connection configuration is not provided.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Puneet Saini](https://github.com/puneeter)
 
 # Release 5.0.0
 

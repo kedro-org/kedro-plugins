@@ -24,6 +24,11 @@ def spark_session(mocker):
 
 
 @pytest.fixture
+def dummy_save_dataset(spark_session):
+    return spark_session.createDataFrame([("foo",)], ["bar"])
+
+
+@pytest.fixture
 def gbq_query_dataset():
     return GBQQueryDataset(
         sql=SQL_QUERY,
@@ -34,12 +39,12 @@ def gbq_query_dataset():
     )
 
 
-def test_save_not_implemented(gbq_query_dataset):
+def test_save_not_implemented(gbq_query_dataset, dummy_save_dataset):
     with pytest.raises(
         DatasetError,
         match=r"'save' is not supported on GBQQueryDataset",
     ):
-        gbq_query_dataset.save(DUMMMY_SAVE_DATA)
+        gbq_query_dataset.save(dummy_save_dataset)
 
 
 @pytest.mark.parametrize(

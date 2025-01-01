@@ -10,7 +10,7 @@ import logging
 from copy import deepcopy
 from typing import Any, NoReturn
 
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import DataFrame
 
@@ -166,9 +166,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         return read_obj.load(**self._get_spark_load_args())
 
     def save(self, data: None) -> NoReturn:
-        raise NotImplementedError(
-            "Save method is not implemented for spark.GBQQueryDataset"
-        )
+        raise DatasetError("'save' is not supported on GBQQueryDataset")
 
     def _describe(self) -> dict[str, Any]:
         return {

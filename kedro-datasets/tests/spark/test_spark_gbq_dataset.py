@@ -15,7 +15,6 @@ REQUIRED_INIT_ARGS = {
     "sql": SQL_QUERY,
     "materialization_dataset": MATERIALIZATION_DATASET,
 }
-DUMMMY_SAVE_DATA = "dummy_save_data"
 
 
 @pytest.fixture

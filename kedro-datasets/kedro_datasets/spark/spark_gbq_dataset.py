@@ -102,6 +102,9 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         self._metadata = metadata
 
     def _get_spark_credentials(self) -> dict[str, str]:
+        if not self._credentials:
+            return {}
+
         if len(self._credentials) > 1:
             raise ValueError(
                 "Please provide only one of 'base64', 'file' or 'json' key in the credentials. "
@@ -121,7 +124,9 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             ).decode("utf-8")
             return {"credentials": creds_b64}
 
-        return {}
+        raise ValueError(
+            f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {self._credentials.keys()}"
+        )
 
     def _get_spark_load_args(self) -> dict[str, Any]:
         spark_load_args = deepcopy(self._load_args)

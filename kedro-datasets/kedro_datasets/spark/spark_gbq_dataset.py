@@ -108,7 +108,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         if len(self._credentials) > 1:
             raise ValueError(
                 "Please provide only one of 'base64', 'file' or 'json' key in the credentials. "
-                "You provided: {list(self._credentials.keys())}"
+                f"You provided: {list(self._credentials.keys())}"
             )
         if self._credentials.get("base64"):
             return {
@@ -125,7 +125,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             return {"credentials": creds_b64}
 
         raise ValueError(
-            f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {self._credentials.keys()}"
+            f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {list(self._credentials.keys())[0]}"
         )
 
     def _get_spark_load_args(self) -> dict[str, Any]:

@@ -10,6 +10,7 @@ SparkDataset: Any
 SparkHiveDataset: Any
 SparkJDBCDataset: Any
 SparkStreamingDataset: Any
+GBQQueryDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

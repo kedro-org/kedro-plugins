@@ -33,7 +33,6 @@ def gbq_query_dataset():
         sql=SQL_QUERY,
         materialization_dataset=MATERIALIZATION_DATASET,
         materialization_project=MATERIALIZATION_PROJECT,
-        credentials=None,
         load_args=LOAD_ARGS,
     )
 
@@ -62,20 +61,20 @@ def test_save_not_implemented(gbq_query_dataset, dummy_save_dataset):
         ({}, {}),
     ],
 )
-def test_get_spark_credentials(gbq_query_dataset, credentials, expected_credentials):
-    gbq_query_dataset._credentials = credentials
-    assert gbq_query_dataset._get_spark_credentials() == expected_credentials
+def test_get_spark_bq_credentials(gbq_query_dataset, credentials, expected_credentials):
+    gbq_query_dataset._bq_credentials = credentials
+    assert gbq_query_dataset._get_spark_bq_credentials() == expected_credentials
 
 
-def test_invalid_credentials_key(gbq_query_dataset):
+def test_invalid_bq_credentials_key(gbq_query_dataset):
 
     invalid_cred_key = "invalid_cred_key"
-    gbq_query_dataset._credentials = {invalid_cred_key: "value"}
+    gbq_query_dataset._bq_credentials = {invalid_cred_key: "value"}
     with pytest.raises(
         ValueError,
         match=f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {invalid_cred_key}",
     ):
-        gbq_query_dataset._get_spark_credentials()
+        gbq_query_dataset._get_spark_bq_credentials()
 
 
 @pytest.mark.parametrize(
@@ -92,8 +91,8 @@ def test_invalid_credentials_key(gbq_query_dataset):
         {"base64": "base64_creds", "invalid_key": "value"},
     ],
 )
-def test_more_than_one_credentials_key(gbq_query_dataset, credentials):
-    gbq_query_dataset._credentials = credentials
+def test_more_than_one_bq_credentials_key(gbq_query_dataset, credentials):
+    gbq_query_dataset._bq_credentials = credentials
     pattern = re.escape(
         f"Please provide only one of 'base64', 'file' or 'json' key in the credentials. You provided: {list(credentials.keys())}"
     )
@@ -101,7 +100,7 @@ def test_more_than_one_credentials_key(gbq_query_dataset, credentials):
         ValueError,
         match=pattern,
     ):
-        gbq_query_dataset._get_spark_credentials()
+        gbq_query_dataset._get_spark_bq_credentials()
 
 
 @pytest.mark.parametrize(

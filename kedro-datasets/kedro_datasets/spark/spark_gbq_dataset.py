@@ -38,8 +38,10 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             SELECT * FROM your_table
           materialization_dataset: your_dataset
           materialization_project: your_project
-          credentials:
+          bq_credentials:
             file: /path/to/your/credentials.json
+          fs_credentials:
+            key: value
 
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\
@@ -58,7 +60,8 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         ...     sql=sql,
         ...     materialization_dataset="your_dataset",
         ...     materialization_project="your_project",  # optional
-        ...     credentials=dict(file="/path/to/your/credentials.json"),
+        ...     bq_credentials=dict(file="/path/to/your/credentials.json"),  # optional
+        ...     fs_credentials=dict(key="value"),  # optional
         ... )
         >>>
         >>> # Load data

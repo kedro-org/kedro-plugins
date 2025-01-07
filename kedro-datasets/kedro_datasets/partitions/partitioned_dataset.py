@@ -43,6 +43,11 @@ def _grandparent(path: str) -> str:
     return str(grandparent)
 
 
+def _islambda(obj: object):
+    """Check if object is a lambda function."""
+    return callable(obj) and hasattr(obj, "__name__") and obj.__name__ == "<lambda>"
+
+
 class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], Any]]]):
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
@@ -311,7 +316,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            if callable(partition_data):
+            if _islambda(partition_data):
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()

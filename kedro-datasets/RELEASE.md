@@ -4,7 +4,7 @@
 
 ## Bug fixes and other changes
 
-- Made `PartitionedDataset` accept only lamda functions for lazy saving and ignore other callable objects.
+- Made `PartitionedDataset` accept only lambda functions for lazy saving and ignore other callable objects.
 
 ## Breaking Changes
 ## Community contributions

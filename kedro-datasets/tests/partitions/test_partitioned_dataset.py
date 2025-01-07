@@ -61,9 +61,9 @@ class TestPartitionedDatasetLocal:
     def test_repr(self, dataset):
         pds = PartitionedDataset(path="", dataset=dataset)
         assert (
-            repr(pds)
-            == """kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
-            """dataset='kedro_datasets.pandas.parquet_dataset.ParquetDataset()')"""
+                repr(pds)
+                == """kedro_datasets.partitions.partitioned_dataset.PartitionedDataset(filepath='', """
+                   """dataset='kedro_datasets.pandas.parquet_dataset.ParquetDataset()')"""
         )
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
@@ -71,7 +71,7 @@ class TestPartitionedDatasetLocal:
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
     )
     def test_load(
-        self, dataset, local_csvs, partitioned_data_pandas, suffix, expected_num_parts
+            self, dataset, local_csvs, partitioned_data_pandas, suffix, expected_num_parts
     ):
         pds = PartitionedDataset(
             path=str(local_csvs), dataset=dataset, filename_suffix=suffix
@@ -108,17 +108,16 @@ class TestPartitionedDatasetLocal:
             path=str(local_csvs), dataset=dataset, filename_suffix=suffix
         )
 
-        def original_data():
-            return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
 
         part_id = "new/data"
-        pds.save({part_id: original_data})
+        pds.save({part_id: lambda: original_data})
 
         assert (local_csvs / "new" / ("data" + suffix)).is_file()
         loaded_partitions = pds.load()
         assert part_id in loaded_partitions
         reloaded_data = loaded_partitions[part_id]()
-        assert_frame_equal(reloaded_data, original_data())
+        assert_frame_equal(reloaded_data, original_data)
 
     def test_save_invalidates_cache(self, local_csvs, mocker):
         """Test that save calls invalidate partition cache"""
@@ -226,7 +225,7 @@ class TestPartitionedDatasetLocal:
         [({"cred": "common"}, {"cred": "common"}, {"cred": "common"}), (None, {}, {})],
     )
     def test_credentials(
-        self, mocker, credentials, expected_pds_creds, expected_dataset_creds
+            self, mocker, credentials, expected_pds_creds, expected_dataset_creds
     ):
         mocked_filesystem = mocker.patch("fsspec.filesystem")
         path = str(Path.cwd())
@@ -277,8 +276,8 @@ class TestPartitionedDatasetLocal:
                 df_loader()
             error_message = str(exc_info.value)
             assert (
-                "Either the file is corrupted or this is not a parquet file"
-                in error_message
+                    "Either the file is corrupted or this is not a parquet file"
+                    in error_message
             )
             assert str(partition) in error_message
 
@@ -287,13 +286,13 @@ class TestPartitionedDatasetLocal:
         [
             ("UndefinedDatasetType", "Class 'UndefinedDatasetType' not found"),
             (
-                "missing.module.UndefinedDatasetType",
-                r"Class 'missing\.module\.UndefinedDatasetType' not found",
+                    "missing.module.UndefinedDatasetType",
+                    r"Class 'missing\.module\.UndefinedDatasetType' not found",
             ),
             (
-                FakeDataset,
-                r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
-                r"is invalid\: all dataset types must extend 'AbstractDataset'",
+                    FakeDataset,
+                    r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
+                    r"is invalid\: all dataset types must extend 'AbstractDataset'",
             ),
             ({}, "'type' is missing from dataset catalog configuration"),
         ],
@@ -314,13 +313,13 @@ class TestPartitionedDatasetLocal:
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
     )
     def test_versioned_dataset_save_and_load(
-        self,
-        mocker,
-        filepath_csvs,
-        dataset_config,
-        suffix,
-        expected_num_parts,
-        partitioned_data_pandas,
+            self,
+            mocker,
+            filepath_csvs,
+            dataset_config,
+            suffix,
+            expected_num_parts,
+            partitioned_data_pandas,
     ):
         """Test that saved and reloaded data matches the original one for
         the versioned dataset."""
@@ -383,19 +382,19 @@ class TestPartitionedDatasetLocal:
         "pds_config,filepath_arg",
         [
             (
-                {
-                    "path": str(Path.cwd()),
-                    "dataset": {"type": CSVDataset, "filepath": "fake_path"},
-                },
-                "filepath",
+                    {
+                        "path": str(Path.cwd()),
+                        "dataset": {"type": CSVDataset, "filepath": "fake_path"},
+                    },
+                    "filepath",
             ),
             (
-                {
-                    "path": str(Path.cwd()),
-                    "dataset": {"type": CSVDataset, "other_arg": "fake_path"},
-                    "filepath_arg": "other_arg",
-                },
-                "other_arg",
+                    {
+                        "path": str(Path.cwd()),
+                        "dataset": {"type": CSVDataset, "other_arg": "fake_path"},
+                        "filepath_arg": "other_arg",
+                    },
+                    "other_arg",
             ),
         ],
     )
@@ -441,38 +440,38 @@ class TestPartitionedDatasetLocal:
         "pds_config,expected_ds_creds,global_creds",
         [
             (
-                {"dataset": "pandas.CSVDataset", "credentials": {"secret": "global"}},
-                {"secret": "global"},
-                {"secret": "global"},
+                    {"dataset": "pandas.CSVDataset", "credentials": {"secret": "global"}},
+                    {"secret": "global"},
+                    {"secret": "global"},
             ),
             (
-                {
-                    "dataset": {
-                        "type": CSVDataset,
-                        "credentials": {"secret": "expected"},
+                    {
+                        "dataset": {
+                            "type": CSVDataset,
+                            "credentials": {"secret": "expected"},
+                        },
                     },
-                },
-                {"secret": "expected"},
-                {},
+                    {"secret": "expected"},
+                    {},
             ),
             (
-                {
-                    "dataset": {"type": CSVDataset, "credentials": None},
-                    "credentials": {"secret": "global"},
-                },
-                None,
-                {"secret": "global"},
-            ),
-            (
-                {
-                    "dataset": {
-                        "type": CSVDataset,
-                        "credentials": {"secret": "expected"},
+                    {
+                        "dataset": {"type": CSVDataset, "credentials": None},
+                        "credentials": {"secret": "global"},
                     },
-                    "credentials": {"secret": "global"},
-                },
-                {"secret": "expected"},
-                {"secret": "global"},
+                    None,
+                    {"secret": "global"},
+            ),
+            (
+                    {
+                        "dataset": {
+                            "type": CSVDataset,
+                            "credentials": {"secret": "expected"},
+                        },
+                        "credentials": {"secret": "global"},
+                    },
+                    {"secret": "expected"},
+                    {"secret": "global"},
             ),
         ],
     )

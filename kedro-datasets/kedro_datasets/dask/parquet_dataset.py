@@ -15,7 +15,7 @@ from kedro.io.core import AbstractDataset, get_protocol_and_path
 class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     """``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
-    https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
+    https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html
 
     Example usage for the
     `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
@@ -104,7 +104,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
-                https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html#optional-parameters
+                https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html#optional-parameters
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """

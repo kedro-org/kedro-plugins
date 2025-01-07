@@ -1,6 +1,11 @@
 # Upcoming Release
 ## Major features and improvements
+
+
 ## Bug fixes and other changes
+
+- Made `PartitionedDataset` accept only lamda functions for lazy saving and ignore other callable objects.
+
 ## Breaking Changes
 ## Community contributions
 

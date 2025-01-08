@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - "fix/polars-csv-win-tests"
     paths-ignore:
       - "kedro-airflow/**"
       - "kedro-docker/**"

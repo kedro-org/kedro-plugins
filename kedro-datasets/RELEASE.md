@@ -1,7 +1,11 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+
 ## Breaking Changes
+
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`
+
 ## Community contributions
 
 # Release 6.0.0

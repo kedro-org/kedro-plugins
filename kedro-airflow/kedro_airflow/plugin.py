@@ -22,7 +22,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
-from kedro_airflow.grouping import group_memory_nodes
+from kedro_airflow.grouping import group_by_namespace, group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
@@ -141,6 +141,11 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help=CONF_SOURCE_HELP,
     default=None,
 )
+@click.option(
+    "--group-namespace",
+    is_flag=True,
+    default=False,
+)
 @click.pass_obj
 def create(  # noqa: PLR0913, PLR0912
     metadata: ProjectMetadata,
@@ -152,6 +157,7 @@ def create(  # noqa: PLR0913, PLR0912
     tags,
     params,
     conf_source,
+    group_namespace,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
@@ -218,6 +224,8 @@ def create(  # noqa: PLR0913, PLR0912
             # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
             # implementation
             nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+        elif group_namespace:
+            nodes, dependencies = group_by_namespace(pipeline)
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and

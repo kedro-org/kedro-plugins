@@ -112,3 +112,31 @@ def group_memory_nodes(
                 group_dependencies[new_name_parent].append(new_name_child)
 
     return group_to_seq, group_dependencies
+
+
+def group_by_namespace(
+    pipeline: Pipeline,
+) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
+    """
+    Groups nodes based on their namespace.
+    """
+    nodes: dict[str, list[Node]] = {}
+    dependencies: dict[str, list[str]] = {}
+
+    for node in pipeline.nodes:
+        key = node.namespace if node.namespace else node.name
+        if key not in nodes:
+            nodes[key] = []
+            dependencies[key] = []
+        nodes[key].append(node)
+        for parent in pipeline.node_dependencies[node]:
+            if parent.namespace and parent.namespace != key:
+                dependencies[key].append(parent.namespace)
+            elif parent.namespace and parent.namespace == key:
+                continue
+            else:
+                dependencies[key].append(parent.name)
+    for key, value in dependencies.items():
+        dependencies[key] = list(set(value))
+
+    return nodes, dependencies

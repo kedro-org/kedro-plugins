@@ -1,10 +1,13 @@
 # Upcoming Release
 ## Major features and improvements
+
 ## Bug fixes and other changes
+
+- Fix polars.CSVDataset `save` method on Windows.
 
 ## Breaking Changes
 
-- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Community contributions
 

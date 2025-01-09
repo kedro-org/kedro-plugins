@@ -72,7 +72,9 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {"rechunk": True}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
-    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w", "encoding":"utf-8"}}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w", "encoding": "utf-8"}
+    }
 
     def __init__(  # noqa: PLR0913
         self,

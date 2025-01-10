@@ -35,3 +35,10 @@ jobs:
       plugin: kedro-telemetry
       os: ubuntu-latest
       python-version: "3.11"
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
+    with:
+      plugin: kedro-telemetry
+      os: ubuntu-latest
+      python-version: "3.11"

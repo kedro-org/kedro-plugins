@@ -4,6 +4,8 @@ from kedro.io import DataCatalog
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
+GOOGLE_API_KEY = "AIzaSyDOwhlpLULCByVvFgGQK7137613HkknE38"
+
 try:
     from kedro.io import CatalogProtocol
 except ImportError:  # pragma: no cover

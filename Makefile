@@ -21,9 +21,6 @@ test:
 e2e-tests:
 	cd $(plugin) && behave
 
-secret-scan:
-	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
-
 install-test-requirements:
 	cd $(plugin) && uv pip install ".[test]"
 

@@ -163,10 +163,6 @@ tensorflow = ["kedro-datasets[tensorflow-tensorflowmodeldataset]"]
 text-textdataset = []
 text = ["kedro-datasets[text-textdataset]"]
 
-tracking-jsondataset = []
-tracking-metricsdataset = []
-tracking = ["kedro-datasets[tracking-jsondataset, tracking-metricsdataset]"]
-
 yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 

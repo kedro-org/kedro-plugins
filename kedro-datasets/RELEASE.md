@@ -2,7 +2,11 @@
 ## Major features and improvements
 * Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 ## Bug fixes and other changes
+
 ## Breaking Changes
+
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`
+
 ## Community contributions
 
 # Release 6.0.0

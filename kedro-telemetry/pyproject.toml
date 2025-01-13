@@ -35,9 +35,9 @@ test = [
 lint = [
     "bandit>=1.6.2, <2.0",
     "black~=22.0",
+    "detect-secrets~=1.5.0",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "trufflehog>=2.1.0, <3.0",
     "ruff~=0.0.290",
     # mypy requirements
     "types-requests",

@@ -1,6 +1,8 @@
 # Upcoming Release
 ## Major features and improvements
 
+- Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+
 ## Bug fixes and other changes
 
 - Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.

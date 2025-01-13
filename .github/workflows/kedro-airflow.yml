@@ -46,3 +46,10 @@ jobs:
       plugin: kedro-airflow
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
+    with:
+      plugin: kedro-airflow
+      os: ubuntu-latest
+      python-version: "3.11"

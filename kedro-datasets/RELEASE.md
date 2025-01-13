@@ -3,7 +3,7 @@
 
 ## Bug fixes and other changes
 
-- Fix polars.CSVDataset `save` method on Windows.
+- Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
 
 ## Breaking Changes
 

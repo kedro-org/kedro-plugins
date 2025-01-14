@@ -3,7 +3,6 @@ underlying functionality is supported by rioxarray and xarray. A read rasterdata
 returns a xarray.DataArray object.
 """
 import logging
-from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -39,7 +38,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
           filepath: sentinal_data.tif
 
     Example usage for the
-        `Python API <https://kedro.readthedocs.io/en/stable/data/\
+        `Python API <https://docs.kedro.org/en/stable/data/\
         advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -51,7 +50,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         >>> data = xr.DataArray(
         ...     np.random.randn(2, 3, 2),
         ...     dims=("band", "y", "x"),
-        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]}
+        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
         ... )
         >>> data_crs = data.rio.write_crs("epsg:4326")
         >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
@@ -106,12 +105,8 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         )
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -122,7 +117,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
             "version": self._version,
         }
 
-    def _load(self) -> xarray.DataArray:
+    def load(self) -> xarray.DataArray:
         load_path = self._get_load_path().as_posix()
         with rasterio.open(load_path) as data:
             tags = data.tags()
@@ -132,7 +127,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         logger.info(f"found coordinate rerence system {data.rio.crs}")
         return data
 
-    def _save(self, data: xarray.DataArray) -> None:
+    def save(self, data: xarray.DataArray) -> None:
         self._sanity_check(data)
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         if not save_path.endswith(tuple(SUPPORTED_FILE_FORMATS)):

@@ -14,6 +14,8 @@
 from __future__ import annotations
 
 import importlib
+import inspect
+import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -21,6 +23,8 @@ from pathlib import Path
 
 from click import secho, style
 from kedro import __version__ as release
+
+import kedro_datasets
 
 # -- Project information -----------------------------------------------------
 
@@ -47,7 +51,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
     "sphinxcontrib.jquery",
     "sphinx_copybutton",
     "myst_parser",
@@ -97,8 +101,8 @@ exclude_patterns = [
 
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
-    "python": ("https://docs.python.org/3.9/", None),
-    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "python": ("https://docs.python.org/3.10/", None),
+    "requests": ("https://requests.readthedocs.io/en/stable/", None),
 }
 
 type_targets = {
@@ -133,15 +137,18 @@ type_targets = {
         "pyspark.sql.dataframe.DataFrame",
         "scipy.sparse._csr.csr_matrix",
         "keras.src.models.model.Model",
-        "kedro_datasets.video.video_dataset.AbstractVideo",
+        "kedro_datasets_experimental.video.video_dataset.AbstractVideo",
         "langchain_anthropic.chat_models.ChatAnthropic",
         "langchain_cohere.chat_models.ChatCohere",
         "xarray.core.dataset.Dataset",
         "xarray.core.dataarray.DataArray",
+        "torch.nn.modules.module.Module",
+        "prophet.forecaster.Prophet",
+        "Prophet",
+        "snowflake.snowpark.session.Session",
     ),
     "py:data": (
         "typing.Any",
-        "typing.Union",
         "typing.Optional",
         "typing.Tuple",
     ),
@@ -448,3 +455,25 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+
+def linkcode_resolve(domain, info):
+    """Resolve a GitHub URL corresponding to a Python object."""
+    if domain != 'py':
+        return None
+
+    try:
+        mod = sys.modules[info['module']]
+        obj = mod
+        for attr in info['fullname'].split('.'):
+            obj = getattr(obj, attr)
+        obj = inspect.unwrap(obj)
+
+        filename = inspect.getsourcefile(obj)
+        source, lineno = inspect.getsourcelines(obj)
+        relpath = os.path.relpath(filename, start=os.path.dirname(
+          kedro_datasets.__file__))
+
+        return f'https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/kedro_datasets/{relpath}#L{lineno}#L{lineno + len(source) - 1}'
+
+    except (KeyError, ImportError, AttributeError, TypeError, OSError, ValueError):
+        return None

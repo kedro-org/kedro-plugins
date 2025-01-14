@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any
 
 import fsspec
 from kedro.io.core import (
@@ -25,7 +25,7 @@ from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 # Type of data input
-_DI = tuple[Union[ndarray, csr_matrix], ndarray]
+_DI = tuple[ndarray | csr_matrix, ndarray]
 # Type of data output
 _DO = tuple[csr_matrix, ndarray]
 
@@ -45,7 +45,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     libsvm command line programs.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -70,7 +70,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             zero_based: False
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -91,6 +91,10 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "wb"},
+        "open_args_load": {"mode": "rb"},
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -123,6 +127,8 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+                All defaults are preserved, except `mode`, which is set to `rb` when loading
+                and to `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -147,17 +153,17 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             glob_function=self._fs.glob,
         )
 
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_load.setdefault("mode", "rb")
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self):
         return {
@@ -168,12 +174,12 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             "version": self._version,
         }
 
-    def _load(self) -> _DO:
+    def load(self) -> _DO:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_svmlight_file(fs_file, **self._load_args)
 
-    def _save(self, data: _DI) -> None:
+    def save(self, data: _DI) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             dump_svmlight_file(data[0], data[1], fs_file, **self._save_args)

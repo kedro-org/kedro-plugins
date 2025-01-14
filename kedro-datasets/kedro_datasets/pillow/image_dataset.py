@@ -23,7 +23,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -45,6 +45,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -80,8 +81,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -106,14 +106,16 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
             glob_function=self._fs.glob,
         )
 
-        # Handle default save argument
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default save and fs arguments
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -123,13 +125,13 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
             "version": self._version,
         }
 
-    def _load(self) -> Image.Image:
+    def load(self) -> Image.Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return Image.open(fs_file).copy()
 
-    def _save(self, data: Image.Image) -> None:
+    def save(self, data: Image.Image) -> None:
         save_path = self._get_save_path()
 
         with self._fs.open(

@@ -45,7 +45,7 @@ def dummy_dataframe():
 
 class TestHDFDataset:
     def test_save_and_load(self, hdf_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         hdf_dataset.save(dummy_dataframe)
         reloaded = hdf_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
@@ -54,7 +54,7 @@ class TestHDFDataset:
 
     def test_exists(self, hdf_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not hdf_dataset.exists()
         hdf_dataset.save(dummy_dataframe)
         assert hdf_dataset.exists()
@@ -86,7 +86,7 @@ class TestHDFDataset:
 
     def test_load_missing_file(self, hdf_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set HDFDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset HDFDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             hdf_dataset.load()
 
@@ -117,7 +117,7 @@ class TestHDFDataset:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_save_and_load_df_with_categorical_variables(self, hdf_dataset):
-        """Test saving and reloading the data set with categorical variables."""
+        """Test saving and reloading the dataset with categorical variables."""
         df = pd.DataFrame(
             {"A": [1, 2, 3], "B": pd.Series(list("aab")).astype("category")}
         )
@@ -166,7 +166,7 @@ class TestHDFDatasetVersioned:
 
     def test_save_and_load(self, versioned_hdf_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_hdf_dataset.save(dummy_dataframe)
         reloaded_df = versioned_hdf_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -178,13 +178,13 @@ class TestHDFDatasetVersioned:
             versioned_hdf_dataset.load()
 
     def test_exists(self, versioned_hdf_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_hdf_dataset.exists()
         versioned_hdf_dataset.save(dummy_dataframe)
         assert versioned_hdf_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_hdf_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding hdf file for a given save version already exists."""
         versioned_hdf_dataset.save(dummy_dataframe)
         pattern = (

@@ -72,12 +72,12 @@ class TestDeltaTableDataset:
         delta_ds = DeltaTableDataset(filepath="")
         if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.deltatable_dataset._get_spark",
+                "kedro_datasets.spark.deltatable_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.deltatable_dataset._get_spark",
+                "kedro_datasets.spark.deltatable_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):
@@ -94,7 +94,7 @@ class TestDeltaTableDataset:
         catalog = DataCatalog({"delta_in": delta_ds})
         pipeline = modular_pipeline([node(no_output, "delta_in", None)])
         pattern = (
-            r"The following data sets cannot be used with "
+            r"The following datasets cannot be used with "
             r"multiprocessing: \['delta_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):

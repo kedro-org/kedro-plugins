@@ -100,9 +100,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         self._fs_open_args_save = _fs_open_args_save
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -112,10 +110,10 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
             "version": self._version,
         }
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: HoloViews) -> None:
+    def save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()
         hv.save(data, bytes_buffer, **self._save_args)
 

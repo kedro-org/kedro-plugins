@@ -138,7 +138,7 @@ class TestSQLTableDataset:
             ).exists()
 
     def test_str_representation_table(self, table_dataset):
-        """Test the data set instance string representation"""
+        """Test the dataset instance string representation"""
         str_repr = str(table_dataset)
         assert (
             "SQLTableDataset(load_args={}, save_args={'index': False}, "
@@ -424,13 +424,13 @@ class TestSQLQueryDataset:
             SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR}).load()
 
     def test_save_error(self, query_dataset, dummy_dataframe):
-        """Check the error when trying to save to the data set"""
+        """Check the error when trying to save to the dataset"""
         pattern = r"'save' is not supported on SQLQueryDataset"
         with pytest.raises(DatasetError, match=pattern):
             query_dataset.save(dummy_dataframe)
 
     def test_str_representation_sql(self, query_dataset, sql_file):
-        """Test the data set instance string representation"""
+        """Test the dataset instance string representation"""
         str_repr = str(query_dataset)
         assert (
             "SQLQueryDataset(execution_options={}, filepath=None, "
@@ -440,7 +440,7 @@ class TestSQLQueryDataset:
         assert sql_file not in str_repr
 
     def test_str_representation_filepath(self, query_file_dataset, sql_file):
-        """Test the data set instance string representation with filepath arg."""
+        """Test the dataset instance string representation with filepath arg."""
         str_repr = str(query_file_dataset)
         assert (
             f"SQLQueryDataset(execution_options={{}}, filepath={str(sql_file)}, "

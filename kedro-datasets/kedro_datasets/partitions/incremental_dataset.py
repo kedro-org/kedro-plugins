@@ -9,8 +9,9 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any
 
 from cachetools import cachedmethod
 from kedro.io.core import (
@@ -99,7 +100,7 @@ class IncrementalDataset(PartitionedDataset):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -110,11 +111,11 @@ class IncrementalDataset(PartitionedDataset):
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem,
-                the dataset dataset initializer and the checkpoint. If
+                the dataset initializer and the checkpoint. If
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -215,7 +216,7 @@ class IncrementalDataset(PartitionedDataset):
         except DatasetError:
             return None
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def load(self) -> dict[str, Callable[[], Any]]:
         partitions: dict[str, Any] = {}
 
         for partition in self._list_partitions():

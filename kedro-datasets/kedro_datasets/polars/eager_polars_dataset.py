@@ -25,7 +25,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
     appropriate type of read/write on a best effort basis.
 
-    Example usage for the `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -51,7 +51,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         >>> dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.frame_equal(reloaded)
+        >>> assert data.equals(reloaded)
 
     """
 
@@ -145,7 +145,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> pl.DataFrame:
+    def load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
 
@@ -160,7 +160,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_method(fs_file, **self._load_args)
 
-    def _save(self, data: pl.DataFrame) -> None:
+    def save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = getattr(data, f"write_{self._file_format}", None)
 

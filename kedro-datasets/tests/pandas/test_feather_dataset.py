@@ -38,14 +38,14 @@ def dummy_dataframe():
 
 class TestFeatherDataset:
     def test_save_and_load(self, feather_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         feather_dataset.save(dummy_dataframe)
         reloaded = feather_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, feather_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not feather_dataset.exists()
         feather_dataset.save(dummy_dataframe)
         assert feather_dataset.exists()
@@ -57,6 +57,16 @@ class TestFeatherDataset:
         """Test overriding the default load arguments."""
         for key, value in load_args.items():
             assert feather_dataset._load_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"k1": "v1"}, "open_args_save": {"index": "value"}}],
+        indirect=True,
+    )
+    def test_fs_extra_params(self, feather_dataset, fs_args):
+        """Test overriding the default fs arguments."""
+        assert feather_dataset._fs_open_args_load == {"k1": "v1"}
+        assert feather_dataset._fs_open_args_save == {"index": "value", "mode": "wb"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",
@@ -82,7 +92,7 @@ class TestFeatherDataset:
 
     def test_load_missing_file(self, feather_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set FeatherDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset FeatherDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             feather_dataset.load()
 
@@ -144,7 +154,7 @@ class TestFeatherDatasetVersioned:
 
     def test_save_and_load(self, versioned_feather_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_feather_dataset.save(dummy_dataframe)
         reloaded_df = versioned_feather_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -156,13 +166,13 @@ class TestFeatherDatasetVersioned:
             versioned_feather_dataset.load()
 
     def test_exists(self, versioned_feather_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_feather_dataset.exists()
         versioned_feather_dataset.save(dummy_dataframe)
         assert versioned_feather_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_feather_dataset, dummy_dataframe):
-        """Check the error when attempting to overwrite the data set if the
+        """Check the error when attempting to overwrite the dataset if the
         corresponding feather file for a given save version already exists."""
         versioned_feather_dataset.save(dummy_dataframe)
         pattern = (

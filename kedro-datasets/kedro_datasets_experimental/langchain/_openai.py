@@ -31,10 +31,10 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
     def _describe(self) -> dict[str, Any]:
         return {**self.kwargs}
 
-    def _save(self, data: None) -> NoReturn:
-        raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
+    def save(self, data: None) -> NoReturn:
+        raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
-    def _load(self) -> OPENAI_TYPE:
+    def load(self) -> OPENAI_TYPE:
         return self.constructor(
             openai_api_base=self.openai_api_base,
             openai_api_key=self.openai_api_key,
@@ -66,7 +66,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
          openai_api_key: <openai-api-key>
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -118,7 +118,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
          openai_api_key: <openai-api-key>
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon

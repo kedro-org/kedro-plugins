@@ -65,7 +65,7 @@ class TestParquetDataset:
         mock_fs.assert_called_once_with("file", auto_mkdir=True, **credentials)
 
     def test_save_and_load(self, tmp_path, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         filepath = (tmp_path / FILENAME).as_posix()
         dataset = ParquetDataset(filepath=filepath)
         dataset.save(dummy_dataframe)
@@ -77,7 +77,7 @@ class TestParquetDataset:
         assert len(files) == 1
 
     def test_save_and_load_non_existing_dir(self, tmp_path, dummy_dataframe):
-        """Test saving and reloading the data set to non-existing directory."""
+        """Test saving and reloading the dataset to non-existing directory."""
         filepath = (tmp_path / "non-existing" / FILENAME).as_posix()
         dataset = ParquetDataset(filepath=filepath)
         dataset.save(dummy_dataframe)
@@ -86,7 +86,7 @@ class TestParquetDataset:
 
     def test_exists(self, parquet_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not parquet_dataset.exists()
         parquet_dataset.save(dummy_dataframe)
         assert parquet_dataset.exists()
@@ -131,7 +131,7 @@ class TestParquetDataset:
 
     def test_load_missing_file(self, parquet_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ParquetDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset ParquetDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load()
 
@@ -273,7 +273,7 @@ class TestParquetDatasetVersioned:
 
     def test_save_and_load(self, versioned_parquet_dataset, dummy_dataframe, mocker):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
             return_value=PyFileSystem(FSSpecHandler(versioned_parquet_dataset._fs)),
@@ -289,7 +289,7 @@ class TestParquetDatasetVersioned:
             versioned_parquet_dataset.load()
 
     def test_exists(self, versioned_parquet_dataset, dummy_dataframe, mocker):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_parquet_dataset.exists()
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",
@@ -301,7 +301,7 @@ class TestParquetDatasetVersioned:
     def test_prevent_overwrite(
         self, versioned_parquet_dataset, dummy_dataframe, mocker
     ):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding parquet file for a given save version already exists."""
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",

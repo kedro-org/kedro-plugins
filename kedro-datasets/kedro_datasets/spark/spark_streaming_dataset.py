@@ -1,7 +1,6 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
 from __future__ import annotations
 
-from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -9,20 +8,16 @@ from kedro.io.core import AbstractDataset
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark.spark_dataset import (
-    SparkDataset,
-    _get_spark,
-    _split_filepath,
-    _strip_dbfs_prefix,
-)
+from kedro_datasets._utils.databricks_utils import split_filepath, strip_dbfs_prefix
+from kedro_datasets._utils.spark_utils import get_spark
+from kedro_datasets.spark.spark_dataset import SparkDataset
 
 
 class SparkStreamingDataset(AbstractDataset):
     """``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -82,18 +77,14 @@ class SparkStreamingDataset(AbstractDataset):
         self._load_args = load_args
         self.metadata = metadata
 
-        fs_prefix, filepath = _split_filepath(filepath)
+        fs_prefix, filepath = split_filepath(filepath)
 
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Handle schema load argument
         self._schema = self._load_args.pop("schema", None)
@@ -110,28 +101,28 @@ class SparkStreamingDataset(AbstractDataset):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         """Loads data from filepath.
         If the connector type is kafka then no file_path is required, schema needs to be
         seperated from load_args.
         Returns:
             Data from filepath as pyspark dataframe.
         """
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         data_stream_reader = (
-            _get_spark()
+            get_spark()
             .readStream.schema(self._schema)
             .format(self._file_format)
             .options(**self._load_args)
         )
         return data_stream_reader.load(load_path)
 
-    def _save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrame) -> None:
         """Saves pyspark dataframe.
         Args:
             data: PySpark streaming dataframe for saving
         """
-        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        save_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
         output_constructor = data.writeStream.format(self._file_format)
         output_mode = (
             self._save_args.pop("output_mode", None) if self._save_args else None
@@ -142,16 +133,16 @@ class SparkStreamingDataset(AbstractDataset):
         (
             output_constructor.option("checkpointLocation", checkpoint)
             .option("path", save_path)
-            .outputMode(output_mode)
+            .outputMode(str(output_mode))
             .options(**self._save_args or {})
             .start()
         )
 
     def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            _get_spark().readStream.schema(self._schema).load(
+            get_spark().readStream.schema(self._schema).load(
                 load_path, self._file_format
             )
         except AnalysisException as exception:

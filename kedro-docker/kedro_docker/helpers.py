@@ -7,11 +7,11 @@ import re
 import shutil
 import socket
 import subprocess
+from collections.abc import Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path, PurePosixPath
 from subprocess import DEVNULL, PIPE
-from typing import Sequence
 
 from click import secho
 from kedro.framework.cli.utils import KedroCliError

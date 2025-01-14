@@ -65,7 +65,7 @@ def cog_geotiff_dataset(cog_file_path, save_args) -> GeoTIFFDataset:
 
 
 def test_load_cog_geotiff(cog_geotiff_dataset):
-    """Test loading cloud optimised geotiff reloading the data set."""
+    """Test loading cloud optimised geotiff reloading the dataset."""
     loaded_xr = cog_geotiff_dataset.load()
     assert isinstance(loaded_xr.rio.crs, CRS)
     assert isinstance(loaded_xr, xr.DataArray)
@@ -144,7 +144,7 @@ def test_load_not_tif():
 
 def test_exists(tmp_path, synthetic_xarray):
     """Test `exists` method invocation for both existing and
-    nonexistent data set."""
+    nonexistent dataset."""
     dataset = GeoTIFFDataset(filepath=str(tmp_path / "tmp.tif"))
     assert not dataset.exists()
     dataset.save(synthetic_xarray)
@@ -155,7 +155,7 @@ def test_exists(tmp_path, synthetic_xarray):
     "synthetic_xarray",
 ])
 def test_save_and_load_geotiff(tmp_path, request, xarray_fixture):
-    """Test saving and reloading the data set."""
+    """Test saving and reloading the dataset."""
     xarray_data = request.getfixturevalue(xarray_fixture)
     dataset = GeoTIFFDataset(filepath=str(tmp_path / "tmp.tif"))
     dataset.save(xarray_data)
@@ -176,6 +176,6 @@ def test_load_missing_file(tmp_path):
     """Check the error when trying to load missing file."""
     dataset = GeoTIFFDataset(filepath=str(tmp_path / "tmp.tif"))
     assert not dataset._exists(), "File unexpectedly exists"
-    pattern = r"Failed while loading data from data set GeoTIFFDataset\(.*\)"
+    pattern = r"Failed while loading data from dataset GeoTIFFDataset\(.*\)"
     with pytest.raises(DatasetError, match=pattern):
         dataset.load()

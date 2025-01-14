@@ -17,10 +17,11 @@ kedro_datasets
    dask.ParquetDataset
    databricks.ManagedTableDataset
    email.EmailMessageDataset
-   geopandas.GeoJSONDataset
+   geopandas.GenericDataset
    holoviews.HoloviewsWriter
    huggingface.HFDataset
    huggingface.HFTransformerPipelineDataset
+   ibis.FileDataset
    ibis.TableDataset
    json.JSONDataset
    matlab.MatlabDataset
@@ -45,6 +46,7 @@ kedro_datasets
    partitions.PartitionedDataset
    pickle.PickleDataset
    pillow.ImageDataset
+   plotly.HTMLDataset
    plotly.JSONDataset
    plotly.PlotlyDataset
    polars.CSVDataset
@@ -60,7 +62,4 @@ kedro_datasets
    svmlight.SVMLightDataset
    tensorflow.TensorFlowModelDataset
    text.TextDataset
-   tracking.JSONDataset
-   tracking.MetricsDataset
-   video.VideoDataset
    yaml.YAMLDataset

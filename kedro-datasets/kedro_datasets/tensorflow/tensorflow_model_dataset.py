@@ -28,7 +28,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     TensorFlow 2.X load_model and save_model methods.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -44,7 +44,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
           credentials: tf_creds
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -129,16 +129,12 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         self._tmp_prefix = "kedro_tensorflow_tmp"  # temp prefix pattern
 
         # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         self._is_h5 = self._save_args.get("save_format") == "h5"
 
-    def _load(self) -> tf.keras.Model:
+    def load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:
@@ -148,7 +144,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
                 # We assume .keras
                 path = str(PurePath(tempdir) / TEMPORARY_KERAS_FILE)  # noqa: PLW2901
 
-            self._fs.copy(load_path, path)
+            self._fs.get(load_path, path)
 
             # Pass the local temporary directory/file path to keras.load_model
             device_name = self._load_args.pop("tf_device", None)
@@ -159,7 +155,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
                 model = tf.keras.models.load_model(path, **self._load_args)
             return model
 
-    def _save(self, data: tf.keras.Model) -> None:
+    def save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tempdir:
@@ -173,7 +169,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
             # Use fsspec to take from local tempfile directory/file and
             # put in ArbitraryFileSystem
-            self._fs.copy(path, save_path)
+            self._fs.put(path, save_path)
 
     def _exists(self) -> bool:
         try:

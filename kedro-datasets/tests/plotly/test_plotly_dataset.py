@@ -47,7 +47,7 @@ def dummy_dataframe():
 
 class TestPlotlyDataset:
     def test_save_and_load(self, plotly_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         plotly_dataset.save(dummy_dataframe)
         reloaded = plotly_dataset.load()
         assert isinstance(reloaded, graph_objects.Figure)
@@ -56,14 +56,14 @@ class TestPlotlyDataset:
 
     def test_exists(self, plotly_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not plotly_dataset.exists()
         plotly_dataset.save(dummy_dataframe)
         assert plotly_dataset.exists()
 
     def test_load_missing_file(self, plotly_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PlotlyDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset PlotlyDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             plotly_dataset.load()
 

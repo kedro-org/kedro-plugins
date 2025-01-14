@@ -27,7 +27,7 @@ If you have new ideas for Kedro-Datasets then please open a [GitHub issue](https
 
 If you're unsure where to begin contributing to Kedro-Datasets, please start by looking through the `good first issue` and `help wanted` on [GitHub](https://github.com/kedro-org/kedro-plugins/issues).
 If you want to contribute a new dataset, read the [tutorial to create and contribute a custom dataset](https://docs.kedro.org/en/stable/data/how_to_create_a_custom_dataset.html) in the Kedro documentation.
-Make sure to add the new dataset to `kedro_datasets.rst` so that it shows up in the API documentation and to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
+Make sure to add the new dataset to `kedro_datasets.rst` so that it shows up in the API documentation and to `kedro-datasets/static/jsonschema/kedro-catalog-X.json` for IDE validation.
 
 Below is a guide to help you understand the process of contributing a new dataset, whether it falls under the category of core or experimental datasets.
 
@@ -41,7 +41,7 @@ Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](h
 3. Must have working doctests (unless complex cloud/DB setup required, which can be discussed in the review).
 4. Must run as part of the regular CI/CD jobs.
 5. Must have 100% test coverage.
-6. Should support all Python versions under NEP 29 (3.9+ currently).
+6. Should support all Python versions under NEP 29 (3.10+ currently).
 7. Should work on Linux, macOS, and Windows.
 
 #### Experimental datasets
@@ -89,7 +89,7 @@ def count_truthy(elements: List[Any]) -> int:
     return sum(1 for elem in elements if elem)
 ```
 
-> *Note:* We only accept contributions under the [Apache 2.0](https://opensource.org/licenses/Apache-2.0) license, and you should have permission to share the submitted code.
+> *Note:* We only accept contributions under the [Apache 2.0](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md) license, and you should have permission to share the submitted code.
 
 ### Branching conventions
 

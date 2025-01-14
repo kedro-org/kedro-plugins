@@ -1,10 +1,9 @@
 import shlex
 import subprocess
-from typing import Dict
 
 
 def run(
-    cmd: str, split: bool = True, print_output: bool = False, **kwargs: Dict
+    cmd: str, split: bool = True, print_output: bool = False, **kwargs: dict
 ) -> int:
     """
     Args:

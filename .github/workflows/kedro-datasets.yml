@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
+        python-version: [ "3.10", "3.11", "3.12" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-datasets
@@ -61,3 +61,10 @@ jobs:
       - name: Documentation check for kedro-datasets
         run: |
           make check-datasets-docs
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
+    with:
+      plugin: kedro-datasets
+      os: ubuntu-latest
+      python-version: "3.11"

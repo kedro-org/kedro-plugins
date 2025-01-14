@@ -170,7 +170,7 @@ class TestGenericCSVDatasetVersioned:
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_csv_dataset.save(dummy_dataframe)
         reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -271,13 +271,13 @@ class TestGenericCSVDatasetVersioned:
             versioned_csv_dataset.load()
 
     def test_exists(self, versioned_csv_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_csv_dataset.exists()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Generic (csv) file for a given save version already exists."""
         versioned_csv_dataset.save(dummy_dataframe)
         pattern = (

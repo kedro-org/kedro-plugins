@@ -5,7 +5,7 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-from typing import Callable
+from collections.abc import Callable
 from unittest.mock import MagicMock
 
 import aiobotocore.awsrequest

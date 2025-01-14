@@ -11,9 +11,14 @@ kedro_datasets_experimental
    :toctree:
    :template: autosummary/class.rst
 
+   databricks.ExternalTableDataset
    langchain.ChatAnthropicDataset
    langchain.ChatCohereDataset
    langchain.ChatOpenAIDataset
    langchain.OpenAIEmbeddingsDataset
    netcdf.NetCDFDataset
+   prophet.ProphetModelDataset
+   pytorch.PyTorchDataset
    rioxarray.GeoTIFFDataset
+   safetensors.SafetensorsDataset
+   video.VideoDataset

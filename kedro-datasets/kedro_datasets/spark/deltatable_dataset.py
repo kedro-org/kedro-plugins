@@ -10,18 +10,15 @@ from delta.tables import DeltaTable
 from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql.utils import AnalysisException
 
-from kedro_datasets.spark.spark_dataset import (
-    _get_spark,
-    _split_filepath,
-    _strip_dbfs_prefix,
-)
+from kedro_datasets._utils.databricks_utils import split_filepath, strip_dbfs_prefix
+from kedro_datasets._utils.spark_utils import get_spark
 
 
 class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataset`` loads data into DeltaTable objects.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
@@ -36,7 +33,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
           filepath: data/02_intermediate/data.parquet
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -81,24 +78,24 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        fs_prefix, filepath = _split_filepath(filepath)
+        fs_prefix, filepath = split_filepath(filepath)
 
         self._fs_prefix = fs_prefix
         self._filepath = PurePosixPath(filepath)
         self.metadata = metadata
 
-    def _load(self) -> DeltaTable:
+    def load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)
-        return DeltaTable.forPath(_get_spark(), load_path)
+        return DeltaTable.forPath(get_spark(), load_path)
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
-            _get_spark().read.load(path=load_path, format="delta")
+            get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
             # `AnalysisException.desc` is deprecated with pyspark >= 3.4
             message = exception.desc if hasattr(exception, "desc") else str(exception)

@@ -1,7 +1,7 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
-default_stages: [commit, manual]
+default_stages: [pre-commit, manual]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -24,6 +24,12 @@ repos:
       additional_dependencies:
         - black==22.12.0
 
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [ '--baseline', '.secrets.baseline' ]
+
   - repo: local
     hooks:
       - id: ruff-kedro-datasets
@@ -42,7 +48,7 @@ repos:
         exclude: ^(?!kedro-airflow/kedro_airflow/).*\.py$
         pass_filenames: false
         stages: [ manual ]
-        entry: ruff kedro-airflow --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-airflow --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-docker
         name: "Ruff on kedro_docker/*"
@@ -51,7 +57,7 @@ repos:
         exclude: ^(?!kedro-docker/kedro_docker/).*\.py$
         pass_filenames: false
         stages: [ manual ]
-        entry: ruff kedro-docker --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-docker --fix --exit-non-zero-on-fix
 
       - id: ruff-kedro-telemetry
         name: "Ruff on kedro_telemetry/*"
@@ -60,7 +66,7 @@ repos:
         exclude: ^(?!kedro-telemetry/kedro_telemetry/).*\.py$
         pass_filenames: false
         stages: [manual]
-        entry: ruff kedro-telemetry --fix --exit-non-zero-on-fix
+        entry: ruff check kedro-telemetry --fix --exit-non-zero-on-fix
 
       - id: black-kedro-datasets
         name: "Black"
@@ -85,12 +91,6 @@ repos:
         language: system
         pass_filenames: false
         entry: black kedro-telemetry/kedro_telemetry kedro-telemetry/tests
-
-      - id: secret_scan
-        name: "Secret scan"
-        language: system
-        pass_filenames: false
-        entry: make secret-scan
 
       - id: bandit
         name: "Bandit security check"

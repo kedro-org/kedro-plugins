@@ -1,4 +1,4 @@
-"""``CSVDataset`` is a data set used to load and save data to CSV files using Dask
+"""``CSVDataset`` is a dataset used to load and save data to CSV files using Dask
 dataframe"""
 from __future__ import annotations
 
@@ -16,8 +16,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -32,7 +31,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               aws_secret_access_key: YOUR_SECRET
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -68,9 +67,9 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             filepath: Filepath in POSIX format to a CSV file
                 CSV collection or the directory of a multipart CSV.
             load_args: Additional loading options `dask.dataframe.read_csv`:
-                https://docs.dask.org/en/latest/generated/dask.dataframe.read_csv.html
+                https://docs.dask.org/en/stable/generated/dask.dataframe.read_csv.html
             save_args: Additional saving options for `dask.dataframe.to_csv`:
-                https://docs.dask.org/en/latest/generated/dask.dataframe.to_csv.html
+                https://docs.dask.org/en/stable/generated/dask.dataframe.to_csv.html
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
@@ -85,12 +84,8 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     @property
     def fs_args(self) -> dict[str, Any]:
@@ -110,12 +105,12 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> dd.DataFrame:
+    def load(self) -> dd.DataFrame:
         return dd.read_csv(
             self._filepath, storage_options=self.fs_args, **self._load_args
         )
 
-    def _save(self, data: dd.DataFrame) -> None:
+    def save(self, data: dd.DataFrame) -> None:
         data.to_csv(self._filepath, storage_options=self.fs_args, **self._save_args)
 
     def _exists(self) -> bool:

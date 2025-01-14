@@ -1,4 +1,17 @@
 # Upcoming release
+* Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+
+# Release 0.6.2
+* Removed support for Python 3.8
+* Added support for Python 3.13
+
+## Thanks for supporting contributions
+* [Felix Scherz](https://github.com/felixscherz)
+
+# Release 0.6.1
+* Changed Kedro CLI loading method to improve loading times.
+* Changed logging level from error to debug for most logging messages.
+* Set default value for the `identity` parameter, to prevent errors due to it being empty.
 
 # Release 0.6.0
 * Moved to an opt-out model for telemetry, enabling it by default without requiring prior consent.

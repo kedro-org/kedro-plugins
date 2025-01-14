@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Docker makes it easy to package Kedro projects with Docker."
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "anyconfig~=0.10.0",  # not directly required, pinned by Snyk to avoid a vulnerability
@@ -24,22 +24,25 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "bandit",
     "behave",
-    "black~=22.0",
     "coverage>=7.2.0",
     "docker",
-    "mypy~=1.0",
-    "pre-commit>=2.9.2",
     "psutil",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]~=2.2.1",
     "PyYAML>=5.1, <7.0",
-    "trufflehog>=2.0.99, <3.0",
+    "wheel==0.32.2",
+]
+
+lint = [
+    "bandit",
+    "black~=22.0",
+    "detect-secrets~=1.5.0",
+    "mypy~=1.0",
+    "pre-commit>=2.9.2",
     "ruff~=0.0.290",
-    "wheel==0.32.2"
 ]
 
 [project.entry-points."kedro.project_commands"]

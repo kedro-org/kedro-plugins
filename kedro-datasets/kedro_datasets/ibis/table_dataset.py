@@ -5,32 +5,28 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
-from kedro.io import AbstractDataset, DatasetError
+from kedro.io import AbstractDataset
+
+from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
 
 
-class TableDataset(AbstractDataset[ir.Table, ir.Table]):
+class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
         cars:
           type: ibis.TableDataset
-          filepath: data/01_raw/company/cars.csv
-          file_format: csv
           table_name: cars
           connection:
             backend: duckdb
             database: company.db
-          load_args:
-            sep: ","
-            nullstr: "#NA"
           save_args:
             materialized: table
 
@@ -42,7 +38,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             database: company.db
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -63,26 +59,29 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
     """
 
+    DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {
+        "backend": "duckdb",
+        "database": ":memory:",
+    }
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
         "overwrite": True,
     }
 
-    _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
+    _CONNECTION_GROUP: ClassVar[str] = "ibis"
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
-        file_format: str | None = None,
-        table_name: str | None = None,
+        table_name: str,
+        database: str | None = None,
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new ``TableDataset`` pointing to a table (or file).
+        """Creates a new ``TableDataset`` pointing to a table.
 
         ``TableDataset`` connects to the Ibis backend object constructed
         from the connection configuration. The `backend` key provided in
@@ -92,25 +91,22 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
         #ibis.duckdb.connect>`_).
 
-        If ``filepath`` and ``file_format`` are given, the corresponding
-        read method (e.g. `read_csv() <https://ibis-project.org/backends/\
-        duckdb#ibis.backends.duckdb.Backend.read_csv>`_) is used to load
-        the file with the backend. Note that only the data is loaded; no
-        link to the underlying file exists past ``TableDataset.load()``.
-
-        If ``table_name`` is given (and ``filepath`` isn't), the dataset
-        establishes a connection to the relevant table for the execution
+        The dataset establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute
         is deferred until materialization, when the expression is saved.
         In practice, this happens when another ``TableDataset`` instance
         is saved, after running code defined across one more more nodes.
 
         Args:
-            filepath: Path to a file to register as a table. Most useful
-                for loading data into your data warehouse (for testing).
-            file_format: Specifies the input file format for `filepath`.
             table_name: The name of the table or view to read or create.
+            database: The name of the database to read the table or view
+                from or create the table or view in. If not passed, then
+                the current database is used. Provide a tuple of strings
+                (e.g. `("catalog", "database")`) or a dotted string path
+                (e.g. `"catalog.database"`) to reference a table or view
+                in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
+                If not provided, connect to DuckDB in in-memory mode.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -121,76 +117,57 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
-        if filepath is None and table_name is None:
-            raise DatasetError(
-                "Must provide at least one of `filepath` or `table_name`."
-            )
 
-        self._filepath = filepath
-        self._file_format = file_format
         self._table_name = table_name
-        self._connection_config = connection
+        self._database = database
+        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+        if database is not None:
+            self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+        if database is not None:
+            self._save_args["database"] = database
 
         self._materialized = self._save_args.pop("materialized")
 
+    def _connect(self) -> BaseBackend:
+        import ibis
+
+        config = deepcopy(self._connection_config)
+        backend = getattr(ibis, config.pop("backend"))
+        return backend.connect(**config)
+
     @property
     def connection(self) -> BaseBackend:
-        def hashable(value):
-            if isinstance(value, dict):
-                return tuple((k, hashable(v)) for k, v in sorted(value.items()))
-            if isinstance(value, list):
-                return tuple(hashable(x) for x in value)
-            return value
+        """The ``Backend`` instance for the connection configuration."""
+        return self._connection
 
-        cls = type(self)
-        key = hashable(self._connection_config)
-        if key not in cls._connections:
-            import ibis
+    def load(self) -> ir.Table:
+        return self.connection.table(self._table_name, **self._load_args)
 
-            config = deepcopy(self._connection_config)
-            backend_attr = config.pop("backend") if config else None
-            backend = getattr(ibis, backend_attr)
-            cls._connections[key] = backend.connect(**config)
-
-        return cls._connections[key]
-
-    def _load(self) -> ir.Table:
-        if self._filepath is not None:
-            if self._file_format is None:
-                raise NotImplementedError
-
-            reader = getattr(self.connection, f"read_{self._file_format}")
-            return reader(self._filepath, self._table_name, **self._load_args)
-        else:
-            return self.connection.table(self._table_name)
-
-    def _save(self, data: ir.Table) -> None:
-        if self._table_name is None:
-            raise DatasetError("Must provide `table_name` for materialization.")
-
+    def save(self, data: ir.Table) -> None:
         writer = getattr(self.connection, f"create_{self._materialized}")
         writer(self._table_name, data, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
+        load_args = deepcopy(self._load_args)
+        save_args = deepcopy(self._save_args)
+        load_args.pop("database", None)
+        save_args.pop("database", None)
         return {
-            "filepath": self._filepath,
-            "file_format": self._file_format,
             "table_name": self._table_name,
-            "backend": self._connection_config.get("backend")
-            if self._connection_config
-            else None,
-            "load_args": self._load_args,
-            "save_args": self._save_args,
+            "database": self._database,
+            "backend": self._connection_config["backend"],
+            "load_args": load_args,
+            "save_args": save_args,
             "materialized": self._materialized,
         }
 

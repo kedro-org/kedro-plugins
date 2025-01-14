@@ -58,7 +58,7 @@ def another_dummy_dataframe():
 
 class TestExcelDataset:
     def test_save_and_load(self, excel_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         excel_dataset.save(dummy_dataframe)
         reloaded = excel_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
@@ -66,7 +66,7 @@ class TestExcelDataset:
     def test_save_and_load_multiple_sheets(
         self, excel_multisheet_dataset, dummy_dataframe, another_dummy_dataframe
     ):
-        """Test saving and reloading the data set with multiple sheets."""
+        """Test saving and reloading the dataset with multiple sheets."""
         dummy_multisheet = {
             "sheet 1": dummy_dataframe,
             "sheet 2": another_dummy_dataframe,
@@ -78,7 +78,7 @@ class TestExcelDataset:
 
     def test_exists(self, excel_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not excel_dataset.exists()
         excel_dataset.save(dummy_dataframe)
         assert excel_dataset.exists()
@@ -169,7 +169,7 @@ class TestExcelDataset:
 
     def test_load_missing_file(self, excel_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ExcelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset ExcelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             excel_dataset.load()
 
@@ -238,7 +238,7 @@ class TestExcelDatasetVersioned:
 
     def test_save_and_load(self, versioned_excel_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_excel_dataset.save(dummy_dataframe)
         reloaded_df = versioned_excel_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -264,13 +264,13 @@ class TestExcelDatasetVersioned:
             )
 
     def test_exists(self, versioned_excel_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_excel_dataset.exists()
         versioned_excel_dataset.save(dummy_dataframe)
         assert versioned_excel_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_excel_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Excel file for a given save version already exists."""
         versioned_excel_dataset.save(dummy_dataframe)
         pattern = (

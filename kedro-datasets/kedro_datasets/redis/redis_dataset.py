@@ -19,8 +19,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
     a value.
 
     Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -40,7 +39,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             ex: 10
 
     Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    `Python API <https://docs.kedro.org/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
     .. code-block:: pycon
@@ -167,7 +166,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.
-    def _load(self) -> Any:
+    def load(self) -> Any:
         if not self.exists():
             raise DatasetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
@@ -175,7 +174,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             self._redis_db.get(self._key), **self._load_args
         )  # type: ignore
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         try:
             imported_backend = importlib.import_module(self._backend)
             self._redis_db.set(

@@ -41,7 +41,7 @@ def images_equal(image_1, image_2):
 
 class TestImageDataset:
     def test_save_and_load(self, image_dataset, image_object):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         image_dataset.save(image_object)
         reloaded_image = image_dataset.load()
         assert images_equal(image_object, reloaded_image)
@@ -49,7 +49,7 @@ class TestImageDataset:
 
     def test_exists(self, image_dataset, image_object):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not image_dataset.exists()
         image_dataset.save(image_object)
         assert image_dataset.exists()
@@ -80,7 +80,7 @@ class TestImageDataset:
 
     def test_load_missing_file(self, image_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ImageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset ImageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             image_dataset.load()
 
@@ -147,7 +147,7 @@ class TestImageDatasetVersioned:
 
     def test_save_and_load(self, versioned_image_dataset, image_object):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_image_dataset.save(image_object)
         reloaded_image = versioned_image_dataset.load()
         assert images_equal(image_object, reloaded_image)
@@ -182,13 +182,13 @@ class TestImageDatasetVersioned:
             versioned_image_dataset.load()
 
     def test_exists(self, versioned_image_dataset, image_object):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_image_dataset.exists()
         versioned_image_dataset.save(image_object)
         assert versioned_image_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_image_dataset, image_object):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding image file for a given save version already exists."""
         versioned_image_dataset.save(image_object)
         pattern = (

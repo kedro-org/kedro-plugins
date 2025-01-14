@@ -39,7 +39,7 @@ def dummy_data():
 
 class TestYAMLDataset:
     def test_save_and_load(self, yaml_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         yaml_dataset.save(dummy_data)
         reloaded = yaml_dataset.load()
         assert dummy_data == reloaded
@@ -48,7 +48,7 @@ class TestYAMLDataset:
 
     def test_exists(self, yaml_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not yaml_dataset.exists()
         yaml_dataset.save(dummy_data)
         assert yaml_dataset.exists()
@@ -72,7 +72,7 @@ class TestYAMLDataset:
 
     def test_load_missing_file(self, yaml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set YAMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset YAMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             yaml_dataset.load()
 
@@ -137,7 +137,7 @@ class TestYAMLDatasetVersioned:
 
     def test_save_and_load(self, versioned_yaml_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_yaml_dataset.save(dummy_data)
         reloaded = versioned_yaml_dataset.load()
         assert dummy_data == reloaded
@@ -149,13 +149,13 @@ class TestYAMLDatasetVersioned:
             versioned_yaml_dataset.load()
 
     def test_exists(self, versioned_yaml_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_yaml_dataset.exists()
         versioned_yaml_dataset.save(dummy_data)
         assert versioned_yaml_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_yaml_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding yaml file for a given save version already exists."""
         versioned_yaml_dataset.save(dummy_data)
         pattern = (

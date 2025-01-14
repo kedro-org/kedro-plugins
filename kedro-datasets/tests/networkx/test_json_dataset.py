@@ -39,9 +39,7 @@ def versioned_json_dataset(filepath_json, load_version, save_version):
 
 @pytest.fixture
 def json_dataset_args(filepath_json):
-    return JSONDataset(
-        filepath=filepath_json, load_args={"attrs": ATTRS}, save_args={"attrs": ATTRS}
-    )
+    return JSONDataset(filepath=filepath_json, load_args=ATTRS, save_args=ATTRS)
 
 
 @pytest.fixture()
@@ -51,7 +49,7 @@ def dummy_graph_data():
 
 class TestJSONDataset:
     def test_save_and_load(self, json_dataset, dummy_graph_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         json_dataset.save(dummy_graph_data)
         reloaded = json_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
@@ -60,7 +58,7 @@ class TestJSONDataset:
 
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set JSONDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset JSONDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert json_dataset.load()
 
@@ -70,7 +68,14 @@ class TestJSONDataset:
             "networkx.node_link_data", wraps=networkx.node_link_data
         )
         json_dataset_args.save(dummy_graph_data)
-        patched_save.assert_called_once_with(dummy_graph_data, attrs=ATTRS)
+        patched_save.assert_called_once_with(
+            dummy_graph_data,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
+        )
 
         patched_load = mocker.patch(
             "networkx.node_link_graph", wraps=networkx.node_link_graph
@@ -91,7 +96,11 @@ class TestJSONDataset:
                     {"from": 1, "to": 2},
                 ],
             },
-            attrs=ATTRS,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 
@@ -140,7 +149,7 @@ class TestJSONDataset:
 class TestJSONDatasetVersioned:
     def test_save_and_load(self, versioned_json_dataset, dummy_graph_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_json_dataset.save(dummy_graph_data)
         reloaded = versioned_json_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
@@ -152,13 +161,13 @@ class TestJSONDatasetVersioned:
             versioned_json_dataset.load()
 
     def test_exists(self, versioned_json_dataset, dummy_graph_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_json_dataset.exists()
         versioned_json_dataset.save(dummy_graph_data)
         assert versioned_json_dataset.exists()
 
     def test_prevent_override(self, versioned_json_dataset, dummy_graph_data):
-        """Check the error when attempt to override the same data set
+        """Check the error when attempt to override the same dataset
         version."""
         versioned_json_dataset.save(dummy_graph_data)
         pattern = (

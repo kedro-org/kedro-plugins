@@ -294,7 +294,7 @@ class TestSparkHiveDataset:
         )
         with pytest.raises(
             DatasetError,
-            match=r"Failed while loading data from data set SparkHiveDataset"
+            match=r"Failed while loading data from dataset SparkHiveDataset"
             r"|table_doesnt_exist"
             r"|UnresolvedRelation",
         ):

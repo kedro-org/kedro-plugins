@@ -50,7 +50,7 @@ def dummy_msg():
 
 class TestEmailMessageDataset:
     def test_save_and_load(self, message_dataset, dummy_msg):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         message_dataset.save(dummy_msg)
         reloaded = message_dataset.load()
         assert dummy_msg.__dict__ == reloaded.__dict__
@@ -59,7 +59,7 @@ class TestEmailMessageDataset:
 
     def test_exists(self, message_dataset, dummy_msg):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not message_dataset.exists()
         message_dataset.save(dummy_msg)
         assert message_dataset.exists()
@@ -91,7 +91,7 @@ class TestEmailMessageDataset:
 
     def test_load_missing_file(self, message_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set EmailMessageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset EmailMessageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             message_dataset.load()
 
@@ -149,7 +149,7 @@ class TestEmailMessageDatasetVersioned:
 
     def test_save_and_load(self, versioned_message_dataset, dummy_msg):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_message_dataset.save(dummy_msg)
         reloaded = versioned_message_dataset.load()
         assert dummy_msg.__dict__ == reloaded.__dict__
@@ -161,13 +161,13 @@ class TestEmailMessageDatasetVersioned:
             versioned_message_dataset.load()
 
     def test_exists(self, versioned_message_dataset, dummy_msg):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_message_dataset.exists()
         versioned_message_dataset.save(dummy_msg)
         assert versioned_message_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_message_dataset, dummy_msg):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding text file for a given save version already exists."""
         versioned_message_dataset.save(dummy_msg)
         pattern = (

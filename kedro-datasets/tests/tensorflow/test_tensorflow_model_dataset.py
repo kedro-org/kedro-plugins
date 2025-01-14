@@ -142,7 +142,7 @@ class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
     def test_save_and_load(self, tf_model_dataset, dummy_tf_base_model, dummy_x_test):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         predictions = dummy_tf_base_model.predict(dummy_x_test)
         tf_model_dataset.save(dummy_tf_base_model)
 
@@ -155,14 +155,12 @@ class TestTensorFlowModelDataset:
 
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
-        pattern = (
-            r"Failed while loading data from data set TensorFlowModelDataset\(.*\)"
-        )
+        pattern = r"Failed while loading data from dataset TensorFlowModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 
     def test_exists(self, tf_model_dataset, dummy_tf_base_model):
-        """Test `exists` method invocation for both existing and nonexistent data set."""
+        """Test `exists` method invocation for both existing and nonexistent dataset."""
         assert not tf_model_dataset.exists()
         tf_model_dataset.save(dummy_tf_base_model)
         assert tf_model_dataset.exists()
@@ -301,7 +299,7 @@ class TestTensorFlowModelDatasetVersioned:
         load_version,
         save_version,
     ):
-        """Test saving and reloading the versioned data set."""
+        """Test saving and reloading the versioned dataset."""
 
         predictions = dummy_tf_base_model.predict(dummy_x_test)
         versioned_tf_model_dataset.save(dummy_tf_base_model)
@@ -334,7 +332,7 @@ class TestTensorFlowModelDatasetVersioned:
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
     def test_prevent_overwrite(self, dummy_tf_base_model, versioned_tf_model_dataset):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
@@ -374,7 +372,7 @@ class TestTensorFlowModelDatasetVersioned:
             )
 
     def test_exists(self, versioned_tf_model_dataset, dummy_tf_base_model):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_tf_model_dataset.exists()
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         assert versioned_tf_model_dataset.exists()

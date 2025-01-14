@@ -34,14 +34,14 @@ jobs:
           python -m pip install "uv==0.2.21"
       - name: Install dependencies
         run: |
-            cd ${{ inputs.plugin }}
-            uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@main"
-            uv pip install --system "${{inputs.plugin}}[test] @ ."
-            uv pip freeze --system
+          cd ${{ inputs.plugin }}
+          uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@main"
+          uv pip install --system "${{inputs.plugin}}[lint] @ ."
+          uv pip freeze --system
       - name: Install pre-commit hooks
         run: |
-            pre-commit install --install-hooks
-            pre-commit install --hook-type pre-push
+          pre-commit install --install-hooks
+          pre-commit install --hook-type pre-push
       - name: Run linter
         run: make plugin=${{ inputs.plugin }} lint
       - name: Run mypy

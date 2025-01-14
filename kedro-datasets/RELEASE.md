@@ -1,12 +1,18 @@
 # Upcoming Release
 ## Major features and improvements
 
+## Bug fixes and other changes
+
+- Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 
 ## Bug fixes and other changes
 
-- Made `PartitionedDataset` accept only lambda functions for lazy saving and ignore other callable objects.
+- Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
 
 ## Breaking Changes
+
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
+
 ## Community contributions
 
 # Release 6.0.0

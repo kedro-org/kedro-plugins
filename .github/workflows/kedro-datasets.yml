@@ -61,3 +61,10 @@ jobs:
       - name: Documentation check for kedro-datasets
         run: |
           make check-datasets-docs
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
+    with:
+      plugin: kedro-datasets
+      os: ubuntu-latest
+      python-version: "3.11"

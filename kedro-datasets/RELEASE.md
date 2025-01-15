@@ -3,10 +3,8 @@
 
 ## Bug fixes and other changes
 
+- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
-
-## Bug fixes and other changes
-
 - Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
 
 ## Breaking Changes

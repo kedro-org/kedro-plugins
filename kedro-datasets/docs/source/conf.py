@@ -102,6 +102,7 @@ exclude_patterns = [
 intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
     "python": ("https://docs.python.org/3.10/", None),
+    "requests": ("https://requests.readthedocs.io/en/stable/", None),
 }
 
 type_targets = {
@@ -110,8 +111,6 @@ type_targets = {
         "kedro.io.AbstractDataset",
         "AbstractDataset",
         "kedro.io.core.Version",
-        "requests.auth.AuthBase",
-        "requests.models.Response",
         "google.oauth2.credentials.Credentials",
         "deltalake.table.Metadata",
         "DataCatalog",

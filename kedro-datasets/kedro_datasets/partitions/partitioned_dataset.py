@@ -69,6 +69,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
               sep: '\\t'
               index: true
           filename_suffix: '.dat'
+          save_lazily: True
 
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\
@@ -93,6 +94,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     path=str(tmp_path / "df_with_partition"),
         ...     dataset="pandas.CSVDataset",
         ...     filename_suffix=".csv",
+        ...     save_lazily=False
         ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
@@ -192,8 +194,10 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
-            save_lazily: If True, lazy saving is enabled. Meaning that if callable object is passed,
-                the partition’s data will not be materialised until it is time to write.
+            save_lazily: If True, lazy saving is enabled. Meaning that if callable object is passed
+                as data to save, the partition’s data will not be materialised until it is time to write.
+                Lazy saving example:
+                https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 

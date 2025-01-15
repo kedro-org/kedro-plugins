@@ -109,7 +109,7 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("suffix", ["", ".csv"])
     def test_callable_save(self, dataset, local_csvs, suffix):
         pds = PartitionedDataset(
-            path=str(local_csvs), dataset=dataset, filename_suffix=suffix
+            path=str(local_csvs), dataset=dataset, filename_suffix=suffix, save_lazily=False
         )
 
         part_id = "new/data"

@@ -131,16 +131,17 @@ class TestPartitionedDatasetLocal:
             path=str(local_csvs), dataset=dataset, filename_suffix=suffix
         )
 
-        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        def original_data():
+            return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
 
         part_id = "new/data"
-        pds.save({part_id: lambda: original_data})
+        pds.save({part_id: original_data})
 
         assert (local_csvs / "new" / ("data" + suffix)).is_file()
         loaded_partitions = pds.load()
         assert part_id in loaded_partitions
         reloaded_data = loaded_partitions[part_id]()
-        assert_frame_equal(reloaded_data, original_data)
+        assert_frame_equal(reloaded_data, original_data())
 
     def test_save_invalidates_cache(self, local_csvs, mocker):
         """Test that save calls invalidate partition cache"""

@@ -194,8 +194,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
-            save_lazily: If True, lazy saving is enabled. Meaning that if callable object is passed
-                as data to save, the partition’s data will not be materialised until it is time to write.
+            save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
+                is passed as data to save, the partition’s data will not be materialised until it is time to write.
                 Lazy saving example:
                 https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.

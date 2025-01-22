@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 
+- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 
 ## Bug fixes and other changes

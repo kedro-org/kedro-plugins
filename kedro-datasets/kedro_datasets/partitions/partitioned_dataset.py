@@ -69,6 +69,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
               sep: '\\t'
               index: true
           filename_suffix: '.dat'
+          save_lazily: True
 
     Example usage for the
     `Python API <https://docs.kedro.org/en/stable/data/\
@@ -93,6 +94,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     path=str(tmp_path / "df_with_partition"),
         ...     dataset="pandas.CSVDataset",
         ...     filename_suffix=".csv",
+        ...     save_lazily=False
         ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
@@ -152,6 +154,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         overwrite: bool = False,
+        save_lazily: bool = True,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
@@ -191,6 +194,10 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
+            save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
+                is passed as data to save, the partition’s data will not be materialised until it is time to write.
+                Lazy saving example:
+                https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
@@ -206,6 +213,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache: Cache = Cache(maxsize=1)
+        self._save_lazily = save_lazily
         self.metadata = metadata
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
@@ -311,7 +319,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            if callable(partition_data):
+            if callable(partition_data) and self._save_lazily:
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()

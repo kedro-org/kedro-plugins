@@ -52,6 +52,10 @@ LOCAL_DATASET_DEFINITION = [
 ]
 
 
+def original_data_callable():
+    return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+
 class FakeDataset:  # pylint: disable=too-few-public-methods
     pass
 
@@ -100,6 +104,25 @@ class TestPartitionedDatasetLocal:
         assert part_id in loaded_partitions
         reloaded_data = loaded_partitions[part_id]()
         assert_frame_equal(reloaded_data, original_data)
+
+    @pytest.mark.parametrize("dataset", ["kedro_datasets.pickle.PickleDataset"])
+    @pytest.mark.parametrize("suffix", ["", ".csv"])
+    def test_callable_save(self, dataset, local_csvs, suffix):
+        pds = PartitionedDataset(
+            path=str(local_csvs),
+            dataset=dataset,
+            filename_suffix=suffix,
+            save_lazily=False,
+        )
+
+        part_id = "new/data"
+        pds.save({part_id: original_data_callable})
+
+        assert (local_csvs / "new" / ("data" + suffix)).is_file()
+        loaded_partitions = pds.load()
+        assert part_id in loaded_partitions
+        reloaded_data = loaded_partitions[part_id]()
+        assert reloaded_data == original_data_callable
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize("suffix", ["", ".csv"])

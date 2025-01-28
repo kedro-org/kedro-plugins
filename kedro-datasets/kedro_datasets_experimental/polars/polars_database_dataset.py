@@ -188,6 +188,16 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             self.create_connection(self._connection_str, self._connection_args)
 
         return cls.engines[self._connection_str]
+    
+    def _describe(self) -> dict[str, Any]:
+        load_args = copy.deepcopy(self._load_args)
+        return {
+            "sql": str(load_args.pop("sql", None)),
+            "filepath": str(self._filepath),
+            "load_args": str(load_args),
+            "table_name": self.table_name,
+            "save_args": str(self._save_args),
+        }
 
     def load(self) -> pl.DataFrame:
         load_args = copy.deepcopy(self._load_args)
@@ -216,35 +226,6 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             connection=self._connection_str,
             **self._save_args
         )
-
-    def _exists(self) -> bool:
-        insp = inspect(self.engine)
-        schema = self._load_args.get("schema", None)
-        return insp.has_table(self._load_args["table_name"], schema)
-
-    def preview(self, nrows: int = 5) -> TablePreview:
-        """
-        Generate a preview of the dataset with a specified number of rows.
-
-        Args:
-            nrows: The number of rows to include in the preview. Defaults to 5.
-
-        Returns:
-            dict: A dictionary containing the data in a split format.
-        """
-        table_name = self._load_args["table_name"]
-
-        metadata = MetaData()
-        table_ref = Table(table_name, metadata, autoload_with=self.engine)
-
-        query = select(table_ref).limit(nrows)  # type: ignore[arg-type]
-
-        with self.engine.connect() as conn:
-            result = conn.execute(query)
-            data_preview = pl.DataFrame(result.fetchall(), columns=result.keys())
-
-        preview_data = data_preview.to_dict(orient="split")
-        return preview_data
     
     # For mssql only
     def adapt_mssql_date_params(self) -> None:

@@ -222,3 +222,26 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         preview_data = data_preview.to_dict(orient="split")
         return preview_data
+    
+    # For mssql only
+    def adapt_mssql_date_params(self) -> None:
+        """We need to change the format of datetime parameters.
+        MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
+        Here, we also accept plain dates.
+        `pyodbc` does not accept named parameters, they must be provided as a list."""
+        params = self._load_args.get("params", [])
+        if not isinstance(params, list):
+            raise DatasetError(
+                "Unrecognized `params` format. It can be only a `list`, "
+                f"got {type(params)!r}"
+            )
+        new_load_args = []
+        for value in params:
+            try:
+                as_date = dt.date.fromisoformat(value)
+                new_val = dt.datetime.combine(as_date, dt.time.min)
+                new_load_args.append(new_val.strftime("%Y-%m-%dT%H:%M:%S"))
+            except (TypeError, ValueError):
+                new_load_args.append(value)
+        if new_load_args:
+            self._load_args["params"] = tuple(new_load_args)

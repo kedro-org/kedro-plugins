@@ -96,6 +96,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         filepath: str | None = None,
+        table_name: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``PolarsDatabaseDataset``."""
@@ -125,6 +126,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             else default_load_args
         )
 
+        self.table_name = table_name
         self.metadata = metadata
 
         # load sql query from file
@@ -191,8 +193,16 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             **load_args
         )
 
-    def save(self, data: None) -> NoReturn:
-        pass
+    def save(self, data: pl.DataFrame) -> NoReturn:
+        if not self.table_name:
+            raise DatasetError(
+                "'table_name' argument is required to save datasets."
+            )
+        
+        data.write_database(
+            table=self.table_name,
+            connection=self._connection_str,
+        )
 
     def _exists(self) -> bool:
         insp = inspect(self.engine)

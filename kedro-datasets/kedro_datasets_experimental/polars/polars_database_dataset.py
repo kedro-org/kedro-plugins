@@ -1,3 +1,5 @@
+"""``PolarsDatabaseDataset`` to load and save data to a SQL backend using Polars."""
+
 import copy
 import datetime as dt
 from pathlib import PurePosixPath
@@ -92,12 +94,14 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         sql: str | None = None,
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         filepath: str | None = None,
         table_name: str | None = None,
+        save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new ``PolarsDatabaseDataset``."""
@@ -120,6 +124,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             )
 
         default_load_args: dict[str, Any] = {}
+        default_save_args: dict[str, Any] = {}
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -128,6 +133,12 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         )
 
         self.table_name = table_name
+        self._save_args = (
+            {**default_save_args, **save_args}
+            if save_args is not None
+            else default_save_args
+        )
+
         self.metadata = metadata
 
         # load sql query from file
@@ -203,6 +214,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         data.write_database(
             table=self.table_name,
             connection=self._connection_str,
+            **self._save_args
         )
 
     def _exists(self) -> bool:

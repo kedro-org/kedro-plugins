@@ -1,7 +1,24 @@
-# Upcoming Release 6.0.0
+# Upcoming Release
+## Major features and improvements
+
+- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
+- Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+
+## Bug fixes and other changes
+
+- Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
+
+## Breaking Changes
+
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
+
+## Community contributions
+
+# Release 6.0.0
 
 ## Major features and improvements
 
+- Supported passing `database` to `ibis.TableDataset` for load and save operations.
 - Added functionality to save pandas DataFrames directly to Snowflake, facilitating seamless `.csv` ingestion.
 - Added Python 3.9, 3.10 and 3.11 support for `snowflake.SnowflakeTableDataset`.
 - Enabled connection sharing between `ibis.FileDataset` and `ibis.TableDataset` instances, thereby allowing nodes to save data loaded by one to the other (as long as they share the same connection configuration).
@@ -14,13 +31,17 @@
 
 ## Bug fixes and other changes
 
+- Delayed backend connection for `pandas.GBQTableDataset`. In practice, this means that a dataset's connection details aren't used (or validated) until the dataset is accessed. On the plus side, the cost of connection isn't incurred regardless of when or whether the dataset is used. Furthermore, this makes the dataset object serializable (e.g. for use with `ParallelRunner`), because the unserializable client isn't part of it.
+- Removed the unused BigQuery client created in `pandas.GBQQueryDataset`. This makes the dataset object serializable (e.g. for use with `ParallelRunner`) by removing the unserializable object.
 - Implemented Snowflake's [local testing framework](https://docs.snowflake.com/en/developer-guide/snowpark/python/testing-locally) for testing purposes.
 - Improved the dependency management for Spark-based datasets by refactoring the Spark and Databricks utility functions used across the datasets.
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
+- Moved `kedro-catalog` JSON schemas from Kedro core to `kedro-datasets`.
 
 ## Breaking Changes
 
 - Demoted `video.VideoDataset` from core to experimental dataset.
+- Removed file handling capabilities from `ibis.TableDataset`. Use `ibis.FileDataset` to load and save files with an Ibis backend instead.
 
 ## Community contributions
 
@@ -28,6 +49,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Thomas d'Hooghe](https://github.com/tdhooghe)
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+- [Mark Druffel](https://github.com/mark-druffel)
+- [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 5.1.0
 

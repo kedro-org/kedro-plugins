@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import PurePosixPath
-from typing import Any, NoReturn
+from typing import Any, ClassVar, NoReturn
 
 import fsspec
 import pandas as pd
@@ -22,8 +22,10 @@ from kedro.io.core import (
     validate_on_forbidden_chars,
 )
 
+from kedro_datasets._utils import ConnectionMixin
 
-class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
+
+class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataset`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
@@ -67,6 +69,8 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"progress_bar": False}
+
+    _CONNECTION_GROUP: ClassVar[str] = "bigquery"
 
     def __init__(  # noqa: PLR0913
         self,
@@ -114,18 +118,14 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
         self._validate_location()
         validate_on_forbidden_chars(dataset=dataset, table_name=table_name)
 
-        if isinstance(credentials, dict):
-            credentials = Credentials(**credentials)
-
         self._dataset = dataset
         self._table_name = table_name
         self._project_id = project
-        self._credentials = credentials
-        self._client = bigquery.Client(
-            project=self._project_id,
-            credentials=self._credentials,
-            location=self._save_args.get("location"),
-        )
+        self._connection_config = {
+            "project": self._project_id,
+            "credentials": credentials,
+            "location": self._save_args.get("location"),
+        }
 
         self.metadata = metadata
 
@@ -137,12 +137,24 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             "save_args": self._save_args,
         }
 
+    def _connect(self) -> bigquery.Client:
+        credentials = self._connection_config["credentials"]
+        if isinstance(credentials, dict):
+            # Only create `Credentials` object once for consistent hash.
+            credentials = Credentials(**credentials)
+
+        return bigquery.Client(
+            project=self._connection_config["project"],
+            credentials=credentials,
+            location=self._connection_config["location"],
+        )
+
     def load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
         self._load_args.setdefault("query_or_table", sql)
         return pd_gbq.read_gbq(
             project_id=self._project_id,
-            credentials=self._credentials,
+            credentials=self._connection._credentials,
             **self._load_args,
         )
 
@@ -151,14 +163,14 @@ class GBQTableDataset(AbstractDataset[None, pd.DataFrame]):
             dataframe=data,
             destination_table=f"{self._dataset}.{self._table_name}",
             project_id=self._project_id,
-            credentials=self._credentials,
+            credentials=self._connection._credentials,
             **self._save_args,
         )
 
     def _exists(self) -> bool:
-        table_ref = self._client.dataset(self._dataset).table(self._table_name)
+        table_ref = self._connection.dataset(self._dataset).table(self._table_name)
         try:
-            self._client.get_table(table_ref)
+            self._connection.get_table(table_ref)
             return True
         except NotFound:
             return False
@@ -268,11 +280,6 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             credentials = Credentials(**credentials)
 
         self._credentials = credentials
-        self._client = bigquery.Client(
-            project=self._project_id,
-            credentials=self._credentials,
-            location=self._load_args.get("location"),
-        )
 
         # load sql query from arg or from file
         if sql:

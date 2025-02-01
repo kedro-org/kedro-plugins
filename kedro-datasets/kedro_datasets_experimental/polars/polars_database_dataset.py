@@ -130,6 +130,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>> sql = "SELECT * FROM table_a"
         >>> tmp_path = Path.cwd() / "tmp"
+        >>> tmp_path.mkdir(parents=True, exist_ok=True)
         >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
         >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials, table_name="table_a")
         >>>
@@ -138,6 +139,10 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         >>>
         >>> assert data.equals(reloaded)
     """
+    # using Any because of Sphinx but it should be
+    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
+    engines: dict[str, Any] = {}
+
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -170,7 +175,9 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             )
 
         default_load_args: dict[str, Any] = {}
-        default_save_args: dict[str, Any] = {}
+        default_save_args: dict[str, Any] = {
+            "if_exists": "replace"
+        }
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -268,7 +275,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             )
         
         data.write_database(
-            table=self.table_name,
+            table_name=self.table_name,
             connection=self._connection_str,
             **self._save_args
         )

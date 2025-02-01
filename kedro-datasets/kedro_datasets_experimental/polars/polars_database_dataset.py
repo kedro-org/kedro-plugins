@@ -2,21 +2,20 @@
 
 import copy
 import datetime as dt
-from pathlib import PurePosixPath
 import re
+from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
 import fsspec
+import polars as pl
 from kedro.io.core import (
     AbstractDataset,
     DatasetError,
     get_filepath_str,
     get_protocol_and_path,
 )
-import polars as pl
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
-
 
 KNOWN_PIP_INSTALL = {
     "psycopg2": "psycopg2",
@@ -89,7 +88,7 @@ def _get_sql_alchemy_missing_error() -> DatasetError:
 
 class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     """``PolarsDatabaseDataset`` loads data from a provided SQL query or write data to a table.
-    It supports all allowed polars options on ``read_database`` and ``write_database``. 
+    It supports all allowed polars options on ``read_database`` and ``write_database``.
     Since Polars uses SQLAlchemy behind the scenes, when instantiating ``PolarsDatabaseDataset`` one needs to pass
     a compatible connection string either in ``credentials`` (see the example
     code snippet below) or in ``load_args``. Connection string formats supported
@@ -241,7 +240,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             self.create_connection(self._connection_str, self._connection_args)
 
         return cls.engines[self._connection_str]
-    
+
     def _describe(self) -> dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
         return {
@@ -273,13 +272,13 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             raise DatasetError(
                 "'table_name' argument is required to save datasets."
             )
-        
+
         data.write_database(
             table_name=self.table_name,
             connection=self._connection_str,
             **self._save_args
         )
-    
+
     # For mssql only
     def adapt_mssql_date_params(self) -> None:
         """We need to change the format of datetime parameters.

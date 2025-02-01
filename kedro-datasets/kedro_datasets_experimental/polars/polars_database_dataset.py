@@ -162,9 +162,9 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
                 "Please only provide one."
             )
 
-        if not (sql or filepath):
+        if not table_name or (sql or filepath):
             raise DatasetError(
-                "'sql' and 'filepath' arguments cannot both be empty."
+                "Either 'table_name' or one of 'sql' or 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
 

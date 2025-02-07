@@ -1,12 +1,14 @@
 # Upcoming Release
+
 ## Major features and improvements
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+- Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
 
 ## Bug fixes and other changes
 
-- Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
+- Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 
 ## Breaking Changes
 

@@ -160,7 +160,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
     def load(self) -> ir.Table:
         load_path = self._get_load_path()
         reader = getattr(self.connection, f"read_{self._file_format}")
-        return reader(load_path, self._table_name, **self._load_args)
+        return reader(load_path, table_name=self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
         save_path = self._get_save_path()

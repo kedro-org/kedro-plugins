@@ -6,6 +6,7 @@
 ## Bug fixes and other changes
 
 - Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
+- Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 
 ## Breaking Changes
 

@@ -4,7 +4,6 @@
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
-- Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
 
 ## Bug fixes and other changes
 

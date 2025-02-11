@@ -9,6 +9,7 @@
 
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
+- Fixed adding `s3://` in spark dataset for supporting old implementation.
 
 ## Breaking Changes
 

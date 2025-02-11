@@ -3,7 +3,6 @@
 ## Major features and improvements
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
-- Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
 
 ## Bug fixes and other changes

@@ -1,4 +1,5 @@
 # Upcoming Release
+* Fixed case where MemoryDatasets in catalog wouldn't be collapsed correctly
 
 # Release 0.9.2
 * Removed support for Python 3.8

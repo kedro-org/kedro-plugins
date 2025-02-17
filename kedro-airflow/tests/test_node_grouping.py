@@ -32,7 +32,6 @@ def mock_data_catalog(
         elif memory_nodes_in_catalog:
             mock_catalog.add(dataset_name, MemoryDataset())
 
-
     return mock_catalog
 
 
@@ -149,7 +148,9 @@ def test_group_memory_nodes(
     ],
 )
 @pytest.mark.parametrize("memory_nodes_in_catalog", (True, False))
-def test_is_memory_dataset(nodes: list[str], memory_nodes: set[str], memory_nodes_in_catalog: bool):
+def test_is_memory_dataset(
+    nodes: list[str], memory_nodes: set[str], memory_nodes_in_catalog: bool
+):
     """Tests for the `_is_memory_dataset` function.
 
     Args:

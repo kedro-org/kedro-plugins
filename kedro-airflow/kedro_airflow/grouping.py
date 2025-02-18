@@ -12,10 +12,9 @@ except ImportError:  # pragma: no cover
 
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
     """Return whether a dataset is a MemoryDataset or not."""
-    if dataset_name not in catalog:
-        return True
-    else:
-        return isinstance(catalog.datasets[dataset_name], MemoryDataset)
+    return dataset_name not in catalog or isinstance(
+        catalog._get_dataset(dataset_name), MemoryDataset
+    )
 
 
 def get_memory_datasets(

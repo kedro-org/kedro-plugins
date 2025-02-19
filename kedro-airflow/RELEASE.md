@@ -1,5 +1,4 @@
 # Upcoming Release
-* Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 
 # Release 0.9.2
 * Removed support for Python 3.8

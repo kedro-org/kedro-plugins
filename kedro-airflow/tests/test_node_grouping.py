@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from kedro.io import AbstractDataset, DataCatalog
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
@@ -21,12 +21,16 @@ class TestDataset(AbstractDataset):
         return []
 
 
-def mock_data_catalog(nodes: list[str], memory_nodes: set[str]) -> DataCatalog:
+def mock_data_catalog(
+    nodes: list[str], memory_nodes: set[str], memory_nodes_in_catalog: bool = False
+) -> DataCatalog:
     mock_catalog = DataCatalog()
     for dataset_name in nodes:
         if dataset_name not in memory_nodes:
             dataset = TestDataset()
             mock_catalog.add(dataset_name, dataset)
+        elif memory_nodes_in_catalog:
+            mock_catalog.add(dataset_name, MemoryDataset())
 
     return mock_catalog
 
@@ -143,8 +147,20 @@ def test_group_memory_nodes(
         ),
     ],
 )
-def test_is_memory_dataset(nodes: list[str], memory_nodes: set[str]):
-    mock_catalog = mock_data_catalog(nodes, memory_nodes)
+@pytest.mark.parametrize("memory_nodes_in_catalog", (True, False))
+def test_is_memory_dataset(
+    nodes: list[str], memory_nodes: set[str], memory_nodes_in_catalog: bool
+):
+    """Tests for the `_is_memory_dataset` function.
+
+    Args:
+        nodes: list of nodes to add to the catalog
+        memory_nodes: set of nodes which should be considered MemoryDatasets
+        memory_nodes_in_catalog: whether to add MemoryDatasets to the catalog or not
+    """
+    mock_catalog = mock_data_catalog(
+        nodes, memory_nodes, memory_nodes_in_catalog=memory_nodes_in_catalog
+    )
     for node_name in nodes:
         if node_name in memory_nodes:
             assert _is_memory_dataset(mock_catalog, node_name)

@@ -1,4 +1,5 @@
 # Upcoming Release
+* Fixed check whether a dataset is a `MemoryDataset`.
 
 # Release 0.9.2
 * Removed support for Python 3.8

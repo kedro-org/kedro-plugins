@@ -6,6 +6,7 @@ import tempfile
 
 import pytest
 from kedro.io import DatasetError
+from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
 
 from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
@@ -19,6 +20,32 @@ REQUIRED_INIT_ARGS = {
     "sql": SQL_QUERY,
     "materialization_dataset": MATERIALIZATION_DATASET,
 }
+
+
+@pytest.fixture
+def mock_gateway_client(mocker):
+    mock_client = mocker.MagicMock()
+    mock_client.send_command.return_value = (
+        "ysjava.util.NoSuchElementException: viewsEnabled"
+    )
+    mock_client.converters = []
+    mock_client.is_connected.return_value = True
+    mock_client.deque = mocker.MagicMock()
+    return mock_client
+
+
+@pytest.fixture
+def mock_java_object(mocker, mock_gateway_client):
+    mock_java_object = mocker.MagicMock()
+    mock_java_object._target_id = "o123"
+    mock_java_object._gateway_client = mock_gateway_client
+    return mock_java_object
+
+
+@pytest.fixture
+def mock_py4j_error_exception(mocker, mock_java_object):
+    mock_errmsg = "An error occurred while calling o123.load."
+    return Py4JJavaError(mock_errmsg, java_exception=mock_java_object)
 
 
 @pytest.fixture
@@ -196,3 +223,42 @@ def test_filepath_sql_query_load(mocker, spark_session, sql_file):
         materializationProject=MATERIALIZATION_PROJECT,
         viewsEnabled="true",
     )
+
+
+@pytest.mark.parametrize(
+    "viewsEnabled, expected_warning",
+    [("false", True), ("true", False), (None, True)],
+)
+def test_warning_spark_views_enabled(
+    mocker,
+    spark_session,
+    gbq_query_dataset,
+    viewsEnabled,
+    expected_warning,
+    mock_py4j_error_exception,
+    caplog,
+):
+    mocker.patch(
+        "kedro_datasets.spark.spark_gbq_dataset.get_spark", return_value=spark_session
+    )
+    read_obj = mocker.MagicMock()
+    spark_session.read.format.return_value = read_obj
+    read_obj.load.return_value = mocker.MagicMock()
+
+    if viewsEnabled is not None:
+        spark_session.conf.get.side_effect = lambda x: {"viewsEnabled": viewsEnabled}[x]
+    else:
+        spark_session.conf.get.side_effect = mock_py4j_error_exception
+
+    with caplog.at_level("WARNING"):
+        gbq_query_dataset.load()
+
+    has_warn_msg = any(
+        (record.levelname == "WARNING") and ("viewsEnabled" in record.message)
+        for record in caplog.records
+    )
+
+    if expected_warning:
+        assert has_warn_msg
+    else:
+        assert not has_warn_msg

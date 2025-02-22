@@ -140,7 +140,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             self._fs_protocol = protocol
 
             self._fs = fsspec.filesystem(
-                self._protocol, **self._fs_credentials, **self._fs_args
+                self._fs_protocol, **self._fs_credentials, **self._fs_args
             )
             self._filepath = path
 

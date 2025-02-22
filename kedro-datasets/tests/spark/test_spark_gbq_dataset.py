@@ -1,11 +1,12 @@
-import pytest
-from pyspark.sql import SparkSession
-from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
-import json
 import base64
-from kedro.io import DatasetError
+import json
 import re
 
+import pytest
+from kedro.io import DatasetError
+from pyspark.sql import SparkSession
+
+from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
 
 SQL_QUERY = "SELECT * FROM table"
 MATERIALIZATION_DATASET = "dataset"

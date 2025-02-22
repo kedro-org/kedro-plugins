@@ -10,15 +10,13 @@ import logging
 from copy import deepcopy
 from typing import Any, NoReturn
 
+import fsspec
 from kedro.io import AbstractDataset, DatasetError
+from kedro.io.core import get_protocol_and_path
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import DataFrame
 
 from kedro_datasets._utils.spark_utils import get_spark
-import copy
-import fsspec
-
-from kedro.io.core import get_protocol_and_path
 
 logger = logging.getLogger(__name__)
 

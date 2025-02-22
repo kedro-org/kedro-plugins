@@ -7,6 +7,8 @@ from kedro.io import DatasetError
 from pyspark.sql import SparkSession
 
 from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
+import tempfile
+import os
 
 SQL_QUERY = "SELECT * FROM table"
 SQL_FILEPATH = "/path/to/file.sql"
@@ -27,6 +29,17 @@ def spark_session(mocker):
 @pytest.fixture
 def dummy_save_dataset(spark_session):
     return spark_session.createDataFrame([("foo",)], ["bar"])
+
+
+@pytest.fixture
+def sql_file():
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".sql") as temp_sql_file:
+        temp_sql_file.write(SQL_QUERY.encode())
+        temp_sql_file_path = temp_sql_file.name
+
+    yield temp_sql_file_path
+
+    os.remove(temp_sql_file_path)
 
 
 @pytest.fixture
@@ -160,3 +173,26 @@ def test_raise_error_if_both_sql_and_filepath_are_provided():
             sql=SQL_QUERY,
             filepath=SQL_FILEPATH,
         )
+
+
+def test_filepath_sql_query_load(mocker, spark_session, sql_file):
+    gbq_query_dataset = GBQQueryDataset(
+        filepath=sql_file,
+        materialization_dataset=MATERIALIZATION_DATASET,
+        materialization_project=MATERIALIZATION_PROJECT,
+    )
+    mocker.patch(
+        "kedro_datasets.spark.spark_gbq_dataset.get_spark", return_value=spark_session
+    )
+    read_obj = mocker.MagicMock()
+    spark_session.read.format.return_value = read_obj
+    read_obj.load.return_value = mocker.MagicMock()
+
+    gbq_query_dataset.load()
+
+    read_obj.load.assert_called_once_with(
+        query=SQL_QUERY,
+        materializationDataset=MATERIALIZATION_DATASET,
+        materializationProject=MATERIALIZATION_PROJECT,
+        viewsEnabled="true",
+    )

@@ -9,6 +9,7 @@ from pyspark.sql import SparkSession
 from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
 
 SQL_QUERY = "SELECT * FROM table"
+SQL_FILEPATH = "/path/to/file.sql"
 MATERIALIZATION_DATASET = "dataset"
 MATERIALIZATION_PROJECT = "project"
 LOAD_ARGS = {"key": "value"}
@@ -139,3 +140,23 @@ def test_load(mocker, spark_session, init_args, expected_load_args):
 
     spark_session.read.format.assert_called_once_with("bigquery")
     read_obj.load.assert_called_once_with(**expected_load_args)
+
+
+def test_raise_error_if_both_sql_and_filepath_not_provided():
+    with pytest.raises(
+        DatasetError,
+        match="'sql' and 'filepath' arguments cannot both be empty.",
+    ):
+        GBQQueryDataset(materialization_dataset=MATERIALIZATION_DATASET)
+
+
+def test_raise_error_if_both_sql_and_filepath_are_provided():
+    with pytest.raises(
+        DatasetError,
+        match="'sql' and 'filepath' arguments cannot both be provided.",
+    ):
+        GBQQueryDataset(
+            materialization_dataset=MATERIALIZATION_DATASET,
+            sql=SQL_QUERY,
+            filepath=SQL_FILEPATH,
+        )

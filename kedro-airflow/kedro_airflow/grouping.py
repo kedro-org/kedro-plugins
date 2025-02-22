@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kedro.io import DataCatalog
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
@@ -11,9 +11,10 @@ except ImportError:  # pragma: no cover
 
 
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
-    if dataset_name not in catalog:
-        return True
-    return False
+    """Return whether a dataset is a MemoryDataset or not."""
+    return dataset_name not in catalog or isinstance(
+        catalog._get_dataset(dataset_name), MemoryDataset
+    )
 
 
 def get_memory_datasets(

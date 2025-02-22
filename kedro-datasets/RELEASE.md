@@ -1,7 +1,19 @@
 # Upcoming Release
+
 ## Major features and improvements
+
+- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
+- Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
+
 ## Bug fixes and other changes
+
+- Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
+- Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
+
 ## Breaking Changes
+
+- Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
+
 ## Community contributions
 
 # Release 6.0.0

@@ -143,7 +143,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
                 self._fs_protocol, **self._fs_credentials, **self._fs_args
             )
             self._filepath = path
-            self._sql = None
+            self._sql = None  # type: ignore
 
         self._materialization_dataset = materialization_dataset
         self._materialization_project = materialization_project

@@ -43,7 +43,7 @@ def mock_java_object(mocker, mock_gateway_client):
 
 
 @pytest.fixture
-def mock_py4j_error_exception(mocker, mock_java_object):
+def mock_py4j_error_exception(mock_java_object):
     mock_errmsg = "An error occurred while calling o123.load."
     return Py4JJavaError(mock_errmsg, java_exception=mock_java_object)
 

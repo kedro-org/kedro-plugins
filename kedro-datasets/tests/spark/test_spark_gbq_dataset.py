@@ -1,14 +1,14 @@
 import base64
 import json
+import os
 import re
+import tempfile
 
 import pytest
 from kedro.io import DatasetError
 from pyspark.sql import SparkSession
 
 from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
-import tempfile
-import os
 
 SQL_QUERY = "SELECT * FROM table"
 SQL_FILEPATH = "/path/to/file.sql"

@@ -2,23 +2,21 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
 import fnmatch
 import logging
 import os
-
+from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
 import optuna
-from sqlalchemy import URL
-
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
     Version,
 )
+from sqlalchemy import URL
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +38,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
               class: TPESampler
               n_startup_trials: 10
               n_ei_candidates: 5
-            pruner: 
+            pruner:
               class: NopPruner
           versioned: true
 
@@ -91,14 +89,14 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         Study on a specific relational database.
 
         Args:
-            backend: Name of the database backend. This name should correspond to a module 
+            backend: Name of the database backend. This name should correspond to a module
                 in ``SQLAlchemy`` .
             database: Name of the database.
             study_name: Name of the optuna Study.
-            load_args: Optuna options for loading studies. Accepts a `sampler` and a 
+            load_args: Optuna options for loading studies. Accepts a `sampler` and a
                 `pruner`. If either are provided, a `class` matching any Optuna `sampler`,
                 respecitively `pruner` class name should be provided, optionally with
-                their argyments. Here you can find all available samplers and pruners 
+                their argyments. Here you can find all available samplers and pruners
                 and their arguments:
                 - https://optuna.readthedocs.io/en/stable/reference/samplers/index.html
                 - https://optuna.readthedocs.io/en/stable/reference/pruners.html
@@ -116,10 +114,10 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         self._database = database
 
         credentials = dict(
-            username=os.getenv('DB_USERNAME'),
-            password=os.getenv('DB_PASSWORD'),
-            host=os.getenv('DB_HOST'),
-            port=os.getenv('DB_PORT'),
+            username=os.getenv("DB_USERNAME"),
+            password=os.getenv("DB_PASSWORD"),
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
         )
 
         _credentials = deepcopy(credentials) or {}
@@ -197,40 +195,40 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         return {
             "backend": self._backend,
             "database": self._database,
-            "study_name": self._study_name, 
+            "study_name": self._study_name,
             "load_args": self._load_args,
             "version": self._version,
         }
-    
+
     # TODO: Support CmaEsSampler, QMCSampler, and GPSampler's independent_sampler
     # TODO: Support PartialFixedSampler's base_sampler
     def _get_sampler_from_config(self, sampler_config):
         if sampler_config is None:
             return None
-        
+
         if "class" not in sampler_config:
             raise ValueError(
                 "Optuna sampler `class` should be specified when trying to load study "
                 f"named `{self._study_name}` with a sampler."
             )
-        
+
         sampler_class = getattr(optuna.samplers, sampler_config.pop("class"))
-        
+
         return sampler_class(**sampler_config)
 
     # TODO: Support PatientPruner's wrapped_pruner
     def _get_pruner_from_config(self, pruner_config):
         if pruner_config is None:
             return None
-        
+
         if "class" not in pruner_config:
             raise ValueError(
                 "Optuna pruner `class` should be specified when trying to load study "
                 f"named `{self._study_name}` with a pruner."
             )
-           
+
         pruner_class = getattr(optuna.pruners, pruner_config.pop("class"))
-        
+
         return pruner_class(**pruner_config)
 
     def load(self) -> pd.DataFrame:

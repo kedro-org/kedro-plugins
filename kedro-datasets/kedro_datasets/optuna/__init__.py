@@ -7,5 +7,8 @@ import lazy_loader as lazy
 StudyDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"study": ["StudyDataset"],}
+    __name__,
+    submod_attrs={
+        "study": ["StudyDataset"],
+    },
 )

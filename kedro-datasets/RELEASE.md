@@ -4,6 +4,11 @@
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
+- Added the following new **experimental** datasets:
+
+| Type                          | Description                                                     | Location                              |
+| ----------------------------- | --------------------------------------------------------------- | ------------------------------------- |
+| `optuna.StudyDataset`         | A dataset for saving and loading Optuna studies.                | `kedro_datasets_experimental.optuna`  |
 
 ## Bug fixes and other changes
 
@@ -15,6 +20,10 @@
 - Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 6.0.0
 

@@ -22,6 +22,7 @@
               "json.JSONDataset",
               "matplotlib.MatplotlibWriter",
               "networkx.NetworkXDataset",
+              "optuna.StudyDataset",
               "pandas.CSVDataset",
               "pandas.ExcelDataset",
               "pandas.FeatherDataset",
@@ -535,6 +536,47 @@
                 "fs_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "optuna.StudyDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "backend",
+                "database",
+                "study_name"
+              ],
+              "properties": {
+                "backend": {
+                  "type": "string",
+                  "description": "Name of the database backend. This name should correspond to a module\nin ``SQLAlchemy``."
+                },
+                "database": {
+                  "type": "string",
+                  "description": "Name of the database."
+                },
+                "study_name": {
+                  "type": "string",
+                  "description": "Name of the optuna Study."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Optuna options for loading studies. Accepts a `sampler` and a\n `pruner`. If either are provided, a `class` matching any Optuna `sampler`,\nrespecitively `pruner` class name should be provided, optionally with\ntheir argyments. Here you can find all available samplers and pruners\nand their arguments:\n- https://optuna.readthedocs.io/en/stable/reference/samplers/index.html\n- https://optuna.readthedocs.io/en/stable/reference/pruners.html\nAll defaults are preserved."
+                },
+                "credentials": {
+                  "type": [
+                    "object",
+                    "string"
+                  ],
+                  "description": "Credentials required to get access to the underlying RDB.\nThey can include `username`, `password`, host`, and `port`."
                 }
               }
             }

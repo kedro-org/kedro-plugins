@@ -29,6 +29,7 @@ kedro_datasets
    networkx.GMLDataset
    networkx.GraphMLDataset
    networkx.JSONDataset
+   optuna.StudyDataset
    pandas.CSVDataset
    pandas.DeltaTableDataset
    pandas.ExcelDataset

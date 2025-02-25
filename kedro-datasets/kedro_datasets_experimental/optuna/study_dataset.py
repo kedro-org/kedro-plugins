@@ -55,13 +55,15 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
     .. code-block:: pycon
 
         >>> from kedro_datasets.optuna import StudyDataset
+        >>> from optuna.distributions import FloatDistribution
         >>> import optuna
         >>>
         >>> study = optuna.create_study()
         >>> trial = optuna.trial.create_trial(
-        >>>     params={"x": 2.0},
-        >>>     distributions={"x": FloatDistribution(0, 10)},
-        >>>     value=4.0,
+        ...     params={"x": 2.0},
+        ...     distributions={"x": FloatDistribution(0, 10)},
+        ...     value=4.0,
+        ... )
         >>> study.add_trial(trial)
         >>>
         >>> dataset = StudyDataset(backend="sqlite", database="optuna.db")
@@ -69,7 +71,6 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         >>> reloaded = dataset.load()
         >>> assert len(reloaded.trials) == 1
         >>> assert reloaded.trials[0].params["x"] == 2.0
-
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {"sampler": None, "pruner": None}

@@ -1,5 +1,6 @@
 import inspect
 import json
+import warnings
 from pathlib import Path
 
 import boto3
@@ -9,9 +10,8 @@ import pytest
 from kedro.io import DatasetError, Version
 from moto import mock_aws
 from s3fs import S3FileSystem
-import warnings
 
-from kedro_datasets.matplotlib import MatplotlibWriter, MatplotlibDataset
+from kedro_datasets.matplotlib import MatplotlibDataset, MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
@@ -295,7 +295,9 @@ class TestMatplotlibDataset:
         )
 
     # Test that deprecated writer also works
-    def test_writer_save_data(self, tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
+    def test_writer_save_data(
+        self, tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket
+    ):
         """Test saving with deprecated writer class still works."""
         plot_writer.save(mock_single_plot)
 

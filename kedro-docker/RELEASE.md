@@ -1,5 +1,8 @@
 # Upcoming Release
 
+## Bug fixes and other changes
+* Removed `_VERBOSE` legacy code usage.
+
 # Release 0.6.2
 
 ## Major features and improvements

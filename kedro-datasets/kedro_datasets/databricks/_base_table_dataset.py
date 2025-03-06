@@ -430,43 +430,6 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): The Spark dataframe to overwrite the table with.
         """
-        spark = get_spark()
-
-        # Drop the table first regardless of schema presence to avoid Delta log conflicts
-        if self._exists():
-            try:
-                full_table_location = self._table.full_table_location()
-                self._logger.debug(
-                    f"Dropping table {full_table_location} before overwrite"
-                )
-
-                # First try with CASCADE option to ensure all dependent objects are dropped
-                try:
-                    spark.sql(f"DROP TABLE IF EXISTS {full_table_location} CASCADE")
-                except Exception:
-                    # If CASCADE fails, try without it
-                    spark.sql(f"DROP TABLE IF EXISTS {full_table_location}")
-
-                # Also try to clean up the underlying directory if it exists
-                if self._table.location:
-                    # Remove any existing Delta log files in the location
-                    location_path = self._table.location
-                    try:
-                        # Try to remove the Delta log directory
-                        import os
-                        import shutil
-
-                        delta_log_path = os.path.join(location_path, "_delta_log")
-                        if os.path.exists(delta_log_path):
-                            shutil.rmtree(delta_log_path)
-                    except Exception as e:
-                        self._logger.warning(
-                            f"Could not remove Delta log directory: {e}"
-                        )
-            except Exception as e:
-                self._logger.warning(f"Could not drop table before overwrite: {e}")
-
-        # Set up the writer with overwriteSchema to ensure schema changes are accepted
         writer = (
             data.write.format(self._table.format)
             .mode("overwrite")

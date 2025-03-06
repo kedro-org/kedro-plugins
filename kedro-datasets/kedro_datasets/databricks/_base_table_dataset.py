@@ -430,6 +430,16 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             data (DataFrame): The Spark dataframe to overwrite the table with.
         """
+        spark = get_spark()
+
+        # When we have a schema defined and table exists, we need to drop it first
+        # to avoid Delta log conflicts with schema changes
+        if self._table.schema() is not None and self._exists():
+            try:
+                self._logger.debug(f"Dropping table {self._table.full_table_location()} before overwrite with schema")
+                spark.sql(f"DROP TABLE IF EXISTS {self._table.full_table_location()}")
+            except Exception as exc:
+                self._logger.warning(f"Could not drop table before overwrite: {exc}")
         writer = (
             data.write.format(self._table.format)
             .mode("overwrite")

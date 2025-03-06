@@ -85,7 +85,7 @@ def mocked_encrypted_s3_bucket():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
+            aws_secret_access_key="fake_secret_key",  # pragma: allowlist secret
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
         conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)

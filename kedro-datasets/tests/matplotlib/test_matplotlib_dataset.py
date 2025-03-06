@@ -14,7 +14,7 @@ from s3fs import S3FileSystem
 from kedro_datasets.matplotlib import MatplotlibDataset, MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
+AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}  # pragma: allowlist secret
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
@@ -57,7 +57,7 @@ def mocked_s3_bucket():
         conn = boto3.client(
             "s3",
             aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
+            aws_secret_access_key="fake_secret_key",  # pragma: allowlist secret
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn

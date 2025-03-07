@@ -25,6 +25,7 @@ kedro_datasets
    ibis.TableDataset
    json.JSONDataset
    matlab.MatlabDataset
+   matplotlib.MatplotlibDataset
    matplotlib.MatplotlibWriter
    networkx.GMLDataset
    networkx.GraphMLDataset

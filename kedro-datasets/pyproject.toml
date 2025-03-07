@@ -81,7 +81,8 @@ matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
+matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]

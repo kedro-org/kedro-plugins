@@ -17,7 +17,7 @@ DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 
 @pytest.fixture(scope="class", autouse=True)
-def spark_session(request):
+def spark_session():
     spark = (
         SparkSession.builder.appName("test")
         .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")
@@ -28,21 +28,10 @@ def spark_session(request):
         )
         .getOrCreate()
     )
-
-    def cleanup():
-        spark.catalog.clearCache()
-        spark.sql("drop database test cascade;")
-
-    # Register the cleanup function to be called after the test class completes
-    request.addfinalizer(cleanup)
-
-    # Initialize the test database
     spark.sql("create database if not exists test")
-
-    yield spark  # Yield the Spark session to the test
-
-    # Cleanup after the test is complete
-    cleanup()
+    yield spark
+    spark.catalog.clearCache()
+    spark.sql("drop database test cascade;")
 
 
 @pytest.fixture

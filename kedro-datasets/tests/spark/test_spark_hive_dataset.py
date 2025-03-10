@@ -324,8 +324,6 @@ class TestSparkHiveDataset:
             dataset.load()
 
     def test_save_delta_format(self, mocker, spark_session_delta):
-        config = spark_session_delta.sparkContext.getConf().getAll()
-        print(config)
         dataset = SparkHiveDataset(
             database="default_1", table="delta_table", save_args={"format": "delta"}
         )

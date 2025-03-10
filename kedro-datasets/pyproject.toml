@@ -190,7 +190,7 @@ rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 safetensors-safetensorsdataset = ["safetensors", "numpy"]
 safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
 
-video-videodataset = ["opencv-python~=4.5.5.64", "numpy"]
+video-videodataset = ["opencv-python~=4.11.0.86", "numpy"]
 video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements

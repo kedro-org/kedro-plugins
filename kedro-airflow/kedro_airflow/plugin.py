@@ -122,6 +122,13 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "as they do not persist between Airflow operators.",
 )
 @click.option(
+    "-gn",
+    "--group-by-namespace",
+    is_flag=True,
+    default=False,
+    help="Groups nodes based on their namespace using Kedro's grouped_nodes_by_namespace property.",
+)
+@click.option(
     "--tags",
     type=str,
     default="",
@@ -149,6 +156,7 @@ def create(  # noqa: PLR0913, PLR0912
     target_path,
     jinja_file,
     group_in_memory,
+    group_by_namespace,
     tags,
     params,
     conf_source,
@@ -218,6 +226,8 @@ def create(  # noqa: PLR0913, PLR0912
             # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
             # implementation
             nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+        elif group_by_namespace:
+            nodes, dependencies = group_by_namespace(pipeline)
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and

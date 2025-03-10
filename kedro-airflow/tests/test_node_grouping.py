@@ -7,7 +7,10 @@ from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
+from kedro_airflow.grouping import (
+    _is_memory_dataset,
+    group_memory_nodes,
+)
 
 
 class TestDataset(AbstractDataset):

@@ -88,7 +88,7 @@ def spark_session_delta():
     spark.sql("drop database test cascade;")
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def spark_test_databases(spark_session):
     """Setup spark test databases for all tests in this module."""
     dataset = _generate_spark_df_one()
@@ -167,7 +167,7 @@ class TestSparkHiveDataset:
                 )
             )
 
-    def test_read_existing_table(self):
+    def test_read_existing_table(self, spark_test_databases):
         dataset = SparkHiveDataset(
             database="default_1", table="table_1", write_mode="overwrite", save_args={}
         )

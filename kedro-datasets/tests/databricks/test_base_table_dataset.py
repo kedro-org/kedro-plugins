@@ -156,9 +156,6 @@ class TestBaseTableDataset:
 
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
-        # assert subset_expected_df.subtract(saved_table).count() == 0
-        # assert saved_table.subtract(subset_expected_df).count() == 0
-
     def test_save_schema_pandas(
         self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
     ):

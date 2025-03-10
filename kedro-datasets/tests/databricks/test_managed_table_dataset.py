@@ -1,5 +1,6 @@
 from kedro_datasets.databricks import ManagedTableDataset
 
+
 class TestManagedTableDataset:
     def test_describe(self):
         unity_ds = ManagedTableDataset(table="test")

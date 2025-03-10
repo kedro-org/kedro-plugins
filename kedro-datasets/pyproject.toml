@@ -238,7 +238,6 @@ test = [
     "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pyarrow!=19.0.0",  # Temporary pin until https://github.com/apache/arrow/issues/45283 is fixed
     "pyodbc~=5.0",
     "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",

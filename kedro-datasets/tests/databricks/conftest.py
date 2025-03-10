@@ -28,10 +28,21 @@ def spark_session(request):
         )
         .getOrCreate()
     )
+
+    def cleanup():
+        spark.catalog.clearCache()
+        spark.sql("drop database test cascade;")
+
+    # Register the cleanup function to be called after the test class completes
+    request.addfinalizer(cleanup)
+
+    # Initialize the test database
     spark.sql("create database if not exists test")
-    yield spark
-    spark.catalog.clearCache()
-    spark.sql("drop database test cascade;")
+
+    yield spark  # Yield the Spark session to the test
+
+    # Cleanup after the test is complete
+    cleanup()
 
 
 @pytest.fixture

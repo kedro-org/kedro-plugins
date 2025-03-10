@@ -15,7 +15,7 @@ from kedro_datasets.spark import SparkHiveDataset
 
 TESTSPARKDIR = "test_spark_dir"
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def spark_session():
     try:
         with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
@@ -67,7 +67,7 @@ def spark_session():
 DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def spark_session_delta():
     spark = (
         SparkSession.builder.appName("test")

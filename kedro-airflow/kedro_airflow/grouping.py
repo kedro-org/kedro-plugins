@@ -113,3 +113,22 @@ def group_memory_nodes(
                 group_dependencies[new_name_parent].append(new_name_child)
 
     return group_to_seq, group_dependencies
+
+
+def group_by_namespace(
+    pipeline: Pipeline,
+) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
+    """
+    Groups nodes based on their namespace using Kedro's grouped_nodes_by_namespace property.
+    """
+    nodes_by_namespace = {}
+    dependencies_by_namespace = {}
+
+    grouped = pipeline.grouped_nodes_by_namespace
+
+    for group_name, group_info in grouped.items():
+        if group_info["type"] == "namespace":
+            nodes_by_namespace[group_name] = group_info["nodes"]
+            dependencies_by_namespace[group_name] = group_info["dependencies"]
+
+    return nodes_by_namespace, dependencies_by_namespace

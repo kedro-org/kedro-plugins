@@ -2,7 +2,8 @@ import gc
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
+# importlib_metadata needs backport for python 3.8 and older
+import importlib_metadata
 import pytest
 from kedro.io.core import DatasetError
 from psutil import Popen
@@ -14,8 +15,7 @@ from kedro_datasets.spark import SparkHiveDataset
 
 TESTSPARKDIR = "test_spark_dir"
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def spark_session():
     try:
         with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
@@ -64,6 +64,24 @@ def spark_session():
             # ReferenceError when you isinstance them
             pass
 
+DELTA_VERSION = importlib_metadata.version("delta-spark")
+
+
+@pytest.fixture()
+def spark_session_delta():
+    spark = (
+        SparkSession.builder.appName("test")
+        .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
+        .getOrCreate()
+    )
+    spark.sql("create database if not exists test")
+    yield spark
+    spark.sql("drop database test cascade;")
 
 @pytest.fixture(scope="module", autouse=True)
 def spark_test_databases(spark_session):
@@ -190,7 +208,7 @@ class TestSparkHiveDataset:
             dataset.load(), _generate_spark_df_one().union(_generate_spark_df_one())
         )
 
-    def test_upsert_config_err(self):
+    def test_upsert_config_err(self, spark_session):
         # no pk provided should prompt config error
         with pytest.raises(
             DatasetError, match="'table_pk' must be set to utilise 'upsert' read mode"
@@ -300,7 +318,7 @@ class TestSparkHiveDataset:
         ):
             dataset.load()
 
-    def test_save_delta_format(self, mocker):
+    def test_save_delta_format(self, mocker, spark_session_delta):
         dataset = SparkHiveDataset(
             database="default_1", table="delta_table", save_args={"format": "delta"}
         )

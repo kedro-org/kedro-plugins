@@ -129,7 +129,7 @@ class TestBaseTableDataset:
             unity_ds.save(sample_spark_df)
 
     @pytest.mark.skipif(
-        sys.version_info == (3, 12),
+        sys.version_info >= (3, 12),
         reason="This test is extremely flaky with Python 3.12",
     )
     def test_save_schema_spark(

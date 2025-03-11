@@ -9,6 +9,7 @@ from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 from kedro_airflow.grouping import (
     _is_memory_dataset,
+    group_by_namespace,
     group_memory_nodes,
 )
 
@@ -169,3 +170,33 @@ def test_is_memory_dataset(
             assert _is_memory_dataset(mock_catalog, node_name)
         else:
             assert not _is_memory_dataset(mock_catalog, node_name)
+
+
+@pytest.mark.parametrize(
+    "pipeline, expected_nodes, expected_dependencies",
+    [
+        (
+            mock_kedro_pipeline(),
+            {
+                "namespace1": ["f1", "f2"],
+                "namespace2": ["f3", "f4"],
+                "namespace3": ["f5"],
+            },
+            {
+                "namespace1": [],
+                "namespace2": ["namespace1"],
+                "namespace3": ["namespace2"],
+            },
+        ),
+    ],
+)
+def test_group_by_namespace(pipeline, expected_nodes, expected_dependencies):
+    """Test grouping of nodes by namespace."""
+    nodes_by_namespace, dependencies_by_namespace = group_by_namespace(pipeline)
+
+    nodes_by_namespace = {
+        ns: [node.name for node in nodes] for ns, nodes in nodes_by_namespace.items()
+    }
+
+    assert nodes_by_namespace == expected_nodes
+    assert dependencies_by_namespace == expected_dependencies

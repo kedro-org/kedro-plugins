@@ -4,7 +4,6 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-import multiprocessing
 import os
 
 # importlib_metadata needs backport for python 3.8 and older
@@ -19,7 +18,6 @@ DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 @pytest.fixture(scope="class", autouse=True)
 def spark_session():
-    multiprocessing.set_start_method("spawn")
     spark = (
         SparkSession.builder.appName("test")
         .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")

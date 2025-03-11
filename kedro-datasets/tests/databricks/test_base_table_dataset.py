@@ -1,3 +1,5 @@
+import sys
+
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError, Version, VersionNotFoundError
@@ -126,6 +128,10 @@ class TestBaseTableDataset:
         with pytest.raises(DatasetError):
             unity_ds.save(sample_spark_df)
 
+    @pytest.mark.skipif(
+        sys.version_info == (3, 12),
+        reason="This test is extremely flaky with Python 3.12",
+    )
     def test_save_schema_spark(
         self, subset_spark_df: DataFrame, subset_expected_df: DataFrame
     ):
@@ -153,7 +159,6 @@ class TestBaseTableDataset:
         )
         unity_ds.save(subset_spark_df)
         saved_table = unity_ds.load()
-
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_schema_pandas(

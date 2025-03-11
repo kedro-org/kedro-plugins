@@ -91,6 +91,63 @@ def mock_kedro_pipeline() -> Pipeline:
     )
 
 
+def mock_kedro_pipeline_with_namespaces() -> Pipeline:
+    def identity_one_to_one(x):
+        return x
+
+    return Pipeline(
+        [
+            node(
+                func=identity_one_to_one,
+                inputs="ds1",
+                outputs="ds2",
+                name="f1",
+                namespace="namespace1",
+            ),
+            node(
+                func=lambda x: (x, x),
+                inputs="ds2",
+                outputs=["ds3", "ds4"],
+                name="f2",
+                namespace="namespace1",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds5",
+                name="f3",
+                namespace="namespace2",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds6",
+                name="f4",
+                namespace="namespace2",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds4",
+                outputs="ds8",
+                name="f5",
+                namespace="namespace3",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds6",
+                outputs="ds7",
+                name="f6",
+            ),
+            node(
+                func=lambda x, y: x,
+                inputs=["ds3", "ds6"],
+                outputs="ds9",
+                name="f7",
+            ),
+        ]
+    )
+
+
 @pytest.mark.parametrize(
     "all_nodes,memory_nodes,expected_nodes,expected_dependencies",
     [
@@ -176,7 +233,7 @@ def test_is_memory_dataset(
     "pipeline, expected_nodes, expected_dependencies",
     [
         (
-            mock_kedro_pipeline(),
+            mock_kedro_pipeline_with_namespaces(),
             {
                 "namespace1": ["f1", "f2"],
                 "namespace2": ["f3", "f4"],

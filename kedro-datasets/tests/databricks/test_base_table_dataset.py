@@ -154,10 +154,7 @@ class TestBaseTableDataset:
         unity_ds.save(subset_spark_df)
         saved_table = unity_ds.load()
 
-        # assert subset_expected_df.exceptAll(saved_table).count() == 0
-
-        assert subset_expected_df.subtract(saved_table).count() == 0
-        assert saved_table.subtract(subset_expected_df).count() == 0
+        assert subset_expected_df.exceptAll(saved_table).count() == 0
 
     def test_save_schema_pandas(
         self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame

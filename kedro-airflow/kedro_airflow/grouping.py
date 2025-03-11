@@ -122,23 +122,29 @@ def group_by_namespace(
     Groups nodes based on their namespace using Pipeline's grouped_nodes_by_namespace property.
     Non-namespaced nodes are assigned to a default namespace.
     """
-    nodes_by_namespace = {}
-    dependencies_by_namespace = {}
+    nodes_by_namespace: dict[str, list[Node]] = {}
+    dependencies_by_namespace: dict[str, list[str]] = {}
 
     grouped_nodes = pipeline.grouped_nodes_by_namespace
 
     for group in grouped_nodes.items():
-        ns = group["name"] if group["type"] == "namespace" else "__default__"
+        group_info = group[1]
+        ns = group_info["name"] if group_info["type"] == "namespace" else "__default__"
         if ns not in nodes_by_namespace:
             nodes_by_namespace[ns] = []
             dependencies_by_namespace[ns] = []
 
-        nodes_by_namespace[ns].extend(group["nodes"])
+        nodes_by_namespace[ns].extend(group_info["nodes"])
 
-        for node in group["nodes"]:
+        for node in group_info["nodes"]:
             for parent in pipeline.node_dependencies.get(node, []):
-                parent_ns = parent.namespace if parent.namespace else "__default__"
-                if parent_ns != ns and parent_ns not in dependencies_by_namespace[ns]:
-                    dependencies_by_namespace[ns].append(parent_ns)
+                parent_namespace = (
+                    parent.namespace if parent.namespace else "__default__"
+                )
+                if (
+                    parent_namespace != ns
+                    and parent_namespace not in dependencies_by_namespace[ns]
+                ):
+                    dependencies_by_namespace[ns].append(parent_namespace)
 
     return nodes_by_namespace, dependencies_by_namespace

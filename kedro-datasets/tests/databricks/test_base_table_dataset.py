@@ -152,11 +152,6 @@ class TestBaseTableDataset:
             write_mode="overwrite",
         )
         unity_ds.save(subset_spark_df)
-
-        # Refresh the table cache before loading
-        from kedro_datasets._utils.spark_utils import get_spark
-        get_spark().sql(f"REFRESH TABLE {unity_ds._table.full_table_location()}")
-
         saved_table = unity_ds.load()
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 

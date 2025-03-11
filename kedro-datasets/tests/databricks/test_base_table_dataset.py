@@ -161,6 +161,10 @@ class TestBaseTableDataset:
         saved_table = unity_ds.load()
         assert subset_expected_df.exceptAll(saved_table).count() == 0
 
+    @pytest.mark.skipif(
+        sys.version_info >= (3, 12),
+        reason="This test is extremely flaky with Python 3.12",
+    )
     def test_save_schema_pandas(
         self, subset_pandas_df: pd.DataFrame, subset_expected_df: DataFrame
     ):

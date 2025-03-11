@@ -119,7 +119,7 @@ def group_by_namespace(
     pipeline: Pipeline,
 ) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
     """
-    Groups nodes based on their namespace using Kedro's grouped_nodes_by_namespace property.
+    Groups nodes based on their namespace using Pipeline's grouped_nodes_by_namespace property.
     """
     nodes_by_namespace = {}
     dependencies_by_namespace = {}
@@ -127,8 +127,7 @@ def group_by_namespace(
     grouped = pipeline.grouped_nodes_by_namespace
 
     for group_name, group_info in grouped.items():
-        if group_info["type"] == "namespace":
-            nodes_by_namespace[group_name] = group_info["nodes"]
-            dependencies_by_namespace[group_name] = group_info["dependencies"]
+        nodes_by_namespace[group_name] = group_info["nodes"]
+        dependencies_by_namespace[group_name] = list(group_info["dependencies"])
 
     return nodes_by_namespace, dependencies_by_namespace

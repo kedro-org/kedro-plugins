@@ -235,11 +235,13 @@ def test_is_memory_dataset(
         (
             mock_kedro_pipeline_with_namespaces(),
             {
+                "__default__": ["f6", "f7"],
                 "namespace1": ["namespace1.f1", "namespace1.f2"],
                 "namespace2": ["namespace2.f3", "namespace2.f4"],
                 "namespace3": ["namespace3.f5"],
             },
             {
+                "__default__": [],
                 "namespace1": [],
                 "namespace2": ["namespace1"],
                 "namespace3": ["namespace2"],

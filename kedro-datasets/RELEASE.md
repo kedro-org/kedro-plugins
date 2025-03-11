@@ -1,4 +1,4 @@
-# Upcoming Release
+# Upcoming Release 7.0.0
 
 ## Major features and improvements
 
@@ -9,6 +9,7 @@
 
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
+- Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
 
 ## Breaking Changes
 

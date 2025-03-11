@@ -4,6 +4,9 @@ from typing import Any
 
 import lazy_loader as lazy
 
+# Import the PolarsExcelDataset
+from .polars_excel_dataset import PolarsExcelDataset
+
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 CSVDataset: Any
 EagerPolarsDataset: Any

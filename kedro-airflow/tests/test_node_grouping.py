@@ -241,10 +241,10 @@ def test_is_memory_dataset(
                 "namespace3": ["namespace3.f5"],
             },
             {
-                "__default__": [],
+                "__default__": ["namespace2", "namespace1"],
                 "namespace1": [],
                 "namespace2": ["namespace1"],
-                "namespace3": ["namespace2"],
+                "namespace3": ["namespace1"],
             },
         ),
     ],

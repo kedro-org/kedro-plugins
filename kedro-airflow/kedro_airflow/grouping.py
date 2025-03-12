@@ -127,24 +127,23 @@ def group_by_namespace(
 
     grouped_nodes = pipeline.grouped_nodes_by_namespace
 
-    for group in grouped_nodes.items():
-        group_info = group[1]
+    node_to_namespace = {}
+
+    for group_name, group_info in grouped_nodes.items():
         ns = group_info["name"] if group_info["type"] == "namespace" else "__default__"
-        if ns not in nodes_by_namespace:
-            nodes_by_namespace[ns] = []
-            dependencies_by_namespace[ns] = []
-
+        nodes_by_namespace.setdefault(ns, [])
+        dependencies_by_namespace.setdefault(ns, [])
         nodes_by_namespace[ns].extend(group_info["nodes"])
-
         for node in group_info["nodes"]:
+            node_to_namespace[node] = ns
+
+    for ns, nodes in nodes_by_namespace.items():
+        dependent_namespaces = set()
+        for node in nodes:
             for parent in pipeline.node_dependencies.get(node, []):
-                parent_namespace = (
-                    parent.namespace if parent.namespace else "__default__"
-                )
-                if (
-                    parent_namespace != ns
-                    and parent_namespace not in dependencies_by_namespace[ns]
-                ):
-                    dependencies_by_namespace[ns].append(parent_namespace)
+                parent_ns = node_to_namespace.get(parent, "__default__")
+                if parent_ns != ns:
+                    dependent_namespaces.add(parent_ns)
+        dependencies_by_namespace[ns] = list(dependent_namespaces)
 
     return nodes_by_namespace, dependencies_by_namespace

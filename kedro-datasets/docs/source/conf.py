@@ -146,6 +146,7 @@ type_targets = {
         "prophet.forecaster.Prophet",
         "Prophet",
         "snowflake.snowpark.session.Session",
+        "optuna.study.study.Study",
     ),
     "py:data": (
         "typing.Any",

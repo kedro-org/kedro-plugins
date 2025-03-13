@@ -286,11 +286,6 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         return pruner_class(**pruner_config)
 
     def load(self) -> optuna.Study:
-        """Load the optuna Study from the storage.
-
-        Returns:
-            optuna.Study: The loaded study.
-        """
         load_args = deepcopy(self._load_args)
         sampler_config = load_args.pop("sampler")
         sampler = self._get_sampler(sampler_config)
@@ -308,11 +303,6 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         return study
 
     def save(self, study: optuna.Study) -> None:
-        """Save the optuna Study to the storage.
-
-        Args:
-            study: The study to save.
-        """
         save_study_name = self._get_save_study_name()
         if self._backend == "sqlite":
             os.makedirs(os.path.dirname(self._filepath), exist_ok=True)

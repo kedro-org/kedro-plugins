@@ -52,9 +52,9 @@ class MatplotlibDataset(
         >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
         [<matplotlib.lines.Line2D object at 0x...>]
-        >>> plot_writer = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
+        >>> plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
         >>> plt.close()
-        >>> plot_writer.save(fig)
+        >>> plot_dataset.save(fig)
 
     Example saving a plot as a PDF file:
 
@@ -66,11 +66,11 @@ class MatplotlibDataset(
         >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
         [<matplotlib.lines.Line2D object at 0x...>]
-        >>> pdf_plot_writer = MatplotlibDataset(
+        >>> pdf_plot_dataset = MatplotlibDataset(
         ...     filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
         ... )
         >>> plt.close()
-        >>> pdf_plot_writer.save(fig)
+        >>> pdf_plot_dataset.save(fig)
 
     Example saving multiple plots in a folder, using a dictionary:
 
@@ -88,8 +88,8 @@ class MatplotlibDataset(
         [<matplotlib.lines.Line2D object at 0x...>]
         [<matplotlib.lines.Line2D object at 0x...>]
         >>> plt.close("all")
-        >>> dict_plot_writer = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
-        >>> dict_plot_writer.save(plots_dict)
+        >>> dict_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
+        >>> dict_plot_dataset.save(plots_dict)
 
     Example saving multiple plots in a folder, using a list:
 
@@ -109,8 +109,8 @@ class MatplotlibDataset(
         [<matplotlib.lines.Line2D object at 0x...>]
         [<matplotlib.lines.Line2D object at 0x...>]
         >>> plt.close("all")
-        >>> list_plot_writer = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
-        >>> list_plot_writer.save(plots_list)
+        >>> list_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
+        >>> list_plot_dataset.save(plots_list)
 
     """
 
@@ -198,6 +198,15 @@ class MatplotlibDataset(
         }
 
     def load(self) -> NoReturn:
+        """
+        Loading is not supported for MatplotlibDataset.
+
+        Raises:
+            DatasetError: When called with any arguments.
+
+        Returns:
+            Never returns as it always raises an exception.
+        """
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:

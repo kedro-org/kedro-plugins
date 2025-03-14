@@ -11,6 +11,7 @@ from kedro.io import DatasetError, Version
 from moto import mock_aws
 from s3fs import S3FileSystem
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.matplotlib import MatplotlibDataset, MatplotlibWriter
 
 BUCKET_NAME = "test_bucket"
@@ -145,7 +146,9 @@ def cleanup_plt():
 class TestMatplotlibDataset:
     def test_writer_deprecation_warning(self, tmp_path):
         """Test that MatplotlibWriter raises a deprecation warning"""
-        with pytest.warns(DeprecationWarning, match="renamed to MatplotlibDataset"):
+        with pytest.warns(
+            KedroDeprecationWarning, match="renamed to MatplotlibDataset"
+        ):
             MatplotlibWriter(filepath=tmp_path / "test.png")
 
     def test_writer_is_dataset_subclass(self, plot_writer):

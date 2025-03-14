@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from warnings import warn
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.matplotlib.matplotlib_dataset import MatplotlibDataset
 
 
@@ -27,7 +28,7 @@ class MatplotlibWriter(MatplotlibDataset):
         warn(
             "The MatplotlibWriter class has been renamed to MatplotlibDataset. "
             "The MatplotlibWriter name is deprecated and will be removed in a future release.",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         super().__init__(**kwargs)

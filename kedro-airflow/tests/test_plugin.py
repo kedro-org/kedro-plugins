@@ -398,13 +398,17 @@ def test_create_airflow_conf_source(cli_runner, metadata):
     dag_file.unlink()
 
 
+@pytest.mark.parametrize("value", ["memory", "MEMORY", "namespace", "NaMeSpAcE"])
+def test_group_by_valid_commands(cli_runner, metadata, value):
+    command = ["airflow", "create", "--group-by", value]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0
+
+
 def test_group_by_invalid_value(cli_runner, metadata):
     command = ["airflow", "create", "--group-by", "asdasdasd"]
     result = cli_runner.invoke(commands, command, obj=metadata)
-
-    print("\n\nHERE\n\n")
-    print(result.stdout)
-    print("\n\nEND\n\n")
 
     assert result.exit_code == 2
     assert (

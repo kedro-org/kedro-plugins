@@ -19,7 +19,23 @@ def get_spark() -> Union[SparkSession, "DatabricksSession"]:
         from databricks.connect import DatabricksSession
 
         # We can't test this as there's no Databricks test env available
-        spark = DatabricksSession.builder.getOrCreate()  # pragma: no cover
+        try:
+            spark = DatabricksSession.builder.getOrCreate()  # pragma: no cover
+        # this can't be narrowed down since databricks-connect throws error of Exception type
+        except Exception as e:
+            error_message = str(e)
+            if (
+                error_message
+                == "Cluster id or serverless are required but were not specified."
+            ):
+                raise type(e)(
+                    "DatabricksSession is expected to behave as singleton but it didn't. "
+                    "Either set up DATABRICKS_CONFIG_PROFILE or DATABRICKS_PROFILE and DATABRICKS_SERVERLESS_COMPUTE_ID "
+                    "env variables in your hooks prior to using the spark session. "
+                    "Read more about these variables here: "
+                    "https://docs.databricks.com/aws/en/dev-tools/databricks-connect/cluster-config#config-profile-env-var"
+                ) from e
+            pass
 
     except ImportError:
         # For "normal" spark sessions that don't use databricks-connect

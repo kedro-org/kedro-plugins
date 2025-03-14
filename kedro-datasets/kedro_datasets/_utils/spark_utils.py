@@ -37,3 +37,4 @@ def _create_databricks_session() -> SparkSession:
                 "Read more about these variables here: "
                 "https://docs.databricks.com/aws/en/dev-tools/databricks-connect/cluster-config#config-profile-env-var"
             ) from exception
+        raise exception

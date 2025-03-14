@@ -22,7 +22,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
-from kedro_airflow.grouping import group_memory_nodes
+from kedro_airflow.grouping import group_by_namespace, group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
@@ -115,18 +115,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
 )
 @click.option(
     "-g",
-    "--group-in-memory",
-    is_flag=True,
-    default=False,
+    "--group-by",
+    "node_grouping",
+    default=None,
     help="Group nodes with at least one MemoryDataset as input/output together, "
     "as they do not persist between Airflow operators.",
-)
-@click.option(
-    "-gn",
-    "--group-by-namespace",
-    is_flag=True,
-    default=False,
-    help="Groups nodes based on their namespace using Kedro's grouped_nodes_by_namespace property.",
+    type=click.Choice(["memory", "namespace"], case_sensitive=False),
 )
 @click.option(
     "--tags",
@@ -155,8 +149,7 @@ def create(  # noqa: PLR0913, PLR0912
     env,
     target_path,
     jinja_file,
-    group_in_memory,
-    group_by_namespace,
+    node_grouping,
     tags,
     params,
     conf_source,
@@ -221,13 +214,14 @@ def create(  # noqa: PLR0913, PLR0912
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
         # Group memory nodes
-        if group_in_memory:
-            # The order of nodes and dependencies is deterministic and based on the
-            # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
-            # implementation
-            nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
-        elif group_by_namespace:
-            nodes, dependencies = group_by_namespace(pipeline)
+        if node_grouping:
+            if node_grouping.lower() == "memory":
+                # The order of nodes and dependencies is deterministic and based on the
+                # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
+                # implementation
+                nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+            elif node_grouping.lower() == "namespace":
+                nodes, dependencies = group_by_namespace(pipeline)
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and

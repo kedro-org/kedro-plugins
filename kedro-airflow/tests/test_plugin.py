@@ -29,8 +29,13 @@ from kedro_airflow.plugin import commands
         # All the datasets are MemoryDataset(), so we have only one joined node without dependencies
         (
             "__default__",
-            ["airflow", "create", "--group-in-memory"],
+            ["airflow", "create", "--group-by", "memory"],
             'task_id="node0-node1-node2-node3-node4",',
+        ),
+        (
+            "__default__",
+            ["airflow", "create", "--group-by", "namespace"],
+            'task_id="default",',
         ),
     ],
 )
@@ -391,3 +396,18 @@ def test_create_airflow_conf_source(cli_runner, metadata):
         dag_code = [line.strip() for line in f.read().splitlines()]
         assert expected_airflow_dag in dag_code
     dag_file.unlink()
+
+
+def test_group_by_invalid_value(cli_runner, metadata):
+    command = ["airflow", "create", "--group-by", "asdasdasd"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    print("\n\nHERE\n\n")
+    print(result.stdout)
+    print("\n\nEND\n\n")
+
+    assert result.exit_code == 2
+    assert (
+        "Error: Invalid value for '-g' / '--group-by': 'asdasdasd' is not one of 'memory', 'namespace'."
+        in result.stdout
+    )

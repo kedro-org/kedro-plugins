@@ -29,7 +29,10 @@ def _create_databricks_session() -> SparkSession:
         return DatabricksSession.builder.getOrCreate()
     # this can't be narrowed down since databricks-connect throws error of Exception type
     except Exception as exception:
-        if str(exception) == "Cluster id or serverless are required but were not specified.":
+        if (
+            str(exception)
+            == "Cluster id or serverless are required but were not specified."
+        ):
             raise type(exception)(
                 "DatabricksSession is expected to behave as singleton but it didn't. "
                 "Either set up DATABRICKS_CONFIG_PROFILE or DATABRICKS_PROFILE and DATABRICKS_SERVERLESS_COMPUTE_ID "

@@ -10,6 +10,7 @@
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
+- Provide enhanced error message for the spark session created via databricks-connect if the builder args are incomplete provided.
 
 ## Breaking Changes
 

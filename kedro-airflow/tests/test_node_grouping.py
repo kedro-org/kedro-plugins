@@ -7,7 +7,11 @@ from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
+from kedro_airflow.grouping import (
+    _is_memory_dataset,
+    group_by_namespace,
+    group_memory_nodes,
+)
 
 
 class TestDataset(AbstractDataset):
@@ -84,6 +88,132 @@ def mock_kedro_pipeline() -> Pipeline:
                 name="f7",
             ),
         ],
+    )
+
+
+@pytest.fixture
+def mock_pipeline_with_pipeline_level_namespaces():
+    def identity_one_to_one(x):
+        return x
+
+    return Pipeline(
+        [
+            node(
+                func=identity_one_to_one,
+                inputs="ds1",
+                outputs="ds2",
+                name="f1",
+                namespace="namespace1",
+            ),
+            node(
+                func=lambda x: (x, x),
+                inputs="ds2",
+                outputs=["ds3", "ds4"],
+                name="f2",
+                namespace="namespace1",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds5",
+                name="f3",
+                namespace="namespace2",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds6",
+                name="f4",
+                namespace="namespace2",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds4",
+                outputs="ds8",
+                name="f5",
+                namespace="namespace3",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds6",
+                outputs="ds7",
+                name="f6",  # Non-namespaced node
+            ),
+            node(
+                func=lambda x, y: x,
+                inputs=["ds3", "ds6"],
+                outputs="ds9",
+                name="f7",  # Non-namespaced node
+            ),
+        ]
+    )
+
+
+@pytest.fixture
+def mock_pipeline_with_no_namespaces():
+    def identity_one_to_one(x):
+        return x
+
+    return Pipeline(
+        [
+            node(
+                func=identity_one_to_one,
+                inputs="ds1",
+                outputs="ds2",
+                name="f1",  # Non-namespaced node
+            ),
+            node(
+                func=lambda x: (x, x),
+                inputs="ds2",
+                outputs=["ds3", "ds4"],
+                name="f2",  # Non-namespaced node
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds5",
+                name="f3",  # Non-namespaced node
+            ),
+        ]
+    )
+
+
+@pytest.fixture
+def mock_pipeline_with_nested_namespaces():
+    def identity_one_to_one(x):
+        return x
+
+    return Pipeline(
+        [
+            node(
+                func=identity_one_to_one,
+                inputs="ds1",
+                outputs="ds2",
+                name="f1",
+                namespace="namespace1.subnamespace1",
+            ),
+            node(
+                func=lambda x: (x, x),
+                inputs="ds2",
+                outputs=["ds3", "ds4"],
+                name="f2",
+                namespace="namespace1.subnamespace1",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds3",
+                outputs="ds5",
+                name="f3",
+                namespace="namespace1.subnamespace2",
+            ),
+            node(
+                func=identity_one_to_one,
+                inputs="ds4",
+                outputs="ds6",
+                name="f4",
+                namespace="namespace2",
+            ),
+        ]
     )
 
 
@@ -166,3 +296,70 @@ def test_is_memory_dataset(
             assert _is_memory_dataset(mock_catalog, node_name)
         else:
             assert not _is_memory_dataset(mock_catalog, node_name)
+
+
+@pytest.mark.parametrize(
+    "pipeline_fixture, expected_nodes, expected_dependencies",
+    [
+        (
+            "mock_pipeline_with_pipeline_level_namespaces",
+            {
+                "namespace1": ["namespace1.f1", "namespace1.f2"],
+                "namespace2": ["namespace2.f3", "namespace2.f4"],
+                "namespace3": ["namespace3.f5"],
+                "f6": ["f6"],
+                "f7": ["f7"],
+            },
+            {
+                "namespace1": [],
+                "namespace2": ["namespace1"],
+                "namespace3": ["namespace1"],
+                "f6": ["namespace2"],
+                "f7": ["namespace1", "namespace2"],
+            },
+        ),
+        (
+            "mock_pipeline_with_no_namespaces",
+            {
+                "f1": ["f1"],
+                "f2": ["f2"],
+                "f3": ["f3"],
+            },
+            {
+                "f1": [],
+                "f2": ["f1"],
+                "f3": ["f2"],
+            },
+        ),
+        (
+            "mock_pipeline_with_nested_namespaces",
+            {
+                "namespace1.subnamespace1": [
+                    "namespace1.subnamespace1.f1",
+                    "namespace1.subnamespace1.f2",
+                ],
+                "namespace1.subnamespace2": ["namespace1.subnamespace2.f3"],
+                "namespace2": ["namespace2.f4"],
+            },
+            {
+                "namespace1.subnamespace1": [],
+                "namespace1.subnamespace2": ["namespace1.subnamespace1"],
+                "namespace2": ["namespace1.subnamespace1"],
+            },
+        ),
+    ],
+)
+def test_group_by_namespace(
+    pipeline_fixture, expected_nodes, expected_dependencies, request
+):
+    """Test grouping of nodes by namespace for different pipeline structures."""
+    pipeline = request.getfixturevalue(pipeline_fixture)
+    nodes_by_namespace, dependencies_by_namespace = group_by_namespace(pipeline)
+
+    # Convert nodes to their names for comparison
+    nodes_by_namespace = {
+        ns: [node.name for node in nodes] for ns, nodes in nodes_by_namespace.items()
+    }
+
+    assert nodes_by_namespace == expected_nodes
+    assert dependencies_by_namespace == expected_dependencies

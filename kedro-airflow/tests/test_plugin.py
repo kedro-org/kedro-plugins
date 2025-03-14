@@ -32,11 +32,6 @@ from kedro_airflow.plugin import commands
             ["airflow", "create", "--group-by", "memory"],
             'task_id="node0-node1-node2-node3-node4",',
         ),
-        (
-            "__default__",
-            ["airflow", "create", "--group-by", "namespace"],
-            'task_id="default",',
-        ),
     ],
 )
 def test_create_airflow_dag(

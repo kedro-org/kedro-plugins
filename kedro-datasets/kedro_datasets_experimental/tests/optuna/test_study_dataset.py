@@ -79,6 +79,13 @@ class TestStudyDataset:
                 database=123,
             )
 
+        with pytest.raises(ValueError, match="does not have an extension"):
+            StudyDataset(
+                study_name="test",
+                backend="sqlite",
+                database="optuna",
+            )
+
     def test_invalid_study_name(self):
         """Test invalid study name raises ValueError."""
         with pytest.raises(ValueError, match="is not a string"):
@@ -151,6 +158,15 @@ class TestStudyDataset:
 
 
 class TestStudyDatasetVersioned:
+    def test_save_and_load(self, versioned_study_dataset, dummy_study):
+        """Test that saved and reloaded data matches the original one for
+        the versioned dataset."""
+        versioned_study_dataset.save(dummy_study)
+        reloaded_study = versioned_study_dataset.load()
+        assert len(reloaded_study.trials) == len(dummy_study.trials)
+        assert reloaded_study.trials[0].params["x"] == dummy_study.trials[0].params["x"]
+        assert reloaded_study.trials[0].value == dummy_study.trials[0].value
+
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
@@ -167,15 +183,6 @@ class TestStudyDatasetVersioned:
         assert ver_str in str(ds_versioned)
         assert "StudyDataset" in str(ds_versioned)
         assert "StudyDataset" in str(ds)
-
-    def test_save_and_load(self, versioned_study_dataset, dummy_study):
-        """Test that saved and reloaded data matches the original one for
-        the versioned dataset."""
-        versioned_study_dataset.save(dummy_study)
-        reloaded_study = versioned_study_dataset.load()
-        assert len(reloaded_study.trials) == len(dummy_study.trials)
-        assert reloaded_study.trials[0].params["x"] == dummy_study.trials[0].params["x"]
-        assert reloaded_study.trials[0].value == dummy_study.trials[0].value
 
     def test_multiple_loads(self, versioned_study_dataset, dummy_study, database_name):
         """Test that if a new version is created mid-run, by an

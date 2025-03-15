@@ -30,7 +30,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
     .. code-block:: yaml
 
         review_prediction_study:
-          type: optuna.StudyDataset
+          type: kedro_datasets_experimental.optuna.StudyDataset
           backend: sqlite
           database: data/05_model_input/review_prediction_study.db
           load_args:
@@ -43,7 +43,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
           versioned: true
 
         price_prediction_study:
-          type: optuna.StudyDataset
+          type: kedro_datasets_experimental.optuna.StudyDataset
           backend: postgresql
           database: optuna_db
           credentials: dev_optuna_postgresql
@@ -54,7 +54,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets.optuna import StudyDataset
+        >>> from kedro_datasets_experimental.optuna import StudyDataset
         >>> from optuna.distributions import FloatDistribution
         >>> import optuna
         >>>
@@ -154,13 +154,6 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         if backend == "sqlite":
             if database == ":memory:":
                 return database
-
-            # Check if the directory exists
-            database_dir = os.path.dirname(database)
-            if len(database_dir) and not os.path.isdir(database_dir):
-                raise FileNotFoundError(
-                    f"The directory of the sqlite DB '{database_dir}' does not exist."
-                )
 
             # Check if the file has an extension
             _, extension = os.path.splitext(database)
@@ -327,6 +320,9 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         )
 
     def _study_name_exists(self, study_name) -> bool:
+        if self._backend == "sqlite" and not os.path.isfile(self._database):
+            return False
+
         study_names = optuna.study.get_all_study_names(storage=self._storage)
         return study_name in study_names
 

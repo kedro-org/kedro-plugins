@@ -77,4 +77,5 @@ dataset-doctest%:
 	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
+	  --ignore kedro_datasets/spark/spark_gbq_dataset.py \
 	  $(extra_pytest_arg${*})

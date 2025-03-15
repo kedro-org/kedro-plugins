@@ -133,7 +133,6 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             self._sql = sql
             self._filepath = None
         else:
-            # TODO: Add protocol specific handling cases for different filesystems.
             protocol, path = get_protocol_and_path(str(filepath))
 
             self._fs_args = fs_args or {}

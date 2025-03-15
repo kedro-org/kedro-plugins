@@ -107,7 +107,8 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
                 `load_args={"credentialsFile": "/path/to/your/credentials.json"}`
 
                 When passing as a json object:
-                NOT SUPPORTED
+                This is not supported when passed directly in load_args. You can pass the json object (as a python dictionary) in the credentials
+                by specifying the key as `json`.
 
                 Read more here:
                     https://github.com/GoogleCloudDataproc/spark-bigquery-connector?tab=readme-ov-file#how-do-i-authenticate-outside-gce--dataproc
@@ -118,13 +119,13 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         """
         if sql and filepath:
             raise DatasetError(
-                "'sql' and 'filepath' arguments cannot both be provided."
+                "'sql' and 'filepath' arguments cannot both be provided. "
                 "Please only provide one."
             )
 
         if not (sql or filepath):
             raise DatasetError(
-                "'sql' and 'filepath' arguments cannot both be empty."
+                "'sql' and 'filepath' arguments cannot both be empty. "
                 "Please provide a sql query or path to a sql query file."
             )
 

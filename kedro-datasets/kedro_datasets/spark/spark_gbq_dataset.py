@@ -1,5 +1,5 @@
 """``AbstractDataset`` implementation to access Spark dataframes using
-``pyspark``.
+BigQuery Spark connector .
 """
 
 from __future__ import annotations
@@ -158,7 +158,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
 
         if len(self._bq_credentials) > 1:
             raise ValueError(
-                "Please provide only one of 'base64', 'file' or 'json' key in the credentials. "
+                f"Please provide only one of {self._VALID_CREDENTIALS_KEYS} key in the credentials. "
                 f"You provided: {list(self._bq_credentials.keys())}"
             )
         if self._bq_credentials.get("base64"):
@@ -176,7 +176,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             return {"credentials": creds_b64}
 
         raise ValueError(
-            f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {list(self._bq_credentials.keys())[0]}"
+            f"Please provide one of {self._VALID_CREDENTIALS_KEYS} key in the credentials. You provided: {list(self._bq_credentials.keys())[0]}"
         )
 
     def _load_sql_from_filepath(self) -> str:

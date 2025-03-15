@@ -114,7 +114,7 @@ def test_invalid_bq_credentials_key(gbq_query_dataset):
     gbq_query_dataset._bq_credentials = {invalid_cred_key: "value"}
     with pytest.raises(
         ValueError,
-        match=f"Please provide one of 'base64', 'file' or 'json' key in the credentials. You provided: {invalid_cred_key}",
+        match=f"Please provide one of {gbq_query_dataset._VALID_CREDENTIALS_KEYS} key in the credentials. You provided: {invalid_cred_key}",
     ):
         gbq_query_dataset._get_spark_bq_credentials()
 
@@ -136,7 +136,7 @@ def test_invalid_bq_credentials_key(gbq_query_dataset):
 def test_more_than_one_bq_credentials_key(gbq_query_dataset, credentials):
     gbq_query_dataset._bq_credentials = credentials
     pattern = re.escape(
-        f"Please provide only one of 'base64', 'file' or 'json' key in the credentials. You provided: {list(credentials.keys())}"
+        f"Please provide only one of {gbq_query_dataset._VALID_CREDENTIALS_KEYS} key in the credentials. You provided: {list(credentials.keys())}"
     )
     with pytest.raises(
         ValueError,

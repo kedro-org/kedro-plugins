@@ -92,129 +92,15 @@ def mock_kedro_pipeline() -> Pipeline:
 
 
 @pytest.fixture
-def mock_pipeline_with_pipeline_level_namespaces():
-    def identity_one_to_one(x):
-        return x
-
-    return Pipeline(
-        [
-            node(
-                func=identity_one_to_one,
-                inputs="ds1",
-                outputs="ds2",
-                name="f1",
-                namespace="namespace1",
-            ),
-            node(
-                func=lambda x: (x, x),
-                inputs="ds2",
-                outputs=["ds3", "ds4"],
-                name="f2",
-                namespace="namespace1",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds3",
-                outputs="ds5",
-                name="f3",
-                namespace="namespace2",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds3",
-                outputs="ds6",
-                name="f4",
-                namespace="namespace2",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds4",
-                outputs="ds8",
-                name="f5",
-                namespace="namespace3",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds6",
-                outputs="ds7",
-                name="f6",  # Non-namespaced node
-            ),
-            node(
-                func=lambda x, y: x,
-                inputs=["ds3", "ds6"],
-                outputs="ds9",
-                name="f7",  # Non-namespaced node
-            ),
-        ]
-    )
+def mock_pipeline_not_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline)
 
 
 @pytest.fixture
-def mock_pipeline_with_no_namespaces():
-    def identity_one_to_one(x):
-        return x
-
-    return Pipeline(
-        [
-            node(
-                func=identity_one_to_one,
-                inputs="ds1",
-                outputs="ds2",
-                name="f1",  # Non-namespaced node
-            ),
-            node(
-                func=lambda x: (x, x),
-                inputs="ds2",
-                outputs=["ds3", "ds4"],
-                name="f2",  # Non-namespaced node
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds3",
-                outputs="ds5",
-                name="f3",  # Non-namespaced node
-            ),
-        ]
-    )
-
-
-@pytest.fixture
-def mock_pipeline_with_nested_namespaces():
-    def identity_one_to_one(x):
-        return x
-
-    return Pipeline(
-        [
-            node(
-                func=identity_one_to_one,
-                inputs="ds1",
-                outputs="ds2",
-                name="f1",
-                namespace="namespace1.subnamespace1",
-            ),
-            node(
-                func=lambda x: (x, x),
-                inputs="ds2",
-                outputs=["ds3", "ds4"],
-                name="f2",
-                namespace="namespace1.subnamespace1",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds3",
-                outputs="ds5",
-                name="f3",
-                namespace="namespace1.subnamespace2",
-            ),
-            node(
-                func=identity_one_to_one,
-                inputs="ds4",
-                outputs="ds6",
-                name="f4",
-                namespace="namespace2",
-            ),
-        ]
-    )
+def mock_pipeline_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline, namespace="namespace1")
 
 
 @pytest.mark.parametrize(
@@ -302,49 +188,41 @@ def test_is_memory_dataset(
     "pipeline_fixture, expected_nodes, expected_dependencies",
     [
         (
-            "mock_pipeline_with_pipeline_level_namespaces",
-            {
-                "namespace1": ["namespace1.f1", "namespace1.f2"],
-                "namespace2": ["namespace2.f3", "namespace2.f4"],
-                "namespace3": ["namespace3.f5"],
-                "f6": ["f6"],
-                "f7": ["f7"],
-            },
-            {
-                "namespace1": [],
-                "namespace2": ["namespace1"],
-                "namespace3": ["namespace1"],
-                "f6": ["namespace2"],
-                "f7": ["namespace1", "namespace2"],
-            },
-        ),
-        (
-            "mock_pipeline_with_no_namespaces",
+            "mock_pipeline_not_namespaced",
             {
                 "f1": ["f1"],
                 "f2": ["f2"],
                 "f3": ["f3"],
+                "f4": ["f4"],
+                "f5": ["f5"],
+                "f6": ["f6"],
+                "f7": ["f7"],
             },
             {
                 "f1": [],
                 "f2": ["f1"],
                 "f3": ["f2"],
+                "f4": ["f2"],
+                "f5": ["f2"],
+                "f6": ["f4"],
+                "f7": ["f2", "f4"],
             },
         ),
         (
-            "mock_pipeline_with_nested_namespaces",
+            "mock_pipeline_namespaced",
             {
-                "namespace1.subnamespace1": [
-                    "namespace1.subnamespace1.f1",
-                    "namespace1.subnamespace1.f2",
-                ],
-                "namespace1.subnamespace2": ["namespace1.subnamespace2.f3"],
-                "namespace2": ["namespace2.f4"],
+                "namespace1": [
+                    "namespace1.f1",
+                    "namespace1.f2",
+                    "namespace1.f3",
+                    "namespace1.f4",
+                    "namespace1.f5",
+                    "namespace1.f6",
+                    "namespace1.f7",
+                ]
             },
             {
-                "namespace1.subnamespace1": [],
-                "namespace1.subnamespace2": ["namespace1.subnamespace1"],
-                "namespace2": ["namespace1.subnamespace1"],
+                "namespace1": [],
             },
         ),
     ],

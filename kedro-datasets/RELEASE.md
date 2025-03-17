@@ -4,6 +4,7 @@
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
+- Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
 
 ## Bug fixes and other changes
 

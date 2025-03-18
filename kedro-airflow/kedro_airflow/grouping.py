@@ -150,6 +150,6 @@ def group_by_namespace(
                 parent_ns = node_to_namespace.get(parent)
                 if parent_ns and parent_ns != ns:
                     dependent_namespaces.add(parent_ns)
-        dependencies_by_namespace[ns] = list(dependent_namespaces)
+        dependencies_by_namespace[ns] = sorted(dependent_namespaces)
 
     return nodes_by_namespace, dependencies_by_namespace

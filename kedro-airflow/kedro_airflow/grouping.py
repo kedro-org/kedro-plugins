@@ -113,3 +113,47 @@ def group_memory_nodes(
                 group_dependencies[new_name_parent].append(new_name_child)
 
     return group_to_seq, group_dependencies
+
+
+def group_by_namespace(
+    pipeline: Pipeline,
+) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
+    """
+    Groups nodes based on their namespace using Pipeline's grouped_nodes_by_namespace property.
+    Non-namespaced nodes are treated as their own single-task namespaces.
+    """
+    nodes_by_namespace: dict[str, list[Node]] = {}
+    dependencies_by_namespace: dict[str, list[str]] = {}
+
+    grouped_nodes = pipeline.grouped_nodes_by_namespace
+
+    node_to_namespace = {}
+
+    for group_name, group_info in grouped_nodes.items():
+        if group_info["type"] == "namespace":
+            ns = group_info["name"]
+            nodes_by_namespace.setdefault(ns, []).extend(group_info["nodes"])
+            dependencies_by_namespace.setdefault(ns, [])
+            for node in group_info["nodes"]:
+                node_to_namespace[node] = ns
+        else:
+            for node in group_info["nodes"]:
+                ns = node.name
+                nodes_by_namespace[ns] = [node]
+                dependencies_by_namespace[ns] = []
+                node_to_namespace[node] = ns
+
+    for ns, nodes in nodes_by_namespace.items():
+        dependent_namespaces = []
+        for node in nodes:
+            for parent in pipeline.node_dependencies.get(node, []):
+                parent_ns = node_to_namespace.get(parent)
+                if (
+                    parent_ns
+                    and parent_ns != ns
+                    and parent_ns not in dependent_namespaces
+                ):
+                    dependent_namespaces.append(parent_ns)
+        dependencies_by_namespace[ns] = dependent_namespaces
+
+    return nodes_by_namespace, dependencies_by_namespace

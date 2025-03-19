@@ -144,12 +144,16 @@ def group_by_namespace(
                 node_to_namespace[node] = ns
 
     for ns, nodes in nodes_by_namespace.items():
-        dependent_namespaces = set()
+        dependent_namespaces = []
         for node in nodes:
             for parent in pipeline.node_dependencies.get(node, []):
                 parent_ns = node_to_namespace.get(parent)
-                if parent_ns and parent_ns != ns:
-                    dependent_namespaces.add(parent_ns)
-        dependencies_by_namespace[ns] = sorted(dependent_namespaces)
+                if (
+                    parent_ns
+                    and parent_ns != ns
+                    and parent_ns not in dependent_namespaces
+                ):
+                    dependent_namespaces.append(parent_ns)
+        dependencies_by_namespace[ns] = dependent_namespaces
 
     return nodes_by_namespace, dependencies_by_namespace

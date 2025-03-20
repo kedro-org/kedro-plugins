@@ -81,7 +81,8 @@ matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
+matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -235,7 +236,7 @@ test = [
     "pandas>=2.0",
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
-    "polars[deltalake,xlsx2csv]>=1.0",
+    "polars[deltalake,xlsx2csv]>=1.0, <1.25.2",  # Temporary pin
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",

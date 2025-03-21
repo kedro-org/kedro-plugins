@@ -1,14 +1,16 @@
-# Upcoming Release
+# Upcoming Release 7.0.0
 
 ## Major features and improvements
 
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
+- Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
 
 ## Bug fixes and other changes
 
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
+- Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
 
 ## Breaking Changes
 

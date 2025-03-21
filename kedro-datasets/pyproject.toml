@@ -81,7 +81,8 @@ matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
+matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -235,10 +236,9 @@ test = [
     "pandas>=2.0",
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
-    "polars[deltalake,xlsx2csv]>=1.0",
+    "polars[deltalake,xlsx2csv]>=1.0, <1.25.2",  # Temporary pin
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pyarrow!=19.0.0",  # Temporary pin until https://github.com/apache/arrow/issues/45283 is fixed
     "pyodbc~=5.0",
     "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",
@@ -322,7 +322,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

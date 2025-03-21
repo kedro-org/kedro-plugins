@@ -1,0 +1,266 @@
+"""``MatplotlibDataset`` saves one or more Matplotlib objects as image
+files to an underlying filesystem (e.g. local, S3, GCS)."""
+from __future__ import annotations
+
+import base64
+import io
+from copy import deepcopy
+from pathlib import PurePosixPath
+from typing import Any, NoReturn
+from warnings import warn
+
+import fsspec
+import matplotlib.pyplot as plt
+from kedro.io.core import (
+    AbstractVersionedDataset,
+    DatasetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
+from matplotlib.figure import Figure
+
+from kedro_datasets._typing import ImagePreview
+
+
+class MatplotlibDataset(
+    AbstractVersionedDataset[Figure | list[Figure] | dict[str, Figure], NoReturn]
+):
+    """``MatplotlibDataset`` saves one or more Matplotlib objects as
+    image files to an underlying filesystem (e.g. local, S3, GCS).
+
+    Example usage for the
+    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+
+    .. code-block:: yaml
+
+        output_plot:
+          type: matplotlib.MatplotlibDataset
+          filepath: data/08_reporting/output_plot.png
+          save_args:
+            format: png
+
+    Example usage for the
+    `Python API <https://docs.kedro.org/en/stable/data/\
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: pycon
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
+        >>> plt.close()
+        >>> plot_dataset.save(fig)
+
+    Example saving a plot as a PDF file:
+
+    .. code-block:: pycon
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> pdf_plot_dataset = MatplotlibDataset(
+        ...     filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
+        ... )
+        >>> plt.close()
+        >>> pdf_plot_dataset.save(fig)
+
+    Example saving multiple plots in a folder, using a dictionary:
+
+    .. code-block:: pycon
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> plots_dict = {}
+        >>> for colour in ["blue", "green", "red"]:
+        ...     plots_dict[f"{colour}.png"] = plt.figure()
+        ...     plt.plot([1, 2, 3], color=colour)
+        ...
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> plt.close("all")
+        >>> dict_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
+        >>> dict_plot_dataset.save(plots_dict)
+
+    Example saving multiple plots in a folder, using a list:
+
+    .. code-block:: pycon
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> plots_list = []
+        >>> for i in range(5):  # doctest: +ELLIPSIS
+        ...     plots_list.append(plt.figure())
+        ...     plt.plot([i, i + 1, i + 2])
+        ...
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> plt.close("all")
+        >>> list_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
+        >>> list_plot_dataset.save(plots_list)
+
+    """
+
+    DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        filepath: str,
+        fs_args: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        version: Version | None = None,
+        overwrite: bool = False,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        """Creates a new instance of ``MatplotlibDataset``.
+
+        Args:
+            filepath: Filepath in POSIX format to save Matplotlib objects to, prefixed with a
+                protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem)
+                will be used. The prefix should be any protocol supported by ``fsspec``.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested key `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``S3FileSystem`` it should look like:
+                `{'key': '<id>', 'secret': '<key>'}}`
+            save_args: Save args passed to `plt.savefig`. See
+                https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
+            version: If specified, should be an instance of
+                ``kedro.io.core.Version``. If its ``load`` attribute is
+                None, the latest version will be loaded. If its ``save``
+                attribute is None, save version will be autogenerated.
+            overwrite: If True, any existing image files will be removed.
+                Only relevant when saving multiple Matplotlib objects at
+                once.
+            metadata: Any arbitrary Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
+        """
+        _credentials = deepcopy(credentials) or {}
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_open_args_save.setdefault("mode", "wb")
+
+        protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        self.metadata = metadata
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
+        self._fs_open_args_save = _fs_open_args_save
+
+        # Handle default save arguments
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+
+        if overwrite and version is not None:
+            warn(
+                "Setting 'overwrite=True' is ineffective if versioning "
+                "is enabled, since the versioned path must not already "
+                "exist; overriding flag with 'overwrite=False' instead."
+            )
+            overwrite = False
+        self._overwrite = overwrite
+
+    def _describe(self) -> dict[str, Any]:
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
+
+    def load(self) -> NoReturn:
+        """
+        Loading is not supported for MatplotlibDataset.
+
+        Raises:
+            DatasetError: When called with any arguments.
+
+        Returns:
+            Never returns as it always raises an exception.
+        """
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+
+    def save(self, data: Figure | (list[Figure] | dict[str, Figure])) -> None:
+        save_path = self._get_save_path()
+
+        if isinstance(data, list | dict) and self._overwrite and self._exists():
+            self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
+
+        if isinstance(data, list):
+            for index, plot in enumerate(data):
+                full_key_path = get_filepath_str(
+                    save_path / f"{index}.png", self._protocol
+                )
+                self._save_to_fs(full_key_path=full_key_path, plot=plot)
+        elif isinstance(data, dict):
+            for plot_name, plot in data.items():
+                full_key_path = get_filepath_str(save_path / plot_name, self._protocol)
+                self._save_to_fs(full_key_path=full_key_path, plot=plot)
+        else:
+            full_key_path = get_filepath_str(save_path, self._protocol)
+            self._save_to_fs(full_key_path=full_key_path, plot=data)
+
+        plt.close("all")
+
+        self._invalidate_cache()
+
+    def _save_to_fs(self, full_key_path: str, plot: Figure):
+        bytes_buffer = io.BytesIO()
+        plot.savefig(bytes_buffer, **self._save_args)
+
+        with self._fs.open(full_key_path, **self._fs_open_args_save) as fs_file:
+            fs_file.write(bytes_buffer.getvalue())
+
+    def _exists(self) -> bool:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        return self._fs.exists(load_path)
+
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
+
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)
+
+    def preview(self) -> ImagePreview:
+        """
+        Generates a preview of the matplotlib dataset as a base64 encoded image.
+
+        Returns:
+            str: A base64 encoded string representing the matplotlib plot image.
+        """
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(load_path, mode="rb") as img_file:
+            base64_bytes = base64.b64encode(img_file.read())
+        return ImagePreview(base64_bytes.decode("utf-8"))

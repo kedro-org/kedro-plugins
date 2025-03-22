@@ -6,20 +6,20 @@ import lazy_loader as lazy
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 DeltaTableDataset: Any
+GBQQueryDataset: Any
 SparkDataset: Any
 SparkHiveDataset: Any
 SparkJDBCDataset: Any
 SparkStreamingDataset: Any
-GBQQueryDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "deltatable_dataset": ["DeltaTableDataset"],
+        "gbq_dataset": ["GBQQueryDataset"],
         "spark_dataset": ["SparkDataset"],
         "spark_hive_dataset": ["SparkHiveDataset"],
         "spark_jdbc_dataset": ["SparkJDBCDataset"],
         "spark_streaming_dataset": ["SparkStreamingDataset"],
-        "spark_gbq_dataset": ["GBQQueryDataset"],
     },
 )

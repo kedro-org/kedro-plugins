@@ -48,7 +48,6 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
     .. code-block:: pycon
 
         >>> from kedro_datasets.spark import GBQQueryDataset
-        >>> import pyspark.sql as sql
         >>>
         >>> # Define your SQL query
         >>> sql = "SELECT * FROM your_table"

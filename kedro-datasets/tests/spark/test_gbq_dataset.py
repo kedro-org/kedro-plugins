@@ -9,7 +9,7 @@ from kedro.io import DatasetError
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
 
-from kedro_datasets.spark.spark_gbq_dataset import GBQQueryDataset
+from kedro_datasets.spark import GBQQueryDataset
 
 SQL_QUERY = "SELECT * FROM table"
 SQL_FILEPATH = "/path/to/file.sql"
@@ -170,7 +170,7 @@ def test_more_than_one_bq_credentials_key(gbq_query_dataset, credentials):
 def test_load(mocker, spark_session, init_args, expected_load_args):
     gbq_query_dataset = GBQQueryDataset(**init_args)
     mocker.patch(
-        "kedro_datasets.spark.spark_gbq_dataset.get_spark", return_value=spark_session
+        "kedro_datasets.spark.gbq_dataset.get_spark", return_value=spark_session
     )
     read_obj = mocker.MagicMock()
     spark_session.read.format.return_value = read_obj
@@ -209,7 +209,7 @@ def test_filepath_sql_query_load(mocker, spark_session, sql_file):
         materialization_project=MATERIALIZATION_PROJECT,
     )
     mocker.patch(
-        "kedro_datasets.spark.spark_gbq_dataset.get_spark", return_value=spark_session
+        "kedro_datasets.spark.gbq_dataset.get_spark", return_value=spark_session
     )
     read_obj = mocker.MagicMock()
     spark_session.read.format.return_value = read_obj
@@ -239,7 +239,7 @@ def test_warning_spark_views_enabled(
     caplog,
 ):
     mocker.patch(
-        "kedro_datasets.spark.spark_gbq_dataset.get_spark", return_value=spark_session
+        "kedro_datasets.spark.gbq_dataset.get_spark", return_value=spark_session
     )
     read_obj = mocker.MagicMock()
     spark_session.read.format.return_value = read_obj

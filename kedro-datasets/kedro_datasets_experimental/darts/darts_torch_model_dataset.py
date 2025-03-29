@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import copy
 from inspect import isclass
-from pathlib import PurePosixPath, Path
-from typing import Any, Optional, Type, Union
+from pathlib import Path, PurePosixPath
+from typing import Any
 
 import fsspec
 from darts import models
@@ -73,13 +73,13 @@ class DartsTorchModelDataset(
             self,
             *,
             filepath: str,
-            model_class: Union[str, Type[TorchForecastingModel]],
-            load_args: Optional[dict[str, Any]] = None,
-            save_args: Optional[dict[str, Any]] = None,
-            version: Optional[Version] = None,
-            credentials: Optional[dict[str, Any]] = None,
-            fs_args: Optional[dict[str, Any]] = None,
-            metadata: Optional[dict[str, Any]] = None,
+            model_class: str | type[TorchForecastingModel],
+            load_args: dict[str, Any] | None = None,
+            save_args: dict[str, Any] | None = None,
+            version: Version | None = None,
+            credentials: dict[str, Any] | None = None,
+            fs_args: dict[str, Any] | None = None,
+            metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of DartsTorchModelDataset.
 

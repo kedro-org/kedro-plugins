@@ -33,6 +33,9 @@ api = ["kedro-datasets[api-apidataset]"]
 biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
+darts-torch-model-dataset = ["u8darts-all"]
+darts = ["kedro-datasets[darts-torch-model-dataset]"]
+
 dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
@@ -301,6 +304,7 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
+    "u8darts-all",
 ]
 
 # All requirements

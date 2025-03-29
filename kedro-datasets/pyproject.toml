@@ -304,7 +304,7 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
-    "u8darts-all",
+    "u8darts[all]",
 ]
 
 # All requirements

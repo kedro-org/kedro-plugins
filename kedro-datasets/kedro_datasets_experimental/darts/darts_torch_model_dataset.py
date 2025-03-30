@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import copy
+import os
 from inspect import isclass
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
@@ -192,7 +193,7 @@ class DartsTorchModelDataset(
         # Skipping model save as 'save_model' is set to False.
         if save_model:
             raw_path = self._get_save_path()
-            Path(raw_path).parent.mkdir(parents=True, exist_ok=True)
+            os.makedirs(os.path.dirname(str(raw_path)), exist_ok=True)
             save_path = get_filepath_str(raw_path, protocol=self._protocol)
             data.save(save_path, **save_args)
 

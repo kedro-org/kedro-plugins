@@ -11,6 +11,7 @@
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
+- Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`
 
 ## Breaking Changes
 

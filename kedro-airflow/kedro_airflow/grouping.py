@@ -127,9 +127,6 @@ def group_by_namespace(
 
     grouped_nodes = pipeline.grouped_nodes_by_namespace
 
-    print("\nGROUPED NODES\n")
-    print(grouped_nodes)
-
     node_to_namespace = {}
 
     for group_name, group_info in grouped_nodes.items():
@@ -158,8 +155,5 @@ def group_by_namespace(
                 ):
                     dependent_namespaces.append(parent_ns)
         dependencies_by_namespace[ns] = dependent_namespaces
-
-    print("\nDEPENDENCIES BY NAMESPACE\n")
-    print(dependencies_by_namespace)
 
     return nodes_by_namespace, dependencies_by_namespace

@@ -43,6 +43,9 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             index: False
             date_format: "%Y-%m-%d %H:%M"
             decimal: .
+          fs_args:
+            open_args_save:
+                mode: a
 
         motorbikes:
           type: pandas.CSVDataset

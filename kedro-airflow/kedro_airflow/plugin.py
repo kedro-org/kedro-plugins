@@ -222,15 +222,15 @@ def create(  # noqa: PLR0913, PLR0912
                 nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
             elif node_grouping.lower() == "namespace":
                 node_objs = pipeline.grouped_nodes_by_namespace
-                print("\nGROUP BY NAMESPACE\n")
-                print(node_objs)
+                # print("\nGROUP BY NAMESPACE\n")
+                # print(node_objs)
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and
             # appended to the corresponding dictionaries
             node_objs = pipeline.nodes
-            print("\nDO NOT GROUP\n")
-            print(node_objs)
+            # print("\nDO NOT GROUP\n")
+            # print(node_objs)
 
         template.stream(
             dag_name=package_name,

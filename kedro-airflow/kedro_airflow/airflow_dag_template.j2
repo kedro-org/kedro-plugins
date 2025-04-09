@@ -64,7 +64,7 @@ with DAG(
         retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
     )
 ) as dag:
-tasks = {
+    tasks = {
     {%- for node_name, node_data in node_objs.items() %}
         "{{ node_name | slugify }}": KedroOperator(
             task_id="{{ node_name | slugify }}",

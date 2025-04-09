@@ -7,7 +7,11 @@ from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
+from kedro_airflow.grouping import (
+    _is_memory_dataset,
+    group_by_namespace,
+    group_memory_nodes,
+)
 
 
 class TestDataset(AbstractDataset):
@@ -85,6 +89,18 @@ def mock_kedro_pipeline() -> Pipeline:
             ),
         ],
     )
+
+
+@pytest.fixture
+def mock_pipeline_not_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline)
+
+
+@pytest.fixture
+def mock_pipeline_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline, namespace="namespace1")
 
 
 @pytest.mark.parametrize(
@@ -166,3 +182,62 @@ def test_is_memory_dataset(
             assert _is_memory_dataset(mock_catalog, node_name)
         else:
             assert not _is_memory_dataset(mock_catalog, node_name)
+
+
+@pytest.mark.parametrize(
+    "pipeline_fixture, expected_nodes, expected_dependencies",
+    [
+        (
+            "mock_pipeline_not_namespaced",
+            {
+                "f1": ["f1"],
+                "f2": ["f2"],
+                "f3": ["f3"],
+                "f4": ["f4"],
+                "f5": ["f5"],
+                "f6": ["f6"],
+                "f7": ["f7"],
+            },
+            {
+                "f1": ["f2"],
+                "f2": ["f3", "f4", "f5", "f7"],
+                "f3": [],
+                "f4": ["f6", "f7"],
+                "f5": [],
+                "f6": [],
+                "f7": [],
+            },
+        ),
+        (
+            "mock_pipeline_namespaced",
+            {
+                "namespace1": [
+                    "namespace1.f1",
+                    "namespace1.f2",
+                    "namespace1.f3",
+                    "namespace1.f4",
+                    "namespace1.f5",
+                    "namespace1.f6",
+                    "namespace1.f7",
+                ]
+            },
+            {
+                "namespace1": [],
+            },
+        ),
+    ],
+)
+def test_group_by_namespace(
+    pipeline_fixture, expected_nodes, expected_dependencies, request
+):
+    """Test grouping of nodes by namespace for different pipeline structures."""
+    pipeline = request.getfixturevalue(pipeline_fixture)
+    nodes_by_namespace, dependencies_by_namespace = group_by_namespace(pipeline)
+
+    # Convert nodes to their names for comparison
+    nodes_by_namespace = {
+        ns: [node.name for node in nodes] for ns, nodes in nodes_by_namespace.items()
+    }
+
+    assert nodes_by_namespace == expected_nodes
+    assert dependencies_by_namespace == expected_dependencies

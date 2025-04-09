@@ -126,34 +126,32 @@ def group_by_namespace(
     dependencies_by_namespace: dict[str, list[str]] = {}
 
     grouped_nodes = pipeline.grouped_nodes_by_namespace
-
-    node_to_namespace = {}
+    node_to_namespace: dict[Node, str] = {}
 
     for group_name, group_info in grouped_nodes.items():
         if group_info["type"] == "namespace":
             ns = group_info["name"]
             nodes_by_namespace.setdefault(ns, []).extend(group_info["nodes"])
-            dependencies_by_namespace.setdefault(ns, [])
             for node in group_info["nodes"]:
                 node_to_namespace[node] = ns
         else:
             for node in group_info["nodes"]:
                 ns = node.name
                 nodes_by_namespace[ns] = [node]
-                dependencies_by_namespace[ns] = []
                 node_to_namespace[node] = ns
 
+    node_to_children: dict[Node, list[Node]] = {node: [] for node in pipeline.nodes}
+    for node, parents in pipeline.node_dependencies.items():
+        for parent in parents:
+            node_to_children[parent].append(node)
+
     for ns, nodes in nodes_by_namespace.items():
-        dependent_namespaces = []
+        downstream_namespaces: list[str] = []
         for node in nodes:
-            for parent in pipeline.node_dependencies.get(node, []):
-                parent_ns = node_to_namespace.get(parent)
-                if (
-                    parent_ns
-                    and parent_ns != ns
-                    and parent_ns not in dependent_namespaces
-                ):
-                    dependent_namespaces.append(parent_ns)
-        dependencies_by_namespace[ns] = dependent_namespaces
+            for child in node_to_children.get(node, []):
+                child_ns = node_to_namespace.get(child)
+                if child_ns and child_ns != ns:
+                    downstream_namespaces.append(child_ns)
+        dependencies_by_namespace[ns] = downstream_namespaces
 
     return nodes_by_namespace, dependencies_by_namespace

@@ -64,19 +64,22 @@ with DAG(
         retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
     )
 ) as dag:
-    tasks = {
-    {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
-            task_id="{{ node_name | safe | slugify  }}",
+tasks = {
+    {%- for node_name, node_data in node_objs.items() %}
+        "{{ node_name | slugify }}": KedroOperator(
+            task_id="{{ node_name | slugify }}",
             package_name=package_name,
             pipeline_name=pipeline_name,
-            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
+            node_name={% if node_data.nodes | length > 1 %}[{% endif %}{% for node in node_data.nodes %}"{{ node.name }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_data.nodes | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
             conf_source=conf_source,
-        ),
-{% endfor %}    }
+        ){% if not loop.last %},{% endif %}
+    {%- endfor %}
+    }
 
-    {% for parent_node, child_nodes in dependencies.items() -%}
-    {% for child in child_nodes %}    tasks["{{ parent_node | safe | slugify }}"] >> tasks["{{ child | safe | slugify }}"]
-    {% endfor %}
+    {%- for node_name, node_data in node_objs.items() %}
+    {%- for dep in node_data.dependencies %}
+    tasks["{{ dep | slugify }}"] >> tasks["{{ node_name | slugify }}"]
+    {%- endfor %}
     {%- endfor %}

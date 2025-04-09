@@ -22,7 +22,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from slugify import slugify
 
-from kedro_airflow.grouping import group_by_namespace, group_memory_nodes
+from kedro_airflow.grouping import group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
@@ -221,24 +221,20 @@ def create(  # noqa: PLR0913, PLR0912
                 # implementation
                 nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
             elif node_grouping.lower() == "namespace":
-                nodes, dependencies = group_by_namespace(pipeline)
+                node_objs = pipeline.grouped_nodes_by_namespace
+                print("\nGROUP BY NAMESPACE\n")
+                print(node_objs)
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and
             # appended to the corresponding dictionaries
-            nodes = {}
-            dependencies = {}
-            for node in pipeline.nodes:
-                nodes[node.name] = [node]
-                dependencies[node.name] = []
-            for node, parent_nodes in pipeline.node_dependencies.items():
-                for parent in parent_nodes:
-                    dependencies[parent.name].append(node.name)
+            node_objs = pipeline.nodes
+            print("\nDO NOT GROUP\n")
+            print(node_objs)
 
         template.stream(
             dag_name=package_name,
-            nodes=nodes,
-            dependencies=dependencies,
+            node_objs=node_objs,
             env=env,
             pipeline_name=name,
             package_name=package_name,

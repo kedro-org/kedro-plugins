@@ -228,20 +228,16 @@ def create(  # noqa: PLR0913, PLR0912
             # appended to the corresponding dictionaries
             node_objs = {}
             for node in pipeline.nodes:
-                key = node.name
-
-                if key not in node_objs:
-                    node_objs[key] = {
-                        "name": key,
-                        "type": "node",
-                        "nodes": [],
-                        "dependencies": [],
-                    }
-                node_objs[key]["nodes"].append(node)
+                node_objs[node.name] = {
+                    "name": node.name,
+                    "nodes": [],
+                    "dependencies": [],
+                }
+                node_objs[node.name]["nodes"].append(node)
 
                 for parent in pipeline.node_dependencies[node]:
-                    if parent.name != key:
-                        node_objs[key]["dependencies"].append(parent.name)
+                    if parent.name != node.name:
+                        node_objs[node.name]["dependencies"].append(parent.name)
 
         template.stream(
             dag_name=package_name,

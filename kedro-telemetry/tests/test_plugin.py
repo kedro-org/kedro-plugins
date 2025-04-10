@@ -7,7 +7,7 @@ import yaml
 from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import KedroDataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from pytest import fixture, mark
@@ -76,7 +76,7 @@ def fake_metadata(tmp_path):
 
 @fixture
 def fake_catalog():
-    catalog = DataCatalog(
+    catalog = KedroDataCatalog(
         {
             "dummy_1": MemoryDataset(),
             "dummy_2": MemoryDataset(),

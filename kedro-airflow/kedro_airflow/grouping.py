@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from typing import Any
+
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
 try:
@@ -57,7 +58,7 @@ def create_adjacency_list(
 
 def group_memory_nodes(
     catalog: CatalogProtocol | DataCatalog, pipeline: Pipeline
-) -> dict[str, dict[str, list[Node]]]:
+) -> dict[str, dict[str, Any]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -92,7 +93,7 @@ def group_memory_nodes(
         groups[component].append(node_name)
 
     old_name_to_group = {}
-    grouped_by_memory: dict[str, dict[str, list[Node]]] = {}
+    grouped_by_memory: dict[str, dict[str, Any]] = {}
 
     for group in groups:
         group_name = "_".join(group)

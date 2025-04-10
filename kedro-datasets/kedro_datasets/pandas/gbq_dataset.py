@@ -102,7 +102,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
             credentials: Credentials for accessing Google APIs.
-                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                Either a credential that bases on google.auth.credentials.Credentials OR
                 a service account json as a dictionary OR
                 a path to a service account key json file.
             load_args: Pandas options for loading BigQuery table into DataFrame.
@@ -248,7 +248,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
             credentials: Credentials for accessing Google APIs.
-                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                Either a credential that bases on google.auth.credentials.Credentials OR
                 a service account json as a dictionary OR
                 a path to a service account key json file.
             load_args: Pandas options for loading BigQuery table into DataFrame.

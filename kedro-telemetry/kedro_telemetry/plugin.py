@@ -22,7 +22,7 @@ from kedro.framework.cli.hooks import cli_hook_impl
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import PACKAGE_NAME, pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.io.data_catalog import DataCatalog
+from kedro.io.kedro_data_catalog import KedroDataCatalog
 from kedro.pipeline import Pipeline
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
@@ -289,7 +289,7 @@ def _get_project_properties(user_uuid: str, project_path: Path | None) -> dict:
 
 
 def _format_project_statistics_data(
-    catalog: DataCatalog,
+    catalog: KedroDataCatalog,
     default_pipeline: Pipeline,
     project_pipelines: dict,
 ):
@@ -297,7 +297,7 @@ def _format_project_statistics_data(
     project_statistics_properties = {}
     project_statistics_properties["number_of_datasets"] = sum(
         1
-        for c in catalog.list()
+        for c in catalog
         if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (

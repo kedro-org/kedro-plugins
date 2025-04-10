@@ -119,7 +119,7 @@ def mock_pipeline_namespaced():
         ),
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
-            {},
+            set(),
             [["f1"], ["f2"], ["f3"], ["f4"], ["f5"], ["f6"], ["f7"]],
             {"f1": {"f2"}, "f2": {"f3", "f4", "f5", "f7"}, "f4": {"f6", "f7"}},
         ),
@@ -135,14 +135,22 @@ def test_group_memory_nodes(
     mock_catalog = mock_data_catalog(all_nodes, memory_nodes)
     mock_pipeline = mock_kedro_pipeline()
 
-    groups, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
-    sequence = [
-        [node_.name for node_ in node_sequence] for node_sequence in groups.values()
-    ]
+    result = group_memory_nodes(mock_catalog, mock_pipeline)
 
-    assert sequence == expected_nodes
-    dependencies_set = {nn: set(deps) for nn, deps in dependencies.items()}
-    assert dependencies_set == expected_dependencies
+    # Extract node name groups (sorted inside and overall, to ensure deterministic comparison)
+    actual_nodes = [
+        sorted([node.name for node in group_info["nodes"]])
+        for group_info in result.values()
+    ]
+    assert sorted(actual_nodes) == sorted(expected_nodes)
+
+    # Extract dependencies
+    actual_dependencies = {
+        group_name: set(group_info["dependencies"])
+        for group_name, group_info in result.items()
+        if group_info["dependencies"]
+    }
+    assert actual_dependencies == expected_dependencies
 
 
 @pytest.mark.parametrize(

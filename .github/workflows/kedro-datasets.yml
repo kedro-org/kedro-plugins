@@ -58,6 +58,10 @@ jobs:
         run: |
           cd kedro-datasets
           uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
+      - name: Clean docs build cache
+        run: |
+          cd kedro-datasets
+          rm -rf _build
       - name: Documentation check for kedro-datasets
         run: |
           make check-datasets-docs

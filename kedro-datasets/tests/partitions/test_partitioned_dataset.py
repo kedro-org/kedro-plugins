@@ -308,10 +308,13 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize(
         "dataset_config,error_pattern",
         [
-            ("UndefinedDatasetType", "Class 'UndefinedDatasetType' not found"),
+            (
+                "UndefinedDatasetType",
+                r"Empty module name\. Invalid dataset path: 'UndefinedDatasetType'\. Please check if it's correct\.",
+            ),
             (
                 "missing.module.UndefinedDatasetType",
-                r"Class 'missing\.module\.UndefinedDatasetType' not found",
+                r"No module named 'missing'\. Please install the missing dependencies for missing\.module\.UndefinedDatasetType",
             ),
             (
                 FakeDataset,

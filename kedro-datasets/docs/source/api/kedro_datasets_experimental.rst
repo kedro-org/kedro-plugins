@@ -11,6 +11,7 @@ kedro_datasets_experimental
    :toctree:
    :template: autosummary/class.rst
 
+   darts.DartsTorchModelDataset
    databricks.ExternalTableDataset
    langchain.ChatAnthropicDataset
    langchain.ChatCohereDataset

@@ -1,5 +1,7 @@
 # Upcoming Release
 * Fixed check whether a dataset is a `MemoryDataset`.
+* Added the option to group nodes by namespace.
+* The CLI option `--group-in-memory` was altered to `--group-by`, which can receive the values `memory` or `namespace`. Functionality for grouping by memory was not altered.
 
 # Release 0.9.2
 * Removed support for Python 3.8

@@ -58,10 +58,11 @@ jobs:
         run: |
           cd kedro-datasets
           uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
-      - name: Clean docs build cache
+      - name: Clean Sphinx build and autosummary cache
         run: |
           cd kedro-datasets
           rm -rf _build
+          find docs/source/api/ -name "*.rst" ! -name "kedro_datasets.rst" ! -name "kedro_datasets_experimental.rst" -delete
       - name: Documentation check for kedro-datasets
         run: |
           make check-datasets-docs

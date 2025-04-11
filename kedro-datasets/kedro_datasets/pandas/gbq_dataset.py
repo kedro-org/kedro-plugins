@@ -101,7 +101,11 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
             project: Google BigQuery Account project ID.
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: use Google API.
+            credentials: Credentials for accessing Google APIs.
+                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                a service account json as a dictionary OR
+                a path to a service account key json file.
+                https://googleapis.dev/python/google-auth/latest/
             load_args: Pandas options for loading BigQuery table into DataFrame.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
@@ -244,7 +248,11 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             project: Google BigQuery Account project ID.
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: use Google API.
+            credentials: Credentials for accessing Google APIs.
+                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                a service account json as a dictionary OR
+                a path to a service account key json file.
+                https://googleapis.dev/python/google-auth/latest/
             load_args: Pandas options for loading BigQuery table into DataFrame.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html

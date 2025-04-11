@@ -19,6 +19,10 @@
 
 ## Community contributions
 
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Abhishek Bhatia](https://github.com/abhi8893)
+
 # Release 6.0.0
 
 ## Major features and improvements

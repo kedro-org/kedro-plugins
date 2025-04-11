@@ -94,31 +94,6 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataset``.
-
-        Args:
-            dataset: Google BigQuery dataset.
-            table_name: Google BigQuery table name.
-            project: Google BigQuery Account project ID.
-                Optional when available from the environment.
-                https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: Google API credentials.
-                Either a credential that bases on google auth credentials OR
-                a service account json as a dictionary OR
-                a path to a service account key json file.
-            load_args: Pandas options for loading BigQuery table into DataFrame.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
-                All defaults are preserved.
-            save_args: Pandas options for saving DataFrame to BigQuery table.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
-                All defaults are preserved, but "progress_bar", which is set to False.
-            metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins.
-
-        Raises:
-            DatasetError: When ``load_args['location']`` and ``save_args['location']``
-                are different.
         """
         # Handle default load and save arguments
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
@@ -241,30 +216,6 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
-
-        Args:
-            sql: The sql query statement.
-            project: Google BigQuery Account project ID.
-                Optional when available from the environment.
-                https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: Google API credentials.
-                Either a credential that bases on google auth credentials OR
-                a service account json as a dictionary OR
-                a path to a service account key json file.
-            load_args: Pandas options for loading BigQuery table into DataFrame.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
-                All defaults are preserved.
-            fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
-                SQL query from filepath.
-            filepath: A path to a file with a sql query statement.
-            metadata: Any arbitrary metadata.
-                This is ignored by Kedro, but may be consumed by users or external plugins.
-
-        Raises:
-            DatasetError: When ``sql`` and ``filepath`` parameters are either both empty
-                or both provided, as well as when the `save()` method is invoked.
         """
         if sql and filepath:
             raise DatasetError(

@@ -101,7 +101,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
             project: Google BigQuery Account project ID.
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: Credentials for accessing Google APIs.
+            credentials: Google API credentials.
                 Either a credential that bases on google auth credentials OR
                 a service account json as a dictionary OR
                 a path to a service account key json file.
@@ -247,7 +247,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             project: Google BigQuery Account project ID.
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
-            credentials: Credentials for accessing Google APIs.
+            credentials: Google API credentials.
                 Either a credential that bases on google auth credentials OR
                 a service account json as a dictionary OR
                 a path to a service account key json file.

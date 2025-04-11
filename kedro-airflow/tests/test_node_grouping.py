@@ -103,25 +103,39 @@ def mock_pipeline_namespaced():
 
 
 @pytest.mark.parametrize(
-    "all_nodes,memory_nodes,expected_nodes,expected_dependencies",
+    "all_nodes, memory_nodes, expected_nodes, expected_dependencies",
     [
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
             {"ds3", "ds6"},
             [["f1"], ["f2", "f3", "f4", "f6", "f7"], ["f5"]],
-            {"f1": {"f2_f3_f4_f6_f7"}, "f2_f3_f4_f6_f7": {"f5"}},
+            {
+                "f2_f3_f4_f6_f7": {"f1"},
+                "f5": {"f2_f3_f4_f6_f7"},
+            },
         ),
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
             {"ds3"},
             [["f1"], ["f2", "f3", "f4", "f7"], ["f5"], ["f6"]],
-            {"f1": {"f2_f3_f4_f7"}, "f2_f3_f4_f7": {"f5", "f6"}},
+            {
+                "f2_f3_f4_f7": {"f1"},
+                "f5": {"f2_f3_f4_f7"},
+                "f6": {"f2_f3_f4_f7"},
+            },
         ),
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
             set(),
             [["f1"], ["f2"], ["f3"], ["f4"], ["f5"], ["f6"], ["f7"]],
-            {"f1": {"f2"}, "f2": {"f3", "f4", "f5", "f7"}, "f4": {"f6", "f7"}},
+            {
+                "f2": {"f1"},
+                "f3": {"f2"},
+                "f4": {"f2"},
+                "f5": {"f2"},
+                "f6": {"f4"},
+                "f7": {"f2", "f4"},
+            },
         ),
     ],
 )

@@ -110,15 +110,11 @@ def group_memory_nodes(
 
     # Compute dependencies between groups
     for parent, children in parent_to_children.items():
-        if not children:
-            continue
         parent_group = old_name_to_group[parent]
         for child in children:
             child_group = old_name_to_group[child]
-            if (
-                parent_group != child_group
-                and child_group not in grouped_by_memory[parent_group]["dependencies"]
-            ):
-                grouped_by_memory[parent_group]["dependencies"].append(child_group)
+            if parent_group != child_group:
+                if parent_group not in grouped_by_memory[child_group]["dependencies"]:
+                    grouped_by_memory[child_group]["dependencies"].append(parent_group)
 
     return grouped_by_memory

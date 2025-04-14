@@ -201,7 +201,6 @@ docs = [
     "kedro-sphinx-theme==2024.10.2",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
-    "Sphinx >=7.0.0, <8.0.0",
 ]
 
 # Test requirements

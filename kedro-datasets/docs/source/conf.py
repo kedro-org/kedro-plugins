@@ -147,6 +147,7 @@ type_targets = {
         "prophet.forecaster.Prophet",
         "Prophet",
         "snowflake.snowpark.session.Session",
+        "darts.models.forecasting.torch_forecasting_model.TorchForecastingModel",
     ),
     "py:data": (
         "typing.Any",

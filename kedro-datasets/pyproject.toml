@@ -33,9 +33,6 @@ api = ["kedro-datasets[api-apidataset]"]
 biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
-darts-torch-model-dataset = ["u8darts-all"]
-darts = ["kedro-datasets[darts-torch-model-dataset]"]
-
 dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
@@ -173,6 +170,8 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+darts-torch-model-dataset = ["u8darts-all"]
+darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]

@@ -5,6 +5,11 @@
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
 - Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
+- Added the following new **experimental datasets**:
+
+| Type     | Description                                             | Location                            |
+|----------|---------------------------------------------------------|-------------------------------------|
+| `darts.DartsTorchModelDataset` | A dataset for securely saving and loading Darts Torch Forecasting Models. | `kedro_datasets_experimental.darts` |
 
 ## Bug fixes and other changes
 
@@ -12,12 +17,20 @@
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
 - Provide enhanced error message for the spark session created via databricks-connect if the builder args are incomplete provided.
+- Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`
 
 ## Breaking Changes
 
 - Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Szymon Cogiel](https://github.com/SzymonCogiel)
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Abhishek Bhatia](https://github.com/abhi8893)
 
 # Release 6.0.0
 

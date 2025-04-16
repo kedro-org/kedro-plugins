@@ -103,6 +103,7 @@ intersphinx_mapping = {
     "kedro": ("https://docs.kedro.org/en/stable/", None),
     "python": ("https://docs.python.org/3.10/", None),
     "requests": ("https://requests.readthedocs.io/en/stable/", None),
+    "google.auth": ('https://googleapis.dev/python/google-auth/latest/', None),
 }
 
 type_targets = {
@@ -146,6 +147,7 @@ type_targets = {
         "prophet.forecaster.Prophet",
         "Prophet",
         "snowflake.snowpark.session.Session",
+        "darts.models.forecasting.torch_forecasting_model.TorchForecastingModel",
     ),
     "py:data": (
         "typing.Any",

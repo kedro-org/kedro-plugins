@@ -147,6 +147,7 @@ type_targets = {
         "prophet.forecaster.Prophet",
         "Prophet",
         "snowflake.snowpark.session.Session",
+        "optuna.study.study.Study",
         "darts.models.forecasting.torch_forecasting_model.TorchForecastingModel",
     ),
     "py:data": (

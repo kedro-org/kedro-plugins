@@ -5,10 +5,11 @@
 - Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
 - Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
 - Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
-- Added the following new **experimental datasets**:
+- Added the following new **experimental** datasets:
 
-| Type     | Description                                             | Location                            |
-|----------|---------------------------------------------------------|-------------------------------------|
+| Type                          | Description                                                     | Location                              |
+| ----------------------------- | --------------------------------------------------------------- | ------------------------------------- |
+| `optuna.StudyDataset`         | A dataset for saving and loading Optuna studies.                | `kedro_datasets_experimental.optuna`  |
 | `darts.DartsTorchModelDataset` | A dataset for securely saving and loading Darts Torch Forecasting Models. | `kedro_datasets_experimental.darts` |
 
 ## Bug fixes and other changes
@@ -30,6 +31,10 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Abhishek Bhatia](https://github.com/abhi8893)
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 6.0.0
 

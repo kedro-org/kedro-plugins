@@ -4,6 +4,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
+import asyncio
 import operator
 from collections.abc import Callable
 from copy import deepcopy
@@ -156,6 +157,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         overwrite: bool = False,
         save_lazily: bool = True,
         metadata: dict[str, Any] | None = None,
+        use_async: bool = False,
     ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
 
@@ -200,6 +202,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
+            use_async: If True, the dataset will be saved asynchronously.
+                Defaults to False.
 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
@@ -215,6 +219,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._partition_cache: Cache = Cache(maxsize=1)
         self._save_lazily = save_lazily
         self.metadata = metadata
+        self._use_async = use_async
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -310,6 +315,12 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return partitions
 
     def save(self, data: dict[str, Any]) -> None:
+        if self._use_async:
+            asyncio.run(self._async_save(data))
+        else:
+            self._sync_save(data)
+
+    def _sync_save(self, data: dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
@@ -323,6 +334,36 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
+
+    async def _async_save(self, data: dict[str, Any]) -> None:
+        if self._overwrite and await self._filesystem_exists(self._normalized_path):
+            await self._filesystem_rm(self._normalized_path, recursive=True)
+
+        async def save_partition(partition_id: str, partition_data: Any) -> None:
+            kwargs = deepcopy(self._dataset_config)
+            partition = self._partition_to_path(partition_id)
+            kwargs[self._filepath_arg] = self._join_protocol(partition)
+            dataset = self._dataset_type(**kwargs)  # type: ignore
+            if callable(partition_data):
+                partition_data = partition_data()  # noqa: PLW2901
+            await self._dataset_save(dataset, partition_data)
+
+        await asyncio.gather(
+            *[
+                save_partition(partition_id, partition_data)
+                for partition_id, partition_data in sorted(data.items())
+            ]
+        )
+        self._invalidate_caches()
+
+    async def _filesystem_exists(self, path: str) -> bool:
+        return self._filesystem.exists(path)
+
+    async def _filesystem_rm(self, path: str, recursive: bool) -> None:
+        self._filesystem.rm(path, recursive=recursive)
+
+    async def _dataset_save(self, dataset: AbstractDataset, data: Any) -> None:
+        dataset.save(data)
 
     def _describe(self) -> dict[str, Any]:
         clean_dataset_config = (

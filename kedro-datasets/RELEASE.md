@@ -1,5 +1,23 @@
 # Upcoming Release
 
+## Major features and improvements
+
+- ...
+
+## Bug fixes and other changes
+
+- ...
+
+## Breaking changes
+
+- ...
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- ...
+
 # Release 7.0.0
 
 ## Major features and improvements

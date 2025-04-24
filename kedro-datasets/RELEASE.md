@@ -1,4 +1,6 @@
-# Upcoming Release 7.0.0
+# Upcoming Release
+
+# Release 7.0.0
 
 ## Major features and improvements
 
@@ -7,33 +9,28 @@
 - Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
 - Added the following new **experimental** datasets:
 
-| Type                          | Description                                                     | Location                              |
-| ----------------------------- | --------------------------------------------------------------- | ------------------------------------- |
-| `optuna.StudyDataset`         | A dataset for saving and loading Optuna studies.                | `kedro_datasets_experimental.optuna`  |
-| `darts.DartsTorchModelDataset` | A dataset for securely saving and loading Darts Torch Forecasting Models. | `kedro_datasets_experimental.darts` |
+| Type                           | Description                                                               | Location                             |
+| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------ |
+| `optuna.StudyDataset`          | A dataset for saving and loading Optuna studies.                          | `kedro_datasets_experimental.optuna` |
+| `darts.DartsTorchModelDataset` | A dataset for securely saving and loading Darts Torch Forecasting Models. | `kedro_datasets_experimental.darts`  |
 
 ## Bug fixes and other changes
 
 - Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
-- Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`
+- Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`.
 
 ## Breaking Changes
 
 - Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Community contributions
+
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
-
-Many thanks to the following Kedroids for contributing PRs to this release:
-
 - [Abhishek Bhatia](https://github.com/abhi8893)
-
-Many thanks to the following Kedroids for contributing PRs to this release:
-
 - [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 6.0.0

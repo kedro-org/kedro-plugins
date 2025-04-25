@@ -89,6 +89,9 @@ networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
+optuna-studydataset = ["optuna"]
+optuna = ["kedro-datasets[optuna-studydataset]"]
+
 pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
@@ -170,6 +173,8 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+darts-torch-model-dataset = ["u8darts-all"]
+darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
@@ -301,6 +306,8 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
+    "optuna",
+    "u8darts[all]",
 ]
 
 # All requirements

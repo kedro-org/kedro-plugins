@@ -33,6 +33,11 @@ def filepath_pq(tmp_path):
 
 
 @pytest.fixture
+def filepath_pq_folder(tmp_path):
+    return (tmp_path / "test_parquet").as_posix()
+
+
+@pytest.fixture
 def dummy_dataframe():
     return pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
@@ -52,6 +57,17 @@ def csv_dataset(filepath_csv, load_args, save_args, fs_args):
 def parquet_dataset(filepath_pq, load_args, save_args, fs_args):
     return LazyPolarsDataset(
         filepath=filepath_pq,
+        file_format="parquet",
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def parquet_folder_dataset(filepath_pq_folder, load_args, save_args, fs_args):
+    return LazyPolarsDataset(
+        filepath=(Path(filepath_pq_folder) / "**" / "*.parquet").as_posix(),
         file_format="parquet",
         load_args=load_args,
         save_args=save_args,
@@ -397,6 +413,18 @@ class TestLazyParquetDatasetVersioned:
         Path(parquet_dataset._filepath.as_posix()).unlink()
         versioned_parquet_dataset.save(dummy_dataframe)
         assert versioned_parquet_dataset.exists()
+
+    def test_loading_parquet_folder_dataset(
+        self, parquet_folder_dataset, dummy_dataframe, filepath_pq_folder
+    ):
+        """Test loading a parquet folder dataset."""
+        dummy_dataframe.write_parquet(
+            filepath_pq_folder,
+            use_pyarrow=True,
+            pyarrow_options={"partition_cols": ["col1"]},
+        )
+        df = parquet_folder_dataset.load().collect()
+        assert df.shape == (2, 2)
 
 
 class TestBadLazyPolarsDataset:

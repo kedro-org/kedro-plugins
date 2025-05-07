@@ -263,14 +263,30 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
-    def _list_partitions(self) -> list[str]:
-        dataset_is_versioned = VERSION_KEY in self._dataset_config
-        return [
-            _grandparent(path) if dataset_is_versioned else path
-            for path in self._filesystem.find(self._normalized_path, **self._load_args)
-            if path.endswith(self._filename_suffix)
-        ]
+    def _list_partitions(self, force_refresh=False) -> list[str]:
+        """List partitions with option to force cache refresh.
+
+        Args:
+            force_refresh: If True, clear the cache before listing partitions.
+                Defaults to False.
+
+        Returns:
+            List of partition paths.
+        """
+        if force_refresh:
+            self._partition_cache.clear()
+            self._filesystem.invalidate_cache(self._normalized_path)
+
+        @cachedmethod(cache=operator.attrgetter("_partition_cache"))
+        def _cached_list_partitions(self):
+            dataset_is_versioned = VERSION_KEY in self._dataset_config
+            return [
+                _grandparent(path) if dataset_is_versioned else path
+                for path in self._filesystem.find(self._normalized_path, **self._load_args)
+                if path.endswith(self._filename_suffix)
+            ]
+
+        return _cached_list_partitions(self)
 
     def _join_protocol(self, path: str) -> str:
         protocol_prefix = f"{self._protocol}://"
@@ -357,7 +373,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:
-        return bool(self._list_partitions())
+        """Check if any partitions exist, with cache refresh."""
+        return bool(self._list_partitions(force_refresh=True))
 
     def _release(self) -> None:
         super()._release()

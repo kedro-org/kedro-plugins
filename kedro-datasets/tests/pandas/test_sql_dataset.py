@@ -384,6 +384,15 @@ class TestSQLQueryDataset:
         if has_execution_options:
             assert con_arg.get_execution_options() == EXECUTION_OPTIONS
 
+    @pytest.mark.parametrize("encoding", ["utf-8", "latin1", "cp1252"])
+    def test_load_with_encoding(self, mocker, query_dataset, encoding):
+        """Test if the encoding params is well transmitted"""
+        query_dataset.encoding = encoding
+        mock_open = mocker.mock_open(read_data=SQL_QUERY)
+        mocker.patch.object(query_dataset._fs, "open", mock_open)
+        query_dataset.load()
+        query_dataset._fs.open.assert_called_once_with(ANY, mode="r", encoding=encoding)
+
     def test_load_driver_missing(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""

@@ -20,6 +20,7 @@ from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+from kedro.pipeline.pipeline import GroupedNode
 from slugify import slugify
 
 from kedro_airflow.grouping import group_memory_nodes
@@ -225,19 +226,23 @@ def create(  # noqa: PLR0913, PLR0912
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and
-            # appended to the corresponding dictionaries
-            node_objs = {}
+            # appended to the corresponding list
+            node_objs = []
             for node in pipeline.nodes:
-                node_objs[node.name] = {
-                    "name": node.name,
-                    "nodes": [],
-                    "dependencies": [],
-                }
-                node_objs[node.name]["nodes"].append(node)
+                dependencies = [
+                    parent.name
+                    for parent in pipeline.node_dependencies[node]
+                    if parent.name != node.name
+                ]
 
-                for parent in pipeline.node_dependencies[node]:
-                    if parent.name != node.name:
-                        node_objs[node.name]["dependencies"].append(parent.name)
+                node_objs.append(
+                    GroupedNode(
+                        name=node.name,
+                        type="node",
+                        nodes=[node.name],
+                        dependencies=dependencies,
+                    )
+                )
 
         template.stream(
             dag_name=package_name,

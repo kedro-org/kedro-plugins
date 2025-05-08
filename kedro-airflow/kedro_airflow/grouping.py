@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline.pipeline import Pipeline
+from kedro.pipeline.pipeline import Pipeline, GroupedNode
 
 try:
     from kedro.io import CatalogProtocol
@@ -58,7 +58,7 @@ def create_adjacency_list(
 
 def group_memory_nodes(
     catalog: CatalogProtocol | DataCatalog, pipeline: Pipeline
-) -> dict[str, dict[str, Any]]:
+) -> list[GroupedNode]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -93,20 +93,20 @@ def group_memory_nodes(
         groups[component].append(node_name)
 
     old_name_to_group = {}
-    grouped_by_memory: dict[str, dict[str, Any]] = {}
+    grouped_by_memory: dict[str, GroupedNode] = {}
 
     for group in groups:
         group_name = "_".join(group)
-        group_nodes = [name_to_node[node_name] for node_name in group]
         for node_name in group:
             old_name_to_group[node_name] = group_name
 
-        grouped_by_memory[group_name] = {
-            "name": group_name,
-            "type": "node",
-            "nodes": group_nodes,
-            "dependencies": [],
-        }
+        grouped_by_memory[group_name] = GroupedNode(
+            name=group_name,
+            type="node",
+            nodes=group,
+            dependencies=[],
+        )
+
 
     # Compute dependencies between groups
     for parent, children in parent_to_children.items():
@@ -114,7 +114,7 @@ def group_memory_nodes(
         for child in children:
             child_group = old_name_to_group[child]
             if parent_group != child_group:
-                if parent_group not in grouped_by_memory[child_group]["dependencies"]:
-                    grouped_by_memory[child_group]["dependencies"].append(parent_group)
+                if parent_group not in grouped_by_memory[child_group].dependencies:
+                    grouped_by_memory[child_group].dependencies.append(parent_group)
 
-    return grouped_by_memory
+    return list(grouped_by_memory.values())

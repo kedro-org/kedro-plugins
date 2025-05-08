@@ -153,16 +153,16 @@ def test_group_memory_nodes(
 
     # Extract node name groups (sorted inside and overall, to ensure deterministic comparison)
     actual_nodes = [
-        sorted([node.name for node in group_info["nodes"]])
-        for group_info in result.values()
+        sorted(group_info.nodes)
+        for group_info in result
     ]
     assert sorted(actual_nodes) == sorted(expected_nodes)
 
     # Extract dependencies
     actual_dependencies = {
-        group_name: set(group_info["dependencies"])
-        for group_name, group_info in result.items()
-        if group_info["dependencies"]
+        group_info.name: set(group_info.dependencies)
+        for group_info in result
+        if group_info.dependencies
     }
     assert actual_dependencies == expected_dependencies
 

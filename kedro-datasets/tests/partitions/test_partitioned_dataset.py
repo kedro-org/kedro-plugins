@@ -508,36 +508,6 @@ class TestPartitionedDatasetLocal:
         assert pds._dataset_config["credentials"] == expected_ds_creds
         assert pds._credentials == global_creds
 
-    def test_force_refresh_parameter(self, tmp_path):
-        """Test that force_refresh parameter correctly refreshes the partition cache."""
-        # Empty partitioned dataset
-        ds = PartitionedDataset(
-            path=str(tmp_path),
-            dataset="pandas.CSVDataset",
-            filename_suffix=".csv"
-        )
-
-        # Initially, no partitions and exist() should return False
-        assert not ds._exists()
-        assert len(ds._list_partitions()) == 0
-
-        # Create a CSV file
-        df = pd.DataFrame({"col1": [1, 2]})
-        csv_path = tmp_path / "test_partition.csv"
-        df.to_csv(csv_path, index=False)
-
-        # Without force_refresh, should still return empty list (cached result)
-        assert len(ds._list_partitions()) == 0
-
-        # With force_refresh, should find the new file
-        assert len(ds._list_partitions(force_refresh=True)) == 1
-
-        # _exists() should also find it because it uses force_refresh
-        assert ds._exists()
-
-        # Cache updated
-        assert len(ds._list_partitions()) == 1
-
 
 BUCKET_NAME = "fake_bucket_name"
 S3_DATASET_DEFINITION = [

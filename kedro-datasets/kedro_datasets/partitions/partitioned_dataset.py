@@ -263,30 +263,14 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
-    def _list_partitions(self, force_refresh=False) -> list[str]:
-        """List partitions with option to force cache refresh.
-
-        Args:
-            force_refresh: If True, clear the cache before listing partitions.
-                Defaults to False.
-
-        Returns:
-            List of partition paths.
-        """
-        if force_refresh:
-            self._partition_cache.clear()
-            self._filesystem.invalidate_cache(self._normalized_path)
-
-        @cachedmethod(cache=operator.attrgetter("_partition_cache"))
-        def _cached_list_partitions(self):
-            dataset_is_versioned = VERSION_KEY in self._dataset_config
-            return [
-                _grandparent(path) if dataset_is_versioned else path
-                for path in self._filesystem.find(self._normalized_path, **self._load_args)
-                if path.endswith(self._filename_suffix)
-            ]
-
-        return _cached_list_partitions(self)
+    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
+    def _list_partitions(self) -> list[str]:
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
+        return [
+            _grandparent(path) if dataset_is_versioned else path
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
+            if path.endswith(self._filename_suffix)
+        ]
 
     def _join_protocol(self, path: str) -> str:
         protocol_prefix = f"{self._protocol}://"
@@ -310,15 +294,18 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:
+        self._invalidate_caches()  # Invalidate cache before listing partitions
+
         partitions = {}
 
-        # Force refresh the cache before listing partitions to see newly created partitions
-        for partition in self._list_partitions(force_refresh=True):
+        # The _list_partitions() call will now always perform a fresh scan
+        # because its cache was just cleared.
+        for partition_file_path in self._list_partitions():
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
+            kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            partition_id = self._path_to_partition(partition)
+            partition_id = self._path_to_partition(partition_file_path)
             partitions[partition_id] = dataset.load
 
         if not partitions:
@@ -374,8 +361,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:
-        """Check if any partitions exist, with cache refresh."""
-        return bool(self._list_partitions(force_refresh=True))
+        return bool(self._list_partitions())
 
     def _release(self) -> None:
         super()._release()

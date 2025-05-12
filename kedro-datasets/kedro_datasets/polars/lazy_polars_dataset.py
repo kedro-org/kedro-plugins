@@ -5,6 +5,7 @@ type of read/write target.
 from __future__ import annotations
 
 import errno
+import glob
 import logging
 import os
 from copy import deepcopy
@@ -248,10 +249,11 @@ class LazyPolarsDataset(
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
+            load_files = glob.glob(load_path)
         except DatasetError:  # pragma: no cover
             return False
 
-        return self._fs.exists(load_path)
+        return all(self._fs.exists(file) for file in load_files)
 
     def _release(self) -> None:
         super()._release()

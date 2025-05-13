@@ -9,9 +9,8 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline import node
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-from kedro.pipeline import Pipeline
 from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
@@ -21,8 +20,8 @@ from kedro_telemetry.plugin import (
     MISSING_USER_IDENTITY,
     KedroTelemetryHook,
     _check_for_telemetry_consent,
-    _is_known_ci_env,
     _format_project_statistics_data,
+    _is_known_ci_env,
 )
 
 REPO_NAME = "dummy_project"

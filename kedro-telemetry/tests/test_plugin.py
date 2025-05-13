@@ -689,9 +689,11 @@ class TestKedroTelemetryHook:
             catalog, pipeline_fixture, project_pipelines
         )
 
-        assert result["number_of_datasets"] == 2
-        assert result["number_of_nodes"] == 2
-        assert result["number_of_pipelines"] == 2
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
 
     def test_new_catalog_with_keys_method(self, pipeline_fixture, project_pipelines):
         # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
@@ -710,6 +712,8 @@ class TestKedroTelemetryHook:
             catalog, pipeline_fixture, project_pipelines
         )
 
-        assert result["number_of_datasets"] == 2
-        assert result["number_of_nodes"] == 2
-        assert result["number_of_pipelines"] == 2
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt

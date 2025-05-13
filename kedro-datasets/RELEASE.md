@@ -6,7 +6,7 @@
 
 ## Bug fixes and other changes
 
-- ...
+- Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 
 ## Breaking changes
 

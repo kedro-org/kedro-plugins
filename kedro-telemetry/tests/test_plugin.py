@@ -1,6 +1,7 @@
 import logging
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import requests
 import yaml
@@ -8,7 +9,7 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline import node
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from pytest import fixture, mark
 
@@ -19,6 +20,7 @@ from kedro_telemetry.plugin import (
     MISSING_USER_IDENTITY,
     KedroTelemetryHook,
     _check_for_telemetry_consent,
+    _format_project_statistics_data,
     _is_known_ci_env,
 )
 
@@ -120,6 +122,21 @@ def fake_sub_pipeline():
         ],
     )
     return mock_sub_pipeline
+
+
+@fixture
+def pipeline_fixture() -> Pipeline:
+    mock_pipeline = MagicMock(spec=Pipeline)
+    mock_pipeline.nodes = ["node1", "node2"]
+    return mock_pipeline
+
+
+@fixture
+def project_pipelines() -> dict[str, Pipeline]:
+    return {
+        "pipeline1": MagicMock(spec=Pipeline),
+        "pipeline2": MagicMock(spec=Pipeline),
+    }
 
 
 class TestKedroTelemetryHook:
@@ -652,3 +669,50 @@ class TestKedroTelemetryHook:
         telemetry_hook.after_context_created(fake_context)
 
         mocked_heap_call.assert_not_called()
+
+    def test_old_catalog_with_list_method(self, pipeline_fixture, project_pipelines):
+        # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
+        catalog = MagicMock()
+        catalog.list.return_value = [
+            "dataset1",
+            "params:my_param",
+            "dataset2",
+            "parameters",
+        ]
+
+        # Ensure .keys is not present
+        if hasattr(catalog, "keys"):
+            del catalog.keys
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
+
+    def test_new_catalog_with_keys_method(self, pipeline_fixture, project_pipelines):
+        # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
+        catalog = MagicMock()
+        catalog.keys.return_value = [
+            "datasetA",
+            "params:global",
+            "datasetB",
+            "parameters",
+        ]
+        # Ensure .list is not present
+        if hasattr(catalog, "list"):
+            del catalog.list
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt

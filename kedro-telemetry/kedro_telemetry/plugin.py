@@ -294,10 +294,16 @@ def _format_project_statistics_data(
     project_pipelines: dict,
 ):
     """Add project statistics to send to Heap."""
+    # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
+    if hasattr(catalog, "keys") and callable(catalog.keys):
+        dataset_names = catalog.keys()
+    else:
+        dataset_names = catalog.list()
+
     project_statistics_properties = {}
     project_statistics_properties["number_of_datasets"] = sum(
         1
-        for c in catalog.list()
+        for c in dataset_names
         if not c.startswith("parameters") and not c.startswith("params:")
     )
     project_statistics_properties["number_of_nodes"] = (

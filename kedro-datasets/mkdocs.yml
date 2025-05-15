@@ -1,0 +1,120 @@
+site_name: ""
+site_url: https://docs.kedro.org
+use_directory_urls: true
+
+theme:
+  name: material
+  palette:
+     # Palette toggle for light mode
+    - scheme: light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  language: en
+  font:
+    text: Inter
+    code: Inter Regular
+  favicon: "https://kedro.org/images/favicon.ico"
+  logo: assets/kedro-horizontal-color-on-light.svg
+
+
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.code.annotate
+    - content.code.highlight
+
+plugins:
+  - search
+  - autorefs
+  - mermaid2
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]  # or wherever your code lives
+          options:
+            # show_source: false
+            show_root_heading: true
+            # show_signature_annotations: true
+            # show_if_no_docstring: true  
+            show_root_toc_entry: true
+            separate_signature: true
+            docstring_options:
+              ignore_init_summary: true
+              warn_unknown_params: false
+              returns_named_value: false
+            import:
+              - https://docs.kedro.org/en/stable/objects.inv
+              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - footnotes
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_css:
+  - stylesheets/colors.css
+  - stylesheets/globals.css
+  - stylesheets/themes.css
+
+extra_javascript:
+  - javascript/readthedocs.js
+  - javascript/deindex-old-docs.js
+
+
+nav:
+  - Home: index.md
+  - Kedro: https://docs.kedro.org/projects/
+  - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
+  - Kedro-Datasets: 
+    - API documentation:
+      - kedro_datasets_experimental:
+        - pages/api/kedro_datasets_experimental/index.md
+        - databricks.ExternalTableDataset: pages/api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
+        - langchain.ChatAnthropicDataset: pages/api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md
+        - langchain.ChatCohereDataset: pages/api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
+        - langchain.ChatOpenAIDataset: pages/api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
+        - langchain.OpenAIEmbeddingsDataset: pages/api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
+        - netcdf.NetCDFDataset: pages/api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - prophet.ProphetModelDataset: pages/api/kedro_datasets_experimental/prophet.ProphetModelDataset.md
+        - pytorch.PyTorchDataset: pages/api/kedro_datasets_experimental/pytorch.PyTorchDataset.md
+        - rioxarray.GeoTIFFDataset: pages/api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md
+        - safetensors.SafetensorsDataset: pages/api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md
+        - video.VideoDataset: pages/api/kedro_datasets_experimental/video.VideoDataset.md

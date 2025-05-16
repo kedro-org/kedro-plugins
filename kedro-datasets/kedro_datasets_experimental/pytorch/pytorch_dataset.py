@@ -28,15 +28,15 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
 
     .. code-block:: pycon
 
-        >>> from kedro_datasets_experimental.pytorch import PyTorchDataset
-        >>> import torch
-        >>>
-        >>> model: torch.nn.Module
-        >>> model = torch.nn.Sequential(torch.nn.Linear(10, 10), torch.nn.ReLU())
-        >>> dataset = PyTorchDataset(filepath=tmp_path / "model.pt")
-        >>> dataset.save(model)
-        >>> reloaded = TheModelClass(*args, **kwargs)
-        >>> reloaded.load_state_dict(dataset.load())
+        from kedro_datasets_experimental.pytorch import PyTorchDataset
+        import torch
+        
+        model: torch.nn.Module
+        model = torch.nn.Sequential(torch.nn.Linear(10, 10), torch.nn.ReLU())
+        dataset = PyTorchDataset(filepath=tmp_path / "model.pt")
+        dataset.save(model)
+        reloaded = TheModelClass(*args, **kwargs)
+        reloaded.load_state_dict(dataset.load())
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

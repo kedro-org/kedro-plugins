@@ -20,49 +20,42 @@ logger = logging.getLogger(__name__)
 
 
 class NetCDFDataset(AbstractDataset):
-    """``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
+    """`NetCDFDataset` loads and saves data to a local netcdf (.nc) file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ```yaml
+    single-file:
+    type: netcdf.NetCDFDataset
+    filepath: s3://bucket_name/path/to/folder/data.nc
+    save_args:
+        mode: a
+    load_args:
+        decode_times: False
 
-    .. code-block:: yaml
+    multi-file:
+    type: netcdf.NetCDFDataset
+    filepath: s3://bucket_name/path/to/folder/data*.nc
+    load_args:
+        concat_dim: time
+        combine: nested
+        parallel: True
+    ```
 
-        single-file:
-          type: netcdf.NetCDFDataset
-          filepath: s3://bucket_name/path/to/folder/data.nc
-          save_args:
-            mode: a
-          load_args:
-            decode_times: False
-
-        multi-file:
-          type: netcdf.NetCDFDataset
-          filepath: s3://bucket_name/path/to/folder/data*.nc
-          load_args:
-            concat_dim: time
-            combine: nested
-            parallel: True
-
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.netcdf import NetCDFDataset
-        >>> import xarray as xr
-        >>> ds = xr.DataArray(
-        ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
-        ... ).to_dataset()
-        >>> dataset = NetCDFDataset(
-        ...     filepath=tmp_path / "data.nc",
-        ...     save_args={"mode": "w"},
-        ... )
-        >>> dataset.save(ds)
-        >>> reloaded = dataset.load()
-        >>> assert ds.equals(reloaded)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ```python
+    from kedro_datasets.netcdf import NetCDFDataset
+    import xarray as xr
+    ds = xr.DataArray(
+         [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
+     ).to_dataset()
+    dataset = NetCDFDataset(
+         filepath=tmp_path / "data.nc",
+         save_args={"mode": "w"},
+    )
+    dataset.save(ds)
+    reloaded = dataset.load()
+    assert ds.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

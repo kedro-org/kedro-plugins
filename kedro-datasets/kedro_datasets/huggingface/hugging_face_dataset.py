@@ -8,31 +8,34 @@ from kedro.io import AbstractVersionedDataset
 
 
 class HFDataset(AbstractVersionedDataset):
-    """``HFDataset`` loads Hugging Face datasets
-    using the `datasets <https://pypi.org/project/datasets>`_ library.
+    """`HFDataset` loads Hugging Face datasets using the [`datasets`](https://pypi.org/project/datasets) library.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
+    yelp_reviews:
+        type: kedro_hf_datasets.HFDataset
+        dataset_name: yelp_review_full
+    ```
 
-       yelp_reviews:
-         type: kedro_hf_datasets.HFDataset
-         dataset_name: yelp_review_full
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the :doc:`Python API <kedro:data/advanced_data_catalog_usage>`:
+    ```python
+    from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
+    disable_progress_bar()  # for doctest to pass
+    set_verbosity(ERROR)  # for doctest to pass
 
-    .. code-block:: pycon
+    from kedro_datasets.huggingface import HFDataset
+    dataset = HFDataset(dataset_name="openai_humaneval")
+    ds = dataset.load()  # doctest: +ELLIPSIS
 
-       >>> from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
-       >>> disable_progress_bar()  # for doctest to pass
-       >>> set_verbosity(ERROR)  # for doctest to pass
-       >>> from kedro_datasets.huggingface import HFDataset
-       >>> dataset = HFDataset(dataset_name="openai_humaneval")
-       >>> ds = dataset.load()  # doctest: +ELLIPSIS
-       Downloading and preparing dataset ...
-       Dataset ...
-       >>> assert "test" in ds
-       >>> assert len(ds["test"]) == 164
+    # Output:
+    # Downloading and preparing dataset ...
+    # Dataset ...
+
+    assert "test" in ds
+    assert len(ds["test"]) == 164
+    ```
 
     """
 

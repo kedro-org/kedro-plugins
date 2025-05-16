@@ -26,31 +26,26 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
     """``YAMLDataset`` loads/saves data from/to a YAML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
+    cars:
+        type: yaml.YAMLDataset
+        filepath: cars.yaml
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-        cars:
-          type: yaml.YAMLDataset
-          filepath: cars.yaml
+    ```python
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    from kedro_datasets.yaml import YAMLDataset
 
-    .. code-block:: pycon
+    data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
 
-        >>> from kedro_datasets.yaml import YAMLDataset
-        >>>
-        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-        >>>
-        >>> dataset = YAMLDataset(filepath=tmp_path / "test.yaml")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data == reloaded
-
+    dataset = YAMLDataset(filepath=tmp_path / "test.yaml")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data == reloaded
+    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"default_flow_style": False}

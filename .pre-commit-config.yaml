@@ -10,6 +10,8 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml # Checks yaml files for parseable syntax.
+        exclude: kedro-datasets/mkdocs.yml
+      - id: check-added-large-files # Checks for large files added to the repository.
       - id: check-added-large-files
       - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
       - id: check-merge-conflict # Check for files that contain merge conflict strings.

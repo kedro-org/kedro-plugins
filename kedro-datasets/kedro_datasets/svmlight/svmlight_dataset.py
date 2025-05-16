@@ -44,49 +44,45 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     This format is used as the default format for both svmlight and the
     libsvm command line programs.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        svm_dataset:
-          type: svmlight.SVMLightDataset
-          filepath: data/01_raw/location.svm
-          load_args:
-            zero_based: False
-          save_args:
-            zero_based: False
+    svm_dataset:
+        type: svmlight.SVMLightDataset
+        filepath: data/01_raw/location.svm
+        load_args:
+        zero_based: False
+        save_args:
+        zero_based: False
 
-        cars:
-          type: svmlight.SVMLightDataset
-          filepath: gcs://your_bucket/cars.svm
-          fs_args:
-            project: my-project
-          credentials: my_gcp_credentials
-          load_args:
-            zero_based: False
-          save_args:
-            zero_based: False
+    cars:
+        type: svmlight.SVMLightDataset
+        filepath: gcs://your_bucket/cars.svm
+        fs_args:
+        project: my-project
+        credentials: my_gcp_credentials
+        load_args:
+        zero_based: False
+        save_args:
+        zero_based: False
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.svmlight import SVMLightDataset
+    import numpy as np
 
-        >>> from kedro_datasets.svmlight import SVMLightDataset
-        >>> import numpy as np
-        >>>
-        >>> # Features and labels.
-        >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
-        >>>
-        >>> dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
-        >>> dataset.save(data)
-        >>> reloaded_features, reloaded_labels = dataset.load()
-        >>> assert (data[0] == reloaded_features).all()
-        >>> assert (data[1] == reloaded_labels).all()
+    # Features and labels.
+    data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
 
+    dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
+    dataset.save(data)
+    reloaded_features, reloaded_labels = dataset.load()
+    assert (data[0] == reloaded_features).all()
+    assert (data[1] == reloaded_labels).all()
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

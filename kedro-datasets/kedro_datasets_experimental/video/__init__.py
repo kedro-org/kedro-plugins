@@ -7,7 +7,7 @@ try:
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
     # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-    VideoDataset = Any
+    VideoDataset: Any
 
 import lazy_loader as lazy
 

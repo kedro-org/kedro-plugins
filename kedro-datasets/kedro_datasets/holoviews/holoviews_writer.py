@@ -27,15 +27,16 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
 
     Example:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import holoviews as hv
-        >>> from kedro_datasets.holoviews import HoloviewsWriter
-        >>>
-        >>> curve = hv.Curve(range(10))
-        >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
-        >>>
-        >>> holoviews_writer.save(curve)
+        import holoviews as hv
+        from kedro_datasets.holoviews import HoloviewsWriter
+
+        curve = hv.Curve(range(10))
+        holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
+
+        holoviews_writer.save(curve)
+    ```
 
     """
 

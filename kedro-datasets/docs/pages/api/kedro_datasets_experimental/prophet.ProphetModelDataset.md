@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.prophet.ProphetDataset
+::: kedro_datasets_experimental.prophet.ProphetModelDataset
     options:
         members: true
         show_source: true

@@ -115,11 +115,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
 )
 @click.option(
     "-g",
-    "--group-in-memory",
-    is_flag=True,
-    default=False,
+    "--group-by",
+    "node_grouping",
+    default=None,
     help="Group nodes with at least one MemoryDataset as input/output together, "
     "as they do not persist between Airflow operators.",
+    type=click.Choice(["memory", "namespace"], case_sensitive=False),
 )
 @click.option(
     "--tags",
@@ -148,7 +149,7 @@ def create(  # noqa: PLR0913, PLR0912
     env,
     target_path,
     jinja_file,
-    group_in_memory,
+    node_grouping,
     tags,
     params,
     conf_source,
@@ -213,28 +214,34 @@ def create(  # noqa: PLR0913, PLR0912
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
         # Group memory nodes
-        if group_in_memory:
-            # The order of nodes and dependencies is deterministic and based on the
-            # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
-            # implementation
-            nodes, dependencies = group_memory_nodes(context.catalog, pipeline)
+        if node_grouping:
+            if node_grouping.lower() == "memory":
+                # The order of nodes and dependencies is deterministic and based on the
+                # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
+                # implementation
+                node_objs = group_memory_nodes(context.catalog, pipeline)
+            elif node_grouping.lower() == "namespace":
+                node_objs = pipeline.grouped_nodes_by_namespace
         else:
             # To keep the order of nodes and dependencies deterministic - nodes are
             # iterated in the topological sort order obtained from pipeline.nodes and
             # appended to the corresponding dictionaries
-            nodes = {}
-            dependencies = {}
+            node_objs = {}
             for node in pipeline.nodes:
-                nodes[node.name] = [node]
-                dependencies[node.name] = []
-            for node, parent_nodes in pipeline.node_dependencies.items():
-                for parent in parent_nodes:
-                    dependencies[parent.name].append(node.name)
+                node_objs[node.name] = {
+                    "name": node.name,
+                    "nodes": [],
+                    "dependencies": [],
+                }
+                node_objs[node.name]["nodes"].append(node)
+
+                for parent in pipeline.node_dependencies[node]:
+                    if parent.name != node.name:
+                        node_objs[node.name]["dependencies"].append(parent.name)
 
         template.stream(
             dag_name=package_name,
-            nodes=nodes,
-            dependencies=dependencies,
+            node_objs=node_objs,
             env=env,
             pipeline_name=name,
             package_name=package_name,

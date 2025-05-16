@@ -7,7 +7,10 @@ from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from kedro_airflow.grouping import _is_memory_dataset, group_memory_nodes
+from kedro_airflow.grouping import (
+    _is_memory_dataset,
+    group_memory_nodes,
+)
 
 
 class TestDataset(AbstractDataset):
@@ -87,26 +90,52 @@ def mock_kedro_pipeline() -> Pipeline:
     )
 
 
+@pytest.fixture
+def mock_pipeline_not_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline)
+
+
+@pytest.fixture
+def mock_pipeline_namespaced():
+    base_pipeline = mock_kedro_pipeline()
+    return modular_pipeline(base_pipeline, namespace="namespace1")
+
+
 @pytest.mark.parametrize(
-    "all_nodes,memory_nodes,expected_nodes,expected_dependencies",
+    "all_nodes, memory_nodes, expected_nodes, expected_dependencies",
     [
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
             {"ds3", "ds6"},
             [["f1"], ["f2", "f3", "f4", "f6", "f7"], ["f5"]],
-            {"f1": {"f2_f3_f4_f6_f7"}, "f2_f3_f4_f6_f7": {"f5"}},
+            {
+                "f2_f3_f4_f6_f7": {"f1"},
+                "f5": {"f2_f3_f4_f6_f7"},
+            },
         ),
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
             {"ds3"},
             [["f1"], ["f2", "f3", "f4", "f7"], ["f5"], ["f6"]],
-            {"f1": {"f2_f3_f4_f7"}, "f2_f3_f4_f7": {"f5", "f6"}},
+            {
+                "f2_f3_f4_f7": {"f1"},
+                "f5": {"f2_f3_f4_f7"},
+                "f6": {"f2_f3_f4_f7"},
+            },
         ),
         (
             ["ds1", "ds2", "ds3", "ds4", "ds5", "ds6", "ds7", "ds8", "ds9"],
-            {},
+            set(),
             [["f1"], ["f2"], ["f3"], ["f4"], ["f5"], ["f6"], ["f7"]],
-            {"f1": {"f2"}, "f2": {"f3", "f4", "f5", "f7"}, "f4": {"f6", "f7"}},
+            {
+                "f2": {"f1"},
+                "f3": {"f2"},
+                "f4": {"f2"},
+                "f5": {"f2"},
+                "f6": {"f4"},
+                "f7": {"f2", "f4"},
+            },
         ),
     ],
 )
@@ -120,14 +149,22 @@ def test_group_memory_nodes(
     mock_catalog = mock_data_catalog(all_nodes, memory_nodes)
     mock_pipeline = mock_kedro_pipeline()
 
-    groups, dependencies = group_memory_nodes(mock_catalog, mock_pipeline)
-    sequence = [
-        [node_.name for node_ in node_sequence] for node_sequence in groups.values()
-    ]
+    result = group_memory_nodes(mock_catalog, mock_pipeline)
 
-    assert sequence == expected_nodes
-    dependencies_set = {nn: set(deps) for nn, deps in dependencies.items()}
-    assert dependencies_set == expected_dependencies
+    # Extract node name groups (sorted inside and overall, to ensure deterministic comparison)
+    actual_nodes = [
+        sorted([node.name for node in group_info["nodes"]])
+        for group_info in result.values()
+    ]
+    assert sorted(actual_nodes) == sorted(expected_nodes)
+
+    # Extract dependencies
+    actual_dependencies = {
+        group_name: set(group_info["dependencies"])
+        for group_name, group_info in result.items()
+        if group_info["dependencies"]
+    }
+    assert actual_dependencies == expected_dependencies
 
 
 @pytest.mark.parametrize(

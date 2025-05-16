@@ -15,7 +15,7 @@ build:
     post_install:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH cd kedro-datasets && uv pip install .[docs]
       # Build the MkDocs documentation
-      - mkdocs build
+      - cd kedro-datasets && mkdocs build
       # Ensure the output directory exists
       - mkdir -p $READTHEDOCS_OUTPUT/html
       # Move the built site to the Read the Docs output directory

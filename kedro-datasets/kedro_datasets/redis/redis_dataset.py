@@ -43,9 +43,9 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
     from kedro_datasets.redis import PickleDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     my_data = PickleDataset(key="my_data")
     my_data.save(data)
     reloaded = my_data.load()

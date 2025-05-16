@@ -73,10 +73,10 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
 
     from kedro_datasets.svmlight import SVMLightDataset
     import numpy as np
-    
+
     # Features and labels.
     data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
-    
+
     dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
     dataset.save(data)
     reloaded_features, reloaded_labels = dataset.load()

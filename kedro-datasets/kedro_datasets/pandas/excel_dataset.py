@@ -58,9 +58,9 @@ class ExcelDataset(
 
     from kedro_datasets.pandas import ExcelDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = ExcelDataset(filepath=tmp_path / "test.xlsx")
     dataset.save(data)
     reloaded = dataset.load()
@@ -81,14 +81,14 @@ class ExcelDataset(
         load_args:
         sheet_name: [Sheet1, Sheet2, Sheet3]
     ```
-    
+
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html) for a multi-sheet Excel file:
-    
+
     ```python
 
     from kedro_datasets.pandas import ExcelDataset
     import pandas as pd
-    
+
     dataframe = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
     another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
     multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}

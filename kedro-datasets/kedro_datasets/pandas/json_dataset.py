@@ -49,9 +49,9 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     from kedro_datasets.pandas import JSONDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = JSONDataset(filepath=tmp_path / "test.json")
     dataset.save(data)
     reloaded = dataset.load()

@@ -33,9 +33,9 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     ```python
 
     from kedro_datasets.text import TextDataset
-    
+
     string_to_write = "This will go in a file."
-    
+
     dataset = TextDataset(filepath=tmp_path / "test.md")
     dataset.save(string_to_write)
     reloaded = dataset.load()

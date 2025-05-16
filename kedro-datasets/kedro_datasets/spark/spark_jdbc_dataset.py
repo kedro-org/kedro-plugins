@@ -39,7 +39,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     import pandas as pd
     from kedro_datasets.spark import SparkJDBCDataset
     from pyspark.sql import SparkSession
-    
+
     spark = SparkSession.builder.getOrCreate()
     data = spark.createDataFrame(
         pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -54,10 +54,10 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         load_args={"properties": connection_properties},
         save_args={"properties": connection_properties},
     )
-    
+
     dataset.save(data)
     reloaded = dataset.load()
-    
+
     assert data.toPandas().equals(reloaded.toPandas())
     ```
 

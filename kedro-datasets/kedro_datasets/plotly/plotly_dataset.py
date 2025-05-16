@@ -50,9 +50,9 @@ class PlotlyDataset(JSONDataset):
     from kedro_datasets.plotly import PlotlyDataset
     import plotly.express as px
     import pandas as pd
-    
+
     df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
-    
+
     dataset = PlotlyDataset(
         filepath=tmp_path / "scatter_plot.json",
         plotly_args={

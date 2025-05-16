@@ -45,16 +45,16 @@ class IncrementalDataset(PartitionedDataset):
     ```python
 
     from kedro_datasets.partitions import IncrementalDataset
-    
+
     dataset = IncrementalDataset(
         path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
     )
     loaded = dataset.load()  # loads all available partitions
     # assert isinstance(loaded, dict)
-    
+
     dataset.confirm()  # update checkpoint value to the last processed partition ID
     reloaded = dataset.load()  # still loads all available partitions
-    
+
     dataset.release()  # clears load cache
     # returns an empty dictionary as no new partitions were added
     assert dataset.load() == {}

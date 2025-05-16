@@ -38,9 +38,9 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
     ```python
 
     from kedro_datasets.yaml import YAMLDataset
-    
+
     data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-    
+
     dataset = YAMLDataset(filepath=tmp_path / "test.yaml")
     dataset.save(data)
     reloaded = dataset.load()

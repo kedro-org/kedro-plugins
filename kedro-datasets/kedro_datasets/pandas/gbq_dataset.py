@@ -28,7 +28,7 @@ from kedro_datasets._utils import ConnectionMixin
 class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataset`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
-    
+
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
@@ -50,15 +50,15 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
 
     from kedro_datasets.pandas import GBQTableDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = GBQTableDataset(
         dataset="dataset", table_name="table_name", project="my-project"
     )
     dataset.save(data)
     reloaded = dataset.load()
-    
+
     assert data.equals(reloaded)
     ```
     """
@@ -190,7 +190,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html): 
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
@@ -208,11 +208,11 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     ```python
 
     from kedro_datasets.pandas import GBQQueryDataset
-    
+
     sql = "SELECT * FROM dataset_1.table_a"
-    
+
     dataset = GBQQueryDataset(sql, project="my-project")
-    
+
     sql_data = dataset.load()
     ```
     """

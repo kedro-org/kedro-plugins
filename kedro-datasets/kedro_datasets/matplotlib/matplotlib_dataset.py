@@ -45,7 +45,7 @@ class MatplotlibDataset(
 
     import matplotlib.pyplot as plt
     from kedro_datasets.matplotlib import MatplotlibDataset
-    
+
     fig = plt.figure()
     plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
@@ -59,7 +59,7 @@ class MatplotlibDataset(
 
     import matplotlib.pyplot as plt
     from kedro_datasets.matplotlib import MatplotlibDataset
-    
+
     fig = plt.figure()
     plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
@@ -75,12 +75,12 @@ class MatplotlibDataset(
 
     import matplotlib.pyplot as plt
     from kedro_datasets.matplotlib import MatplotlibDataset
-    
+
     plots_dict = {}
     for colour in ["blue", "green", "red"]:
         plots_dict[f"{colour}.png"] = plt.figure()
         plt.plot([1, 2, 3], color=colour)
-    
+
     [<matplotlib.lines.Line2D object at 0x...>]
     [<matplotlib.lines.Line2D object at 0x...>]
     [<matplotlib.lines.Line2D object at 0x...>]
@@ -94,12 +94,12 @@ class MatplotlibDataset(
 
     import matplotlib.pyplot as plt
     from kedro_datasets.matplotlib import MatplotlibDataset
-    
+
     plots_list = []
     for i in range(5):  # doctest: +ELLIPSIS
         plots_list.append(plt.figure())
         plt.plot([i, i + 1, i + 2])
-    
+
     [<matplotlib.lines.Line2D object at 0x...>]
     [<matplotlib.lines.Line2D object at 0x...>]
     [<matplotlib.lines.Line2D object at 0x...>]

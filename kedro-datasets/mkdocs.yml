@@ -105,7 +105,7 @@ nav:
   - Home: index.md
   - Kedro: https://docs.kedro.org/projects/
   - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
-  - Kedro-Datasets: 
+  - Kedro-Datasets:
     - API documentation:
       - Core Datasets:
         - pages/api/kedro_datasets/index.md

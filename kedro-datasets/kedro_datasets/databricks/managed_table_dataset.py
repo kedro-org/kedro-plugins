@@ -54,7 +54,7 @@ class ManagedTableDataset(BaseTableDataset):
     from pyspark.sql import SparkSession
     from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
     import importlib_metadata
-    
+
     DELTA_VERSION = importlib_metadata.version("delta-spark")
     schema = StructType(
         [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]

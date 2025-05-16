@@ -38,20 +38,20 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     from kedro_datasets.spark import DeltaTableDataset, SparkDataset
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-    
+
     schema = StructType(
         [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
     )
-    
+
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-    
+
     spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
     filepath = (tmp_path / "test_data").as_posix()
     dataset = SparkDataset(filepath=filepath, file_format="delta")
     dataset.save(spark_df)
     deltatable_dataset = DeltaTableDataset(filepath=filepath)
     delta_table = deltatable_dataset.load()
-    
+
     assert isinstance(delta_table, DeltaTable)
     ```
     """

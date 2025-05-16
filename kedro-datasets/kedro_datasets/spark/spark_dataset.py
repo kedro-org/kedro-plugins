@@ -125,21 +125,21 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
 
     from pyspark.sql import SparkSession
     from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-    
+
     from kedro_datasets.spark import SparkDataset
-    
+
     schema = StructType(
         [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
     )
-    
+
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-    
+
     spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-    
+
     dataset = SparkDataset(filepath=tmp_path / "test_data")
     dataset.save(spark_df)
     reloaded = dataset.load()
-    
+
     assert Row(name="Bob", age=12) in reloaded.take(4)
     ```
     """

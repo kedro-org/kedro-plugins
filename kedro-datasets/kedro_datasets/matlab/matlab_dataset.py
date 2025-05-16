@@ -44,7 +44,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
 
     data = np.array([1, 2, 3])
     dataset = MatlabDataset(filepath=tmp_path / "test.mat")
-    
+
     dataset.save(data)
     reloaded = dataset.load()
     assert (data == reloaded["data"]).all()

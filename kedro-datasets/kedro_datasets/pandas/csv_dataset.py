@@ -54,9 +54,9 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     from kedro_datasets.pandas import CSVDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = CSVDataset(filepath=tmp_path / "test.csv")
     dataset.save(data)
     reloaded = dataset.load()

@@ -62,9 +62,9 @@ class LazyPolarsDataset(
 
     from kedro_datasets.polars import LazyPolarsDataset
     import polars as pl
-    
+
     data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = LazyPolarsDataset(filepath=tmp_path / "test.csv", file_format="csv")
     dataset.save(data)
     reloaded = dataset.load()

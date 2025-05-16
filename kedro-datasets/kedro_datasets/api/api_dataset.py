@@ -17,7 +17,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html): 
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
@@ -37,8 +37,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     ```python
 
         from kedro_datasets.api import APIDataset
-        
-        
+
+
         dataset = APIDataset(
             url="https://api.spaceflightnewsapi.net/v4/articles",
             load_args={
@@ -56,7 +56,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     ```python
 
         example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
-        
+
         dataset = APIDataset(
             method="POST",
             url="https://dummyjson.com/products/add",

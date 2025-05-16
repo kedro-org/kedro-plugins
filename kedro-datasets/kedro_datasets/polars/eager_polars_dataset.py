@@ -38,16 +38,16 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         save_args:
         compression: "snappy"
     ```
-    
+
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
     from kedro_datasets.polars import EagerPolarsDataset
     import polars as pl
-    
+
     data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
     dataset.save(data)
     reloaded = dataset.load()

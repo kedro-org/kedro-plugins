@@ -27,13 +27,13 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     ```python
 
         import sys
-        
+
         import pytest
         from kedro_datasets.pillow import ImageDataset
-        
+
         if sys.platform.startswith("win"):
             pytest.skip("this doctest hangs on Windows CI runner")
-        
+
         dataset = ImageDataset(
             filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
         )

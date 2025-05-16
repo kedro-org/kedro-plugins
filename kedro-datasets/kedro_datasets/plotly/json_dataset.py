@@ -41,7 +41,7 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
 
     from kedro_datasets.plotly import JSONDataset
     import plotly.express as px
-    
+
     fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
     dataset = JSONDataset(filepath=tmp_path / "test.json")
     dataset.save(fig)

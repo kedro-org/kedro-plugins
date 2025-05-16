@@ -44,23 +44,23 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-    
+
     from kedro_datasets.spark import SparkHiveDataset
-    
+
     schema = StructType(
         [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
     )
-    
+
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-    
+
     spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-    
+
     dataset = SparkHiveDataset(
         database="test_database", table="test_table", write_mode="overwrite"
     )
     dataset.save(spark_df)
     reloaded = dataset.load()
-    
+
     reloaded.take(4)
     ```
     """

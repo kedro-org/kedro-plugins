@@ -50,14 +50,14 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     from kedro_datasets.pandas import FeatherDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = FeatherDataset(filepath=tmp_path / "test.feather")
-    
+
     dataset.save(data)
     reloaded = dataset.load()
-    
+
     assert data.equals(reloaded)
     ```
     """

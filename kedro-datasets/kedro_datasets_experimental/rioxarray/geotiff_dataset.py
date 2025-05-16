@@ -25,8 +25,8 @@ SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
     """`GeoTIFFDataset` loads and saves raster data files and reads them as xarray `DataArray`s. The underlying functionality is supported by **rioxarray**, **rasterio**, and **xarray**.
 
-    Reading and writing of single and multiband GeoTIFF data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.  
-    Supported dimensions are `("band", "x", "y")` and `("x", "y")`. xarray `DataArray`s with other dimensions cannot be saved to a GeoTIFF file.  
+    Reading and writing of single and multiband GeoTIFF data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
+    Supported dimensions are `("band", "x", "y")` and `("x", "y")`. xarray `DataArray`s with other dimensions cannot be saved to a GeoTIFF file.
     If you need other formats, consider using NetCDF.
 
     ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)

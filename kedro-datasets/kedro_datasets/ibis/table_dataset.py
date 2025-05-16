@@ -39,9 +39,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     ```python
     import ibis
     from kedro_datasets.ibis import TableDataset
-    
+
     data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    
+
     dataset = TableDataset(
         table_name="test",
         connection={"backend": "duckdb", "database": tmp_path / "file.db"},

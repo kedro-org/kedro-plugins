@@ -134,15 +134,15 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
         from kedro_datasets.pandas import SQLTableDataset
         import pandas as pd
-        
+
         data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         table_name = "table_a"
         credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
         dataset = SQLTableDataset(table_name=table_name, credentials=credentials)
-        
+
         dataset.save(data)
         reloaded = dataset.load()
-        
+
         assert data.equals(reloaded)
     ```
     """
@@ -329,7 +329,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         stream_results: true
         load_args:
         chunksize: 1000
-    ``` 
+    ```
 
     Sample database credentials entry in ``credentials.yml``:
 
@@ -345,15 +345,15 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     ```python
 
     import sqlite3
-    
+
     from kedro_datasets.pandas import SQLQueryDataset
     import pandas as pd
-    
+
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
     sql = "SELECT * FROM table_a"
     credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
     dataset = SQLQueryDataset(sql=sql, credentials=credentials)
-    
+
     con = sqlite3.connect(tmp_path / "test.db")
     cur = con.cursor()
     cur.execute("CREATE TABLE table_a(col1, col2, col3)")
@@ -362,7 +362,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     <sqlite3.Cursor object at 0x...>
     con.commit()
     reloaded = dataset.load()
-    
+
     assert data.equals(reloaded)
     ```
 
@@ -389,7 +389,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             f"TrustServerCertificate=yes;"
         )
         return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
-    
+
     connection_str = _make_mssql_connection_str(**credentials)  # doctest: +SKIP
     dataset = SQLQueryDataset(  # doctest: +SKIP
         credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"

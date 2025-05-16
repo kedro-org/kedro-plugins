@@ -50,9 +50,9 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
 
         import ibis
         from kedro_datasets.ibis import FileDataset
-        
+
         data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
+
         dataset = FileDataset(
             filepath=tmp_path / "test.csv",
             file_format="csv",

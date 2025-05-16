@@ -107,7 +107,62 @@ nav:
   - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
   - Kedro-Datasets: 
     - API documentation:
-      - kedro_datasets_experimental:
+      - Core Datasets:
+        - pages/api/kedro_datasets/index.md
+        - api.APIDataset: pages/api/kedro_datasets/api.APIDataset.md
+        - biosequence.BioSequenceDataset: pages/api/kedro_datasets/biosequence.BioSequenceDataset.md
+        - dask.CSVDataset: pages/api/kedro_datasets/dask.CSVDataset.md
+        - dask.ParquetDataset: pages/api/kedro_datasets/dask.ParquetDataset.md
+        - databricks.ManagedTableDataset: pages/api/kedro_datasets/databricks.ManagedTableDataset.md
+        - email.EmailMessageDataset: pages/api/kedro_datasets/email.EmailMessageDataset.md
+        - geopandas.GenericDataset: pages/api/kedro_datasets/geopandas.GenericDataset.md
+        - holoviews.HoloviewsWriter: pages/api/kedro_datasets/holoviews.HoloviewsWriter.md
+        - huggingface.HFDataset: pages/api/kedro_datasets/huggingface.HFDataset.md
+        - huggingface.HFTransformerPipelineDataset: pages/api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md
+        - ibis.FileDataset: pages/api/kedro_datasets/ibis.FileDataset.md
+        - ibis.TableDataset: pages/api/kedro_datasets/ibis.TableDataset.md
+        - json.JSONDataset: pages/api/kedro_datasets/json.JSONDataset.md
+        - matlab.MatlabDataset: pages/api/kedro_datasets/matlab.MatlabDataset.md
+        - matplotlib.MatplotlibDataset: pages/api/kedro_datasets/matplotlib.MatplotlibDataset.md
+        - matplotlib.MatplotlibWriter: pages/api/kedro_datasets/matplotlib.MatplotlibWriter.md
+        - networkx.GMLDataset: pages/api/kedro_datasets/networkx.GMLDataset.md
+        - networkx.GraphMLDataset: pages/api/kedro_datasets/networkx.GraphMLDataset.md
+        - networkx.JSONDataset: pages/api/kedro_datasets/networkx.JSONDataset.md
+        - pandas.CSVDataset: pages/api/kedro_datasets/pandas.CSVDataset.md
+        - pandas.DeltaTableDataset: pages/api/kedro_datasets/pandas.DeltaTableDataset.md
+        - pandas.ExcelDataset: pages/api/kedro_datasets/pandas.ExcelDataset.md
+        - pandas.FeatherDataset: pages/api/kedro_datasets/pandas.FeatherDataset.md
+        - pandas.GBQQueryDataset: pages/api/kedro_datasets/pandas.GBQQueryDataset.md
+        - pandas.GBQTableDataset: pages/api/kedro_datasets/pandas.GBQTableDataset.md
+        - pandas.GenericDataset: pages/api/kedro_datasets/pandas.GenericDataset.md
+        - pandas.HDFDataset: pages/api/kedro_datasets/pandas.HDFDataset.md
+        - pandas.JSONDataset: pages/api/kedro_datasets/pandas.JSONDataset.md
+        - pandas.ParquetDataset: pages/api/kedro_datasets/pandas.ParquetDataset.md
+        - pandas.SQLQueryDataset: pages/api/kedro_datasets/pandas.SQLQueryDataset.md
+        - pandas.SQLTableDataset: pages/api/kedro_datasets/pandas.SQLTableDataset.md
+        - pandas.XMLDataset: pages/api/kedro_datasets/pandas.XMLDataset.md
+        - partitions.IncrementalDataset: pages/api/kedro_datasets/partitions.IncrementalDataset.md
+        - partitions.PartitionedDataset: pages/api/kedro_datasets/partitions.PartitionedDataset.md
+        - pickle.PickleDataset: pages/api/kedro_datasets/pickle.PickleDataset.md
+        - pillow.ImageDataset: pages/api/kedro_datasets/pillow.ImageDataset.md
+        - plotly.HTMLDataset: pages/api/kedro_datasets/plotly.HTMLDataset.md
+        - plotly.JSONDataset: pages/api/kedro_datasets/plotly.JSONDataset.md
+        - plotly.PlotlyDataset: pages/api/kedro_datasets/plotly.PlotlyDataset.md
+        - polars.CSVDataset: pages/api/kedro_datasets/polars.CSVDataset.md
+        - polars.EagerPolarsDataset: pages/api/kedro_datasets/polars.EagerPolarsDataset.md
+        - polars.LazyPolarsDataset: pages/api/kedro_datasets/polars.LazyPolarsDataset.md
+        - redis.PickleDataset: pages/api/kedro_datasets/redis.PickleDataset.md
+        - snowflake.SnowparkTableDataset: pages/api/kedro_datasets/snowflake.SnowparkTableDataset.md
+        - spark.DeltaTableDataset: pages/api/kedro_datasets/spark.DeltaTableDataset.md
+        - spark.SparkDataset: pages/api/kedro_datasets/spark.SparkDataset.md
+        - spark.SparkHiveDataset: pages/api/kedro_datasets/spark.SparkHiveDataset.md
+        - spark.SparkJDBCDataset: pages/api/kedro_datasets/spark.SparkJDBCDataset.md
+        - spark.SparkStreamingDataset: pages/api/kedro_datasets/spark.SparkStreamingDataset.md
+        - svmlight.SVMLightDataset: pages/api/kedro_datasets/svmlight.SVMLightDataset.md
+        - tensorflow.TensorFlowModelDataset: pages/api/kedro_datasets/tensorflow.TensorFlowModelDataset.md
+        - text.TextDataset: pages/api/kedro_datasets/text.TextDataset.md
+        - yaml.YAMLDataset: pages/api/kedro_datasets/yaml.YAMLDataset.md
+      - Experimental Datasets:
         - pages/api/kedro_datasets_experimental/index.md
         - databricks.ExternalTableDataset: pages/api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - langchain.ChatAnthropicDataset: pages/api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md

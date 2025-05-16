@@ -32,7 +32,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         cars:
           type: pandas.FeatherDataset
@@ -45,25 +45,23 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           type: pandas.FeatherDataset
           filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
           credentials: dev_s3
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import FeatherDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = FeatherDataset(filepath=tmp_path / "test.feather")
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
-
+        from kedro_datasets.pandas import FeatherDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        dataset = FeatherDataset(filepath=tmp_path / "test.feather")
+        
+        dataset.save(data)
+        reloaded = dataset.load()
+        
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

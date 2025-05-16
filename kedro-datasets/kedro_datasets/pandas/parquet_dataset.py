@@ -32,7 +32,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         boats:
           type: pandas.ParquetDataset
@@ -55,23 +55,21 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           save_args:
             compression: GZIP
             partition_on: [name]
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import ParquetDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
-
+        from kedro_datasets.pandas import ParquetDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

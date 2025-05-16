@@ -33,10 +33,9 @@ class ExcelDataset(
     """``ExcelDataset`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         rockets:
           type: pandas.ExcelDataset
@@ -52,58 +51,53 @@ class ExcelDataset(
         shuttles:
           type: pandas.ExcelDataset
           filepath: data/01_raw/shuttles.xlsx
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import ExcelDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = ExcelDataset(filepath=tmp_path / "test.xlsx")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
+        from kedro_datasets.pandas import ExcelDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        dataset = ExcelDataset(filepath=tmp_path / "test.xlsx")
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.equals(reloaded)
+    ```
 
     To save a multi-sheet Excel file, no special ``save_args`` are required.
     Instead, return a dictionary of ``Dict[str, pd.DataFrame]`` where the string
     keys are your sheet names.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_
-    for a multi-sheet Excel file:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html) for a multi-sheet Excel file:
 
-    .. code-block:: yaml
+    ```yaml
 
         trains:
           type: pandas.ExcelDataset
           filepath: data/02_intermediate/company/trains.xlsx
           load_args:
             sheet_name: [Sheet1, Sheet2, Sheet3]
+    ```
+    
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html) for a multi-sheet Excel file:
+    
+    ```python
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_
-    for a multi-sheet Excel file:
-
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import ExcelDataset
-        >>> import pandas as pd
-        >>>
-        >>> dataframe = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
-        >>> multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
-        >>> dataset = ExcelDataset(filepath="test.xlsx", load_args={"sheet_name": None})
-        >>> dataset.save(multiframe)
-        >>> reloaded = dataset.load()
-        >>> assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
-        >>> assert multiframe["Sheet2"].equals(reloaded["Sheet2"])
-
+        from kedro_datasets.pandas import ExcelDataset
+        import pandas as pd
+        
+        dataframe = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
+        multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
+        dataset = ExcelDataset(filepath="test.xlsx", load_args={"sheet_name": None})
+        dataset.save(multiframe)
+        reloaded = dataset.load()
+        assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
+        assert multiframe["Sheet2"].equals(reloaded["Sheet2"])
+    ```
     """
 
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}

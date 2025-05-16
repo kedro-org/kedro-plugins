@@ -29,30 +29,28 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         hdf_dataset:
           type: pandas.HDFDataset
           filepath: s3://my_bucket/raw/sensor_reading.h5
           credentials: aws_s3_creds
           key: data
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import HDFDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = HDFDataset(filepath=tmp_path / "test.h5", key="data")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
-
+        from kedro_datasets.pandas import HDFDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        dataset = HDFDataset(filepath=tmp_path / "test.h5", key="data")
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.equals(reloaded)
+    ```
     """
 
     # _lock is a class attribute that will be shared across all the instances.

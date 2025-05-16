@@ -33,7 +33,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         vehicles:
           type: pandas.GBQTableDataset
@@ -45,26 +45,24 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
             reauth: True
           save_args:
             chunk_size: 100
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import GBQTableDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = GBQTableDataset(
-        ...     dataset="dataset", table_name="table_name", project="my-project"
-        ... )
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
-
+        from kedro_datasets.pandas import GBQTableDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        dataset = GBQTableDataset(
+            dataset="dataset", table_name="table_name", project="my-project"
+        )
+        dataset.save(data)
+        reloaded = dataset.load()
+        
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -196,7 +194,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     Example adding a catalog entry with the ``YAML API``:
 
-    .. code-block:: yaml
+    ```yaml
 
         vehicles:
           type: pandas.GBQQueryDataset
@@ -209,15 +207,15 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     Example using Python API:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.pandas import GBQQueryDataset
-        >>>
-        >>> sql = "SELECT * FROM dataset_1.table_a"
-        >>>
-        >>> dataset = GBQQueryDataset(sql, project="my-project")
-        >>>
-        >>> sql_data = dataset.load()
+        from kedro_datasets.pandas import GBQQueryDataset
+        
+        sql = "SELECT * FROM dataset_1.table_a"
+        
+        dataset = GBQQueryDataset(sql, project="my-project")
+        
+        sql_data = dataset.load()
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

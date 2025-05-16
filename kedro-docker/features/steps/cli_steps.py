@@ -77,7 +77,7 @@ def _get_docker_ipython_output(context):
         return context.ipython_stdout
 
     try:
-        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=128)
+        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=256)
     finally:
         kill_docker_containers(context.project_name)
 

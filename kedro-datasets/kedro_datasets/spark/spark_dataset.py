@@ -91,7 +91,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         weather:
           type: spark.SparkDataset
@@ -120,31 +120,30 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
           type: spark.SparkDataset
           filepath: data/02_intermediate/data.parquet
           file_format: parquet
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-        >>>
-        >>> from kedro_datasets.spark import SparkDataset
-        >>>
-        >>> schema = StructType(
-        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
-        ... )
-        >>>
-        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>>
-        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-        >>>
-        >>> dataset = SparkDataset(filepath=tmp_path / "test_data")
-        >>> dataset.save(spark_df)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
+        from pyspark.sql import SparkSession
+        from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+        
+        from kedro_datasets.spark import SparkDataset
+        
+        schema = StructType(
+            [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        )
+        
+        data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
+        
+        spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        
+        dataset = SparkDataset(filepath=tmp_path / "test_data")
+        dataset.save(spark_df)
+        reloaded = dataset.load()
+        
+        assert Row(name="Bob", age=12) in reloaded.take(4)
+    ```
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

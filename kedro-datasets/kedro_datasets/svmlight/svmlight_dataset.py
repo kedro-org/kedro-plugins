@@ -48,7 +48,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         svm_dataset:
           type: svmlight.SVMLightDataset
@@ -68,25 +68,23 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             zero_based: False
           save_args:
             zero_based: False
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.svmlight import SVMLightDataset
-        >>> import numpy as np
-        >>>
-        >>> # Features and labels.
-        >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
-        >>>
-        >>> dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
-        >>> dataset.save(data)
-        >>> reloaded_features, reloaded_labels = dataset.load()
-        >>> assert (data[0] == reloaded_features).all()
-        >>> assert (data[1] == reloaded_labels).all()
-
+        from kedro_datasets.svmlight import SVMLightDataset
+        import numpy as np
+        
+        # Features and labels.
+        data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
+        
+        dataset = SVMLightDataset(filepath=tmp_path / "test.svm")
+        dataset.save(data)
+        reloaded_features, reloaded_labels = dataset.load()
+        assert (data[0] == reloaded_features).all()
+        assert (data[1] == reloaded_labels).all()
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

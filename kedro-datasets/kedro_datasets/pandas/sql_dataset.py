@@ -110,7 +110,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         shuttles_table_dataset:
           type: pandas.SQLTableDataset
@@ -121,34 +121,32 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
           save_args:
             schema: dwschema
             if_exists: replace
-
+    ```
     Sample database credentials entry in ``credentials.yml``:
 
-    .. code-block:: yaml
+    ```yaml
 
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
           pool_size: 10 # additional parameters
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import SQLTableDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> table_name = "table_a"
-        >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
-        >>> dataset = SQLTableDataset(table_name=table_name, credentials=credentials)
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
-
+        from kedro_datasets.pandas import SQLTableDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        table_name = "table_a"
+        credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+        dataset = SQLTableDataset(table_name=table_name, credentials=credentials)
+        
+        dataset.save(data)
+        reloaded = dataset.load()
+        
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -315,7 +313,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         shuttle_id_dataset:
           type: pandas.SQLQueryDataset
@@ -324,7 +322,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     Advanced example using the ``stream_results`` and ``chunksize`` options to reduce memory usage:
 
-    .. code-block:: yaml
+    ```yaml
 
         shuttle_id_dataset:
           type: pandas.SQLQueryDataset
@@ -337,72 +335,70 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
     Sample database credentials entry in ``credentials.yml``:
 
-    .. code-block:: yaml
+    ```yaml
 
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
           pool_size: 10 # additional parameters
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import sqlite3
-        >>>
-        >>> from kedro_datasets.pandas import SQLQueryDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> sql = "SELECT * FROM table_a"
-        >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
-        >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials)
-        >>>
-        >>> con = sqlite3.connect(tmp_path / "test.db")
-        >>> cur = con.cursor()
-        >>> cur.execute("CREATE TABLE table_a(col1, col2, col3)")
+        import sqlite3
+        
+        from kedro_datasets.pandas import SQLQueryDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        sql = "SELECT * FROM table_a"
+        credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+        dataset = SQLQueryDataset(sql=sql, credentials=credentials)
+        
+        con = sqlite3.connect(tmp_path / "test.db")
+        cur = con.cursor()
+        cur.execute("CREATE TABLE table_a(col1, col2, col3)")
         <sqlite3.Cursor object at 0x...>
-        >>> cur.execute("INSERT INTO table_a VALUES (1, 4, 5), (2, 5, 6)")
+        cur.execute("INSERT INTO table_a VALUES (1, 4, 5), (2, 5, 6)")
         <sqlite3.Cursor object at 0x...>
-        >>> con.commit()
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
+        con.commit()
+        reloaded = dataset.load()
+        
+        assert data.equals(reloaded)
 
     Example of usage for MSSQL:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> credentials = {
-        ...     "server": "localhost",
-        ...     "port": "1433",
-        ...     "database": "TestDB",
-        ...     "user": "SA",
-        ...     "password": "StrongPassword",
-        ... }
-        >>> def _make_mssql_connection_str(
-        ...     server: str, port: str, database: str, user: str, password: str
-        ... ) -> str:
-        ...     import pyodbc
-        ...     from sqlalchemy.engine import URL
-        ...     driver = pyodbc.drivers()[-1]
-        ...     connection_str = (
-        ...         f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
-        ...         f"ENCRYPT=yes;UID={user};PWD={password};"
-        ...         f"TrustServerCertificate=yes;"
-        ...     )
-        ...     return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
-        ...
-        >>> connection_str = _make_mssql_connection_str(**credentials)  # doctest: +SKIP
-        >>> dataset = SQLQueryDataset(  # doctest: +SKIP
-        ...     credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
-        ... )
-        >>> df = dataset.load()
+        credentials = {
+            "server": "localhost",
+            "port": "1433",
+            "database": "TestDB",
+            "user": "SA",
+            "password": "StrongPassword",
+        }
+        def _make_mssql_connection_str(
+            server: str, port: str, database: str, user: str, password: str
+        ) -> str:
+            import pyodbc
+            from sqlalchemy.engine import URL
+            driver = pyodbc.drivers()[-1]
+            connection_str = (
+                f"DRIVER={driver};SERVER={server},{port};DATABASE={database};"
+                f"ENCRYPT=yes;UID={user};PWD={password};"
+                f"TrustServerCertificate=yes;"
+            )
+            return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
+        
+        connection_str = _make_mssql_connection_str(**credentials)  # doctest: +SKIP
+        dataset = SQLQueryDataset(  # doctest: +SKIP
+            credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
+        )
+        df = dataset.load()
 
     In addition, here is an example of a catalog with dates parsing:
 
-    .. code-block:: yaml
+    ```yaml
 
         mssql_dataset:
           type: kedro_datasets.pandas.SQLQueryDataset

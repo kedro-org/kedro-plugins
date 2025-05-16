@@ -26,7 +26,7 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         scatter_plot:
           type: plotly.HTMLDataset
@@ -38,14 +38,15 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.plotly import HTMLDataset
-        >>> import plotly.express as px
-        >>>
-        >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html")
-        >>> dataset.save(fig)
+        from kedro_datasets.plotly import HTMLDataset
+        import plotly.express as px
+        
+        fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        dataset = HTMLDataset(filepath=tmp_path / "test.html")
+        dataset.save(fig)
+    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

@@ -22,26 +22,24 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     """``ImageDataset`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import sys
-        >>>
-        >>> import pytest
-        >>> from kedro_datasets.pillow import ImageDataset
-        >>>
-        >>> if sys.platform.startswith("win"):
-        ...     pytest.skip("this doctest hangs on Windows CI runner")
-        ...
-        >>> dataset = ImageDataset(
-        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
-        ... )
-        >>> image = dataset.load()
-        >>> image.show()
-
+        import sys
+        
+        import pytest
+        from kedro_datasets.pillow import ImageDataset
+        
+        if sys.platform.startswith("win"):
+            pytest.skip("this doctest hangs on Windows CI runner")
+        
+        dataset = ImageDataset(
+            filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
+        )
+        image = dataset.load()
+        image.show()
+    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

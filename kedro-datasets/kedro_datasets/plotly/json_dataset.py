@@ -29,7 +29,7 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         scatter_plot:
           type: plotly.JSONDataset
@@ -37,20 +37,19 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
           save_args:
             engine: auto
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.plotly import JSONDataset
-        >>> import plotly.express as px
-        >>>
-        >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> dataset = JSONDataset(filepath=tmp_path / "test.json")
-        >>> dataset.save(fig)
-        >>> reloaded = dataset.load()
-        >>> assert fig == reloaded
+        from kedro_datasets.plotly import JSONDataset
+        import plotly.express as px
+        
+        fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        dataset = JSONDataset(filepath=tmp_path / "test.json")
+        dataset.save(fig)
+        reloaded = dataset.load()
+        assert fig == reloaded
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

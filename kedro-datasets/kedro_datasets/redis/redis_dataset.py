@@ -18,10 +18,9 @@ class PickleDataset(AbstractDataset[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         my_python_object: # simple example
           type: redis.PickleDataset
@@ -37,22 +36,21 @@ class PickleDataset(AbstractDataset[Any, Any]):
             db: 1
           save_args:
             ex: 10
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.redis import PickleDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> my_data = PickleDataset(key="my_data")
-        >>> my_data.save(data)
-        >>> reloaded = my_data.load()
-        >>> assert data.equals(reloaded)
+        from kedro_datasets.redis import PickleDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        
+        my_data = PickleDataset(key="my_data")
+        my_data.save(data)
+        reloaded = my_data.load()
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379")

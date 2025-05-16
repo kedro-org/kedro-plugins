@@ -29,7 +29,7 @@ class PlotlyDataset(JSONDataset):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         bar_plot:
           type: plotly.PlotlyDataset
@@ -44,30 +44,28 @@ class PlotlyDataset(JSONDataset):
               xaxis_title: x
               yaxis_title: y
               title: Title
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.plotly import PlotlyDataset
-        >>> import plotly.express as px
-        >>> import pandas as pd
-        >>>
-        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
-        >>>
-        >>> dataset = PlotlyDataset(
-        ...     filepath=tmp_path / "scatter_plot.json",
-        ...     plotly_args={
-        ...         "type": "scatter",
-        ...         "fig": {"x": "x1", "y": "x2"},
-        ...     },
-        ... )
-        >>> dataset.save(df_data)
-        >>> reloaded = dataset.load()
-        >>> assert px.scatter(df_data, x="x1", y="x2") == reloaded
-
+        from kedro_datasets.plotly import PlotlyDataset
+        import plotly.express as px
+        import pandas as pd
+        
+        df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
+        
+        dataset = PlotlyDataset(
+            filepath=tmp_path / "scatter_plot.json",
+            plotly_args={
+                "type": "scatter",
+                "fig": {"x": "x1", "y": "x2"},
+            },
+        )
+        dataset.save(df_data)
+        reloaded = dataset.load()
+        assert px.scatter(df_data, x="x1", y="x2") == reloaded
+    ```
     """
 
     DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}

@@ -24,7 +24,7 @@ class SnowparkTableDataset(AbstractDataset):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
       weather:
         type: kedro_datasets.snowflake.SnowparkTableDataset
@@ -36,7 +36,7 @@ class SnowparkTableDataset(AbstractDataset):
           mode: overwrite
           column_order: name
           table_type: ''
-
+    ```
     You can skip everything but "table_name" if the database and schema are
     provided via credentials. This allows catalog entries to be shorter when
     all Snowflake tables are in the same database and schema. Values in the
@@ -50,7 +50,7 @@ class SnowparkTableDataset(AbstractDataset):
 
     catalog.yml:
 
-    .. code-block:: yaml
+    ```yaml
 
       weather:
         type: kedro_datasets.snowflake.SnowparkTableDataset
@@ -68,10 +68,10 @@ class SnowparkTableDataset(AbstractDataset):
         table_name: "geopolygons"
         credentials: snowflake_client
         schema: "geodata"
-
+    ```
     credentials.yml:
 
-    .. code-block:: yaml
+    ```yaml
 
       snowflake_client:
         account: 'ab12345.eu-central-1'
@@ -81,10 +81,10 @@ class SnowparkTableDataset(AbstractDataset):
         schema: "observations"
         user: "service_account_abc"
         password: "supersecret"
-
+    ```
     credentials.yml (with externalbrowser authentication):
 
-    .. code-block:: yaml
+    ```yaml
 
       snowflake_client:
         account: 'ab12345.eu-central-1'
@@ -94,7 +94,7 @@ class SnowparkTableDataset(AbstractDataset):
         schema: "observations"
         user: "john_doe@wdomain.com"
         authenticator: "externalbrowser"
-
+    ```
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

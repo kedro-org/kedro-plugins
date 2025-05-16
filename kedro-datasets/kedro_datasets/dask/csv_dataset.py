@@ -16,10 +16,9 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         cars:
           type: dask.CSVDataset
@@ -30,23 +29,22 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             client_kwargs:
               aws_access_key_id: YOUR_KEY
               aws_secret_access_key: YOUR_SECRET
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.dask import CSVDataset
-        >>> import pandas as pd
-        >>> import numpy as np
-        >>> import dask.dataframe as dd
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
-        >>> ddf = dd.from_pandas(data, npartitions=1)
-        >>> dataset = CSVDataset(filepath="path/to/folder/*.csv")
-        >>> dataset.save(ddf)
-        >>> reloaded = dataset.load()
-        >>> assert np.array_equal(ddf.compute(), reloaded.compute())
+        from kedro_datasets.dask import CSVDataset
+        import pandas as pd
+        import numpy as np
+        import dask.dataframe as dd
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
+        ddf = dd.from_pandas(data, npartitions=1)
+        dataset = CSVDataset(filepath="path/to/folder/*.csv")
+        dataset.save(ddf)
+        reloaded = dataset.load()
+        assert np.array_equal(ddf.compute(), reloaded.compute())
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

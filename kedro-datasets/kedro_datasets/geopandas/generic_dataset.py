@@ -37,21 +37,22 @@ class GenericDataset(
 
     Example:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import geopandas as gpd
-        >>> from kedro_datasets.geopandas import GenericDataset
-        >>> from shapely.geometry import Point
-        >>>
-        >>> data = gpd.GeoDataFrame(
-        ...     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
-        ...     geometry=[Point(1, 1), Point(2, 4)],
-        ... )
-        >>> dataset = GenericDataset(filepath=tmp_path / "test.geojson")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
+        import geopandas as gpd
+        from kedro_datasets.geopandas import GenericDataset
+        from shapely.geometry import Point
+        
+        data = gpd.GeoDataFrame(
+            {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
+            geometry=[Point(1, 1), Point(2, 4)],
+        )
+        dataset = GenericDataset(filepath=tmp_path / "test.geojson")
+        dataset.save(data)
+        reloaded = dataset.load()
+        
+        assert data.equals(reloaded)
+    ```
 
     """
 

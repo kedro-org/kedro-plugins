@@ -17,29 +17,29 @@ class BioSequenceDataset(AbstractDataset[list, list]):
 
     Example:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.biosequence import BioSequenceDataset
-        >>> from io import StringIO
-        >>> from Bio import SeqIO
-        >>>
-        >>> data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
-        >>> raw_data = []
-        >>> for record in SeqIO.parse(StringIO(data), "fasta"):
-        ...     raw_data.append(record)
-        ...
-        >>>
-        >>> dataset = BioSequenceDataset(
-        ...     filepath=tmp_path / "ls_orchid.fasta",
-        ...     load_args={"format": "fasta"},
-        ...     save_args={"format": "fasta"},
-        ... )
-        >>> dataset.save(raw_data)
-        >>> sequence_list = dataset.load()
-        >>>
-        >>> assert raw_data[0].id == sequence_list[0].id
-        >>> assert raw_data[0].seq == sequence_list[0].seq
-
+        from kedro_datasets.biosequence import BioSequenceDataset
+        from io import StringIO
+        from Bio import SeqIO
+        
+        data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
+        raw_data = []
+        for record in SeqIO.parse(StringIO(data), "fasta"):
+            raw_data.append(record)
+        
+        
+        dataset = BioSequenceDataset(
+            filepath=tmp_path / "ls_orchid.fasta",
+            load_args={"format": "fasta"},
+            save_args={"format": "fasta"},
+        )
+        dataset.save(raw_data)
+        sequence_list = dataset.load()
+        
+        assert raw_data[0].id == sequence_list[0].id
+        assert raw_data[0].seq == sequence_list[0].seq
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

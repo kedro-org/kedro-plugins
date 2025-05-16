@@ -27,7 +27,7 @@ class DeltaTableDataset(AbstractDataset):
     `YAML API <https://docs.kedro.org/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
 
-    .. code-block:: yaml
+    ```yaml
 
         boats_filesystem:
           type: pandas.DeltaTableDataset
@@ -56,27 +56,25 @@ class DeltaTableDataset(AbstractDataset):
           table: db_table
           save_args:
             mode: overwrite
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import DeltaTableDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
-        >>>
-        >>> new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
-        >>> dataset.save(new_data)
-        >>> assert isinstance(dataset.get_loaded_version(), int)
-
+        from kedro_datasets.pandas import DeltaTableDataset
+        import pandas as pd
+        
+        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        dataset = DeltaTableDataset(filepath=tmp_path / "test")
+        
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.equals(reloaded)
+        
+        new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
+        dataset.save(new_data)
+        assert isinstance(dataset.get_loaded_version(), int)
+    ```
     """
 
     DEFAULT_WRITE_MODE = "overwrite"

@@ -22,9 +22,7 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     """``HTMLDataset`` saves a plotly figure to an HTML file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
@@ -33,10 +31,9 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
           filepath: data/08_reporting/scatter_plot.html
           save_args:
             auto_open: False
+    ```
 
-    Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 

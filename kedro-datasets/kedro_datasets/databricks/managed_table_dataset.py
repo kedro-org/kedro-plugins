@@ -33,49 +33,49 @@ class ManagedTableDataset(BaseTableDataset):
     dataset to function properly. Follow the instructions in that starter to
     setup your project for this dataset.
 
-   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
-        names_and_ages@spark:
-          type: databricks.ManagedTableDataset
-          table: names_and_ages
+    names_and_ages@spark:
+        type: databricks.ManagedTableDataset
+        table: names_and_ages
 
-        names_and_ages@pandas:
-          type: databricks.ManagedTableDataset
-          table: names_and_ages
-          dataframe_type: pandas
+    names_and_ages@pandas:
+        type: databricks.ManagedTableDataset
+        table: names_and_ages
+        dataframe_type: pandas
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.databricks import ManagedTableDataset
-        from pyspark.sql import SparkSession
-        from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-        import importlib_metadata
-        
-        DELTA_VERSION = importlib_metadata.version("delta-spark")
-        schema = StructType(
-            [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+    from kedro_datasets.databricks import ManagedTableDataset
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+    import importlib_metadata
+    
+    DELTA_VERSION = importlib_metadata.version("delta-spark")
+    schema = StructType(
+        [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+    )
+    data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
+    spark_df = (
+        SparkSession.builder.config(
+            "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
         )
-        data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        spark_df = (
-            SparkSession.builder.config(
-                "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
-            )
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config(
-                "spark.sql.catalog.spark_catalog",
-                "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-            )
-            .getOrCreate()
-            .createDataFrame(data, schema)
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
-        dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
-        dataset.save(spark_df)
-        reloaded = dataset.load()
-        assert Row(name="Bob", age=12) in reloaded.take(4)
+        .getOrCreate()
+        .createDataFrame(data, schema)
+    )
+    dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
+    dataset.save(spark_df)
+    reloaded = dataset.load()
+    assert Row(name="Bob", age=12) in reloaded.take(4)
     ```
     """
 

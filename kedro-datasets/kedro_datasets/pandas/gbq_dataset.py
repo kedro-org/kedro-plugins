@@ -28,40 +28,38 @@ from kedro_datasets._utils import ConnectionMixin
 class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataset`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
-
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
-        vehicles:
-          type: pandas.GBQTableDataset
-          dataset: big_query_dataset
-          table_name: big_query_table
-          project: my-project
-          credentials: gbq-creds
-          load_args:
-            reauth: True
-          save_args:
-            chunk_size: 100
+    vehicles:
+        type: pandas.GBQTableDataset
+        dataset: big_query_dataset
+        table_name: big_query_table
+        project: my-project
+        credentials: gbq-creds
+        load_args:
+        reauth: True
+        save_args:
+        chunk_size: 100
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.pandas import GBQTableDataset
-        import pandas as pd
-        
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
-        dataset = GBQTableDataset(
-            dataset="dataset", table_name="table_name", project="my-project"
-        )
-        dataset.save(data)
-        reloaded = dataset.load()
-        
-        assert data.equals(reloaded)
+    from kedro_datasets.pandas import GBQTableDataset
+    import pandas as pd
+    
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    
+    dataset = GBQTableDataset(
+        dataset="dataset", table_name="table_name", project="my-project"
+    )
+    dataset.save(data)
+    reloaded = dataset.load()
+    
+    assert data.equals(reloaded)
     ```
     """
 
@@ -192,30 +190,31 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
-    Example adding a catalog entry with the ``YAML API``:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html): 
 
     ```yaml
 
-        vehicles:
-          type: pandas.GBQQueryDataset
-          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
-          project: my-project
-          credentials: gbq-creds
-          load_args:
-            reauth: True
+    vehicles:
+        type: pandas.GBQQueryDataset
+        sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        project: my-project
+        credentials: gbq-creds
+        load_args:
+        reauth: True
+    ```
 
-
-    Example using Python API:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.pandas import GBQQueryDataset
-        
-        sql = "SELECT * FROM dataset_1.table_a"
-        
-        dataset = GBQQueryDataset(sql, project="my-project")
-        
-        sql_data = dataset.load()
+    from kedro_datasets.pandas import GBQQueryDataset
+    
+    sql = "SELECT * FROM dataset_1.table_a"
+    
+    dataset = GBQQueryDataset(sql, project="my-project")
+    
+    sql_data = dataset.load()
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

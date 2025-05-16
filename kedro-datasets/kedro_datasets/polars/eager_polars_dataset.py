@@ -29,28 +29,29 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     ```yaml
 
-        cars:
-          type: polars.EagerPolarsDataset
-          file_format: parquet
-          filepath: s3://data/01_raw/company/cars.parquet
-          load_args:
-            low_memory: True
-          save_args:
-            compression: "snappy"
+    cars:
+        type: polars.EagerPolarsDataset
+        file_format: parquet
+        filepath: s3://data/01_raw/company/cars.parquet
+        load_args:
+        low_memory: True
+        save_args:
+        compression: "snappy"
     ```
-    Example using Python API:
+    
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.polars import EagerPolarsDataset
-        import polars as pl
-        
-        data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
-        dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
+    from kedro_datasets.polars import EagerPolarsDataset
+    import polars as pl
+    
+    data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    
+    dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
     ```
     """
 

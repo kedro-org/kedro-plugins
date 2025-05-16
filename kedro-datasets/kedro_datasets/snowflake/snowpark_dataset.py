@@ -20,9 +20,7 @@ class SnowparkTableDataset(AbstractDataset):
     As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
     Python 3.12 is not supported yet.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 

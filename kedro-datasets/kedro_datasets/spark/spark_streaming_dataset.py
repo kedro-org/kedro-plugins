@@ -20,17 +20,17 @@ class SparkStreamingDataset(AbstractDataset):
 
     ```yaml
 
-        raw.new_inventory:
-          type: spark.SparkStreamingDataset
-          filepath: data/01_raw/stream/inventory/
-          file_format: json
-          save_args:
-            output_mode: append
-            checkpoint: data/04_checkpoint/raw_new_inventory
-            header: True
-          load_args:
-            schema:
-                filepath: data/01_raw/schema/inventory_schema.json
+    raw.new_inventory:
+        type: spark.SparkStreamingDataset
+        filepath: data/01_raw/stream/inventory/
+        file_format: json
+        save_args:
+        output_mode: append
+        checkpoint: data/04_checkpoint/raw_new_inventory
+        header: True
+        load_args:
+        schema:
+            filepath: data/01_raw/schema/inventory_schema.json
     ```
     """
 

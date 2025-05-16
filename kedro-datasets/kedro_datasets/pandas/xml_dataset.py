@@ -30,15 +30,15 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     ```python
 
-        from kedro_datasets.pandas import XMLDataset
-        import pandas as pd
-        
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
-        dataset = XMLDataset(filepath=tmp_path / "test.xml")
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
+    from kedro_datasets.pandas import XMLDataset
+    import pandas as pd
+    
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    
+    dataset = XMLDataset(filepath=tmp_path / "test.xml")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
     ```
     """
 

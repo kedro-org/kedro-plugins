@@ -21,26 +21,25 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     """``TextDataset`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
-
-        alice_book:
-          type: text.TextDataset
-          filepath: data/01_raw/alice.txt
+    alice_book:
+        type: text.TextDataset
+        filepath: data/01_raw/alice.txt
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.text import TextDataset
-        
-        string_to_write = "This will go in a file."
-        
-        dataset = TextDataset(filepath=tmp_path / "test.md")
-        dataset.save(string_to_write)
-        reloaded = dataset.load()
-        assert string_to_write == reloaded
+    from kedro_datasets.text import TextDataset
+    
+    string_to_write = "This will go in a file."
+    
+    dataset = TextDataset(filepath=tmp_path / "test.md")
+    dataset.save(string_to_write)
+    reloaded = dataset.load()
+    assert string_to_write == reloaded
     ```
     """
 

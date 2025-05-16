@@ -28,39 +28,39 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
-   ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
-        cars:
-          type: pandas.CSVDataset
-          filepath: data/01_raw/company/cars.csv
-          load_args:
-            sep: ","
-            na_values: ["#NA", NA]
-          save_args:
-            index: False
-            date_format: "%Y-%m-%d %H:%M"
-            decimal: .
+    cars:
+        type: pandas.CSVDataset
+        filepath: data/01_raw/company/cars.csv
+        load_args:
+        sep: ","
+        na_values: ["#NA", NA]
+        save_args:
+        index: False
+        date_format: "%Y-%m-%d %H:%M"
+        decimal: .
 
-        motorbikes:
-          type: pandas.CSVDataset
-          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-          credentials: dev_s3
+    motorbikes:
+        type: pandas.CSVDataset
+        filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+        credentials: dev_s3
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.pandas import CSVDataset
-        import pandas as pd
-        
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
-        dataset = CSVDataset(filepath=tmp_path / "test.csv")
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
+    from kedro_datasets.pandas import CSVDataset
+    import pandas as pd
+    
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    
+    dataset = CSVDataset(filepath=tmp_path / "test.csv")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
     ```
     """
 

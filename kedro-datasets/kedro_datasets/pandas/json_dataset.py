@@ -28,36 +28,34 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 
-        clickstream_dataset:
-          type: pandas.JSONDataset
-          filepath: abfs://landing_area/primary/click_stream.json
-          credentials: abfs_creds
+    clickstream_dataset:
+        type: pandas.JSONDataset
+        filepath: abfs://landing_area/primary/click_stream.json
+        credentials: abfs_creds
 
-        json_dataset:
-          type: pandas.JSONDataset
-          filepath: data/01_raw/Video_Games.json
-          load_args:
-            lines: True
+    json_dataset:
+        type: pandas.JSONDataset
+        filepath: data/01_raw/Video_Games.json
+        load_args:
+        lines: True
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-        from kedro_datasets.pandas import JSONDataset
-        import pandas as pd
-        
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        
-        dataset = JSONDataset(filepath=tmp_path / "test.json")
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
+    from kedro_datasets.pandas import JSONDataset
+    import pandas as pd
+    
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    
+    dataset = JSONDataset(filepath=tmp_path / "test.json")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
     ```
     """
 

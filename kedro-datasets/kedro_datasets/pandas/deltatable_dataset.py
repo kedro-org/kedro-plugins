@@ -23,9 +23,7 @@ class DeltaTableDataset(AbstractDataset):
     mode=overwrite together with partition_filters. This will remove all files within the
     matching partition and insert your data as new files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
 

@@ -152,10 +152,7 @@ def test_group_memory_nodes(
     result = group_memory_nodes(mock_catalog, mock_pipeline)
 
     # Extract node name groups (sorted inside and overall, to ensure deterministic comparison)
-    actual_nodes = [
-        sorted(group_info.nodes)
-        for group_info in result
-    ]
+    actual_nodes = [sorted(group_info.nodes) for group_info in result]
     assert sorted(actual_nodes) == sorted(expected_nodes)
 
     # Extract dependencies

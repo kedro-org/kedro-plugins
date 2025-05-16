@@ -1,4 +1,4 @@
-""" Kedro plugin for running a project with Airflow """
+"""Kedro plugin for running a project with Airflow"""
 
 from __future__ import annotations
 
@@ -20,10 +20,16 @@ from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
-from kedro.pipeline.pipeline import GroupedNode
+from kedro.pipeline.pipeline import Pipeline, GroupedNode
 from slugify import slugify
 
-from kedro_airflow.grouping import group_memory_nodes
+
+from kedro.io import DataCatalog, MemoryDataset
+
+try:
+    from kedro.io import CatalogProtocol
+except ImportError:  # pragma: no cover
+    pass
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
@@ -85,6 +91,24 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     return dag_config
 
 
+def _is_memory_dataset(catalog, dataset_name: str) -> bool:
+    """Return whether a dataset is a MemoryDataset or not."""
+    return dataset_name not in catalog or isinstance(
+        catalog._get_dataset(dataset_name), MemoryDataset
+    )
+
+
+def _get_memory_datasets(
+    catalog: CatalogProtocol | DataCatalog, pipeline: Pipeline
+) -> set[str]:
+    """Gather all datasets in the pipeline that are of type MemoryDataset, excluding 'parameters'."""
+    return {
+        dataset_name
+        for dataset_name in pipeline.datasets()
+        if _is_memory_dataset(catalog, dataset_name)
+    }
+
+
 @airflow_commands.command()
 @click.option(
     "-p",
@@ -119,8 +143,8 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--group-by",
     "node_grouping",
     default=None,
-    help="Group nodes with at least one MemoryDataset as input/output together, "
-    "as they do not persist between Airflow operators.",
+    help="Group nodes either by top-level namespace or by MemoryDataset-connected groups "
+    "that must run together in one Airflow task (e.g., single Docker container run).",
     type=click.Choice(["memory", "namespace"], case_sensitive=False),
 )
 @click.option(
@@ -214,35 +238,14 @@ def create(  # noqa: PLR0913, PLR0912
         if tags:
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
-        # Group memory nodes
-        if node_grouping:
-            if node_grouping.lower() == "memory":
-                # The order of nodes and dependencies is deterministic and based on the
-                # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
-                # implementation
-                node_objs = group_memory_nodes(context.catalog, pipeline)
-            elif node_grouping.lower() == "namespace":
-                node_objs = pipeline.grouped_nodes_by_namespace
-        else:
-            # To keep the order of nodes and dependencies deterministic - nodes are
-            # iterated in the topological sort order obtained from pipeline.nodes and
-            # appended to the corresponding list
-            node_objs = []
-            for node in pipeline.nodes:
-                dependencies = [
-                    parent.name
-                    for parent in pipeline.node_dependencies[node]
-                    if parent.name != node.name
-                ]
-
-                node_objs.append(
-                    GroupedNode(
-                        name=node.name,
-                        type="node",
-                        nodes=[node.name],
-                        dependencies=dependencies,
-                    )
-                )
+        node_objs = pipeline.grouped_nodes_custom(
+            node_grouping if node_grouping else None,
+            (
+                _get_memory_datasets(context.catalog, pipeline)
+                if node_grouping == "memory"
+                else None
+            ),
+        )
 
         template.stream(
             dag_name=package_name,

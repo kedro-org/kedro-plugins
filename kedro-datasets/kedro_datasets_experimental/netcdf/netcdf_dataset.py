@@ -25,20 +25,20 @@ class NetCDFDataset(AbstractDataset):
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
     ```yaml
     single-file:
-    type: netcdf.NetCDFDataset
-    filepath: s3://bucket_name/path/to/folder/data.nc
-    save_args:
-        mode: a
-    load_args:
-        decode_times: False
+        type: netcdf.NetCDFDataset
+        filepath: s3://bucket_name/path/to/folder/data.nc
+        save_args:
+            mode: a
+        load_args:
+            decode_times: False
 
     multi-file:
-    type: netcdf.NetCDFDataset
-    filepath: s3://bucket_name/path/to/folder/data*.nc
-    load_args:
-        concat_dim: time
-        combine: nested
-        parallel: True
+        type: netcdf.NetCDFDataset
+        filepath: s3://bucket_name/path/to/folder/data*.nc
+        load_args:
+            concat_dim: time
+            combine: nested
+            parallel: True
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):

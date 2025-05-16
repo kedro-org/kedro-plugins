@@ -16,27 +16,35 @@ from kedro.io.core import (
 
 
 class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
-    """``PyTorchDataset`` loads and saves PyTorch models' `state_dict`
-    using PyTorch's recommended zipfile serialization protocol. To avoid
-    security issues with Pickle.
+    """`PyTorchDataset` loads and saves PyTorch models' `state_dict` using PyTorch's recommended zipfile serialization protocol to avoid security issues with Pickle.
 
-    .. code-block:: yaml
+    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
 
-        model:
-          type: pytorch.PyTorchDataset
-          filepath: data/06_models/model.pt
+    ```yaml
+    model:
+        type: pytorch.PyTorchDataset
+        filepath: data/06_models/model.pt
+    ```
 
-    .. code-block:: pycon
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
 
-        from kedro_datasets_experimental.pytorch import PyTorchDataset
-        import torch
-        
-        model: torch.nn.Module
-        model = torch.nn.Sequential(torch.nn.Linear(10, 10), torch.nn.ReLU())
-        dataset = PyTorchDataset(filepath=tmp_path / "model.pt")
-        dataset.save(model)
-        reloaded = TheModelClass(*args, **kwargs)
-        reloaded.load_state_dict(dataset.load())
+    ```python
+    from kedro_datasets_experimental.pytorch import PyTorchDataset
+    import torch
+
+    # Define your model
+    model: torch.nn.Module
+    model = torch.nn.Sequential(torch.nn.Linear(10, 10), torch.nn.ReLU())
+
+    # Save model state dict
+    dataset = PyTorchDataset(filepath="data/06_models/model.pt")
+    dataset.save(model)
+
+    # Reload model state dict
+    reloaded = TheModelClass(*args, **kwargs)
+    reloaded.load_state_dict(dataset.load())
+    ```
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

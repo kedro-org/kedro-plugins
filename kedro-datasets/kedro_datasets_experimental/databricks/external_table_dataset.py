@@ -55,60 +55,63 @@ class ExternalTable(BaseTable):
 
 
 class ExternalTableDataset(BaseTableDataset):
-    """``ExternalTableDataset`` loads and saves data into external tables in Databricks.
-    Load and save can be in Spark or Pandas dataframes, specified in dataframe_type.
+    """`ExternalTableDataset` loads and saves data into external tables in Databricks.  
+    Load and save operations can use either Spark or Pandas DataFrames, specified via the `dataframe_type` argument.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
 
-    .. code-block:: yaml
+    ```yaml
+    names_and_ages@spark:
+        type: databricks.ExternalTableDataset
+        format: parquet
+        table: names_and_ages
 
-        names_and_ages@spark:
-          type: databricks.ExternalTableDataset
-          format: parquet
-          table: names_and_ages
+    names_and_ages@pandas:
+        type: databricks.ExternalTableDataset
+        format: parquet
+        table: names_and_ages
+        dataframe_type: pandas
+    ```
 
-        names_and_ages@pandas:
-          type: databricks.ExternalTableDataset
-          format: parquet
-          table: names_and_ages
-          dataframe_type: pandas
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html>`_:
+    ```python
+    from kedro_datasets.databricks import ExternalTableDataset
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+    import importlib_metadata
 
-    .. code-block:: pycon
+    DELTA_VERSION = importlib_metadata.version("delta-spark")
+    schema = StructType([
+        StructField("name", StringType(), True),
+        StructField("age", IntegerType(), True)
+    ])
+    data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
-        >>> from kedro_datasets.databricks import ExternalTableDataset
-        >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-        >>> import importlib_metadata
-        >>>
-        >>> DELTA_VERSION = importlib_metadata.version("delta-spark")
-        >>> schema = StructType(
-        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
-        ... )
-        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>> spark_df = (
-        ...     SparkSession.builder.config(
-        ...         "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
-        ...     )
-        ...     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        ...     .config(
-        ...         "spark.sql.catalog.spark_catalog",
-        ...         "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-        ...     )
-        ...     .getOrCreate()
-        ...     .createDataFrame(data, schema)
-        ... )
-        >>> dataset = ExternalTableDataset(
-        ...     table="names_and_ages",
-        ...     write_mode="overwrite",
-        ...     location="abfss://container@storageaccount.dfs.core.windows.net/depts/cust"
-        ... )
-        >>> dataset.save(spark_df)
-        >>> reloaded = dataset.load()
-        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
+    spark_df = (
+        SparkSession.builder.config(
+            "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        )
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
+        .getOrCreate()
+        .createDataFrame(data, schema)
+    )
+
+    dataset = ExternalTableDataset(
+        table="names_and_ages",
+        write_mode="overwrite",
+        location="abfss://container@storageaccount.dfs.core.windows.net/depts/cust"
+    )
+
+    dataset.save(spark_df)
+    reloaded = dataset.load()
+    assert Row(name="Bob", age=12) in reloaded.take(4)
+    ```
+
     """
 
     def _create_table(  # noqa: PLR0913

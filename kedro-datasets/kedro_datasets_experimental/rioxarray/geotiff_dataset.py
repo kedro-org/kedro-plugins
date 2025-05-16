@@ -23,41 +23,39 @@ SUPPORTED_FILE_FORMATS = [".tif", ".tiff"]
 
 
 class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray]):
-    """``GeoTIFFDataset`` loads and saves rasterdata files and reads them as xarray
-    DataArrays. The underlying functionality is supported by rioxarray, rasterio and xarray.
+    """`GeoTIFFDataset` loads and saves raster data files and reads them as xarray `DataArray`s. The underlying functionality is supported by **rioxarray**, **rasterio**, and **xarray**.
 
-    Reading and writing of single and multiband GeoTIFFs data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.
-    Supported dimensions are ("band", "x", "y") and ("x", "y") and xarray.DataArray with other dimension can not be saved to a GeoTIFF file.
-    Have a look at netcdf if this is what you need.
+    Reading and writing of single and multiband GeoTIFF data is supported. There are sanity checks to ensure that a coordinate reference system (CRS) is present.  
+    Supported dimensions are `("band", "x", "y")` and `("x", "y")`. xarray `DataArray`s with other dimensions cannot be saved to a GeoTIFF file.  
+    If you need other formats, consider using NetCDF.
 
+    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
 
-    .. code-block:: yaml
+    ```yaml
+    sentinal_data:
+        type: rioxarray.GeoTIFFDataset
+        filepath: sentinal_data.tif
+    ```
 
-        sentinal_data:
-          type: rioxarray.GeoTIFFDataset
-          filepath: sentinal_data.tif
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-        `Python API <https://docs.kedro.org/en/stable/data/\
-        advanced_data_catalog_usage.html>`_:
+    ```python
+    from kedro_datasets.rioxarray import GeoTIFFDataset
+    import xarray as xr
+    import numpy as np
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.rioxarray import GeoTIFFDataset
-        >>> import xarray as xr
-        >>> import numpy as np
-        >>>
-        >>> data = xr.DataArray(
-        ...     np.random.randn(2, 3, 2),
-        ...     dims=("band", "y", "x"),
-        ...     coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
-        ... )
-        >>> data_crs = data.rio.write_crs("epsg:4326")
-        >>> data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
-        >>> dataset = GeoTIFFDataset(filepath="test.tif")
-        >>> dataset.save(data_spatial_dims)
-        >>> reloaded = dataset.load()
-        >>> xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
+    data = xr.DataArray(
+        np.random.randn(2, 3, 2),
+        dims=("band", "y", "x"),
+        coords={"band": [1, 2], "y": [0.5, 1.5, 2.5], "x": [0.5, 1.5]},
+    )
+    data_crs = data.rio.write_crs("epsg:4326")
+    data_spatial_dims = data_crs.rio.set_spatial_dims("x", "y")
+    dataset = GeoTIFFDataset(filepath="test.tif")
+    dataset.save(data_spatial_dims)
+    reloaded = dataset.load()
+    xr.testing.assert_allclose(data_spatial_dims, reloaded, rtol=1e-5)
+    ```
 
     """
 

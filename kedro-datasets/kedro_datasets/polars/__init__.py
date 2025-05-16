@@ -4,10 +4,26 @@ from typing import Any
 
 import lazy_loader as lazy
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-CSVDataset: Any
-EagerPolarsDataset: Any
-LazyPolarsDataset: Any
+try:
+    from .csv_dataset import CSVDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    CSVDataset: Any
+
+try:
+    from .eager_polars_dataset import EagerPolarsDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    EagerPolarsDataset: Any
+
+try:
+    from .lazy_polars_dataset import LazyPolarsDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    LazyPolarsDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

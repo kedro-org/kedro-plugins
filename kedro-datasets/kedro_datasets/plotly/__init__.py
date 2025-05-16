@@ -5,10 +5,26 @@ from typing import Any
 
 import lazy_loader as lazy
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-JSONDataset: Any
-PlotlyDataset: Any
-HTMLDataset: Any
+try:
+    from .html_dataset import HTMLDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    HTMLDataset: Any
+
+try:
+    from .json_dataset import JSONDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    JSONDataset: Any
+
+try:
+    from .plotly_dataset import PlotlyDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    PlotlyDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

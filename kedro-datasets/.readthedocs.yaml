@@ -17,9 +17,9 @@ build:
       # Build the MkDocs documentation
       - cd kedro-datasets && mkdocs build
       # Ensure the output directory exists
-      - cd kedro-datasets && mkdir -p $READTHEDOCS_OUTPUT/html
+      - mkdir --parents $READTHEDOCS_OUTPUT
       # Move the built site to the Read the Docs output directory
-      - cd kedro-datasets && mv site/* $READTHEDOCS_OUTPUT/html
+      - mv kedro-datasets/site/* $READTHEDOCS_OUTPUT/html
 
 mkdocs:
   configuration: mkdocs.yml

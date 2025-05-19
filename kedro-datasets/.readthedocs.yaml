@@ -22,4 +22,4 @@ build:
       - cd kedro-datasets && mv site/* $READTHEDOCS_OUTPUT/html
 
 mkdocs:
-  configuration: mkdocs.yml
+  configuration: kedro-datasets/mkdocs.yml

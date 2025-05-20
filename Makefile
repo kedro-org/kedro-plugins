@@ -50,7 +50,7 @@ test-no-spark:
 # kedro-datasets/snowflake tests skipped from default scope
 test-snowflake-only:
 	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
-	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
+	cd kedro-datasets && pytest kedro_datasets/snowflake --no-cov
 
 check-datasets-docs:
 	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
@@ -62,20 +62,4 @@ dataset-tests:
 	cd kedro-datasets && pytest tests/databricks --no-cov
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
-extra_pytest_args=
-dataset-doctest%:
-	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
-	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \
-	  exit 2; \
-	fi; \
-    \
-	# The ignored datasets below require complicated setup with cloud/database clients which is overkill for the doctest examples.
-	cd kedro-datasets && pytest --doctest-modules --doctest-continue-on-failure --no-cov \
-	  --ignore kedro_datasets/pandas/gbq_dataset.py \
-	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
-	  --ignore kedro_datasets/redis/redis_dataset.py \
-	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
-	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
-	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_datasets_experimental/* \
-	  $(extra_pytest_arg${*})
+

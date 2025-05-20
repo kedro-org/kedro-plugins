@@ -25,34 +25,34 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
     appropriate type of read/write on a best effort basis.
 
-    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        cars:
-          type: polars.EagerPolarsDataset
-          file_format: parquet
-          filepath: s3://data/01_raw/company/cars.parquet
-          load_args:
-            low_memory: True
-          save_args:
-            compression: "snappy"
+    cars:
+        type: polars.EagerPolarsDataset
+        file_format: parquet
+        filepath: s3://data/01_raw/company/cars.parquet
+        load_args:
+        low_memory: True
+        save_args:
+        compression: "snappy"
+    ```
 
-    Example using Python API:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.polars import EagerPolarsDataset
-        >>> import polars as pl
-        >>>
-        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
+    from kedro_datasets.polars import EagerPolarsDataset
+    import polars as pl
 
+    data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+    dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: dict[str, Any]

@@ -22,30 +22,28 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     """``HTMLDataset`` saves a plotly figure to an HTML file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example usage for the
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         scatter_plot:
           type: plotly.HTMLDataset
           filepath: data/08_reporting/scatter_plot.html
           save_args:
             auto_open: False
+    ```
 
-    Example usage for the
-    `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> from kedro_datasets.plotly import HTMLDataset
-        >>> import plotly.express as px
-        >>>
-        >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> dataset = HTMLDataset(filepath=tmp_path / "test.html")
-        >>> dataset.save(fig)
+        from kedro_datasets.plotly import HTMLDataset
+        import plotly.express as px
+
+        fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        dataset = HTMLDataset(filepath=tmp_path / "test.html")
+        dataset.save(fig)
+    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

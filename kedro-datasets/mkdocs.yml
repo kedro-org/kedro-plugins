@@ -154,6 +154,7 @@ nav:
         - redis.PickleDataset: pages/api/kedro_datasets/redis.PickleDataset.md
         - snowflake.SnowparkTableDataset: pages/api/kedro_datasets/snowflake.SnowparkTableDataset.md
         - spark.DeltaTableDataset: pages/api/kedro_datasets/spark.DeltaTableDataset.md
+        - spark.GBQQueryDataset: pages/api/kedro_datasets/spark.GBQQueryDataset.md
         - spark.SparkDataset: pages/api/kedro_datasets/spark.SparkDataset.md
         - spark.SparkHiveDataset: pages/api/kedro_datasets/spark.SparkHiveDataset.md
         - spark.SparkJDBCDataset: pages/api/kedro_datasets/spark.SparkJDBCDataset.md

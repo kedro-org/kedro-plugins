@@ -51,6 +51,7 @@
 | [redis.PickleDataset](redis.PickleDataset.md) | ``PickleDataset`` loads/saves data from/to a Redis database. The underlying functionality is supported by the redis library, so it supports all allowed options for instantiating the redis app ``from_url`` and setting a value. |
 | [snowflake.SnowparkTableDataset](snowflake.SnowparkTableDataset.md) | ``SnowparkTableDataset`` loads and saves Snowpark DataFrames. As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11. Python 3.12 is not supported yet. |
 | [spark.DeltaTableDataset](spark.DeltaTableDataset.md) | ``DeltaTableDataset`` loads data into DeltaTable objects. |
+| [spark.GBQQueryDataset](spark.GBQQueryDataset.md) | ``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector. |
 | [spark.SparkDataset](spark.SparkDataset.md) | ``SparkDataset`` loads and saves Spark dataframes. |
 | [spark.SparkHiveDataset](spark.SparkHiveDataset.md) |``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive. |
 | [spark.SparkJDBCDataset](spark.SparkJDBCDataset.md) |``SparkJDBCDataset`` loads data from a database table accessible via JDBC URL url and connection properties and saves the content of a PySpark DataFrame to an external database table via JDBC.  |

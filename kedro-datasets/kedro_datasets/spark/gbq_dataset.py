@@ -17,6 +17,7 @@ from py4j.protocol import Py4JJavaError
 from pyspark.sql import DataFrame
 
 from kedro_datasets._utils.spark_utils import get_spark
+from kedro_datasets.spark import GBQQueryDataset
 
 logger = logging.getLogger(__name__)
 
@@ -24,48 +25,42 @@ logger = logging.getLogger(__name__)
 class GBQQueryDataset(AbstractDataset[None, DataFrame]):
     """``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
+    my_gbq_spark_data:
+        type: spark.GBQQueryDataset
+        sql: |
+        SELECT * FROM your_table
+        materialization_dataset: your_dataset
+        materialization_project: your_project
+        bq_credentials:
+        file: /path/to/your/credentials.json
+        fs_credentials:
+        key: value
+    ```
 
-        my_gbq_spark_data:
-          type: spark.GBQQueryDataset
-          sql: |
-            SELECT * FROM your_table
-          materialization_dataset: your_dataset
-          materialization_project: your_project
-          bq_credentials:
-            file: /path/to/your/credentials.json
-          fs_credentials:
-            key: value
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
+    # Define your SQL query
+    sql = "SELECT * FROM your_table"
 
-    .. code-block:: pycon
+    # Initialize dataset
+    dataset = GBQQueryDataset(
+        sql=sql,
+        materialization_dataset="your_dataset",
+        materialization_project="your_project",  # optional
+        bq_credentials=dict(file="/path/to/your/credentials.json"),  # optional
+        fs_credentials=dict(key="value"),  # optional
+    )
 
-        >>> from kedro_datasets.spark import GBQQueryDataset
-        >>>
-        >>> # Define your SQL query
-        >>> sql = "SELECT * FROM your_table"
-        >>>
-        >>> # Initialize dataset
-        >>> dataset = GBQQueryDataset(
-        ...     sql=sql,
-        ...     materialization_dataset="your_dataset",
-        ...     materialization_project="your_project",  # optional
-        ...     bq_credentials=dict(file="/path/to/your/credentials.json"),  # optional
-        ...     fs_credentials=dict(key="value"),  # optional
-        ... )
-        >>>
-        >>> # Load data
-        >>> df = dataset.load()
-        >>>
-        >>> # Example output
-        >>> df.show()
+    # Load data
+    df = dataset.load()
+
+    # Example output
+    df.show()
+    ```
     """
 
     _VALID_CREDENTIALS_KEYS = {"base64", "file", "json"}

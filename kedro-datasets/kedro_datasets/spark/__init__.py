@@ -11,6 +11,11 @@ except (ImportError, RuntimeError):
     DeltaTableDataset: Any
 
 try:
+    from .gbq_dataset import GBQQueryDataset
+except (ImportError, RuntimeError):
+    GBQQueryDataset: Any
+
+try:
     from .spark_dataset import SparkDataset
 except (ImportError, RuntimeError):
     SparkDataset: Any

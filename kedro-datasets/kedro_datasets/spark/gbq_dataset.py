@@ -17,7 +17,6 @@ from py4j.protocol import Py4JJavaError
 from pyspark.sql import DataFrame
 
 from kedro_datasets._utils.spark_utils import get_spark
-from kedro_datasets.spark import GBQQueryDataset
 
 logger = logging.getLogger(__name__)
 

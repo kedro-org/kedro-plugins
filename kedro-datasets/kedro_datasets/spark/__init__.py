@@ -4,7 +4,6 @@ from typing import Any
 
 import lazy_loader as lazy
 
-
 try:
     from .deltatable_dataset import DeltaTableDataset
 except (ImportError, RuntimeError):

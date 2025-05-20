@@ -55,9 +55,6 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         import pytest
         from kedro_datasets.polars import CSVDataset
 
-        if sys.platform.startswith("win"):
-            pytest.skip("this doctest fails on Windows CI runner")
-
         data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
         dataset = CSVDataset(filepath=tmp_path / "test.csv")

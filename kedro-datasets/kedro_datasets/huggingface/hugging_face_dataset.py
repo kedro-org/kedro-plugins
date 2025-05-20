@@ -22,12 +22,12 @@ class HFDataset(AbstractVersionedDataset):
 
     ```python
     from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
-    disable_progress_bar()  # for doctest to pass
-    set_verbosity(ERROR)  # for doctest to pass
+    disable_progress_bar()
+    set_verbosity(ERROR)
 
     from kedro_datasets.huggingface import HFDataset
     dataset = HFDataset(dataset_name="openai_humaneval")
-    ds = dataset.load()  # doctest: +ELLIPSIS
+    ds = dataset.load()
 
     # Output:
     # Downloading and preparing dataset ...

@@ -390,8 +390,8 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         )
         return URL.create("mssql+pyodbc", query={"odbc_connect": connection_str})
 
-    connection_str = _make_mssql_connection_str(**credentials)  # doctest: +SKIP
-    dataset = SQLQueryDataset(  # doctest: +SKIP
+    connection_str = _make_mssql_connection_str(**credentials)
+    dataset = SQLQueryDataset(
         credentials={"con": connection_str}, sql="SELECT TOP 5 * FROM TestTable;"
     )
     df = dataset.load()

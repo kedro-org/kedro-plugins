@@ -47,7 +47,7 @@ class MatplotlibDataset(
     from kedro_datasets.matplotlib import MatplotlibDataset
 
     fig = plt.figure()
-    plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+    plt.plot([1, 2, 3])
     [<matplotlib.lines.Line2D object at 0x...>]
     plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
     plt.close()
@@ -61,7 +61,7 @@ class MatplotlibDataset(
     from kedro_datasets.matplotlib import MatplotlibDataset
 
     fig = plt.figure()
-    plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+    plt.plot([1, 2, 3])
     [<matplotlib.lines.Line2D object at 0x...>]
     pdf_plot_dataset = MatplotlibDataset(
         filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
@@ -96,7 +96,7 @@ class MatplotlibDataset(
     from kedro_datasets.matplotlib import MatplotlibDataset
 
     plots_list = []
-    for i in range(5):  # doctest: +ELLIPSIS
+    for i in range(5):
         plots_list.append(plt.figure())
         plt.plot([i, i + 1, i + 2])
 

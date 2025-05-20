@@ -62,4 +62,3 @@ dataset-tests:
 	cd kedro-datasets && pytest tests/databricks --no-cov
 
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
-

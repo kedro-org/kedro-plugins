@@ -6,7 +6,7 @@
 
 ## Bug fixes and other changes
 
-- ...
+- Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 
 ## Breaking changes
 
@@ -38,6 +38,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
 - Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`.
+- Add encoding parameter for `SQLQueryDataset`.
+
 
 ## Breaking changes
 
@@ -50,6 +52,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [Paul Lemonnier](https://github.com/PaulLemonnier)
 
 # Release 6.0.0
 

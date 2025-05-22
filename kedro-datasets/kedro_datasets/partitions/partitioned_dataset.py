@@ -294,14 +294,18 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:
+        self._invalidate_caches()  # Invalidate cache before listing partitions
+
         partitions = {}
 
-        for partition in self._list_partitions():
+        # The _list_partitions() call will now always perform a fresh scan
+        # because its cache was just cleared.
+        for partition_file_path in self._list_partitions():
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
+            kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            partition_id = self._path_to_partition(partition)
+            partition_id = self._path_to_partition(partition_file_path)
             partitions[partition_id] = dataset.load
 
         if not partitions:

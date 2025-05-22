@@ -7,6 +7,7 @@
 ## Bug fixes and other changes
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
+- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`
 
 ## Breaking changes
 
@@ -16,7 +17,7 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-- ...
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 7.0.0
 

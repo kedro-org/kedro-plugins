@@ -1,0 +1,22 @@
+Metadata-Version: 2.1
+Name: pyproject-toml
+Version: 0.0.12
+Summary: Project intend to implement PEP 517, 518, 621, 631 and so on.
+Home-page: https://github.com/pyproject-toml/pyproject-toml
+Author-email: Tang Ziya <tcztzy@hotmail.com>
+License: MIT
+Project-URL: homepage, https://github.com/pyproject-toml/pyproject-toml
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/x-rst
+Requires-Dist: setuptools>=42
+Requires-Dist: wheel
+Requires-Dist: toml
+Requires-Dist: jsonschema
+Requires-Dist: typing-extensions; python_version < "3.8"
+
+pyproject-toml
+==============
+
+Project intend to implement PEP 517, 518, 621, 631 and so on.

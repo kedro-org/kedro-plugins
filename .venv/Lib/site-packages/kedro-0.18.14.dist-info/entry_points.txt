@@ -1,0 +1,2 @@
+[console_scripts]
+kedro = kedro.framework.cli:main

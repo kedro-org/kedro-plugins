@@ -1,4 +1,4 @@
-""" Kedro plugin for running a project with Airflow """
+"""Kedro plugin for running a project with Airflow"""
 
 from __future__ import annotations
 
@@ -118,8 +118,8 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "--group-by",
     "node_grouping",
     default=None,
-    help="Group nodes with at least one MemoryDataset as input/output together, "
-    "as they do not persist between Airflow operators.",
+    help="Group nodes either by top-level namespace or by MemoryDataset-connected groups "
+    "that must run together in one Airflow task (e.g., single Docker container run).",
     type=click.Choice(["memory", "namespace"], case_sensitive=False),
 )
 @click.option(
@@ -213,31 +213,13 @@ def create(  # noqa: PLR0913, PLR0912
         if tags:
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
 
-        # Group memory nodes
-        if node_grouping:
-            if node_grouping.lower() == "memory":
-                # The order of nodes and dependencies is deterministic and based on the
-                # topological sort order obtained from pipeline.nodes, see group_memory_nodes()
-                # implementation
-                node_objs = group_memory_nodes(context.catalog, pipeline)
-            elif node_grouping.lower() == "namespace":
-                node_objs = pipeline.grouped_nodes_by_namespace
-        else:
-            # To keep the order of nodes and dependencies deterministic - nodes are
-            # iterated in the topological sort order obtained from pipeline.nodes and
-            # appended to the corresponding dictionaries
-            node_objs = {}
-            for node in pipeline.nodes:
-                node_objs[node.name] = {
-                    "name": node.name,
-                    "nodes": [],
-                    "dependencies": [],
-                }
-                node_objs[node.name]["nodes"].append(node)
+        if node_grouping and node_grouping.lower() == "memory":
 
-                for parent in pipeline.node_dependencies[node]:
-                    if parent.name != node.name:
-                        node_objs[node.name]["dependencies"].append(parent.name)
+                node_objs = group_memory_nodes(context.catalog, pipeline)
+        else:
+            node_objs = pipeline.grouped_nodes_custom(
+                group_by = node_grouping,
+            )
 
         template.stream(
             dag_name=package_name,

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline.pipeline import Pipeline
+from kedro.pipeline import Pipeline, GroupedNodes
 
 try:
     from kedro.io import CatalogProtocol
@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
     """Return whether a dataset is a MemoryDataset or not."""
     return dataset_name not in catalog or isinstance(
-        catalog._get_dataset(dataset_name), MemoryDataset
+        catalog.get(dataset_name), MemoryDataset
     )
 
 
@@ -58,7 +58,7 @@ def create_adjacency_list(
 
 def group_memory_nodes(
     catalog: CatalogProtocol | DataCatalog, pipeline: Pipeline
-) -> dict[str, dict[str, Any]]:
+) -> list[GroupedNodes]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -93,7 +93,7 @@ def group_memory_nodes(
         groups[component].append(node_name)
 
     old_name_to_group = {}
-    grouped_by_memory: dict[str, dict[str, Any]] = {}
+    grouped_by_memory: dict[str, GroupedNodes] = {}
 
     for group in groups:
         group_name = "_".join(group)
@@ -101,12 +101,12 @@ def group_memory_nodes(
         for node_name in group:
             old_name_to_group[node_name] = group_name
 
-        grouped_by_memory[group_name] = {
-            "name": group_name,
-            "type": "node",
-            "nodes": group_nodes,
-            "dependencies": [],
-        }
+        grouped_by_memory[group_name] = GroupedNodes(
+            name=group_name,
+            type="nodes",
+            nodes=group,
+            dependencies=[],
+        )
 
     # Compute dependencies between groups
     for parent, children in parent_to_children.items():
@@ -114,7 +114,7 @@ def group_memory_nodes(
         for child in children:
             child_group = old_name_to_group[child]
             if parent_group != child_group:
-                if parent_group not in grouped_by_memory[child_group]["dependencies"]:
-                    grouped_by_memory[child_group]["dependencies"].append(parent_group)
+                if parent_group not in grouped_by_memory[child_group].dependencies:
+                    grouped_by_memory[child_group].dependencies.append(parent_group)
 
-    return grouped_by_memory
+    return list(grouped_by_memory.values())

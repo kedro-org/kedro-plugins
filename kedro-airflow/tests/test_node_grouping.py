@@ -5,7 +5,6 @@ from typing import Any
 import pytest
 from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 from kedro_airflow.grouping import (
     _is_memory_dataset,
@@ -31,9 +30,9 @@ def mock_data_catalog(
     for dataset_name in nodes:
         if dataset_name not in memory_nodes:
             dataset = TestDataset()
-            mock_catalog.add(dataset_name, dataset)
+            mock_catalog[dataset_name] = dataset
         elif memory_nodes_in_catalog:
-            mock_catalog.add(dataset_name, MemoryDataset())
+            mock_catalog[dataset_name] = MemoryDataset()
 
     return mock_catalog
 
@@ -42,7 +41,7 @@ def mock_kedro_pipeline() -> Pipeline:
     def identity_one_to_one(x):
         return x
 
-    return modular_pipeline(
+    return Pipeline(
         [
             node(
                 func=identity_one_to_one,
@@ -93,13 +92,13 @@ def mock_kedro_pipeline() -> Pipeline:
 @pytest.fixture
 def mock_pipeline_not_namespaced():
     base_pipeline = mock_kedro_pipeline()
-    return modular_pipeline(base_pipeline)
+    return base_pipeline
 
 
 @pytest.fixture
 def mock_pipeline_namespaced():
     base_pipeline = mock_kedro_pipeline()
-    return modular_pipeline(base_pipeline, namespace="namespace1")
+    return Pipeline(base_pipeline, namespace="namespace1")
 
 
 @pytest.mark.parametrize(
@@ -152,17 +151,14 @@ def test_group_memory_nodes(
     result = group_memory_nodes(mock_catalog, mock_pipeline)
 
     # Extract node name groups (sorted inside and overall, to ensure deterministic comparison)
-    actual_nodes = [
-        sorted([node.name for node in group_info["nodes"]])
-        for group_info in result.values()
-    ]
+    actual_nodes = [sorted(group_info.nodes) for group_info in result]
     assert sorted(actual_nodes) == sorted(expected_nodes)
 
     # Extract dependencies
     actual_dependencies = {
-        group_name: set(group_info["dependencies"])
-        for group_name, group_info in result.items()
-        if group_info["dependencies"]
+        group_info.name: set(group_info.dependencies)
+        for group_info in result
+        if group_info.dependencies
     }
     assert actual_dependencies == expected_dependencies
 

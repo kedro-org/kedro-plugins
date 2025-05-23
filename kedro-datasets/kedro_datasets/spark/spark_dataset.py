@@ -33,10 +33,10 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_glob,
     deployed_on_databricks,
     get_dbutils,
+    is_unity_catalog_path,
     parse_glob_pattern,
     split_filepath,
     strip_dbfs_prefix,
-    is_unity_catalog_path,
 )
 from kedro_datasets._utils.spark_utils import get_spark
 

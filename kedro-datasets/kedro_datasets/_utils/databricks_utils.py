@@ -30,6 +30,7 @@ def split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
 def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
     return path[len(prefix) :] if path.startswith(prefix) else path
 
+
 def is_unity_catalog_path(path: str) -> bool:
     """
     Determine if the given path refers to a Unity Catalog Volume on Databricks.

@@ -30,7 +30,7 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_exists,
     dbfs_glob,
     get_dbutils,
-    is_unity_catalog_path
+    is_unity_catalog_path,
 )
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
@@ -172,7 +172,6 @@ class FileInfo:
 
 
 class TestSparkDataset:
-
     def test_is_unity_catalog_path_recognizes_volumes():
         assert is_unity_catalog_path("/Volumes/catalog/schema/table")
         assert is_unity_catalog_path("/Volumes/my_data") is True
@@ -181,7 +180,7 @@ class TestSparkDataset:
         assert is_unity_catalog_path("/mnt/Volumes/data") is False
         assert is_unity_catalog_path("/volume") is False
         assert is_unity_catalog_path("") is False
-    
+
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()
         local_parquet_set = ParquetDataset(filepath=temp_path)
@@ -473,15 +472,15 @@ class TestSparkDataset:
         assert expected_message not in caplog.text
 
     @pytest.mark.parametrize(
-    "filepath,should_warn",
-    [
-        ("/dbfs/my_project/data/02_intermediate/processed_data", False),  
-        ("my_project/data/02_intermediate/processed_data", True),         
-        ("s3://my_project/data/02_intermediate/processed_data", False),   
-        ("/Volumes/catalog/schema/table", False),                         
-    ],
+        "filepath,should_warn",
+        [
+            ("/dbfs/my_project/data/02_intermediate/processed_data", False),
+            ("my_project/data/02_intermediate/processed_data", True),
+            ("s3://my_project/data/02_intermediate/processed_data", False),
+            ("/Volumes/catalog/schema/table", False),
+        ],
     )
-    def test_prefix_warning_on_databricks(filepath, should_warn, monkeypatch, caplog):
+    def test_prefix_warning_on_databricks(self, filepath, should_warn, monkeypatch, caplog):
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
         SparkDataset(filepath=filepath)

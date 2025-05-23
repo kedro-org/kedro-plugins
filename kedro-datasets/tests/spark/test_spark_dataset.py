@@ -30,7 +30,6 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_exists,
     dbfs_glob,
     get_dbutils,
-    is_unity_catalog_path,
 )
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
@@ -172,15 +171,6 @@ class FileInfo:
 
 
 class TestSparkDataset:
-    def test_is_unity_catalog_path_recognizes_volumes(self):
-        assert is_unity_catalog_path("/Volumes/catalog/schema/table")
-        assert is_unity_catalog_path("/Volumes/my_data") is True
-        assert is_unity_catalog_path("/dbfs/Volumes/my_data") is False
-        assert is_unity_catalog_path("Volumes/data") is False
-        assert is_unity_catalog_path("/mnt/Volumes/data") is False
-        assert is_unity_catalog_path("/volume") is False
-        assert is_unity_catalog_path("") is False
-
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()
         local_parquet_set = ParquetDataset(filepath=temp_path)

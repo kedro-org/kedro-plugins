@@ -33,7 +33,6 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_glob,
     deployed_on_databricks,
     get_dbutils,
-    is_unity_catalog_path,
     parse_glob_pattern,
     split_filepath,
     strip_dbfs_prefix,
@@ -208,12 +207,12 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         self.metadata = metadata
 
         if (
-            not filepath.startswith("/dbfs/" or is_unity_catalog_path(filepath))
+            not (filepath.startswith("/dbfs") or filepath.startswith("/Volumes"))
             and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
             and deployed_on_databricks()
         ):
             logger.warning(
-                "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
+                "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",
                 filepath,
             )

@@ -30,6 +30,23 @@ def split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
 def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
     return path[len(prefix) :] if path.startswith(prefix) else path
 
+def is_unity_catalog_path(path: str) -> bool:
+    """
+    Determine if the given path refers to a Unity Catalog Volume on Databricks.
+
+    Unity Catalog Volumes are typically mounted at the root path `/Volumes`.
+    This function checks whether the path starts with `/Volumes` to identify
+    such storage locations.
+
+    Args:
+        path: The file path to check.
+
+    Returns:
+        True if the path starts with `/Volumes`, indicating a Unity Catalog Volume;
+        False otherwise.
+    """
+    return PurePosixPath(path).parts[:1] == ("/Volumes",)
+
 
 def dbfs_glob(pattern: str, dbutils: "DBUtils") -> list[str]:
     """Perform a custom glob search in DBFS using the provided pattern.

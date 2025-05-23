@@ -36,6 +36,7 @@ from kedro_datasets._utils.databricks_utils import (
     parse_glob_pattern,
     split_filepath,
     strip_dbfs_prefix,
+    is_unity_catalog_path,
 )
 from kedro_datasets._utils.spark_utils import get_spark
 
@@ -207,7 +208,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         self.metadata = metadata
 
         if (
-            not filepath.startswith("/dbfs/")
+            not filepath.startswith("/dbfs/" or is_unity_catalog_path(filepath))
             and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
             and deployed_on_databricks()
         ):

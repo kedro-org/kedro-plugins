@@ -30,6 +30,7 @@ from kedro_datasets._utils.databricks_utils import (
     dbfs_exists,
     dbfs_glob,
     get_dbutils,
+    is_unity_catalog_path
 )
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
@@ -171,6 +172,16 @@ class FileInfo:
 
 
 class TestSparkDataset:
+
+    def test_is_unity_catalog_path_recognizes_volumes():
+        assert is_unity_catalog_path("/Volumes/catalog/schema/table")
+        assert is_unity_catalog_path("/Volumes/my_data") is True
+        assert is_unity_catalog_path("/dbfs/Volumes/my_data") is False
+        assert is_unity_catalog_path("Volumes/data") is False
+        assert is_unity_catalog_path("/mnt/Volumes/data") is False
+        assert is_unity_catalog_path("/volume") is False
+        assert is_unity_catalog_path("") is False
+    
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = (tmp_path / "data").as_posix()
         local_parquet_set = ParquetDataset(filepath=temp_path)
@@ -461,29 +472,25 @@ class TestSparkDataset:
         SparkDataset(filepath="my_project/data/02_intermediate/processed_data")
         assert expected_message not in caplog.text
 
-    def test_dbfs_prefix_warning_on_databricks_with_prefix(self, monkeypatch, caplog):
-        # test that warning is not raised when on Databricks and filepath has /dbfs prefix
-        filepath = "/dbfs/my_project/data/02_intermediate/processed_data"
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataset(filepath=filepath)
-        assert caplog.text == ""
+    @pytest.mark.parametrize(
+    "filepath,should_warn",
+    [
+        ("/dbfs/my_project/data/02_intermediate/processed_data", False),  
+        ("my_project/data/02_intermediate/processed_data", True),         
+        ("s3://my_project/data/02_intermediate/processed_data", False),   
+        ("/Volumes/catalog/schema/table", False),                         
+    ],
+    )
+    def test_prefix_warning_on_databricks(filepath, should_warn, monkeypatch, caplog):
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
-    def test_dbfs_prefix_warning_on_databricks_no_prefix(self, monkeypatch, caplog):
-        # test that warning is raised when on Databricks and filepath does not have /dbfs prefix
-        filepath = "my_project/data/02_intermediate/processed_data"
-        expected_message = (
-            "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
-            f"filepath is a known source of error. You must add this prefix to {filepath}"
-        )
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
         SparkDataset(filepath=filepath)
-        assert expected_message in caplog.text
 
-    def test_dbfs_prefix_warning_databricks_s3(self, monkeypatch, caplog):
-        # test that warning is not raised when on Databricks using an s3 path
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataset(filepath="s3://my_project/data/02_intermediate/processed_data")
-        assert caplog.text == ""
+        warning_msg = "Using SparkDataset on Databricks without the `/dbfs/` prefix"
+        if should_warn:
+            assert warning_msg in caplog.text
+        else:
+            assert warning_msg not in caplog.text
 
 
 class TestSparkDatasetVersionedLocal:

@@ -455,7 +455,7 @@ class TestSparkDataset:
         # test that warning is not raised when not on Databricks
         filepath = "my_project/data/02_intermediate/processed_data"
         expected_message = (
-            "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
+            "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix in the "
             f"filepath is a known source of error. You must add this prefix to {filepath}."
         )
         SparkDataset(filepath="my_project/data/02_intermediate/processed_data")
@@ -477,7 +477,9 @@ class TestSparkDataset:
 
         SparkDataset(filepath=filepath)
 
-        warning_msg = "Using SparkDataset on Databricks without the `/dbfs/` prefix"
+        warning_msg = (
+            "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix"
+        )
         if should_warn:
             assert warning_msg in caplog.text
         else:

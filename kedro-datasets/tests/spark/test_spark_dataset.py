@@ -172,7 +172,7 @@ class FileInfo:
 
 
 class TestSparkDataset:
-    def test_is_unity_catalog_path_recognizes_volumes():
+    def test_is_unity_catalog_path_recognizes_volumes(self):
         assert is_unity_catalog_path("/Volumes/catalog/schema/table")
         assert is_unity_catalog_path("/Volumes/my_data") is True
         assert is_unity_catalog_path("/dbfs/Volumes/my_data") is False
@@ -480,7 +480,9 @@ class TestSparkDataset:
             ("/Volumes/catalog/schema/table", False),
         ],
     )
-    def test_prefix_warning_on_databricks(self, filepath, should_warn, monkeypatch, caplog):
+    def test_prefix_warning_on_databricks(
+        self, filepath, should_warn, monkeypatch, caplog
+    ):
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
         SparkDataset(filepath=filepath)

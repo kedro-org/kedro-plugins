@@ -207,12 +207,12 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         self.metadata = metadata
 
         if (
-            not filepath.startswith("/dbfs/")
+            not (filepath.startswith("/dbfs") or filepath.startswith("/Volumes"))
             and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
             and deployed_on_databricks()
         ):
             logger.warning(
-                "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
+                "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",
                 filepath,
             )

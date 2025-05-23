@@ -217,7 +217,7 @@ def create(  # noqa: PLR0913, PLR0912
 
                 node_objs = group_memory_nodes(context.catalog, pipeline)
         else:
-            node_objs = pipeline.grouped_nodes_custom(
+            node_objs = pipeline.group_nodes_by(
                 group_by = node_grouping,
             )
 

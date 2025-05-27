@@ -109,7 +109,6 @@ def test_get_spark_bq_credentials(gbq_query_dataset, credentials, expected_crede
 
 
 def test_invalid_bq_credentials_key(gbq_query_dataset):
-
     invalid_cred_key = "invalid_cred_key"
     gbq_query_dataset._bq_credentials = {invalid_cred_key: "value"}
     with pytest.raises(

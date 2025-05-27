@@ -4,11 +4,12 @@ from typing import Any
 
 from datasets import load_dataset
 from huggingface_hub import HfApi
-from kedro.io import AbstractVersionedDataset
+from kedro.io import AbstractDataset
 
 
-class HFDataset(AbstractVersionedDataset):
-    """`HFDataset` loads Hugging Face datasets using the [`datasets`](https://pypi.org/project/datasets) library.
+class HFDataset(AbstractDataset):
+    """``HFDataset`` loads Hugging Face datasets
+    using the `datasets <https://pypi.org/project/datasets>`_ library.
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 

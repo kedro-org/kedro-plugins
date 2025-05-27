@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-- ...
+- Migrated docs to mkdocs
 
 ## Bug fixes and other changes
 

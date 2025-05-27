@@ -1,5 +1,5 @@
 # Upcoming release
-* Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+* Updated catalog API usage to comply with both new and old catalogs.
 
 # Release 0.6.2
 * Removed support for Python 3.8

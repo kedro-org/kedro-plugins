@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from kedro.io import DataCatalog
-from kedro.pipeline.node import Node
+from typing import Any
+
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.pipeline import Pipeline
 
 try:
@@ -11,9 +12,10 @@ except ImportError:  # pragma: no cover
 
 
 def _is_memory_dataset(catalog, dataset_name: str) -> bool:
-    if dataset_name not in catalog:
-        return True
-    return False
+    """Return whether a dataset is a MemoryDataset or not."""
+    return dataset_name not in catalog or isinstance(
+        catalog._get_dataset(dataset_name), MemoryDataset
+    )
 
 
 def get_memory_datasets(
@@ -56,7 +58,7 @@ def create_adjacency_list(
 
 def group_memory_nodes(
     catalog: CatalogProtocol | DataCatalog, pipeline: Pipeline
-) -> tuple[dict[str, list[Node]], dict[str, list[str]]]:
+) -> dict[str, dict[str, Any]]:
     """
     Nodes that are connected through MemoryDatasets cannot be distributed across
     multiple machines, e.g. be in different Kubernetes pods. This function
@@ -85,30 +87,34 @@ def group_memory_nodes(
             dfs(node_name, cur_component)
             cur_component += 1
 
-    # Joining nodes based on found connected components
+    # Join nodes based on connected components
     groups: list[list[str]] = [[] for _ in range(cur_component)]
     for node_name, component in con_components.items():
         groups[component].append(node_name)
 
-    group_to_seq: dict[str, list[Node]] = {}
     old_name_to_group = {}
+    grouped_by_memory: dict[str, dict[str, Any]] = {}
+
     for group in groups:
         group_name = "_".join(group)
-        group_to_seq[group_name] = [name_to_node[node_name] for node_name in group]
+        group_nodes = [name_to_node[node_name] for node_name in group]
         for node_name in group:
             old_name_to_group[node_name] = group_name
 
-    # Retrieving dependencies between joined nodes based on initial topological sort
-    group_dependencies: dict[str, list[str]] = {}
-    for parent, children in parent_to_children.items():
-        if not children:
-            continue
-        new_name_parent = old_name_to_group[parent]
-        if new_name_parent not in group_dependencies:
-            group_dependencies[new_name_parent] = []
-        for child in children:
-            new_name_child = old_name_to_group[child]
-            if new_name_parent != new_name_child:
-                group_dependencies[new_name_parent].append(new_name_child)
+        grouped_by_memory[group_name] = {
+            "name": group_name,
+            "type": "node",
+            "nodes": group_nodes,
+            "dependencies": [],
+        }
 
-    return group_to_seq, group_dependencies
+    # Compute dependencies between groups
+    for parent, children in parent_to_children.items():
+        parent_group = old_name_to_group[parent]
+        for child in children:
+            child_group = old_name_to_group[child]
+            if parent_group != child_group:
+                if parent_group not in grouped_by_memory[child_group]["dependencies"]:
+                    grouped_by_memory[child_group]["dependencies"].append(parent_group)
+
+    return grouped_by_memory

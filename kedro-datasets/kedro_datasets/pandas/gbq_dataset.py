@@ -11,9 +11,10 @@ from typing import Any, ClassVar, NoReturn
 import fsspec
 import pandas as pd
 import pandas_gbq as pd_gbq
+from google.auth.credentials import Credentials
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from google.oauth2.credentials import Credentials
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from kedro.io.core import (
     AbstractDataset,
     DatasetError,
@@ -25,46 +26,51 @@ from kedro.io.core import (
 from kedro_datasets._utils import ConnectionMixin
 
 
+def _get_credentials(credentials: dict[str, Any] | str) -> ServiceAccountCredentials:
+    # If dict: Assume it's a service account json
+    if isinstance(credentials, dict):
+        return ServiceAccountCredentials.from_service_account_info(credentials)
+
+    # If str: Assume it's a path to a service account key json file
+    return ServiceAccountCredentials.from_service_account_file(credentials)
+
+
 class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataset`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        vehicles:
-          type: pandas.GBQTableDataset
-          dataset: big_query_dataset
-          table_name: big_query_table
-          project: my-project
-          credentials: gbq-creds
-          load_args:
-            reauth: True
-          save_args:
-            chunk_size: 100
+    vehicles:
+        type: pandas.GBQTableDataset
+        dataset: big_query_dataset
+        table_name: big_query_table
+        project: my-project
+        credentials: gbq-creds
+        load_args:
+        reauth: True
+        save_args:
+        chunk_size: 100
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.pandas import GBQTableDataset
+    import pandas as pd
 
-        >>> from kedro_datasets.pandas import GBQTableDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = GBQTableDataset(
-        ...     dataset="dataset", table_name="table_name", project="my-project"
-        ... )
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
+    dataset = GBQTableDataset(
+        dataset="dataset", table_name="table_name", project="my-project"
+    )
+    dataset.save(data)
+    reloaded = dataset.load()
+
+    assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -78,7 +84,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
         dataset: str,
         table_name: str,
         project: str | None = None,
-        credentials: dict[str, Any] | Credentials | None = None,
+        credentials: dict[str, Any] | str | Credentials | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -92,10 +98,10 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
             credentials: Credentials for accessing Google APIs.
-                Either ``google.auth.credentials.Credentials`` object or dictionary with
-                parameters required to instantiate ``google.oauth2.credentials.Credentials``.
-                Here you can find all the arguments:
-                https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html
+                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                a service account json as a dictionary OR
+                a path to a service account key json file.
+                https://googleapis.dev/python/google-auth/latest/
             load_args: Pandas options for loading BigQuery table into DataFrame.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
@@ -121,6 +127,10 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
         self._dataset = dataset
         self._table_name = table_name
         self._project_id = project
+
+        if (not isinstance(credentials, Credentials)) and (credentials is not None):
+            credentials = _get_credentials(credentials)
+
         self._connection_config = {
             "project": self._project_id,
             "credentials": credentials,
@@ -138,14 +148,9 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
         }
 
     def _connect(self) -> bigquery.Client:
-        credentials = self._connection_config["credentials"]
-        if isinstance(credentials, dict):
-            # Only create `Credentials` object once for consistent hash.
-            credentials = Credentials(**credentials)
-
         return bigquery.Client(
             project=self._connection_config["project"],
-            credentials=credentials,
+            credentials=self._connection_config["credentials"],
             location=self._connection_config["location"],
         )
 
@@ -194,30 +199,31 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
-    Example adding a catalog entry with the ``YAML API``:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        vehicles:
-          type: pandas.GBQQueryDataset
-          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
-          project: my-project
-          credentials: gbq-creds
-          load_args:
-            reauth: True
+    vehicles:
+        type: pandas.GBQQueryDataset
+        sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        project: my-project
+        credentials: gbq-creds
+        load_args:
+        reauth: True
+    ```
 
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example using Python API:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.pandas import GBQQueryDataset
 
-        >>> from kedro_datasets.pandas import GBQQueryDataset
-        >>>
-        >>> sql = "SELECT * FROM dataset_1.table_a"
-        >>>
-        >>> dataset = GBQQueryDataset(sql, project="my-project")
-        >>>
-        >>> sql_data = dataset.load()
+    sql = "SELECT * FROM dataset_1.table_a"
+
+    dataset = GBQQueryDataset(sql, project="my-project")
+
+    sql_data = dataset.load()
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -240,10 +246,10 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Optional when available from the environment.
                 https://cloud.google.com/resource-manager/docs/creating-managing-projects
             credentials: Credentials for accessing Google APIs.
-                Either ``google.auth.credentials.Credentials`` object or dictionary with
-                parameters required to instantiate ``google.oauth2.credentials.Credentials``.
-                Here you can find all the arguments:
-                https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html
+                Either a credential that bases on ``google.auth.credentials.Credentials`` OR
+                a service account json as a dictionary OR
+                a path to a service account key json file.
+                https://googleapis.dev/python/google-auth/latest/
             load_args: Pandas options for loading BigQuery table into DataFrame.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
@@ -276,10 +282,10 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         self._project_id = project
 
-        if isinstance(credentials, dict):
-            credentials = Credentials(**credentials)
-
-        self._credentials = credentials
+        if (not isinstance(credentials, Credentials)) and (credentials is not None):
+            self._credentials = _get_credentials(credentials)
+        else:
+            self._credentials = credentials
 
         # load sql query from arg or from file
         if sql:

@@ -26,10 +26,9 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 
-    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         cars:
           type: polars.CSVDataset
@@ -45,29 +44,24 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
           type: polars.CSVDataset
           filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
           credentials: dev_s3
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+        import sys
 
-        >>> import sys
-        >>>
-        >>> import polars as pl
-        >>> import pytest
-        >>> from kedro_datasets.polars import CSVDataset
-        >>>
-        >>> if sys.platform.startswith("win"):
-        ...     pytest.skip("this doctest fails on Windows CI runner")
-        ...
-        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = CSVDataset(filepath=tmp_path / "test.csv")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
+        import polars as pl
+        import pytest
+        from kedro_datasets.polars import CSVDataset
 
+        data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+        dataset = CSVDataset(filepath=tmp_path / "test.csv")
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {"rechunk": True}

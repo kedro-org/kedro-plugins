@@ -17,84 +17,82 @@ logger = logging.getLogger(__name__)
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark DataFrames.
 
-    As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
-    Python 3.12 is not supported yet.
+     As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
+     Python 3.12 is not supported yet.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+     ```yaml
 
-      weather:
-        type: kedro_datasets.snowflake.SnowparkTableDataset
-        table_name: "weather_data"
-        database: "meteorology"
-        schema: "observations"
-        credentials: db_credentials
-        save_args:
-          mode: overwrite
-          column_order: name
-          table_type: ''
+       weather:
+         type: kedro_datasets.snowflake.SnowparkTableDataset
+         table_name: "weather_data"
+         database: "meteorology"
+         schema: "observations"
+         credentials: db_credentials
+         save_args:
+           mode: overwrite
+           column_order: name
+           table_type: ''
+     ```
+     You can skip everything but "table_name" if the database and schema are
+     provided via credentials. This allows catalog entries to be shorter when
+     all Snowflake tables are in the same database and schema. Values in the
+     dataset definition take priority over those defined in credentials.
 
-    You can skip everything but "table_name" if the database and schema are
-    provided via credentials. This allows catalog entries to be shorter when
-    all Snowflake tables are in the same database and schema. Values in the
-    dataset definition take priority over those defined in credentials.
+     Example:
+     The credentials file provides all connection attributes. The catalog entry
+     for "weather" reuses the credentials parameters, while the "polygons" catalog
+     entry reuses all credentials parameters except for specifying a different
+     schema. The second example demonstrates the use of ``externalbrowser`` authentication.
 
-    Example:
-    The credentials file provides all connection attributes. The catalog entry
-    for "weather" reuses the credentials parameters, while the "polygons" catalog
-    entry reuses all credentials parameters except for specifying a different
-    schema. The second example demonstrates the use of ``externalbrowser`` authentication.
+     catalog.yml:
 
-    catalog.yml:
+     ```yaml
 
-    .. code-block:: yaml
+       weather:
+         type: kedro_datasets.snowflake.SnowparkTableDataset
+         table_name: "weather_data"
+         database: "meteorology"
+         schema: "observations"
+         credentials: snowflake_client
+         save_args:
+           mode: overwrite
+           column_order: name
+           table_type: ''
 
-      weather:
-        type: kedro_datasets.snowflake.SnowparkTableDataset
-        table_name: "weather_data"
-        database: "meteorology"
-        schema: "observations"
-        credentials: snowflake_client
-        save_args:
-          mode: overwrite
-          column_order: name
-          table_type: ''
+       polygons:
+         type: kedro_datasets.snowflake.SnowparkTableDataset
+         table_name: "geopolygons"
+         credentials: snowflake_client
+         schema: "geodata"
+     ```
+     credentials.yml:
 
-      polygons:
-        type: kedro_datasets.snowflake.SnowparkTableDataset
-        table_name: "geopolygons"
-        credentials: snowflake_client
-        schema: "geodata"
+     ```yaml
 
-    credentials.yml:
+       snowflake_client:
+         account: 'ab12345.eu-central-1'
+         port: 443
+         warehouse: "datascience_wh"
+         database: "detailed_data"
+         schema: "observations"
+         user: "service_account_abc"
+         password: "supersecret"
+     ```
+     credentials.yml (with externalbrowser authentication):
 
-    .. code-block:: yaml
+     ```yaml
 
-      snowflake_client:
-        account: 'ab12345.eu-central-1'
-        port: 443
-        warehouse: "datascience_wh"
-        database: "detailed_data"
-        schema: "observations"
-        user: "service_account_abc"
-        password: "supersecret"
-
-    credentials.yml (with externalbrowser authentication):
-
-    .. code-block:: yaml
-
-      snowflake_client:
-        account: 'ab12345.eu-central-1'
-        port: 443
-        warehouse: "datascience_wh"
-        database: "detailed_data"
-        schema: "observations"
-        user: "john_doe@wdomain.com"
-        authenticator: "externalbrowser"
-
+       snowflake_client:
+         account: 'ab12345.eu-central-1'
+         port: 443
+         warehouse: "datascience_wh"
+         database: "detailed_data"
+         schema: "observations"
+         user: "john_doe@wdomain.com"
+         authenticator: "externalbrowser"
+     ```
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -232,11 +230,7 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             DataFrame: The loaded data as a Snowpark DataFrame.
         """
-        if self._session is None:
-            raise DatasetError(
-                "No active session. Please initialise a Snowpark session before loading data."
-            )
-        return self._session.table(self._validate_and_get_table_name())
+        return self.session.table(self._validate_and_get_table_name())
 
     def save(self, data: pd.DataFrame | DataFrame) -> None:
         """
@@ -246,12 +240,8 @@ class SnowparkTableDataset(AbstractDataset):
         Args:
             data (pd.DataFrame | DataFrame): The data to save.
         """
-        if self._session is None:
-            raise DatasetError(
-                "No active session. Please initialise a Snowpark session before loading data."
-            )
         if isinstance(data, pd.DataFrame):
-            snowpark_df = self._session.create_dataframe(data)
+            snowpark_df = self.session.create_dataframe(data)
         elif isinstance(data, DataFrame):
             snowpark_df = data
         else:
@@ -270,12 +260,8 @@ class SnowparkTableDataset(AbstractDataset):
         Returns:
             bool: True if the table exists, False otherwise.
         """
-        if self._session is None:
-            raise DatasetError(
-                "No active session. Please initialise a Snowpark session before loading data."
-            )
         try:
-            self._session.table(
+            self.session.table(
                 f"{self._database}.{self._schema}.{self._table_name}"
             ).show()
             return True

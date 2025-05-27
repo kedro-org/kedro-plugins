@@ -1,5 +1,7 @@
 # Upcoming Release
-* Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+
+## Bug fixes and other changes
+* Removed `_VERBOSE` legacy code usage.
 
 # Release 0.6.2
 

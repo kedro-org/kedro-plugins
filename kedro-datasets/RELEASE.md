@@ -1,18 +1,55 @@
 # Upcoming Release
+
 ## Major features and improvements
 
-- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
-- Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+- Migrated docs to mkdocs
 
 ## Bug fixes and other changes
 
-- Fix polars.CSVDataset `save` method on Windows using `utf-8` as default encoding.
+- Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 
-## Breaking Changes
+## Breaking changes
+
+- ...
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- ...
+
+# Release 7.0.0
+
+## Major features and improvements
+
+- Added a parameter to enable/disable lazy saving for `PartitionedDataset`.
+- Added `ibis-athena` and `ibis-databricks` extras for the backends added in Ibis 10.0.
+- Renamed `MatplotlibWriter` to `MatplotlibDataset` for consistency with other dataset naming conventions. `MatplotlibWriter` is deprecated and will be removed in a future release.
+- Added the following new **experimental** datasets:
+
+| Type                           | Description                                                               | Location                             |
+| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------ |
+| `optuna.StudyDataset`          | A dataset for saving and loading Optuna studies.                          | `kedro_datasets_experimental.optuna` |
+| `darts.DartsTorchModelDataset` | A dataset for securely saving and loading Darts Torch Forecasting Models. | `kedro_datasets_experimental.darts`  |
+
+## Bug fixes and other changes
+
+- Fixed `polars.CSVDataset` `save` method on Windows using `utf-8` as default encoding.
+- Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
+- Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
+- Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`.
+
+## Breaking changes
 
 - Removed `tracking.MetricsDataset` and `tracking.JSONDataset`.
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Szymon Cogiel](https://github.com/SzymonCogiel)
+- [Abhishek Bhatia](https://github.com/abhi8893)
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 6.0.0
 
@@ -38,7 +75,7 @@
 - Added deprecation warning for `tracking.MetricsDataset` and `tracking.JSONDataset`.
 - Moved `kedro-catalog` JSON schemas from Kedro core to `kedro-datasets`.
 
-## Breaking Changes
+## Breaking changes
 
 - Demoted `video.VideoDataset` from core to experimental dataset.
 - Removed file handling capabilities from `ibis.TableDataset`. Use `ibis.FileDataset` to load and save files with an Ibis backend instead.
@@ -91,7 +128,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Fixed deprecated load and save approaches of `GBQTableDataset` and `GBQQueryDataset` by invoking save and load directly over `pandas-gbq` lib.
 - Fixed incorrect `pandas` optional dependency.
 
-## Breaking Changes
+## Breaking changes
 
 - Exposed `load` and `save` publicly for each dataset. This requires Kedro version 0.19.7 or higher.
 - Replaced the `geopandas.GeoJSONDataset` with `geopandas.GenericDataset` to support parquet and feather file formats.
@@ -119,7 +156,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Updated `ibis.TableDataset` to make sure credentials are not printed in interactive environment.
 
-## Breaking Changes
+## Breaking changes
 
 ## Community contributions
 
@@ -150,7 +187,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added `metadata` parameter for a few datasets
 
-## Breaking Changes
+## Breaking changes
 
 - `netcdf.NetCDFDataset` moved from `kedro_datasets` to `kedro_datasets_experimental`.
 

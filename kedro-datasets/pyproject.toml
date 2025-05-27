@@ -40,7 +40,7 @@ dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona >=1.8, <2.0"]
+geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona>=1.8, <2.0"]
 geopandas = ["kedro-datasets[geopandas-genericdataset]"]
 
 holoviews-holoviewswriter = ["holoviews>=1.13.0"]
@@ -50,9 +50,11 @@ huggingface-hfdataset = ["datasets", "huggingface_hub"]
 huggingface-hftransformerpipelinedataset = ["transformers"]
 huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
 
+ibis-athena = ["ibis-framework[athena]"]
 ibis-bigquery = ["ibis-framework[bigquery]"]
 ibis-clickhouse = ["ibis-framework[clickhouse]"]
-ibis-dask = ["ibis-framework[dask]"]
+ibis-dask = ["ibis-framework[dask]<10.0"]
+ibis-databricks = ["ibis-framework[databricks]"]
 ibis-datafusion = ["ibis-framework[datafusion]"]
 ibis-druid = ["ibis-framework[druid]"]
 ibis-duckdb = ["ibis-framework[duckdb]"]
@@ -62,7 +64,7 @@ ibis-impala = ["ibis-framework[impala]"]
 ibis-mssql = ["ibis-framework[mssql]"]
 ibis-mysql = ["ibis-framework[mysql]"]
 ibis-oracle = ["ibis-framework[oracle]"]
-ibis-pandas = ["ibis-framework[pandas]"]
+ibis-pandas = ["ibis-framework[pandas]<10.0"]
 ibis-polars = ["ibis-framework[polars]"]
 ibis-postgres = ["ibis-framework[postgres]"]
 ibis-pyspark = ["ibis-framework[pyspark]"]
@@ -79,12 +81,16 @@ matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
 matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter]"]
+matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
+
+optuna-studydataset = ["optuna"]
+optuna = ["kedro-datasets[optuna-studydataset]"]
 
 pandas-csvdataset = ["kedro-datasets[pandas-base]"]
 pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
@@ -167,6 +173,8 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+darts-torch-model-dataset = ["u8darts-all"]
+darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
@@ -193,14 +201,22 @@ video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
 docs = [
-    "kedro-sphinx-theme==2024.10.2",
+   "mkdocs>=1.6.1",
+   "mkdocs-material>=9.6.11",
+   "mkdocs-material-extensions>=1.3.1",
+   "mkdocs-mermaid2-plugin>=1.2.1",
+   "mkdocs-autorefs>=1.4.1",
+   "mkdocs-get-deps>=0.2.0",
+   "mkdocstrings>=0.29.1",
+   "mkdocstrings-python>=0.29.1",
+   "linkchecker>=10.2.1",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
 ]
 
 # Test requirements
 test = [
-    "accelerate<0.32", # Temporary pin
+    "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
     "behave==1.2.6",
     "biopython~=1.73",
@@ -298,6 +314,8 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
+    "optuna",
+    "u8darts[all]",
 ]
 
 # All requirements
@@ -319,7 +337,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
@@ -345,7 +363,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
 [tool.ruff.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
@@ -353,3 +371,4 @@ ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.mypy]
 ignore_missing_imports = true
+disable_error_code = ['no-redef']

@@ -146,25 +146,36 @@ class TestPartitionedDatasetLocal:
     def test_save_invalidates_cache(self, local_csvs, mocker):
         """Test that save calls invalidate partition cache"""
         pds = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
-        mocked_fs_invalidate = mocker.patch.object(pds._filesystem, "invalidate_cache")
-        first_load = pds.load()
-        assert pds._partition_cache.currsize == 1
-        mocked_fs_invalidate.assert_not_called()
+        # Patch _filesystem.invalidate_cache after PartitionedDataset is initialized,
+        fs_instance = pds._filesystem
+        mocked_fs_invalidate = mocker.patch.object(fs_instance, "invalidate_cache")
 
-        # save clears cache
+        first_load = pds.load()
+        assert (
+            pds._partition_cache.currsize == 1
+        )  # _list_partitions caches its result in _partition_cache
+        mocked_fs_invalidate.assert_called_once_with(
+            pds._normalized_path
+        )  # Assert it was called by load()
+        mocked_fs_invalidate.reset_mock()  # Reset for the next check
+
+        # save calls _invalidate_caches()
         data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         new_partition = "new/data.csv"
         pds.save({new_partition: data})
+        # save() calls _invalidate_caches which clears the Cachetools
         assert pds._partition_cache.currsize == 0
-        # it seems that `_filesystem.invalidate_cache` calls itself inside,
-        # resulting in not one, but 2 mock calls
-        # hence using `assert_any_call` instead of `assert_called_once_with`
         mocked_fs_invalidate.assert_any_call(pds._normalized_path)
+        mocked_fs_invalidate.reset_mock()  # Reset before the next load
 
         # new load returns new partition too
         second_load = pds.load()
         assert new_partition not in first_load
         assert new_partition in second_load
+        assert (
+            pds._partition_cache.currsize == 1
+        )  # Cache repopulated by the second load
+        mocked_fs_invalidate.assert_called_once_with(pds._normalized_path)
 
     @pytest.mark.parametrize("overwrite,expected_num_parts", [(False, 6), (True, 1)])
     def test_overwrite(self, local_csvs, overwrite, expected_num_parts):
@@ -210,14 +221,30 @@ class TestPartitionedDatasetLocal:
         pds = PartitionedDataset(path=str(local_csvs), dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
+        assert pds._partition_cache.currsize == 1
 
         (local_csvs / partition_to_remove).unlink()
-        cached_load = pds.load()
-        assert initial_load.keys() == cached_load.keys()
+
+        # Load will call _invalidate_caches()
+        load_after_file_delete = pds.load()
+        # So, it should NOT contain the removed partition.
+        assert partition_to_remove not in load_after_file_delete.keys()
+        assert pds._partition_cache.currsize == 1
 
         pds.release()
-        load_after_release = pds.load()
-        assert initial_load.keys() ^ load_after_release.keys() == {partition_to_remove}
+        # Cachetools should be empty now.
+        assert pds._partition_cache.currsize == 0
+
+        # Re-scan and find the same state as load_after_file_delete.
+        load_after_release_call = pds.load()
+        assert partition_to_remove not in load_after_release_call.keys()
+        # Keys same as load after deletion.
+        assert load_after_file_delete.keys() == load_after_release_call.keys()
+
+        # The difference between the initial state and the final state is the removed partition
+        assert initial_load.keys() ^ load_after_release_call.keys() == {
+            partition_to_remove
+        }
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_describe(self, dataset):
@@ -308,10 +335,13 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize(
         "dataset_config,error_pattern",
         [
-            ("UndefinedDatasetType", "Class 'UndefinedDatasetType' not found"),
+            (
+                "UndefinedDatasetType",
+                r"Empty module name\. Invalid dataset path: 'UndefinedDatasetType'\. Please check if it's correct\.",
+            ),
             (
                 "missing.module.UndefinedDatasetType",
-                r"Class 'missing\.module\.UndefinedDatasetType' not found",
+                r"No module named 'missing'\. Please install the missing dependencies for missing\.module\.UndefinedDatasetType",
             ),
             (
                 FakeDataset,
@@ -626,15 +656,31 @@ class TestPartitionedDatasetS3:
         pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
+        assert pds._partition_cache.currsize == 1
 
         s3 = s3fs.S3FileSystem()
         s3.rm("/".join([mocked_csvs_in_s3, partition_to_remove]))
-        cached_load = pds.load()
-        assert initial_load.keys() == cached_load.keys()
+
+        # Load will call _invalidate_caches()
+        load_after_file_delete = pds.load()
+        # So, it should NOT contain the removed partition.
+        assert partition_to_remove not in load_after_file_delete.keys()
+        assert pds._partition_cache.currsize == 1
 
         pds.release()
-        load_after_release = pds.load()
-        assert initial_load.keys() ^ load_after_release.keys() == {partition_to_remove}
+        # Cachetools should be empty now.
+        assert pds._partition_cache.currsize == 0
+
+        # Re-scan and find the same state as load_after_file_delete.
+        load_after_release_call = pds.load()
+        assert partition_to_remove not in load_after_release_call.keys()
+        # Keys same as load after deletion.
+        assert load_after_file_delete.keys() == load_after_release_call.keys()
+
+        # The difference between the initial state and the final state is the removed partition.
+        assert initial_load.keys() ^ load_after_release_call.keys() == {
+            partition_to_remove
+        }
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):

@@ -28,42 +28,38 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     is supported by pandas, so it supports all allowed pandas options
     for loading and saving csv files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        cars:
-          type: pandas.FeatherDataset
-          filepath: data/01_raw/company/cars.feather
-          load_args:
-            columns: ['col1', 'col2', 'col3']
-            use_threads: True
+    cars:
+        type: pandas.FeatherDataset
+        filepath: data/01_raw/company/cars.feather
+        load_args:
+        columns: ['col1', 'col2', 'col3']
+        use_threads: True
 
-        motorbikes:
-          type: pandas.FeatherDataset
-          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
-          credentials: dev_s3
+    motorbikes:
+        type: pandas.FeatherDataset
+        filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
+        credentials: dev_s3
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.pandas import FeatherDataset
+    import pandas as pd
 
-        >>> from kedro_datasets.pandas import FeatherDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = FeatherDataset(filepath=tmp_path / "test.feather")
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
+    dataset = FeatherDataset(filepath=tmp_path / "test.feather")
+
+    dataset.save(data)
+    reloaded = dataset.load()
+
+    assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

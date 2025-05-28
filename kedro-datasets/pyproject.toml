@@ -280,6 +280,7 @@ test = [
     "datasets",
     "huggingface_hub",
     "transformers[torch]",
+    "pytest-doctest-mkdocstrings",
 ]
 
 # Lint requirements

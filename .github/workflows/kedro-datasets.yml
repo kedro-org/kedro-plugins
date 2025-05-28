@@ -66,8 +66,8 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           fail: false
-          args: --max-concurrency 32 --exclude "@.lycheeignore"
-          workingDirectory: kedro-datasets/site/
+          args: --max-concurrency 32 --exclude "@.lycheeignore" site/
+          workingDirectory: kedro-datasets
 
   detect-secrets:
     uses: ./.github/workflows/detect-secrets.yml

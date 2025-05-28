@@ -17,3 +17,4 @@
 | [rioxarray.GeoTIFFDataset](rioxarray.GeoTIFFDataset.md) | Loads and saves raster data files as xarray DataArrays. Supports single and multiband GeoTIFFs with CRS validation. |
 | [safetensors.SafetensorsDataset](safetensors.SafetensorsDataset.md) | Loads and saves data using the SafeTensors library with support for multiple backends like numpy and torch. |
 | [video.VideoDataset](video.VideoDataset.md) | Loads and saves video data as a sequence of images using OpenCV, supporting various codecs and formats. |
+| [polars.PolarsDatabaseDataset](polars.PolarsDatabaseDataset.md) | ``PolarsDatabaseDataset`` implementation to access databases as Polars DataFrames. It supports reading from a SQL query and writing to a database table. |

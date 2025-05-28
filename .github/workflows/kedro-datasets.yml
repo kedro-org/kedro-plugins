@@ -60,7 +60,7 @@ jobs:
           uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
       - name: Build datasets documentation
         run: |
-          build build-datasets-docs
+          make build-datasets-docs
       - name: Link Checker
         id: lychee
         uses: lycheeverse/lychee-action@v2

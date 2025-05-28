@@ -212,6 +212,7 @@ docs = [
    "linkchecker>=10.2.1",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
+    "pytest-doctest-mkdocstrings
 ]
 
 # Test requirements
@@ -341,15 +342,20 @@ omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", 
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
-addopts = """
---cov-report xml:coverage.xml \
---cov-report term-missing \
---cov kedro_datasets \
---cov tests \
---ignore tests/template/fake_repo \
---no-cov-on-fail \
--ra \
--W ignore"""
+addopts = [
+    "--doctest-modules",
+    "--doctest-glob=*.md",
+    "--doctest-mdcodeblocks",
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=term-missing",
+    "--cov=kedro_datasets",
+    "--cov=tests",
+    "--ignore=tests/template/fake_repo",
+    "--no-cov-on-fail",
+    "-ra",
+    "-W",
+    "ignore"
+]
 
 [tool.ruff]
 line-length = 88

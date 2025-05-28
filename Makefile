@@ -53,7 +53,10 @@ test-snowflake-only:
 	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
 check-datasets-docs:
-	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
+	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
+	cd kedro-datasets && mkdocs build
+	# lychee checks for broken external links in the built site, with max concurrency set to 32
+	cd kedro-datasets && lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests

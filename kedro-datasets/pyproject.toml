@@ -211,8 +211,7 @@ docs = [
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
-   "Jinja2<3.2.0",
-   "pytest-doctest-mkdocstrings"
+   "Jinja2<3.2.0"
 ]
 
 # Test requirements
@@ -280,7 +279,6 @@ test = [
     "datasets",
     "huggingface_hub",
     "transformers[torch]",
-    "pytest-doctest-mkdocstrings",
 ]
 
 # Lint requirements
@@ -344,9 +342,6 @@ exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
 addopts = [
-    "--doctest-modules",
-    "--doctest-glob=*.md",
-    "--doctest-mdcodeblocks",
     "--cov-report=xml:coverage.xml",
     "--cov-report=term-missing",
     "--cov=kedro_datasets",

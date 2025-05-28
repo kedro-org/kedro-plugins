@@ -1,6 +1,6 @@
 ![Kedro logo](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png)
 
-# Welcome to Kedro's award-winning documentation!
+# Welcome to Kedro's award-winning documentation
 
 [![GitHub Actions - Main Branch](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main)](https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain)
 
@@ -81,17 +81,17 @@
 - [Single-machine deployment](pages/deploy/single_machine.md)
 - [Distributed deployment](pages/deploy/distributed.md)
 - Supported platforms:
-  - [Apache Airflow](pages/deploy/supported-platforms/airflow.md)
-  - [Amazon SageMaker](pages/deploy/supported-platforms/amazon_sagemaker.md)
-  - [Amazon EMR Serverless](pages/deploy/supported-platforms/amazon_emr_serverless.md)
-  - [AWS Step Functions](pages/deploy/supported-platforms/aws_step_functions.md)
-  - [Azure ML pipelines](pages/deploy/supported-platforms/azure.md)
-  - [Dask](pages/deploy/supported-platforms/dask.md)
-  - [Kubeflow Pipelines](pages/deploy/supported-platforms/kubeflow.md)
-  - [Prefect](pages/deploy/supported-platforms/prefect.md)
-  - [VertexAI](pages/deploy/supported-platforms/vertexai.md)
-  - [Argo Workflows](pages/deploy/supported-platforms/argo.md)
-  - [AWS Batch](pages/deploy/supported-platforms/aws_batch.md)
+- [Apache Airflow](pages/deploy/supported-platforms/airflow.md)
+- [Amazon SageMaker](pages/deploy/supported-platforms/amazon_sagemaker.md)
+- [Amazon EMR Serverless](pages/deploy/supported-platforms/amazon_emr_serverless.md)
+- [AWS Step Functions](pages/deploy/supported-platforms/aws_step_functions.md)
+- [Azure ML pipelines](pages/deploy/supported-platforms/azure.md)
+- [Dask](pages/deploy/supported-platforms/dask.md)
+- [Kubeflow Pipelines](pages/deploy/supported-platforms/kubeflow.md)
+- [Prefect](pages/deploy/supported-platforms/prefect.md)
+- [VertexAI](pages/deploy/supported-platforms/vertexai.md)
+- [Argo Workflows](pages/deploy/supported-platforms/argo.md)
+- [AWS Batch](pages/deploy/supported-platforms/aws_batch.md)
 
 ## Extend
 
@@ -103,14 +103,14 @@
 ## Reference
 
 - [Kedro API](pages/api/index.md)
-  - [kedro.config](pages/api/config/kedro.config.md)
-  - [kedro.framework](pages/api/framework/kedro.framework.md)
-  - [kedro.io](pages/api/io/kedro.io.md)
-  - [kedro.ipython](pages/api/ipython/kedro.ipython.md)
-  - [kedro.logging](pages/api/kedro.logging.md)
-  - [kedro.pipeline](pages/api/pipeline/kedro.pipeline.md)
-  - [kedro.runner](pages/api/runner/kedro.runner.md)
-  - [kedro.utils](pages/api/kedro.utils.md)
+- [kedro.config](pages/api/config/kedro.config.md)
+- [kedro.framework](pages/api/framework/kedro.framework.md)
+- [kedro.io](pages/api/io/kedro.io.md)
+- [kedro.ipython](pages/api/ipython/kedro.ipython.md)
+- [kedro.logging](pages/api/kedro.logging.md)
+- [kedro.pipeline](pages/api/pipeline/kedro.pipeline.md)
+- [kedro.runner](pages/api/runner/kedro.runner.md)
+- [kedro.utils](pages/api/kedro.utils.md)
 
 ## Integration & Plugins
 

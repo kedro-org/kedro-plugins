@@ -67,7 +67,7 @@ jobs:
         with:
           fail: false
           args: --max-concurrency 32 --exclude "@.lycheeignore"
-          workingDirectory: site/
+          workingDirectory: kedro-datasets/site/
 
   detect-secrets:
     uses: ./.github/workflows/detect-secrets.yml

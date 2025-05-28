@@ -210,9 +210,9 @@ docs = [
    "mkdocstrings>=0.29.1",
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
-    "pytest-doctest-mkdocstrings
+   "ipykernel>=5.3, <7.0",
+   "Jinja2<3.2.0",
+   "pytest-doctest-mkdocstrings"
 ]
 
 # Test requirements

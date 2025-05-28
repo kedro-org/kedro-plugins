@@ -65,7 +65,7 @@ jobs:
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:
-          fail: false
+          # fail: false
           args: --max-concurrency 32 --exclude "@.lycheeignore" site/
           workingDirectory: kedro-datasets
 

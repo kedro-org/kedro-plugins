@@ -56,6 +56,11 @@ build-datasets-docs:
 	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
 	cd kedro-datasets && mkdocs build
 
+fix-markdownlint:
+	npm install -g markdownlint-cli2
+	# markdownlint rules are defined in .markdownlint.yaml
+	markdownlint-cli2 --config .markdownlint.yaml --fix "kedro-datasets/docs/**/*.md"
+
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doc
 	cd kedro-datasets && pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks
@@ -79,9 +84,9 @@ dataset-doctest%:
 	  --ignore kedro_datasets/spark/gbq_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
-	  --ignore kedro_experimental_datasets/
+	  --ignore kedro_datasets_experimental/
 	  $(extra_pytest_arg${*})
 
 dataset-doc:
 	cd kedro-datasets && pytest --doctest-mdcodeblocks --doctest-modules --doctest-glob="*.md" --doctest-continue-on-failure --no-cov \
-	 --ignore kedro_experimental_datasets/
+	 --ignore kedro_datasets_experimental/

@@ -1,6 +1,7 @@
 site_name: ""
 site_url: https://docs.kedro.org/projects/kedro-datasets
-use_directory_urls: true
+repo_name: kedro-org/kedro
+repo_url: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets
 
 theme:
   name: material

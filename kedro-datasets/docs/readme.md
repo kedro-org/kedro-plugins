@@ -15,7 +15,7 @@ This guide will help you set up and run the documentation site locally using MkD
 
 To install the documentation dependencies locally, run:
 
-```
+```bash
 pip install -e ".[docs]"
 ```
 
@@ -27,7 +27,7 @@ This installs all required packages needed to build and serve the documentation.
 
 Once the installation is complete, start the MkDocs development server with:
 
-```
+```bash
 mkdocs serve
 ```
 
@@ -43,14 +43,14 @@ Below are examples of commonly used components in the documentation:
 
 #### 🔔 Note
 
-```
+```text
 > **Note**
 > This is a note block to highlight important information.
 ```
 
 **Rendered Output:**
 
-```
+```bash
 > This is a note block to highlight important information.
 ```
 

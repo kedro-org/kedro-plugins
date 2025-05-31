@@ -75,6 +75,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         *,
         table_name: str,
         database: str | None = None,
+        credentials: dict[str, Any] | str | None = None,
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -104,8 +105,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 (e.g. `("catalog", "database")`) or a dotted string path
                 (e.g. `"catalog.database"`) to reference a table or view
                 in a multi-level table hierarchy.
-            connection: Configuration for connecting to an Ibis backend.
-                If not provided, connect to DuckDB in in-memory mode.
+            credentials: (Preferred) Connection information for the Ibis backend. Can be a connection string or a dict of parameters. Supersedes `connection`.
+            connection: (Deprecated) Configuration for connecting to an Ibis backend. Use `credentials` instead.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -119,9 +120,21 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 but may be consumed by users or external plugins.
         """
 
+        if credentials is not None and connection is not None:
+            import warnings
+
+            warnings.warn(
+                "Both 'credentials' and deprecated 'connection' were provided. 'credentials' will be used.",
+                DeprecationWarning,
+            )
+
         self._table_name = table_name
         self._database = database
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        # Prefer credentials if provided, else fallback to connection
+        if credentials is not None:
+            self._connection_config = credentials
+        else:
+            self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
@@ -153,6 +166,13 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         import ibis
 
         config = deepcopy(self._connection_config)
+        # If credentials is a string, treat as connection string
+        if isinstance(config, str):
+            return ibis.connect(config)
+        # If credentials is a dict with a 'con' key, treat as connection string
+        if isinstance(config, dict) and "con" in config:
+            return ibis.connect(config["con"])
+        # Otherwise, treat as expanded dict (params)
         backend = getattr(ibis, config.pop("backend"))
         return backend.connect(**config)
 
@@ -198,6 +218,23 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         except KeyError:
             raise ValueError(f"Unknown mode: {self._mode!r}")
 
+    def _get_backend_name(self) -> str | None:
+        """Get the backend name from the connection config or connection string."""
+        config = self._connection_config
+        # If dict and has 'backend'
+        if isinstance(config, dict) and "backend" in config:
+            return config["backend"]
+        # If string, parse as backend://...
+        if isinstance(config, str):
+            if "://" in config:
+                return config.split("://", 1)[0]
+        # If dict with 'con' key
+        if isinstance(config, dict) and "con" in config:
+            con_str = config["con"]
+            if "://" in con_str:
+                return con_str.split("://", 1)[0]
+        return None
+
     def _describe(self) -> dict[str, Any]:
         load_args = deepcopy(self._load_args)
         save_args = deepcopy(self._save_args)
@@ -206,7 +243,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return {
             "table_name": self._table_name,
             "database": self._database,
-            "backend": self._connection_config["backend"],
+            "backend": self._get_backend_name(),
             "load_args": load_args,
             "save_args": save_args,
             "materialized": self._materialized,

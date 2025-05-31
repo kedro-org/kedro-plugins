@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -140,15 +141,14 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         # Handle mode / overwrite conflict
         if save_args and "mode" in save_args and "overwrite" in self._save_args:
-            raise ValueError(
-                "Cannot specify both 'mode' and deprecated 'overwrite'."
-            )
+            raise ValueError("Cannot specify both 'mode' and deprecated 'overwrite'.")
         # Map legacy overwrite if present
         if "overwrite" in self._save_args:
             legacy = self._save_args.pop("overwrite")
             self._mode = "overwrite" if legacy else "error"
         else:
             self._mode = self._save_args.pop("mode")
+
     def _connect(self) -> BaseBackend:
         import ibis
 
@@ -167,9 +167,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def save(self, data: ir.Table) -> None:
         if self._mode == "append":
             if hasattr(self.connection, "insert"):
-                self.connection.insert(
-                    self._table_name, data, **self._save_args
-                )
+                self.connection.insert(self._table_name, data, **self._save_args)
             else:
                 raise NotImplementedError(
                     f"Insert mode is not supported by the {self.connection!r} backend."
@@ -180,8 +178,10 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         def overwrite():
             writer(self._table_name, data, overwrite=True, **self._save_args)
+
         def error():
             writer(self._table_name, data, overwrite=False, **self._save_args)
+
         def ignore():
             if self._exists():
                 return

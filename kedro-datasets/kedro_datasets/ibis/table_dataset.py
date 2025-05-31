@@ -105,18 +105,25 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 (e.g. `("catalog", "database")`) or a dotted string path
                 (e.g. `"catalog.database"`) to reference a table or view
                 in a multi-level table hierarchy.
-            credentials: (Preferred) Connection information for the Ibis backend. Can be a connection string or a dict of parameters. Supersedes `connection`.
-            connection: (Deprecated) Configuration for connecting to an Ibis backend. Use `credentials` instead.
+            credentials: (Preferred) Connection information for the Ibis
+            backend. Can be a connection string or a dict of parameters.
+            Supersedes `connection`.
+            connection: (Deprecated) Configuration for connecting to an
+            Ibis backend. Use `credentials` instead.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
-                `materialized` in `save_args`. You can also include a
-                `mode` parameter ("append", "overwrite", "error", "ignore")
-                to control write behavior.
-            metadata: Any arbitrary metadata. This is ignored by Kedro,
+                `materialized` in `save_args`. The `mode` parameter controls 
+                the behavior when saving data:
+                - _"overwrite"_: Overwrite existing data in the table.
+                - _"append"_: Append contents of the new data to the existing table (does not overwrite).
+                - _"error"_ or _"errorifexists"_: Throw an exception if the table already exists.
+                - _"ignore"_: Silently ignore the operation if the table already exists.
+                These options are similar to those in Spark's DataFrameWriter (see: https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.mode.html).
+        metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
 
@@ -139,13 +146,13 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args:
+        if load_args is not None:
             self._load_args.update(load_args)
         if database is not None:
             self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args:
+        if save_args is not None:
             self._save_args.update(save_args)
         if database is not None:
             self._save_args["database"] = database
@@ -196,26 +203,15 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         writer = getattr(self.connection, f"create_{self._materialized}")
 
-        def overwrite():
+        if self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)
-
-        def error():
+        elif self._mode == "error":
             writer(self._table_name, data, overwrite=False, **self._save_args)
-
-        def ignore():
+        elif self._mode == "ignore":
             if self._exists():
                 return
             writer(self._table_name, data, overwrite=False, **self._save_args)
-
-        mode_dispatch = {
-            "overwrite": overwrite,
-            "error": error,
-            "ignore": ignore,
-        }
-
-        try:
-            mode_dispatch[self._mode]()
-        except KeyError:
+        else:
             raise ValueError(f"Unknown mode: {self._mode!r}")
 
     def _get_backend_name(self) -> str | None:

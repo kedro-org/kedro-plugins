@@ -26,6 +26,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         database: company.db
       save_args:
         materialized: table
+        mode: append
 
     motorbikes:
       type: ibis.TableDataset
@@ -33,6 +34,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
       connection:
         backend: duckdb
         database: company.db
+      save_args:
+        materialized: view
+        mode: overwrite
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -45,7 +49,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     dataset = TableDataset(
         table_name="test",
         connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        save_args={"materialized": "table"},
+        save_args={"materialized": "table", "mode": "overwrite"},
     )
     dataset.save(data)
     reloaded = dataset.load()
@@ -60,7 +64,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
-        "overwrite": True,
+        "mode": "overwrite",
     }
 
     _CONNECTION_GROUP: ClassVar[str] = "ibis"
@@ -107,7 +111,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
-                `materialized` in `save_args`.
+                `materialized` in `save_args`. You can also include a
+                `mode` parameter ("append", "overwrite", "error", "ignore")
+                to control write behavior.
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
@@ -119,19 +125,30 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
+        if load_args:
             self._load_args.update(load_args)
         if database is not None:
             self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
+        if save_args:
             self._save_args.update(save_args)
         if database is not None:
             self._save_args["database"] = database
 
         self._materialized = self._save_args.pop("materialized")
 
+        # Handle mode / overwrite conflict
+        if save_args and "mode" in save_args and "overwrite" in self._save_args:
+            raise ValueError(
+                "Cannot specify both 'mode' and deprecated 'overwrite'."
+            )
+        # Map legacy overwrite if present
+        if "overwrite" in self._save_args:
+            legacy = self._save_args.pop("overwrite")
+            self._mode = "overwrite" if legacy else "error"
+        else:
+            self._mode = self._save_args.pop("mode")
     def _connect(self) -> BaseBackend:
         import ibis
 
@@ -148,8 +165,38 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
+        if self._mode == "append":
+            if hasattr(self.connection, "insert"):
+                self.connection.insert(
+                    self._table_name, data, **self._save_args
+                )
+            else:
+                raise NotImplementedError(
+                    f"Insert mode is not supported by the {self.connection!r} backend."
+                )
+            return
+
         writer = getattr(self.connection, f"create_{self._materialized}")
-        writer(self._table_name, data, **self._save_args)
+
+        def overwrite():
+            writer(self._table_name, data, overwrite=True, **self._save_args)
+        def error():
+            writer(self._table_name, data, overwrite=False, **self._save_args)
+        def ignore():
+            if self._exists():
+                return
+            writer(self._table_name, data, overwrite=False, **self._save_args)
+
+        mode_dispatch = {
+            "overwrite": overwrite,
+            "error": error,
+            "ignore": ignore,
+        }
+
+        try:
+            mode_dispatch[self._mode]()
+        except KeyError:
+            raise ValueError(f"Unknown mode: {self._mode!r}")
 
     def _describe(self) -> dict[str, Any]:
         load_args = deepcopy(self._load_args)
@@ -163,6 +210,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             "load_args": load_args,
             "save_args": save_args,
             "materialized": self._materialized,
+            "mode": self._mode,
         }
 
     def _exists(self) -> bool:

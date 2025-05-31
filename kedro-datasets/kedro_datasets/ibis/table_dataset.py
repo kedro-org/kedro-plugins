@@ -205,7 +205,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         if self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)
-        elif self._mode == "error":
+        elif self._mode in ("error", "errorifexists"):
             writer(self._table_name, data, overwrite=False, **self._save_args)
         elif self._mode == "ignore":
             if self._exists():

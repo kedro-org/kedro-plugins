@@ -223,9 +223,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
 
-        self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials or {})
 
-        self._fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -242,7 +242,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args) or {}
+        self._load_args = deepcopy(load_args or {})
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
         self._invalidate_caches()

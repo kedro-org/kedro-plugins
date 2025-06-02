@@ -54,7 +54,7 @@ test-snowflake-only:
 
 build-datasets-docs:
 	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
-	cd kedro-datasets && mkdocs build
+	cd kedro-datasets && mkdocs build --strict
 
 fix-markdownlint:
 	npm install -g markdownlint-cli2

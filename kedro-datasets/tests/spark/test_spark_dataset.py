@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
 from kedro.io.core import DatasetError, generate_timestamp
+from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline import node
 from kedro.pipeline import Pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -424,7 +425,7 @@ class TestSparkDataset:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
         """Test ParallelRunner with SparkDataset fails."""
-        catalog = DataCatalog({"spark_in": spark_in})
+        catalog = SharedMemoryDataCatalog({"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
             r"The following datasets cannot be used with "

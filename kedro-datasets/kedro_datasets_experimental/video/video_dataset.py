@@ -198,73 +198,67 @@ class GeneratorVideo(AbstractVideo):
 
 
 class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
-    """``VideoDataset`` loads / save video data from a given filepath as sequence
-    of PIL.Image.Image using OpenCV.
+    """`VideoDataset` loads/saves video data from a given filepath as a sequence of `PIL.Image.Image` using OpenCV.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
 
-    .. code-block:: yaml
+    ```yaml
+    cars:
+        type: video.VideoDataset
+        filepath: data/01_raw/cars.mp4
 
-        cars:
-          type: video.VideoDataset
-          filepath: data/01_raw/cars.mp4
+    motorbikes:
+        type: video.VideoDataset
+        filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
+        credentials: dev_s3
+    ```
 
-        motorbikes:
-          type: video.VideoDataset
-          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
-          credentials: dev_s3
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
+    from kedro_datasets.video import VideoDataset
+    import numpy as np
 
-    .. code-block:: pycon
+    video = VideoDataset(
+        filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+    ).load()
+    frame = video[0]
+    ```
 
-        >>> from kedro_datasets.video import VideoDataset
-        >>> import numpy as np
-        >>>
-        >>> video = VideoDataset(
-        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-        ... ).load()
-        >>> frame = video[0]
+    ### Example creating a video from numpy frames using Python API
 
+    ```python
+    from kedro_datasets.video.video_dataset import VideoDataset, SequenceVideo
+    import numpy as np
+    from PIL import Image
 
-    Example creating a video from numpy frames using Python API:
+    frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
+    imgs = []
+    for i in range(255):
+        imgs.append(Image.fromarray(frame))
+        frame -= 1
 
-    .. code-block:: pycon
+    video = VideoDataset(filepath=tmp_path / "my_video.mp4")
+    video.save(SequenceVideo(imgs, fps=25))
+    ```
 
-        >>> from kedro_datasets.video.video_dataset import VideoDataset, SequenceVideo
-        >>> import numpy as np
-        >>> from PIL import Image
-        >>>
-        >>> frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
-        >>> imgs = []
-        >>> for i in range(255):
-        ...     imgs.append(Image.fromarray(frame))
-        ...     frame -= 1
-        ...
-        >>> video = VideoDataset(filepath=tmp_path / "my_video.mp4")
-        >>> video.save(SequenceVideo(imgs, fps=25))
+    ### Example creating a video from numpy frames using a generator and the Python API
 
+    ```python
+    from kedro_datasets.video.video_dataset import VideoDataset, GeneratorVideo
+    import numpy as np
+    from PIL import Image
 
-    Example creating a video from numpy frames using a generator and the Python API:
+    def gen():
+        frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
+        for i in range(255):
+            yield Image.fromarray(frame)
+            frame -= 1
 
-    .. code-block:: pycon
+    video = VideoDataset(filepath=tmp_path / "my_video.mp4")
+    video.save(GeneratorVideo(gen(), fps=25, length=None))
+    ```
 
-        >>> from kedro_datasets.video.video_dataset import VideoDataset, GeneratorVideo
-        >>> import numpy as np
-        >>> from PIL import Image
-        >>>
-        >>> def gen():
-        ...     frame = np.ones((640, 480, 3), dtype=np.uint8) * 255
-        ...     for i in range(255):
-        ...         yield Image.fromarray(frame)
-        ...         frame -= 1
-        ...
-        >>> video = VideoDataset(filepath=tmp_path / "my_video.mp4")
-        >>> video.save(GeneratorVideo(gen(), fps=25, length=None))
 
     """
 

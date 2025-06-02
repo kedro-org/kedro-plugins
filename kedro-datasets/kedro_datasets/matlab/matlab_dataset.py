@@ -24,32 +24,31 @@ from scipy import io
 class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """`MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        cars:
-          type: matlab.MatlabDataset
-          filepath: gcs://your_bucket/cars.mat
-          fs_args:
-            project: my-project
-          credentials: my_gcp_credentials
+    cars:
+        type: matlab.MatlabDataset
+        filepath: gcs://your_bucket/cars.mat
+        fs_args:
+        project: my-project
+        credentials: my_gcp_credentials
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.matlab import MatlabDataset
+    import numpy as np
 
-        >>> from kedro_datasets.matlab import MatlabDataset
-        >>> import numpy as np
-        >>> data = np.array([1, 2, 3])
-        >>> dataset = MatlabDataset(filepath=tmp_path / "test.mat")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert (data == reloaded["data"]).all()
+    data = np.array([1, 2, 3])
+    dataset = MatlabDataset(filepath=tmp_path / "test.mat")
 
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert (data == reloaded["data"]).all()
+    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}

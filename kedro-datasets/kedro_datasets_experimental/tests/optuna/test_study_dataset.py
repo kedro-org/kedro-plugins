@@ -105,6 +105,26 @@ class TestStudyDataset:
                 credentials={"username": "user", "pwd": "pass"}, # pragma: allowlist secret
             )
 
+    def test_study_existence(self):
+        """Test invalid credentials raise ValueError."""
+        study_dataset = StudyDataset(
+            study_name="test",
+            backend="postgresql",
+            database="optuna_db",
+            credentials={"username": "user", "password": "pass"}, # pragma: allowlist secret
+        )
+
+        # Test that RDB storage can be created but DB access module cannot be imported
+        with pytest.raises(ImportError, match="Failed to import DB access module"):
+            study_dataset._study_name_exists(study_name="blah")
+
+        study_dataset = StudyDataset(
+            study_name="test",
+            backend="sqlite",
+            database="optuna.db",
+        )
+        assert study_dataset._study_name_exists(study_name="blah") is False
+
     def test_study_name_exists(self, study_dataset, dummy_study):
         """Test `_study_name_exists` method."""
         assert not study_dataset._study_name_exists("test")

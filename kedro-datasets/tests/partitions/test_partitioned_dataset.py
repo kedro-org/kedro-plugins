@@ -8,14 +8,7 @@ import pandas as pd
 import pytest
 import s3fs
 from kedro.io import DatasetError
-
-try:
-    # Kedro 1.0.0+
-    from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
-except ImportError:
-    # Older versions
-    from kedro.io.data_catalog import CREDENTIALS_KEY
-
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from moto import mock_aws
 from pandas.testing import assert_frame_equal
 

@@ -113,7 +113,7 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Kedro: https://docs.kedro.org/projects/
+  - Kedro: https://docs.kedro.org/en/develop/
   - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
   - Kedro-Datasets:
     - API documentation:

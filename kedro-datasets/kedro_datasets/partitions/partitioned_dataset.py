@@ -26,7 +26,7 @@ try:
     from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 except ImportError:  # pragma: no cover
     # Older versions
-    from kedro.io.data_catalog import CREDENTIALS_KEY
+    from kedro.io.data_catalog import CREDENTIALS_KEY  # type: ignore[attr-defined]
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "

@@ -108,8 +108,8 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._filepath = filepath
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         self.metadata = metadata
 

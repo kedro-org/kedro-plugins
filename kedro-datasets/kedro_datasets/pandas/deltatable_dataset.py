@@ -132,8 +132,8 @@ class DeltaTableDataset(AbstractDataset):
         self._catalog_name = catalog_name
         self._database = database
         self._table = table
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         # DeltaTable cannot be instantiated from an empty directory
         # for the first time creation from filepath, we need to delay the instantiation

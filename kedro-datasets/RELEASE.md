@@ -38,6 +38,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Made `table_name` a keyword argument in the `ibis.FileDataset` implementation to be compatible with Ibis 10.0.
 - Fixed how sessions are handled in the `snowflake.SnowflakeTableDataset` implementation.
 - Fixed credentials handling in `pandas.GBQQueryDataset` and `pandas.GBQTableDataset`.
+- Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
 
 ## Breaking changes
 
@@ -50,6 +51,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [Paul Lemonnier](https://github.com/PaulLemonnier)
 
 # Release 6.0.0
 

@@ -24,7 +24,7 @@ from kedro.io.core import (
 try:
     # Kedro 1.0.0+
     from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
-except ImportError:
+except ImportError:  # pragma: no cover
     # Older versions
     from kedro.io.data_catalog import CREDENTIALS_KEY
 

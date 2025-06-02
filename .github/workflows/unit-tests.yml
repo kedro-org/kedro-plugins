@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ inputs.plugin }}
-          uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@main"
+          uv pip install --system "kedro @ git+https://github.com/kedro-org/kedro@feature-1.0.0"
           uv pip install --system "${{inputs.plugin}}[test] @ ."
       - name: pip freeze
         run: uv pip freeze --system

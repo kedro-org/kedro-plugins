@@ -21,7 +21,14 @@ from kedro.io.core import (
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
+
+try:
+    # Kedro 1.0.0+
+    from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
+except ImportError:
+    # Older versions
+    from kedro.io.data_catalog import CREDENTIALS_KEY
+
 from kedro.utils import load_obj
 
 from .partitioned_dataset import (
@@ -43,7 +50,6 @@ class IncrementalDataset(PartitionedDataset):
     Example:
 
     ```python
-
     from kedro_datasets.partitions import IncrementalDataset
 
     dataset = IncrementalDataset(

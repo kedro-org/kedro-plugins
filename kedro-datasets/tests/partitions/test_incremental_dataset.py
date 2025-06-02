@@ -9,7 +9,14 @@ import boto3
 import pandas as pd
 import pytest
 from kedro.io.core import AbstractDataset, DatasetError
-from kedro.io.data_catalog import CREDENTIALS_KEY
+
+try:
+    # Kedro 1.0.0+
+    from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
+except ImportError:
+    # Older versions
+    from kedro.io.data_catalog import CREDENTIALS_KEY
+
 from moto import mock_aws
 from pandas.testing import assert_frame_equal
 

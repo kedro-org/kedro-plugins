@@ -20,7 +20,13 @@ from kedro.io.core import (
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
+
+try:
+    # Kedro 1.0.0+
+    from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
+except ImportError:
+    # Older versions
+    from kedro.io.data_catalog import CREDENTIALS_KEY
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -70,7 +76,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
-
     import pandas as pd
     from kedro_datasets.partitions import PartitionedDataset
 
@@ -79,17 +84,17 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
     # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
     dict_df = {
-            day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-            for day_of_month in df["DAY_OF_MONTH"]
-        }
+        day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+        for day_of_month in df["DAY_OF_MONTH"]
+    }
 
     # Save it as small partitions with DAY_OF_MONTH as the partition key
     dataset = PartitionedDataset(
-            path=str(tmp_path / "df_with_partition"),
-            dataset="pandas.CSVDataset",
-            filename_suffix=".csv",
-            save_lazily=False
-        )
+        path=str(tmp_path / "df_with_partition"),
+        dataset="pandas.CSVDataset",
+        filename_suffix=".csv",
+        save_lazily=False,
+    )
     # This will create a folder `df_with_partition` and save multiple files
     # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
     dataset.save(dict_df)
@@ -99,8 +104,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
     # Load all the partitions
     for partition_id, partition_load_func in loaded.items():
-            # The actual function that loads the data
-            partition_data = partition_load_func()
+        # The actual function that loads the data
+        partition_data = partition_load_func()
 
     # Add the processing logic for individual partition HERE
     # print(partition_data)
@@ -110,7 +115,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     like this:
 
     ```python
-
     import pandas as pd
     from kedro_datasets.partitions import PartitionedDataset
 
@@ -119,18 +123,18 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     credentials = {"key1": "secret1", "key2": "secret2"}
 
     dataset = PartitionedDataset(
-            path="s3://bucket-name/path/to/folder",
-            dataset="pandas.CSVDataset",
-            credentials=credentials,
-        )
+        path="s3://bucket-name/path/to/folder",
+        dataset="pandas.CSVDataset",
+        credentials=credentials,
+    )
     loaded = dataset.load()
     # assert isinstance(loaded, dict)
 
     combine_all = pd.DataFrame()
 
     for partition_id, partition_load_func in loaded.items():
-            partition_data = partition_load_func()
-            combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
+        partition_data = partition_load_func()
+        combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
 
     new_data = pd.DataFrame({"new": [1, 2]})
     # creates "s3://bucket-name/path/to/folder/new/partition.csv"

@@ -117,10 +117,10 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
+        _fs_args = deepcopy(fs_args or {})
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _credentials = deepcopy(credentials) or {}
+        _credentials = deepcopy(credentials or {})
 
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":

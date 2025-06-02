@@ -2,8 +2,7 @@ import pytest
 from delta import DeltaTable
 from kedro.io.core import DatasetError
 from kedro.io.data_catalog import SharedMemoryDataCatalog
-from kedro.pipeline import node
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
 from packaging.version import Version
 from pyspark import __version__

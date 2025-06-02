@@ -10,8 +10,7 @@ import pytest
 from kedro.io import DataCatalog, Version
 from kedro.io.core import DatasetError, generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
-from kedro.pipeline import node
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 from moto import mock_aws
 from packaging.version import Version as PackagingVersion

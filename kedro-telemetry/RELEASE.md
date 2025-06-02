@@ -1,5 +1,8 @@
 # Upcoming release
 
+# Release 0.6.3
+* Updated catalog API usage to comply with both new and old catalogs.
+
 # Release 0.6.2
 * Removed support for Python 3.8
 * Added support for Python 3.13

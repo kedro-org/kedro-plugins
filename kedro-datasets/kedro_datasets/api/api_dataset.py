@@ -17,9 +17,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
         usda:
           type: api.APIDataset
@@ -31,41 +31,39 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             statisticcat_des: YIELD,
             agg_level_desc: STATE,
             year: 2000
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+        from kedro_datasets.api import APIDataset
 
-        >>> from kedro_datasets.api import APIDataset
-        >>>
-        >>>
-        >>> dataset = APIDataset(
-        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
-        ...     load_args={
-        ...         "params": {
-        ...             "news_site": "NASA",
-        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
-        ...         }
-        ...     },
-        ... )
-        >>> data = dataset.load()
 
+        dataset = APIDataset(
+            url="https://api.spaceflightnewsapi.net/v4/articles",
+            load_args={
+                "params": {
+                    "news_site": "NASA",
+                    "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
+                }
+            },
+        )
+        data = dataset.load()
+    ```
     ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
     methods.
 
-    .. code-block:: pycon
+    ```python
 
-        >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
-        >>>
-        >>> dataset = APIDataset(
-        ...     method="POST",
-        ...     url="https://dummyjson.com/products/add",
-        ...     save_args={"chunk_size": 1},
-        ... )
-        >>> dataset.save(example_table)
+        example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
 
+        dataset = APIDataset(
+            method="POST",
+            url="https://dummyjson.com/products/add",
+            save_args={"chunk_size": 1},
+        )
+        dataset.save(example_table)
+    ```
     On initialisation, we can specify all the necessary parameters in the save args
     dictionary. The default HTTP(S) method is POST but PUT is also supported. Two
     important parameters to keep in mind are timeout and chunk_size. `timeout` defines

@@ -16,53 +16,50 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        weather:
-          type: spark.SparkJDBCDataset
-          table: weather_table
-          url: jdbc:postgresql://localhost/test
-          credentials: db_credentials
-          load_args:
-            properties:
-              driver: org.postgresql.Driver
-          save_args:
-            properties:
-              driver: org.postgresql.Driver
+    weather:
+        type: spark.SparkJDBCDataset
+        table: weather_table
+        url: jdbc:postgresql://localhost/test
+        credentials: db_credentials
+        load_args:
+        properties:
+            driver: org.postgresql.Driver
+        save_args:
+        properties:
+            driver: org.postgresql.Driver
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    import pandas as pd
+    from kedro_datasets.spark import SparkJDBCDataset
+    from pyspark.sql import SparkSession
 
-        >>> import pandas as pd
-        >>> from kedro_datasets.spark import SparkJDBCDataset
-        >>> from pyspark.sql import SparkSession
-        >>>
-        >>> spark = SparkSession.builder.getOrCreate()
-        >>> data = spark.createDataFrame(
-        ...     pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        ... )
-        >>> url = "jdbc:postgresql://localhost/test"
-        >>> table = "table_a"
-        >>> connection_properties = {"driver": "org.postgresql.Driver"}
-        >>> dataset = SparkJDBCDataset(
-        ...     url=url,
-        ...     table=table,
-        ...     credentials={"user": "scott", "password": "tiger"},
-        ...     load_args={"properties": connection_properties},
-        ...     save_args={"properties": connection_properties},
-        ... )
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.toPandas().equals(reloaded.toPandas())
+    spark = SparkSession.builder.getOrCreate()
+    data = spark.createDataFrame(
+        pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    )
+    url = "jdbc:postgresql://localhost/test"
+    table = "table_a"
+    connection_properties = {"driver": "org.postgresql.Driver"}
+    dataset = SparkJDBCDataset(
+        url=url,
+        table=table,
+        credentials={"user": "scott", "password": "tiger"},
+        load_args={"properties": connection_properties},
+        save_args={"properties": connection_properties},
+    )
+
+    dataset.save(data)
+    reloaded = dataset.load()
+
+    assert data.toPandas().equals(reloaded.toPandas())
+    ```
 
     """
 

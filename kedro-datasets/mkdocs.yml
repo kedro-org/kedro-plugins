@@ -112,7 +112,7 @@ extra_javascript:
   - javascript/deindex-old-docs.js
 
 nav:
-  - Home: https://docs.kedro.org/en/develop/
+  - Welcome: https://docs.kedro.org/en/develop/
   - Kedro: https://docs.kedro.org/en/develop/pages/getting-started/course/
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-12.0/pages/
   - Kedro-Datasets:

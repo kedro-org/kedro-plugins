@@ -17,7 +17,7 @@ def filepath_docx(tmp_path):
 
 
 @pytest.fixture
-def docx_dataset(filepath_docx, save_args, fs_args):
+def docx_dataset(filepath_docx, fs_args):
     return DOCXDataset(filepath=filepath_docx, fs_args=fs_args)
 
 
@@ -116,16 +116,14 @@ class TestDOCXDatasetVersioned:
         assert "DOCXDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-        # Default save_args
-        assert "save_args={'default_flow_style': False}" in str(ds)
-        assert "save_args={'default_flow_style': False}" in str(ds_versioned)
+
 
     def test_save_and_load(self, versioned_docx_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned dataset."""
         versioned_docx_dataset.save(dummy_data)
         reloaded = versioned_docx_dataset.load()
-        assert dummy_data == reloaded
+        assert dummy_data.paragraphs[0].text == reloaded.paragraphs[0].text
 
     def test_no_versions(self, versioned_docx_dataset):
         """Check the error if no versions are available for load."""

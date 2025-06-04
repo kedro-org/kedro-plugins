@@ -176,7 +176,7 @@ nav:
       - Experimental Datasets:
         - pages/api/kedro_datasets_experimental/index.md
         - databricks.ExternalTableDataset: pages/api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
-        - docx.DOCXDataset: pages/api/kedro_datasets_experimental/docx.DOCXDataset.md
+        - docx.DocxDataset: pages/api/kedro_datasets_experimental/docx.DocxDataset.md
         - langchain.ChatAnthropicDataset: pages/api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md
         - langchain.ChatCohereDataset: pages/api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
         - langchain.ChatOpenAIDataset: pages/api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md

@@ -1,5 +1,5 @@
-"""``DOCXDataset`` loads/saves data from/to a DOCX file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses docx from Document to handle the DOCX file.
+"""``DocxDataset`` loads/saves data from/to a Docx file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the Docx file.
 """
 
 from __future__ import annotations
@@ -7,6 +7,7 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
+from io import BytesIO
 
 import fsspec
 from docx import Document
@@ -17,29 +18,28 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from six import BytesIO
 
 
-class DOCXDataset(AbstractVersionedDataset[dict, dict]):
-    """``DOCXDataset`` loads/saves data from/to a DOCX file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses docx from Document to handle the DOCX file.
+class DocxDataset(AbstractVersionedDataset[dict, dict]):
+    """``DocxDataset`` loads/saves data from/to a Docx file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the Docx file.
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
     ```yaml
     cats:
-        type: docx.DOCXDataset
+        type: docx.DocxDataset
         filepath: soya.docx
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
     ```python
 
-    from kedro_datasets.docx import DOCXDataset
+    from kedro_datasets.docx import DocxDataset
 
     data = Document()
     data.add_paragraph("Hello, World !")
-    dataset = DOCXDataset(filepath=tmp_path / "test.docx")
+    dataset = DocxDataset(filepath=tmp_path / "test.docx")
     dataset.save(data)
 
     reloaded = dataset.load()
@@ -59,11 +59,11 @@ class DOCXDataset(AbstractVersionedDataset[dict, dict]):
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new instance of ``DOCXDataset`` pointing to a concrete DOCX file
+        """Creates a new instance of ``DocxDataset`` pointing to a concrete Docx file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a DOCX file prefixed with a protocol like `s3://`.
+            filepath: Filepath in POSIX format to a Docx file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.

@@ -8,7 +8,7 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets_experimental.docx import DOCXDataset
+from kedro_datasets_experimental.docx import DocxDataset
 
 
 @pytest.fixture
@@ -18,12 +18,12 @@ def filepath_docx(tmp_path):
 
 @pytest.fixture
 def docx_dataset(filepath_docx, fs_args):
-    return DOCXDataset(filepath=filepath_docx, fs_args=fs_args)
+    return DocxDataset(filepath=filepath_docx, fs_args=fs_args)
 
 
 @pytest.fixture
 def versioned_docx_dataset(filepath_docx, load_version, save_version):
-    return DOCXDataset(
+    return DocxDataset(
         filepath=filepath_docx, version=Version(load_version, save_version)
     )
 
@@ -35,7 +35,7 @@ def dummy_data() -> Document:
     return test_doc
 
 
-class TestDOCXDataset:
+class TestDocxDataset:
     def test_save_and_load(self, docx_dataset, dummy_data):
         """Test saving and reloading the dataset."""
         docx_dataset.save(dummy_data)
@@ -62,7 +62,7 @@ class TestDOCXDataset:
 
     def test_load_missing_file(self, docx_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset DOCXDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset DocxDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             docx_dataset.load()
 
@@ -81,7 +81,7 @@ class TestDOCXDataset:
         if "{tmp}" in filepath:
             filepath = filepath.format(tmp=tmp_path.as_posix())
 
-        dataset = DOCXDataset(filepath=filepath)
+        dataset = DocxDataset(filepath=filepath)
 
         assert isinstance(dataset._fs, instance_type)
 
@@ -92,18 +92,18 @@ class TestDOCXDataset:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.docx"
-        dataset = DOCXDataset(filepath=filepath)
+        dataset = DocxDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 
-class TestDOCXDatasetVersioned:
+class TestDocxDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
         filepath = "test.docx"
-        ds = DOCXDataset(filepath=filepath)
-        ds_versioned = DOCXDataset(
+        ds = DocxDataset(filepath=filepath)
+        ds_versioned = DocxDataset(
             filepath=filepath, version=Version(load_version, save_version)
         )
         assert filepath in str(ds)
@@ -112,8 +112,8 @@ class TestDOCXDatasetVersioned:
         assert filepath in str(ds_versioned)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
-        assert "DOCXDataset" in str(ds_versioned)
-        assert "DOCXDataset" in str(ds)
+        assert "DocxDataset" in str(ds_versioned)
+        assert "DocxDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
@@ -127,7 +127,7 @@ class TestDOCXDatasetVersioned:
 
     def test_no_versions(self, versioned_docx_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for DOCXDataset\(.+\)"
+        pattern = r"Did not find any versions for DocxDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_docx_dataset.load()
 
@@ -142,7 +142,7 @@ class TestDOCXDatasetVersioned:
         corresponding docx file for a given save version already exists."""
         versioned_docx_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for DOCXDataset\(.+\) must "
+            r"Save path \'.+\' for DocxDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -161,7 +161,7 @@ class TestDOCXDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for DOCXDataset\(.+\)"
+            rf"'{load_version}' for DocxDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_docx_dataset.save(dummy_data)
@@ -170,7 +170,7 @@ class TestDOCXDatasetVersioned:
         pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
-            DOCXDataset(
+            DocxDataset(
                 filepath="https://example.com/file.docx", version=Version(None, None)
             )
 

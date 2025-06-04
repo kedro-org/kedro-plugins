@@ -5,9 +5,9 @@ filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle t
 from __future__ import annotations
 
 from copy import deepcopy
+from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any
-from io import BytesIO
 
 import fsspec
 from docx import Document

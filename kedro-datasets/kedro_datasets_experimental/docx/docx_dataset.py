@@ -35,7 +35,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
 
     ```python
 
-    from kedro_datasets.docx import DocxDataset
+    from kedro_datasets_experimental.docx import DocxDataset
 
     data = Document()
     data.add_paragraph("Hello, World !")

@@ -7,7 +7,7 @@
 Name | Description
 -----|------------
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
-[docx.DocxDataset](docx.DocxDataset.md) | ``DocxDataset`` loads/saves data from/to a DOCX file (Word) using an underlying filesystem (e.g.: local, S3, GCS). It uses `python-docx` to handle the Docx file.
+[docx.DocxDataset](docx.DocxDataset.md) | ``DocxDataset`` loads/saves data from/to a Docx file (Word) using an underlying filesystem (e.g.: local, S3, GCS). It uses `python-docx` to handle the Docx file.
 [langchain.ChatAnthropicDataset](langchain.ChatAnthropicDataset.md) | ``ChatAnthropicDataset`` loads a ChatAnthropic `langchain` model.
 [langchain.ChatCohereDataset](langchain.ChatCohereDataset.md) | ``ChatCohereDataset`` loads a ChatCohere `langchain` model.
 [langchain.ChatOpenAIDataset](langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.

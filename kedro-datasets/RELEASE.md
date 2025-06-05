@@ -3,6 +3,11 @@
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Added the following new **experimental** datasets:
+
+| Type                           | Description                                                                                                                                                | Location                           |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
+| `docx.DocxDataset`             | A dataset loads/saves data from/to a Docx file (Word) using an underlying filesystem (e.g.: local, S3, GCS). | `kedro_datasets_experimental.docx` |
 
 ## Bug fixes and other changes
 
@@ -16,7 +21,7 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-- ...
+- [Seohyun Park](https://github.com/soyamimi)
 
 # Release 7.0.0
 

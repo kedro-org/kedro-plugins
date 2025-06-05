@@ -118,7 +118,7 @@ nav:
   - Kedro-Datasets:
     - API documentation:
       - Core Datasets:
-        - api/kedro_datasets/index.md
+        - Overview: index.md
         - api.APIDataset: api/kedro_datasets/api.APIDataset.md
         - biosequence.BioSequenceDataset: api/kedro_datasets/biosequence.BioSequenceDataset.md
         - dask.CSVDataset: api/kedro_datasets/dask.CSVDataset.md
@@ -174,7 +174,7 @@ nav:
         - text.TextDataset: api/kedro_datasets/text.TextDataset.md
         - yaml.YAMLDataset: api/kedro_datasets/yaml.YAMLDataset.md
       - Experimental Datasets:
-        - api/kedro_datasets_experimental/index.md
+        - Overview: api/kedro_datasets_experimental/index.md
         - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - langchain.ChatAnthropicDataset: api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md
         - langchain.ChatCohereDataset: api/kedro_datasets_experimental/langchain.ChatCohereDataset.md

@@ -1,4 +1,5 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+
 from __future__ import annotations
 
 import copy
@@ -432,6 +433,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         filepath: str | None = None,
         execution_options: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
+        encoding: str | None = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -498,6 +500,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         )
 
         self.metadata = metadata
+        self.encoding = encoding
 
         # load sql query from file
         if sql:
@@ -562,7 +565,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
-            with self._fs.open(load_path, mode="r") as fs_file:
+            with self._fs.open(load_path, mode="r", encoding=self.encoding) as fs_file:
                 load_args["sql"] = fs_file.read()
 
         return pd.read_sql_query(

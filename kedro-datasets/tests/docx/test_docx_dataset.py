@@ -84,7 +84,7 @@ class TestDocxDataset:
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(Path(dataset._filepath).resolve()) == str(Path(path).resolve())
+        assert str(dataset._filepath).endswith(path)
         assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):

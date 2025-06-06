@@ -82,13 +82,8 @@ class TestDocxDataset:
 
         assert isinstance(dataset._fs, instance_type)
 
-        expected_path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
-
-        if isinstance(dataset._fs, LocalFileSystem):
-            # Use absolute POSIX path for local files
-            expected_path = Path(expected_path).resolve().as_posix()
-
-        assert dataset._filepath.as_posix() == expected_path
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
+        assert dataset._filepath.as_posix() == PurePosixPath(path).as_posix()
         assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):

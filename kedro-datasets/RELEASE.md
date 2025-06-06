@@ -3,6 +3,11 @@
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Added the following new datasets:
+
+| Type                           | Description                                                         | Location                          |
+|--------------------------------|---------------------------------------------------------------------|-----------------------------------|
+| `docx.DocxDataset`             | A dataset loading and saving .docx files (Word) using `python-docx` | `kedro_datasets.docx` |
 
 ## Bug fixes and other changes
 
@@ -18,6 +23,8 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+
 
 # Release 7.0.0
 

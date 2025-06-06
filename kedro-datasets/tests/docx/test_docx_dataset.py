@@ -8,7 +8,7 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets_experimental.docx import DocxDataset
+from kedro_datasets.docx import DocxDataset
 
 
 @pytest.fixture
@@ -116,7 +116,6 @@ class TestDocxDatasetVersioned:
         assert "DocxDataset" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-
 
     def test_save_and_load(self, versioned_docx_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for

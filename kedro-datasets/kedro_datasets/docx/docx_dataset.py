@@ -1,5 +1,5 @@
-"""``DocxDataset`` loads/saves data from/to a Docx file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the Docx file.
+"""``DocxDataset`` loads/saves data from/to a .docx file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the .docx file.
 """
 
 from __future__ import annotations
@@ -21,8 +21,8 @@ from kedro.io.core import (
 
 
 class DocxDataset(AbstractVersionedDataset[dict, dict]):
-    """``DocxDataset`` loads/saves data from/to a Docx file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the Docx file.
+    """``DocxDataset`` loads/saves data from/to a .docx file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the .docx file.
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
@@ -35,7 +35,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
 
     ```python
 
-    from kedro_datasets_experimental.docx import DocxDataset
+    from kedro_datasets.docx import DocxDataset
 
     data = Document()
     data.add_paragraph("Hello, World !")
@@ -59,11 +59,11 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new instance of ``DocxDataset`` pointing to a concrete Docx file
+        """Creates a new instance of ``DocxDataset`` pointing to a concrete .docx file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a Docx file prefixed with a protocol like `s3://`.
+            filepath: Filepath in POSIX format to a .docx file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
@@ -79,7 +79,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -114,6 +114,14 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         }
 
     def _describe(self) -> dict[str, Any]:
+        """Returns a dictionary with basic dataset information.
+
+        Returns:
+            dict[str, Any]: A dictionary with the following keys:
+                - "filepath" (PurePosixPath): Path to the `.docx` file.
+                - "protocol" (str): Filesystem protocol (e.g., 'file', 's3').
+                - "version" (Version | None): Version information if specified.
+        """
         return {
             "filepath": self._filepath,
             "protocol": self._protocol,
@@ -121,11 +129,21 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         }
 
     def load(self) -> Document:
+        """Loads a `.docx` file from the filesystem.
+
+        Returns:
+            Document: A `python-docx` Document instance containing the loaded content.
+        """
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return Document(fs_file)
 
     def save(self, data: Document) -> None:
+        """Saves a `Document` object to the filesystem.
+
+        Args:
+            data (Document): A `python-docx` Document instance to be saved.
+        """
         buffer = BytesIO()
         data.save(buffer)
         buffer.seek(0)
@@ -136,6 +154,11 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         self._invalidate_cache()
 
     def _exists(self) -> bool:
+        """Checks whether the file exists on the filesystem.
+
+        Returns:
+            bool: True if the file exists, otherwise False.
+        """
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
         except DatasetError:
@@ -144,6 +167,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         return self._fs.exists(load_path)
 
     def _release(self) -> None:
+        """Releases resources and invalidates the filesystem cache."""
         super()._release()
         self._invalidate_cache()
 

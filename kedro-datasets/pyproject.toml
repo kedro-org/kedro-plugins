@@ -37,6 +37,9 @@ dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
+docx-docxdataset = ["python-docx"]
+docx = ["kedro-datasets[docx-docxdataset]"]
+
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
@@ -176,7 +179,6 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 darts-torch-model-dataset = ["u8darts-all"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
-docx-docxdataset = ["python-docx"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
@@ -260,6 +262,7 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
+    "python-docx",
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",

@@ -11,6 +11,7 @@ Name | Description
 [dask.CSVDataset](dask.CSVDataset.md) | ``CSVDataset`` loads and saves data to comma-separated value file(s). It uses Dask remote data services to handle the corresponding load and save operations.
 [dask.ParquetDataset](dask.ParquetDataset.md) | ``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask remote data services to handle the corresponding load and save operations.
 [databricks.ManagedTableDataset](databricks.ManagedTableDataset.md) | ``ManagedTableDataset`` loads and saves data into managed delta tables in Databricks.
+[docx.DocxDataset](docx.DocxDataset.md) | `DocxDataset` loads/saves data from/to a .docx file (Word) using an underlying filesystem (e.g.: local, S3, GCS). It uses `python-docx` to handle the .docx file.
 [email.EmailMessageDataset](email.EmailMessageDataset.md) | ``EmailMessageDataset`` loads/saves an email message from/to a file using an underlying filesystem (e.g.: local, S3, GCS). It uses the ``email`` package in the standard library to manage email messages.
 [geopandas.GenericDataset](geopandas.GenericDataset.md) | ``GenericDataset`` loads/saves data to a file using an underlying filesystem (eg: local, S3, GCS). The underlying functionality is supported by geopandas, so it supports all allowed geopandas (pandas) options for loading and saving files.
 [holoviews.HoloviewsWriter](holoviews.HoloviewsWriter.md) | ``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying filesystem (e.g. local, S3, GCS).

@@ -3,11 +3,11 @@
 ## Major features and improvements
 
 - Migrated docs to mkdocs
-- Added the following new **experimental** datasets:
+- Added the following new datasets:
 
-| Type                           | Description                                                                                                                                                | Location                           |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
-| `docx.DocxDataset`             | A dataset loads/saves data from/to a Docx file (Word) using an underlying filesystem (e.g.: local, S3, GCS). | `kedro_datasets_experimental.docx` |
+| Type                           | Description                                                         | Location                          |
+|--------------------------------|---------------------------------------------------------------------|-----------------------------------|
+| `docx.DocxDataset`             | A dataset loading and saving .docx files (Word) using `python-docx` | `kedro_datasets.docx` |
 
 ## Bug fixes and other changes
 

@@ -124,6 +124,7 @@ nav:
         - dask.CSVDataset: pages/api/kedro_datasets/dask.CSVDataset.md
         - dask.ParquetDataset: pages/api/kedro_datasets/dask.ParquetDataset.md
         - databricks.ManagedTableDataset: pages/api/kedro_datasets/databricks.ManagedTableDataset.md
+        - docx.DocxDataset: pages/api/kedro_datasets/docx.DocxDataset.md
         - email.EmailMessageDataset: pages/api/kedro_datasets/email.EmailMessageDataset.md
         - geopandas.GenericDataset: pages/api/kedro_datasets/geopandas.GenericDataset.md
         - holoviews.HoloviewsWriter: pages/api/kedro_datasets/holoviews.HoloviewsWriter.md
@@ -176,7 +177,6 @@ nav:
       - Experimental Datasets:
         - pages/api/kedro_datasets_experimental/index.md
         - databricks.ExternalTableDataset: pages/api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
-        - docx.DocxDataset: pages/api/kedro_datasets_experimental/docx.DocxDataset.md
         - langchain.ChatAnthropicDataset: pages/api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md
         - langchain.ChatCohereDataset: pages/api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
         - langchain.ChatOpenAIDataset: pages/api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md

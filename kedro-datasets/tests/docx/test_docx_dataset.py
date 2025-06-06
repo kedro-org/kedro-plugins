@@ -67,24 +67,22 @@ class TestDocxDataset:
             docx_dataset.load()
 
     @pytest.mark.parametrize(
-        "filepath, instance_type",
+        "filepath,instance_type",
         [
             ("s3://bucket/file.docx", S3FileSystem),
-            ("file://{tmp}/test.docx", LocalFileSystem),
-            ("{tmp}/test.docx", LocalFileSystem),
+            ("file:///tmp/test.docx", LocalFileSystem),
+            ("/tmp/test.docx", LocalFileSystem),
             ("gcs://bucket/file.docx", GCSFileSystem),
             ("https://example.com/file.docx", HTTPFileSystem),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type, tmp_path):
-        filepath = filepath.format(tmp=tmp_path.as_posix())
+    def test_protocol_usage(self, filepath, instance_type):
         dataset = DocxDataset(filepath=filepath)
-
         assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(dataset._filepath).endswith(path)
+        assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):

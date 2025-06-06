@@ -77,16 +77,18 @@ class TestDocxDataset:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, tmp_path):
-        # Replace {tmp} with actual tmp_path in local file cases
-        if "{tmp}" in filepath:
-            filepath = filepath.format(tmp=tmp_path.as_posix())
-
+        filepath = filepath.format(tmp=tmp_path.as_posix())
         dataset = DocxDataset(filepath=filepath)
 
         assert isinstance(dataset._fs, instance_type)
 
-        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
-        assert str(dataset._filepath) == path
+        expected_path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
+
+        if isinstance(dataset._fs, LocalFileSystem):
+            # Use absolute POSIX path for local files
+            expected_path = Path(expected_path).resolve().as_posix()
+
+        assert dataset._filepath.as_posix() == expected_path
         assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):

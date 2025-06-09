@@ -1,9 +1,8 @@
 import pytest
 from delta import DeltaTable
-from kedro.io import DataCatalog
 from kedro.io.core import DatasetError
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
 from packaging.version import Version
 from pyspark import __version__
@@ -91,8 +90,8 @@ class TestDeltaTableDataset:
             _ = x + 1  # pragma: no cover
 
         delta_ds = DeltaTableDataset(filepath="")
-        catalog = DataCatalog({"delta_in": delta_ds})
-        pipeline = modular_pipeline([node(no_output, "delta_in", None)])
+        catalog = SharedMemoryDataCatalog({"delta_in": delta_ds})
+        pipeline = Pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following datasets cannot be used with "
             r"multiprocessing: \['delta_in'\]"

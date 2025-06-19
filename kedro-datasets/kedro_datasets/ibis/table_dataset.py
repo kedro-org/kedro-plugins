@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -26,6 +27,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         database: company.db
       save_args:
         materialized: table
+        mode: append
 
     motorbikes:
       type: ibis.TableDataset
@@ -33,6 +35,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
       connection:
         backend: duckdb
         database: company.db
+      save_args:
+        materialized: view
+        mode: overwrite
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -45,7 +50,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     dataset = TableDataset(
         table_name="test",
         connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        save_args={"materialized": "table"},
+        save_args={"materialized": "table", "mode": "overwrite"},
     )
     dataset.save(data)
     reloaded = dataset.load()
@@ -60,7 +65,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
-        "overwrite": True,
+        "mode": "overwrite",
     }
 
     _CONNECTION_GROUP: ClassVar[str] = "ibis"
@@ -70,6 +75,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         *,
         table_name: str,
         database: str | None = None,
+        credentials: dict[str, Any] | str | None = None,
         connection: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -99,22 +105,43 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 (e.g. `("catalog", "database")`) or a dotted string path
                 (e.g. `"catalog.database"`) to reference a table or view
                 in a multi-level table hierarchy.
-            connection: Configuration for connecting to an Ibis backend.
-                If not provided, connect to DuckDB in in-memory mode.
+            credentials: (Preferred) Connection information for the Ibis
+            backend. Can be a connection string or a dict of parameters.
+            Supersedes `connection`.
+            connection: (Deprecated) Configuration for connecting to an
+            Ibis backend. Use `credentials` instead.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
-                `materialized` in `save_args`.
-            metadata: Any arbitrary metadata. This is ignored by Kedro,
+                `materialized` in `save_args`. The `mode` parameter controls 
+                the behavior when saving data:
+                - _"overwrite"_: Overwrite existing data in the table.
+                - _"append"_: Append contents of the new data to the existing table (does not overwrite).
+                - _"error"_ or _"errorifexists"_: Throw an exception if the table already exists.
+                - _"ignore"_: Silently ignore the operation if the table already exists.
+                These options are similar to those in Spark's DataFrameWriter (see: https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.mode.html).
+        metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
 
+        if credentials is not None and connection is not None:
+            import warnings
+
+            warnings.warn(
+                "Both 'credentials' and deprecated 'connection' were provided. 'credentials' will be used.",
+                DeprecationWarning,
+            )
+
         self._table_name = table_name
         self._database = database
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        # Prefer credentials if provided, else fallback to connection
+        if credentials is not None:
+            self._connection_config = credentials
+        else:
+            self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
@@ -132,10 +159,27 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._materialized = self._save_args.pop("materialized")
 
+        # Handle mode / overwrite conflict
+        if save_args and "mode" in save_args and "overwrite" in self._save_args:
+            raise ValueError("Cannot specify both 'mode' and deprecated 'overwrite'.")
+        # Map legacy overwrite if present
+        if "overwrite" in self._save_args:
+            legacy = self._save_args.pop("overwrite")
+            self._mode = "overwrite" if legacy else "error"
+        else:
+            self._mode = self._save_args.pop("mode")
+
     def _connect(self) -> BaseBackend:
         import ibis
 
         config = deepcopy(self._connection_config)
+        # If credentials is a string, treat as connection string
+        if isinstance(config, str):
+            return ibis.connect(config)
+        # If credentials is a dict with a 'con' key, treat as connection string
+        if isinstance(config, dict) and "con" in config:
+            return ibis.connect(config["con"])
+        # Otherwise, treat as expanded dict (params)
         backend = getattr(ibis, config.pop("backend"))
         return backend.connect(**config)
 
@@ -148,8 +192,44 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
+        if self._mode == "append":
+            if hasattr(self.connection, "insert"):
+                self.connection.insert(self._table_name, data, **self._save_args)
+            else:
+                raise NotImplementedError(
+                    f"Insert mode is not supported by the {self.connection!r} backend."
+                )
+            return
+
         writer = getattr(self.connection, f"create_{self._materialized}")
-        writer(self._table_name, data, **self._save_args)
+
+        if self._mode == "overwrite":
+            writer(self._table_name, data, overwrite=True, **self._save_args)
+        elif self._mode in ("error", "errorifexists"):
+            writer(self._table_name, data, overwrite=False, **self._save_args)
+        elif self._mode == "ignore":
+            if self._exists():
+                return
+            writer(self._table_name, data, overwrite=False, **self._save_args)
+        else:
+            raise ValueError(f"Unknown mode: {self._mode!r}")
+
+    def _get_backend_name(self) -> str | None:
+        """Get the backend name from the connection config or connection string."""
+        config = self._connection_config
+        # If dict and has 'backend'
+        if isinstance(config, dict) and "backend" in config:
+            return config["backend"]
+        # If string, parse as backend://...
+        if isinstance(config, str):
+            if "://" in config:
+                return config.split("://", 1)[0]
+        # If dict with 'con' key
+        if isinstance(config, dict) and "con" in config:
+            con_str = config["con"]
+            if "://" in con_str:
+                return con_str.split("://", 1)[0]
+        return None
 
     def _describe(self) -> dict[str, Any]:
         load_args = deepcopy(self._load_args)
@@ -159,10 +239,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return {
             "table_name": self._table_name,
             "database": self._database,
-            "backend": self._connection_config["backend"],
+            "backend": self._get_backend_name(),
             "load_args": load_args,
             "save_args": save_args,
             "materialized": self._materialized,
+            "mode": self._mode,
         }
 
     def _exists(self) -> bool:

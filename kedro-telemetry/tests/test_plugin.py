@@ -517,7 +517,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 3,
+            "number_of_pipelines": 2,
         }
         expected_properties = {**project_properties, **project_statistics}
         expected_call = mocker.call(
@@ -580,7 +580,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 3,
+            "number_of_pipelines": 2,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -646,7 +646,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 3,
+            "number_of_pipelines": 2,
         }
         expected_properties = {**project_properties, **project_statistics}
 

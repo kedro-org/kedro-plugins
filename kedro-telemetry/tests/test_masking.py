@@ -61,7 +61,7 @@ def fake_metadata(fake_root_dir):
 class TestCLIMasking:
     def test_get_cli_structure_raw(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli.is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -85,7 +85,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_depth(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli.is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -125,7 +125,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_help(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli.is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -184,7 +184,7 @@ class TestCLIMasking:
         self, input_command_args, expected_masked_args, fake_metadata, mocker
     ):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli.is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )

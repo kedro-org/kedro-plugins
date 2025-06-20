@@ -10,7 +10,7 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import pipeline as modular_pipeline
 from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION

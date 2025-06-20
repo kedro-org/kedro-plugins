@@ -10,7 +10,7 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import pipeline as modular_pipeline
 from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
@@ -517,7 +517,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 2,
+            "number_of_pipelines": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
         expected_call = mocker.call(
@@ -580,7 +580,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 2,
+            "number_of_pipelines": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -646,7 +646,7 @@ class TestKedroTelemetryHook:
         project_statistics = {
             "number_of_datasets": 3,
             "number_of_nodes": 2,
-            "number_of_pipelines": 2,
+            "number_of_pipelines": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
 

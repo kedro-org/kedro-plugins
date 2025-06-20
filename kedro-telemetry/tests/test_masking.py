@@ -22,7 +22,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "info",
     "ipython",
     "jupyter",
-    "micropkg",
     "new",
     "package",
     "pipeline",

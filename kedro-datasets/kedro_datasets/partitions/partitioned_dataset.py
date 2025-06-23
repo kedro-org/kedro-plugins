@@ -14,13 +14,13 @@ from warnings import warn
 
 import fsspec
 from cachetools import Cache, cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "

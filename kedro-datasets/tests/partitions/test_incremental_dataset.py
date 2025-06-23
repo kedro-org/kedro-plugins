@@ -8,8 +8,8 @@ from typing import Any
 import boto3
 import pandas as pd
 import pytest
-from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.data_catalog import CREDENTIALS_KEY
 from moto import mock_aws
 from pandas.testing import assert_frame_equal
 

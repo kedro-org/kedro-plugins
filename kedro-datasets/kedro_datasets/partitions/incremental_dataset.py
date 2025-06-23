@@ -14,6 +14,7 @@ from copy import deepcopy
 from typing import Any
 
 from cachetools import cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -21,7 +22,6 @@ from kedro.io.core import (
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
 from .partitioned_dataset import (

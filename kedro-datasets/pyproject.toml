@@ -93,7 +93,7 @@ optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
 
 pandas-csvdataset = ["kedro-datasets[pandas-base]"]
-pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
+pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0, <1.0.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
 pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
@@ -133,8 +133,8 @@ plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
 plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
-polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
-polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2, <1.0.0"]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2, <1.0.0"]
 polars = [
     """kedro-datasets[polars-csvdataset,\
     polars-eagerpolarsdataset,\
@@ -201,9 +201,17 @@ video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
 docs = [
-    "kedro-sphinx-theme==2024.10.2",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
+   "mkdocs>=1.6.1",
+   "mkdocs-material>=9.6.11",
+   "mkdocs-material-extensions>=1.3.1",
+   "mkdocs-mermaid2-plugin>=1.2.1",
+   "mkdocs-autorefs>=1.4.1",
+   "mkdocs-get-deps>=0.2.0",
+   "mkdocstrings>=0.29.1",
+   "mkdocstrings-python>=0.29.1",
+   "linkchecker>=10.2.1",
+   "ipykernel>=5.3, <7.0",
+   "Jinja2<3.2.0"
 ]
 
 # Test requirements
@@ -217,7 +225,7 @@ test = [
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
@@ -241,7 +249,7 @@ test = [
     "pandas>=2.0",
     "Pillow~=10.0",
     "plotly>=4.8.0, <6.0",
-    "polars[deltalake,xlsx2csv]>=1.0, <1.25.2",  # Temporary pin
+    "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
@@ -329,19 +337,21 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
-addopts = """
---cov-report xml:coverage.xml \
---cov-report term-missing \
---cov kedro_datasets \
---cov tests \
---ignore tests/template/fake_repo \
---no-cov-on-fail \
--ra \
--W ignore"""
+addopts = [
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=term-missing",
+    "--cov=kedro_datasets",
+    "--cov=tests",
+    "--ignore=tests/template/fake_repo",
+    "--no-cov-on-fail",
+    "-ra",
+    "-W",
+    "ignore"
+]
 
 [tool.ruff]
 line-length = 88
@@ -355,7 +365,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
 [tool.ruff.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
@@ -363,3 +373,4 @@ ignore = ["E501"]  # Black takes care of line-too-long
 
 [tool.mypy]
 ignore_missing_imports = true
+disable_error_code = ['no-redef']

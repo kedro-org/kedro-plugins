@@ -27,45 +27,41 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        tensorflow_model:
-          type: tensorflow.TensorFlowModelDataset
-          filepath: data/06_models/tensorflow_model.h5
-          load_args:
-            compile: False
-          save_args:
-            overwrite: True
-            include_optimizer: False
-          credentials: tf_creds
+    tensorflow_model:
+        type: tensorflow.TensorFlowModelDataset
+        filepath: data/06_models/tensorflow_model.h5
+        load_args:
+        compile: False
+        save_args:
+        overwrite: True
+        include_optimizer: False
+        credentials: tf_creds
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.tensorflow import TensorFlowModelDataset
+    import tensorflow as tf
+    import numpy as np
 
-        >>> from kedro_datasets.tensorflow import TensorFlowModelDataset
-        >>> import tensorflow as tf
-        >>> import numpy as np
-        >>>
-        >>> dataset = TensorFlowModelDataset(
-        ...     filepath=tmp_path / "data/06_models/tensorflow_model.h5"
-        ... )
-        >>> model = tf.keras.Sequential(
-        ...     [tf.keras.layers.Dense(5, input_shape=(3,)), tf.keras.layers.Softmax()]
-        ... )
-        >>>
-        >>> # x = tf.random.uniform((10, 3))
-        >>> # predictions = model.predict(x)
-        >>>
-        >>> dataset.save(model)
-        >>> loaded_model = dataset.load()
+    dataset = TensorFlowModelDataset(
+        filepath=tmp_path / "data/06_models/tensorflow_model.h5"
+    )
+    model = tf.keras.Sequential(
+        [tf.keras.layers.Dense(5, input_shape=(3,)), tf.keras.layers.Softmax()]
+    )
 
+    # x = tf.random.uniform((10, 3))
+    # predictions = model.predict(x)
+
+    dataset.save(model)
+    loaded_model = dataset.load()
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

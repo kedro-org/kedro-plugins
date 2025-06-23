@@ -48,99 +48,94 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    It also supports advanced features like
-    `lazy saving <https://docs.kedro.org/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_.
+    It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        station_data:
-          type: partitions.PartitionedDataset
-          path: data/03_primary/station_data
-          dataset:
-            type: pandas.CSVDataset
-            load_args:
-              sep: '\\t'
-            save_args:
-              sep: '\\t'
-              index: true
-          filename_suffix: '.dat'
-          save_lazily: True
+    station_data:
+        type: partitions.PartitionedDataset
+        path: data/03_primary/station_data
+        dataset:
+        type: pandas.CSVDataset
+        load_args:
+            sep: '\\t'
+        save_args:
+            sep: '\\t'
+            index: true
+        filename_suffix: '.dat'
+        save_lazily: True
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    import pandas as pd
+    from kedro_datasets.partitions import PartitionedDataset
 
-        >>> import pandas as pd
-        >>> from kedro_datasets.partitions import PartitionedDataset
-        >>>
-        >>> # Create a fake pandas dataframe with 10 rows of data
-        >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
-        >>>
-        >>> # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
-        >>> dict_df = {
-        ...     day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-        ...     for day_of_month in df["DAY_OF_MONTH"]
-        ... }
-        >>>
-        >>> # Save it as small partitions with DAY_OF_MONTH as the partition key
-        >>> dataset = PartitionedDataset(
-        ...     path=str(tmp_path / "df_with_partition"),
-        ...     dataset="pandas.CSVDataset",
-        ...     filename_suffix=".csv",
-        ...     save_lazily=False
-        ... )
-        >>> # This will create a folder `df_with_partition` and save multiple files
-        >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
-        >>> dataset.save(dict_df)
-        >>>
-        >>> # This will create lazy load functions instead of loading data into memory immediately.
-        >>> loaded = dataset.load()
-        >>>
-        >>> # Load all the partitions
-        >>> for partition_id, partition_load_func in loaded.items():
-        ...     # The actual function that loads the data
-        ...     partition_data = partition_load_func()
-        ...
-        >>> # Add the processing logic for individual partition HERE
-        >>> # print(partition_data)
+    # Create a fake pandas dataframe with 10 rows of data
+    df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
+
+    # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
+    dict_df = {
+            day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+            for day_of_month in df["DAY_OF_MONTH"]
+        }
+
+    # Save it as small partitions with DAY_OF_MONTH as the partition key
+    dataset = PartitionedDataset(
+            path=str(tmp_path / "df_with_partition"),
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            save_lazily=False
+        )
+    # This will create a folder `df_with_partition` and save multiple files
+    # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
+    dataset.save(dict_df)
+
+    # This will create lazy load functions instead of loading data into memory immediately.
+    loaded = dataset.load()
+
+    # Load all the partitions
+    for partition_id, partition_load_func in loaded.items():
+            # The actual function that loads the data
+            partition_data = partition_load_func()
+
+    # Add the processing logic for individual partition HERE
+    # print(partition_data)
+    ```
 
     You can also load multiple partitions from a remote storage and combine them
     like this:
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import pandas as pd
-        >>> from kedro_datasets.partitions import PartitionedDataset
-        >>>
-        >>> # these credentials will be passed to both 'fsspec.filesystem()' call
-        >>> # and the dataset initializer
-        >>> credentials = {"key1": "secret1", "key2": "secret2"}
-        >>>
-        >>> dataset = PartitionedDataset(
-        ...     path="s3://bucket-name/path/to/folder",
-        ...     dataset="pandas.CSVDataset",
-        ...     credentials=credentials,
-        ... )
-        >>> loaded = dataset.load()
-        >>> # assert isinstance(loaded, dict)
-        >>>
-        >>> combine_all = pd.DataFrame()
-        >>>
-        >>> for partition_id, partition_load_func in loaded.items():
-        ...     partition_data = partition_load_func()
-        ...     combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
-        ...
-        >>> new_data = pd.DataFrame({"new": [1, 2]})
-        >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
-        >>> dataset.save({"new/partition.csv": new_data})
+    import pandas as pd
+    from kedro_datasets.partitions import PartitionedDataset
 
+    # these credentials will be passed to both 'fsspec.filesystem()' call
+    # and the dataset initializer
+    credentials = {"key1": "secret1", "key2": "secret2"}
+
+    dataset = PartitionedDataset(
+            path="s3://bucket-name/path/to/folder",
+            dataset="pandas.CSVDataset",
+            credentials=credentials,
+        )
+    loaded = dataset.load()
+    # assert isinstance(loaded, dict)
+
+    combine_all = pd.DataFrame()
+
+    for partition_id, partition_load_func in loaded.items():
+            partition_data = partition_load_func()
+            combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
+
+    new_data = pd.DataFrame({"new": [1, 2]})
+    # creates "s3://bucket-name/path/to/folder/new/partition.csv"
+    dataset.save({"new/partition.csv": new_data})
+    ```
     """
 
     def __init__(  # noqa: PLR0913
@@ -228,9 +223,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
 
-        self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials or {})
 
-        self._fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -247,7 +242,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args) or {}
+        self._load_args = deepcopy(load_args or {})
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
         self._invalidate_caches()
@@ -294,14 +289,18 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:
+        self._invalidate_caches()  # Invalidate cache before listing partitions
+
         partitions = {}
 
-        for partition in self._list_partitions():
+        # The _list_partitions() call will now always perform a fresh scan
+        # because its cache was just cleared.
+        for partition_file_path in self._list_partitions():
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
+            kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            partition_id = self._path_to_partition(partition)
+            partition_id = self._path_to_partition(partition_file_path)
             partitions[partition_id] = dataset.load
 
         if not partitions:

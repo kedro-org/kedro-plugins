@@ -17,11 +17,9 @@ if TYPE_CHECKING:
 class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table]):
     """``FileDataset`` loads/saves data from/to a specified file format.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
-
+    ```yaml
         cars:
           type: ibis.FileDataset
           filepath: data/01_raw/company/cars.csv
@@ -44,28 +42,28 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
           table_name: motorbikes
           connection:
             backend: polars
+    ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    .. code-block:: pycon
+    ```python
 
-        >>> import ibis
-        >>> from kedro_datasets.ibis import FileDataset
-        >>>
-        >>> data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = FileDataset(
-        ...     filepath=tmp_path / "test.csv",
-        ...     file_format="csv",
-        ...     table_name="test",
-        ...     connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        ... )
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.execute().equals(reloaded.execute())
+        import ibis
+        from kedro_datasets.ibis import FileDataset
 
+        data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+        dataset = FileDataset(
+            filepath=tmp_path / "test.csv",
+            file_format="csv",
+            table_name="test",
+            connection={"backend": "duckdb", "database": tmp_path / "file.db"},
+        )
+        dataset.save(data)
+        reloaded = dataset.load()
+        assert data.execute().equals(reloaded.execute())
+
+    ```
     """
 
     DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {

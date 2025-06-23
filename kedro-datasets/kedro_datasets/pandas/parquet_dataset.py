@@ -28,50 +28,46 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataset`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    .. code-block:: yaml
+    ```yaml
 
-        boats:
-          type: pandas.ParquetDataset
-          filepath: data/01_raw/boats.parquet
-          load_args:
-            engine: pyarrow
-            use_nullable_dtypes: True
-          save_args:
-            file_scheme: hive
-            has_nulls: False
-            engine: pyarrow
+    boats:
+        type: pandas.ParquetDataset
+        filepath: data/01_raw/boats.parquet
+        load_args:
+        engine: pyarrow
+        use_nullable_dtypes: True
+        save_args:
+        file_scheme: hive
+        has_nulls: False
+        engine: pyarrow
 
-        trucks:
-          type: pandas.ParquetDataset
-          filepath: abfs://container/02_intermediate/trucks.parquet
-          credentials: dev_abs
-          load_args:
-            columns: [name, gear, disp, wt]
-            index: name
-          save_args:
-            compression: GZIP
-            partition_on: [name]
+    trucks:
+        type: pandas.ParquetDataset
+        filepath: abfs://container/02_intermediate/trucks.parquet
+        credentials: dev_abs
+        load_args:
+        columns: [name, gear, disp, wt]
+        index: name
+        save_args:
+        compression: GZIP
+        partition_on: [name]
+    ```
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
 
-    .. code-block:: pycon
+    from kedro_datasets.pandas import ParquetDataset
+    import pandas as pd
 
-        >>> from kedro_datasets.pandas import ParquetDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>>
-        >>> dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert data.equals(reloaded)
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
+    dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert data.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -121,10 +117,10 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        _fs_args = deepcopy(fs_args) or {}
+        _fs_args = deepcopy(fs_args or {})
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _credentials = deepcopy(credentials) or {}
+        _credentials = deepcopy(credentials or {})
 
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":

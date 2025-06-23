@@ -3,9 +3,19 @@ from typing import Any
 
 import lazy_loader as lazy
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-FileDataset: Any
-TableDataset: Any
+try:
+    from .file_dataset import FileDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    FileDataset: Any
+
+try:
+    from .table_dataset import TableDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    TableDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

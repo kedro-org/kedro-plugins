@@ -1,8 +1,9 @@
-# Upcoming Release
+# Upcoming Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
 
 ## Bug fixes and other changes
 
@@ -11,7 +12,7 @@
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
 
 ## Community contributions
 

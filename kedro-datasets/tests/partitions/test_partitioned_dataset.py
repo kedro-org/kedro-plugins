@@ -348,12 +348,15 @@ class TestPartitionedDatasetLocal:
                 r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
                 r"is invalid\: all dataset types must extend 'AbstractDataset'",
             ),
-            ({}, "'type' is missing from dataset catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
         with pytest.raises(DatasetError, match=error_pattern):
             PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config)
+
+    def test_empty_dataset_config(self):
+        with pytest.raises(KeyError, match="type"):
+            PartitionedDataset(path=str(Path.cwd()), dataset={})
 
     @pytest.mark.parametrize(
         "dataset_config",

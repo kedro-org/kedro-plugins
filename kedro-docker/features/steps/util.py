@@ -9,7 +9,6 @@ from time import sleep, time
 from typing import Any, Callable
 
 import docker
-# from kedro.framework.cli.utils import get_pkg_version
 
 
 class WaitForException(Exception):
@@ -177,25 +176,6 @@ def get_docker_images(name: str) -> list[docker.models.images.Image]:
     """
     client = init_docker_client()
     return [i for i in client.images.list() if any(name in t for t in i.tags)]
-
-
-# def modify_kedro_ver(req_file: Path, version: str) -> str:
-#     """
-#     Modify project kedro requirement to deal with invalid kedro version
-#     bug when bumping up version.
-
-#     Args:
-#         req_file: Path to `requirements.txt` in kedro project.
-#         version: Version of kedro to insert into project `requirements.txt`.
-
-#     Returns:
-#         Version of kedro in original project `requirements.txt`
-#     """
-#     project_reqs = req_file.read_text("utf-8")
-#     org_version = get_pkg_version(req_file, "kedro")
-#     project_reqs = project_reqs.replace(org_version, version)
-#     req_file.write_text(project_reqs)
-#     return org_version
 
 
 def create_new_venv() -> Path:

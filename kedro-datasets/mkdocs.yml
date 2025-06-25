@@ -134,7 +134,6 @@ nav:
         - json.JSONDataset: api/kedro_datasets/json.JSONDataset.md
         - matlab.MatlabDataset: api/kedro_datasets/matlab.MatlabDataset.md
         - matplotlib.MatplotlibDataset: api/kedro_datasets/matplotlib.MatplotlibDataset.md
-        - matplotlib.MatplotlibWriter: api/kedro_datasets/matplotlib.MatplotlibWriter.md
         - networkx.GMLDataset: api/kedro_datasets/networkx.GMLDataset.md
         - networkx.GraphMLDataset: api/kedro_datasets/networkx.GraphMLDataset.md
         - networkx.JSONDataset: api/kedro_datasets/networkx.JSONDataset.md

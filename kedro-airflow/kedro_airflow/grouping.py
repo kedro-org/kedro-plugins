@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline import Pipeline, GroupedNodes
+from kedro.pipeline import GroupedNodes, Pipeline
 
 try:
     from kedro.io import CatalogProtocol
@@ -69,7 +67,6 @@ def group_memory_nodes(
     # Creating adjacency list
     adj_list, parent_to_children = create_adjacency_list(catalog, pipeline)
 
-    name_to_node = {node.name: node for node in pipeline.nodes}
     con_components: dict[str, int] = {node.name: -1 for node in pipeline.nodes}
 
     # Searching connected components
@@ -97,7 +94,6 @@ def group_memory_nodes(
 
     for group in groups:
         group_name = "_".join(group)
-        group_nodes = [name_to_node[node_name] for node_name in group]
         for node_name in group:
             old_name_to_group[node_name] = group_name
 

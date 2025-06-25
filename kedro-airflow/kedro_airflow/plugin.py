@@ -215,10 +215,10 @@ def create(  # noqa: PLR0913, PLR0912
 
         if node_grouping and node_grouping.lower() == "memory":
 
-                node_objs = group_memory_nodes(context.catalog, pipeline)
+            node_objs = group_memory_nodes(context.catalog, pipeline)
         else:
             node_objs = pipeline.group_nodes_by(
-                group_by = node_grouping,
+                group_by=node_grouping,
             )
 
         template.stream(

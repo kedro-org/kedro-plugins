@@ -1,5 +1,4 @@
-"""Common functions for e2e testing.
-"""
+"""Common functions for e2e testing."""
 
 import tempfile
 import urllib.request

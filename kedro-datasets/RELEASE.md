@@ -1,8 +1,9 @@
-# Upcoming Release
+# Upcoming Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
 - Added the following new datasets:
 
 | Type                           | Description                                                                       | Location                          |
@@ -16,7 +17,8 @@
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
+- Removed `matplotlib.MatplotlibWriter`.
 
 ## Community contributions
 

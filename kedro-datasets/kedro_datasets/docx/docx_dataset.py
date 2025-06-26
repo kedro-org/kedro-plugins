@@ -45,7 +45,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
 
     reloaded = dataset.load()
     assert data == reloaded
-    assert dummy_data.paragraphs[0].text == reloaded.paragraphs[0].text
+    assert data.paragraphs[0].text == reloaded.paragraphs[0].text
     ```
     """
 

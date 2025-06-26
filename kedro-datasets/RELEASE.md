@@ -5,9 +5,9 @@
 - Migrated docs to mkdocs
 - Added the following new datasets:
 
-| Type                           | Description                                                         | Location                          |
-|--------------------------------|---------------------------------------------------------------------|-----------------------------------|
-| `docx.DocxDataset`             | A dataset loading and saving .docx files (Word) using `python-docx` | `kedro_datasets.docx` |
+| Type                           | Description                                                                       | Location                          |
+|--------------------------------|-----------------------------------------------------------------------------------|-----------------------------------|
+| `docx.DocxDataset`             | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.docx` |
 
 ## Bug fixes and other changes
 

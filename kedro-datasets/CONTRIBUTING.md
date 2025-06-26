@@ -42,10 +42,11 @@ Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](h
 
 1. Must be something that the Kedro TSC is willing to maintain.
 2. Must be fully documented.
-3. Must run as part of the regular CI/CD jobs.
-4. Must have 100% test coverage.
-5. Should support all Python versions under NEP 29 (3.10+ currently).
-6. Should work on Linux, macOS, and Windows.
+3. Must have working doctests (unless complex cloud/DB setup required, which can be discussed in the review).
+4. Must run as part of the regular CI/CD jobs.
+5. Must have 100% test coverage.
+6. Should support all Python versions under NEP 29 (3.10+ currently).
+7. Should work on Linux, macOS, and Windows.
 
 #### Experimental datasets
 The requirements for experimental datasets are more flexible and these datasets are not maintained by the Kedro TSC. Experimental datasets:
@@ -108,14 +109,14 @@ We use a branching model that helps us keep track of branches in a logical, cons
 
 ## Dataset contribution process
 
- 1. Fork the project
- 2. Develop your contribution in a new branch.
- 3. Add your dataset to `kedro_datasets_experimental`.
- 4. Make sure all your commits are signed off by using `-s` flag with `git commit`.
- 5. Open a PR against the `main` branch and make sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(datasets)`.
- 6. The TSC will review your contribution and decide whether they want to maintain the dataset, and thus, whether it is contributed as a core or experimental dataset.
- 7. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below).
- 8. Update the PR according to the reviewer's comments.
+1. Fork the project
+2. Develop your contribution in a new branch.
+3. Add your dataset to `kedro_datasets_experimental`.
+4. Make sure all your commits are signed off by using `-s` flag with `git commit`.
+5. Open a PR against the `main` branch and make sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(datasets)`.
+6. The TSC will review your contribution and decide whether they want to maintain the dataset, and thus, whether it is contributed as a core or experimental dataset.
+7. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below).
+8. Update the PR according to the reviewer's comments.
 
 
 ## CI / CD and running checks locally

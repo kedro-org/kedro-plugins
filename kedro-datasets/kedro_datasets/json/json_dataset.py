@@ -24,30 +24,29 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
     """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        cars:
+          type: json.JSONDataset
+          filepath: gcs://your_bucket/cars.json
+          fs_args:
+            project: my-project
+          credentials: my_gcp_credentials
+        ```
 
-    cars:
-        type: json.JSONDataset
-        filepath: gcs://your_bucket/cars.json
-        fs_args:
-        project: my-project
-        credentials: my_gcp_credentials
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> from kedro_datasets.json import JSONDataset
+        >>>
+        >>> data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
+        >>>
+        >>> dataset = JSONDataset(filepath=tmp_path / "test.json")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data == reloaded
 
-    from kedro_datasets.json import JSONDataset
-
-    data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-
-    dataset = JSONDataset(filepath=tmp_path / "test.json")
-    dataset.save(data)
-    reloaded = dataset.load()
-    assert data == reloaded
-    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}

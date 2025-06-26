@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark DataFrames.
 
-     As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
-     Python 3.12 is not supported yet.
+    As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
+    Python 3.12 is not supported yet.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-     ```yaml
-
+        ```yaml
        weather:
          type: kedro_datasets.snowflake.SnowparkTableDataset
          table_name: "weather_data"
@@ -34,65 +34,66 @@ class SnowparkTableDataset(AbstractDataset):
            mode: overwrite
            column_order: name
            table_type: ''
-     ```
-     You can skip everything but "table_name" if the database and schema are
-     provided via credentials. This allows catalog entries to be shorter when
-     all Snowflake tables are in the same database and schema. Values in the
-     dataset definition take priority over those defined in credentials.
+        ```
 
-     Example:
-     The credentials file provides all connection attributes. The catalog entry
-     for "weather" reuses the credentials parameters, while the "polygons" catalog
-     entry reuses all credentials parameters except for specifying a different
-     schema. The second example demonstrates the use of ``externalbrowser`` authentication.
+        You can skip everything but "table_name" if the database and schema are
+        provided via credentials. This allows catalog entries to be shorter when
+        all Snowflake tables are in the same database and schema. Values in the
+        dataset definition take priority over those defined in credentials.
 
-     catalog.yml:
+        The credentials file provides all connection attributes. The catalog entry
+        for "weather" reuses the credentials parameters, while the "polygons" catalog
+        entry reuses all credentials parameters except for specifying a different
+        schema. The second example demonstrates the use of ``externalbrowser`` authentication.
 
-     ```yaml
+        catalog.yml:
 
-       weather:
-         type: kedro_datasets.snowflake.SnowparkTableDataset
-         table_name: "weather_data"
-         database: "meteorology"
-         schema: "observations"
-         credentials: snowflake_client
-         save_args:
-           mode: overwrite
-           column_order: name
-           table_type: ''
+        ```yaml
+        weather:
+          type: kedro_datasets.snowflake.SnowparkTableDataset
+          table_name: "weather_data"
+          database: "meteorology"
+          schema: "observations"
+          credentials: snowflake_client
+          save_args:
+            mode: overwrite
+            column_order: name
+            table_type: ''
 
-       polygons:
-         type: kedro_datasets.snowflake.SnowparkTableDataset
-         table_name: "geopolygons"
-         credentials: snowflake_client
-         schema: "geodata"
-     ```
-     credentials.yml:
+        polygons:
+          type: kedro_datasets.snowflake.SnowparkTableDataset
+          table_name: "geopolygons"
+          credentials: snowflake_client
+          schema: "geodata"
+        ```
 
-     ```yaml
+        credentials.yml:
 
-       snowflake_client:
-         account: 'ab12345.eu-central-1'
-         port: 443
-         warehouse: "datascience_wh"
-         database: "detailed_data"
-         schema: "observations"
-         user: "service_account_abc"
-         password: "supersecret"
-     ```
-     credentials.yml (with externalbrowser authentication):
+        ```yaml
 
-     ```yaml
+        snowflake_client:
+          account: 'ab12345.eu-central-1'
+          port: 443
+          warehouse: "datascience_wh"
+          database: "detailed_data"
+          schema: "observations"
+          user: "service_account_abc"
+          password: "supersecret"
+        ```
 
-       snowflake_client:
-         account: 'ab12345.eu-central-1'
-         port: 443
-         warehouse: "datascience_wh"
-         database: "detailed_data"
-         schema: "observations"
-         user: "john_doe@wdomain.com"
-         authenticator: "externalbrowser"
-     ```
+        credentials.yml (with externalbrowser authentication):
+
+        ```yaml
+        snowflake_client:
+          account: 'ab12345.eu-central-1'
+          port: 443
+          warehouse: "datascience_wh"
+          database: "detailed_data"
+          schema: "observations"
+          user: "john_doe@wdomain.com"
+          authenticator: "externalbrowser"
+        ```
+
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

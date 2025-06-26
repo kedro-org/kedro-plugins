@@ -124,7 +124,7 @@ nav:
         - dask.CSVDataset: api/kedro_datasets/dask.CSVDataset.md
         - dask.ParquetDataset: api/kedro_datasets/dask.ParquetDataset.md
         - databricks.ManagedTableDataset: api/kedro_datasets/databricks.ManagedTableDataset.md
-        - docx.DocxDataset: pages/api/kedro_datasets/docx.DocxDataset.md
+        - docx.DocxDataset: api/kedro_datasets/docx.DocxDataset.md
         - email.EmailMessageDataset: api/kedro_datasets/email.EmailMessageDataset.md
         - geopandas.GenericDataset: api/kedro_datasets/geopandas.GenericDataset.md
         - holoviews.HoloviewsWriter: api/kedro_datasets/holoviews.HoloviewsWriter.md

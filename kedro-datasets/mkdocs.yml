@@ -106,10 +106,12 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
+  - stylesheets/code-select.css
 
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
+  - javascript/code-select.js
 
 nav:
   - Welcome: https://docs.kedro.org/en/develop/

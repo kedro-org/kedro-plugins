@@ -15,7 +15,8 @@ from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_pa
 class BioSequenceDataset(AbstractDataset[list, list]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> from Bio import SeqIO
         >>> from io import StringIO
@@ -36,6 +37,7 @@ class BioSequenceDataset(AbstractDataset[list, list]):
         >>> sequence_list = dataset.load()
         >>> assert raw_data[0].id == sequence_list[0].id
         >>> assert raw_data[0].seq == sequence_list[0].seq
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

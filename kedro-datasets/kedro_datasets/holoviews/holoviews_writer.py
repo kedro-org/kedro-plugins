@@ -25,12 +25,14 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> import holoviews as hv
         >>> from kedro_datasets.holoviews import HoloviewsWriter
         >>>
         >>> curve = hv.Curve(range(10))
+        >>>
         >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
         >>> holoviews_writer.save(curve)
 

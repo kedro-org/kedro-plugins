@@ -24,7 +24,8 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
 
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> import networkx as nx
         >>> from kedro_datasets.networkx import GraphMLDataset

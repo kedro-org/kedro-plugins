@@ -40,7 +40,8 @@ class IncrementalDataset(PartitionedDataset):
     that is persisted to the location of the data partitions by default, so that
     subsequent pipeline run loads only new partitions past the checkpoint.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>

@@ -35,7 +35,8 @@ class GenericDataset(
     The underlying functionality is supported by geopandas, so it supports all
     allowed geopandas (pandas) options for loading and saving files.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> import geopandas as gpd
         >>> from kedro_datasets.geopandas import GenericDataset

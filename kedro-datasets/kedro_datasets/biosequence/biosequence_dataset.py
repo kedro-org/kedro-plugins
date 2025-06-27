@@ -15,31 +15,29 @@ from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_pa
 class BioSequenceDataset(AbstractDataset[list, list]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> from Bio import SeqIO
+        >>> from io import StringIO
+        >>> from kedro_datasets.biosequence import BioSequenceDataset
+        >>>
+        >>> data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
+        >>> raw_data = []
+        >>> for record in SeqIO.parse(StringIO(data), "fasta"):
+        ...     raw_data.append(record)
+        ...
+        >>>
+        >>> dataset = BioSequenceDataset(
+        ...     filepath=tmp_path / "ls_orchid.fasta",
+        ...     load_args={"format": "fasta"},
+        ...     save_args={"format": "fasta"},
+        ... )
+        >>> dataset.save(raw_data)
+        >>> sequence_list = dataset.load()
+        >>> assert raw_data[0].id == sequence_list[0].id
+        >>> assert raw_data[0].seq == sequence_list[0].seq
 
-        from kedro_datasets.biosequence import BioSequenceDataset
-        from io import StringIO
-        from Bio import SeqIO
-
-        data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
-        raw_data = []
-        for record in SeqIO.parse(StringIO(data), "fasta"):
-            raw_data.append(record)
-
-
-        dataset = BioSequenceDataset(
-            filepath=tmp_path / "ls_orchid.fasta",
-            load_args={"format": "fasta"},
-            save_args={"format": "fasta"},
-        )
-        dataset.save(raw_data)
-        sequence_list = dataset.load()
-
-        assert raw_data[0].id == sequence_list[0].id
-        assert raw_data[0].seq == sequence_list[0].seq
-    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

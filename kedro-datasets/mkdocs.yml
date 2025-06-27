@@ -56,6 +56,8 @@ plugins:
       handlers:
         python:
           options:
+            filters:
+            - "!^_[^_]"
             show_root_toc_entry: true
             show_source: false #currently doesn't show source at correct level, and not for pydantic models
             docstring_style: google

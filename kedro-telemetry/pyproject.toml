@@ -76,5 +76,5 @@ select = [
 ]
 ignore = ["E501"]  # Black takes care of line-too-long
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["kedro_telemetry"]

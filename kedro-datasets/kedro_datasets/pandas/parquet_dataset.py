@@ -229,7 +229,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         Returns:
             dict: A dictionary containing the data in a split format.
         """
-        import pyarrow.parquet as pq
+        import pyarrow.parquet as pq  # noqa: PLC0415
 
         load_path = str(self._get_load_path())
 

@@ -72,7 +72,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
         a Redis database while deserialising/serialising. Supports custom backends to
         serialise/deserialise objects.
 
-        Example backends that are compatible (non-exhaustive):
+        Example backends that are compatible - non-exhaustive:
             * `pickle`
             * `dill`
             * `compress_pickle`

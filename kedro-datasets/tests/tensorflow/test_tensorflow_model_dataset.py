@@ -32,14 +32,14 @@ if sys.platform == "win32":
 # a subprocess spawned by the parallel runner, so we wrap the import inside fixtures.
 @pytest.fixture(scope="module")
 def tf():
-    import tensorflow as tf
+    import tensorflow as tf  # noqa: PLC0415
 
     return tf
 
 
 @pytest.fixture(scope="module")
 def tensorflow_model_dataset():
-    from kedro_datasets.tensorflow import TensorFlowModelDataset
+    from kedro_datasets.tensorflow import TensorFlowModelDataset  # noqa: PLC0415
 
     return TensorFlowModelDataset
 

@@ -199,7 +199,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        from fsspec.utils import infer_storage_options  # for performance reasons
+        # for performance reasons
+        from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 

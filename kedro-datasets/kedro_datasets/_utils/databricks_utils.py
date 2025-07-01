@@ -65,12 +65,12 @@ def get_dbutils(spark: Union[SparkSession, "DatabricksSession"]) -> "DBUtils":
         return dbutils
 
     try:
-        from pyspark.dbutils import DBUtils
+        from pyspark.dbutils import DBUtils  # noqa: PLC0415
 
         dbutils = DBUtils(spark)
     except ImportError:
         try:
-            import IPython
+            import IPython  # noqa: PLC0415
         except ImportError:
             pass
         else:

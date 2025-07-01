@@ -25,7 +25,7 @@ class TestKedroTelemetryHookIntegration:
     def test_telemetry_sent_once_with_other_kedro_command(
         self, mocker, dummy_project_path
     ):
-        from kedro_telemetry.plugin import telemetry_hook
+        from kedro_telemetry.plugin import telemetry_hook  # noqa: PLC0415
 
         telemetry_hook.consent = None
         telemetry_hook._sent = False
@@ -41,7 +41,7 @@ class TestKedroTelemetryHookIntegration:
         mocked_heap_call.assert_called_once()
 
     def test_telemetry_sent_once_with_session_run(self, mocker, dummy_project_path):
-        from kedro_telemetry.plugin import telemetry_hook
+        from kedro_telemetry.plugin import telemetry_hook  # noqa: PLC0415
 
         telemetry_hook.consent = None
         telemetry_hook._sent = False

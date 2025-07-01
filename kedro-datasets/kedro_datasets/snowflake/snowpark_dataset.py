@@ -24,16 +24,16 @@ class SnowparkTableDataset(AbstractDataset):
         Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
         ```yaml
-       weather:
-         type: kedro_datasets.snowflake.SnowparkTableDataset
-         table_name: "weather_data"
-         database: "meteorology"
-         schema: "observations"
-         credentials: db_credentials
-         save_args:
-           mode: overwrite
-           column_order: name
-           table_type: ''
+        weather:
+          type: kedro_datasets.snowflake.SnowparkTableDataset
+          table_name: "weather_data"
+          database: "meteorology"
+          schema: "observations"
+          credentials: db_credentials
+          save_args:
+            mode: overwrite
+            column_order: name
+            table_type: ''
         ```
 
         You can skip everything but "table_name" if the database and schema are

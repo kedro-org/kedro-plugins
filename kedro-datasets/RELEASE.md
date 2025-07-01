@@ -6,9 +6,9 @@
 - Make `kedro-datasets` compatible with Kedro 1.0.0.
 - Added the following new datasets:
 
-| Type                           | Description                                                                       | Location                          |
-|--------------------------------|-----------------------------------------------------------------------------------|-----------------------------------|
-| `docx.DocxDataset`             | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.docx` |
+| Type                  | Description                                                                       | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 

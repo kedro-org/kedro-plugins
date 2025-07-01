@@ -8,7 +8,7 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs.core import S3FileSystem
 
-from kedro_datasets.docx import DocxDataset
+from kedro_datasets.openxml import DocxDataset
 
 
 @pytest.fixture

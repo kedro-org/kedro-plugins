@@ -37,9 +37,6 @@ dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
-docx-docxdataset = ["python-docx"]
-docx = ["kedro-datasets[docx-docxdataset]"]
-
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
@@ -90,6 +87,9 @@ networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
+
+openxml-docxdataset = ["python-docx"]
+openxml = ["kedro-datasets[openxml-docxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]

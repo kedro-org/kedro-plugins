@@ -28,7 +28,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
 
     ```yaml
     cats:
-        type: docx.DocxDataset
+        type: openxml.DocxDataset
         filepath: soya.docx
     ```
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -36,7 +36,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
     ```python
 
     from docx import Document
-    from kedro_datasets.docx import DocxDataset
+    from kedro_datasets.openxml import DocxDataset
 
     data = Document()
     data.add_paragraph("Hello, World !")

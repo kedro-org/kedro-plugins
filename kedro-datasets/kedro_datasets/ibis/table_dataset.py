@@ -133,7 +133,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self._materialized = self._save_args.pop("materialized")
 
     def _connect(self) -> BaseBackend:
-        import ibis
+        import ibis  # noqa: PLC0415
 
         config = deepcopy(self._connection_config)
         backend = getattr(ibis, config.pop("backend"))

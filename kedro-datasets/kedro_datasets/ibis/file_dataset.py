@@ -144,7 +144,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
             self._save_args.update(save_args)
 
     def _connect(self) -> BaseBackend:
-        import ibis
+        import ibis  # noqa: PLC0415
 
         config = deepcopy(self._connection_config)
         backend = getattr(ibis, config.pop("backend"))

@@ -1,22 +1,25 @@
-# Upcoming Release
+# Upcoming Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
 
 ## Bug fixes and other changes
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
+- Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
+- Removed `matplotlib.MatplotlibWriter`.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-- ...
+- [Paul Lemonnier](https://github.com/PaulLemonnier)
 
 # Release 7.0.0
 
@@ -50,6 +53,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+
 
 # Release 6.0.0
 

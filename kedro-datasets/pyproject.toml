@@ -80,9 +80,8 @@ json = ["kedro-datasets[json-jsondataset]"]
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
-matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -93,7 +92,7 @@ optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
 
 pandas-csvdataset = ["kedro-datasets[pandas-base]"]
-pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
+pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0, <1.0.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
 pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
@@ -133,8 +132,8 @@ plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
 plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
-polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
-polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2, <1.0.0"]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2, <1.0.0"]
 polars = [
     """kedro-datasets[polars-csvdataset,\
     polars-eagerpolarsdataset,\
@@ -210,8 +209,8 @@ docs = [
    "mkdocstrings>=0.29.1",
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
+   "ipykernel>=5.3, <7.0",
+   "Jinja2<3.2.0"
 ]
 
 # Test requirements
@@ -225,7 +224,7 @@ test = [
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
@@ -290,7 +289,7 @@ lint = [
     "import-linter[toml]==1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.0.290",
+    "ruff~=0.12.1",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",
@@ -341,19 +340,23 @@ omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", 
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
-addopts = """
---cov-report xml:coverage.xml \
---cov-report term-missing \
---cov kedro_datasets \
---cov tests \
---ignore tests/template/fake_repo \
---no-cov-on-fail \
--ra \
--W ignore"""
+addopts = [
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=term-missing",
+    "--cov=kedro_datasets",
+    "--cov=tests",
+    "--ignore=tests/template/fake_repo",
+    "--no-cov-on-fail",
+    "-ra",
+    "-W",
+    "ignore"
+]
 
 [tool.ruff]
 line-length = 88
 show-fixes = true
+
+[tool.ruff.lint]
 select = [
     "F",   # Pyflakes
     "W",   # pycodestyle

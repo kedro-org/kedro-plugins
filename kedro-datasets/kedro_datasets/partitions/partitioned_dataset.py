@@ -14,13 +14,13 @@ from warnings import warn
 
 import fsspec
 from cachetools import Cache, cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -199,7 +199,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        from fsspec.utils import infer_storage_options  # for performance reasons
+        # for performance reasons
+        from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 
@@ -223,9 +224,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
 
-        self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials or {})
 
-        self._fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -242,7 +243,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args) or {}
+        self._load_args = deepcopy(load_args or {})
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
         self._invalidate_caches()

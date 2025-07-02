@@ -298,7 +298,7 @@ def _format_project_statistics_data(
     if hasattr(catalog, "keys") and callable(catalog.keys):
         dataset_names = catalog.keys()
     else:
-        dataset_names = catalog.list()
+        dataset_names = catalog.list()  # type: ignore
 
     project_statistics_properties = {}
     project_statistics_properties["number_of_datasets"] = sum(

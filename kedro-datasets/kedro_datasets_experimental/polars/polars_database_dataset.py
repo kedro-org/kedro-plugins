@@ -88,6 +88,7 @@ def _get_sql_alchemy_missing_error() -> DatasetError:
 
 class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     """``PolarsDatabaseDataset`` loads data from a provided SQL query or write data to a table.
+
     It supports all allowed polars options on ``read_database`` and ``write_database``.
     Since Polars uses SQLAlchemy behind the scenes, when instantiating ``PolarsDatabaseDataset`` one needs to pass
     a compatible connection string either in ``credentials`` (see the example
@@ -95,48 +96,42 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
-
-    .. code-block:: yaml
-
-        shuttle_id_dataset:
-          type: polars.PolarsDatabaseDataset
-          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
-          credentials: db_credentials
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ```yaml
+    shuttle_id_dataset:
+        type: polars.PolarsDatabaseDataset
+        sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        credentials: db_credentials
+    ```
 
     Sample database credentials entry in ``credentials.yml``:
 
-    .. code-block:: yaml
+    ```
+    db_credentials:
+        con: postgresql://scott:tiger@localhost/test
+        pool_size: 10 # additional parameters
+    ```
 
-        db_credentials:
-          con: postgresql://scott:tiger@localhost/test
-          pool_size: 10 # additional parameters
-
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
-
-        >>> from pathlib import Path
-        >>> import polars as pl
-        >>> import sqlite3
-        >>>
-        >>> from kedro_datasets_experimental.polars import PolarsDatabaseDataset
-        >>>
-        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> sql = "SELECT * FROM table_a"
-        >>> tmp_path = Path.cwd() / "tmp"
-        >>> tmp_path.mkdir(parents=True, exist_ok=True)
-        >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
-        >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials, table_name="table_a")
-        >>>
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>>
-        >>> assert data.equals(reloaded)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ```python
+    >>> from pathlib import Path
+    >>> import polars as pl
+    >>> import sqlite3
+    >>>
+    >>> from kedro_datasets_experimental.polars import PolarsDatabaseDataset
+    >>>
+    >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    >>> sql = "SELECT * FROM table_a"
+    >>> tmp_path = Path.cwd() / "tmp"
+    >>> tmp_path.mkdir(parents=True, exist_ok=True)
+    >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+    >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials, table_name="table_a")
+    >>>
+    >>> dataset.save(data)
+    >>> reloaded = dataset.load()
+    >>>
+    >>> assert data.equals(reloaded)
+    ```
     """
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine

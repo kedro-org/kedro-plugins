@@ -343,7 +343,9 @@ class TestSparkDataset:
             spark_dataset = SparkDataset(
                 filepath=filepath, file_format="csv", load_args={"header": True}
             )
-            assert "SparkDataset" in str(spark_dataset)
+            assert "kedro_datasets.spark.spark_dataset.SparkDataset" in str(
+                spark_dataset
+            )
             assert f"filepath={filepath}" in str(spark_dataset)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
@@ -488,7 +490,7 @@ class TestSparkDataset:
 
 class TestSparkDatasetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_local.load()
 
@@ -731,7 +733,7 @@ class TestSparkDatasetVersionedS3:
 
     @pytest.mark.xfail
     def test_no_version(self, versioned_dataset_s3):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_s3.load()
 

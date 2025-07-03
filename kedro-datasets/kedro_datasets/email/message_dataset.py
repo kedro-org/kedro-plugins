@@ -29,28 +29,26 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
 
     Note that ``EmailMessageDataset`` doesn't handle sending email messages.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
-
-        from email.message import EmailMessage
-
-        from kedro_datasets.email import EmailMessageDataset
-
-        string_to_write = "what would you do if you were invisable for one day????"
-
-        # Create a text/plain message
-        msg = EmailMessage()
-        msg.set_content(string_to_write)
-        msg["Subject"] = "invisibility"
-        msg["From"] = '"sin studly17"'
-        msg["To"] = '"strong bad"'
-
-        dataset = EmailMessageDataset(filepath=tmp_path / "test")
-        dataset.save(msg)
-        reloaded = dataset.load()
-        assert msg.__dict__ == reloaded.__dict__
-    ```
+        >>> from email.message import EmailMessage
+        >>>
+        >>> from kedro_datasets.email import EmailMessageDataset
+        >>>
+        >>> string_to_write = "what would you do if you were invisable for one day????"
+        >>>
+        >>> # Create a text/plain message
+        >>> msg = EmailMessage()
+        >>> msg.set_content(string_to_write)
+        >>> msg["Subject"] = "invisibility"
+        >>> msg["From"] = '"sin studly17"'
+        >>> msg["To"] = '"strong bad"'
+        >>>
+        >>> dataset = EmailMessageDataset(filepath=tmp_path / "test")
+        >>> dataset.save(msg)
+        >>> reloaded = dataset.load()
+        >>> assert msg.__dict__ == reloaded.__dict__
 
     """
 

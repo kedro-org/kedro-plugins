@@ -40,25 +40,24 @@ class IncrementalDataset(PartitionedDataset):
     that is persisted to the location of the data partitions by default, so that
     subsequent pipeline run loads only new partitions past the checkpoint.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> from kedro_datasets.partitions import IncrementalDataset
+        >>>
+        >>> dataset = IncrementalDataset(
+        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
+        ... )
+        >>> loaded = dataset.load()  # loads all available partitions
+        >>> # assert isinstance(loaded, dict)
+        >>>
+        >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
+        >>> reloaded = dataset.load()  # still loads all available partitions
+        >>>
+        >>> dataset.release()  # clears load cache
+        >>> # returns an empty dictionary as no new partitions were added
+        >>> assert dataset.load() == {}
 
-    from kedro_datasets.partitions import IncrementalDataset
-
-    dataset = IncrementalDataset(
-        path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
-    )
-    loaded = dataset.load()  # loads all available partitions
-    # assert isinstance(loaded, dict)
-
-    dataset.confirm()  # update checkpoint value to the last processed partition ID
-    reloaded = dataset.load()  # still loads all available partitions
-
-    dataset.release()  # clears load cache
-    # returns an empty dictionary as no new partitions were added
-    assert dataset.load() == {}
-    ```
     """
 
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"

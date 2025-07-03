@@ -251,9 +251,9 @@ class TestPartitionedDatasetLocal:
         path = str(Path.cwd())
         pds = PartitionedDataset(path=path, dataset=dataset)
 
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert f"path={path}" in pds._describe()
+        assert "dataset_type=CSVDataset" in pds._describe()
+        assert "dataset_config" in pds._describe()
 
     def test_load_args(self, mocker):
         fake_partition_name = "fake_partition"
@@ -690,6 +690,6 @@ class TestPartitionedDatasetS3:
         path = f"s3://{BUCKET_NAME}/foo/bar"
         pds = PartitionedDataset(path=path, dataset=dataset)
 
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert f"path={path}" in pds._describe()
+        assert "dataset_type=CSVDataset" in pds._describe()
+        assert "dataset_config" in pds._describe()

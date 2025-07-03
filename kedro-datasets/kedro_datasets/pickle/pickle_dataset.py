@@ -26,10 +26,10 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
-
+        ```yaml
         test_model: # simple example without compression
           type: pickle.PickleDataset
           filepath: data/07_model_output/test_model.pkl
@@ -42,31 +42,29 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
           credentials: s3_credentials
           save_args:
             compress: lz4
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        ```
 
-    ```python
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-        from kedro_datasets.pickle import PickleDataset
-        import pandas as pd
-
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-        dataset = PickleDataset(filepath="test.pkl", backend="pickle")
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
-
-        dataset = PickleDataset(
-            filepath=tmp_path / "test.pickle.lz4",
-            backend="compress_pickle",
-            load_args={"compression": "lz4"},
-            save_args={"compression": "lz4"},
-        )
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
-    ```
+        >>> import pandas as pd
+        >>> from kedro_datasets.pickle import PickleDataset
+        >>>
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = PickleDataset(filepath="test.pkl", backend="pickle")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded)
+        >>>
+        >>> dataset = PickleDataset(
+        ...     filepath=tmp_path / "test.pickle.lz4",
+        ...     backend="compress_pickle",
+        ...     load_args={"compression": "lz4"},
+        ...     save_args={"compression": "lz4"},
+        ... )
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

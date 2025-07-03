@@ -72,7 +72,7 @@ class TestYAMLDataset:
 
     def test_load_missing_file(self, yaml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset YAMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             yaml_dataset.load()
 
@@ -144,7 +144,7 @@ class TestYAMLDatasetVersioned:
 
     def test_no_versions(self, versioned_yaml_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for YAMLDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_yaml_dataset.load()
 
@@ -159,7 +159,7 @@ class TestYAMLDatasetVersioned:
         corresponding yaml file for a given save version already exists."""
         versioned_yaml_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for YAMLDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -178,7 +178,7 @@ class TestYAMLDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for YAMLDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_yaml_dataset.save(dummy_data)

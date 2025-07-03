@@ -63,6 +63,6 @@ def test_load_returns_same_spark_object(memory_dataset, spark_data_frame):
 
 def test_str_representation(memory_dataset):
     """Test string representation of the dataset"""
-    assert "kedro.io.memory_dataset.MemoryDataset(data=<DataFrame>)" in str(
+    assert "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')" in str(
         memory_dataset
     )

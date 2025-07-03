@@ -346,7 +346,7 @@ class TestSparkDataset:
             assert "kedro_datasets.spark.spark_dataset.SparkDataset" in str(
                 spark_dataset
             )
-            assert f"filepath={filepath}" in str(spark_dataset)
+            assert f"filepath='{filepath}" in str(spark_dataset)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
@@ -827,7 +827,7 @@ class TestSparkDatasetVersionedS3:
         )
 
         dataset_s3 = SparkDataset(filepath=f"s3a://{BUCKET_NAME}/{FILENAME}")
-        assert "filepath=s3a://" in str(dataset_s3)
+        assert "filepath='s3a://" in str(dataset_s3)
         assert "version=" not in str(dataset_s3)
 
 

@@ -58,7 +58,7 @@ class TestJSONDataset:
 
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset JSONDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.plotly.json_dataset.JSONDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert json_dataset.load()
 

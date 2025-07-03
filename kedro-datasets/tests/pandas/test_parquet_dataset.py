@@ -131,7 +131,7 @@ class TestParquetDataset:
 
     def test_load_missing_file(self, parquet_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset ParquetDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load()
 

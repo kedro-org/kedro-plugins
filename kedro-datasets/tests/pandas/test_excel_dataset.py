@@ -233,8 +233,8 @@ class TestExcelDatasetVersioned:
         # Default save_args and load_args
         assert "save_args={'index': False}" in str(ds)
         assert "save_args={'index': False}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds)
+        assert "load_args={'engine': 'openpyxl'}" in str(ds_versioned)
+        assert "load_args={'engine': 'openpyxl'}" in str(ds)
 
     def test_save_and_load(self, versioned_excel_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for

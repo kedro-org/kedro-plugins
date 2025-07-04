@@ -167,7 +167,7 @@ class TestJSONDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"JSONDataset\(.+\)"
+            r"kedro_datasets.json.json_dataset.JSONDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_dataset.save(dummy_data)

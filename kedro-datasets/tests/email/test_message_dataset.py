@@ -191,7 +191,7 @@ class TestEmailMessageDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"EmailMessageDataset\(.+\)"
+            r"kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_message_dataset.save(dummy_msg)

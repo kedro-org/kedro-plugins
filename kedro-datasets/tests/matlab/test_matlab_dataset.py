@@ -167,7 +167,7 @@ class TestMatlabDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MatlabDataset\(.+\)"
+            r"kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_matlab_dataset.save(dummy_data)

@@ -597,7 +597,7 @@ class TestPartitionedDatasetS3:
         s3a_path = f"s3a://{path}"
 
         mocked_ds = mocker.patch(
-            "kedro_datasets.partitioned_dataset.PartitionedDataset._dataset_type"
+            "kedro_datasets.partitions.partitioned_dataset.PartitionedDataset._dataset_type"
         )
         mocked_ds.__name__ = "mocked"
 
@@ -638,7 +638,7 @@ class TestPartitionedDatasetS3:
 
         # Patch BEFORE creating the PartitionedDataset
         mocked_ds = mocker.patch(
-            "kedro_datasets.partitioned_dataset.PartitionedDataset._dataset_type"
+            "kedro_datasets.partitions.partitioned_dataset.PartitionedDataset._dataset_type"
         )
         mocked_ds.__name__ = "mocked"
 

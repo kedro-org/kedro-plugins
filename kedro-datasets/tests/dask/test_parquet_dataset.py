@@ -87,7 +87,7 @@ class TestParquetDataset:
     @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials):
         parquet_dataset = ParquetDataset(filepath=S3_PATH, credentials=bad_credentials)
-        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.dask.parquet_dataset.ParquetDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset.load().compute()
 
@@ -97,7 +97,7 @@ class TestParquetDataset:
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_dataset = ParquetDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.dask.parquet_dataset.ParquetDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset.load().compute()
 

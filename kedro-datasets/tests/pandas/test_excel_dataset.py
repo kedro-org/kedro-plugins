@@ -169,7 +169,7 @@ class TestExcelDataset:
 
     def test_load_missing_file(self, excel_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset ExcelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.excel_dataset.ExcelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             excel_dataset.load()
 

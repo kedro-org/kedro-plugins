@@ -91,7 +91,7 @@ class TestEmailMessageDataset:
 
     def test_load_missing_file(self, message_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset EmailMessageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.email.message_dataset.EmailMessageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             message_dataset.load()
 

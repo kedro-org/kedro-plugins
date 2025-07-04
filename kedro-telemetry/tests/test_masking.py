@@ -162,8 +162,8 @@ class TestCLIMasking:
                 ["run", "--pipeline", MASK],
             ),
             (
-                ["catalog", "list-datasets"],
-                ["catalog", "list-datasets"],
+                ["catalog", "describe-datasets"],
+                ["catalog", "describe-datasets"],
             ),
             (
                 ["pipeline", "create", "mypipeline"],

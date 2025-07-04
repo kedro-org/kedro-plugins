@@ -60,7 +60,7 @@ class TestGMLDataset:
 
     def test_load_missing_file(self, gml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset GMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.networkx.gml_dataset.GMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert gml_dataset.load()
 

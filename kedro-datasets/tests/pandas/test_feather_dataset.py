@@ -92,7 +92,7 @@ class TestFeatherDataset:
 
     def test_load_missing_file(self, feather_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset FeatherDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.feather_dataset.FeatherDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             feather_dataset.load()
 

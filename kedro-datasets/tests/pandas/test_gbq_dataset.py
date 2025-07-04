@@ -95,7 +95,7 @@ class TestGBQDataset:
 
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
-        pattern = r"Failed while loading data from dataset GBQTableDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.gbq_dataset.GBQTableDataset\(.*\)"
         mocked_read_gbq = mocker.patch(
             "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
         )

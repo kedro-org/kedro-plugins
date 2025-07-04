@@ -86,7 +86,7 @@ class TestHDFDataset:
 
     def test_load_missing_file(self, hdf_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset HDFDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.hdf_dataset.HDFDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             hdf_dataset.load()
 

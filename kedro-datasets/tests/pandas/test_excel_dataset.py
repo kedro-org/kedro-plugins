@@ -245,7 +245,7 @@ class TestExcelDatasetVersioned:
 
     def test_no_versions(self, versioned_excel_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ExcelDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_excel_dataset.load()
 
@@ -274,7 +274,7 @@ class TestExcelDatasetVersioned:
         corresponding Excel file for a given save version already exists."""
         versioned_excel_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for ExcelDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -293,7 +293,7 @@ class TestExcelDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for ExcelDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_excel_dataset.save(dummy_dataframe)

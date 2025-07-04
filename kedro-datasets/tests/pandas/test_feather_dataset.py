@@ -161,7 +161,7 @@ class TestFeatherDatasetVersioned:
 
     def test_no_versions(self, versioned_feather_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for FeatherDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.feather_dataset.FeatherDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_feather_dataset.load()
 
@@ -176,7 +176,7 @@ class TestFeatherDatasetVersioned:
         corresponding feather file for a given save version already exists."""
         versioned_feather_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for FeatherDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.feather_dataset.FeatherDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -195,7 +195,7 @@ class TestFeatherDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for FeatherDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.feather_dataset.FeatherDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_feather_dataset.save(dummy_dataframe)

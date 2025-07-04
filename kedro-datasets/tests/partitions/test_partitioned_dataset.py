@@ -598,6 +598,10 @@ class TestPartitionedDatasetS3:
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
+
+        # Reset mock call history to ignore constructor-time calls
+        mocked_ds.reset_mock()
+
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
@@ -636,6 +640,10 @@ class TestPartitionedDatasetS3:
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
+
+        # Reset mock call history to ignore constructor-time calls
+        mocked_ds.reset_mock()
+
         new_partition = "new/data"
         data = "data"
 

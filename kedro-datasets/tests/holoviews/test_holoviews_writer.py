@@ -144,7 +144,7 @@ class TestHoloviewsWriterVersioned:
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
-            r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.holoviews.holoviews_writer.HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -163,7 +163,7 @@ class TestHoloviewsWriterVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for HoloviewsWriter\(.+\)"
+            rf"'{load_version}' for kedro_datasets.holoviews.holoviews_writer.HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)

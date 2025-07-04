@@ -69,7 +69,7 @@ class TestMatlabDataset:
 
     def test_load_missing_file(self, matlab_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset MatlabDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             matlab_dataset.load()
 
@@ -132,7 +132,7 @@ class TestMatlabDatasetVersioned:
 
     def test_no_versions(self, versioned_matlab_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MatlabDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_matlab_dataset.load()
 
@@ -147,7 +147,7 @@ class TestMatlabDatasetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_matlab_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for MatlabDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -167,7 +167,7 @@ class TestMatlabDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MatlabDataset\(.+\)"
+            r"kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_matlab_dataset.save(dummy_data)

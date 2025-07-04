@@ -343,8 +343,10 @@ class TestSparkDataset:
             spark_dataset = SparkDataset(
                 filepath=filepath, file_format="csv", load_args={"header": True}
             )
-            assert "SparkDataset" in str(spark_dataset)
-            assert f"filepath={filepath}" in str(spark_dataset)
+            assert "kedro_datasets.spark.spark_dataset.SparkDataset" in str(
+                spark_dataset
+            )
+            assert f"filepath='{filepath}" in str(spark_dataset)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
@@ -488,7 +490,7 @@ class TestSparkDataset:
 
 class TestSparkDatasetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_local.load()
 
@@ -529,7 +531,7 @@ class TestSparkDatasetVersionedLocal:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -544,7 +546,7 @@ class TestSparkDatasetVersionedLocal:
         versioned_local.save(sample_spark_df)
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -731,7 +733,7 @@ class TestSparkDatasetVersionedS3:
 
     @pytest.mark.xfail
     def test_no_version(self, versioned_dataset_s3):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_s3.load()
 
@@ -796,7 +798,7 @@ class TestSparkDatasetVersionedS3:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
@@ -810,7 +812,7 @@ class TestSparkDatasetVersionedS3:
         mocker.patch.object(versioned_dataset_s3, "_exists_function", return_value=True)
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -819,13 +821,13 @@ class TestSparkDatasetVersionedS3:
         mocked_spark_df.write.save.assert_not_called()
 
     def test_repr(self, versioned_dataset_s3, version):
-        assert "filepath=s3a://" in str(versioned_dataset_s3)
+        assert "filepath='s3a://" in str(versioned_dataset_s3)
         assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_dataset_s3
         )
 
         dataset_s3 = SparkDataset(filepath=f"s3a://{BUCKET_NAME}/{FILENAME}")
-        assert "filepath=s3a://" in str(dataset_s3)
+        assert "filepath='s3a://" in str(dataset_s3)
         assert "version=" not in str(dataset_s3)
 
 
@@ -838,7 +840,7 @@ class TestSparkDatasetVersionedHdfs:
 
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_hdfs.load()
 
@@ -922,7 +924,7 @@ class TestSparkDatasetVersionedHdfs:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
 
         with pytest.warns(UserWarning, match=pattern):
@@ -943,7 +945,7 @@ class TestSparkDatasetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -965,13 +967,13 @@ class TestSparkDatasetVersionedHdfs:
 
     def test_repr(self, version):
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
-        assert "filepath=hdfs://" in str(versioned_hdfs)
+        assert "filepath='hdfs://" in str(versioned_hdfs)
         assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_hdfs
         )
 
         dataset_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}")
-        assert "filepath=hdfs://" in str(dataset_hdfs)
+        assert "filepath='hdfs://" in str(dataset_hdfs)
         assert "version=" not in str(dataset_hdfs)
 
 

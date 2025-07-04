@@ -91,7 +91,7 @@ class TestEmailMessageDataset:
 
     def test_load_missing_file(self, message_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset EmailMessageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.email.message_dataset.EmailMessageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             message_dataset.load()
 
@@ -156,7 +156,7 @@ class TestEmailMessageDatasetVersioned:
 
     def test_no_versions(self, versioned_message_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for EmailMessageDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_message_dataset.load()
 
@@ -171,7 +171,7 @@ class TestEmailMessageDatasetVersioned:
         corresponding text file for a given save version already exists."""
         versioned_message_dataset.save(dummy_msg)
         pattern = (
-            r"Save path \'.+\' for EmailMessageDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -191,7 +191,7 @@ class TestEmailMessageDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"EmailMessageDataset\(.+\)"
+            r"kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_message_dataset.save(dummy_msg)

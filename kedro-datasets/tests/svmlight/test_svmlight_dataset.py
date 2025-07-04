@@ -82,7 +82,7 @@ class TestSVMLightDataset:
 
     def test_load_missing_file(self, svm_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset SVMLightDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.svmlight.svmlight_dataset.SVMLightDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             svm_dataset.load()
 
@@ -144,7 +144,7 @@ class TestSVMLightDatasetVersioned:
 
     def test_no_versions(self, versioned_svm_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for SVMLightDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.svmlight.svmlight_dataset.SVMLightDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_svm_dataset.load()
 
@@ -159,7 +159,7 @@ class TestSVMLightDatasetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_svm_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for SVMLightDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.svmlight.svmlight_dataset.SVMLightDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -179,7 +179,7 @@ class TestSVMLightDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"SVMLightDataset\(.+\)"
+            r"kedro_datasets.svmlight.svmlight_dataset.SVMLightDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_svm_dataset.save(dummy_data)

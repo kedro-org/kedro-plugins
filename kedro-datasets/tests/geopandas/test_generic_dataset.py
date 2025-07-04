@@ -149,7 +149,7 @@ class TestGenericDataset:
     @pytest.mark.parametrize("geojson_dataset", [{"index": False}], indirect=True)
     def test_load_missing_file(self, geojson_dataset):
         """Check the error while trying to load from missing source."""
-        pattern = r"Failed while loading data from dataset GenericDataset"
+        pattern = r"Failed while loading data from dataset kedro_datasets.geopandas.generic_dataset.GenericDataset"
         with pytest.raises(DatasetError, match=pattern):
             geojson_dataset.load()
 
@@ -173,7 +173,7 @@ class TestGenericDataset:
         self, parquet_dataset_bad_config, dummy_dataframe, filepath_parquet
     ):
         dummy_dataframe.to_parquet(filepath_parquet)
-        pattern = r"Failed while loading data from dataset GenericDataset(.*)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.geopandas.generic_dataset.GenericDataset(.*)"
         with pytest.raises(DatasetError, match=pattern):
             parquet_dataset_bad_config.load()
 
@@ -273,7 +273,7 @@ class TestGenericDatasetVersioned:
 
     def test_no_versions(self, versioned_geojson_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GenericDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.geopandas.generic_dataset.GenericDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_geojson_dataset.load()
 
@@ -288,7 +288,7 @@ class TestGenericDatasetVersioned:
         version."""
         versioned_geojson_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for GenericDataset\(.+\) must not "
+            r"Save path \'.+\' for kedro_datasets.geopandas.generic_dataset.GenericDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -307,7 +307,7 @@ class TestGenericDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for GenericDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.geopandas.generic_dataset.GenericDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_geojson_dataset.save(dummy_dataframe)

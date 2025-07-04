@@ -95,7 +95,7 @@ class TestGBQDataset:
 
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
-        pattern = r"Failed while loading data from dataset GBQTableDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.gbq_dataset.GBQTableDataset\(.*\)"
         mocked_read_gbq = mocker.patch(
             "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
         )
@@ -339,7 +339,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation"""
         str_repr = str(gbq_sql_dataset)
         assert (
-            f"GBQQueryDataset(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='{SQL_QUERY}', filepath='None', load_args='{{}}')"
             in str_repr
         )
         assert sql_file not in str_repr
@@ -348,7 +348,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation with filepath arg."""
         str_repr = str(gbq_sql_file_dataset)
         assert (
-            f"GBQQueryDataset(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='None', filepath='{str(sql_file)}', load_args='{{}}')"
             in str_repr
         )
         assert SQL_QUERY not in str_repr

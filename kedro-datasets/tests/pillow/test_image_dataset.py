@@ -80,7 +80,7 @@ class TestImageDataset:
 
     def test_load_missing_file(self, image_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset ImageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pillow.image_dataset.ImageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             image_dataset.load()
 
@@ -177,7 +177,7 @@ class TestImageDatasetVersioned:
 
     def test_no_versions(self, versioned_image_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ImageDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pillow.image_dataset.ImageDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_image_dataset.load()
 
@@ -192,7 +192,7 @@ class TestImageDatasetVersioned:
         corresponding image file for a given save version already exists."""
         versioned_image_dataset.save(image_object)
         pattern = (
-            r"Save path \'.+\' for ImageDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pillow.image_dataset.ImageDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -211,7 +211,7 @@ class TestImageDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for ImageDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pillow.image_dataset.ImageDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_image_dataset.save(image_object)

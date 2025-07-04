@@ -596,7 +596,11 @@ class TestPartitionedDatasetS3:
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
 
+        # Create a MagicMock to act as the dataset type
         mocked_dataset_type = mocker.MagicMock()
+        mocked_dataset_type.__name__ = "MockedDataset"
+
+        # Patch parse_dataset_definition to return the mocked dataset type and empty config
         mocker.patch(
             "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
             return_value=(mocked_dataset_type, {}),
@@ -635,8 +639,9 @@ class TestPartitionedDatasetS3:
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
 
-        # Patch parse_dataset_definition to control _dataset_type
+        # Create a MagicMock to act as the dataset type
         mocked_dataset_type = mocker.MagicMock()
+        mocked_dataset_type.__name__ = "MockedDataset"
         mocker.patch(
             "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
             return_value=(mocked_dataset_type, {}),

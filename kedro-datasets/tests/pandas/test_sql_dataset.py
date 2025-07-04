@@ -141,7 +141,7 @@ class TestSQLTableDataset:
         """Test the dataset instance string representation"""
         str_repr = str(table_dataset)
         assert (
-            f"kedro_datasets.pandas.sql_dataset.SQLTableDataset(table_name='{TABLE_NAME}'), load_args='{{}}', save_args={'index': False}"
+            f"kedro_datasets.pandas.sql_dataset.SQLTableDataset(table_name='{TABLE_NAME}'), load_args='{{}}', save_args={{'index': False}}"
             in str_repr
         )
         assert CONNECTION not in str(str_repr)
@@ -433,8 +433,8 @@ class TestSQLQueryDataset:
         """Test the dataset instance string representation"""
         str_repr = str(query_dataset)
         assert (
-            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql=`{SQL_QUERY}`), filepath=`None`, "
-            f"load_args=`{{}}`, execution_options=`{{}}`" in str_repr
+            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql='{SQL_QUERY}'), filepath='None', "
+            f"load_args='{{}}', execution_options='{{}}'" in str_repr
         )
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr

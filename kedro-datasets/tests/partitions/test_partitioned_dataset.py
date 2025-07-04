@@ -251,13 +251,9 @@ class TestPartitionedDatasetLocal:
         path = str(Path.cwd())
         pds = PartitionedDataset(path=path, dataset=dataset)
 
-        pds_description = pds._describe()
-        assert "path" in pds_description and path in pds_description["path"]
-        assert (
-            "dataset_type" in pds_description
-            and "CSVDataset" in pds_description["dataset_type"]
-        )
-        assert "dataset_config" in pds_description
+        assert f"path={path}" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
+        assert "dataset_config" in str(pds)
 
     def test_load_args(self, mocker):
         fake_partition_name = "fake_partition"
@@ -326,7 +322,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -595,29 +591,26 @@ class TestPartitionedDatasetS3:
     def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
-
-        # Create a MagicMock to act as the dataset type
-        mocked_dataset_type = mocker.MagicMock()
-        mocked_dataset_type.__name__ = "MockedDataset"
-
-        # Patch parse_dataset_definition to return the mocked dataset type and empty config
-        mocker.patch(
-            "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
-            return_value=(mocked_dataset_type, {}),
-        )
-
+        # any type is fine as long as it passes isinstance check
+        # since _dataset_type is mocked later anyways
         pds = PartitionedDataset(path=s3a_path, dataset="pandas.CSVDataset")
         assert pds._protocol == "s3a"
+
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+
+        # Reset mock call history to ignore constructor-time calls
+        mocked_ds.reset_mock()
 
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
-        assert mocked_dataset_type.call_count == len(loaded_partitions)
-        expected_calls = [
+        assert mocked_ds.call_count == len(loaded_partitions)
+        expected = [
             mocker.call(filepath=f"{s3a_path}/{partition_id}")
             for partition_id in loaded_partitions
         ]
-        mocked_dataset_type.assert_has_calls(expected_calls, any_order=True)
+        mocked_ds.assert_has_calls(expected, any_order=True)
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_save(self, dataset, mocked_csvs_in_s3):
@@ -638,52 +631,35 @@ class TestPartitionedDatasetS3:
         """Test that save works in case of s3a protocol"""
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
-
-        # Create a MagicMock to act as the dataset type
-        mocked_dataset_type = mocker.MagicMock()
-        mocked_dataset_type.__name__ = "MockedDataset"
-        mocker.patch(
-            "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
-            return_value=(mocked_dataset_type, {}),
-        )
-
+        # any type is fine as long as it passes isinstance check
+        # since _dataset_type is mocked later anyways
         pds = PartitionedDataset(
             path=s3a_path, dataset="pandas.CSVDataset", filename_suffix=".csv"
         )
         assert pds._protocol == "s3a"
 
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+
+        # Reset mock call history to ignore constructor-time calls
+        mocked_ds.reset_mock()
+
         new_partition = "new/data"
         data = "data"
 
         pds.save({new_partition: data})
+        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
+        mocked_ds.return_value.save.assert_called_once_with(data)
 
-        # Assert _dataset_type was called with correct filepath
-        mocked_dataset_type.assert_called_once_with(
-            filepath=f"{s3a_path}/{new_partition}.csv"
-        )
-        mocked_dataset_type.return_value.save.assert_called_once_with(data)
-
-    @pytest.mark.parametrize(
-        "dataset,dataset_config",
-        [
-            ("pandas.CSVDataset", {}),
-            ("pandas.HDFDataset", {"key": "test_key"}),
-        ],
-    )
-    def test_exists(self, dataset, dataset_config, mocked_csvs_in_s3):
-        assert PartitionedDataset(
-            path=mocked_csvs_in_s3, dataset={"type": dataset, **dataset_config}
-        ).exists()
+    @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.HDFDataset"])
+    def test_exists(self, dataset, mocked_csvs_in_s3):
+        assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataset(
-            path=empty_folder, dataset={"type": dataset, **dataset_config}
-        ).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
         s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataset(
-            path=empty_folder, dataset={"type": dataset, **dataset_config}
-        ).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_release(self, dataset, mocked_csvs_in_s3):
@@ -722,10 +698,6 @@ class TestPartitionedDatasetS3:
         path = f"s3://{BUCKET_NAME}/foo/bar"
         pds = PartitionedDataset(path=path, dataset=dataset)
 
-        pds_description = pds._describe()
-        assert "path" in pds_description and path in pds_description["path"]
-        assert (
-            "dataset_type" in pds_description
-            and "CSVDataset" in pds_description["dataset_type"]
-        )
-        assert "dataset_config" in pds_description
+        assert f"path={path}" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
+        assert "dataset_config" in str(pds)

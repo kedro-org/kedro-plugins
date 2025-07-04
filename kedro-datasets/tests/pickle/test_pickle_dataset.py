@@ -98,7 +98,7 @@ class TestPickleDataset:
 
     def test_load_missing_file(self, pickle_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset PickleDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pickle.pickle_dataset.PickleDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             pickle_dataset.load()
 

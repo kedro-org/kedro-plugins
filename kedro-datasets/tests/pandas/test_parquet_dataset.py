@@ -238,7 +238,7 @@ class TestParquetDataset:
     def test_preview(
         self, parquet_dataset, dummy_dataframe_preview, nrows, expected_rows
     ):
-        """Test the preview functionality for ParquetDataset."""
+        """Test the preview functionality for kedro_datasets.pandas.parquet_dataset.ParquetDataset."""
         parquet_dataset.save(dummy_dataframe_preview)
         previewed_data = parquet_dataset.preview(nrows=nrows)
 
@@ -284,7 +284,7 @@ class TestParquetDatasetVersioned:
 
     def test_no_versions(self, versioned_parquet_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ParquetDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_parquet_dataset.load()
 
@@ -309,7 +309,7 @@ class TestParquetDatasetVersioned:
         )
         versioned_parquet_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for ParquetDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -333,7 +333,7 @@ class TestParquetDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for ParquetDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.parquet_dataset.ParquetDataset\(.+\)"
         )
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",

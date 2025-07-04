@@ -173,7 +173,7 @@ class TestHDFDatasetVersioned:
 
     def test_no_versions(self, versioned_hdf_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for HDFDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.hdf_dataset.HDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_hdf_dataset.load()
 
@@ -188,7 +188,7 @@ class TestHDFDatasetVersioned:
         corresponding hdf file for a given save version already exists."""
         versioned_hdf_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for HDFDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.hdf_dataset.HDFDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -207,7 +207,7 @@ class TestHDFDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for HDFDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.hdf_dataset.HDFDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdf_dataset.save(dummy_dataframe)

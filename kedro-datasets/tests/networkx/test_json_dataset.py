@@ -156,7 +156,7 @@ class TestJSONDatasetVersioned:
 
     def test_no_versions(self, versioned_json_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for JSONDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_json_dataset.load()
 
@@ -171,7 +171,7 @@ class TestJSONDatasetVersioned:
         version."""
         versioned_json_dataset.save(dummy_graph_data)
         pattern = (
-            r"Save path \'.+\' for JSONDataset\(.+\) must not "
+            r"Save path \'.+\' for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -190,7 +190,7 @@ class TestJSONDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for JSONDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_dataset.save(dummy_graph_data)

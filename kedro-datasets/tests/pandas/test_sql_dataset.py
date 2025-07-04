@@ -141,7 +141,7 @@ class TestSQLTableDataset:
         """Test the dataset instance string representation"""
         str_repr = str(table_dataset)
         assert (
-            f"kedro_datasets.pandas.sql_dataset.SQLTableDataset(table_name=`{TABLE_NAME}`), load_args=`{{}}`, save_args={'index': False}"
+            f"kedro_datasets.pandas.sql_dataset.SQLTableDataset(table_name='{TABLE_NAME}'), load_args='{{}}', save_args={'index': False}"
             in str_repr
         )
         assert CONNECTION not in str(str_repr)
@@ -443,14 +443,14 @@ class TestSQLQueryDataset:
         """Test the dataset instance string representation with filepath arg."""
         str_repr = str(query_file_dataset)
         assert (
-            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql=`None`, filepath=`{str(sql_file)}`, "
-            f"load_args=`{{}}`, execution_options=`{{}}`)" in str_repr
+            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql='None', filepath='{str(sql_file)}', "
+            f"load_args='{{}}', execution_options='{{}}')" in str_repr
         )
         assert CONNECTION not in str_repr
         assert SQL_QUERY not in str_repr
 
     def test_sql_and_filepath_args(self, sql_file):
-        """Test that an error is raised when both `sql` and `filepath` args are given."""
+        """Test that an error is raised when both 'sql' and 'filepath' args are given."""
         pattern = (
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."

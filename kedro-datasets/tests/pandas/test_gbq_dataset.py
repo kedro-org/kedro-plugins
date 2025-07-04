@@ -339,7 +339,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation"""
         str_repr = str(gbq_sql_dataset)
         assert (
-            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql=`{SQL_QUERY}`, filepath=`None`, load_args=`{{}}`)"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='{SQL_QUERY}', filepath='None', load_args='{{}}')"
             in str_repr
         )
         assert sql_file not in str_repr
@@ -348,7 +348,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation with filepath arg."""
         str_repr = str(gbq_sql_file_dataset)
         assert (
-            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql=`None`, filepath=`{str(sql_file)}`, load_args=`{{}}`)"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='None', filepath='{str(sql_file)}', load_args='{{}}')"
             in str_repr
         )
         assert SQL_QUERY not in str_repr

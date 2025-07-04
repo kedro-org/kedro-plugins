@@ -345,7 +345,7 @@ class TestLazyParquetDatasetVersioned:
 
     def test_no_versions(self, versioned_parquet_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset(\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_parquet_dataset.load()
 
@@ -354,7 +354,7 @@ class TestLazyParquetDatasetVersioned:
         corresponding Generic (parquet) file for a given save version already exists."""
         versioned_parquet_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset(\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -373,7 +373,7 @@ class TestLazyParquetDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset(\(.+\)"
+            rf"'{load_version}' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_dataset.save(dummy_dataframe)

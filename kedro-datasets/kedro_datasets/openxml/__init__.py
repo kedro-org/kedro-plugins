@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementation to load/save data from/to a Docx file."""
+"""``AbstractDataset`` implementation to load/save data from/to a .docx file."""
 
 from typing import Any
 

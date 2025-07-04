@@ -596,25 +596,24 @@ class TestPartitionedDatasetS3:
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
 
-        mocked_ds = mocker.patch(
-            "kedro_datasets.partitions.partitioned_dataset.PartitionedDataset._dataset_type"
+        mocked_dataset_type = mocker.MagicMock()
+        mocker.patch(
+            "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
+            return_value=(mocked_dataset_type, {}),
         )
-        mocked_ds.__name__ = "mocked"
 
-        # any type is fine as long as it passes isinstance check
-        # since _dataset_type is mocked later anyways
         pds = PartitionedDataset(path=s3a_path, dataset="pandas.CSVDataset")
         assert pds._protocol == "s3a"
 
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
-        assert mocked_ds.call_count == len(loaded_partitions)
-        expected = [
+        assert mocked_dataset_type.call_count == len(loaded_partitions)
+        expected_calls = [
             mocker.call(filepath=f"{s3a_path}/{partition_id}")
             for partition_id in loaded_partitions
         ]
-        mocked_ds.assert_has_calls(expected, any_order=True)
+        mocked_dataset_type.assert_has_calls(expected_calls, any_order=True)
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_save(self, dataset, mocked_csvs_in_s3):
@@ -636,14 +635,13 @@ class TestPartitionedDatasetS3:
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
 
-        # Patch BEFORE creating the PartitionedDataset
-        mocked_ds = mocker.patch(
-            "kedro_datasets.partitions.partitioned_dataset.PartitionedDataset._dataset_type"
+        # Patch parse_dataset_definition to control _dataset_type
+        mocked_dataset_type = mocker.MagicMock()
+        mocker.patch(
+            "kedro_datasets.partitions.partitioned_dataset.parse_dataset_definition",
+            return_value=(mocked_dataset_type, {}),
         )
-        mocked_ds.__name__ = "mocked"
 
-        # any type is fine as long as it passes isinstance check
-        # since _dataset_type is mocked later anyways
         pds = PartitionedDataset(
             path=s3a_path, dataset="pandas.CSVDataset", filename_suffix=".csv"
         )
@@ -653,8 +651,12 @@ class TestPartitionedDatasetS3:
         data = "data"
 
         pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
-        mocked_ds.return_value.save.assert_called_once_with(data)
+
+        # Assert _dataset_type was called with correct filepath
+        mocked_dataset_type.assert_called_once_with(
+            filepath=f"{s3a_path}/{new_partition}.csv"
+        )
+        mocked_dataset_type.return_value.save.assert_called_once_with(data)
 
     @pytest.mark.parametrize(
         "dataset,dataset_config",

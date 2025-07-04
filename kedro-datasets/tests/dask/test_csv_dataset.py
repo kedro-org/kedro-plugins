@@ -84,7 +84,7 @@ class TestCSVDataset:
     @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials):
         csv_dataset = CSVDataset(filepath=S3_PATH, credentials=bad_credentials)
-        pattern = r"Failed while loading data from dataset CSVDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.polars.csv_dataset.CSVDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load().compute()
 
@@ -94,7 +94,7 @@ class TestCSVDataset:
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_dataset = CSVDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        pattern = r"Failed while loading data from dataset CSVDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.polars.csv_dataset.CSVDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset.load().compute()
 

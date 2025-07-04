@@ -80,7 +80,7 @@ class TestImageDataset:
 
     def test_load_missing_file(self, image_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset ImageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pillow.image_dataset.ImageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             image_dataset.load()
 

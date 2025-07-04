@@ -137,7 +137,7 @@ class TestLazyCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset LazyPolarsDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 

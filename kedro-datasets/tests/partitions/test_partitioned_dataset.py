@@ -326,7 +326,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)

@@ -196,7 +196,7 @@ class TestPickleDatasetVersioned:
 
     def test_no_versions(self, versioned_pickle_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for PickleDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_pickle_dataset.load()
 
@@ -211,7 +211,7 @@ class TestPickleDatasetVersioned:
         corresponding Pickle file for a given save version already exists."""
         versioned_pickle_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for PickleDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -230,7 +230,7 @@ class TestPickleDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for PickleDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_pickle_dataset.save(dummy_dataframe)

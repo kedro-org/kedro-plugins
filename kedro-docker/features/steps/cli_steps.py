@@ -141,7 +141,7 @@ def create_project_from_config_file(context, starter_name):
             starter_name,
         ],
         env=context.env,
-        cwd=str(context.temp_dir),
+        cwd=str(context.root_project_dir),
     )
 
     # add a consent file to prevent telemetry from prompting for input during e2e test

@@ -651,24 +651,18 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize(
         "dataset_class, dataset_kwargs",
         [
-            ("pandas.CSVDataset", {}),
-            ("pandas.HDFDataset", {"key": "data"}),
+            {"type": "pandas.CSVDataset"},
+            {"type": "pandas.HDFDataset", "key": "data"},
         ],
     )
-    def test_exists(self, dataset_class, dataset_kwargs, mocked_csvs_in_s3):
-        assert PartitionedDataset(
-            path=mocked_csvs_in_s3, dataset=dataset_class, **dataset_kwargs
-        ).exists()
+    def test_exists(self, dataset, mocked_csvs_in_s3):
+        assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataset(
-            path=empty_folder, dataset=dataset_class, **dataset_kwargs
-        ).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
         s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataset(
-            path=empty_folder, dataset=dataset_class, **dataset_kwargs
-        ).exists()
+        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_release(self, dataset, mocked_csvs_in_s3):

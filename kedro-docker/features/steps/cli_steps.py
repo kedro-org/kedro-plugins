@@ -146,8 +146,8 @@ def create_project_from_config_file(context, starter_name):
 
     import os
 
-    print("\nContents of temp_dir after kedro new:")
-    for root, dirs, files in os.walk(context.temp_dir):
+    print("\nContents of root_project_dir after kedro new:")
+    for root, dirs, files in os.walk(context.root_project_dir):
         level = root.replace(str(context.temp_dir), "").count(os.sep)
         indent = " " * 4 * level
         print(f"{indent}{os.path.basename(root)}/")

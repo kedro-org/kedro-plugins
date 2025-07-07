@@ -41,15 +41,19 @@ class HFDataset(AbstractDataset):
         self,
         *,
         dataset_name: str,
+        revision: str | None = None,
         dataset_kwargs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         self.dataset_name = dataset_name
+        self._revision = revision
         self._dataset_kwargs = dataset_kwargs or {}
         self.metadata = metadata
 
     def load(self):
-        return load_dataset(self.dataset_name, **self._dataset_kwargs)
+        return load_dataset(
+            self.dataset_name, revision=self._revision, **self._dataset_kwargs
+        )
 
     def save(self):
         raise NotImplementedError("Not yet implemented")

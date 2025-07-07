@@ -649,7 +649,7 @@ class TestPartitionedDatasetS3:
         mocked_ds.return_value.save.assert_called_once_with(data)
 
     @pytest.mark.parametrize(
-        "dataset_class, dataset_kwargs",
+        "dataset",
         [
             {"type": "pandas.CSVDataset"},
             {"type": "pandas.HDFDataset", "key": "data"},

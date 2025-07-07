@@ -322,7 +322,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -698,6 +698,6 @@ class TestPartitionedDatasetS3:
         path = f"s3://{BUCKET_NAME}/foo/bar"
         pds = PartitionedDataset(path=path, dataset=dataset)
 
-        assert f"path={path}" in str(pds)
+        assert f"filepath={path}" in str(pds)
         assert "dataset_type=CSVDataset" in str(pds)
         assert "dataset_config" in str(pds)

@@ -80,9 +80,8 @@ json = ["kedro-datasets[json-jsondataset]"]
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
-matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -290,7 +289,7 @@ lint = [
     "import-linter[toml]==1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.0.290",
+    "ruff~=0.12.1",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",
@@ -356,6 +355,8 @@ addopts = [
 [tool.ruff]
 line-length = 88
 show-fixes = true
+
+[tool.ruff.lint]
 select = [
     "F",   # Pyflakes
     "W",   # pycodestyle

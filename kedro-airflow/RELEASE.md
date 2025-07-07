@@ -1,4 +1,5 @@
 # Upcoming Release
+* Update for Kedro 1.0.0 compatibility by using `pipeline.group_nodes_by()` for grouping by namespace or `None`, and applying the new `DataCatalog` API syntax.
 
 # Release 0.10.0
 * Fixed check whether a dataset is a `MemoryDataset`.

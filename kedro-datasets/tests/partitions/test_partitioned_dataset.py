@@ -249,11 +249,11 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_describe(self, dataset):
         path = str(Path.cwd())
-        pds = PartitionedDataset(path=path, dataset=dataset)
+        pds_descr = PartitionedDataset(path=path, dataset=dataset)._describe()
 
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert "path" in pds_descr and pds_descr["path"] == path
+        assert "dataset_type" in pds_descr and pds_descr["dataset_type"] == "CSVDataset"
+        assert "dataset_config" in pds_descr
 
     def test_load_args(self, mocker):
         fake_partition_name = "fake_partition"
@@ -699,9 +699,5 @@ class TestPartitionedDatasetS3:
         pds_descr = PartitionedDataset(path=path, dataset=dataset)._describe()
 
         assert "path" in pds_descr and pds_descr["path"] == path
-        assert (
-            "dataset_type" in pds_descr
-            and pds_descr["dataset_type"]
-            == "kedro_datasets.pandas.csv_dataset.CSVDataset()"
-        )
+        assert "dataset_type" in pds_descr and pds_descr["dataset_type"] == "CSVDataset"
         assert "dataset_config" in pds_descr

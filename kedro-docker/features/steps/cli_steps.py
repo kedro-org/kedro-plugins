@@ -144,18 +144,6 @@ def create_project_from_config_file(context, starter_name):
         cwd=str(context.temp_dir),
     )
 
-    import os
-
-    print("\nContents of temp_dir after kedro new:")
-    for root, dirs, files in os.walk(context.temp_dir):
-        print(dirs)
-        print(files)
-
-    print("\nContents of root_project_dir after kedro new:")
-    for root, dirs, files in os.walk(context.root_project_dir):
-        print(dirs)
-        print(files)
-
     # add a consent file to prevent telemetry from prompting for input during e2e test
     telemetry_file = context.root_project_dir / ".telemetry"
     telemetry_file.write_text("consent: false", encoding="utf-8")

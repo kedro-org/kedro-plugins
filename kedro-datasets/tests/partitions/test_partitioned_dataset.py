@@ -599,13 +599,11 @@ class TestPartitionedDatasetS3:
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
 
-        # Reset mock call history to ignore constructor-time calls
-        mocked_ds.reset_mock()
-
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
-        assert mocked_ds.call_count == len(loaded_partitions)
+        # We need to add +1 as one extrac call is done via _pretty_repr()
+        assert mocked_ds.call_count == len(loaded_partitions) + 1
         expected = [
             mocker.call(filepath=f"{s3a_path}/{partition_id}")
             for partition_id in loaded_partitions
@@ -641,25 +639,36 @@ class TestPartitionedDatasetS3:
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
 
-        # Reset mock call history to ignore constructor-time calls
-        mocked_ds.reset_mock()
-
         new_partition = "new/data"
         data = "data"
 
         pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
+        mocked_ds.assert_any_call(filepath=f"{s3a_path}/{new_partition}.csv")
+        # We need to add +1 as one extrac call is done via _pretty_repr()
+        assert mocked_ds.call_count == 2
         mocked_ds.return_value.save.assert_called_once_with(data)
 
-    @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.HDFDataset"])
-    def test_exists(self, dataset, mocked_csvs_in_s3):
-        assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset).exists()
+    @pytest.mark.parametrize(
+        "dataset_class, dataset_kwargs",
+        [
+            ("pandas.CSVDataset", {}),
+            ("pandas.HDFDataset", {"key": "data"}),
+        ],
+    )
+    def test_exists(self, dataset_class, dataset_kwargs, mocked_csvs_in_s3):
+        assert PartitionedDataset(
+            path=mocked_csvs_in_s3, dataset=dataset_class, dataset_kwargs=dataset_kwargs
+        ).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
+        assert not PartitionedDataset(
+            path=empty_folder, dataset=dataset_class, dataset_kwargs=dataset_kwargs
+        ).exists()
 
         s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataset(path=empty_folder, dataset=dataset).exists()
+        assert not PartitionedDataset(
+            path=empty_folder, dataset=dataset_class, dataset_kwargs=dataset_kwargs
+        ).exists()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_release(self, dataset, mocked_csvs_in_s3):

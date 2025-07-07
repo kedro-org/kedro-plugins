@@ -141,8 +141,25 @@ def create_project_from_config_file(context, starter_name):
             starter_name,
         ],
         env=context.env,
-        cwd=str(context.root_project_dir),
+        cwd=str(context.temp_dir),
     )
+
+    import os
+
+    print("\nContents of temp_dir after kedro new:")
+    for root, dirs, files in os.walk(context.temp_dir):
+        level = root.replace(str(context.temp_dir), "").count(os.sep)
+        indent = " " * 4 * level
+        print(f"{indent}{os.path.basename(root)}/")
+        subindent = " " * 4 * (level + 1)
+        for f in files:
+            print(f"{subindent}{f}")
+
+    # Now check if project dir exists
+    if not context.root_project_dir.exists():
+        raise AssertionError(
+            f"Project directory {context.root_project_dir} does not exist!"
+        )
 
     # add a consent file to prevent telemetry from prompting for input during e2e test
     telemetry_file = context.root_project_dir / ".telemetry"

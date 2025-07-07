@@ -146,35 +146,35 @@ def create_project_from_config_file(context, starter_name):
         cwd=str(context.temp_dir),
     )
 
-    # override base logging configuration to simplify assertions
-    logging_conf = context.root_project_dir / "conf" / "logging.yml"
-    logging_conf.write_text(
-        textwrap.dedent(
-            """
-        version: 1
-
-        disable_existing_loggers: False
-
-        formatters:
-          simple:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-        handlers:
-          console:
-            class: logging.StreamHandler
-            level: INFO
-            formatter: simple
-            stream: ext://sys.stdout
-
-        loggers:
-          kedro:
-            level: INFO
-
-        root:
-          handlers: [console]
-        """
-        )
-    )
+    # # override base logging configuration to simplify assertions
+    # logging_conf = context.root_project_dir / "conf" / "logging.yml"
+    # logging_conf.write_text(
+    #     textwrap.dedent(
+    #         """
+    #     version: 1
+    #
+    #     disable_existing_loggers: False
+    #
+    #     formatters:
+    #       simple:
+    #         format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    #
+    #     handlers:
+    #       console:
+    #         class: logging.StreamHandler
+    #         level: INFO
+    #         formatter: simple
+    #         stream: ext://sys.stdout
+    #
+    #     loggers:
+    #       kedro:
+    #         level: INFO
+    #
+    #     root:
+    #       handlers: [console]
+    #     """
+    #     )
+    # )
 
     assert res.returncode == 0
 

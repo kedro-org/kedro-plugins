@@ -28,46 +28,44 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataset`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        boats:
+          type: pandas.ParquetDataset
+          filepath: data/01_raw/boats.parquet
+          load_args:
+            engine: pyarrow
+            use_nullable_dtypes: True
+          save_args:
+            file_scheme: hive
+            has_nulls: False
+            engine: pyarrow
 
-    boats:
-        type: pandas.ParquetDataset
-        filepath: data/01_raw/boats.parquet
-        load_args:
-        engine: pyarrow
-        use_nullable_dtypes: True
-        save_args:
-        file_scheme: hive
-        has_nulls: False
-        engine: pyarrow
+        trucks:
+          type: pandas.ParquetDataset
+          filepath: abfs://container/02_intermediate/trucks.parquet
+          credentials: dev_abs
+          load_args:
+            columns: [name, gear, disp, wt]
+            index: name
+          save_args:
+            compression: GZIP
+            partition_on: [name]
+        ```
 
-    trucks:
-        type: pandas.ParquetDataset
-        filepath: abfs://container/02_intermediate/trucks.parquet
-        credentials: dev_abs
-        load_args:
-        columns: [name, gear, disp, wt]
-        index: name
-        save_args:
-        compression: GZIP
-        partition_on: [name]
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
-
-    from kedro_datasets.pandas import ParquetDataset
-    import pandas as pd
-
-    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-    dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
-    dataset.save(data)
-    reloaded = dataset.load()
-    assert data.equals(reloaded)
-    ```
+        >>> import pandas as pd
+        >>> from kedro_datasets.pandas import ParquetDataset
+        >>>
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = ParquetDataset(filepath=tmp_path / "test.parquet")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -229,7 +227,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         Returns:
             dict: A dictionary containing the data in a split format.
         """
-        import pyarrow.parquet as pq
+        import pyarrow.parquet as pq  # noqa: PLC0415
 
         load_path = str(self._get_load_path())
 

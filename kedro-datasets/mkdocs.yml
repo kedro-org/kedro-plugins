@@ -106,10 +106,12 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
+  - stylesheets/code-select.css
 
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
+  - javascript/code-select.js
 
 nav:
   - Welcome: https://docs.kedro.org/en/stable/
@@ -134,7 +136,6 @@ nav:
         - json.JSONDataset: api/kedro_datasets/json.JSONDataset.md
         - matlab.MatlabDataset: api/kedro_datasets/matlab.MatlabDataset.md
         - matplotlib.MatplotlibDataset: api/kedro_datasets/matplotlib.MatplotlibDataset.md
-        - matplotlib.MatplotlibWriter: api/kedro_datasets/matplotlib.MatplotlibWriter.md
         - networkx.GMLDataset: api/kedro_datasets/networkx.GMLDataset.md
         - networkx.GraphMLDataset: api/kedro_datasets/networkx.GraphMLDataset.md
         - networkx.JSONDataset: api/kedro_datasets/networkx.JSONDataset.md

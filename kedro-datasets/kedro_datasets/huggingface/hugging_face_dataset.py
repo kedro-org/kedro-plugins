@@ -9,7 +9,11 @@ from kedro.io import AbstractDataset
 
 class HFDataset(AbstractDataset):
     """``HFDataset`` loads Hugging Face datasets
-    using the `datasets <https://pypi.org/project/datasets>`_ library.
+    using the `datasets <https://pypi.org/project/datasets>`_ library,
+    with optional revision pinning for improved security.
+
+     The `revision` parameter allows specifying a dataset version, tag, or commit hash,
+    which is recommended to ensure reproducibility and avoid unexpected dataset changes.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
@@ -18,6 +22,7 @@ class HFDataset(AbstractDataset):
         yelp_reviews:
           type: kedro_hf_datasets.HFDataset
           dataset_name: yelp_review_full
+          revision: "v1.0.0"
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -28,7 +33,7 @@ class HFDataset(AbstractDataset):
         >>> disable_progress_bar()  # for doctest to pass
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
-        >>> dataset = HFDataset(dataset_name="openai_humaneval")
+        >>> dataset = HFDataset(dataset_name="openai_humaneval", revision="1.0.0")
         >>> ds = dataset.load()  # doctest: +ELLIPSIS
         Downloading and preparing dataset ...
         Dataset ...

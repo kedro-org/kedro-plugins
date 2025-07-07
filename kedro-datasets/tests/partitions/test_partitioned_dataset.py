@@ -695,7 +695,7 @@ class TestPartitionedDatasetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):
-        path = f"s3://{BUCKET_NAME}/foo/bar"
+        path = f"'s3://{BUCKET_NAME}/foo/bar'"
         pds = PartitionedDataset(path=path, dataset=dataset)
 
         assert f"filepath={path}" in str(pds)

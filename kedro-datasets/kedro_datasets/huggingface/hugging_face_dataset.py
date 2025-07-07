@@ -49,7 +49,8 @@ class HFDataset(AbstractDataset):
         self.metadata = metadata
 
     def load(self):
-        return load_dataset(self.dataset_name, **self._dataset_kwargs)
+        # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 
     def save(self):
         raise NotImplementedError("Not yet implemented")

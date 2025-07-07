@@ -695,9 +695,13 @@ class TestPartitionedDatasetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):
-        path = f"'s3://{BUCKET_NAME}/foo/bar'"
-        pds = PartitionedDataset(path=path, dataset=dataset)
+        path = f"s3://{BUCKET_NAME}/foo/bar"
+        pds_descr = PartitionedDataset(path=path, dataset=dataset)._describe()
 
-        assert f"filepath={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert "path" in pds_descr and pds_descr["path"] == path
+        assert (
+            "dataset_type" in pds_descr
+            and pds_descr["dataset_type"]
+            == "kedro_datasets.pandas.csv_dataset.CSVDataset()"
+        )
+        assert "dataset_config" in pds_descr

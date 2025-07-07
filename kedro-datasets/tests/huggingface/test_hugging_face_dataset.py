@@ -20,7 +20,7 @@ class TestHFDataset:
         )
         hf_ds = dataset.load()
 
-        mocked_load_dataset.assert_called_once_with(dataset_name, revision=None)
+        mocked_load_dataset.assert_called_once_with(dataset_name)
         assert hf_ds is mocked_load_dataset.return_value
 
     def test_list_datasets(self, mocker):
@@ -39,6 +39,25 @@ class TestHFDataset:
 
         revision = "v1.0.0"
         dataset = HFDataset(dataset_name=dataset_name, revision=revision)
-        dataset.load()
+        hf_ds = dataset.load()
 
         mocked_load_dataset.assert_called_once_with(dataset_name, revision=revision)
+        assert hf_ds is mocked_load_dataset.return_value
+
+    def test_dataset_kwargs_combined(self, dataset_name, mocker):
+        mocked_load_dataset = mocker.patch(
+            "kedro_datasets.huggingface.hugging_face_dataset.load_dataset"
+        )
+
+        dataset_kwargs = {"split": "train"}
+        revision = "v1.0.0"
+
+        dataset = HFDataset(
+            dataset_name=dataset_name, revision=revision, dataset_kwargs=dataset_kwargs
+        )
+        hf_ds = dataset.load()
+
+        mocked_load_dataset.assert_called_once_with(
+            dataset_name, split="train", revision=revision
+        )
+        assert hf_ds is mocked_load_dataset.return_value

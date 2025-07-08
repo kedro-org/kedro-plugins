@@ -10,10 +10,11 @@ from kedro.io import AbstractDataset
 class HFDataset(AbstractDataset):
     """``HFDataset`` loads Hugging Face datasets
     using the `datasets <https://pypi.org/project/datasets>`_ library,
-    with optional revision pinning for improved security.
+    and requires a `revision` (e.g., tag, version, or commit hash) to ensure
+    secure and reproducible dataset loading.
 
-     The `revision` parameter allows specifying a dataset version, tag, or commit hash,
-    which is recommended to ensure reproducibility and avoid unexpected dataset changes.
+    The `revision` argument is **mandatory** to avoid unsafe downloads and to comply
+    with security checks like Bandit B615.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
@@ -46,7 +47,7 @@ class HFDataset(AbstractDataset):
         self,
         *,
         dataset_name: str,
-        revision: str | None = None,
+        revision: str,
         dataset_kwargs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
@@ -54,11 +55,18 @@ class HFDataset(AbstractDataset):
         self._dataset_kwargs = dataset_kwargs or {}
         if revision:
             self._dataset_kwargs["revision"] = revision
+        else:
+            raise ValueError(
+                f"{str(self)} requires `revision` to be set for secure dataset loading."
+            )
         self.metadata = metadata
 
     def load(self):
-        # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
-        return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
+        return load_dataset(
+            self.dataset_name,
+            revision=self._dataset_kwargs["revision"],
+            **{k: v for k, v in self._dataset_kwargs.items() if k != "revision"},
+        )
 
     def save(self):
         raise NotImplementedError("Not yet implemented")

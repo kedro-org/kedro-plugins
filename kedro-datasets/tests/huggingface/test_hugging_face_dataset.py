@@ -58,4 +58,4 @@ class TestHFDataset:
             ValueError,
             match="kedro_datasets.huggingface.hugging_face_dataset.HFDataset requires `revision` to be set",
         ):
-            HFDataset(dataset_name=dataset_name, revision=None)  # type: ignore
+            HFDataset(dataset_name=dataset_name, revision=None).load()  # type: ignore

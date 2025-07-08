@@ -34,8 +34,8 @@ class HFDataset(AbstractDataset):
         >>> disable_progress_bar()  # for doctest to pass
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
-        >>> dataset = HFDataset(dataset_name="yelp_review_full", revision="main")
-        >>> ds = dataset.load()
+        >>> dataset = HFDataset(dataset_name="yelp_review_full", revision="main", dataset_kwargs={"use_auth_token": False})
+        >>> ds = dataset.load() # doctest: +ELLIPSIS
         >>> assert "test" in ds
         >>> assert len(ds["test"]) == 164
     """
@@ -50,15 +50,15 @@ class HFDataset(AbstractDataset):
     ):
         self.dataset_name = dataset_name
         self._dataset_kwargs = dataset_kwargs or {}
-        if revision:
-            self._dataset_kwargs["revision"] = revision
-        else:
-            raise ValueError(
-                f"{str(self)} requires `revision` to be set for secure dataset loading."
-            )
+        self._dataset_kwargs["revision"] = revision
         self.metadata = metadata
 
     def load(self):
+        if not self._dataset_kwargs["revision"]:
+            raise ValueError(
+                f"{str(self)} requires `revision` to be set for secure dataset loading."
+            )
+
         return load_dataset(
             self.dataset_name,
             revision=self._dataset_kwargs["revision"],

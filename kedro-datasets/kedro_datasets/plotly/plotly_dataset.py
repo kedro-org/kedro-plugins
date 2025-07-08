@@ -25,45 +25,44 @@ class PlotlyDataset(JSONDataset):
     ``PlotlyDataset`` is a convenience wrapper for ``plotly.JSONDataset``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        bar_plot:
+          type: plotly.PlotlyDataset
+          filepath: data/08_reporting/bar_plot.json
+          plotly_args:
+            type: bar
+            fig:
+              x: features
+              y: importance
+              orientation: h
+            layout:
+              xaxis_title: x
+              yaxis_title: y
+              title: Title
+        ```
 
-    bar_plot:
-        type: plotly.PlotlyDataset
-        filepath: data/08_reporting/bar_plot.json
-        plotly_args:
-        type: bar
-        fig:
-            x: features
-            y: importance
-            orientation: h
-        layout:
-            xaxis_title: x
-            yaxis_title: y
-            title: Title
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> import pandas as pd
+        >>> import plotly.express as px
+        >>> from kedro_datasets.plotly import PlotlyDataset
+        >>>
+        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
+        >>>
+        >>> dataset = PlotlyDataset(
+        ...     filepath=tmp_path / "scatter_plot.json",
+        ...     plotly_args={
+        ...         "type": "scatter",
+        ...         "fig": {"x": "x1", "y": "x2"},
+        ...     },
+        ... )
+        >>> dataset.save(df_data)
+        >>> reloaded = dataset.load()
+        >>> assert px.scatter(df_data, x="x1", y="x2") == reloaded
 
-    from kedro_datasets.plotly import PlotlyDataset
-    import plotly.express as px
-    import pandas as pd
-
-    df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
-
-    dataset = PlotlyDataset(
-        filepath=tmp_path / "scatter_plot.json",
-        plotly_args={
-            "type": "scatter",
-            "fig": {"x": "x1", "y": "x2"},
-        },
-    )
-    dataset.save(df_data)
-    reloaded = dataset.load()
-    assert px.scatter(df_data, x="x1", y="x2") == reloaded
-    ```
     """
 
     DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}

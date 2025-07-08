@@ -29,86 +29,60 @@ class MatplotlibDataset(
     """``MatplotlibDataset`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        output_plot:
+          type: matplotlib.MatplotlibDataset
+          filepath: data/08_reporting/output_plot.png
+          save_args:
+            format: png
+        ```
 
-    output_plot:
-        type: matplotlib.MatplotlibDataset
-        filepath: data/08_reporting/output_plot.png
-        save_args:
-        format: png
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
+        >>> plt.close()
+        >>> plot_dataset.save(fig)
 
-    import matplotlib.pyplot as plt
-    from kedro_datasets.matplotlib import MatplotlibDataset
+        Saving a plot as a PDF file:
 
-    fig = plt.figure()
-    plt.plot([1, 2, 3])
-    [<matplotlib.lines.Line2D object at 0x...>]
-    plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/output_plot.png")
-    plt.close()
-    plot_dataset.save(fig)
-    ```
-    Example saving a plot as a PDF file:
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])  # doctest: +ELLIPSIS
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> pdf_plot_dataset = MatplotlibDataset(
+        ...     filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
+        ... )
+        >>> plt.close()
+        >>> pdf_plot_dataset.save(fig)
 
-    ```python
+        Saving multiple plots in a folder, using a dictionary:
 
-    import matplotlib.pyplot as plt
-    from kedro_datasets.matplotlib import MatplotlibDataset
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro_datasets.matplotlib import MatplotlibDataset
+        >>>
+        >>> plots_dict = {}
+        >>> for colour in ["blue", "green", "red"]:
+        ...     plots_dict[f"{colour}.png"] = plt.figure()
+        ...     plt.plot([1, 2, 3], color=colour)
+        ...
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        [<matplotlib.lines.Line2D object at 0x...>]
+        >>> plt.close("all")
+        >>> dict_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
+        >>> dict_plot_dataset.save(plots_dict)
 
-    fig = plt.figure()
-    plt.plot([1, 2, 3])
-    [<matplotlib.lines.Line2D object at 0x...>]
-    pdf_plot_dataset = MatplotlibDataset(
-        filepath=tmp_path / "data/08_reporting/output_plot.pdf", save_args={"format": "pdf"}
-    )
-    plt.close()
-    pdf_plot_dataset.save(fig)
-    ```
-    Example saving multiple plots in a folder, using a dictionary:
-
-    ```python
-
-    import matplotlib.pyplot as plt
-    from kedro_datasets.matplotlib import MatplotlibDataset
-
-    plots_dict = {}
-    for colour in ["blue", "green", "red"]:
-        plots_dict[f"{colour}.png"] = plt.figure()
-        plt.plot([1, 2, 3], color=colour)
-
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    plt.close("all")
-    dict_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
-    dict_plot_dataset.save(plots_dict)
-    ```
-    Example saving multiple plots in a folder, using a list:
-
-    ```python
-
-    import matplotlib.pyplot as plt
-    from kedro_datasets.matplotlib import MatplotlibDataset
-
-    plots_list = []
-    for i in range(5):
-        plots_list.append(plt.figure())
-        plt.plot([i, i + 1, i + 2])
-
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    [<matplotlib.lines.Line2D object at 0x...>]
-    plt.close("all")
-    list_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
-    list_plot_dataset.save(plots_list)
-    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

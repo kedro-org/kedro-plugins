@@ -11,7 +11,7 @@ def dataset_name():
 
 @pytest.fixture
 def revision():
-    return "v1.0.0"
+    return "refs/convert/parquet"
 
 
 class TestHFDataset:

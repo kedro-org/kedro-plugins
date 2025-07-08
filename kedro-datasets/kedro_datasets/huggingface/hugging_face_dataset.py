@@ -23,7 +23,7 @@ class HFDataset(AbstractDataset):
         yelp_reviews:
           type: kedro_hf_datasets.HFDataset
           dataset_name: yelp_review_full
-          revision: "main"
+          revision: "refs/convert/parquet"
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -34,7 +34,7 @@ class HFDataset(AbstractDataset):
         >>> disable_progress_bar()  # for doctest to pass
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
-        >>> dataset = HFDataset(dataset_name="openai_humaneval", revision="main")
+        >>> dataset = HFDataset(dataset_name="yelp_review_full", revision="refs/convert/parquet")
         >>> ds = dataset.load()
         >>> assert "test" in ds
         >>> assert len(ds["test"]) == 164

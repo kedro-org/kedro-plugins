@@ -230,7 +230,7 @@ class TestFileDatasetVersioned:
 
     def test_no_versions(self, versioned_file_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for FileDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.ibis.file_dataset.FileDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_file_dataset.load()
 
@@ -245,7 +245,7 @@ class TestFileDatasetVersioned:
         corresponding CSV file for a given save version already exists."""
         versioned_file_dataset.save(dummy_table)
         pattern = (
-            r"Save path \'.+\' for FileDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.ibis.file_dataset.FileDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -264,7 +264,7 @@ class TestFileDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for FileDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.ibis.file_dataset.FileDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_file_dataset.save(dummy_table)

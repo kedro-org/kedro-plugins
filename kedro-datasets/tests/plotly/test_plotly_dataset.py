@@ -63,7 +63,7 @@ class TestPlotlyDataset:
 
     def test_load_missing_file(self, plotly_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset PlotlyDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.plotly.plotly_dataset.PlotlyDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             plotly_dataset.load()
 

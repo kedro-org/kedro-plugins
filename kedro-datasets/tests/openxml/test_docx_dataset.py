@@ -62,7 +62,7 @@ class TestDocxDataset:
 
     def test_load_missing_file(self, docx_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset DocxDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.openxml.docx_dataset.DocxDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             docx_dataset.load()
 
@@ -122,7 +122,7 @@ class TestDocxDatasetVersioned:
 
     def test_no_versions(self, versioned_docx_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for DocxDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.openxml.docx_dataset.DocxDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_docx_dataset.load()
 
@@ -137,7 +137,7 @@ class TestDocxDatasetVersioned:
         corresponding docx file for a given save version already exists."""
         versioned_docx_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for DocxDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.openxml.docx_dataset.DocxDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -156,7 +156,7 @@ class TestDocxDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for DocxDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.openxml.docx_dataset.DocxDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_docx_dataset.save(dummy_data)

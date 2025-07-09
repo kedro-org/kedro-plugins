@@ -4,6 +4,11 @@
 
 - Migrated docs to mkdocs
 - Make `kedro-datasets` compatible with Kedro 1.0.0.
+- Added the following new datasets:
+
+| Type                  | Description                                                                       | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 
@@ -20,6 +25,8 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+
 
 # Release 7.0.0
 

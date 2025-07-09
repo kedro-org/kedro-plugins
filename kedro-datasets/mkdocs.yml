@@ -139,6 +139,7 @@ nav:
         - networkx.GMLDataset: api/kedro_datasets/networkx.GMLDataset.md
         - networkx.GraphMLDataset: api/kedro_datasets/networkx.GraphMLDataset.md
         - networkx.JSONDataset: api/kedro_datasets/networkx.JSONDataset.md
+        - docx.DocxDataset: api/kedro_datasets/openxml.DocxDataset.md
         - pandas.CSVDataset: api/kedro_datasets/pandas.CSVDataset.md
         - pandas.DeltaTableDataset: api/kedro_datasets/pandas.DeltaTableDataset.md
         - pandas.ExcelDataset: api/kedro_datasets/pandas.ExcelDataset.md

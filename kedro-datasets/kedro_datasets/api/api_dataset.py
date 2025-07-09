@@ -24,13 +24,14 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         usda:
           type: api.APIDataset
           url: https://quickstats.nass.usda.gov
-          params:
-            key: SOME_TOKEN,
-            format: JSON,
-            commodity_desc: CORN,
-            statisticcat_des: YIELD,
-            agg_level_desc: STATE,
-            year: 2000
+          load_args:
+              params:
+                key: SOME_TOKEN,
+                format: JSON,
+                commodity_desc: CORN,
+                statisticcat_des: YIELD,
+                agg_level_desc: STATE,
+                year: 2000
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):

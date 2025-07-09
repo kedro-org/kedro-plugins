@@ -9,12 +9,7 @@ from kedro.io import AbstractDataset
 
 class HFDataset(AbstractDataset):
     """``HFDataset`` loads Hugging Face datasets
-    using the `datasets <https://pypi.org/project/datasets>`_ library,
-    and requires a `revision` (e.g., tag, version, or commit hash) to ensure
-    secure and reproducible dataset loading.
-
-    The `revision` argument is **mandatory** to avoid unsafe downloads and to comply
-    with security checks like Bandit B615.
+    using the `datasets <https://pypi.org/project/datasets>`_ library.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
@@ -23,7 +18,6 @@ class HFDataset(AbstractDataset):
         yelp_reviews:
           type: kedro_hf_datasets.HFDataset
           dataset_name: yelp_review_full
-          revision: "main"
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
@@ -34,36 +28,29 @@ class HFDataset(AbstractDataset):
         >>> disable_progress_bar()  # for doctest to pass
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
-        >>> dataset = HFDataset(dataset_name="yelp_review_full", revision="main", dataset_kwargs={"use_auth_token": False})
-        >>> ds = dataset.load() # doctest: +ELLIPSIS
+        >>> dataset = HFDataset(dataset_name="openai_humaneval")
+        >>> ds = dataset.load()  # doctest: +ELLIPSIS
+        Downloading and preparing dataset ...
+        Dataset ...
         >>> assert "test" in ds
         >>> assert len(ds["test"]) == 164
+
     """
 
     def __init__(
         self,
         *,
         dataset_name: str,
-        revision: str,
         dataset_kwargs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         self.dataset_name = dataset_name
         self._dataset_kwargs = dataset_kwargs or {}
-        self._dataset_kwargs["revision"] = revision
         self.metadata = metadata
 
     def load(self):
-        if not self._dataset_kwargs["revision"]:
-            raise ValueError(
-                f"{str(self)} requires `revision` to be set for secure dataset loading."
-            )
-
-        return load_dataset(
-            self.dataset_name,
-            revision=self._dataset_kwargs["revision"],
-            **{k: v for k, v in self._dataset_kwargs.items() if k != "revision"},
-        )
+        # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 
     def save(self):
         raise NotImplementedError("Not yet implemented")

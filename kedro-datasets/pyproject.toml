@@ -88,6 +88,9 @@ networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
+openxml-docxdataset = ["python-docx"]
+openxml = ["kedro-datasets[openxml-docxdataset]"]
+
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
 
@@ -258,6 +261,7 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
+    "python-docx",
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",

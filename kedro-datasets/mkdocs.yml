@@ -1,5 +1,5 @@
 site_name: ""
-site_url: https://docs.kedro.org/projects/kedro-datasets
+site_url: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 repo_name: kedro-org/kedro-plugins
 repo_url: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets
 
@@ -114,9 +114,9 @@ extra_javascript:
   - javascript/code-select.js
 
 nav:
-  - Welcome: https://docs.kedro.org/en/develop/
-  - Kedro: https://docs.kedro.org/en/develop/getting-started/course/
-  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-branch-mkdocs/
+  - Welcome: https://docs.kedro.org/en/stable/
+  - Kedro: https://docs.kedro.org/en/stable/getting-started/course/
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro-Datasets:
     - API documentation:
       - Core Datasets:
@@ -139,6 +139,7 @@ nav:
         - networkx.GMLDataset: api/kedro_datasets/networkx.GMLDataset.md
         - networkx.GraphMLDataset: api/kedro_datasets/networkx.GraphMLDataset.md
         - networkx.JSONDataset: api/kedro_datasets/networkx.JSONDataset.md
+        - docx.DocxDataset: api/kedro_datasets/openxml.DocxDataset.md
         - pandas.CSVDataset: api/kedro_datasets/pandas.CSVDataset.md
         - pandas.DeltaTableDataset: api/kedro_datasets/pandas.DeltaTableDataset.md
         - pandas.ExcelDataset: api/kedro_datasets/pandas.ExcelDataset.md

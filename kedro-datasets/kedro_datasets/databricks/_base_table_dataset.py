@@ -138,14 +138,56 @@ class BaseTable:
     def _validate_primary_key(self):
         """Validates the primary key of the table.
 
+        Ensures that:
+        1. A primary key is provided when `write_mode` is "upsert".
+        2. The primary key column(s) exist in the table schema.
+        3. The primary key column(s) do not contain null values.
+
         Raises:
-            DatasetError: If no `primary_key` is specified.
+            DatasetError: If no `primary_key` is specified, if the primary key
+            column(s) do not exist in the table schema, or if the primary key
+            column(s) contain null values.
         """
         if self.primary_key is None or len(self.primary_key) == 0:
             if self.write_mode == "upsert":
                 raise DatasetError(
                     f"`primary_key` must be provided for"
                     f"`write_mode` {self.write_mode}"
+                )
+
+        table_schema = self.schema()
+        if table_schema is None:
+            raise DatasetError(
+                f"Cannot validate primary key because the schema for table '{self.full_table_location()}' is not available."
+            )
+
+        primary_keys = (
+            [self.primary_key]
+            if isinstance(self.primary_key, str)
+            else self.primary_key
+        )
+
+        # Check if primary key columns exist in the schema
+        missing_columns = [
+            column for column in primary_keys if column not in table_schema.fieldNames()
+        ]
+        if missing_columns:
+            raise DatasetError(
+                f"Primary key column(s) {missing_columns} do not exist in the table schema."
+            )
+
+        # Check if primary key columns contain null values
+        for col in primary_keys:
+            null_count = (
+                get_spark()
+                .table(self.full_table_location())
+                .filter(f"{col} IS NULL")
+                .count()
+            )
+            if null_count > 0:
+                raise DatasetError(
+                    f"Primary key column '{col}' contains {null_count} null value(s). "
+                    "Primary key columns must not contain null values."
                 )
 
     def full_table_location(self) -> str | None:
@@ -201,6 +243,54 @@ class BaseTable:
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+
+    def add_primary_key_constraint(self) -> None:
+        """Adds a primary key constraint to the table.
+
+        This method uses Delta Lake's `ALTER TABLE` command to add a primary key
+        constraint to the table. Note that this requires Delta Lake's constraints
+        feature to be enabled in your environment.
+
+        Raises:
+            DatasetError: If the table does not exist or if the primary key is not defined.
+
+        Example:
+            >>> table = BaseTable(
+            ...     database="default",
+            ...     table="example_table",
+            ...     primary_key="id",
+            ...     write_mode="upsert",
+            ... )
+            >>> table.add_primary_key_constraint()
+        """
+        if not self.exists():
+            raise DatasetError(f"Table '{self.full_table_location()}' does not exist.")
+
+        if not self.primary_key:
+            raise DatasetError("Primary key is not defined for this table.")
+
+        primary_key = (
+            self.primary_key
+            if isinstance(self.primary_key, list)
+            else [self.primary_key]
+        )
+
+        primary_key_columns = ", ".join(f"`{col}`" for col in primary_key)
+
+        try:
+            get_spark().sql(
+                f"ALTER TABLE {self.full_table_location()} "
+                f"ADD CONSTRAINT pk_constraint PRIMARY KEY ({primary_key_columns})"
+            )
+            logger.info(
+                "Primary key constraint added to table '%s' on columns: %s",
+                self.full_table_location(),
+                primary_key_columns,
+            )
+        except Exception as exc:
+            raise DatasetError(
+                f"Failed to add primary key constraint to table '{self.full_table_location()}': {exc}"
+            )
 
 
 class BaseTableDataset(AbstractVersionedDataset):
@@ -291,6 +381,8 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         self.metadata = metadata
         self._version = version
+        # [TODO: Confirm on where to make this call]
+        self._table.add_primary_key_constraint()
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]

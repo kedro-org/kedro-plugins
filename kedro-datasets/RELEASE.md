@@ -25,7 +25,6 @@
 ## Breaking changes
 
 - `kedro-datasets` now requires Kedro 1.0.0 or higher.
-- Removed `matplotlib.MatplotlibWriter`.
 
 ## Community contributions
 

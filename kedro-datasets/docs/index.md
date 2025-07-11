@@ -21,6 +21,7 @@ Name | Description
 [json.JSONDataset](api/kedro_datasets/json.JSONDataset.md) | ``JSONDataset`` loads/saves data from/to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 [matlab.MatlabDataset](api/kedro_datasets/matlab.MatlabDataset.md) | `MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 [matplotlib.MatplotlibDataset](api/kedro_datasets/matplotlib.MatplotlibDataset.md) | ``MatplotlibDataset`` saves one or more Matplotlib objects as image files to an underlying filesystem (e.g. local, S3, GCS).
+[matplotlib.MatplotlibWriter](api/kedro_datasets/matplotlib.MatplotlibWriter.md) | DEPRECATED
 [networkx.GMLDataset](api/kedro_datasets/networkx.GMLDataset.md) | ``GMLDataset`` loads and saves graphs to a GML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GML data.
 [networkx.GraphMLDataset](api/kedro_datasets/networkx.GraphMLDataset.md) | ``GraphMLDataset`` loads and saves graphs to a GraphML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
 [networkx.JSONDataset](api/kedro_datasets/networkx.JSONDataset.md) | NetworkX ``JSONDataset`` loads and saves graphs to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.

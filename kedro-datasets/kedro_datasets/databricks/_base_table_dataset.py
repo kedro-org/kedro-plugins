@@ -157,9 +157,17 @@ class BaseTable:
 
         table_schema = self.schema()
         if table_schema is None:
-            raise DatasetError(
-                f"Cannot validate primary key because the schema for table '{self.full_table_location()}' is not available."
-            )
+            try:
+                table_schema = get_spark().table(self.full_table_location()).schema
+            except Exception as exc:
+                raise DatasetError(
+                    f"Unable to retrieve schema for table '{self.full_table_location()}': {exc}"
+                )
+
+        # if table_schema is None:
+        #     raise DatasetError(
+        #         f"Cannot validate primary key because the schema for table '{self.full_table_location()}' is not available."
+        #     )
 
         primary_keys = (
             [self.primary_key]

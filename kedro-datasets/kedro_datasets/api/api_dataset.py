@@ -26,11 +26,11 @@ class APIDataset(AbstractDataset[None, requests.Response]):
           url: https://quickstats.nass.usda.gov
           load_args:
               params:
-                key: SOME_TOKEN,
-                format: JSON,
-                commodity_desc: CORN,
-                statisticcat_des: YIELD,
-                agg_level_desc: STATE,
+                key: SOME_TOKEN
+                format: JSON
+                commodity_desc: CORN
+                statisticcat_des: YIELD
+                agg_level_desc: STATE
                 year: 2000
         ```
 

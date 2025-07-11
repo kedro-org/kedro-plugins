@@ -184,6 +184,7 @@ nav:
         - langchain.ChatOpenAIDataset: api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
         - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
         - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - polars.PolarsDatabaseDataset: api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md
         - prophet.ProphetModelDataset: api/kedro_datasets_experimental/prophet.ProphetModelDataset.md
         - pytorch.PyTorchDataset: api/kedro_datasets_experimental/pytorch.PyTorchDataset.md
         - rioxarray.GeoTIFFDataset: api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md

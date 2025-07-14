@@ -283,9 +283,22 @@ class BaseTable:
             else [self.primary_key]
         )
 
-        primary_key_columns = ", ".join(f"`{col}`" for col in primary_key)
-
         try:
+            # Ensure the primary key column is not null
+            for col in primary_key:
+                get_spark().sql(
+                    f"ALTER TABLE {self.full_table_location()} "
+                    f"ALTER COLUMN `{col}` SET NOT NULL"
+                )
+                logger.info(
+                    "Column '%s' set to NOT NULL in table '%s'.",
+                    col,
+                    self.full_table_location(),
+                )
+
+            primary_key_columns = ", ".join(f"`{col}`" for col in primary_key)
+
+            # Add constraint
             get_spark().sql(
                 f"ALTER TABLE {self.full_table_location()} "
                 f"ADD CONSTRAINT pk_constraint PRIMARY KEY ({primary_key_columns})"

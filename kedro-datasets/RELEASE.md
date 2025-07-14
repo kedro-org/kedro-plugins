@@ -1,4 +1,11 @@
-# Upcoming Release 8.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking Changes
+## Community contributions
+
+
+# Release 8.0.0
 
 ## Major features and improvements
 
@@ -14,6 +21,7 @@
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 - Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
+- Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
 
 ## Breaking changes
 
@@ -25,6 +33,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
 - [Seohyun Park](https://github.com/soyamimi)
+- [Daniel Russell-Brain](https://github.com/killerfridge)
 
 
 # Release 7.0.0

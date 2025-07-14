@@ -389,8 +389,6 @@ class BaseTableDataset(AbstractVersionedDataset):
 
         self.metadata = metadata
         self._version = version
-        # [TODO: Confirm on where to make this call]
-        self._table.add_primary_key_constraint()
 
         super().__init__(
             filepath=None,  # type: ignore[arg-type]
@@ -502,6 +500,9 @@ class BaseTableDataset(AbstractVersionedDataset):
         method = getattr(self, f"_save_{self._table.write_mode}", None)
         if method:
             method(data)
+
+        # [TODO: Confirm on where to make this call]
+        self._table.add_primary_key_constraint()
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

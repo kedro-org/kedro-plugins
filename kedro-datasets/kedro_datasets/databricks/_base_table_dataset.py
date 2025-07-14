@@ -164,11 +164,6 @@ class BaseTable:
                     f"Unable to retrieve schema for table '{self.full_table_location()}': {exc}"
                 )
 
-        # if table_schema is None:
-        #     raise DatasetError(
-        #         f"Cannot validate primary key because the schema for table '{self.full_table_location()}' is not available."
-        #     )
-
         primary_keys = (
             [self.primary_key]
             if isinstance(self.primary_key, str)

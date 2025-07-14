@@ -289,6 +289,65 @@
           {
             "if": {
               "properties": {
+                "type": { "const": "databricks.ManagedTableDataset" }
+              }
+            },
+            "then": {
+              "required": ["table"],
+              "properties": {
+                "table": {
+                  "type": "string",
+                  "description": "The name of the managed table in Databricks."
+                },
+                "catalog": {
+                  "type": ["string", "null"],
+                  "description": "The name of the catalog in Unity. Optional."
+                },
+                "database": {
+                  "type": "string",
+                  "description": "The name of the database (schema). Defaults to 'default'."
+                },
+                "write_mode": {
+                  "type": ["string", "null"],
+                  "enum": ["overwrite", "append", "upsert", null],
+                  "description": "Mode to write data: overwrite, append, or upsert. Upsert requires primary_key."
+                },
+                "dataframe_type": {
+                  "type": "string",
+                  "enum": ["spark", "pandas"],
+                  "description": "Type of dataframe to use. Defaults to 'spark'."
+                },
+                "primary_key": {
+                  "type": ["string", "array", "null"],
+                  "description": "Primary key column(s) for upsert mode."
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "schema": {
+                  "type": ["object", "null"],
+                  "description": "Table schema in JSON form. Used to create the table if provided."
+                },
+                "partition_columns": {
+                  "type": ["array", "null"],
+                  "items": { "type": "string" },
+                  "description": "Columns to use for partitioning the table."
+                },
+                "owner_group": {
+                  "type": ["string", "null"],
+                  "description": "Owner group for table access control."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
                 "type": {
                   "const": "email.EmailMessageDataset"
                 }
@@ -328,38 +387,43 @@
           {
             "if": {
               "properties": {
-                "type": {
-                  "const": "geopandas.GeoJSONDataset"
-                }
+                "type": { "const": "geopandas.GenericDataset" }
               }
             },
             "then": {
-              "required": [
-                "filepath"
-              ],
+              "required": ["filepath"],
               "properties": {
                 "filepath": {
                   "type": "string",
-                  "description": "Filepath in POSIX format to a GeoJSON file prefixed with a protocol like\n`s3://`. If prefix is not provided `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
+                  "description": "Filepath in POSIX format to a file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "file_format": {
+                  "type": "string",
+                  "description": "String used to match the appropriate load/save method (e.g. 'parquet', 'geojson'). Defaults to 'file'."
                 },
                 "load_args": {
                   "type": "object",
-                  "description": "GeoPandas options for loading GeoJSON files.\nHere you can find all available arguments:\nhttps://geopandas.org/reference/geopandas.read_file.html"
+                  "description": "GeoPandas options for loading files. See: https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html"
                 },
                 "save_args": {
                   "type": "object",
-                  "description": "GeoPandas options for saving geojson files.\nHere you can find all available arguments:\nhttps://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file\nThe default_save_arg driver is 'GeoJSON', all others preserved."
+                  "description": "GeoPandas options for saving files. See: https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.to_file.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
                 },
                 "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "credentials required to access the underlying filesystem.\nEg. for ``GCFileSystem`` it would look like `{'token': None}`."
+                  "type": ["object", "null"],
+                  "description": "Credentials required to access the underlying filesystem. E.g. for GCSFileSystem: {'token': None}."
                 },
                 "fs_args": {
                   "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -447,6 +511,86 @@
           {
             "if": {
               "properties": {
+                "type": { "const": "ibis.FileDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath", "file_format"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to a file to register as a table. Supports local and remote filesystems (e.g. s3://)."
+                },
+                "file_format": {
+                  "type": "string",
+                  "description": "String specifying the file format (e.g. 'csv', 'parquet', 'delta')."
+                },
+                "table_name": {
+                  "type": ["string", "null"],
+                  "description": "The name to use for the created table (on load)."
+                },
+                "connection": {
+                  "type": "object",
+                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the Ibis backend's read_{file_format} method."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the Ibis backend's to_{file_format} method."
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "ibis.TableDataset" }
+              }
+            },
+            "then": {
+              "required": ["table_name"],
+              "properties": {
+                "table_name": {
+                  "type": "string",
+                  "description": "The name of the table or view to read or create."
+                },
+                "database": {
+                  "type": ["string", "null"],
+                  "description": "The name of the database to read from or create in. Can be a dotted string or tuple for multi-level hierarchy."
+                },
+                "connection": {
+                  "type": "object",
+                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in-memory."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the Ibis backend's table loading method."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the Ibis backend's create_{materialized} method. By default, materialized as views."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
                 "type": {
                   "const": "json.JSONDataset"
                 }
@@ -475,6 +619,42 @@
                 "fs_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "matlab.MatlabDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a Matlab file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Options for saving .mat files using scipy.io.savemat."
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -549,6 +729,38 @@
                 "fs_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "openxml.DocxDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a .docx file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -990,34 +1202,75 @@
           {
             "if": {
               "properties": {
-                "type": {
-                  "const": "pillow.ImageDataset"
-                }
+                "type": { "const": "plotly.HTMLDataset" }
               }
             },
             "then": {
-              "required": [
-                "filepath"
-              ],
+              "required": ["filepath"],
               "properties": {
                 "filepath": {
                   "type": "string",
-                  "description": "Filepath in POSIX format to an image file prefixed with a protocol like\n`s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
+                  "description": "Filepath in POSIX format to an HTML file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
                 },
                 "save_args": {
                   "type": "object",
-                  "description": "Pillow options for saving image files.\nHere you can find all available arguments:\nhttps://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save\nAll defaults are preserved."
+                  "description": "Plotly options for saving HTML files. See: https://plotly.com/python-api-reference/generated/plotly.io.write_html.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
                 },
                 "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
                 },
                 "fs_args": {
                   "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "plotly.JSONDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a JSON file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Plotly options for loading JSON files. See: https://plotly.com/python-api-reference/generated/plotly.io.from_json.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Plotly options for saving JSON files. See: https://plotly.com/python-api-reference/generated/plotly.io.write_json.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -1070,6 +1323,170 @@
             "if": {
               "properties": {
                 "type": {
+                  "const": "pillow.ImageDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "filepath"
+              ],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to an image file prefixed with a protocol like\n`s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Pillow options for saving image files.\nHere you can find all available arguments:\nhttps://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save\nAll defaults are preserved."
+                },
+                "credentials": {
+                  "type": [
+                    "object",
+                    "string"
+                  ],
+                  "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "polars.CSVDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a CSV file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Polars options for loading CSV files. See: https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.read_csv.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Polars options for saving CSV files. See: https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_csv.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "polars.EagerPolarsDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath", "file_format"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "file_format": {
+                  "type": "string",
+                  "description": "String used to match the appropriate Polars load/save method (e.g. 'csv', 'parquet')."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Polars options for loading files. See: https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Polars options for saving files. See: https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "polars.LazyPolarsDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath", "file_format"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "file_format": {
+                  "type": "string",
+                  "enum": ["csv", "parquet"],
+                  "description": "String used to match the appropriate Polars load/save method (e.g. 'csv', 'parquet')."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Polars options for loading files. See: https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Polars options for saving files. See: https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
                   "const": "redis.PickleDataset"
                 }
               }
@@ -1102,6 +1519,50 @@
                 "redis_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into the redis client constructor ``redis.StrictRedis.from_url``, as well as to pass to the ``redis.StrictRedis.set``"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "snowflake.SnowparkTableDataset" }
+              }
+            },
+            "then": {
+              "required": ["table_name", "credentials"],
+              "properties": {
+                "table_name": {
+                  "type": "string",
+                  "description": "The name of the table to load or save data to."
+                },
+                "schema": {
+                  "type": ["string", "null"],
+                  "description": "Name of the schema where the table is. Optional if provided in credentials."
+                },
+                "database": {
+                  "type": ["string", "null"],
+                  "description": "Name of the database where the schema is. Optional if provided in credentials."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments for loading data. Currently not used."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments for Snowpark DataFrameWriter.save_as_table. See: https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html"
+                },
+                "credentials": {
+                  "type": "object",
+                  "description": "Dictionary with Snowflake connection parameters. See: https://docs.snowflake.com/en/user-guide/python-connector-api.html#connect"
+                },
+                "session": {
+                  "type": ["object", "null"],
+                  "description": "Optional Snowpark session object. Usually not set in YAML."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -1215,6 +1676,78 @@
                 "save_args": {
                   "type": "object",
                   "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "spark.SparkStreamingDataset" }
+              }
+            },
+            "then": {
+              "required": ["file_format"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a Spark dataframe. For Databricks, use paths starting with `/dbfs/`. For message brokers (e.g. Kafka), filepath is not required."
+                },
+                "file_format": {
+                  "type": "string",
+                  "description": "File format used during load and save operations (e.g. 'json', 'parquet', 'csv', 'delta'). Must be supported by the running SparkContext."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to Spark DataFrameReader.load. Dependent on file format. See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments passed to Spark DataFrameWriter.writeStream.options. Dependent on file format. See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "svmlight.SVMLightDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a svmlight/libsvm file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `sklearn.datasets.load_svmlight_file`. See: https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_svmlight_file.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `sklearn.datasets.dump_svmlight_file`. See: https://scikit-learn.org/stable/modules/generated/sklearn.datasets.dump_svmlight_file.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. All defaults are preserved, except `mode`, which is set to `rb` when loading and to `wb` when saving. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }

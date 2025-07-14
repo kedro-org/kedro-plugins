@@ -15,19 +15,19 @@
               "biosequence.BioSequenceDataset",
               "dask.CSVDataset",
               "dask.ParquetDataset",
-              "databricks.ManagedTableDataset", // NEW
+              "databricks.ManagedTableDataset",
               "email.EmailMessageDataset",
-              "geopandas.GenericDataset", // CHANGED
+              "geopandas.GenericDataset",
               "holoviews.HoloviewsWriter",
               "huggingface.HFDataset",
               "huggingface.HFTransformerPipelineDataset",
-              "ibis.FileDataset", // NEW
-              "ibis.TableDataset", // NEW
+              "ibis.FileDataset",
+              "ibis.TableDataset",
               "json.JSONDataset",
-              "matlab.MatlabDataset", // NEW
+              "matlab.MatlabDataset",
               "matplotlib.MatplotlibWriter",
               "networkx.NetworkXDataset",
-              "openxlml.DocxDataset", // NEW
+              "openxlml.DocxDataset",
               "pandas.CSVDataset",
               "pandas.ExcelDataset",
               "pandas.FeatherDataset",
@@ -40,19 +40,19 @@
               "pandas.XMLDataset",
               "pillow.ImageDataset",
               "pickle.PickleDataset",
-              "plotly.HTMLDataset", // NEW
-              "plotly.JSONDataset", // NEW
+              "plotly.HTMLDataset",
+              "plotly.JSONDataset",
               "plotly.PlotlyDataset",
-              "polars.CSVDataset", // NEW
-              "polars.EagerPolarsDataset", // NEW
-              "polars.LazyPolarsDataset", // NEW
+              "polars.CSVDataset",
+              "polars.EagerPolarsDataset",
+              "polars.LazyPolarsDataset",
               "redis.PickleDataset",
-              "snowflake.SnowparkTableDataset", // NEW
+              "snowflake.SnowparkTableDataset",
               "spark.SparkDataset",
               "spark.SparkHiveDataset",
               "spark.SparkJDBCDataset",
-              "spark.SparkStreamingDataset", // NEW
-              "svmlight.SVMLightDataset", // NEW
+              "spark.SparkStreamingDataset",
+              "svmlight.SVMLightDataset",
               "tensorflow.TensorFlowModelDataset",
               "text.TextDataset",
               "yaml.YAMLDataset"

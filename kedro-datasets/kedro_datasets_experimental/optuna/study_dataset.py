@@ -301,14 +301,15 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         save_study_name = self._get_save_study_name()
 
         storage_url_str = self._storage_url.render_as_string(hide_password=False)
-        storage = optuna.storages.RDBStorage(url=storage_url_str)
         if self._backend == "sqlite":
             os.makedirs(os.path.dirname(self._filepath), exist_ok=True)
 
             if not os.path.isfile(self._filepath):
                 optuna.create_study(
-                    storage=storage,
+                    storage=storage_url_str,
                 )
+
+        storage = optuna.storages.RDBStorage(url=storage_url_str)
 
         # To overwrite an existing study, we need to first delete it if it exists
         if self._study_name_exists(save_study_name):

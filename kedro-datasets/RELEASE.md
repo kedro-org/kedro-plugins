@@ -1,25 +1,40 @@
-# Upcoming Release 8.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking Changes
+## Community contributions
+
+
+# Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
 - Make `kedro-datasets` compatible with Kedro 1.0.0.
+- Added the following new datasets:
+
+| Type                  | Description                                                                       | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 - Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
+- Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
 
 ## Breaking changes
 
 - `kedro-datasets` now requires Kedro 1.0.0 or higher.
-- Removed `matplotlib.MatplotlibWriter`.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+- [Daniel Russell-Brain](https://github.com/killerfridge)
+
 
 # Release 7.0.0
 

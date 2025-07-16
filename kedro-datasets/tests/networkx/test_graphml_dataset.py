@@ -60,7 +60,7 @@ class TestGraphMLDataset:
 
     def test_load_missing_file(self, graphml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset GraphMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.networkx.graphml_dataset.GraphMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert graphml_dataset.load()
 
@@ -109,7 +109,7 @@ class TestGraphMLDatasetVersioned:
 
     def test_no_versions(self, versioned_graphml_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GraphMLDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.networkx.graphml_dataset.GraphMLDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_graphml_dataset.load()
 
@@ -124,7 +124,7 @@ class TestGraphMLDatasetVersioned:
         version."""
         versioned_graphml_dataset.save(dummy_graph_data)
         pattern = (
-            r"Save path \'.+\' for GraphMLDataset\(.+\) must not "
+            r"Save path \'.+\' for kedro_datasets.networkx.graphml_dataset.GraphMLDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -143,7 +143,7 @@ class TestGraphMLDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match "
-            rf"load version '{load_version}' for GraphMLDataset\(.+\)"
+            rf"load version '{load_version}' for kedro_datasets.networkx.graphml_dataset.GraphMLDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_graphml_dataset.save(dummy_graph_data)

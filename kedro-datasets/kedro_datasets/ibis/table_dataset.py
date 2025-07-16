@@ -16,41 +16,43 @@ if TYPE_CHECKING:
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     """`TableDataset` loads/saves data from/to Ibis table expressions.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
-    ```yaml
-    cars:
-      type: ibis.TableDataset
-      table_name: cars
-      connection:
-        backend: duckdb
-        database: company.db
-      save_args:
-        materialized: table
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    motorbikes:
-      type: ibis.TableDataset
-      table_name: motorbikes
-      connection:
-        backend: duckdb
-        database: company.db
-    ```
+        ```yaml
+        cars:
+          type: ibis.TableDataset
+          table_name: cars
+          connection:
+            backend: duckdb
+            database: company.db
+          save_args:
+            materialized: table
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
-    ```python
-    import ibis
-    from kedro_datasets.ibis import TableDataset
+        motorbikes:
+          type: ibis.TableDataset
+          table_name: motorbikes
+          connection:
+            backend: duckdb
+            database: company.db
+        ```
 
-    data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    dataset = TableDataset(
-        table_name="test",
-        connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        save_args={"materialized": "table"},
-    )
-    dataset.save(data)
-    reloaded = dataset.load()
-    assert data.execute().equals(reloaded.execute())
-    ```
+        >>> import ibis
+        >>> from kedro_datasets.ibis import TableDataset
+        >>>
+        >>> data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = TableDataset(
+        ...     table_name="test",
+        ...     connection={"backend": "duckdb", "database": tmp_path / "file.db"},
+        ...     save_args={"materialized": "table"},
+        ... )
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.execute().equals(reloaded.execute())
+
     """
 
     DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {

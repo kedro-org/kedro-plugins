@@ -11,7 +11,7 @@ description = "Kedro-Datasets is where you can find all of Kedro's data connecto
 requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "kedro>=0.19.7",
+    "kedro>=1.0.0rc1, <2.0.0",
     "lazy_loader",
 ]
 dynamic = ["readme", "version"]
@@ -80,13 +80,17 @@ json = ["kedro-datasets[json-jsondataset]"]
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
+matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibdataset]"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
+
+openxml-docxdataset = ["python-docx"]
+openxml = ["kedro-datasets[openxml-docxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
@@ -258,6 +262,7 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
+    "python-docx",
     "redis~=4.1",
     "requests-mock~=1.6",
     "requests~=2.20",

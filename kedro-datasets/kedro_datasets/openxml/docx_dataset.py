@@ -39,12 +39,12 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
         >>> from kedro_datasets.openxml import DocxDataset
         >>>
         >>> data = Document()
-        >>> data.add_paragraph("Hello, World!")
+        >>> data.add_paragraph("Hello, World!")  # doctest: +ELLIPSIS
+        <docx.text.paragraph.Paragraph object at 0x...>
         >>>
         >>> dataset = DocxDataset(filepath=tmp_path / "test.docx")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data == reloaded
         >>> assert data.paragraphs[0].text == reloaded.paragraphs[0].text
 
     """

@@ -9,8 +9,6 @@
           "type": {
             "type": "string",
             "enum": [
-              "partitions.IncrementalDataset",
-              "partitions.PartitionedDataset",
               "api.APIDataset",
               "biosequence.BioSequenceDataset",
               "dask.CSVDataset",
@@ -38,6 +36,8 @@
               "pandas.SQLTableDataset",
               "pandas.SQLQueryDataset",
               "pandas.XMLDataset",
+              "partitions.IncrementalDataset",
+              "partitions.PartitionedDataset",
               "pillow.ImageDataset",
               "pickle.PickleDataset",
               "plotly.HTMLDataset",
@@ -60,106 +60,6 @@
           }
         },
         "allOf": [
-          {
-            "if": {
-              "properties": {
-                "type": {
-                  "const": "IncrementalDataset"
-                }
-              }
-            },
-            "then": {
-              "required": [
-                "path",
-                "dataset"
-              ],
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
-                },
-                "dataset": {
-                  "pattern": ".*",
-                  "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration."
-                },
-                "checkpoint": {
-                  "pattern": "object",
-                  "description": "Optional checkpoint configuration. Accepts a dictionary\nwith the corresponding dataset definition including ``filepath``\n(unlike ``dataset`` argument). Checkpoint configuration is\ndescribed here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#checkpoint-configuration\nCredentials for the checkpoint can be explicitly specified\nin this configuration."
-                },
-                "filepath_arg": {
-                  "type": "string",
-                  "description": "Underlying dataset initializer argument that will\ncontain a path to each corresponding partition file.\nIf unspecified, defaults to \"filepath\"."
-                },
-                "filename_suffix": {
-                  "type": "string",
-                  "description": "If specified, only partitions that end with this\nstring will be processed."
-                },
-                "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#partitioned-dataset-credentials"
-                },
-                "load_args": {
-                  "type": "object",
-                  "description": "Keyword arguments to be passed into ``find()`` method of\nthe filesystem implementation."
-                },
-                "fs_args": {
-                  "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)"
-                }
-              }
-            }
-          },
-          {
-            "if": {
-              "properties": {
-                "type": {
-                  "const": "PartitionedDataset"
-                }
-              }
-            },
-            "then": {
-              "required": [
-                "path",
-                "dataset"
-              ],
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
-                },
-                "dataset": {
-                  "pattern": ".*",
-                  "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration."
-                },
-                "filepath_arg": {
-                  "type": "string",
-                  "description": "Underlying dataset initializer argument that will\ncontain a path to each corresponding partition file.\nIf unspecified, defaults to \"filepath\"."
-                },
-                "filename_suffix": {
-                  "type": "string",
-                  "description": "If specified, only partitions that end with this\nstring will be processed."
-                },
-                "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#partitioned-dataset-credentials"
-                },
-                "load_args": {
-                  "type": "object",
-                  "description": "Keyword arguments to be passed into ``find()`` method of\nthe filesystem implementation."
-                },
-                "fs_args": {
-                  "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)"
-                }
-              }
-            }
-          },
           {
             "if": {
               "properties": {
@@ -1152,6 +1052,106 @@
                 "fs_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                }
+              }
+            }
+          },
+                    {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "IncrementalDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "path",
+                "dataset"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
+                },
+                "dataset": {
+                  "pattern": ".*",
+                  "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration."
+                },
+                "checkpoint": {
+                  "pattern": "object",
+                  "description": "Optional checkpoint configuration. Accepts a dictionary\nwith the corresponding dataset definition including ``filepath``\n(unlike ``dataset`` argument). Checkpoint configuration is\ndescribed here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#checkpoint-configuration\nCredentials for the checkpoint can be explicitly specified\nin this configuration."
+                },
+                "filepath_arg": {
+                  "type": "string",
+                  "description": "Underlying dataset initializer argument that will\ncontain a path to each corresponding partition file.\nIf unspecified, defaults to \"filepath\"."
+                },
+                "filename_suffix": {
+                  "type": "string",
+                  "description": "If specified, only partitions that end with this\nstring will be processed."
+                },
+                "credentials": {
+                  "type": [
+                    "object",
+                    "string"
+                  ],
+                  "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#partitioned-dataset-credentials"
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Keyword arguments to be passed into ``find()`` method of\nthe filesystem implementation."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "PartitionedDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "path",
+                "dataset"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
+                },
+                "dataset": {
+                  "pattern": ".*",
+                  "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration."
+                },
+                "filepath_arg": {
+                  "type": "string",
+                  "description": "Underlying dataset initializer argument that will\ncontain a path to each corresponding partition file.\nIf unspecified, defaults to \"filepath\"."
+                },
+                "filename_suffix": {
+                  "type": "string",
+                  "description": "If specified, only partitions that end with this\nstring will be processed."
+                },
+                "credentials": {
+                  "type": [
+                    "object",
+                    "string"
+                  ],
+                  "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#partitioned-dataset-credentials"
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Keyword arguments to be passed into ``find()`` method of\nthe filesystem implementation."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)"
                 }
               }
             }

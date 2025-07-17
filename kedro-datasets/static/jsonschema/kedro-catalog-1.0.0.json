@@ -23,10 +23,14 @@
               "ibis.TableDataset",
               "json.JSONDataset",
               "matlab.MatlabDataset",
+              "matplotlib.MatplotlibDataset",
               "matplotlib.MatplotlibWriter",
-              "networkx.NetworkXDataset",
+              "networkx.GMLDataset",
+              "networkx.GraphMLDataset",
+              "networkx.JSONDataset",
               "openxlml.DocxDataset",
               "pandas.CSVDataset",
+              "pandas.DeltaTableDataset",
               "pandas.ExcelDataset",
               "pandas.FeatherDataset",
               "pandas.GBQTableDataset",
@@ -562,6 +566,46 @@
           {
             "if": {
               "properties": {
+                "type": { "const": "matplotlib.MatplotlibDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to save Matplotlib objects to, prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for S3FileSystem: {'key': '<id>', 'secret': '<key>'}."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `matplotlib.pyplot.savefig`. See: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "overwrite": {
+                  "type": "boolean",
+                  "description": "If True, any existing image files will be removed. Only relevant when saving multiple Matplotlib objects at once."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
                 "type": {
                   "const": "matplotlib.MatplotlibWriter"
                 }
@@ -597,38 +641,119 @@
           {
             "if": {
               "properties": {
-                "type": {
-                  "const": "networkx.NetworkXDataset"
-                }
+                "type": { "const": "networkx.GMLDataset" }
               }
             },
             "then": {
-              "required": [
-                "filepath"
-              ],
+              "required": ["filepath"],
               "properties": {
                 "filepath": {
                   "type": "string",
-                  "description": "Filepath in POSIX format to the NetworkX graph JSON file."
+                  "description": "Filepath in POSIX format to a GML file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
                 },
                 "load_args": {
                   "type": "object",
-                  "description": "Arguments passed on to ```networkx.node_link_graph``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html"
+                  "description": "Arguments passed to `networkx.read_gml`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.gml.read_gml.html"
                 },
                 "save_args": {
                   "type": "object",
-                  "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
+                  "description": "Arguments passed to `networkx.write_gml`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.gml.write_gml.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
                 },
                 "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
                 },
                 "fs_args": {
                   "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+                  "description": "Extra arguments for the filesystem class constructor and open method. All defaults are preserved, except `mode`, which is set to `rb` when loading and to `wb` when saving. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "networkx.GraphMLDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a GraphML file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `networkx.read_graphml`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.graphml.read_graphml.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `networkx.write_graphml`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.graphml.write_graphml.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. All defaults are preserved, except `mode`, which is set to `rb` when loading and to `wb` when saving. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "networkx.JSONDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a NetworkX graph JSON file prefixed with a protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used. The prefix should be any protocol supported by fsspec. Note: `http(s)` doesn't support versioning."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `networkx.node_link_graph`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_graph.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Arguments passed to `networkx.node_link_data`. See: https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html"
+                },
+                "version": {
+                  "type": ["object", "null"],
+                  "description": "kedro.io.core.Version instance for versioned data."
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor and open method. All defaults are preserved, except `mode`, which is set to `w` when saving. See: https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
             }
@@ -702,6 +827,70 @@
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
                 }
               }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "pandas.DeltaTableDataset" }
+              }
+            },
+            "then": {
+              "properties": {
+                "filepath": {
+                  "type": ["string", "null"],
+                  "description": "Filepath to a Delta Lake table. Supports protocols like s3://, az://, gs://, or local file. If not provided, catalog_type must be set."
+                },
+                "catalog_type": {
+                  "type": ["string", "null"],
+                  "enum": ["AWS", "UNITY", null],
+                  "description": "Type of catalog to use if not loading from filepath. Must be 'AWS' or 'UNITY'."
+                },
+                "catalog_name": {
+                  "type": ["string", "null"],
+                  "description": "Name of the catalog in AWS Glue or Databricks Unity."
+                },
+                "database": {
+                  "type": ["string", "null"],
+                  "description": "Name of the database (schema) in the catalog."
+                },
+                "table": {
+                  "type": ["string", "null"],
+                  "description": "Name of the table in the catalog."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional options for loading, e.g. {'version': 7} to load a specific version."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional options for saving, e.g. {'mode': 'overwrite'}. See: https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables"
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to access the underlying filesystem. E.g. for GCSFileSystem: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor. E.g. {'project': 'my-project'} for GCSFileSystem."
+                },
+                "version": {
+                  "type": ["integer", "null"],
+                  "description": "Version of the Delta table to load. Used in load_args."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              },
+              "oneOf": [
+                {
+                  "required": ["filepath"]
+                },
+                {
+                  "required": ["catalog_type", "database", "table"]
+                }
+              ]
             }
           },
           {

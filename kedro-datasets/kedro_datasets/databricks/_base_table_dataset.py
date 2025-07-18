@@ -247,6 +247,33 @@ class BaseTable:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
 
+    def get_existing_primary_key_columns(self) -> list[str] | None:
+        """Retrieves the existing primary key columns for the table.
+
+        Returns:
+            list[str] | None: List of primary key columns if they exist, otherwise None.
+        """
+        try:
+            constraints = (
+                get_spark()
+                .sql(f"SHOW TBLPROPERTIES {self.full_table_location()}")
+                .filter("key = 'delta.constraints.primaryKey'")
+                .collect()
+            )
+
+            if constraints:
+                primary_key_str = constraints[0]["value"]
+                # Parse the primary key columns from the string (e.g., `["col1", "col2"]`)
+                return [col.strip() for col in primary_key_str.strip("[]").split(",")]
+        except Exception as exc:
+            logger.warning(
+                "Failed to retrieve primary key columns for table '%s': %s",
+                self.full_table_location(),
+                exc,
+            )
+
+        return None
+
     def add_primary_key_constraint(self) -> None:
         """Adds a primary key constraint to the table.
 
@@ -272,15 +299,20 @@ class BaseTable:
         if not self.primary_key:
             raise DatasetError("Primary key is not defined for this table.")
 
-        primary_key = (
+        current_primary_keys = (
             self.primary_key
             if isinstance(self.primary_key, list)
             else [self.primary_key]
         )
+        existing_primary_keys = self.get_existing_primary_key_columns()
+
+        # Do nothing if the constraint already exists
+        if current_primary_keys == existing_primary_keys:
+            return
 
         try:
             # Ensure the primary key column is not null
-            for col in primary_key:
+            for col in current_primary_keys:
                 get_spark().sql(
                     f"ALTER TABLE {self.full_table_location()} "
                     f"ALTER COLUMN `{col}` SET NOT NULL"
@@ -291,7 +323,7 @@ class BaseTable:
                     self.full_table_location(),
                 )
 
-            primary_key_columns = ", ".join(f"`{col}`" for col in primary_key)
+            primary_key_columns = ", ".join(f"`{col}`" for col in current_primary_keys)
 
             # Add constraint
             get_spark().sql(
@@ -509,7 +541,6 @@ class BaseTableDataset(AbstractVersionedDataset):
         if method:
             method(data)
 
-        # [TODO: Confirm on where to make this call]
         self._table.add_primary_key_constraint()
 
     def _save_append(self, data: DataFrame) -> None:

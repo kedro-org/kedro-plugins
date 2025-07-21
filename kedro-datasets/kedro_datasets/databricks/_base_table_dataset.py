@@ -18,6 +18,7 @@ from kedro.io.core import (
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
+from pyspark.sql.functions import col
 
 from kedro_datasets._utils.spark_utils import get_spark
 
@@ -41,6 +42,7 @@ class BaseTable:
     _VALID_FORMATS: ClassVar[list[str]] = field(
         default=["delta", "parquet", "csv", "json", "orc", "avro", "text"]
     )
+    _PK_CONSTRAINT_NAME = "pk_constraint_kedro"
 
     database: str
     catalog: str | None
@@ -154,6 +156,7 @@ class BaseTable:
                     f"`primary_key` must be provided for"
                     f"`write_mode` {self.write_mode}"
                 )
+            return
 
         table_schema = self.schema()
         if table_schema is None:
@@ -248,31 +251,33 @@ class BaseTable:
             return False
 
     def get_existing_primary_key_columns(self) -> list[str] | None:
-        """Retrieves the existing primary key columns for the table.
+        """
+        Retrieve primary key columns for a Delta table managed by Unity Catalog
+        using Databricks system.information_schema tables using the Spark API.
 
         Returns:
-            list[str] | None: List of primary key columns if they exist, otherwise None.
+            list[str] | None: List of PK columns or None if not found.
+
+        Raises:
+            DatasetError: If retrieving of primary key column names fail.
         """
         try:
-            constraints = (
+            columns_df = (
                 get_spark()
-                .sql(f"SHOW TBLPROPERTIES {self.full_table_location()}")
-                .filter("key = 'delta.constraints.primaryKey'")
-                .collect()
+                .table("system.information_schema.key_column_usage")
+                .filter(
+                    (col("table_catalog") == self.catalog)
+                    & (col("table_schema") == self.database)
+                    & (col("table_name") == self.table)
+                    & (col("constraint_name") == self._PK_CONSTRAINT_NAME)
+                )
+                .orderBy("ordinal_position")
+                .select("column_name")
             )
 
-            if constraints:
-                primary_key_str = constraints[0]["value"]
-                # Parse the primary key columns from the string (e.g., `["col1", "col2"]`)
-                return [col.strip() for col in primary_key_str.strip("[]").split(",")]
+            return [row["column_name"] for row in columns_df.collect()]
         except Exception as exc:
-            logger.warning(
-                "Failed to retrieve primary key columns for table '%s': %s",
-                self.full_table_location(),
-                exc,
-            )
-
-        return None
+            raise DatasetError(f"Failed to retrieve primary key columns: {exc}")
 
     def add_primary_key_constraint(self) -> None:
         """Adds a primary key constraint to the table.
@@ -328,7 +333,7 @@ class BaseTable:
             # Add constraint
             get_spark().sql(
                 f"ALTER TABLE {self.full_table_location()} "
-                f"ADD CONSTRAINT pk_constraint PRIMARY KEY ({primary_key_columns})"
+                f"ADD CONSTRAINT {self._PK_CONSTRAINT_NAME} PRIMARY KEY ({primary_key_columns})"
             )
             logger.info(
                 "Primary key constraint added to table '%s' on columns: %s",

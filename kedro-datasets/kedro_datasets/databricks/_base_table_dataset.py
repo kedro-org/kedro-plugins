@@ -616,6 +616,8 @@ class BaseTableDataset(AbstractVersionedDataset):
             update_data (DataFrame): The Spark dataframe to upsert.
         """
         if self._exists():
+
+            logger.warning("Table location:: %s", self._table.full_table_location())
             base_data = get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
@@ -643,8 +645,11 @@ class BaseTableDataset(AbstractVersionedDataset):
             get_spark().conf.set("whereExpr", where_expr)
             upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+
+            logger.warning("SQL %s", upsert_sql)
             get_spark().sql(upsert_sql)
         else:
+            logger.warning("Somehow to append:: %s", update_data)
             self._save_append(update_data)
 
     def _describe(self) -> dict[str, str | list | None]:

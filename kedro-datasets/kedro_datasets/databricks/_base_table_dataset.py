@@ -298,22 +298,12 @@ class BaseTable:
             ... )
             >>> table.add_primary_key_constraint()
         """
-        if not self.exists():
-            raise DatasetError(f"Table '{self.full_table_location()}' does not exist.")
-
-        if not self.primary_key:
-            raise DatasetError("Primary key is not defined for this table.")
 
         current_primary_keys = (
             self.primary_key
             if isinstance(self.primary_key, list)
             else [self.primary_key]
         )
-        existing_primary_keys = self.get_existing_primary_key_columns()
-
-        # Do nothing if the constraint already exists
-        if current_primary_keys == existing_primary_keys:
-            return
 
         try:
             # Ensure the primary key column is not null
@@ -546,7 +536,31 @@ class BaseTableDataset(AbstractVersionedDataset):
         if method:
             method(data)
 
-        self._table.add_primary_key_constraint()
+        # Check if the primary key constraint already exists
+        existing_primary_keys = self._table.get_existing_primary_key_columns()
+        new_primary_keys = (
+            [self._table.primary_key]
+            if isinstance(self._table.primary_key, str)
+            else self._table.primary_key
+        )
+
+        # Add the primary key constraint only if it doesn't already exist or is different
+        if (
+            new_primary_keys
+            and existing_primary_keys
+            and existing_primary_keys != new_primary_keys
+        ):
+            try:
+                logger.info("NEW %s", new_primary_keys)
+                logger.info("EXISTING %s", existing_primary_keys)
+                logger.warning("HERE everytime")
+                self._table.add_primary_key_constraint(new_primary_keys)
+            except Exception as exc:
+                logger.warning(
+                    "Failed to add primary key constraint for table '%s': %s",
+                    self._table.full_table_location(),
+                    exc,
+                )
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

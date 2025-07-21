@@ -532,10 +532,6 @@ class BaseTableDataset(AbstractVersionedDataset):
         elif self._table.dataframe_type == "pandas":
             data = get_spark().createDataFrame(data)
 
-        method = getattr(self, f"_save_{self._table.write_mode}", None)
-        if method:
-            method(data)
-
         # Check if the primary key constraint already exists
         existing_primary_keys = self._table.get_existing_primary_key_columns()
         new_primary_keys = (
@@ -543,6 +539,15 @@ class BaseTableDataset(AbstractVersionedDataset):
             if isinstance(self._table.primary_key, str)
             else self._table.primary_key
         )
+
+        logger.warning("Catalog %s", self._table.catalog)
+        logger.warning("Database %s", self._table.database)
+        logger.warning("Table %s", self._table.table)
+        logger.warning("Mode %s", self._table.write_mode)
+
+        method = getattr(self, f"_save_{self._table.write_mode}", None)
+        if method:
+            method(data)
 
         # Add the primary key constraint only if it doesn't already exist or is different
         if new_primary_keys and existing_primary_keys != new_primary_keys:

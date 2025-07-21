@@ -545,11 +545,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         )
 
         # Add the primary key constraint only if it doesn't already exist or is different
-        if (
-            new_primary_keys
-            and existing_primary_keys
-            and existing_primary_keys != new_primary_keys
-        ):
+        if new_primary_keys and existing_primary_keys != new_primary_keys:
             try:
                 logger.info("NEW %s", new_primary_keys)
                 logger.info("EXISTING %s", existing_primary_keys)

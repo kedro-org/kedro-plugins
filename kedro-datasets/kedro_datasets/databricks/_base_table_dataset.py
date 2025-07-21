@@ -547,10 +547,10 @@ class BaseTableDataset(AbstractVersionedDataset):
         # Add the primary key constraint only if it doesn't already exist or is different
         if new_primary_keys and existing_primary_keys != new_primary_keys:
             try:
-                logger.info("NEW %s", new_primary_keys)
-                logger.info("EXISTING %s", existing_primary_keys)
+                logger.warning("NEW %s", new_primary_keys)
+                logger.warning("EXISTING %s", existing_primary_keys)
                 logger.warning("HERE everytime")
-                self._table.add_primary_key_constraint(new_primary_keys)
+                self._table.add_primary_key_constraint()
             except Exception as exc:
                 logger.warning(
                     "Failed to add primary key constraint for table '%s': %s",

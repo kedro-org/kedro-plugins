@@ -550,7 +550,9 @@ class BaseTableDataset(AbstractVersionedDataset):
             method(data)
 
         # Add the primary key constraint only if it doesn't already exist or is different
-        if new_primary_keys and existing_primary_keys != new_primary_keys:
+        if self._table.write_mode == "overwrite" or (
+            new_primary_keys and existing_primary_keys != new_primary_keys
+        ):
             try:
                 logger.warning("NEW %s", new_primary_keys)
                 logger.warning("EXISTING %s", existing_primary_keys)
@@ -641,13 +643,15 @@ class BaseTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            get_spark().conf.set("fullTableAddress", self._table.full_table_location())
-            get_spark().conf.set("whereExpr", where_expr)
-            upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
-                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+            base_data.alias("base").merge(
+                update_data.alias("update"), where_expr
+            ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
 
-            logger.warning("SQL %s", upsert_sql)
-            get_spark().sql(upsert_sql)
+            # upsert_sql = f"""MERGE INTO {self._table.full_table_location()} base USING update ON {where_expr}
+            #     WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+
+            # logger.warning("SQL %s", upsert_sql)
+            # get_spark().sql(upsert_sql)
         else:
             logger.warning("Somehow to append:: %s", update_data)
             self._save_append(update_data)

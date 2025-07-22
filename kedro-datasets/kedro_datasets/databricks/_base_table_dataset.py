@@ -161,6 +161,9 @@ class BaseTable:
         table_schema = self.schema()
         if table_schema is None:
             try:
+                if not self.exists():
+                    return
+
                 table_schema = get_spark().table(self.full_table_location()).schema
             except Exception as exc:
                 raise DatasetError(

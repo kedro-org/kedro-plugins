@@ -58,6 +58,9 @@ class HFDataset(AbstractDataset):
     def _describe(self) -> dict[str, Any]:
         api = HfApi()
         dataset_info = list(api.list_datasets(search=self.dataset_name))[0]
+        # force tests to run
+        if self:
+            pass
         return {
             "dataset_name": self.dataset_name,
             "dataset_tags": dataset_info.tags,

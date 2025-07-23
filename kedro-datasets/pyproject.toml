@@ -46,9 +46,9 @@ geopandas = ["kedro-datasets[geopandas-genericdataset]"]
 holoviews-holoviewswriter = ["holoviews>=1.13.0"]
 holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
 
-huggingface-hfdataset = ["datasets", "huggingface_hub"]
-huggingface-hftransformerpipelinedataset = ["transformers"]
-huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
+huggingface-hfdataset = ["datasets", "huggingface_hub", "pyarrow<=14.0.2"]
+huggingface-hftransformerpipelinedataset = ["transformers", "pyarrow<=14.0.2"]
+huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]", "pyarrow<=14.0.2"]
 
 ibis-athena = ["ibis-framework[athena]"]
 ibis-bigquery = ["ibis-framework[bigquery]"]

@@ -46,9 +46,9 @@ geopandas = ["kedro-datasets[geopandas-genericdataset]"]
 holoviews-holoviewswriter = ["holoviews>=1.13.0"]
 holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
 
-huggingface-hfdataset = ["datasets", "huggingface_hub", "pyarrow<=14.0.2"]
-huggingface-hftransformerpipelinedataset = ["transformers", "pyarrow<=14.0.2"]
-huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]", "pyarrow<=14.0.2"]
+huggingface-hfdataset = ["datasets", "huggingface_hub"]
+huggingface-hftransformerpipelinedataset = ["transformers"]
+huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
 
 ibis-athena = ["ibis-framework[athena]"]
 ibis-bigquery = ["ibis-framework[bigquery]"]
@@ -254,7 +254,7 @@ test = [
     "plotly>=4.8.0, <6.0",
     "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
-    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyarrow>=7.0, <=14.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
     "pyspark>=3.0; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",

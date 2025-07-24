@@ -142,7 +142,7 @@ def project_pipelines() -> dict[str, Pipeline]:
 class TestKedroTelemetryHook:
     def test_before_command_run(self, mocker, fake_metadata, caplog):
         mocker.patch(
-            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=None
         )
         mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")

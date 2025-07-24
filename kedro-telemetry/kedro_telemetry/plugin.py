@@ -171,7 +171,9 @@ class KedroTelemetryHook:
 
         project_path = project_metadata.project_path if project_metadata else None
 
-        self._consent = _check_for_telemetry_consent(project_path)
+        consent = _check_for_telemetry_consent(project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         if not self._consent:
             return
 
@@ -200,7 +202,9 @@ class KedroTelemetryHook:
     def after_context_created(self, context):
         """Hook implementation to read metadata"""
 
-        self._consent = _check_for_telemetry_consent(context.project_path)
+        consent = _check_for_telemetry_consent(context.project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         self._project_path = context.project_path
 
     @hook_impl
@@ -230,13 +234,16 @@ class KedroTelemetryHook:
     def _send_telemetry_heap_event(self, event_name: str):
         """Hook implementation to send command run data to Heap"""
 
-        logger.info(
-            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
-            "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
-            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
-        )
+        if self._consent_is_implicit:
+            logger.info(
+                "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+                "No personal data or IP addresses are stored on our side. "
+                "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+                "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+                "If you don't want to see this message again, "
+                "create a `.telemetry` file in the current working directory with the contents `consent: true`. "
+                "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            )
 
         try:
             _send_heap_event(
@@ -350,7 +357,7 @@ def _send_heap_event(
         )
 
 
-def _check_for_telemetry_consent(project_path: Path | None) -> bool:
+def _check_for_telemetry_consent(project_path: Path | None) -> bool | None:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
@@ -367,7 +374,7 @@ def _check_for_telemetry_consent(project_path: Path | None) -> bool:
                 telemetry = yaml.safe_load(telemetry_file)
                 if _is_valid_syntax(telemetry):
                     return telemetry["consent"]
-    return True
+    return None
 
 
 def _is_valid_syntax(telemetry: Any) -> bool:

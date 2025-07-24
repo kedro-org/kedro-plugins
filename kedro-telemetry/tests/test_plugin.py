@@ -192,6 +192,8 @@ class TestKedroTelemetryHook:
             "No personal data or IP addresses are stored on our side. "
             "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+            "If you don't want to see this message again, "
+            "create a `.telemetry` file in the current working directory with the contents `consent: true`. "
             "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
             in record.message
             for record in caplog.records
@@ -425,7 +427,7 @@ class TestKedroTelemetryHook:
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({}, telemetry_file)
 
-        assert _check_for_telemetry_consent(fake_metadata.project_path)
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
     def test_check_for_telemetry_consent_file_no_consent_field(
         self, mocker, fake_metadata
@@ -435,14 +437,14 @@ class TestKedroTelemetryHook:
         with open(telemetry_file_path, "w", encoding="utf8") as telemetry_file:
             yaml.dump({"nonsense": "bla"}, telemetry_file)
 
-        assert _check_for_telemetry_consent(fake_metadata.project_path)
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
     def test_check_for_telemetry_consent_file_invalid_yaml(self, mocker, fake_metadata):
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         telemetry_file_path.write_text("invalid_ yaml")
 
-        assert _check_for_telemetry_consent(fake_metadata.project_path)
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
     @mark.parametrize(
         "env_vars,result",

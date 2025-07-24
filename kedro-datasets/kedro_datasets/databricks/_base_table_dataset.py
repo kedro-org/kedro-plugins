@@ -293,10 +293,10 @@ class BaseTable:
         feature to be enabled in your environment.
 
         Args:
-            primary_keys: List of column names to be added as primary key for the table
+            primary_keys: List of column names to be added as primary key for the table.
 
         Raises:
-            DatasetError: If the table does not exist or if the primary key is not defined.
+            DatasetError: If adding of primary key column names fail.
 
         Example:
             >>> table = BaseTable(

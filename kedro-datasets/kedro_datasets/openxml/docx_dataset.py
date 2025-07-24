@@ -24,29 +24,29 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
     """``DocxDataset`` loads/saves data from/to a .docx file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the .docx file.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
-    cats:
-        type: openxml.DocxDataset
-        filepath: soya.docx
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        ```yaml
+        cats:
+          type: openxml.DocxDataset
+          filepath: soya.docx
+        ```
 
-    ```python
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    from docx import Document
-    from kedro_datasets.openxml import DocxDataset
+        >>> from docx import Document
+        >>> from kedro_datasets.openxml import DocxDataset
+        >>>
+        >>> data = Document()
+        >>> data.add_paragraph("Hello, World!")  # doctest: +ELLIPSIS
+        <docx.text.paragraph.Paragraph object at 0x...>
+        >>>
+        >>> dataset = DocxDataset(filepath=tmp_path / "test.docx")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.paragraphs[0].text == reloaded.paragraphs[0].text
 
-    data = Document()
-    data.add_paragraph("Hello, World !")
-    dataset = DocxDataset(filepath=tmp_path / "test.docx")
-    dataset.save(data)
-
-    reloaded = dataset.load()
-    assert data == reloaded
-    assert data.paragraphs[0].text == reloaded.paragraphs[0].text
-    ```
     """
 
     DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}

@@ -282,12 +282,15 @@ class BaseTable:
         except Exception as exc:
             raise DatasetError(f"Failed to retrieve primary key columns: {exc}")
 
-    def add_primary_key_constraint(self) -> None:
+    def add_primary_key_constraint(self, primary_keys: list[str]) -> None:
         """Adds a primary key constraint to the table.
 
         This method uses Delta Lake's `ALTER TABLE` command to add a primary key
         constraint to the table. Note that this requires Delta Lake's constraints
         feature to be enabled in your environment.
+
+        Args:
+            primary_keys: List of column names to be added as primary key for the table
 
         Raises:
             DatasetError: If the table does not exist or if the primary key is not defined.
@@ -299,18 +302,11 @@ class BaseTable:
             ...     primary_key="id",
             ...     write_mode="upsert",
             ... )
-            >>> table.add_primary_key_constraint()
+            >>> table.add_primary_key_constraint(["id"])
         """
-
-        current_primary_keys = (
-            self.primary_key
-            if isinstance(self.primary_key, list)
-            else [self.primary_key]
-        )
-
         try:
-            # Ensure the primary key column is not null
-            for pk_column in current_primary_keys:
+            # Ensure the primary key column is set to not null
+            for pk_column in primary_keys:
                 get_spark().sql(
                     f"ALTER TABLE {self.full_table_location()} "
                     f"ALTER COLUMN `{pk_column}` SET NOT NULL"
@@ -321,7 +317,7 @@ class BaseTable:
                     self.full_table_location(),
                 )
 
-            primary_key_columns = ", ".join(f"`{col}`" for col in current_primary_keys)
+            primary_key_columns = ", ".join(f"`{col}`" for col in primary_keys)
 
             # Add constraint
             get_spark().sql(
@@ -536,7 +532,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             data = get_spark().createDataFrame(data)
 
         # Check if the primary key constraint already exists
-        existing_primary_keys = self._table.get_existing_primary_key_columns()
+        existing_primary_keys = self._table.get_existing_primary_key_columns() or []
         new_primary_keys = (
             [self._table.primary_key]
             if isinstance(self._table.primary_key, str)
@@ -548,11 +544,12 @@ class BaseTableDataset(AbstractVersionedDataset):
             method(data)
 
         # Add the primary key constraint only if it is overwrite or is different than existing
-        if self._table.write_mode == "overwrite" or (
-            new_primary_keys and existing_primary_keys != new_primary_keys
+        if new_primary_keys and (
+            self._table.write_mode == "overwrite"
+            or set(existing_primary_keys) != set(new_primary_keys)
         ):
             try:
-                self._table.add_primary_key_constraint()
+                self._table.add_primary_key_constraint(new_primary_keys)
             except Exception as exc:
                 logger.warning(
                     "Failed to add primary key constraint for table '%s': %s",

@@ -16,9 +16,9 @@ from kedro.io.core import (
     VersionNotFoundError,
 )
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col as col_func
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
-from pyspark.sql.functions import col as col_func
 
 from kedro_datasets._utils.spark_utils import get_spark
 
@@ -195,7 +195,7 @@ class BaseTable:
             )
             if null_count > 0:
                 raise DatasetError(
-                    f"Primary key column '{col}' contains {null_count} null value(s). "
+                    f"Primary key column '{pk_column}' contains {null_count} null value(s). "
                     "Primary key columns must not contain null values."
                 )
 

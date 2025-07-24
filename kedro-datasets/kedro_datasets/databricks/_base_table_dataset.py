@@ -18,7 +18,7 @@ from kedro.io.core import (
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col as col_func
 
 from kedro_datasets._utils.spark_utils import get_spark
 
@@ -186,11 +186,11 @@ class BaseTable:
             )
 
         # Check if primary key columns contain null values
-        for col in primary_keys:
+        for pk_column in primary_keys:
             null_count = (
                 get_spark()
                 .table(self.full_table_location())
-                .filter(f"{col} IS NULL")
+                .filter(f"{pk_column} IS NULL")
                 .count()
             )
             if null_count > 0:
@@ -269,10 +269,10 @@ class BaseTable:
                 get_spark()
                 .table("system.information_schema.key_column_usage")
                 .filter(
-                    (col("table_catalog") == self.catalog)
-                    & (col("table_schema") == self.database)
-                    & (col("table_name") == self.table)
-                    & (col("constraint_name") == self._PK_CONSTRAINT_NAME)
+                    (col_func("table_catalog") == self.catalog)
+                    & (col_func("table_schema") == self.database)
+                    & (col_func("table_name") == self.table)
+                    & (col_func("constraint_name") == self._PK_CONSTRAINT_NAME)
                 )
                 .orderBy("ordinal_position")
                 .select("column_name")
@@ -310,14 +310,14 @@ class BaseTable:
 
         try:
             # Ensure the primary key column is not null
-            for col in current_primary_keys:
+            for pk_column in current_primary_keys:
                 get_spark().sql(
                     f"ALTER TABLE {self.full_table_location()} "
-                    f"ALTER COLUMN `{col}` SET NOT NULL"
+                    f"ALTER COLUMN `{pk_column}` SET NOT NULL"
                 )
                 logger.info(
                     "Column '%s' set to NOT NULL in table '%s'.",
-                    col,
+                    pk_column,
                     self.full_table_location(),
                 )
 
@@ -543,23 +543,15 @@ class BaseTableDataset(AbstractVersionedDataset):
             else self._table.primary_key
         )
 
-        logger.warning("Catalog %s", self._table.catalog)
-        logger.warning("Database %s", self._table.database)
-        logger.warning("Table %s", self._table.table)
-        logger.warning("Mode %s", self._table.write_mode)
-
         method = getattr(self, f"_save_{self._table.write_mode}", None)
         if method:
             method(data)
 
-        # Add the primary key constraint only if it doesn't already exist or is different
+        # Add the primary key constraint only if it is overwrite or is different than existing
         if self._table.write_mode == "overwrite" or (
             new_primary_keys and existing_primary_keys != new_primary_keys
         ):
             try:
-                logger.warning("NEW %s", new_primary_keys)
-                logger.warning("EXISTING %s", existing_primary_keys)
-                logger.warning("HERE everytime")
                 self._table.add_primary_key_constraint()
             except Exception as exc:
                 logger.warning(
@@ -621,8 +613,6 @@ class BaseTableDataset(AbstractVersionedDataset):
             update_data (DataFrame): The Spark dataframe to upsert.
         """
         if self._exists():
-
-            logger.warning("Table location:: %s", self._table.full_table_location())
             base_data = get_spark().table(self._table.full_table_location())
             base_columns = base_data.columns
             update_columns = update_data.columns
@@ -646,17 +636,12 @@ class BaseTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            base_data.alias("base").merge(
-                update_data.alias("update"), where_expr
-            ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
-
-            # upsert_sql = f"""MERGE INTO {self._table.full_table_location()} base USING update ON {where_expr}
-            #     WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
-
-            # logger.warning("SQL %s", upsert_sql)
-            # get_spark().sql(upsert_sql)
+            get_spark().conf.set("fullTableAddress", self._table.full_table_location())
+            get_spark().conf.set("whereExpr", where_expr)
+            upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
+                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+            get_spark().sql(upsert_sql)
         else:
-            logger.warning("Somehow to append:: %s", update_data)
             self._save_append(update_data)
 
     def _describe(self) -> dict[str, str | list | None]:

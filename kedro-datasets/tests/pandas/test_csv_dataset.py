@@ -45,6 +45,10 @@ def versioned_csv_dataset(filepath_csv, load_version, save_version):
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
+@pytest.fixture
+def dummy_dataframe_with_bool():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3-bool": [True, False]})
+
 
 @pytest.fixture
 def partitioned_data_pandas():
@@ -192,6 +196,20 @@ class TestCSVDataset:
         assert (
             inspect.signature(csv_dataset.preview).return_annotation == "TablePreview"
         )
+
+    def test_preview_bool_col(self, csv_dataset, dummy_dataframe):
+        """Test preview returns string values for boolean columns."""
+        expected =  {
+            "index": [0, 1],
+            "columns": ["col1", "col2", "col3"],
+            "data": [[1, 4, "True"], [2, 5, "True"]],
+        }
+
+        dummy_dataframe.loc["col3"] = True
+        csv_dataset.save(dummy_dataframe)
+        previewed = csv_dataset.preview()
+        assert previewed == expected
+
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""

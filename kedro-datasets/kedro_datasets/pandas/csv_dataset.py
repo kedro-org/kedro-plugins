@@ -215,4 +215,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         data = dataset_copy.load()
 
+        # Convert boolean columns to strings for rendering.
+        bool_cols = data.select_dtypes(include="bool").columns
+        data[bool_cols] = data[bool_cols].astype(str)
+
         return data.to_dict(orient="split")

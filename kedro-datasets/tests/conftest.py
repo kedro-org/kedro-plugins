@@ -9,7 +9,6 @@ from collections.abc import Callable
 from unittest.mock import MagicMock
 
 import aiobotocore.awsrequest
-import aiobotocore.endpoint
 import aiohttp
 import aiohttp.client_reqrep
 import aiohttp.typedefs
@@ -65,6 +64,7 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
 
 @fixture(scope="session", autouse=True)
 def patch_aiobotocore():
+    import aiobotocore.endpoint
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
             http_response: botocore.awsrequest.AWSResponse,

@@ -74,7 +74,7 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
 
 @fixture(scope="session", autouse=True)
 def patch_aiobotocore():
-    import aiobotocore.endpoint
+    import aiobotocore.endpoint  # noqa: PLC0415
 
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(

@@ -268,6 +268,17 @@ class BaseTable:
             DatasetError: If retrieving of primary key column names fail.
         """
         try:
+            # Check if running in Unity Catalog
+            catalog_impl = get_spark().conf.get(
+                "spark.sql.catalogImplementation", "hive"
+            )
+            if catalog_impl == "hive":
+                # Fallback for non-Unity Catalog environments
+                logger.warning(
+                    "Unity Catalog is not available. Skipping primary key retrieval."
+                )
+                return None
+
             columns_df = (
                 get_spark()
                 .table("system.information_schema.key_column_usage")

@@ -16,6 +16,7 @@ from kedro.io.core import (
     VersionNotFoundError,
 )
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col as col_func
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
@@ -41,6 +42,7 @@ class BaseTable:
     _VALID_FORMATS: ClassVar[list[str]] = field(
         default=["delta", "parquet", "csv", "json", "orc", "avro", "text"]
     )
+    _PK_CONSTRAINT_NAME = "pk_constraint_kedro"
 
     database: str
     catalog: str | None
@@ -138,14 +140,66 @@ class BaseTable:
     def _validate_primary_key(self):
         """Validates the primary key of the table.
 
+        Ensures that:
+        1. A primary key is provided when `write_mode` is "upsert".
+        2. The primary key column(s) exist in the table schema.
+        3. The primary key column(s) do not contain null values.
+
         Raises:
-            DatasetError: If no `primary_key` is specified.
+            DatasetError: If no `primary_key` is specified, if the primary key
+            column(s) do not exist in the table schema, or if the primary key
+            column(s) contain null values.
         """
         if self.primary_key is None or len(self.primary_key) == 0:
             if self.write_mode == "upsert":
                 raise DatasetError(
                     f"`primary_key` must be provided for"
                     f"`write_mode` {self.write_mode}"
+                )
+            return
+
+        if not self.exists():
+            return
+
+        try:
+            table_schema = (
+                self.schema() or get_spark().table(self.full_table_location()).schema
+            )
+        except Exception as exc:
+            raise DatasetError(
+                f"Unable to retrieve schema for table '{self.full_table_location()}': {exc}"
+            )
+
+        if not table_schema:
+            return
+
+        primary_keys = (
+            [self.primary_key]
+            if isinstance(self.primary_key, str)
+            else self.primary_key
+        )
+
+        # Check if primary key columns exist in the schema
+        missing_columns = [
+            column for column in primary_keys if column not in table_schema.fieldNames()
+        ]
+        if missing_columns:
+            raise DatasetError(
+                f"Primary key column(s) {missing_columns} do not exist in the table schema."
+            )
+
+        # Check if primary key columns contain null values
+        for pk_column in primary_keys:
+            null_count = (
+                get_spark()
+                .table(self.full_table_location())
+                .filter(f"{pk_column} IS NULL")
+                .count()
+            )
+            if null_count > 0:
+                raise DatasetError(
+                    f"Primary key column '{pk_column}' contains {null_count} null value(s). "
+                    "Primary key columns must not contain null values."
                 )
 
     def full_table_location(self) -> str | None:
@@ -201,6 +255,89 @@ class BaseTable:
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+
+    def get_existing_primary_key_columns(self) -> list[str] | None:
+        """
+        Retrieve primary key columns for a Delta table managed by Unity Catalog
+        using Databricks information_schema tables using the Spark API.
+
+        Returns:
+            list[str] | None: List of PK columns or None if not found.
+
+        Raises:
+            DatasetError: If retrieving of primary key column names fail.
+        """
+        try:
+            # Check if running in Unity Catalog
+            catalog_impl = get_spark().conf.get(
+                "spark.sql.catalogImplementation", "hive"
+            )
+            if catalog_impl == "hive":
+                # Fallback for non-Unity Catalog environments
+                logger.warning(
+                    "Unity Catalog is not available. Skipping primary key retrieval."
+                )
+                return None
+
+            columns_df = (
+                get_spark()
+                .table("system.information_schema.key_column_usage")
+                .filter(
+                    (col_func("table_catalog") == self.catalog)
+                    & (col_func("table_schema") == self.database)
+                    & (col_func("table_name") == self.table)
+                    & (col_func("constraint_name") == self._PK_CONSTRAINT_NAME)
+                )
+                .orderBy("ordinal_position")
+                .select("column_name")
+            )
+
+            return [row["column_name"] for row in columns_df.collect()]
+        except Exception as exc:
+            raise DatasetError(f"Failed to retrieve primary key columns: {exc}")
+
+    def add_primary_key_constraint(self, primary_keys: list[str]) -> None:
+        """Adds a primary key constraint to the table.
+
+        This method uses Delta Lake's `ALTER TABLE` command to add a primary key
+        constraint to the table. Note that this requires Delta Lake's constraints
+        feature to be enabled in your environment.
+
+        Args:
+            primary_keys: List of column names to be added as primary key for the table.
+
+        Raises:
+            DatasetError: If adding of primary key column names fail.
+        """
+        try:
+            # Ensure the primary key column is set to not null
+            for pk_column in primary_keys:
+                get_spark().sql(
+                    f"ALTER TABLE {self.full_table_location()} "
+                    f"ALTER COLUMN `{pk_column}` SET NOT NULL"
+                )
+                logger.info(
+                    "Column '%s' set to NOT NULL in table '%s'.",
+                    pk_column,
+                    self.full_table_location(),
+                )
+
+            primary_key_columns = ", ".join(f"`{col}`" for col in primary_keys)
+
+            # Add constraint
+            get_spark().sql(
+                f"ALTER TABLE {self.full_table_location()} "
+                f"ADD CONSTRAINT {self._PK_CONSTRAINT_NAME} PRIMARY KEY ({primary_key_columns})"
+            )
+            logger.info(
+                "Primary key constraint added to table '%s' on columns: %s",
+                self.full_table_location(),
+                primary_key_columns,
+            )
+        except Exception as exc:
+            raise DatasetError(
+                f"Failed to add primary key constraint to table '{self.full_table_location()}': {exc}"
+            )
 
 
 class BaseTableDataset(AbstractVersionedDataset):
@@ -399,9 +536,31 @@ class BaseTableDataset(AbstractVersionedDataset):
         elif self._table.dataframe_type == "pandas":
             data = get_spark().createDataFrame(data)
 
+        # Check if the primary key constraint already exists
+        existing_primary_keys = self._table.get_existing_primary_key_columns() or []
+        new_primary_keys = (
+            [self._table.primary_key]
+            if isinstance(self._table.primary_key, str)
+            else self._table.primary_key
+        )
+
         method = getattr(self, f"_save_{self._table.write_mode}", None)
         if method:
             method(data)
+
+        # Add the primary key constraint only if it is overwrite or is different than existing
+        if new_primary_keys and (
+            self._table.write_mode == "overwrite"
+            or set(existing_primary_keys) != set(new_primary_keys)
+        ):
+            try:
+                self._table.add_primary_key_constraint(new_primary_keys)
+            except Exception as exc:
+                logger.warning(
+                    "Failed to add primary key constraint for table '%s': %s",
+                    self._table.full_table_location(),
+                    exc,
+                )
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

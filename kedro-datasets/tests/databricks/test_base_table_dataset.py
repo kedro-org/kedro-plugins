@@ -7,6 +7,14 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from kedro_datasets.databricks._base_table_dataset import BaseTableDataset
 
 
+@pytest.fixture(autouse=True)
+def mock_get_existing_primary_key_columns(mocker):
+    mocker.patch(
+        "kedro_datasets.databricks._base_table_dataset.BaseTable.get_existing_primary_key_columns",
+        return_value=[],
+    )
+
+
 class TestBaseTableDataset:
     def test_full_table(self):
         unity_ds = BaseTableDataset(catalog="test", database="test", table="test")

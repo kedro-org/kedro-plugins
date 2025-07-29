@@ -108,7 +108,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```
     db_credentials:
-        con: postgresql://scott:tiger@localhost/test
+        con: postgresql://scott:tiger@localhost/test  # pragma: allowlist secret
         pool_size: 10 # additional parameters
     ```
 

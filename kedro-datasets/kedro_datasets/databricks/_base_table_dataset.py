@@ -259,7 +259,7 @@ class BaseTable:
     def get_existing_primary_key_columns(self) -> list[str] | None:
         """
         Retrieve primary key columns for a Delta table managed by Unity Catalog
-        using Databricks system.information_schema tables using the Spark API.
+        using Databricks information_schema tables using the Spark API.
 
         Returns:
             list[str] | None: List of PK columns or None if not found.
@@ -297,15 +297,6 @@ class BaseTable:
 
         Raises:
             DatasetError: If adding of primary key column names fail.
-
-        Example:
-            >>> table = BaseTable(
-            ...     database="default",
-            ...     table="example_table",
-            ...     primary_key="id",
-            ...     write_mode="upsert",
-            ... )
-            >>> table.add_primary_key_constraint(["id"])
         """
         try:
             # Ensure the primary key column is set to not null

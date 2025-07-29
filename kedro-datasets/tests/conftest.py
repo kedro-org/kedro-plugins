@@ -39,15 +39,14 @@ class MockAWSResponse(aiobotocore.awsrequest.AioAWSResponse):
     def headers(self) -> dict:
         # This is accessed directly in some cases
         return self._moto_response.headers
-    
+
     # adapt async methods to use moto's response
     async def _content_prop(self) -> bytes:
         return self._moto_response.content
 
     async def _text_prop(self) -> str:
         return self._moto_response.text
-    
-    
+
 
 class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
     def __init__(self, response: botocore.awsrequest.AWSResponse):
@@ -76,6 +75,7 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
 @fixture(scope="session", autouse=True)
 def patch_aiobotocore():
     import aiobotocore.endpoint
+
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
             http_response: botocore.awsrequest.AWSResponse,

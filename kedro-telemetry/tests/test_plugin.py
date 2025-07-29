@@ -190,10 +190,9 @@ class TestKedroTelemetryHook:
         assert any(
             "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
             "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "If you don't want to see this message again, "
-            "create a `.telemetry` file in the current working directory with the contents `consent: true`. "
+            "To hide this message, explicitly grant or deny consent. "
             "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
             in record.message
             for record in caplog.records
@@ -311,9 +310,10 @@ class TestKedroTelemetryHook:
         assert not any(
             "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
             "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/latest/configuration/telemetry.html"
+            "To hide this message, explicitly grant or deny consent. "
+            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
             in record.message
             for record in caplog.records
         )

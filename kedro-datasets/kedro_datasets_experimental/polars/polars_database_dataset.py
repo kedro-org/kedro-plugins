@@ -125,7 +125,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     >>> tmp_path = Path.cwd() / "tmp"
     >>> tmp_path.mkdir(parents=True, exist_ok=True)
     >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
-    >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials, table_name="table_a")
+    >>> dataset = PolarsDatabaseDataset(sql=sql, credentials=credentials, table_name="table_a")
     >>>
     >>> dataset.save(data)
     >>> reloaded = dataset.load()

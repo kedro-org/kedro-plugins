@@ -1,9 +1,16 @@
 # Upcoming Release
 ## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+
 ## Bug fixes and other changes
 ## Breaking Changes
 ## Community contributions
-
+- [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 
 # Release 8.0.0
 

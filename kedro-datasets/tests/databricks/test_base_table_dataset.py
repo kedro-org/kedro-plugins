@@ -355,8 +355,8 @@ class TestBaseTableDataset:
             mock_add_pk.call_count == 2
         ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
         expected_add_pk_calls = [
-            mocker.call([unity_ds._table.primary_key]),
-            mocker.call([unity_ds._table.primary_key]),
+            mocker.call(unity_ds._table.primary_key),
+            mocker.call(unity_ds._table.primary_key),
         ]
         mock_add_pk.assert_has_calls(expected_add_pk_calls)
 
@@ -378,13 +378,10 @@ class TestBaseTableDataset:
             unity_ds.save(mismatched_upsert_spark_df)
 
         assert (
-            mock_add_pk.call_count == 2
-        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
-        expected_add_pk_calls = [
-            mocker.call([unity_ds._table.primary_key]),
-            mocker.call([unity_ds._table.primary_key]),
-        ]
-        mock_add_pk.assert_has_calls(expected_add_pk_calls)
+            mock_add_pk.call_count == 1
+        ), f"Expected 1 call, but got {mock_add_pk.call_count}"
+
+        mock_add_pk.assert_called_once_with([unity_ds._table.primary_key])
 
     def test_load_spark(self, sample_spark_df: DataFrame):
         unity_ds = BaseTableDataset(

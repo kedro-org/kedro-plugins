@@ -35,7 +35,7 @@ jobs:
       #   if: inputs.os == 'windows-latest'
       #   uses: microsoft/setup-msbuild@v2
       - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
-        # if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Linux / kedro-datasets
         if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'

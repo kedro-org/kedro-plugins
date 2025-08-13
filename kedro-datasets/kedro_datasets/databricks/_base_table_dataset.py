@@ -202,7 +202,7 @@ class BaseTable:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
 
-    def add_primary_key_constraint(self, primary_keys: list[str]) -> None:
+    def _add_primary_key_constraint(self, primary_keys: list[str]) -> None:
         """Adds a primary key constraint to the table.
 
         This method uses Delta Lake's `ALTER TABLE` command to add a primary key
@@ -453,7 +453,7 @@ class BaseTableDataset(AbstractVersionedDataset):
         )
 
         if primary_keys:
-            self._table.add_primary_key_constraint(primary_keys)
+            self._table._add_primary_key_constraint(primary_keys)
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

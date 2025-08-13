@@ -305,7 +305,7 @@ class TestBaseTableDataset:
             write_mode="upsert",
             primary_key="name",
         )
-        mocker.patch(
+        mock_add_pk = mocker.patch(
             "kedro_datasets.databricks._base_table_dataset.BaseTable._add_primary_key_constraint",
             return_value=None,
         )
@@ -314,6 +314,15 @@ class TestBaseTableDataset:
         unity_ds.save(upsert_spark_df)
         upserted_table = unity_ds.load()
         assert expected_upsert_spark_df.exceptAll(upserted_table).count() == 0
+
+        assert (
+            mock_add_pk.call_count == 2
+        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        expected_add_pk_calls = [
+            mocker.call([unity_ds._table.primary_key]),
+            mocker.call([unity_ds._table.primary_key]),
+        ]
+        mock_add_pk.assert_has_calls(expected_add_pk_calls)
 
     def test_save_upsert_multiple_primary(
         self,
@@ -328,7 +337,7 @@ class TestBaseTableDataset:
             write_mode="upsert",
             primary_key=["name", "age"],
         )
-        mocker.patch(
+        mock_add_pk = mocker.patch(
             "kedro_datasets.databricks._base_table_dataset.BaseTable._add_primary_key_constraint",
             return_value=None,
         )
@@ -342,6 +351,15 @@ class TestBaseTableDataset:
             == 0
         )
 
+        assert (
+            mock_add_pk.call_count == 2
+        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        expected_add_pk_calls = [
+            mocker.call([unity_ds._table.primary_key]),
+            mocker.call([unity_ds._table.primary_key]),
+        ]
+        mock_add_pk.assert_has_calls(expected_add_pk_calls)
+
     def test_save_upsert_mismatched_columns(
         self, sample_spark_df: DataFrame, mismatched_upsert_spark_df: DataFrame, mocker
     ):
@@ -351,13 +369,22 @@ class TestBaseTableDataset:
             write_mode="upsert",
             primary_key="name",
         )
-        mocker.patch(
+        mock_add_pk = mocker.patch(
             "kedro_datasets.databricks._base_table_dataset.BaseTable._add_primary_key_constraint",
             return_value=None,
         )
         unity_ds.save(sample_spark_df)
         with pytest.raises(DatasetError):
             unity_ds.save(mismatched_upsert_spark_df)
+
+        assert (
+            mock_add_pk.call_count == 2
+        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        expected_add_pk_calls = [
+            mocker.call([unity_ds._table.primary_key]),
+            mocker.call([unity_ds._table.primary_key]),
+        ]
+        mock_add_pk.assert_has_calls(expected_add_pk_calls)
 
     def test_load_spark(self, sample_spark_df: DataFrame):
         unity_ds = BaseTableDataset(

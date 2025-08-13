@@ -31,20 +31,12 @@ jobs:
           uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
           make plugin=${{ inputs.plugin }} install-test-requirements
           uv pip freeze
-      # - name: Add MSBuild to PATH
-      #   if: inputs.os == 'windows-latest'
-      #   uses: microsoft/setup-msbuild@v2
-      - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
-        if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
+      - name: Run unit tests for kedro-airflow, kedro-docker, kedro-telemetry
+        if: inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Linux / kedro-datasets
         if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: make dataset-tests
-      - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
-        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
-        run: |
-          cd ${{ inputs.plugin }}
-          pytest tests
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |

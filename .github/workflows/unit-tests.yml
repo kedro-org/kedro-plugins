@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
-          make plugin=${{ inputs.plugin }} install-lint-requirements
+          make plugin=${{ inputs.plugin }} install-test-requirements
           uv pip freeze
       # - name: Add MSBuild to PATH
       #   if: inputs.os == 'windows-latest'

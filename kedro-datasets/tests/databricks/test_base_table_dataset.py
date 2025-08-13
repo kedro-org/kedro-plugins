@@ -297,6 +297,7 @@ class TestBaseTableDataset:
         sample_spark_df: DataFrame,
         upsert_spark_df: DataFrame,
         expected_upsert_spark_df: DataFrame,
+        mocker,
     ):
         unity_ds = BaseTableDataset(
             database="test",
@@ -304,12 +305,16 @@ class TestBaseTableDataset:
             write_mode="upsert",
             primary_key="name",
         )
+        mock_add_pk = mocker.patch(
+            "kedro_datasets.databricks._base_table_dataset.BaseTable._add_primary_key_constraint",
+            return_value=None,
+        )
+
         unity_ds.save(sample_spark_df)
         unity_ds.save(upsert_spark_df)
-
         upserted_table = unity_ds.load()
-
         assert expected_upsert_spark_df.exceptAll(upserted_table).count() == 0
+        mock_add_pk.assert_called_once_with(unity_ds._table.primary_key)
 
     def test_save_upsert_multiple_primary(
         self,

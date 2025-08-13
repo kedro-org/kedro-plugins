@@ -16,7 +16,6 @@ from kedro.io.core import (
     VersionNotFoundError,
 )
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col as col_func
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 

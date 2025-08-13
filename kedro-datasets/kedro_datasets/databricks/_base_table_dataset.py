@@ -41,8 +41,6 @@ class BaseTable:
     _VALID_FORMATS: ClassVar[list[str]] = field(
         default=["delta", "parquet", "csv", "json", "orc", "avro", "text"]
     )
-    _PK_CONSTRAINT_NAME = "pk_constraint_kedro"
-
     database: str
     catalog: str | None
     table: str
@@ -68,6 +66,11 @@ class BaseTable:
             method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()
+
+    @property
+    def pk_constraint_name(self) -> str:
+        """Generate a unique primary key constraint name per table."""
+        return f"pk_constraint_kedro_{self.table}"
 
     def _validate_format(self):
         """Validates the format of the table.
@@ -202,6 +205,52 @@ class BaseTable:
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+
+    def _should_add_primary_key_constraint(self) -> bool:
+        """
+        Determines whether a primary key constraint should be added to the table.
+
+        The primary key constraint should be added if:
+        - The write mode is 'overwrite', or
+        - The write mode is not 'overwrite' and the primary key constraint does not already exist.
+
+        Args:
+            primary_keys: List of column names to be added as primary key for the table.
+
+        Returns:
+            bool: True if the primary key constraint should be added, False otherwise.
+        """
+        try:
+            # If write mode is 'overwrite', always add the primary key constraint
+            if self.write_mode == "overwrite":
+                return True
+
+            # Check if the primary key constraint already exists
+            existing_constraints = (
+                get_spark()
+                .sql(f"SHOW TBLPROPERTIES {self.full_table_location()}")
+                .filter("key = 'delta.constraints'")
+            )
+
+            if not existing_constraints.isEmpty():
+                constraints = existing_constraints.collect()[0]["value"]
+                if self.pk_constraint_name in constraints:
+                    logger.info(
+                        "Primary key constraint '%s' already exists for table '%s'. Skipping.",
+                        self.pk_constraint_name,
+                        self.full_table_location(),
+                    )
+                    return False
+            return True
+        except Exception as exc:
+            logger.error(
+                "Failed to determine if primary key constraint should be added for table '%s': %s",
+                self.full_table_location(),
+                exc,
+            )
+            raise DatasetError(
+                f"Failed to determine if primary key constraint should be added for table '{self.full_table_location()}': {exc}"
+            )
 
     def _add_primary_key_constraint(self, primary_keys: list[str]) -> None:
         """Adds a primary key constraint to the table.
@@ -453,7 +502,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             else self._table.primary_key
         )
 
-        if primary_keys:
+        if primary_keys and self._table._should_add_primary_key_constraint():
             self._table._add_primary_key_constraint(primary_keys)
 
     def _save_append(self, data: DataFrame) -> None:

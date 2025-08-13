@@ -138,6 +138,7 @@ class BaseTable:
 
     def _validate_primary_key(self):
         """Validates the primary key of the table.
+
         Raises:
             DatasetError: If no `primary_key` is specified.
         """

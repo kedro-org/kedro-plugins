@@ -7,7 +7,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from typing import Any, ClassVar
-from pyspark.sql import functions
+
 import pandas as pd
 from kedro.io.core import (
     AbstractVersionedDataset,
@@ -15,7 +15,7 @@ from kedro.io.core import (
     Version,
     VersionNotFoundError,
 )
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, functions
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 

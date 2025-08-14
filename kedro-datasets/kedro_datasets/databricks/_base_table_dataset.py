@@ -283,7 +283,7 @@ class BaseTable:
             # Add constraint
             get_spark().sql(
                 f"ALTER TABLE {self.full_table_location()} "
-                f"ADD CONSTRAINT {self._PK_CONSTRAINT_NAME} PRIMARY KEY ({primary_key_columns})"
+                f"ADD CONSTRAINT {self.pk_constraint_name} PRIMARY KEY ({primary_key_columns})"
             )
             logger.info(
                 "Primary key constraint added to table '%s' on columns: %s",

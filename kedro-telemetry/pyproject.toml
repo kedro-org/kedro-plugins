@@ -11,9 +11,11 @@ description = "Kedro-Telemetry"
 requires-python = ">=3.9"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
+    "appdirs>=1.4.4",
     "kedro>=0.18.0, <2.0.0",
     "requests~=2.20",
-    "appdirs>=1.4.4",
+    "tomli>=1.1.0;python_version<'3.11'",  # tomllib is part of the standard library in Python 3.11+
+    "tomli-w",
 ]
 dynamic = ["readme", "version"]
 
@@ -42,7 +44,6 @@ lint = [
     # mypy requirements
     "types-requests",
     "types-PyYAML",
-    "types-toml",
 ]
 
 [project.entry-points."kedro.cli_hooks"]

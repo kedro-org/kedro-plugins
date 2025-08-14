@@ -230,9 +230,10 @@ class BaseTable:
 
             return constraints_df.count() == 0
         except Exception as exc:
-            raise DatasetError(
-                f"Failed to check for primary key constraint '{self.pk_constraint_name}' on table '{self.full_table_location()}': {exc}"
+            logger.warning(
+                f"Failed pre-check to add primary key constraint '{self.pk_constraint_name}' on table '{self.full_table_location()}': {exc}"
             )
+            return False
 
     def _add_primary_key_constraint(self, primary_keys: list[str]) -> None:
         """Adds a primary key constraint to the table.
@@ -243,9 +244,6 @@ class BaseTable:
 
         Args:
             primary_keys: List of column names to be added as primary key for the table.
-
-        Raises:
-            DatasetError: If adding of primary key column names fail.
         """
         try:
             # Ensure the primary key column is set to not null
@@ -273,7 +271,7 @@ class BaseTable:
                 primary_key_columns,
             )
         except Exception as exc:
-            raise DatasetError(
+            logger.warning(
                 f"Failed to add primary key constraint to table '{self.full_table_location()}': {exc}"
             )
 

@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
+import pandas as pd
 from kedro.io import AbstractDataset
 
 from kedro_datasets._utils import ConnectionMixin
@@ -116,7 +117,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
-                `materialized` in `save_args`. The `mode` parameter controls 
+                `materialized` in `save_args`. The `mode` parameter controls
                 the behavior when saving data:
                 - _"overwrite"_: Overwrite existing data in the table.
                 - _"append"_: Append contents of the new data to the existing table (does not overwrite).
@@ -191,17 +192,21 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def load(self) -> ir.Table:
         return self.connection.table(self._table_name, **self._load_args)
 
-    def save(self, data: ir.Table) -> None:
+    def save(self, data: pd.DataFrame) -> None:
+        #check if data is empty
+        if data.empty:
+            return
+        writer = getattr(self.connection, f"create_{self._materialized}")
         if self._mode == "append":
-            if hasattr(self.connection, "insert"):
+            if not self._exists():
+                writer(self._table_name, data, overwrite=False, **self._save_args)
+            elif hasattr(self.connection, "insert"):
                 self.connection.insert(self._table_name, data, **self._save_args)
             else:
                 raise NotImplementedError(
                     f"Insert mode is not supported by the {self.connection!r} backend."
                 )
             return
-
-        writer = getattr(self.connection, f"create_{self._materialized}")
 
         if self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)

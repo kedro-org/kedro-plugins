@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-import toml
+import tomli_w
 import yaml
 from appdirs import user_config_dir
 from kedro import __version__ as KEDRO_VERSION
@@ -24,6 +24,11 @@ from kedro.framework.project import PACKAGE_NAME, pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.masking import _mask_kedro_cli
@@ -67,8 +72,8 @@ def _get_or_create_uuid() -> str:
 
     try:
         if os.path.exists(full_path):
-            with open(full_path) as f:
-                config = toml.load(f)
+            with open(full_path, "rb") as f:
+                config = tomllib.load(f)
 
                 if "telemetry" in config and "uuid" in config["telemetry"]:
                     return uuid.UUID(config["telemetry"]["uuid"]).hex
@@ -89,8 +94,8 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
     Returns None if configuration file does not exist or does not relate to Kedro.
     """
     try:
-        with open(pyproject_path, "r+") as file:
-            pyproject_data = toml.load(file)
+        with open(pyproject_path, "r+b") as file:
+            pyproject_data = tomllib.load(file)
 
             # Check if pyproject related to kedro
             try:
@@ -102,7 +107,7 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                     toml_string = (
                         f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
                     )
-                    file.write(toml_string)
+                    file.write(toml_string.encode("utf-8"))
                 return project_id
             except KeyError:
                 logging.debug(
@@ -122,8 +127,8 @@ def _add_tool_properties(
     Extends project properties with tool's properties.
     """
     if pyproject_path.exists():
-        with open(pyproject_path) as file:
-            pyproject_data = toml.load(file)
+        with open(pyproject_path, "rb") as file:
+            pyproject_data = tomllib.load(file)
 
         try:
             tool_kedro = pyproject_data["tool"]["kedro"]
@@ -144,8 +149,8 @@ def _generate_new_uuid(full_path: str) -> str:
         config["telemetry"]["uuid"] = new_uuid
 
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
-        with open(full_path, "w") as f:
-            toml.dump(config, f)
+        with open(full_path, "wb") as f:
+            tomli_w.dump(config, f)
 
         return new_uuid
     except Exception as e:
@@ -171,7 +176,9 @@ class KedroTelemetryHook:
 
         project_path = project_metadata.project_path if project_metadata else None
 
-        self._consent = _check_for_telemetry_consent(project_path)
+        consent = _check_for_telemetry_consent(project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         if not self._consent:
             return
 
@@ -200,7 +207,9 @@ class KedroTelemetryHook:
     def after_context_created(self, context):
         """Hook implementation to read metadata"""
 
-        self._consent = _check_for_telemetry_consent(context.project_path)
+        consent = _check_for_telemetry_consent(context.project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         self._project_path = context.project_path
 
     @hook_impl
@@ -230,13 +239,15 @@ class KedroTelemetryHook:
     def _send_telemetry_heap_event(self, event_name: str):
         """Hook implementation to send command run data to Heap"""
 
-        logger.info(
-            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
-            "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
-            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
-        )
+        if self._consent_is_implicit:
+            logger.info(
+                "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+                "No personal data or IP addresses are stored on our side. "
+                "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+                "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+                "To hide this message, explicitly grant or deny consent. "
+                "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            )
 
         try:
             _send_heap_event(
@@ -350,7 +361,7 @@ def _send_heap_event(
         )
 
 
-def _check_for_telemetry_consent(project_path: Path | None) -> bool:
+def _check_for_telemetry_consent(project_path: Path | None) -> bool | None:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
@@ -367,7 +378,7 @@ def _check_for_telemetry_consent(project_path: Path | None) -> bool:
                 telemetry = yaml.safe_load(telemetry_file)
                 if _is_valid_syntax(telemetry):
                     return telemetry["consent"]
-    return True
+    return None
 
 
 def _is_valid_syntax(telemetry: Any) -> bool:

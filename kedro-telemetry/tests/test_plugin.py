@@ -216,7 +216,10 @@ class TestKedroTelemetryHook:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
+        mocker.patch(
+            "builtins.open",
+            mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS.encode("utf-8")),
+        )
         mocker.patch("pathlib.Path.exists", return_value=True)
         telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
@@ -499,8 +502,8 @@ class TestKedroTelemetryHook:
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.open")
-        mocker.patch("kedro_telemetry.plugin.toml.load")
-        mocker.patch("kedro_telemetry.plugin.toml.dump")
+        mocker.patch("kedro_telemetry.plugin.tomllib.load")
+        mocker.patch("kedro_telemetry.plugin.tomli_w.dump")
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryHook()
@@ -558,8 +561,8 @@ class TestKedroTelemetryHook:
             return_value="project_id",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("kedro_telemetry.plugin.toml.load")
-        mocker.patch("kedro_telemetry.plugin.toml.dump")
+        mocker.patch("kedro_telemetry.plugin.tomllib.load")
+        mocker.patch("kedro_telemetry.plugin.tomli_w.dump")
         # CLI run first
         telemetry_cli_hook = KedroTelemetryHook()
         command_args = ["--version"]
@@ -621,7 +624,10 @@ class TestKedroTelemetryHook:
             return_value="project_id",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
+        mocker.patch(
+            "builtins.open",
+            mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS.encode("utf-8")),
+        )
         mocker.patch("pathlib.Path.exists", return_value=True)
 
         # CLI run first

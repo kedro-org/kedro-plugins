@@ -8,6 +8,9 @@
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
 ## Bug fixes and other changes
+
+- Added primary key constraint to BaseTable.
+
 ## Breaking Changes
 ## Community contributions
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)

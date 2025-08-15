@@ -71,7 +71,9 @@ class TestTableDataset:
 
         # Verify that the appropriate materialization strategy was used.
         con = duckdb.connect(database)
-        assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
+        assert (
+            con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"].size == 0
+        )
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     @pytest.mark.parametrize(
@@ -116,7 +118,7 @@ class TestTableDataset:
         assert (
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
-        assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
+        assert con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"].size == 0
 
     @pytest.mark.parametrize("database_name", ["test"], indirect=True)
     def test_external_database(

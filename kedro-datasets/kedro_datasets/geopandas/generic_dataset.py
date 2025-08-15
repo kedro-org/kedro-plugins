@@ -35,24 +35,22 @@ class GenericDataset(
     The underlying functionality is supported by geopandas, so it supports all
     allowed geopandas (pandas) options for loading and saving files.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
-
-    import geopandas as gpd
-    from kedro_datasets.geopandas import GenericDataset
-    from shapely.geometry import Point
-
-    data = gpd.GeoDataFrame(
-        {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
-        geometry=[Point(1, 1), Point(2, 4)],
-    )
-    dataset = GenericDataset(filepath=tmp_path / "test.geojson")
-    dataset.save(data)
-    reloaded = dataset.load()
-
-    assert data.equals(reloaded)
-    ```
+        >>> import geopandas as gpd
+        >>> from kedro_datasets.geopandas import GenericDataset
+        >>> from shapely.geometry import Point
+        >>>
+        >>> data = gpd.GeoDataFrame(
+        ...     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
+        ...     geometry=[Point(1, 1), Point(2, 4)],
+        ... )
+        >>>
+        >>> dataset = GenericDataset(filepath=tmp_path / "test.geojson")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded)
 
     """
 
@@ -76,7 +74,6 @@ class GenericDataset(
         on a specific filesystem fsspec.
 
         Args:
-
             filepath: Filepath in POSIX format to a file prefixed with a protocol like
                 `s3://`. If prefix is not provided `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.

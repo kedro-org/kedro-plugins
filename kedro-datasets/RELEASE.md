@@ -1,22 +1,50 @@
 # Upcoming Release
+## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+
+## Bug fixes and other changes
+
+- Added primary key constraint to BaseTable.
+
+## Breaking Changes
+## Community contributions
+- [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+
+# Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
+- Added the following new datasets:
+
+| Type                  | Description                                                                       | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
+- Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
+- Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-- ...
+- [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+- [Daniel Russell-Brain](https://github.com/killerfridge)
+
 
 # Release 7.0.0
 
@@ -50,6 +78,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+
 
 # Release 6.0.0
 

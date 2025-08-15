@@ -28,41 +28,36 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
       to external changes to the target table while executing. Upsert methodology works by
       leveraging Spark DataFrame execution plan checkpointing.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        hive_dataset:
+          type: spark.SparkHiveDataset
+          database: hive_database
+          table: table_name
+          write_mode: overwrite
+        ```
 
-    hive_dataset:
-        type: spark.SparkHiveDataset
-        database: hive_database
-        table: table_name
-        write_mode: overwrite
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> from kedro_datasets.spark import SparkHiveDataset
+        >>> from pyspark.sql import SparkSession
+        >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
+        >>>
+        >>> schema = StructType(
+        ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
+        ... )
+        >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        >>>
+        >>> dataset = SparkHiveDataset(
+        ...     database="test_database", table="test_table", write_mode="overwrite"
+        ... )
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
+        >>> reloaded.take(4)
 
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-
-    from kedro_datasets.spark import SparkHiveDataset
-
-    schema = StructType(
-        [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
-    )
-
-    data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-
-    spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-
-    dataset = SparkHiveDataset(
-        database="test_database", table="test_table", write_mode="overwrite"
-    )
-    dataset.save(spark_df)
-    reloaded = dataset.load()
-
-    reloaded.take(4)
-    ```
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

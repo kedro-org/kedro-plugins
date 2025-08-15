@@ -23,10 +23,10 @@ class DeltaTableDataset(AbstractDataset):
     mode=overwrite together with partition_filters. This will remove all files within the
     matching partition and insert your data as new files.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
-
+        ```yaml
         boats_filesystem:
           type: pandas.DeltaTableDataset
           filepath: data/01_raw/boats
@@ -54,25 +54,24 @@ class DeltaTableDataset(AbstractDataset):
           table: db_table
           save_args:
             mode: overwrite
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        ```
 
-    ```python
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-        from kedro_datasets.pandas import DeltaTableDataset
-        import pandas as pd
+        >>> from kedro_datasets.pandas import DeltaTableDataset
+        >>> import pandas as pd
+        >>>
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded)
+        >>>
+        >>> new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
+        >>> dataset.save(new_data)
+        >>> assert isinstance(dataset.get_loaded_version(), int)
 
-        data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        dataset = DeltaTableDataset(filepath=tmp_path / "test")
-
-        dataset.save(data)
-        reloaded = dataset.load()
-        assert data.equals(reloaded)
-
-        new_data = pd.DataFrame({"col1": [7, 8], "col2": [9, 10], "col3": [11, 12]})
-        dataset.save(new_data)
-        assert isinstance(dataset.get_loaded_version(), int)
-    ```
     """
 
     DEFAULT_WRITE_MODE = "overwrite"
@@ -132,8 +131,8 @@ class DeltaTableDataset(AbstractDataset):
         self._catalog_name = catalog_name
         self._database = database
         self._table = table
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         # DeltaTable cannot be instantiated from an empty directory
         # for the first time creation from filepath, we need to delay the instantiation

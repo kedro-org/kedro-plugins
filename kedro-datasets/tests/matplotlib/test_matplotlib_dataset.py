@@ -335,7 +335,7 @@ class TestMatplotlibDatasetVersioned:
         corresponding matplotlib file for a given save version already exists."""
         versioned_plot_dataset.save(mock_single_plot)
         pattern = (
-            r"Save path \'.+\' for MatplotlibDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.matplotlib.matplotlib_dataset.MatplotlibDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -368,7 +368,7 @@ class TestMatplotlibDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for MatplotlibDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.matplotlib.matplotlib_dataset.MatplotlibDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_plot_dataset.save(mock_single_plot)

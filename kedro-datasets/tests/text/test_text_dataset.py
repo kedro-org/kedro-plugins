@@ -56,7 +56,7 @@ class TestTextDataset:
 
     def test_load_missing_file(self, txt_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset TextDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.text.text_dataset.TextDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             txt_dataset.load()
 
@@ -116,7 +116,7 @@ class TestTextDatasetVersioned:
 
     def test_no_versions(self, versioned_txt_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for TextDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.text.text_dataset.TextDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_txt_dataset.load()
 
@@ -131,7 +131,7 @@ class TestTextDatasetVersioned:
         corresponding text file for a given save version already exists."""
         versioned_txt_dataset.save(STRING)
         pattern = (
-            r"Save path \'.+\' for TextDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.text.text_dataset.TextDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -150,7 +150,7 @@ class TestTextDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for TextDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.text.text_dataset.TextDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_txt_dataset.save(STRING)

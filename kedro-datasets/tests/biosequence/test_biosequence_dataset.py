@@ -75,7 +75,7 @@ class TestBioSequenceDataset:
 
     def test_load_missing_file(self, biosequence_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset BioSequenceDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.biosequence.biosequence_dataset.BioSequenceDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             biosequence_dataset.load()
 

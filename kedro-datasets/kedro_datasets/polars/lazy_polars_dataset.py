@@ -38,39 +38,38 @@ class LazyPolarsDataset(
     the type of read/write target. It uses lazy loading with Polars Lazy API, but it can
     save both Lazy and Eager Polars DataFrames.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
+        cars:
+          type: polars.LazyPolarsDataset
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            parse_dates: False
+          save_args:
+            has_header: False
+            null_value: "somenullstring"
 
-    cars:
-        type: polars.LazyPolarsDataset
-        filepath: data/01_raw/company/cars.csv
-        load_args:
-        sep: ","
-        parse_dates: False
-        save_args:
-        has_header: False
-        null_value: "somenullstring"
+        motorbikes:
+          type: polars.LazyPolarsDataset
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+        ```
 
-    motorbikes:
-        type: polars.LazyPolarsDataset
-        filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        credentials: dev_s3
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
+        >>> import polars as pl
+        >>> from kedro_datasets.polars import LazyPolarsDataset
+        >>>
+        >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = LazyPolarsDataset(filepath=tmp_path / "test.csv", file_format="csv")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.equals(reloaded.collect())
 
-    from kedro_datasets.polars import LazyPolarsDataset
-    import polars as pl
-
-    data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-    dataset = LazyPolarsDataset(filepath=tmp_path / "test.csv", file_format="csv")
-    dataset.save(data)
-    reloaded = dataset.load()
-    assert data.equals(reloaded.collect())
-    ```
     """
 
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}

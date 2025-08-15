@@ -1,131 +1,63 @@
-![Kedro logo](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png)
+# kedro_datasets
 
-# Welcome to Kedro's award-winning documentation!
+::: kedro_datasets
 
-[![GitHub Actions - Main Branch](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main)](https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain)
+## Dataset Classes
 
-[![GitHub Actions - Develop Branch](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop)](https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Adevelop)
-
-[![License is Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/license/apache2-0-php/)
-
-[![Python version 3.9, 3.10, 3.11, 3.12, 3.13](https://img.shields.io/badge/3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/kedro/)
-
-[![PyPI package version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
-
-[![Conda package version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
-
-[![Docs build status](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://docs.kedro.org/)
-
-[![Kedro\'s Slack organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://slack.kedro.org)
-
-[![Kedro\'s Slack archive](https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20)](https://linen-slack.kedro.org/)
-
-[![Linted and Formatted with Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-
-[![OpenSSF Best Practices Badge Program](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
-
-## Getting started
-
-- [Kedro architecture](pages/getting-started/architecture_overview.md)
-- [Kedro's CLI](pages/getting-started/commands_reference.md)
-<!-- - [Quickstart](pages/getting-started/quickstart.md) -->
-- [Installation](pages/getting-started/install.md)
-- [Glossary](pages/getting-started/glossary.md)
-
-## Tutorials
-
-- [Kedro Spaceflights tutorial](pages/tutorials/spaceflights_tutorial.md)
-- [Kedro for Notebook tutorial](pages/tutorials/notebooks_tutorial.md)
-
-## Create
-
-- [Create a Kedro project](pages/create/new_project.md)
-- [Create a minimal Kedro project](pages/create/minimal_kedro_project.md)
-- [Customise a new project](pages/create/customise_project.md)
-- [Kedro starters](pages/create/starters.md)
-
-## Configure
-
-- [Migration guide for config loaders](pages/configure/config_loader_migration.md)
-- [Advanced configuration](pages/configure/advanced_configuration.md)
-- [Parameters](pages/configure/parameters.md)
-- [Credentials](pages/configure/credentials.md)
-
-## Catalog Data
-
-- [Introduction](pages/catalog-data/introduction.md)
-- [Data Catalog YAML examples](pages/catalog-data/data_catalog_yaml_examples.md)
-- [Dataset factories](pages/catalog-data/kedro_dataset_factories.md)
-- [Data and pipeline versioning](pages/catalog-data/kedro_dvc_versioning.md)
-- [Partitioned and incremental datasets](pages/catalog-data/partitioned_and_incremental_datasets.md)
-
-## Build
-
-- [Nodes](pages/build/nodes.md)
-- [Pipeline object](pages/build/pipeline_introduction.md)
-- [Run a pipeline](pages/build/run_a_pipeline.md)
-- [Modular pipelines](pages/build/modular_pipelines.md)
-- [Reusing pipelines (namespaces)](pages/build/namespaces.md)
-- [Pipeline registry](pages/build/pipeline_registry.md)
-- [Slice a pipeline](pages/build/slice_a_pipeline.md)
-
-## Develop
-
-- [Logging](pages/develop/logging.md)
-- [Automated testing](pages/develop/automated_testing.md)
-- [Code formatting and linting](pages/develop/linting.md)
-- [Debugging](pages/develop/debugging.md)
-
-## Deploy
-
-- [Single-machine deployment](pages/deploy/single_machine.md)
-- [Distributed deployment](pages/deploy/distributed.md)
-- Supported platforms:
-  - [Apache Airflow](pages/deploy/supported-platforms/airflow.md)
-  - [Amazon SageMaker](pages/deploy/supported-platforms/amazon_sagemaker.md)
-  - [Amazon EMR Serverless](pages/deploy/supported-platforms/amazon_emr_serverless.md)
-  - [AWS Step Functions](pages/deploy/supported-platforms/aws_step_functions.md)
-  - [Azure ML pipelines](pages/deploy/supported-platforms/azure.md)
-  - [Dask](pages/deploy/supported-platforms/dask.md)
-  - [Kubeflow Pipelines](pages/deploy/supported-platforms/kubeflow.md)
-  - [Prefect](pages/deploy/supported-platforms/prefect.md)
-  - [VertexAI](pages/deploy/supported-platforms/vertexai.md)
-  - [Argo Workflows](pages/deploy/supported-platforms/argo.md)
-  - [AWS Batch](pages/deploy/supported-platforms/aws_batch.md)
-
-## Extend
-
-- [Use Cases](pages/extend/common_use_cases.md)
-- [Custom datasets](pages/extend/how_to_create_a_custom_dataset.md)
-- [Custom plugins](pages/extend/plugins.md)
-- [Custom starters](pages/extend/create_a_starter.md)
-
-## Reference
-
-- [Kedro API](pages/api/index.md)
-  - [kedro.config](pages/api/config/kedro.config.md)
-  - [kedro.framework](pages/api/framework/kedro.framework.md)
-  - [kedro.io](pages/api/io/kedro.io.md)
-  - [kedro.ipython](pages/api/ipython/kedro.ipython.md)
-  - [kedro.logging](pages/api/kedro.logging.md)
-  - [kedro.pipeline](pages/api/pipeline/kedro.pipeline.md)
-  - [kedro.runner](pages/api/runner/kedro.runner.md)
-  - [kedro.utils](pages/api/kedro.utils.md)
-
-## Integration & Plugins
-
-- [PySpark](pages/integrations-and-plugins/pyspark_integration.md)
-- [MLflow](pages/integrations-and-plugins/mlflow.md)
-- [Delta Lake](pages/integrations-and-plugins/deltalake_versioning.md)
-- [Iceberg](pages/integrations-and-plugins/iceberg_versioning.md)
-
-## IDE Support
-
-- [Visual Studio Code](pages/ide/set_up_vscode.md)
-- [PyCharm](pages/ide/set_up_pycharm.md)
-
-## About
-
-- [Kedro's Technical Steering Committee](pages/about/technical_steering_committee.md)
-- [Migration guide](pages/about/migration.md)
-- [Kedro telemetry](pages/about/telemetry.md)
+Name | Description
+------|-------------
+[api.APIDataset](api/kedro_datasets/api.APIDataset.md) | ``APIDataset`` loads/saves data from/to HTTP(S) APIs. It uses the python requests library: <https://requests.readthedocs.io/en/latest/>
+[biosequence.BioSequenceDataset](api/kedro_datasets/biosequence.BioSequenceDataset.md) | ``BioSequenceDataset`` loads and saves data to a sequence file.
+[dask.CSVDataset](api/kedro_datasets/dask.CSVDataset.md) | ``CSVDataset`` loads and saves data to comma-separated value file(s). It uses Dask remote data services to handle the corresponding load and save operations.
+[dask.ParquetDataset](api/kedro_datasets/dask.ParquetDataset.md) | ``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask remote data services to handle the corresponding load and save operations.
+[databricks.ManagedTableDataset](api/kedro_datasets/databricks.ManagedTableDataset.md) | ``ManagedTableDataset`` loads and saves data into managed delta tables in Databricks.
+[email.EmailMessageDataset](api/kedro_datasets/email.EmailMessageDataset.md) | ``EmailMessageDataset`` loads/saves an email message from/to a file using an underlying filesystem (e.g.: local, S3, GCS). It uses the ``email`` package in the standard library to manage email messages.
+[geopandas.GenericDataset](api/kedro_datasets/geopandas.GenericDataset.md) | ``GenericDataset`` loads/saves data to a file using an underlying filesystem (eg: local, S3, GCS). The underlying functionality is supported by geopandas, so it supports all allowed geopandas (pandas) options for loading and saving files.
+[holoviews.HoloviewsWriter](api/kedro_datasets/holoviews.HoloviewsWriter.md) | ``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying filesystem (e.g. local, S3, GCS).
+[huggingface.HFDataset](api/kedro_datasets/huggingface.HFDataset.md) | ``HFDataset`` loads Hugging Face datasets using the `datasets` library.
+[huggingface.HFTransformerPipelineDataset](api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md) | ``HFTransformerPipelineDataset`` loads pretrained Hugging Face transformers using the `transformers` library.
+[ibis.FileDataset](api/kedro_datasets/ibis.FileDataset.md) | ``FileDataset`` loads/saves data from/to a specified file format.
+[ibis.TableDataset](api/kedro_datasets/ibis.TableDataset.md) | `TableDataset` loads/saves data from/to Ibis table expressions.
+[json.JSONDataset](api/kedro_datasets/json.JSONDataset.md) | ``JSONDataset`` loads/saves data from/to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
+[matlab.MatlabDataset](api/kedro_datasets/matlab.MatlabDataset.md) | `MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
+[matplotlib.MatplotlibDataset](api/kedro_datasets/matplotlib.MatplotlibDataset.md) | ``MatplotlibDataset`` saves one or more Matplotlib objects as image files to an underlying filesystem (e.g. local, S3, GCS).
+[matplotlib.MatplotlibWriter](api/kedro_datasets/matplotlib.MatplotlibWriter.md) | DEPRECATED
+[networkx.GMLDataset](api/kedro_datasets/networkx.GMLDataset.md) | ``GMLDataset`` loads and saves graphs to a GML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GML data.
+[networkx.GraphMLDataset](api/kedro_datasets/networkx.GraphMLDataset.md) | ``GraphMLDataset`` loads and saves graphs to a GraphML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
+[networkx.JSONDataset](api/kedro_datasets/networkx.JSONDataset.md) | NetworkX ``JSONDataset`` loads and saves graphs to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.
+[openxml.DocxDataset](api/kedro_datasets/openxml.DocxDataset.md) | ``DocxDataset`` loads/saves data from/to a .docx file using an underlying filesystem (e.g.: local, S3, GCS). It uses python-docx to handle the .docx file.
+[pandas.CSVDataset](api/kedro_datasets/pandas.CSVDataset.md) | A dataset that loads and saves data to/from CSV files using pandas.
+[pandas.DeltaTableDataset](api/kedro_datasets/pandas.DeltaTableDataset.md) | ``DeltaTableDataset`` loads/saves delta tables from/to a filesystem (e.g.: local, S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles load and save using a pandas dataframe.
+[pandas.ExcelDataset](api/kedro_datasets/pandas.ExcelDataset.md) | ``ExcelDataset`` loads/saves data from/to a Excel file using an underlying filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
+[pandas.FeatherDataset](api/kedro_datasets/pandas.FeatherDataset.md) | A dataset that loads and saves data to/from Feather files using pandas.
+[pandas.GBQQueryDataset](api/kedro_datasets/pandas.GBQQueryDataset.md) | A dataset that loads data from a provided SQL query in Google BigQuery using pandas-gbq. It is read-only.
+[pandas.GBQTableDataset](api/kedro_datasets/pandas.GBQTableDataset.md) | A dataset that loads and saves data to/from Google BigQuery tables using pandas-gbq.
+[pandas.GenericDataset](api/kedro_datasets/pandas.GenericDataset.md) | ``GenericDataset`` loads/saves data from/to a data file using an underlying filesystem (e.g.: local, S3, GCS). It uses pandas to handle the type of read/write target.
+[pandas.HDFDataset](api/kedro_datasets/pandas.HDFDataset.md) | A dataset that loads and saves data to/from HDF files using pandas.
+[pandas.JSONDataset](api/kedro_datasets/pandas.JSONDataset.md) | A dataset that loads and saves data to/from JSON files using pandas.
+[pandas.ParquetDataset](api/kedro_datasets/pandas.ParquetDataset.md) | A dataset that loads and saves data to/from Parquet files using pandas.
+[pandas.SQLQueryDataset](api/kedro_datasets/pandas.SQLQueryDataset.md) | A dataset that loads data from a provided SQL query using pandas. It is read-only.
+[pandas.SQLTableDataset](api/kedro_datasets/pandas.SQLTableDataset.md) | A dataset that loads data from a SQL table and saves a pandas DataFrame to a table.
+[pandas.XMLDataset](api/kedro_datasets/pandas.XMLDataset.md) | A dataset that loads and saves data to/from XML files using pandas.
+[partitions.IncrementalDataset](api/kedro_datasets/partitions.IncrementalDataset.md) | ``IncrementalDataset`` inherits from ``PartitionedDataset``, which loads and saves partitioned file-like data using the underlying dataset definition.
+[partitions.PartitionedDataset](api/kedro_datasets/partitions.PartitionedDataset.md) | ``PartitionedDataset`` loads and saves partitioned file-like data using the underlying dataset definition. It also uses `fsspec` for filesystem level operations.
+[pickle.PickleDataset](api/kedro_datasets/pickle.PickleDataset.md) | ``PickleDataset`` loads/saves data from/to a Pickle file using an underlying filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by the specified backend library passed in (defaults to the ``pickle`` library), so it supports all allowed options for loading and saving pickle files.
+[pillow.ImageDataset](api/kedro_datasets/pillow.ImageDataset.md) | ``ImageDataset`` loads/saves image data as `numpy` from an underlying filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
+[plotly.HTMLDataset](api/kedro_datasets/plotly.HTMLDataset.md) | ``HTMLDataset`` saves a plotly figure to an HTML file using an underlying filesystem (e.g.: local, S3, GCS).
+[plotly.JSONDataset](api/kedro_datasets/plotly.JSONDataset.md) | ``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an underlying filesystem (e.g.: local, S3, GCS).
+[plotly.PlotlyDataset](api/kedro_datasets/plotly.PlotlyDataset.md) | ``PlotlyDataset`` generates a plot from a pandas DataFrame and saves it to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a plotly figure.
+[polars.CSVDataset](api/kedro_datasets/polars.CSVDataset.md) | ``CSVDataset`` loads/saves data from/to a CSV file using an underlying filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
+[polars.EagerPolarsDataset](api/kedro_datasets/polars.EagerPolarsDataset.md) | ``EagerPolarsDataset`` loads/saves data from/to a data file using an filesystem (e.g.: local, S3, GCS). It uses polars to handle the type of read/write target.
+[polars.LazyPolarsDataset](api/kedro_datasets/polars.LazyPolarsDataset.md) | ``LazyPolarsDataset`` loads/saves data from/to a data file using an underlying filesystem (e.g.: local, S3, GCS). It uses polars to handle the type of read/write target.
+[redis.PickleDataset](api/kedro_datasets/redis.PickleDataset.md) | ``PickleDataset`` loads/saves data from/to a Redis database. The underlying functionality is supported by the redis library, so it supports all allowed options for instantiating the redis app ``from_url`` and setting a value.
+[snowflake.SnowparkTableDataset](api/kedro_datasets/snowflake.SnowparkTableDataset.md) | ``SnowparkTableDataset`` loads and saves Snowpark DataFrames. As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11. Python 3.12 is not supported yet.
+[spark.DeltaTableDataset](api/kedro_datasets/spark.DeltaTableDataset.md) | ``DeltaTableDataset`` loads data into DeltaTable objects.
+[spark.GBQQueryDataset](api/kedro_datasets/spark.GBQQueryDataset.md) | ``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
+[spark.SparkDataset](api/kedro_datasets/spark.SparkDataset.md) | ``SparkDataset`` loads and saves Spark dataframes.
+[spark.SparkHiveDataset](api/kedro_datasets/spark.SparkHiveDataset.md) |``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
+[spark.SparkJDBCDataset](api/kedro_datasets/spark.SparkJDBCDataset.md) |``SparkJDBCDataset`` loads data from a database table accessible via JDBC URL url and connection properties and saves the content of a PySpark DataFrame to an external database table via JDBC.
+[spark.SparkStreamingDataset](api/kedro_datasets/spark.SparkStreamingDataset.md) |``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.
+[svmlight.SVMLightDataset](api/kedro_datasets/svmlight.SVMLightDataset.md) | ``SVMLightDataset`` loads/saves data from/to a svmlight/libsvm file using an underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.
+[tensorflow.TensorFlowModelDataset](api/kedro_datasets/tensorflow.TensorFlowModelDataset.md) | ``TensorFlowModelDataset`` loads and saves TensorFlow models. The underlying functionality is supported by, and passes input arguments through to, TensorFlow 2.X load_model and save_model methods.
+[text.TextDataset](api/kedro_datasets/text.TextDataset.md) | ``TextDataset`` loads/saves data from/to a text file using an underlying filesystem (e.g.: local, S3, GCS).
+[yaml.YAMLDataset](api/kedro_datasets/yaml.YAMLDataset.md) | ``YAMLDataset`` loads/saves data from/to a YAML file using an underlying filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.

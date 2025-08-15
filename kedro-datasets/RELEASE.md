@@ -10,7 +10,7 @@
 ## Bug fixes and other changes
 
 - Added primary key constraint to BaseTable.
-- Added save/load with `use_pyarrow=True` save_args for LazyPolarsDataset partitioned parquet files. 
+- Added save/load with `use_pyarrow=True` save_args for LazyPolarsDataset partitioned parquet files.
 
 ## Breaking Changes
 ## Community contributions

@@ -14,13 +14,13 @@ from warnings import warn
 
 import fsspec
 from cachetools import Cache, cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -50,92 +50,89 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
     It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving).
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
+        ```yaml
 
-    station_data:
-        type: partitions.PartitionedDataset
-        path: data/03_primary/station_data
-        dataset:
-        type: pandas.CSVDataset
-        load_args:
+        station_data:
+          type: partitions.PartitionedDataset
+          path: data/03_primary/station_data
+          dataset:
+          type: pandas.CSVDataset
+          load_args:
             sep: '\\t'
-        save_args:
+          save_args:
             sep: '\\t'
             index: true
-        filename_suffix: '.dat'
-        save_lazily: True
-    ```
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+          filename_suffix: '.dat'
+          save_lazily: True
+        ```
 
-    ```python
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    import pandas as pd
-    from kedro_datasets.partitions import PartitionedDataset
+        >>> import pandas as pd
+        >>> from kedro_datasets.partitions import PartitionedDataset
+        >>>
+        >>> # Create a fake pandas dataframe with 10 rows of data
+        >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
+        >>>
+        >>> # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
+        >>> dict_df = {
+        ...     day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+        ...     for day_of_month in df["DAY_OF_MONTH"]
+        ... }
+        >>>
+        >>> # Save it as small partitions with DAY_OF_MONTH as the partition key
+        >>> dataset = PartitionedDataset(
+        ...     path=str(tmp_path / "df_with_partition"),
+        ...     dataset="pandas.CSVDataset",
+        ...     filename_suffix=".csv",
+        ...     save_lazily=False
+        ... )
+        >>> # This will create a folder `df_with_partition` and save multiple files
+        >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
+        >>> dataset.save(dict_df)
+        >>>
+        >>> # This will create lazy load functions instead of loading data into memory immediately.
+        >>> loaded = dataset.load()
+        >>>
+        >>> # Load all the partitions
+        >>> for partition_id, partition_load_func in loaded.items():
+        ...     # The actual function that loads the data
+        ...     partition_data = partition_load_func()
+        ...
+        >>> # Add the processing logic for individual partition HERE
+        >>> # print(partition_data)
 
-    # Create a fake pandas dataframe with 10 rows of data
-    df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
+        You can also load multiple partitions from a remote storage and combine them
+        like this:
 
-    # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
-    dict_df = {
-            day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-            for day_of_month in df["DAY_OF_MONTH"]
-        }
+        >>> import pandas as pd
+        >>> from kedro_datasets.partitions import PartitionedDataset
+        >>>
+        >>> # these credentials will be passed to both 'fsspec.filesystem()' call
+        >>> # and the dataset initializer
+        >>> credentials = {"key1": "secret1", "key2": "secret2"}
+        >>>
+        >>> dataset = PartitionedDataset(
+        ...     path="s3://bucket-name/path/to/folder",
+        ...     dataset="pandas.CSVDataset",
+        ...     credentials=credentials,
+        ... )
+        >>> loaded = dataset.load()
+        >>> # assert isinstance(loaded, dict)
+        >>>
+        >>> combine_all = pd.DataFrame()
+        >>>
+        >>> for partition_id, partition_load_func in loaded.items():
+        ...     partition_data = partition_load_func()
+        ...     combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
+        ...
+        >>> new_data = pd.DataFrame({"new": [1, 2]})
+        >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
+        >>> dataset.save({"new/partition.csv": new_data})
 
-    # Save it as small partitions with DAY_OF_MONTH as the partition key
-    dataset = PartitionedDataset(
-            path=str(tmp_path / "df_with_partition"),
-            dataset="pandas.CSVDataset",
-            filename_suffix=".csv",
-            save_lazily=False
-        )
-    # This will create a folder `df_with_partition` and save multiple files
-    # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
-    dataset.save(dict_df)
-
-    # This will create lazy load functions instead of loading data into memory immediately.
-    loaded = dataset.load()
-
-    # Load all the partitions
-    for partition_id, partition_load_func in loaded.items():
-            # The actual function that loads the data
-            partition_data = partition_load_func()
-
-    # Add the processing logic for individual partition HERE
-    # print(partition_data)
-    ```
-
-    You can also load multiple partitions from a remote storage and combine them
-    like this:
-
-    ```python
-
-    import pandas as pd
-    from kedro_datasets.partitions import PartitionedDataset
-
-    # these credentials will be passed to both 'fsspec.filesystem()' call
-    # and the dataset initializer
-    credentials = {"key1": "secret1", "key2": "secret2"}
-
-    dataset = PartitionedDataset(
-            path="s3://bucket-name/path/to/folder",
-            dataset="pandas.CSVDataset",
-            credentials=credentials,
-        )
-    loaded = dataset.load()
-    # assert isinstance(loaded, dict)
-
-    combine_all = pd.DataFrame()
-
-    for partition_id, partition_load_func in loaded.items():
-            partition_data = partition_load_func()
-            combine_all = pd.concat([combine_all, partition_data], ignore_index=True, sort=True)
-
-    new_data = pd.DataFrame({"new": [1, 2]})
-    # creates "s3://bucket-name/path/to/folder/new/partition.csv"
-    dataset.save({"new/partition.csv": new_data})
-    ```
     """
 
     def __init__(  # noqa: PLR0913
@@ -199,7 +196,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        from fsspec.utils import infer_storage_options  # for performance reasons
+        # for performance reasons
+        from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 

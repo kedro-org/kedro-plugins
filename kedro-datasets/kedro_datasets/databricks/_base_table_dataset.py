@@ -15,7 +15,7 @@ from kedro.io.core import (
     Version,
     VersionNotFoundError,
 )
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, functions
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException, ParseException
 
@@ -41,7 +41,6 @@ class BaseTable:
     _VALID_FORMATS: ClassVar[list[str]] = field(
         default=["delta", "parquet", "csv", "json", "orc", "avro", "text"]
     )
-
     database: str
     catalog: str | None
     table: str
@@ -67,6 +66,11 @@ class BaseTable:
             method = getattr(self, f"_validate_{name}", None)
             if method:
                 method()
+
+    @property
+    def pk_constraint_name(self) -> str:
+        """Generate a unique primary key constraint name per table."""
+        return f"pk_constraint_kedro_{self.table}"
 
     def _validate_format(self):
         """Validates the format of the table.
@@ -201,6 +205,75 @@ class BaseTable:
         except (ParseException, AnalysisException) as exc:
             logger.warning("error occured while trying to find table: %s", exc)
             return False
+
+    def _should_add_primary_key_constraint(self) -> bool:
+        """
+        Determines whether a primary key constraint should be added to the table.
+        The primary key constraint should be added if the same primary key constraint does not already exist.
+
+        Returns:
+            bool: True if the primary key constraint should be added, False otherwise.
+        """
+        try:
+            # Query the information_schema.table_constraints table
+            constraints_df = (
+                get_spark()
+                .table("system.information_schema.table_constraints")
+                .filter(
+                    (functions.col("table_catalog") == self.catalog)
+                    & (functions.col("table_schema") == self.database)
+                    & (functions.col("table_name") == self.table)
+                    & (functions.col("constraint_name") == self.pk_constraint_name)
+                )
+                .select("constraint_name")
+            )
+
+            return constraints_df.count() == 0
+        except Exception as exc:
+            logger.warning(
+                f"Failed pre-check to add primary key constraint '{self.pk_constraint_name}' on table '{self.full_table_location()}': {exc}"
+            )
+            return False
+
+    def _add_primary_key_constraint(self, primary_keys: list[str]) -> None:
+        """Adds a primary key constraint to the table.
+
+        This method uses Delta Lake's `ALTER TABLE` command to add a primary key
+        constraint to the table. Note that this requires Delta Lake's constraints
+        feature to be enabled in your environment.
+
+        Args:
+            primary_keys: List of column names to be added as primary key for the table.
+        """
+        try:
+            # Ensure the primary key column is set to not null
+            for pk_column in primary_keys:
+                get_spark().sql(
+                    f"ALTER TABLE {self.full_table_location()} "
+                    f"ALTER COLUMN `{pk_column}` SET NOT NULL"
+                )
+                logger.info(
+                    "Column '%s' set to NOT NULL in table '%s'.",
+                    pk_column,
+                    self.full_table_location(),
+                )
+
+            primary_key_columns = ", ".join(f"`{col}`" for col in primary_keys)
+
+            # Add constraint
+            get_spark().sql(
+                f"ALTER TABLE {self.full_table_location()} "
+                f"ADD CONSTRAINT {self.pk_constraint_name} PRIMARY KEY ({primary_key_columns})"
+            )
+            logger.info(
+                "Primary key constraint added to table '%s' on columns: %s",
+                self.full_table_location(),
+                primary_key_columns,
+            )
+        except Exception as exc:
+            logger.warning(
+                f"Failed to add primary key constraint to table '{self.full_table_location()}': {exc}"
+            )
 
 
 class BaseTableDataset(AbstractVersionedDataset):
@@ -402,6 +475,15 @@ class BaseTableDataset(AbstractVersionedDataset):
         method = getattr(self, f"_save_{self._table.write_mode}", None)
         if method:
             method(data)
+
+        primary_keys = (
+            [self._table.primary_key]
+            if isinstance(self._table.primary_key, str)
+            else self._table.primary_key
+        )
+
+        if primary_keys and self._table._should_add_primary_key_constraint():
+            self._table._add_primary_key_constraint(primary_keys)
 
     def _save_append(self, data: DataFrame) -> None:
         """Saves the data to the table by appending it

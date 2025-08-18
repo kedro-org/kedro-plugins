@@ -1,8 +1,32 @@
 # Upcoming Release
+## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+
+## Bug fixes and other changes
+
+- Added primary key constraint to BaseTable.
+
+## Breaking Changes
+## Community contributions
+- [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+
+# Release 8.0.0
 
 ## Major features and improvements
 
 - Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
+- Added the following new datasets:
+
+| Type                  | Description                                                                       | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
+
 - `ibis.TableDataset`: Added configurable save modes via `save_args.mode`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore". Legacy `save_args.overwrite` is mapped to `mode` for backward compatibility; specifying both is now an error.
 - `ibis.TableDataset`: Added a `credentials` parameter (string URI or dict, optionally with `con`) that supersedes the `connection` parameter. If both are provided, `credentials` takes precedence and a deprecation warning is issued.
 
@@ -10,11 +34,12 @@
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 - Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
+- Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
 - Improved `_connect` and `_describe` for `ibis.TableDataset`; saving an empty pandas DataFrame is now a no-op.
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
 - `ibis.TableDataset`: Deprecated `save_args.overwrite` and the `connection` parameter in favor of `save_args.mode` and `credentials`. Using both `overwrite` and `mode` together raises an error; providing both `credentials` and `connection` emits a deprecation warning. The deprecated options will be removed in a future release.
 
 ## Community contributions
@@ -22,6 +47,8 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+- [Daniel Russell-Brain](https://github.com/killerfridge)
 - [gitgud5000](https://github.com/gitgud5000)
 
 # Release 7.0.0

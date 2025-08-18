@@ -18,45 +18,47 @@ if TYPE_CHECKING:
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     """`TableDataset` loads/saves data from/to Ibis table expressions.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
-    ```yaml
-    cars:
-      type: ibis.TableDataset
-      table_name: cars
-      connection:
-        backend: duckdb
-        database: company.db
-      save_args:
-        materialized: table
-        mode: append
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    motorbikes:
-      type: ibis.TableDataset
-      table_name: motorbikes
-      connection:
-        backend: duckdb
-        database: company.db
-      save_args:
-        materialized: view
-        mode: overwrite
+        ```yaml
+        cars:
+          type: ibis.TableDataset
+          table_name: cars
+          connection:
+            backend: duckdb
+            database: company.db
+          save_args:
+            materialized: table
+            mode: append
+
+        motorbikes:
+          type: ibis.TableDataset
+          table_name: motorbikes
+          connection:
+            backend: duckdb
+            database: company.db
+          save_args:
+            materialized: view
+            mode: overwrite
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
-    ```python
-    import ibis
-    from kedro_datasets.ibis import TableDataset
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>> import ibis
+        >>> from kedro_datasets.ibis import TableDataset
+        >>>
+        >>> data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
+        >>> dataset = TableDataset(
+        ...     table_name="test",
+        ...     connection={"backend": "duckdb", "database": tmp_path / "file.db"},
+        ...     save_args={"materialized": "table", "mode": "overwrite"},
+        ... )
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
+        >>> assert data.execute().equals(reloaded.execute())
 
-    dataset = TableDataset(
-        table_name="test",
-        connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        save_args={"materialized": "table", "mode": "overwrite"},
-    )
-    dataset.save(data)
-    reloaded = dataset.load()
-    assert data.execute().equals(reloaded.execute())
-    ```
     """
 
     DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {
@@ -173,7 +175,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             self._mode = self._save_args.pop("mode")
 
     def _connect(self) -> BaseBackend:
-        import ibis
+        import ibis  # noqa: PLC0415
 
         config = deepcopy(self._connection_config)
         # If credentials is a string, treat as connection string

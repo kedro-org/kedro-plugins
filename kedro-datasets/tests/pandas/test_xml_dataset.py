@@ -94,7 +94,7 @@ class TestXMLDataset:
 
     def test_load_missing_file(self, xml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset XMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.xml_dataset.XMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             xml_dataset.load()
 
@@ -172,7 +172,7 @@ class TestXMLDatasetVersioned:
 
     def test_no_versions(self, versioned_xml_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for XMLDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.xml_dataset.XMLDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_xml_dataset.load()
 
@@ -187,7 +187,7 @@ class TestXMLDatasetVersioned:
         corresponding hdf file for a given save version already exists."""
         versioned_xml_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for XMLDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.xml_dataset.XMLDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -206,7 +206,7 @@ class TestXMLDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match "
-            rf"load version '{load_version}' for XMLDataset\(.+\)"
+            rf"load version '{load_version}' for kedro_datasets.pandas.xml_dataset.XMLDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_xml_dataset.save(dummy_dataframe)

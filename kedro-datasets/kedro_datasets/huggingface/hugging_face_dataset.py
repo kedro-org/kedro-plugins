@@ -11,32 +11,27 @@ class HFDataset(AbstractDataset):
     """``HFDataset`` loads Hugging Face datasets
     using the `datasets <https://pypi.org/project/datasets>`_ library.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
 
-    ```yaml
-    yelp_reviews:
-        type: kedro_hf_datasets.HFDataset
-        dataset_name: yelp_review_full
-    ```
+        ```yaml
+        yelp_reviews:
+          type: kedro_hf_datasets.HFDataset
+          dataset_name: yelp_review_full
+        ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
-    ```python
-    from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
-    disable_progress_bar()
-    set_verbosity(ERROR)
-
-    from kedro_datasets.huggingface import HFDataset
-    dataset = HFDataset(dataset_name="openai_humaneval")
-    ds = dataset.load()
-
-    # Output:
-    # Downloading and preparing dataset ...
-    # Dataset ...
-
-    assert "test" in ds
-    assert len(ds["test"]) == 164
-    ```
+        >>> from datasets.utils.logging import ERROR, disable_progress_bar, set_verbosity
+        >>> from kedro_datasets.huggingface import HFDataset
+        >>>
+        >>> disable_progress_bar()  # for doctest to pass
+        >>> set_verbosity(ERROR)  # for doctest to pass
+        >>>
+        >>> dataset = HFDataset(dataset_name="openai_humaneval")
+        >>> ds = dataset.load()
+        >>> assert "test" in ds
+        >>> assert len(ds["test"]) == 164
 
     """
 
@@ -52,7 +47,8 @@ class HFDataset(AbstractDataset):
         self.metadata = metadata
 
     def load(self):
-        return load_dataset(self.dataset_name, **self._dataset_kwargs)
+        # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 
     def save(self):
         raise NotImplementedError("Not yet implemented")

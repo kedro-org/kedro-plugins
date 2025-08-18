@@ -135,7 +135,7 @@ def _generate_spark_df_upsert_expected():
 
 class TestSparkHiveDataset:
     def test_cant_pickle(self):
-        import pickle
+        import pickle  # noqa: PLC0415
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(

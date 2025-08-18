@@ -35,6 +35,7 @@
               "pandas.FeatherDataset",
               "pandas.GBQQueryDataset",
               "pandas.GBQTableDataset",
+              "pandas.GenericDataset",
               "pandas.HDFDataset",
               "pandas.JSONDataset",
               "pandas.ParquetDataset",

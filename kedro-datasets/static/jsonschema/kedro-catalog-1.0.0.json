@@ -33,6 +33,7 @@
               "pandas.DeltaTableDataset",
               "pandas.ExcelDataset",
               "pandas.FeatherDataset",
+              "pandas.GBQQueryDataset",
               "pandas.GBQTableDataset",
               "pandas.HDFDataset",
               "pandas.JSONDataset",

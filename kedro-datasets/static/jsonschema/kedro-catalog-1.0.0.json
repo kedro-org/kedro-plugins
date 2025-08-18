@@ -158,6 +158,42 @@
           {
             "if": {
               "properties": {
+                "type": { "const": "dask.CSVDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a CSV file, CSV collection, or directory of a multipart CSV. Supports protocols like `s3://`, `gcs://`, etc."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional options for `dask.dataframe.read_csv`. See: https://docs.dask.org/en/stable/generated/dask.dataframe.read_csv.html"
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional options for `dask.dataframe.to_csv`. See: https://docs.dask.org/en/stable/generated/dask.dataframe.to_csv.html"
+                },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to access the underlying filesystem. E.g., for `GCSFileSystem`: {\"token\": None}."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Optional parameters for the backend file system driver. See: https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html#optional-parameters"
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
                 "type": {
                   "const": "dask.ParquetDataset"
                 }
@@ -978,6 +1014,54 @@
           {
             "if": {
               "properties": {
+                "type": { "const": "pandas.GBQQueryDataset" }
+              }
+            },
+            "then": {
+              "required": ["sql"],
+              "properties": {
+                "sql": {
+                  "type": "string",
+                  "description": "The SQL query statement to execute on Google BigQuery."
+                },
+                "project": {
+                  "type": ["string", "null"],
+                  "description": "Google BigQuery Account project ID. Optional if available from the environment."
+                },
+                "credentials": {
+                  "type": ["object", "string", "null"],
+                  "description": "Credentials for accessing Google APIs. Can be a dictionary, a path to a service account key JSON file, or a `google.auth.credentials.Credentials` object."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Pandas options for loading BigQuery table into a DataFrame. See: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html"
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor (e.g., `{\"project\": \"my-project\"}` for `GCSFileSystem`)."
+                },
+                "filepath": {
+                  "type": ["string", "null"],
+                  "description": "Path to a file containing the SQL query statement. If provided, `sql` must not be set."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              },
+              "oneOf": [
+                {
+                  "required": ["sql"]
+                },
+                {
+                  "required": ["filepath"]
+                }
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
                 "type": {
                   "const": "pandas.GBQTableDataset"
                 }
@@ -1253,7 +1337,7 @@
             "if": {
               "properties": {
                 "type": {
-                  "const": "IncrementalDataset"
+                  "const": "partitions.IncrementalDataset"
                 }
               }
             },
@@ -1305,7 +1389,7 @@
             "if": {
               "properties": {
                 "type": {
-                  "const": "PartitionedDataset"
+                  "const": "partitions.PartitionedDataset"
                 }
               }
             },
@@ -1758,6 +1842,82 @@
                   "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
                 }
               }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "spark.DeltaTableDataset" }
+              }
+            },
+            "then": {
+              "required": ["filepath"],
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Filepath in POSIX format to a Delta table. When using Databricks, specify paths starting with `/dbfs/mnt` for mount points."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": { "const": "spark.GBQQueryDataset" }
+              }
+            },
+            "then": {
+              "required": ["materialization_dataset"],
+              "properties": {
+                "materialization_dataset": {
+                  "type": "string",
+                  "description": "The name of the dataset to materialize the query results."
+                },
+                "sql": {
+                  "type": ["string", "null"],
+                  "description": "The SQL query to execute on Google BigQuery."
+                },
+                "filepath": {
+                  "type": ["string", "null"],
+                  "description": "Path to a file containing the SQL query statement. If provided, `sql` must not be set."
+                },
+                "materialization_project": {
+                  "type": ["string", "null"],
+                  "description": "The name of the project to materialize the query results. Optional if set in credentials."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to Spark DataFrameReader load method. See: https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html"
+                },
+                "bq_credentials": {
+                  "type": "object",
+                  "description": "Credentials to authenticate Spark session with Google BigQuery. Must contain one of the keys: 'base64', 'file', or 'json'."
+                },
+                "fs_credentials": {
+                  "type": "object",
+                  "description": "Credentials to authenticate with the filesystem. Passed directly to `fsspec.filesystem` constructor."
+                },
+                "fs_args": {
+                  "type": "object",
+                  "description": "Extra arguments for the filesystem class constructor."
+                },
+                "metadata": {
+                  "type": ["object", "null"],
+                  "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
+                }
+              },
+              "oneOf": [
+                {
+                  "required": ["sql"]
+                },
+                {
+                  "required": ["filepath"]
+                }
+              ]
             }
           },
           {

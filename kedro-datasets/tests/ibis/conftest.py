@@ -5,7 +5,7 @@ from unittest import mock
 # accessed via attribute lookup during tests (for example, ibis.mssql
 # tries to import pyodbc which may not be installed in the test env).
 # Creating module attributes here prevents ibis.__getattr__ from being
-# invoked by tests that call mocker.patch("ibis.<backend>").
+# invoked by tests that call mocker.patch("ibis.<backend>")...
 
 _IBIS_BACKENDS_TO_STUB = ("mssql",)
 

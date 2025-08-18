@@ -157,7 +157,11 @@ class TestTableDataset:
             TableDataset(
                 table_name="conflict",
                 connection={"backend": "duckdb", "database": database},
-                save_args={"materialized": "table", "mode": "append", "overwrite": True},
+                save_args={
+                    "materialized": "table",
+                    "mode": "append",
+                    "overwrite": True,
+                },
             )
 
     @pytest.mark.parametrize("legacy_overwrite", [True, False])
@@ -199,7 +203,9 @@ class TestTableDataset:
         # Smoke test load path by creating then reloading
         df = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
         ds.save(df)
-        assert_frame_equal(ds.load().execute().reset_index(drop=True), df.reset_index(drop=True))
+        assert_frame_equal(
+            ds.load().execute().reset_index(drop=True), df.reset_index(drop=True)
+        )
 
     def test_describe_includes_backend_mode_and_materialized(self, table_dataset):
         """_describe should expose backend, mode and materialized; nested args exclude database."""

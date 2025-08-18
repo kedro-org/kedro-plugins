@@ -108,11 +108,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 (e.g. `("catalog", "database")`) or a dotted string path
                 (e.g. `"catalog.database"`) to reference a table or view
                 in a multi-level table hierarchy.
-            credentials: (Preferred) Connection information for the Ibis
-            backend. Can be a connection string or a dict of parameters.
-            Supersedes `connection`.
-            connection: (Deprecated) Configuration for connecting to an
-            Ibis backend. Use `credentials` instead.
+            credentials: (Preferred) Connection information for the Ibis backend.
+                Can be a connection string or a dict of parameters. Supersedes
+                `connection`.
+            connection: (Deprecated) Configuration for connecting to an Ibis
+                backend. Use `credentials` instead.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -127,7 +127,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 - _"ignore"_: Silently ignore the operation if the table already exists.
                 These options are similar to those in Spark's DataFrameWriter (see: https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.mode.html).
         metadata: Any arbitrary metadata. This is ignored by Kedro,
-                but may be consumed by users or external plugins.
+            but may be consumed by users or external plugins.
         """
 
         if credentials is not None and connection is not None:

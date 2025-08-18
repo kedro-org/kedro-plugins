@@ -131,7 +131,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         """
 
         if credentials is not None and connection is not None:
-            import warnings
+            import warnings  # noqa: PLC0415
 
             warnings.warn(
                 "Both 'credentials' and deprecated 'connection' were provided. 'credentials' will be used.",

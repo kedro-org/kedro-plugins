@@ -166,6 +166,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         # Map legacy overwrite if present
         if "overwrite" in self._save_args:
             legacy = self._save_args.pop("overwrite")
+            # remove any lingering 'mode' key from defaults to avoid leaking into writer kwargs
+            self._save_args.pop("mode", None)
             self._mode = "overwrite" if legacy else "error"
         else:
             self._mode = self._save_args.pop("mode")
@@ -192,9 +194,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def load(self) -> ir.Table:
         return self.connection.table(self._table_name, **self._load_args)
 
-    def save(self, data: pd.DataFrame) -> None:
-        #check if data is empty
-        if data.empty:
+    def save(self, data: pd.DataFrame | ir.Table) -> None:
+        # treat empty pandas DataFrame as a no-op; ibis tables don't have .empty
+        if isinstance(data, pd.DataFrame) and getattr(data, "empty", False):
             return
         writer = getattr(self.connection, f"create_{self._materialized}")
         if self._mode == "append":

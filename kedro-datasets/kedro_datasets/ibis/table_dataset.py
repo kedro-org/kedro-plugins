@@ -140,11 +140,19 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._table_name = table_name
         self._database = database
-        # Prefer credentials if provided, else fallback to connection
+        # Prefer credentials if provided, else fallback to connection.
+        # Ensure _connection_config is always a dict[str, Any] for type stability.
+        self._connection_config: dict[str, Any]
         if credentials is not None:
-            self._connection_config = credentials
+            if isinstance(credentials, str):
+                # Treat string credentials as a connection string under key 'con'
+                self._connection_config = {"con": credentials}
+            else:
+                self._connection_config = deepcopy(credentials)
         else:
-            self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+            self._connection_config = deepcopy(
+                connection or self.DEFAULT_CONNECTION_CONFIG
+            )
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.

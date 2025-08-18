@@ -1,5 +1,6 @@
 import duckdb
 import ibis
+import pandas as pd
 import pytest
 from packaging.version import Version
 from pandas.testing import assert_frame_equal
@@ -99,6 +100,124 @@ class TestTableDataset:
         assert not table_dataset.exists()
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"materialized": "table", "mode": "append"}],
+        indirect=True,
+    )
+    def test_save_mode_append(self, table_dataset):
+        """Saving with mode=append should add rows to an existing table."""
+        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
+        df2 = pd.DataFrame({"col1": [4], "col2": [5], "col3": [6]})
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        reloaded = table_dataset.load().execute()
+        assert len(reloaded) == len(df1) + len(df2)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {"materialized": "table", "mode": "error"},
+            {"materialized": "table", "mode": "errorifexists"},
+        ],
+        indirect=True,
+    )
+    def test_save_mode_error_variants(self, table_dataset):
+        """Saving with error/errorifexists should raise when table exists."""
+        df = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
+        table_dataset.save(df)
+        with pytest.raises(Exception):
+            table_dataset.save(df)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"materialized": "table", "mode": "ignore"}],
+        indirect=True,
+    )
+    def test_save_mode_ignore(self, table_dataset):
+        """Saving with ignore should not change existing table."""
+        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
+        df2 = pd.DataFrame({"col1": [10], "col2": [20], "col3": [30]})
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        reloaded = table_dataset.load().execute()
+        # Should remain as first save only
+        assert_frame_equal(reloaded.reset_index(drop=True), df1.reset_index(drop=True))
+
+    def test_legacy_overwrite_conflict_raises(self, database):
+        """Providing both mode and overwrite should raise a ValueError."""
+        with pytest.raises(ValueError):
+            TableDataset(
+                table_name="conflict",
+                connection={"backend": "duckdb", "database": database},
+                save_args={"materialized": "table", "mode": "append", "overwrite": True},
+            )
+
+    @pytest.mark.parametrize("legacy_overwrite", [True, False])
+    def test_legacy_overwrite_behavior(self, database, legacy_overwrite):
+        """Legacy overwrite should map to overwrite or error behavior."""
+        ds = TableDataset(
+            table_name="legacy_overwrite",
+            connection={"backend": "duckdb", "database": database},
+            save_args={"materialized": "table", "overwrite": legacy_overwrite},
+        )
+        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
+        df2 = pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]})
+
+        ds.save(df1)
+        if legacy_overwrite:
+            # Should overwrite existing table with new contents
+            ds.save(df2)
+            out = ds.load().execute().reset_index(drop=True)
+            assert_frame_equal(out, df2.reset_index(drop=True))
+        else:
+            # Should raise on second save when table exists
+            with pytest.raises(Exception):
+                ds.save(df2)
+
+    def test_credentials_precedence_and_warning(self, database):
+        """When both are given, credentials take precedence and warn."""
+        with pytest.warns(DeprecationWarning):
+            ds = TableDataset(
+                table_name="cred_pref",
+                database=None,
+                credentials={"backend": "duckdb", "database": database},
+                connection={"backend": "polars"},
+                save_args={"materialized": "table"},
+            )
+
+        # Uses backend from credentials
+        desc = ds._describe()
+        assert desc["backend"] == "duckdb"
+        # Smoke test load path by creating then reloading
+        df = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
+        ds.save(df)
+        assert_frame_equal(ds.load().execute().reset_index(drop=True), df.reset_index(drop=True))
+
+    def test_describe_includes_backend_mode_and_materialized(self, table_dataset):
+        """_describe should expose backend, mode and materialized; nested args exclude database."""
+        desc = table_dataset._describe()
+        assert {"backend", "mode", "materialized"}.issubset(desc.keys())
+        assert "database" in desc
+        # database key should not be duplicated inside nested args
+        assert "database" not in desc["load_args"]
+        assert "database" not in desc["save_args"]
+
+    def test_save_empty_dataframe_is_noop(self, database):
+        """Saving an empty DataFrame should be a no-op (no table created)."""
+        ds = TableDataset(
+            table_name="empty_noop",
+            connection={"backend": "duckdb", "database": database},
+            save_args={"materialized": "table"},
+        )
+        empty_df = pd.DataFrame({"col1": [], "col2": [], "col3": []})
+        ds.save(empty_df)
+        assert not ds.exists()
 
     @pytest.mark.parametrize("load_args", [{"database": "test"}], indirect=True)
     def test_load_extra_params(self, table_dataset, load_args):

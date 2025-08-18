@@ -28,7 +28,7 @@
               "networkx.GMLDataset",
               "networkx.GraphMLDataset",
               "networkx.JSONDataset",
-              "openxlml.DocxDataset",
+              "openxml.DocxDataset",
               "pandas.CSVDataset",
               "pandas.DeltaTableDataset",
               "pandas.ExcelDataset",

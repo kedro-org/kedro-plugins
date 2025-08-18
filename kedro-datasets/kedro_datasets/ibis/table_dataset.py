@@ -1,5 +1,4 @@
 """Provide data loading and saving functionality for Ibis's backends."""
-
 from __future__ import annotations
 
 from copy import deepcopy
@@ -53,7 +52,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         >>> dataset = TableDataset(
         ...     table_name="test",
         ...     connection={"backend": "duckdb", "database": tmp_path / "file.db"},
-        ...     save_args={"materialized": "table", "mode": "overwrite"},
+        ...     save_args={"materialized": "table"},
         ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
@@ -125,9 +124,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 - _"append"_: Append contents of the new data to the existing table (does not overwrite).
                 - _"error"_ or _"errorifexists"_: Throw an exception if the table already exists.
                 - _"ignore"_: Silently ignore the operation if the table already exists.
-                These options are similar to those in Spark's DataFrameWriter (see: https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.mode.html).
-        metadata: Any arbitrary metadata. This is ignored by Kedro,
-            but may be consumed by users or external plugins.
+            metadata: Any arbitrary metadata. This is ignored by Kedro,
+                but may be consumed by users or external plugins.
         """
 
         if credentials is not None and connection is not None:

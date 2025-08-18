@@ -52,6 +52,8 @@
               "polars.LazyPolarsDataset",
               "redis.PickleDataset",
               "snowflake.SnowparkTableDataset",
+              "spark.DeltaTableDataset",
+              "spark.GBQQueryDataset",
               "spark.SparkDataset",
               "spark.SparkHiveDataset",
               "spark.SparkJDBCDataset",

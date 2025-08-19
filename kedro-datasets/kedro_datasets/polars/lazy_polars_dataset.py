@@ -21,6 +21,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+from pyarrow.fs import FSSpecHandler, PyFileSystem
 
 ACCEPTED_FILE_FORMATS = ["csv", "parquet"]
 
@@ -202,6 +203,7 @@ class LazyPolarsDataset(
 
         if self._protocol == "file":
             # With local filesystems, we can use Polar's build-in I/O method:
+            self._load_args.pop("partitioning", None)
             load_method = getattr(pl, f"scan_{self._file_format}", None)
             return load_method(load_path, **self._load_args)  # type: ignore[misc]
 
@@ -225,9 +227,15 @@ class LazyPolarsDataset(
         # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
         save_method = getattr(collected_data, f"write_{self._file_format}", None)
         if save_method:
-            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                save_method(file=fs_file, **self._save_args)
-
+            if self._save_args.get("use_pyarrow") is True:
+                pyarrow_opts = self._save_args.get("pyarrow_options", {})
+                pa_fs = PyFileSystem(FSSpecHandler(self._fs))
+                pyarrow_opts["filesystem"] = pa_fs
+                self._save_args["pyarrow_options"] = pyarrow_opts
+                save_method(file=save_path, **self._save_args)
+            else:
+                with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+                    save_method(file=fs_file, **self._save_args)
                 self._invalidate_cache()
         # How the LazyPolarsDataset logic is currently written with
         # ACCEPTED_FILE_FORMATS and a check in the `__init__` method,

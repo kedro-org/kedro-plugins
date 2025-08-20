@@ -17,13 +17,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function extractFilePath(text) {
         // Look for patterns like "Source code in kedro_datasets/..." or direct file paths
         const sourceMatch = text.match(/Source code in ([^\s]+\.py)/);
+        let filePath = null;
+        
         if (sourceMatch) {
-            return sourceMatch[1];
+            filePath = sourceMatch[1];
+        } else if (text.includes('kedro_datasets') && text.endsWith('.py')) {
+            filePath = text.trim();
         }
-        // Check if it's already a file path
-        if (text.includes('kedro_datasets') && text.endsWith('.py')) {
-            return text.trim();
+        
+        if (filePath) {
+            // Remove any existing kedro-datasets/ prefix to avoid duplication
+            filePath = filePath.replace(/^kedro-datasets\//, '');
+            return filePath;
         }
+        
         return null;
     }
 

@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const elementText = element.textContent || element.innerText;
                     if (elementText.includes('Source code in') && elementText.includes('.py')) {
                         sourceFilePath = extractFilePath(elementText);
-                        console.log('Found source file path:', sourceFilePath);
                         break;
                     }
                 }
@@ -87,9 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Make existing source paths clickable
     function makeSourcePathsClickable() {
-        console.log('Making source paths clickable...');
         const sourceElements = document.querySelectorAll('.doc-source-path, .doc-source, [class*="source"]');
-        console.log(`Found ${sourceElements.length} source elements`);
         
         sourceElements.forEach(function(element) {
             const text = element.textContent || element.innerText;
@@ -119,4 +116,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     setTimeout(runAllFunctions, 100)
+
+    // Also run when content is dynamically loaded
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                setTimeout(runAllFunctions, 100);
+            }
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });

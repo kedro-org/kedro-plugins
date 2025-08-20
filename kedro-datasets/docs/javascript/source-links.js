@@ -7,25 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sourceButton.target = '_blank';
         sourceButton.rel = 'noopener noreferrer';
         sourceButton.textContent = '[source]';
-        sourceButton.style.cssText = `
-            margin-left: 0.5em;
-            font-size: 0.85em;
-            color: #1976d2;
-            text-decoration: none;
-            border: 1px solid #1976d2;
-            padding: 2px 6px;
-            border-radius: 3px;
-            background: transparent;
-            font-family: monospace;
-        `;
-        sourceButton.addEventListener('mouseover', function() {
-            this.style.backgroundColor = '#1976d2';
-            this.style.color = 'white';
-        });
-        sourceButton.addEventListener('mouseout', function() {
-            this.style.backgroundColor = 'transparent';
-            this.style.color = '#1976d2';
-        });
+        sourceButton.className = 'source-button';
         return sourceButton;
     }
 
@@ -45,8 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add [source] buttons to class signatures
     function addSourceButtonsToSignatures() {
-        console.log('Looking for signatures...');
-        
         // Try multiple selectors to find the signature elements
         const possibleSelectors = [
             '.doc-signature',
@@ -68,9 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const elements = document.querySelectorAll(selector);
             signatures = signatures.concat(Array.from(elements));
         });
-        
-        console.log(`Found ${signatures.length} potential signature elements`);
-        
+                
         signatures.forEach(function(signature) {
             // Skip if already has a source button
             if (signature.querySelector('a[href*="github.com"]')) {
@@ -78,12 +56,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const text = signature.textContent || signature.innerText;
-            console.log('Checking signature text:', text);
             
             // Look for class names that match our datasets - more flexible regex
             const classMatch = text.match(/(kedro_datasets(?:_experimental)?[\.\w]*)/);
             if (classMatch) {
-                console.log('Found class match:', classMatch[1]);
                 
                 // Find the corresponding source path in the document
                 const allElements = document.querySelectorAll('*');
@@ -102,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const githubUrl = `https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/${sourceFilePath}`;
                     const sourceButton = createSourceButton(githubUrl);
                     
-                    console.log('Adding source button to:', signature.tagName);
                     // Add the button to the signature
                     signature.appendChild(sourceButton);
                 }
@@ -129,8 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 link.target = '_blank';
                 link.rel = 'noopener noreferrer';
                 link.textContent = text;
-                link.style.textDecoration = 'none';
-                link.style.color = 'inherit';
+                link.className = 'source-link';
                 
                 // Replace the original text with the link
                 element.innerHTML = '';
@@ -139,63 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle mkdocstrings generated source code spans
-    function handleSourceSpans() {
-        console.log('Handling source spans...');
-        const codeSpans = document.querySelectorAll('span, p, div');
-        let foundSpans = 0;
-        
-        codeSpans.forEach(function(span) {
-            const text = span.textContent || span.innerText;
-            if (text.includes('kedro_datasets/') && text.includes('.py')) {
-                foundSpans++;
-                const filePath = text.trim();
-                if (filePath.endsWith('.py')) {
-                    console.log('Converting span to link:', filePath);
-                    const githubUrl = `https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/${filePath}`;
-                    
-                    const link = document.createElement('a');
-                    link.href = githubUrl;
-                    link.target = '_blank';
-                    link.rel = 'noopener noreferrer';
-                    link.textContent = text;
-                    link.style.color = '#1976d2';
-                    link.style.textDecoration = 'underline';
-                    
-                    span.innerHTML = '';
-                    span.appendChild(link);
-                }
-            }
-        });
-        console.log(`Found ${foundSpans} source spans`);
-    }
-
-    // Run all functions with multiple attempts
     function runAllFunctions() {
-        console.log('Running source link functions...');
         addSourceButtonsToSignatures();
         makeSourcePathsClickable();
-        handleSourceSpans();
     }
 
-    // Try multiple times with different delays
-    setTimeout(runAllFunctions, 100);
-    setTimeout(runAllFunctions, 500);
-    setTimeout(runAllFunctions, 1000);
-    setTimeout(runAllFunctions, 2000);
-
-    // Also run when content is dynamically loaded
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                console.log('Content changed, re-running source link functions...');
-                setTimeout(runAllFunctions, 100);
-            }
-        });
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    setTimeout(runAllFunctions, 100)
 });

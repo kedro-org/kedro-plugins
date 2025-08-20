@@ -106,7 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 link.className = 'source-link';
 
                 // Replace the original text with the link
-                element.innerHTML = '';
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
                 element.appendChild(link);
             }
         });

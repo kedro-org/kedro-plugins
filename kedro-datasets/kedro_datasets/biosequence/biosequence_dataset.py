@@ -16,7 +16,7 @@ class BioSequenceDataset(AbstractDataset[list, list]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
     Examples:
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from Bio import SeqIO
         >>> from io import StringIO

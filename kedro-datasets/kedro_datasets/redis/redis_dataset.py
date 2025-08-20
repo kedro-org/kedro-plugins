@@ -19,7 +19,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
     a value.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         my_python_object: # simple example
@@ -38,7 +38,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             ex: 10
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.redis import PickleDataset

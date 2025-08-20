@@ -29,7 +29,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     for loading and saving csv files.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cars:
@@ -45,7 +45,7 @@ class FeatherDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           credentials: dev_s3
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import FeatherDataset

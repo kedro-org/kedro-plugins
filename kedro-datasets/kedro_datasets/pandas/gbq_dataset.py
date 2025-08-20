@@ -40,7 +40,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
     It uses pandas-gbq to read and write from/to BigQuery table.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         vehicles:
@@ -55,7 +55,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
             chunk_size: 100
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import GBQTableDataset
@@ -197,7 +197,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
 
@@ -210,7 +210,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         reauth: True
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
     from kedro_datasets.pandas import GBQQueryDataset

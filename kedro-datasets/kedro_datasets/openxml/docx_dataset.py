@@ -25,7 +25,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
     filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle the .docx file.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cats:
@@ -33,7 +33,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
           filepath: soya.docx
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from docx import Document
         >>> from kedro_datasets.openxml import DocxDataset

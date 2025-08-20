@@ -96,7 +96,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
     shuttle_id_dataset:
         type: polars.PolarsDatabaseDataset
@@ -112,7 +112,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         pool_size: 10 # additional parameters
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
     >>> from pathlib import Path
     >>> import polars as pl

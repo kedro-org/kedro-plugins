@@ -68,7 +68,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             zero_based: False
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import numpy as np
         >>> from kedro_datasets.svmlight import SVMLightDataset

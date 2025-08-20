@@ -44,7 +44,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
             compress: lz4
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pickle import PickleDataset

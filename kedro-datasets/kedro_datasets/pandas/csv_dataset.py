@@ -52,7 +52,7 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           credentials: dev_s3
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.pandas import CSVDataset
         >>> import pandas as pd

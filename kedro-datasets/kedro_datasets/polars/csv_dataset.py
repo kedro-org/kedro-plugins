@@ -46,7 +46,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
           credentials: dev_s3
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import sys
         >>>

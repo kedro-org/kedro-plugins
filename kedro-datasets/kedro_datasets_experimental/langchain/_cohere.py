@@ -33,7 +33,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         cohere_api_key: <cohere-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import ChatCohereDataset

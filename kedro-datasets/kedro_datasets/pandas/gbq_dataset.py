@@ -55,7 +55,7 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
             chunk_size: 100
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import GBQTableDataset
@@ -210,7 +210,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         reauth: True
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
     from kedro_datasets.pandas import GBQQueryDataset

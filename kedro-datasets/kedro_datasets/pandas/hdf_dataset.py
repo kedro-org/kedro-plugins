@@ -36,7 +36,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           key: data
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import HDFDataset

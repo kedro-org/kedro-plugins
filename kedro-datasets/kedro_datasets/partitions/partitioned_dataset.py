@@ -69,7 +69,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
           save_lazily: True
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset

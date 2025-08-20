@@ -31,7 +31,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               aws_secret_access_key: YOUR_SECRET
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import dask.dataframe as dd
         >>> import numpy as np

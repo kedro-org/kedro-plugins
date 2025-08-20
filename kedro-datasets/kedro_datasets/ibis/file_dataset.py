@@ -45,7 +45,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
             backend: polars
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import ibis
         >>> from kedro_datasets.ibis import FileDataset

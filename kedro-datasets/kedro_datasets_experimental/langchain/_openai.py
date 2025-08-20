@@ -66,7 +66,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
         openai_api_key: <openai-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
@@ -117,7 +117,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         openai_api_key: <openai-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import ChatOpenAIDataset

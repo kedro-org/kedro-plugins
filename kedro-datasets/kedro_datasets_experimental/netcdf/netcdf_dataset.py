@@ -41,7 +41,7 @@ class NetCDFDataset(AbstractDataset):
             parallel: True
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
     from kedro_datasets.netcdf import NetCDFDataset
     import xarray as xr

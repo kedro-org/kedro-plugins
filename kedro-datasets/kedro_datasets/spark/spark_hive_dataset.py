@@ -39,7 +39,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
           write_mode: overwrite
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.spark import SparkHiveDataset
         >>> from pyspark.sql import SparkSession

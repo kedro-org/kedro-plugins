@@ -31,7 +31,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
           filepath: data/02_intermediate/data.parquet
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from delta import DeltaTable
         >>> from kedro_datasets.spark import DeltaTableDataset, SparkDataset

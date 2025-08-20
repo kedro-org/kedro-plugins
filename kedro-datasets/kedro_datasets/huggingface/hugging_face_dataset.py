@@ -20,7 +20,7 @@ class HFDataset(AbstractDataset):
           dataset_name: yelp_review_full
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from datasets.utils.logging import ERROR, disable_progress_bar, set_verbosity
         >>> from kedro_datasets.huggingface import HFDataset

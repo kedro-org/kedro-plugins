@@ -25,7 +25,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
           model_name: Twitter/twhin-bert-base
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
         >>>

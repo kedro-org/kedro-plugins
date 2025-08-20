@@ -57,7 +57,7 @@ class ExcelDataset(
           filepath: data/01_raw/shuttles.xlsx
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import ExcelDataset
@@ -79,7 +79,7 @@ class ExcelDataset(
             sheet_name: [Sheet1, Sheet2, Sheet3]
         ```
 
-        For a multi-sheet Excel file, using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        For a multi-sheet Excel file, using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import ExcelDataset

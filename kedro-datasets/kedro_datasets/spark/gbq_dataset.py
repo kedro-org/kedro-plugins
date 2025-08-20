@@ -40,7 +40,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             key: value
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.spark import GBQQueryDataset
         >>>

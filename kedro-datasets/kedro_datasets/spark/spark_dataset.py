@@ -120,7 +120,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
           file_format: parquet
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.spark import SparkDataset
         >>> from pyspark.sql import SparkSession

@@ -73,7 +73,7 @@ class ExternalTableDataset(BaseTableDataset):
         dataframe_type: pandas
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
     from kedro_datasets.databricks import ExternalTableDataset

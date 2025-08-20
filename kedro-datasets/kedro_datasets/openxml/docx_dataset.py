@@ -33,7 +33,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
           filepath: soya.docx
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from docx import Document
         >>> from kedro_datasets.openxml import DocxDataset

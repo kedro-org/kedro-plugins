@@ -36,7 +36,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
           credentials: my_gcp_credentials
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.json import JSONDataset
         >>>

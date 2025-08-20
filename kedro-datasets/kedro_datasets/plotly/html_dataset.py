@@ -33,7 +33,7 @@ class HTMLDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
             auto_open: False
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import plotly.express as px
         >>> from kedro_datasets.plotly import HTMLDataset

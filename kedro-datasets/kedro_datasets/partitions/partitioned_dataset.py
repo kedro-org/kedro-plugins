@@ -48,7 +48,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving).
+    It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving).
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -189,7 +189,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
                 is passed as data to save, the partition’s data will not be materialised until it is time to write.
                 Lazy saving example:
-                https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
+                https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 

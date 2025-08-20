@@ -25,7 +25,7 @@ class DartsTorchModelDataset(
     The underlying functionality is supported by, and passes arguments through to,
     the Darts library's model load and save methods.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
 

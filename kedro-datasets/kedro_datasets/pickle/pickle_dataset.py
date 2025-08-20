@@ -27,7 +27,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     supports all allowed options for loading and saving pickle files.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         test_model: # simple example without compression

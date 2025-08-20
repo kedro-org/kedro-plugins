@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class NetCDFDataset(AbstractDataset):
     """`NetCDFDataset` loads and saves data to a local netcdf (.nc) file.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
     single-file:
         type: netcdf.NetCDFDataset

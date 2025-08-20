@@ -24,7 +24,7 @@ class DeltaTableDataset(AbstractDataset):
     matching partition and insert your data as new files.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         boats_filesystem:

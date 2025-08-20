@@ -200,7 +200,7 @@ class GeneratorVideo(AbstractVideo):
 class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     """`VideoDataset` loads/saves video data from a given filepath as a sequence of `PIL.Image.Image` using OpenCV.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
     ```yaml
     cars:

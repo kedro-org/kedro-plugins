@@ -51,7 +51,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving).
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
 

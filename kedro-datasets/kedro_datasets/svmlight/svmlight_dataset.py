@@ -45,7 +45,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     libsvm command line programs.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         svm_dataset:

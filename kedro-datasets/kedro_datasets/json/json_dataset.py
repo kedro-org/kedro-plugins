@@ -25,7 +25,7 @@ class JSONDataset(AbstractVersionedDataset[Any, Any]):
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cars:

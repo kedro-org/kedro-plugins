@@ -18,7 +18,7 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataset`` loads data into DeltaTable objects.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         weather@spark:

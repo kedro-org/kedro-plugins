@@ -18,7 +18,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cars:

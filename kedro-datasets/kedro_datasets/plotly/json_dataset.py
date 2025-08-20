@@ -26,7 +26,7 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     underlying filesystem (e.g.: local, S3, GCS).
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         scatter_plot:

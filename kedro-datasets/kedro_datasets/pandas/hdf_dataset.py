@@ -26,7 +26,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         hdf_dataset:

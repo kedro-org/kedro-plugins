@@ -107,7 +107,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     symmetric.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         shuttles_table_dataset:
@@ -306,7 +306,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     To save data to a SQL server use ``SQLTableDataset``.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         shuttle_id_dataset:

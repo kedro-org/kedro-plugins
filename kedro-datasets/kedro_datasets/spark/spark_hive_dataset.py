@@ -29,7 +29,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
       leveraging Spark DataFrame execution plan checkpointing.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         hive_dataset:

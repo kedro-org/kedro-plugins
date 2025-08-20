@@ -88,7 +88,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     """``SparkDataset`` loads and saves Spark dataframes.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         weather:

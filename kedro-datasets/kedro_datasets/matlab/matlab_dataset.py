@@ -25,7 +25,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """`MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cars:
@@ -36,7 +36,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
           credentials: my_gcp_credentials
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import numpy as np
         >>> from kedro_datasets.matlab import MatlabDataset

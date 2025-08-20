@@ -25,7 +25,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
     """``StudyDataset`` loads/saves data from/to an optuna Study.
 
     Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    `YAML API <https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/>`_:
 
     .. code-block:: yaml
 

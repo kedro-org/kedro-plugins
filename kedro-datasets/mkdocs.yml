@@ -1,11 +1,7 @@
 site_name: ""
 site_url: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 repo_name: kedro-org/kedro-plugins
-repo_url: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets
-
-# Source links configuration
-extra:
-  source_url: https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/
+edit_uri: blob/main/kedro-datasets/
 
 theme:
   name: material

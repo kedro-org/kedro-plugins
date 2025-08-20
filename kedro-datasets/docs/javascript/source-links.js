@@ -18,19 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Look for patterns like "Source code in kedro_datasets/..." or direct file paths
         const sourceMatch = text.match(/Source code in ([^\s]+\.py)/);
         let filePath = null;
-        
+
         if (sourceMatch) {
             filePath = sourceMatch[1];
         } else if (text.includes('kedro_datasets') && text.endsWith('.py')) {
             filePath = text.trim();
         }
-        
+
         if (filePath) {
             // Remove any existing kedro-datasets/ prefix to avoid duplication
             filePath = filePath.replace(/^kedro-datasets\//, '');
             return filePath;
         }
-        
+
         return null;
     }
 

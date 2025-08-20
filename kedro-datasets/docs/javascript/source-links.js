@@ -1,5 +1,7 @@
 // Make source code paths clickable and add [source] buttons
 document.addEventListener('DOMContentLoaded', function() {
+    const SOURCE_BUTTON_TIMEOUT_MS = 100;
+
     // Function to create a [source] button
     function createSourceButton(githubUrl) {
         const sourceButton = document.createElement('a');
@@ -115,13 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
         makeSourcePathsClickable();
     }
 
-    setTimeout(runAllFunctions, 100)
+    setTimeout(runAllFunctions, SOURCE_BUTTON_TIMEOUT_MS)
 
     // Also run when content is dynamically loaded
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                setTimeout(runAllFunctions, 100);
+                setTimeout(runAllFunctions, SOURCE_BUTTON_TIMEOUT_MS);
             }
         });
     });

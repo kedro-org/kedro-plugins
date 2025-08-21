@@ -72,7 +72,7 @@ plugins:
               - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
   - llmstxt:
       markdown_description: |
-        Kedro-Datasets provides a collection of data connectors for various file formats and storage systems, 
+        Kedro-Datasets provides a collection of data connectors for various file formats and storage systems,
         designed to work seamlessly with the Kedro framework's Data Catalog.
 
         This is a companion package to the main Kedro framework:

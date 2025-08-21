@@ -1,7 +1,6 @@
 site_name: ""
 site_url: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 repo_name: kedro-org/kedro-plugins
-repo_url: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets
 
 theme:
   name: material
@@ -100,6 +99,7 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_css:
+  - stylesheets/source-buttons.css
   - stylesheets/colors.css
   - stylesheets/globals.css
   - stylesheets/typography.css
@@ -112,6 +112,7 @@ extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
   - javascript/code-select.js
+  - javascript/source-links.js
 
 nav:
   - Welcome: https://docs.kedro.org/en/stable/

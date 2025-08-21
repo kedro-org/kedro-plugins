@@ -1,7 +1,6 @@
 site_name: ""
 site_url: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 repo_name: kedro-org/kedro-plugins
-edit_uri: blob/main/kedro-datasets/
 
 theme:
   name: material

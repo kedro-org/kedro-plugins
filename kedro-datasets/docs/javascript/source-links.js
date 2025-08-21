@@ -93,37 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Make existing source paths clickable
-    function makeSourcePathsClickable() {
-        const sourceElements = document.querySelectorAll('.doc-source-path, .doc-source, [class*="source"]');
-
-        sourceElements.forEach(function(element) {
-            const text = element.textContent || element.innerText;
-            const filePath = extractFilePath(text);
-
-            if (filePath) {
-                const githubUrl = `https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/${filePath}`;
-
-                // Create a clickable link
-                const link = document.createElement('a');
-                link.href = githubUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.textContent = text;
-                link.className = 'source-link';
-
-                // Replace the original text with the link
-                while (element.firstChild) {
-                    element.removeChild(element.firstChild);
-                }
-                element.appendChild(link);
-            }
-        });
-    }
 
     function runAllFunctions() {
         addSourceButtonsToSignatures();
-        makeSourcePathsClickable();
     }
 
     setTimeout(runAllFunctions, SOURCE_BUTTON_TIMEOUT_MS)

@@ -1,4 +1,6 @@
 # Upcoming Release
+
+# Release 8.1.0
 ## Major features and improvements
 
 - Added the following new experimental datasets:
@@ -11,6 +13,7 @@
 
 - Added primary key constraint to BaseTable.
 - Added save/load with `use_pyarrow=True` save_args for LazyPolarsDataset partitioned parquet files.
+- Updated the json schema for Kedro 1.0.0.
 
 ## Breaking Changes
 ## Community contributions

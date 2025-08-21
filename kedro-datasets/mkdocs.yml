@@ -70,6 +70,114 @@ plugins:
             import:
               - https://docs.kedro.org/en/stable/objects.inv
               - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+  - llmstxt:
+      markdown_description: |
+        Kedro-Datasets provides a collection of data connectors for various file formats and storage systems, 
+        designed to work seamlessly with the Kedro framework's Data Catalog.
+
+        This is a companion package to the main Kedro framework:
+        Main documentation: https://docs.kedro.org/en/stable/
+
+        Current version: 8.1.0
+        Last updated: 21/08/2025
+
+      full_output: llms-full.txt
+
+      sections:
+        Core Datasets Overview:
+          - index.md: Kedro Datasets documentation homepage
+
+        Core Data Format Datasets:
+          - api/kedro_datasets/pandas.CSVDataset.md: CSV file handling with pandas
+          - api/kedro_datasets/pandas.ExcelDataset.md: Excel file operations
+          - api/kedro_datasets/pandas.ParquetDataset.md: Efficient columnar storage format
+          - api/kedro_datasets/pandas.JSONDataset.md: JSON data handling
+          - api/kedro_datasets/pandas.XMLDataset.md: XML file processing
+          - api/kedro_datasets/pandas.HDFDataset.md: HDF5 file format support
+          - api/kedro_datasets/pandas.FeatherDataset.md: Fast feather format
+          - api/kedro_datasets/pandas.GenericDataset.md: Generic pandas operations
+          - api/kedro_datasets/json.JSONDataset.md: Native JSON handling
+          - api/kedro_datasets/yaml.YAMLDataset.md: YAML configuration files
+          - api/kedro_datasets/text.TextDataset.md: Plain text file operations
+          - api/kedro_datasets/pickle.PickleDataset.md: Python object serialization
+          - api/kedro_datasets/biosequence.BioSequenceDataset.md: Biological sequence data
+          - api/kedro_datasets/email.EmailMessageDataset.md: Email message handling
+          - api/kedro_datasets/matlab.MatlabDataset.md: MATLAB file support
+          - api/kedro_datasets/svmlight.SVMLightDataset.md: SVMLight format for ML
+          - api/kedro_datasets/openxml.DocxDataset.md: Microsoft Word documents
+
+        Database Datasets:
+          - api/kedro_datasets/pandas.SQLTableDataset.md: SQL table operations
+          - api/kedro_datasets/pandas.SQLQueryDataset.md: Custom SQL queries
+          - api/kedro_datasets/pandas.GBQTableDataset.md: Google BigQuery tables
+          - api/kedro_datasets/pandas.GBQQueryDataset.md: Google BigQuery queries
+          - api/kedro_datasets/snowflake.SnowparkTableDataset.md: Snowflake integration
+          - api/kedro_datasets/redis.PickleDataset.md: Redis key-value store
+
+        Big Data and Distributed Computing:
+          - api/kedro_datasets/spark.SparkDataset.md: Apache Spark DataFrames
+          - api/kedro_datasets/spark.SparkHiveDataset.md: Spark Hive tables
+          - api/kedro_datasets/spark.SparkJDBCDataset.md: Spark JDBC connections
+          - api/kedro_datasets/spark.SparkStreamingDataset.md: Spark streaming data
+          - api/kedro_datasets/spark.DeltaTableDataset.md: Delta Lake tables
+          - api/kedro_datasets/spark.GBQQueryDataset.md: Spark BigQuery integration
+          - api/kedro_datasets/databricks.ManagedTableDataset.md: Databricks managed tables
+          - api/kedro_datasets/dask.CSVDataset.md: Dask distributed CSV
+          - api/kedro_datasets/dask.ParquetDataset.md: Dask distributed Parquet
+          - api/kedro_datasets/polars.CSVDataset.md: High-performance Polars CSV
+          - api/kedro_datasets/polars.EagerPolarsDataset.md: Eager Polars DataFrames
+          - api/kedro_datasets/polars.LazyPolarsDataset.md: Lazy Polars evaluation
+          - api/kedro_datasets/pandas.DeltaTableDataset.md: Pandas Delta Lake support
+
+        Partitioned and Incremental Data:
+          - api/kedro_datasets/partitions.PartitionedDataset.md: Handle multiple files as one dataset
+          - api/kedro_datasets/partitions.IncrementalDataset.md: Process only new/changed data
+
+        Machine Learning and AI:
+          - api/kedro_datasets/tensorflow.TensorFlowModelDataset.md: TensorFlow model storage
+          - api/kedro_datasets/huggingface.HFDataset.md: HuggingFace datasets integration
+          - api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md: HuggingFace transformer pipelines
+
+        Visualization and Plotting:
+          - api/kedro_datasets/matplotlib.MatplotlibDataset.md: Matplotlib figure storage
+          - api/kedro_datasets/matplotlib.MatplotlibWriter.md: Save matplotlib plots
+          - api/kedro_datasets/plotly.PlotlyDataset.md: Interactive Plotly visualizations
+          - api/kedro_datasets/plotly.JSONDataset.md: Plotly JSON format
+          - api/kedro_datasets/plotly.HTMLDataset.md: Plotly HTML output
+          - api/kedro_datasets/holoviews.HoloviewsWriter.md: Holoviews visualization
+          - api/kedro_datasets/pillow.ImageDataset.md: Image processing with Pillow
+
+        Geospatial and Scientific:
+          - api/kedro_datasets/geopandas.GenericDataset.md: Geospatial data with GeoPandas
+          - api/kedro_datasets/ibis.FileDataset.md: Ibis file operations
+          - api/kedro_datasets/ibis.TableDataset.md: Ibis table operations
+          - api/kedro_datasets/networkx.GMLDataset.md: Graph Modeling Language
+          - api/kedro_datasets/networkx.GraphMLDataset.md: GraphML format
+          - api/kedro_datasets/networkx.JSONDataset.md: NetworkX JSON graphs
+
+        API and External Services:
+          - api/kedro_datasets/api.APIDataset.md: REST API data fetching
+
+        Experimental Datasets Overview:
+          - api/kedro_datasets_experimental/index.md: Experimental features documentation
+
+        Experimental LLM and AI:
+          - api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md: OpenAI chat integration
+          - api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md: Anthropic Claude integration
+          - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models
+          - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
+
+        Experimental Deep Learning:
+          - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
+          - api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md: Safe tensor serialization
+
+        Experimental Specialized Formats:
+          - api/kedro_datasets_experimental/prophet.ProphetModelDataset.md: Time series with Prophet
+          - api/kedro_datasets_experimental/video.VideoDataset.md: Video file processing
+          - api/kedro_datasets_experimental/netcdf.NetCDFDataset.md: NetCDF scientific data
+          - api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md: GeoTIFF raster data
+          - api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md: Polars database connector
+          - api/kedro_datasets_experimental/databricks.ExternalTableDataset.md: Databricks external tables
 
 markdown_extensions:
   - attr_list

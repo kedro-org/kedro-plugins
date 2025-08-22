@@ -217,6 +217,7 @@ docs = [
    "Jinja2<3.2.0",
    "black",
    "ruff",
+   "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 
 # Test requirements

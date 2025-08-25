@@ -26,7 +26,7 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
         filepath: data/06_models/model.pt
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.pytorch import PyTorchDataset

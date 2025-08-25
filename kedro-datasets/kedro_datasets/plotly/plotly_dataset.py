@@ -26,7 +26,7 @@ class PlotlyDataset(JSONDataset):
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         bar_plot:
@@ -44,7 +44,7 @@ class PlotlyDataset(JSONDataset):
               title: Title
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> import plotly.express as px

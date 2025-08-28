@@ -9,6 +9,13 @@ on:
         type: string
       python-version:
         type: string
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: 'Plugin to test (e.g., kedro-docker, kedro-datasets, kedro-airflow, kedro-telemetry)'
+        required: true
+        default: 'kedro-docker'
+        type: string
 
 jobs:
   e2e-tests:

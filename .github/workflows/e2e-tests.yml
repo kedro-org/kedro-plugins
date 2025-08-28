@@ -43,4 +43,7 @@ jobs:
         # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`
         # isn't supported on Github Actions. See https://github.com/actions/runner/issues/241
         shell: 'script -q -e -c "bash {0}"'
+        env:
+          # Fix Apache Arrow compatibility in Docker containers
+          PYSPARK_SUBMIT_ARGS: "--conf spark.sql.execution.arrow.pyspark.enabled=false pyspark-shell"
         run: make plugin=${{ inputs.plugin }} e2e-tests

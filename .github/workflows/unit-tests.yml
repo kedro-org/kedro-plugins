@@ -61,20 +61,18 @@ jobs:
         if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: make dataset-tests
       - name: Run unit tests for Linux / kedro-telemetry
-        if: inputs.plugin == 'kedro-telemetry'
+        if: inputs.os != 'windows-latest && inputs.plugin == 'kedro-telemetry'
         run: |
           unset KEDRO_DISABLE_TELEMETRY
           make plugin=kedro-telemetry test
           export KEDRO_DISABLE_TELEMETRY="true"
-        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-telemetry'
-        run: make telemetry-tests
       - name: Run unit tests for Windows / kedro-airflow, kedro-docker
         if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets' && inputs.plugin != 'kedro-telemetry'
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
       - name: Run unit tests for Windows / kedro-telemetry
-        if: inputs.plugin == 'kedro-telemetry'
+        if: inputs.os == 'windows-latest && inputs.plugin == 'kedro-telemetry'
         run: |
           unset KEDRO_DISABLE_TELEMETRY
           cd kedro-telemetry

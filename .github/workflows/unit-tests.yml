@@ -54,17 +54,32 @@ jobs:
           uv pip install --system "${{inputs.plugin}}[test] @ ."
       - name: pip freeze
         run: uv pip freeze --system
-      - name: Run unit tests for Linux / kedro-airflow, kedro-docker, kedro-telemetry
-        if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets'
+      - name: Run unit tests for Linux / kedro-airflow, kedro-docker
+        if: inputs.os != 'windows-latest' && inputs.plugin != 'kedro-datasets' && inputs.plugin != 'kedro-telemetry'
         run: make plugin=${{ inputs.plugin }} test
       - name: Run unit tests for Linux / kedro-datasets
         if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: make dataset-tests
-      - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
-        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+      - name: Run unit tests for Linux / kedro-telemetry
+        if: inputs.plugin == 'kedro-telemetry'
+        run: |
+          unset KEDRO_DISABLE_TELEMETRY
+          make plugin=kedro-telemetry test
+          export KEDRO_DISABLE_TELEMETRY="true"
+        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-telemetry'
+        run: make telemetry-tests
+      - name: Run unit tests for Windows / kedro-airflow, kedro-docker
+        if: inputs.os == 'windows-latest' && inputs.plugin != 'kedro-datasets' && inputs.plugin != 'kedro-telemetry'
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
+        - name: Run unit tests for Windows / kedro-telemetry
+        if: inputs.plugin == 'kedro-telemetry'
+        run: |
+          unset KEDRO_DISABLE_TELEMETRY
+          cd kedro-telemetry
+          pytest tests
+          export KEDRO_DISABLE_TELEMETRY="true"
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |

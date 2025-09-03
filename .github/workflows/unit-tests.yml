@@ -73,7 +73,7 @@ jobs:
         run: |
           cd ${{ inputs.plugin }}
           pytest tests
-        - name: Run unit tests for Windows / kedro-telemetry
+      - name: Run unit tests for Windows / kedro-telemetry
         if: inputs.plugin == 'kedro-telemetry'
         run: |
           unset KEDRO_DISABLE_TELEMETRY

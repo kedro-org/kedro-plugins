@@ -365,11 +365,19 @@ def _check_for_telemetry_consent(project_path: Path | None) -> bool | None:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
+    Returns False if telemetry should be disabled via:
+    - Environment variables (DO_NOT_TRACK, KEDRO_DISABLE_TELEMETRY)
+    - From kedro-org CI/CD (GITHUB_REPOSITORY_OWNER == "kedro-org")
+    - ".telemetry" file with consent: false
     """
 
     for env_var in _SKIP_TELEMETRY_ENV_VAR_KEYS:
         if os.environ.get(env_var):
             return False
+
+    # Disable telemetry for kedro-org repositories CI/CD environments
+    if os.environ.get("GITHUB_REPOSITORY_OWNER") == "kedro-org":
+        return False
 
     if project_path:
         telemetry_file_path = project_path / ".telemetry"

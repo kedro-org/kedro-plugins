@@ -395,7 +395,10 @@ class TestKedroTelemetryHook:
         assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
-    def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_given(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
@@ -403,7 +406,10 @@ class TestKedroTelemetryHook:
 
         assert _check_for_telemetry_consent(fake_metadata.project_path)
 
-    def test_check_for_telemetry_consent_not_given(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_not_given(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
@@ -423,7 +429,10 @@ class TestKedroTelemetryHook:
 
         assert not _check_for_telemetry_consent(fake_metadata.project_path)
 
-    def test_check_for_telemetry_consent_empty_file(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_empty_file(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
 
@@ -433,8 +442,11 @@ class TestKedroTelemetryHook:
         assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
     def test_check_for_telemetry_consent_file_no_consent_field(
-        self, mocker, fake_metadata
+        self, monkeypatch, fake_metadata
     ):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf8") as telemetry_file:
@@ -442,12 +454,45 @@ class TestKedroTelemetryHook:
 
         assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
-    def test_check_for_telemetry_consent_file_invalid_yaml(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_file_invalid_yaml(
+        self, monkeypatch, fake_metadata
+    ):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         telemetry_file_path.write_text("invalid_ yaml")
 
         assert _check_for_telemetry_consent(fake_metadata.project_path) is None
+
+    def test_check_for_telemetry_consent_kedro_org_repo(
+        self, monkeypatch, fake_metadata
+    ):
+        """Test that telemetry is disabled when GITHUB_REPOSITORY_OWNER is kedro-org"""
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "kedro-org")
+
+        # Even if consent file says True, should still be disabled for kedro-org
+        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
+        telemetry_file_path = fake_metadata.project_path / ".telemetry"
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({"consent": True}, telemetry_file)
+
+        assert not _check_for_telemetry_consent(fake_metadata.project_path)
+
+    def test_check_for_telemetry_consent_non_kedro_org_repo(
+        self, monkeypatch, fake_metadata
+    ):
+        """Test that telemetry works normally for non-kedro-org repositories"""
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
+        # Should get the value the consent file
+        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
+        telemetry_file_path = fake_metadata.project_path / ".telemetry"
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({"consent": True}, telemetry_file)
+
+        assert _check_for_telemetry_consent(fake_metadata.project_path)
 
     @mark.parametrize(
         "env_vars,result",

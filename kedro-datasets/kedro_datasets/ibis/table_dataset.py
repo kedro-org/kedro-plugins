@@ -69,6 +69,14 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         "materialized": "view",
         "mode": "overwrite",
     }
+    # Supported modes for saving behavior.
+    _ALLOWED_MODES: ClassVar[set[str]] = {
+        "append",
+        "overwrite",
+        "error",
+        "errorifexists",
+        "ignore",
+    }
 
     _CONNECTION_GROUP: ClassVar[str] = "ibis"
 
@@ -180,6 +188,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         else:
             self._mode = self._save_args.pop("mode")
 
+        if self._mode not in self._ALLOWED_MODES:
+            raise ValueError(
+                f"Invalid 'mode' value: {(self._mode,)!r}."
+            )
+
     def _connect(self) -> BaseBackend:
         import ibis  # noqa: PLC0415
 
@@ -220,14 +233,12 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         if self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)
-        elif self._mode in ("error", "errorifexists"):
+        elif self._mode in {"error", "errorifexists"}:
             writer(self._table_name, data, overwrite=False, **self._save_args)
         elif self._mode == "ignore":
             if self._exists():
                 return
             writer(self._table_name, data, overwrite=False, **self._save_args)
-        else:
-            raise ValueError(f"Unknown mode: {self._mode!r}")
 
     def _get_backend_name(self) -> str | None:
         """Get the backend name from the connection config or connection string."""

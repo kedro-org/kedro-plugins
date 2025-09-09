@@ -190,7 +190,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         if self._mode not in self._ALLOWED_MODES:
             raise ValueError(
-                f"Invalid 'mode' value: {(self._mode,)!r}."
+                f"Invalid 'mode' value: {self._mode}."
             )
 
     def _connect(self) -> BaseBackend:

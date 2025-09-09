@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
 import pandas as pd
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 
 from kedro_datasets._utils import ConnectionMixin
 
@@ -213,8 +213,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             elif hasattr(self.connection, "insert"):
                 self.connection.insert(self._table_name, data, **self._save_args)
             else:
-                raise NotImplementedError(
-                    f"Insert mode is not supported by the {self.connection!r} backend."
+                raise DatasetError(
+                    f"The {self.connection.name} backend for Ibis does not support inserts."
                 )
             return
 

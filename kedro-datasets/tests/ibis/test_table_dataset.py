@@ -382,24 +382,24 @@ class TestTableDataset:
         ("credentials_config", "key"),
         [
             (
-                "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                "postgres://xxxxx:yyyyyy@xxxx.postgres.database.azure.com:5432/postgres",
                 (
                     ("backend", "postgres"),
                     (
                         "con",
-                        "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                        "postgres://xxxxx:yyyyyy@xxxx.postgres.database.azure.com:5432/postgres",
                     ),
                 ),
             ),
             (
                 {
-                    "con": "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres"
+                    "con": "postgres://xxxxx:yyyyyy@xxxx.postgres.database.azure.com:5432/postgres"
                 },
                 (
                     ("backend", "postgres"),
                     (
                         "con",
-                        "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                        "postgres://xxxxx:yyyyyy@xxxx.postgres.database.azure.com:5432/postgres",
                     ),
                 ),
             ),
@@ -455,7 +455,7 @@ class TestTableDataset:
 
         def test_get_backend_name_string_with_scheme(self):
             ds = TableDataset(table_name="t")
-            ds._credentials = "mysql://user:pass@host:3306/dbname"
+            ds._credentials = "mysql://uxxxxx:yyyyyy@host:3306/dbname"
             assert ds._get_backend_name() == "mysql"
 
         def test_get_backend_name_string_without_scheme(self):

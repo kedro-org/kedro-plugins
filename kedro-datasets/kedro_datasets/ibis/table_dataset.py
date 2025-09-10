@@ -216,9 +216,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     def load(self) -> ir.Table:
         return self.connection.table(self._table_name, **self._load_args)
 
-    def save(self, data: pd.DataFrame | ir.Table) -> None:
-        # treat empty pandas DataFrame as a no-op; ibis tables don't have .empty
-        if isinstance(data, pd.DataFrame) and getattr(data, "empty", False):
+    # Users should wrap their DataFrame-like object in an ibis.memtable for in-memory data.
+    # https://github.com/ibis-project/ibis/blob/df4f1858e7f9bc36d589dcf2a53f9f16b1acd92a/ibis/backends/duckdb/__init__.py#L180
+    def save(self, data: ir.Table) -> None:
+        # treat empty ir.Table as a no-op
+        if isinstance(data, ir.Table) and data.count().execute() == 0:
             return
         writer = getattr(self.connection, f"create_{self._materialized}")
         if self._mode == "append":

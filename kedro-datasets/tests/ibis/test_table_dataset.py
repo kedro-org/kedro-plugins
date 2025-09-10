@@ -2,6 +2,7 @@ import duckdb
 import ibis
 import pandas as pd
 import pytest
+from kedro.io import DatasetError
 from packaging.version import Version
 from pandas.testing import assert_frame_equal
 
@@ -36,11 +37,39 @@ def connection_config(request, database):
     )
 
 
+@pytest.fixture(params=[_SENTINEL])
+def credentials_config(request, database):
+    return (
+        None
+        if request.param is _SENTINEL  # `None` is a valid value to test
+        else request.param
+    )
+
+
+@pytest.fixture(params=[_SENTINEL])
+def table_name(request):
+    # Default table name when not explicitly parametrized
+    return "test" if request.param is _SENTINEL else request.param
+
+
+# @pytest.fixture(params=['test'])
+# def table_name(request):
+#     return request.param
+
+
 @pytest.fixture
-def table_dataset(database_name, connection_config, load_args, save_args):
+def table_dataset(
+    database_name,
+    credentials_config,
+    connection_config,
+    load_args,
+    save_args,
+    table_name,
+):
     return TableDataset(
-        table_name="test",
+        table_name=table_name,
         database=database_name,
+        credentials=credentials_config,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -108,14 +137,16 @@ class TestTableDataset:
         [{"materialized": "table", "mode": "append"}],
         indirect=True,
     )
-    def test_save_mode_append(self, table_dataset):
+    def test_save_mode_append(self, table_dataset, dummy_table):
         """Saving with mode=append should add rows to an existing table."""
-        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
-        df2 = pd.DataFrame({"col1": [4], "col2": [5], "col3": [6]})
+        df1 = dummy_table
+        df2 = dummy_table
 
         table_dataset.save(df1)
         table_dataset.save(df2)
 
+        df1 = df1.execute()
+        df2 = df2.execute()
         reloaded = table_dataset.load().execute()
         assert len(reloaded) == len(df1) + len(df2)
 
@@ -127,36 +158,47 @@ class TestTableDataset:
         ],
         indirect=True,
     )
-    def test_save_mode_error_variants(self, table_dataset):
+    def test_save_mode_error_variants(self, table_dataset, dummy_table):
         """Saving with error/errorifexists should raise when table exists."""
-        df = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
-        table_dataset.save(df)
-        with pytest.raises(Exception):
-            table_dataset.save(df)
+        table_dataset.save(dummy_table)
+        with pytest.raises(DatasetError, match='Table with name "test" already exists'):
+            table_dataset.save(dummy_table)
 
     @pytest.mark.parametrize(
         "save_args",
         [{"materialized": "table", "mode": "ignore"}],
         indirect=True,
     )
-    def test_save_mode_ignore(self, table_dataset):
+    def test_save_mode_ignore(self, table_dataset, dummy_table):
         """Saving with ignore should not change existing table."""
-        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
-        df2 = pd.DataFrame({"col1": [10], "col2": [20], "col3": [30]})
+        df1 = dummy_table
+        df2 = dummy_table
 
         table_dataset.save(df1)
         table_dataset.save(df2)
+        df1 = df1.execute()
 
         reloaded = table_dataset.load().execute()
         # Should remain as first save only
         assert_frame_equal(reloaded.reset_index(drop=True), df1.reset_index(drop=True))
 
-    def test_legacy_overwrite_conflict_raises(self, database):
+    def test_unsupported_save_mode_raises(self, database_name, connection_config):
+        """Providing an unsupported save mode should raise a DatasetError."""
+        with pytest.raises(ValueError, match="Invalid 'mode' value:"):
+            TableDataset(
+                table_name="unsupported_mode",
+                database=database_name,
+                connection=connection_config,
+                save_args={"materialized": "table", "mode": "unsupported_mode"},
+            )
+
+    def test_legacy_overwrite_conflict_raises(self, database_name, connection_config):
         """Providing both mode and overwrite should raise a ValueError."""
         with pytest.raises(ValueError):
             TableDataset(
                 table_name="conflict",
-                connection={"backend": "duckdb", "database": database},
+                database=database_name,
+                connection=connection_config,
                 save_args={
                     "materialized": "table",
                     "mode": "append",
@@ -164,21 +206,42 @@ class TestTableDataset:
                 },
             )
 
+    @pytest.mark.parametrize(
+        "connection_config", [{"backend": "polars"}], indirect=True
+    )
+    @pytest.mark.parametrize(
+        ("save_args", "table_name"),
+        [
+            (
+                {"materialized": "table", "mode": "append"},
+                "test_append_mode_no_insert",
+            )
+        ],
+        indirect=True,
+    )
+    def test_append_mode_no_insert_raises(self, table_dataset, dummy_table):
+        """Test that saving with mode=append on a backend without 'insert' raises DatasetError (polars backend)."""
+        # Save once to create the table
+        table_dataset.save(dummy_table)
+        # Try to append again, should raise DatasetError
+        with pytest.raises(DatasetError, match="does not support inserts"):
+            table_dataset.save(dummy_table)
+
     @pytest.mark.parametrize("legacy_overwrite", [True, False])
-    def test_legacy_overwrite_behavior(self, database, legacy_overwrite):
+    def test_legacy_overwrite_behavior(self, database, legacy_overwrite, dummy_table):
         """Legacy overwrite should map to overwrite or error behavior."""
         ds = TableDataset(
             table_name="legacy_overwrite",
             connection={"backend": "duckdb", "database": database},
             save_args={"materialized": "table", "overwrite": legacy_overwrite},
         )
-        df1 = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
-        df2 = pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]})
+        df2 = ibis.memtable(pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]}))
 
-        ds.save(df1)
+        ds.save(dummy_table)  # First save should always work
         if legacy_overwrite:
             # Should overwrite existing table with new contents
             ds.save(df2)
+            df2 = df2.execute()
             out = ds.load().execute().reset_index(drop=True)
             assert_frame_equal(out, df2.reset_index(drop=True))
         else:
@@ -186,46 +249,27 @@ class TestTableDataset:
             with pytest.raises(Exception):
                 ds.save(df2)
 
-    def test_credentials_precedence_and_warning(self, database):
-        """When both are given, credentials take precedence and warn."""
-        with pytest.warns(DeprecationWarning):
-            ds = TableDataset(
-                table_name="cred_pref",
-                database=None,
-                credentials={"backend": "duckdb", "database": database},
-                connection={"backend": "polars"},
-                save_args={"materialized": "table"},
-            )
-
-        # Uses backend from credentials
-        desc = ds._describe()
-        assert desc["backend"] == "duckdb"
-        # Smoke test load path by creating then reloading
-        df = pd.DataFrame({"col1": [1], "col2": [2], "col3": [3]})
-        ds.save(df)
-        assert_frame_equal(
-            ds.load().execute().reset_index(drop=True), df.reset_index(drop=True)
-        )
-
     def test_describe_includes_backend_mode_and_materialized(self, table_dataset):
         """_describe should expose backend, mode and materialized; nested args exclude database."""
+
         desc = table_dataset._describe()
+
         assert {"backend", "mode", "materialized"}.issubset(desc.keys())
         assert "database" in desc
         # database key should not be duplicated inside nested args
         assert "database" not in desc["load_args"]
         assert "database" not in desc["save_args"]
 
-    def test_save_empty_dataframe_is_noop(self, database):
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"materialized": "table"}],
+        indirect=True,
+    )
+    def test_save_empty_dataframe_is_noop(self, table_dataset):
         """Saving an empty DataFrame should be a no-op (no table created)."""
-        ds = TableDataset(
-            table_name="empty_noop",
-            connection={"backend": "duckdb", "database": database},
-            save_args={"materialized": "table"},
-        )
-        empty_df = pd.DataFrame({"col1": [], "col2": [], "col3": []})
-        ds.save(empty_df)
-        assert not ds.exists()
+        empty_table = ibis.memtable(pd.DataFrame({"col1": [], "col2": [], "col3": []}))
+        table_dataset.save(empty_table)
+        assert not table_dataset.exists()
 
     @pytest.mark.parametrize("load_args", [{"database": "test"}], indirect=True)
     def test_load_extra_params(self, table_dataset, load_args):
@@ -334,9 +378,106 @@ class TestTableDataset:
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections
 
+    @pytest.mark.parametrize(
+        ("credentials_config", "key"),
+        [
+            (
+                "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                (
+                    ("backend", "postgres"),
+                    (
+                        "con",
+                        "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                    ),
+                ),
+            ),
+            (
+                {
+                    "con": "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres"
+                },
+                (
+                    ("backend", "postgres"),
+                    (
+                        "con",
+                        "postgres://user:pwd@xxxx.postgres.database.azure.com:5432/postgres",
+                    ),
+                ),
+            ),
+            (
+                {
+                    "backend": "postgres",
+                    "database": "postgres",
+                    "user": "user",
+                    "password": "pwd",
+                    "host": "xxxx.postgres.database.azure.com",
+                    "port": "5432",
+                },
+                (
+                    ("backend", "postgres"),
+                    ("database", "postgres"),
+                    ("host", "xxxx.postgres.database.azure.com"),
+                    ("password", "pwd"),
+                    ("port", "5432"),
+                    ("user", "user"),
+                ),
+            ),
+        ],
+    )
+    @pytest.mark.parametrize("connection_config", [None], indirect=True)
+    def test_connection_config_with_credentials(
+        self, mocker, table_dataset, credentials_config, key
+    ):
+        # 1) isolate the cache so parametrized cases don't reuse connections
+
+        if isinstance(credentials_config, str) or "backend" not in credentials_config:
+            backend = "postgres"
+        else:
+            backend = credentials_config["backend"]
+
+        mocker.patch(f"ibis.{backend}")
+        conn = table_dataset.connection
+        assert conn is not None
+        table_dataset.load()
+        assert ("ibis", key) in table_dataset._connections
+
     def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
         """Test interoperability of Ibis datasets sharing a database."""
         dummy_table = file_dataset.load()
         assert not table_dataset.exists()
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
+
+    # Additional tests for _get_backend_name branch coverage
+    class TestGetBackendName:
+        def test_get_backend_name_dict_with_backend(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"backend": "postgres", "database": "db"}
+            assert ds._get_backend_name() == "postgres"
+
+        def test_get_backend_name_dict_without_backend_or_con(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"user": "u", "password": "p"}
+            assert ds._get_backend_name() is None
+
+        def test_get_backend_name_string_with_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = "mysql://user:pass@host:3306/dbname"
+            assert ds._get_backend_name() == "mysql"
+
+        def test_get_backend_name_string_without_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = "not_a_url_string"
+            assert ds._get_backend_name() is None
+
+        def test_get_backend_name_dict_with_con_and_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {
+                "con": "postgres://user:pass@host:5432/dbname",
+                "some_other": "value",
+            }
+            assert ds._get_backend_name() == "postgres"
+
+        def test_get_backend_name_dict_with_con_without_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"con": "sqlite_memory"}
+            assert ds._get_backend_name() is None

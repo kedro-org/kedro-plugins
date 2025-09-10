@@ -407,18 +407,12 @@ class TestTableDataset:
                 {
                     "backend": "postgres",
                     "database": "postgres",
-                    "user": "user",
-                    "password": "pwd",
                     "host": "xxxx.postgres.database.azure.com",
-                    "port": "5432",
                 },
                 (
                     ("backend", "postgres"),
                     ("database", "postgres"),
                     ("host", "xxxx.postgres.database.azure.com"),
-                    ("password", "pwd"),
-                    ("port", "5432"),
-                    ("user", "user"),
                 ),
             ),
         ],

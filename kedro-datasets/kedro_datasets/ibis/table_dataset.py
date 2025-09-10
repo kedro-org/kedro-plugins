@@ -148,8 +148,8 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self._connection_config = connection or (
             self.DEFAULT_CONNECTION_CONFIG if self._credentials == {} else {}
         )
-        if credentials is not None:
-            if isinstance(credentials, str):
+        if self._credentials is not None:
+            if isinstance(self._credentials, str):
                 self._connection_config.update(
                     {
                         "backend": self._backend_name,
@@ -157,9 +157,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                     }
                 )
             elif (
-                isinstance(credentials, dict)
-                and "backend" not in credentials
-                and "con" in credentials
+                isinstance(self._credentials, dict)
+                and "backend" not in self._credentials
+                and "con" in self._credentials
             ):
                 self._connection_config.update(
                     self._credentials | {"backend": self._backend_name}

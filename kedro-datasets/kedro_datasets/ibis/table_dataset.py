@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -149,18 +150,20 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         )
         if credentials is not None:
             if isinstance(credentials, str):
-                self._connection_config.update( {
-                    "backend": self._backend_name,
-                    "con": self._credentials,
-                })
+                self._connection_config.update(
+                    {
+                        "backend": self._backend_name,
+                        "con": self._credentials,
+                    }
+                )
             elif (
                 isinstance(credentials, dict)
                 and "backend" not in credentials
                 and "con" in credentials
             ):
-                self._connection_config.update(self._credentials | {
-                    "backend": self._backend_name
-                })
+                self._connection_config.update(
+                    self._credentials | {"backend": self._backend_name}
+                )
             else:
                 self._connection_config.update(self._credentials)
         self.metadata = metadata
@@ -193,9 +196,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             self._mode = self._save_args.pop("mode")
 
         if self._mode not in self._ALLOWED_MODES:
-            raise ValueError(
-                f"Invalid 'mode' value: {self._mode}."
-            )
+            raise ValueError(f"Invalid 'mode' value: {self._mode}.")
 
     def _connect(self) -> BaseBackend:
         import ibis  # noqa: PLC0415

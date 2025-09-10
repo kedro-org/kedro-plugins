@@ -115,11 +115,12 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 (e.g. `("catalog", "database")`) or a dotted string path
                 (e.g. `"catalog.database"`) to reference a table or view
                 in a multi-level table hierarchy.
-            credentials: (Preferred) Connection information for the Ibis backend.
-                Can be a connection string or a dict of parameters. Supersedes
-                `connection`.
-            connection: (Deprecated) Configuration for connecting to an Ibis
-                backend. Use `credentials` instead.
+            connection: Configuration for connecting to an Ibis backend.
+                If not provided, connect to DuckDB in in-memory mode.
+            credentials: Connection information (e.g.
+                user, password, token, account). If provided, these values
+                overlay the base `connection` configuration. May also be a
+                connection string.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -136,29 +137,32 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 but may be consumed by users or external plugins.
         """
 
-        if credentials is not None and connection is not None:
-            import warnings  # noqa: PLC0415
-
-            warnings.warn(
-                "Both 'credentials' and deprecated 'connection' were provided. 'credentials' will be used.",
-                DeprecationWarning,
-            )
-
         self._table_name = table_name
         self._database = database
+        self._credentials = deepcopy(credentials) or {}
+        if self._credentials != {}:
+            self._backend_name = self._get_backend_name()
+
         # Prefer credentials if provided, else fallback to connection.
-        # Ensure _connection_config is always a dict[str, Any] for type stability.
-        self._connection_config: dict[str, Any]
+        self._connection_config = connection or (
+            self.DEFAULT_CONNECTION_CONFIG if self._credentials == {} else {}
+        )
         if credentials is not None:
             if isinstance(credentials, str):
-                # Treat string credentials as a connection string under key 'con'
-                self._connection_config = {"con": credentials}
+                self._connection_config.update( {
+                    "backend": self._backend_name,
+                    "con": self._credentials,
+                })
+            elif (
+                isinstance(credentials, dict)
+                and "backend" not in credentials
+                and "con" in credentials
+            ):
+                self._connection_config.update(self._credentials | {
+                    "backend": self._backend_name
+                })
             else:
-                self._connection_config = deepcopy(credentials)
-        else:
-            self._connection_config = deepcopy(
-                connection or self.DEFAULT_CONNECTION_CONFIG
-            )
+                self._connection_config.update(self._credentials)
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
@@ -197,12 +201,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         import ibis  # noqa: PLC0415
 
         config = deepcopy(self._connection_config)
-        # If credentials is a string, treat as connection string
-        if isinstance(config, str):
-            return ibis.connect(config)
         # If credentials is a dict with a 'con' key, treat as connection string
         if isinstance(config, dict) and "con" in config:
-            return ibis.connect(config["con"])
+            return ibis.connect(config.pop("con"))
         # Otherwise, treat as expanded dict (params)
         backend = getattr(ibis, config.pop("backend"))
         return backend.connect(**config)
@@ -242,7 +243,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
     def _get_backend_name(self) -> str | None:
         """Get the backend name from the connection config or connection string."""
-        config = self._connection_config
+        config = self._credentials
         # If dict and has 'backend'
         if isinstance(config, dict) and "backend" in config:
             return config["backend"]
@@ -255,7 +256,6 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             con_str = config["con"]
             if "://" in con_str:
                 return con_str.split("://", 1)[0]
-        return None
 
     def _describe(self) -> dict[str, Any]:
         load_args = deepcopy(self._load_args)
@@ -265,7 +265,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         return {
             "table_name": self._table_name,
             "database": self._database,
-            "backend": self._get_backend_name(),
+            "backend": self.connection.name,
             "load_args": load_args,
             "save_args": save_args,
             "materialized": self._materialized,

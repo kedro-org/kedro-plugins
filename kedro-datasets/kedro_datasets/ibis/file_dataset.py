@@ -48,6 +48,8 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import ibis
+        >>> import pyarrow as pa
+
         >>> from kedro_datasets.ibis import FileDataset
         >>>
         >>> data = ibis.memtable({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -60,8 +62,16 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.execute().equals(reloaded.execute())
 
+        >>> def _normalize_arrow_result(x):
+        ...     # If backend returns a RecordBatchReader, materialize it
+        ...     if hasattr(x, "read_all") and callable(x.read_all):
+        ...         return x.read_all()
+        ...     return x
+
+        >>> left = _normalize_arrow_result(data.execute())
+        >>> right = _normalize_arrow_result(reloaded.execute())
+        >>> assert left.to_pandas().equals(right.to_pandas())
     """
 
     DEFAULT_CONNECTION_CONFIG: ClassVar[dict[str, Any]] = {

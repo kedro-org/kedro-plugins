@@ -51,7 +51,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         ... )
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.execute().equals(reloaded.execute())
+        >>> assert data.execute().to_pandas().equals(reloaded.execute().to_pandas())
 
     """
 

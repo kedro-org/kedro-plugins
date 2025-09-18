@@ -33,7 +33,6 @@ test = [
     "pytest-mock",
     "pytest-xdist",
     "wheel",
-    "flask-limiter<3.13",
     "rich<14.1.0"
 ]
 

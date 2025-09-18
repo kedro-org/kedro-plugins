@@ -1,4 +1,7 @@
 # Upcoming Release
+## Major features and improvements
+
+- Group datasets documentation according to the dependencies to clean up the nav bar.
 
 # Release 8.1.0
 ## Major features and improvements
@@ -6,7 +9,7 @@
 - Added the following new experimental datasets:
 
 | Type                           | Description                                                   | Location                             |
-|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
 ## Bug fixes and other changes
@@ -29,7 +32,7 @@
 - Added the following new datasets:
 
 | Type                  | Description                                                                       | Location                 |
-|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| --------------------- | --------------------------------------------------------------------------------- | ------------------------ |
 | `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes

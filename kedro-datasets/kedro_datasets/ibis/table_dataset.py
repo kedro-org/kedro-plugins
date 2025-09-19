@@ -6,7 +6,6 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import ibis.expr.types as ir
-import pandas as pd
 from kedro.io import AbstractDataset, DatasetError
 
 from kedro_datasets._utils import ConnectionMixin

@@ -18,20 +18,45 @@ dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
 pandas-base = ["pandas>=1.3, <3.0"]
-spark-core = []
-spark-local = ["kedro-datasets[spark-core]", "pyspark>=2.2,<4.0"]
-spark-s3 = ["kedro-datasets[spark-core,s3fs-base]"]
-spark-hdfs = ["kedro-datasets[spark-core,hdfs-base]"]
-spark-databricks = ["kedro-datasets[spark-core]"]
-spark-full = ["kedro-datasets[spark-local,spark-s3,spark-hdfs,delta-base]"]
-hdfs-base = ["hdfs>=2.5.8, <3.0"]
-s3fs-base = ["s3fs>=2021.4"]
 polars-base = ["polars>=0.18.0"]
 plotly-base = ["plotly>=4.8.0, <6.0"]
 delta-base = ["delta-spark>=1.0, <4.0"]
 networkx-base = ["networkx~=3.4"]
+hdfs-base = ["hdfs>=2.5.8, <3.0"]
+s3fs-base = ["s3fs>=2021.4"]
 
-# Individual Datasets
+# Spark dependencies
+spark-core = []  # No dependencies
+spark-local = ["pyspark>=2.2,<4.0"]  # For local development
+spark-databricks = []  # Uses Databricks runtime Spark
+spark-emr = []  # Uses EMR runtime Spark
+
+# Filesystem specific packages for Spark
+spark-s3 = ["s3fs>=2021.4"]
+spark-gcs = ["gcsfs>=2023.1, <2023.7"]
+spark-azure = ["adlfs>=2023.1"]
+spark-hdfs = ["pyarrow>=7.0"]  # PyArrow includes HDFS support
+
+# Convenience bundles
+spark = ["kedro-datasets[spark-local,spark-s3]"]  # Most common setup
+spark-cloud = ["kedro-datasets[spark-s3,spark-gcs,spark-azure]"]  # All cloud filesystems
+
+# Individual Spark datasets
+spark-deltatabledataset = ["kedro-datasets[spark-core,delta-base]"]
+spark-sparkdataset = ["kedro-datasets[spark-core]"]
+spark-sparkhivedataset = ["kedro-datasets[spark-core]"]
+spark-sparkjdbcdataset = ["kedro-datasets[spark-core]"]
+spark-sparkstreamingdataset = ["kedro-datasets[spark-core]"]
+
+spark-all = [
+    """kedro-datasets[spark-deltatabledataset,\
+    spark-sparkdataset,\
+    spark-sparkhivedataset,\
+    spark-sparkjdbcdataset,\
+    spark-sparkstreamingdataset,\
+    spark-local,\
+    spark-cloud]"""
+]
 api-apidataset = ["requests~=2.20"]
 api = ["kedro-datasets[api-apidataset]"]
 
@@ -42,8 +67,9 @@ dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
-databricks-managedtabledataset = ["kedro-datasets[spark-core,s3fs-base]"]
-databricks = ["kedro-datasets[databricks-managedtabledataset]"]
+databricks-managedtabledataset = ["kedro-datasets[spark-core,spark-s3]"]
+databricks-externaltabledataset = ["kedro-datasets[spark-core,spark-s3]"]
+databricks = ["kedro-datasets[databricks-managedtabledataset,databricks-externaltabledataset]"]
 
 geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona>=1.8, <2.0"]
 geopandas = ["kedro-datasets[geopandas-genericdataset]"]
@@ -155,19 +181,6 @@ redis = ["kedro-datasets[redis-pickledataset]"]
 snowflake-snowparktabledataset = ["snowflake-snowpark-python>=1.23"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
-spark-deltatabledataset = ["kedro-datasets[spark-local,s3fs-base,delta-base]"]
-spark-sparkdataset = ["kedro-datasets[spark-local,spark-s3]"]
-spark-sparkhivedataset = ["kedro-datasets[spark-local,s3fs-base]"]
-spark-sparkjdbcdataset = ["kedro-datasets[spark-local]"]
-spark-sparkstreamingdataset = ["kedro-datasets[spark-local,s3fs-base]"]
-spark = [
-    """kedro-datasets[spark-deltatabledataset,\
-    spark-sparkdataset,\
-    spark-sparkhivedataset,\
-    spark-sparkjdbcdataset,\
-    spark-sparkstreamingdataset]"""
-]
-
 svmlight-svmlightdataset = ["scikit-learn>=1.0.2", "scipy>=1.7.3"]
 svmlight = ["kedro-datasets[svmlight-svmlightdataset]"]
 
@@ -183,7 +196,6 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 # Experimental Datasets
 darts-torch-model-dataset = ["u8darts-all"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
-databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]

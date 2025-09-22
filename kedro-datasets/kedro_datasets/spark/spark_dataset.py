@@ -3,10 +3,11 @@
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
-import os
+
 import logging
+import os
 from pathlib import PurePosixPath
+from typing import TYPE_CHECKING, Any
 
 from kedro.io.core import (
     AbstractVersionedDataset,
@@ -126,13 +127,14 @@ class SparkDataset(AbstractVersionedDataset):
     def _get_filesystem(self):
         """Get fsspec filesystem with helpful errors for missing deps"""
         try:
-            import fsspec
+            import fsspec  # noqa: PLC0415
         except ImportError:
             raise ImportError("fsspec is required")
 
         # Normalise protocols
         protocol_map = {
-            "s3a": "s3", "s3n": "s3",  # Spark S3 variants
+            "s3a": "s3",
+            "s3n": "s3",  # Spark S3 variants
             "dbfs": "file",  # DBFS is mounted as local
             "": "file",  # Default to local
         }
@@ -180,10 +182,11 @@ class SparkDataset(AbstractVersionedDataset):
             return path
         return f"{spark_protocol}://{path}"
 
-    def _get_spark(self) -> "SparkSession":
+    def _get_spark(self) -> SparkSession:
         """Lazy load Spark with environment specific guidance"""
         try:
-            from pyspark.sql import SparkSession
+            from pyspark.sql import SparkSession  # noqa: PLC0415
+
             return SparkSession.builder.getOrCreate()
         except ImportError as e:
             # Detect environment and provide specific help
@@ -217,17 +220,20 @@ class SparkDataset(AbstractVersionedDataset):
                 raise DatasetError("Schema dict must have 'filepath'")
 
             # Use fsspec to load
-            import json
+            import json  # noqa: PLC0415
+
             protocol, path = get_protocol_and_path(schema_path)
 
             try:
-                import fsspec
+                import fsspec  # noqa: PLC0415
+
                 fs = fsspec.filesystem(protocol, **schema.get("credentials", {}))
                 with fs.open(path, "r") as f:
                     schema_json = json.load(f)
 
                 # Lazy import StructType
-                from pyspark.sql.types import StructType
+                from pyspark.sql.types import StructType  # noqa: PLC0415
+
                 return StructType.fromJson(schema_json)
             except ImportError as e:
                 if "pyspark" in str(e):
@@ -238,7 +244,7 @@ class SparkDataset(AbstractVersionedDataset):
 
         return schema
 
-    def load(self) -> "DataFrame":
+    def load(self) -> DataFrame:
         """Load data using Spark"""
         spark = self._get_spark()
 
@@ -246,9 +252,13 @@ class SparkDataset(AbstractVersionedDataset):
         if self._schema:
             reader = reader.schema(self._schema)
 
-        return reader.format(self.file_format).options(**self.load_args).load(self._spark_path)
+        return (
+            reader.format(self.file_format)
+            .options(**self.load_args)
+            .load(self._spark_path)
+        )
 
-    def save(self, data: "DataFrame") -> None:
+    def save(self, data: DataFrame) -> None:
         """Save data using Spark"""
         writer = data.write
 

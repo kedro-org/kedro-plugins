@@ -1,5 +1,8 @@
 # Upcoming release
 
+# Release 0.6.5
+* Disabled data collection for CI/CD environments running in `kedro-org` repositories to avoid capturing internal usage metrics.
+
 # Release 0.6.4
 * Updated logic to only show the message that Kedro is sending telemetry if the user hasn't explicitly granted permission.
 * Replaced dependency on `toml` with `tomli` (before Python 3.11) and `tomli-w`.

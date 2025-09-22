@@ -113,7 +113,9 @@ class SparkDataset(AbstractVersionedDataset):
         self._spark_path = self._to_spark_path(filepath)
 
         # Handle schema if provided
-        self._schema = self._process_schema(self.load_args.pop("schema", None))
+        self._schema = SparkDataset._load_schema_from_file(
+            self.load_args.pop("schema", None)
+        )
 
         super().__init__(
             filepath=PurePosixPath(self.path),
@@ -208,7 +210,8 @@ class SparkDataset(AbstractVersionedDataset):
                 )
             raise ImportError(msg) from e
 
-    def _process_schema(self, schema: Any) -> Any:
+    @staticmethod
+    def _load_schema_from_file(schema: Any) -> Any:
         """Process schema argument if provided"""
         if schema is None:
             return None

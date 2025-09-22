@@ -70,7 +70,7 @@ class SparkDataset(AbstractVersionedDataset):
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
-        >>> dataset = SparkDataset(filepath=tmp_path / "test_data")
+        >>> dataset = SparkDataset(filepath="tmp_path/test_data")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
         >>> assert Row(name="Bob", age=12) in reloaded.take(4)
@@ -155,6 +155,7 @@ class SparkDataset(AbstractVersionedDataset):
 
     def _to_spark_path(self, filepath: str) -> str:
         """Convert to Spark-compatible path format"""
+        filepath = str(filepath)  # Convert PosixPath to string
         protocol, path = get_protocol_and_path(filepath)
 
         # Handle special cases

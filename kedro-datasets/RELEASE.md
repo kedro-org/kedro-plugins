@@ -9,6 +9,7 @@
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
 - `ibis.TableDataset`: Added configurable save modes via `save_args.mode`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore". Legacy `save_args.overwrite` is mapped to `mode` for backward compatibility; specifying both is now an error.
+- `ibis.TableDataset`: Added a `credentials` parameter (string URI or dict, optionally with `con`) that supersedes the `connection` parameter. If both are provided, `credentials` takes precedence and a deprecation warning is issued.
 
 ## Bug fixes and other changes
 

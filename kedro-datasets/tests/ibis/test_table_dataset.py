@@ -38,16 +38,38 @@ def connection_config(request, database):
 
 
 @pytest.fixture(params=[_SENTINEL])
+def credentials_config(request, database):
+    return (
+        None
+        if request.param is _SENTINEL  # `None` is a valid value to test
+        else request.param
+    )
+
+
+@pytest.fixture(params=[_SENTINEL])
 def table_name(request):
     # Default table name when not explicitly parametrized
     return "test" if request.param is _SENTINEL else request.param
 
 
+# @pytest.fixture(params=['test'])
+# def table_name(request):
+#     return request.param
+
+
 @pytest.fixture
-def table_dataset(table_name, database_name, connection_config, load_args, save_args):
+def table_dataset(
+    database_name,
+    credentials_config,
+    connection_config,
+    load_args,
+    save_args,
+    table_name,
+):
     return TableDataset(
         table_name=table_name,
         database=database_name,
+        credentials=credentials_config,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
@@ -238,6 +260,17 @@ class TestTableDataset:
         assert "database" not in desc["load_args"]
         assert "database" not in desc["save_args"]
 
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"materialized": "table"}],
+        indirect=True,
+    )
+    def test_save_empty_dataframe_is_noop(self, table_dataset):
+        """Saving an empty DataFrame should be a no-op (no table created)."""
+        empty_table = ibis.memtable(pd.DataFrame({"col1": [], "col2": [], "col3": []}))
+        table_dataset.save(empty_table)
+        assert not table_dataset.exists()
+
     @pytest.mark.parametrize("load_args", [{"database": "test"}], indirect=True)
     def test_load_extra_params(self, table_dataset, load_args):
         """Test overriding the default load arguments."""
@@ -345,9 +378,100 @@ class TestTableDataset:
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections
 
+    @pytest.mark.parametrize(
+        ("credentials_config", "key"),
+        [
+            (
+                "postgres://xxxxxx.postgres.database.azure.com:5432/postgres",
+                (
+                    ("backend", "postgres"),
+                    (
+                        "con",
+                        "postgres://xxxxxx.postgres.database.azure.com:5432/postgres",
+                    ),
+                ),
+            ),
+            (
+                {
+                    "con": "postgres://xxxxxx@xxxx.postgres.database.azure.com:5432/postgres"
+                },
+                (
+                    ("backend", "postgres"),
+                    (
+                        "con",
+                        "postgres://xxxxxx@xxxx.postgres.database.azure.com:5432/postgres",
+                    ),
+                ),
+            ),
+            (
+                {
+                    "backend": "postgres",
+                    "database": "postgres",
+                    "host": "xxxx.postgres.database.azure.com",
+                },
+                (
+                    ("backend", "postgres"),
+                    ("database", "postgres"),
+                    ("host", "xxxx.postgres.database.azure.com"),
+                ),
+            ),
+        ],
+    )
+    @pytest.mark.parametrize("connection_config", [None], indirect=True)
+    def test_connection_config_with_credentials(
+        self, mocker, table_dataset, credentials_config, key
+    ):
+        # 1) isolate the cache so parametrized cases don't reuse connections
+
+        if isinstance(credentials_config, str) or "backend" not in credentials_config:
+            backend = "postgres"
+        else:
+            backend = credentials_config["backend"]
+
+        mocker.patch(f"ibis.{backend}")
+        conn = table_dataset.connection
+        assert conn is not None
+        table_dataset.load()
+        assert ("ibis", key) in table_dataset._connections
+
     def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
         """Test interoperability of Ibis datasets sharing a database."""
         dummy_table = file_dataset.load()
         assert not table_dataset.exists()
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
+
+    # Additional tests for _get_backend_name branch coverage
+    class TestGetBackendName:
+        def test_get_backend_name_dict_with_backend(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"backend": "postgres", "database": "db"}
+            assert ds._get_backend_name() == "postgres"
+
+        def test_get_backend_name_dict_without_backend_or_con(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"user": "u", "password": "p"}
+            assert ds._get_backend_name() is None
+
+        def test_get_backend_name_string_with_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = "mysql://xxxxxx@host:3306/dbname"
+            assert ds._get_backend_name() == "mysql"
+
+        def test_get_backend_name_string_without_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = "not_a_url_string"
+            assert ds._get_backend_name() is None
+
+        def test_get_backend_name_dict_with_con_and_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {
+                "con": "postgres://xxxxxx@host:5432/dbname",
+                "some_other": "value",
+            }
+            assert ds._get_backend_name() == "postgres"
+
+        def test_get_backend_name_dict_with_con_without_scheme(self):
+            ds = TableDataset(table_name="t")
+            ds._credentials = {"con": "sqlite_memory"}
+            assert ds._get_backend_name() is None

@@ -7,7 +7,10 @@ from unittest import mock
 # Creating module attributes here prevents ibis.__getattr__ from being
 # invoked by tests that call mocker.patch("ibis.<backend>")...
 
-_IBIS_BACKENDS_TO_STUB = ("mssql", "postgres",)
+_IBIS_BACKENDS_TO_STUB = (
+    "mssql",
+    "postgres",
+)
 
 try:
     ibis = importlib.import_module("ibis")

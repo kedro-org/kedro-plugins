@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+import sys
 from copy import deepcopy
+from enum import auto
 from typing import TYPE_CHECKING, Any, ClassVar
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum  # pragma: no cover
+else:
+    from backports.strenum import StrEnum  # pragma: no cover
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
@@ -12,6 +19,16 @@ from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
+
+
+class SaveMode(StrEnum):
+    """`SaveMode` is used to specify the expected behavior of saving a table."""
+
+    APPEND = auto()
+    OVERWRITE = auto()
+    ERROR = auto()
+    ERRORIFEXISTS = auto()
+    IGNORE = auto()
 
 
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
@@ -68,14 +85,6 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
         "mode": "overwrite",
-    }
-    # Supported modes for saving behavior.
-    _ALLOWED_MODES: ClassVar[set[str]] = {
-        "append",
-        "overwrite",
-        "error",
-        "errorifexists",
-        "ignore",
     }
 
     _CONNECTION_GROUP: ClassVar[str] = "ibis"
@@ -152,20 +161,21 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._materialized = self._save_args.pop("materialized")
 
-        # Handle mode / overwrite conflict
+        # Handle mode/overwrite conflict.
         if save_args and "mode" in save_args and "overwrite" in self._save_args:
             raise ValueError("Cannot specify both 'mode' and deprecated 'overwrite'.")
-        # Map legacy overwrite if present
+
+        # Map legacy overwrite if present.
         if "overwrite" in self._save_args:
             legacy = self._save_args.pop("overwrite")
-            # remove any lingering 'mode' key from defaults to avoid leaking into writer kwargs
-            self._save_args.pop("mode", None)
-            self._mode = "overwrite" if legacy else "error"
+            # Remove any lingering 'mode' key from defaults to avoid
+            # leaking into writer kwargs.
+            del self._save_args["mode"]
+            mode = "overwrite" if legacy else "error"
         else:
-            self._mode = self._save_args.pop("mode")
+            mode = self._save_args.pop("mode")
 
-        if self._mode not in self._ALLOWED_MODES:
-            raise ValueError(f"Invalid 'mode' value: {self._mode}.")
+        self._mode = SaveMode(mode)
 
     def _connect(self) -> BaseBackend:
         import ibis  # noqa: PLC0415

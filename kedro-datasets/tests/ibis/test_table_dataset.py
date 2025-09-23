@@ -162,7 +162,9 @@ class TestTableDataset:
 
     def test_unsupported_save_mode_raises(self, database_name, connection_config):
         """Providing an unsupported save mode should raise a DatasetError."""
-        with pytest.raises(ValueError, match="Invalid 'mode' value:"):
+        with pytest.raises(
+            ValueError, match="'unsupported_mode' is not a valid SaveMode"
+        ):
             TableDataset(
                 table_name="unsupported_mode",
                 database=database_name,

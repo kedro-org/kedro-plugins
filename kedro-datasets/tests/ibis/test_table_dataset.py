@@ -37,21 +37,17 @@ def connection_config(request, database):
     )
 
 
-@pytest.fixture(params=[_SENTINEL])
-def table_name(request):
-    # Default table name when not explicitly parametrized
-    return "test" if request.param is _SENTINEL else request.param
-
-
 @pytest.fixture
-def table_dataset(table_name, database_name, connection_config, load_args, save_args):
-    return TableDataset(
-        table_name=table_name,
+def table_dataset(database_name, connection_config, load_args, save_args):
+    ds = TableDataset(
+        table_name="test",
         database=database_name,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
     )
+    yield ds
+    getattr(ds._connection, f"drop_{ds._materialized}")("test", force=True)
 
 
 @pytest.fixture
@@ -190,14 +186,7 @@ class TestTableDataset:
         "connection_config", [{"backend": "polars"}], indirect=True
     )
     @pytest.mark.parametrize(
-        ("save_args", "table_name"),
-        [
-            (
-                {"materialized": "table", "mode": "append"},
-                "test_append_mode_no_insert",
-            )
-        ],
-        indirect=True,
+        "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
     )
     def test_append_mode_no_insert_raises(self, table_dataset, dummy_table):
         """Test that saving with mode=append on a backend without 'insert' raises DatasetError (polars backend)."""

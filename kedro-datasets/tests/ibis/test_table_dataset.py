@@ -211,7 +211,7 @@ class TestTableDataset:
             assert_frame_equal(out, df2.reset_index(drop=True))
         else:
             # Should raise on second save when table exists
-            with pytest.raises(Exception):
+            with pytest.raises(DatasetError):
                 ds.save(df2)
 
     def test_describe_includes_backend_mode_and_materialized(self, table_dataset):

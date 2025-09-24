@@ -40,7 +40,6 @@
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
 - Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
 - Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
-- Improved `_connect` and `_describe` for `ibis.TableDataset`; saving an empty pandas DataFrame is now a no-op.
 
 ## Breaking changes
 

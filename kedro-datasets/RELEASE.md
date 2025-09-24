@@ -8,7 +8,7 @@
 |--------------------------------|---------------------------------------------------------------|--------------------------------------|
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
-- `ibis.TableDataset`: Added configurable save modes via `save_args.mode`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore". Legacy `save_args.overwrite` is mapped to `mode` for backward compatibility; specifying both is now an error.
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The `overwrite` save argument is mapped to `mode` for backward compatibility; specifying both results in an error.
 
 ## Bug fixes and other changes
 

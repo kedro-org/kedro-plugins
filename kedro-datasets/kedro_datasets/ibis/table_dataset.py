@@ -203,15 +203,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 raise DatasetError(
                     f"The {self.connection.name} backend for Ibis does not support inserts."
                 )
-            return
-
-        if self._mode == "overwrite":
+        elif self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)
         elif self._mode in {"error", "errorifexists"}:
             writer(self._table_name, data, overwrite=False, **self._save_args)
-        elif self._mode == "ignore":
-            if self._exists():
-                return
+        elif self._mode == "ignore" and not self._exists():
             writer(self._table_name, data, overwrite=False, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:

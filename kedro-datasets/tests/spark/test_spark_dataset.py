@@ -26,6 +26,7 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
+import kedro_datasets._utils.databricks_utils
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset
@@ -327,10 +328,7 @@ class TestSparkDataset:
     @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
         filepath = (tmp_path / "test_data").as_posix()
-        pattern = (
-            f"Delta format doesn't support mode '{mode}'. "
-            f"Use one of"
-        )
+        pattern = f"Delta format doesn't support mode '{mode}'. " f"Use one of"
 
         with pytest.raises(DatasetError, match=pattern):
             _ = SparkDataset(
@@ -401,7 +399,6 @@ class TestSparkDataset:
 
     def test_dbfs_prefix_warning_no_databricks(self, caplog):
         # test that warning is not raised when not on Databricks
-        filepath = "my_project/data/02_intermediate/processed_data"
         expected_message = (
             "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix"
         )
@@ -423,11 +420,10 @@ class TestSparkDataset:
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
         # Mock deployed_on_databricks to return True
-        import kedro_datasets._utils.databricks_utils
         monkeypatch.setattr(
             kedro_datasets._utils.databricks_utils,
             "deployed_on_databricks",
-            lambda: True
+            lambda: True,
         )
 
         SparkDataset(filepath=filepath)
@@ -606,7 +602,7 @@ class TestSparkDatasetVersionedS3:
             versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
-        mocker.patch.object(versioned_dataset_s3, '_get_spark')
+        mocker.patch.object(versioned_dataset_s3, "_get_spark")
         mocked_glob = mocker.patch.object(versioned_dataset_s3, "_glob_function")
         mocked_glob.return_value = [
             "{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v="mocked_version")
@@ -615,7 +611,7 @@ class TestSparkDatasetVersionedS3:
 
         # Mock the actual Spark read
         mock_spark = mocker.MagicMock()
-        mocker.patch.object(versioned_dataset_s3, '_get_spark', return_value=mock_spark)
+        mocker.patch.object(versioned_dataset_s3, "_get_spark", return_value=mock_spark)
 
         versioned_dataset_s3.load()
 
@@ -630,7 +626,7 @@ class TestSparkDatasetVersionedS3:
         )
 
         mock_spark = mocker.MagicMock()
-        mocker.patch.object(ds_s3, '_get_spark', return_value=mock_spark)
+        mocker.patch.object(ds_s3, "_get_spark", return_value=mock_spark)
 
         ds_s3.load()
 

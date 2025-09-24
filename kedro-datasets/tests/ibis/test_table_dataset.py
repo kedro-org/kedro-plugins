@@ -222,7 +222,7 @@ class TestTableDataset:
 
         desc = table_dataset._describe()
 
-        assert {"backend", "mode", "materialized"}.issubset(desc.keys())
+        assert {"backend", "mode", "materialized"} <= desc.keys()
         assert "database" in desc
         # database key should not be duplicated inside nested args
         assert "database" not in desc["load_args"]

@@ -192,27 +192,30 @@ class TestTableDataset:
         with pytest.raises(DatasetError, match="does not support inserts"):
             table_dataset.save(dummy_table)
 
-    @pytest.mark.parametrize("legacy_overwrite", [True, False])
-    def test_legacy_overwrite_behavior(self, database, legacy_overwrite, dummy_table):
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {"materialized": "table", "overwrite": True},
+            {"materialized": "table", "overwrite": False},
+        ],
+        indirect=True,
+    )
+    def test_legacy_overwrite_behavior(self, table_dataset, save_args, dummy_table):
         """Legacy overwrite should map to overwrite or error behavior."""
-        ds = TableDataset(
-            table_name="legacy_overwrite",
-            connection={"backend": "duckdb", "database": database},
-            save_args={"materialized": "table", "overwrite": legacy_overwrite},
-        )
+        legacy_overwrite = save_args["overwrite"]
         df2 = ibis.memtable(pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]}))
 
-        ds.save(dummy_table)  # First save should always work
+        table_dataset.save(dummy_table)  # First save should always work
         if legacy_overwrite:
             # Should overwrite existing table with new contents
-            ds.save(df2)
+            table_dataset.save(df2)
             df2 = df2.execute()
-            out = ds.load().execute().reset_index(drop=True)
+            out = table_dataset.load().execute().reset_index(drop=True)
             assert_frame_equal(out, df2.reset_index(drop=True))
         else:
             # Should raise on second save when table exists
             with pytest.raises(DatasetError):
-                ds.save(df2)
+                table_dataset.save(df2)
 
     def test_describe_includes_backend_mode_and_materialized(self, table_dataset):
         """_describe should expose backend, mode and materialized; nested args exclude database."""
@@ -232,7 +235,7 @@ class TestTableDataset:
             assert table_dataset._load_args[key] == value
 
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
-    def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
+    def test_save_extra_params(self, table_dataset, dummy_table, database):
         """Test overriding the default save arguments."""
         table_dataset.save(dummy_table)
 

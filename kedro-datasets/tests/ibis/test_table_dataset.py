@@ -81,9 +81,10 @@ class TestTableDataset:
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     @pytest.mark.parametrize(
-        "connection_config", [{"backend": "polars"}], indirect=True
+        ("connection_config", "save_args"),
+        [({"backend": "polars"}, {"materialized": "table"})],
+        indirect=True,
     )
-    @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
     def test_save_and_load_polars(
         self, table_dataset, connection_config, save_args, dummy_table
     ):
@@ -107,9 +108,7 @@ class TestTableDataset:
         assert table_dataset.exists()
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"materialized": "table", "mode": "append"}],
-        indirect=True,
+        "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
     )
     def test_save_mode_append(self, table_dataset, dummy_table):
         """Saving with mode=append should add rows to an existing table."""
@@ -139,9 +138,7 @@ class TestTableDataset:
             table_dataset.save(dummy_table)
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"materialized": "table", "mode": "ignore"}],
-        indirect=True,
+        "save_args", [{"materialized": "table", "mode": "ignore"}], indirect=True
     )
     def test_save_mode_ignore(self, table_dataset, dummy_table):
         """Saving with ignore should not change existing table."""
@@ -183,10 +180,9 @@ class TestTableDataset:
             )
 
     @pytest.mark.parametrize(
-        "connection_config", [{"backend": "polars"}], indirect=True
-    )
-    @pytest.mark.parametrize(
-        "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
+        ("connection_config", "save_args"),
+        [({"backend": "polars"}, {"materialized": "table", "mode": "append"})],
+        indirect=True,
     )
     def test_append_mode_no_insert_raises(self, table_dataset, dummy_table):
         """Test that saving with mode=append on a backend without 'insert' raises DatasetError (polars backend)."""

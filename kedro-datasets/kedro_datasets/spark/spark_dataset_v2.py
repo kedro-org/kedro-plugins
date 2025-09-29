@@ -23,6 +23,14 @@ if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import StructType
 
+from kedro_datasets._utils.databricks_utils import (
+    dbfs_exists,
+    dbfs_glob,
+    deployed_on_databricks,
+    get_dbutils,
+    strip_dbfs_prefix,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -119,9 +127,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         self._spark_path = self._to_spark_path(filepath)
 
         # Handle schema if provided
-        self._schema = self._load_schema_from_file(
-            self.load_args.pop("schema", None)
-        )
+        self._schema = self._load_schema_from_file(self.load_args.pop("schema", None))
 
         super().__init__(
             filepath=PurePosixPath(self.path),
@@ -149,14 +155,17 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
     def _validate_databricks_path(self, filepath: str) -> None:
         """Warn about potential Databricks path issues."""
-        from kedro_datasets._utils.databricks_utils import deployed_on_databricks
-
         if (
-                deployed_on_databricks()
-                and not (filepath.startswith("/dbfs")
-                         or filepath.startswith("dbfs:/")
-                         or filepath.startswith("/Volumes"))
-                and not any(filepath.startswith(f"{p}://") for p in ["s3", "s3a", "s3n", "gs", "abfs", "wasbs"])
+            deployed_on_databricks()
+            and not (
+                filepath.startswith("/dbfs")
+                or filepath.startswith("dbfs:/")
+                or filepath.startswith("/Volumes")
+            )
+            and not any(
+                filepath.startswith(f"{p}://")
+                for p in ["s3", "s3a", "s3n", "gs", "abfs", "wasbs"]
+            )
         ):
             logger.warning(
                 "Using SparkDatasetV2 on Databricks without the `/dbfs/`, `dbfs:/`, or `/Volumes` prefix "
@@ -166,13 +175,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
     def _get_filesystem_ops(self) -> tuple:
         """Get filesystem operations with DBFS optimization."""
-        from kedro_datasets._utils.databricks_utils import (
-            dbfs_exists,
-            dbfs_glob,
-            deployed_on_databricks,
-            get_dbutils,
-        )
-
         # Special handling for DBFS to avoid performance issues
         # This addresses the critical performance issue raised by deepyaman
         if self.protocol == "dbfs" and deployed_on_databricks():
@@ -183,7 +185,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
                     logger.debug("Using optimized DBFS operations via dbutils")
                     return (
                         partial(dbfs_exists, dbutils=dbutils),
-                        partial(dbfs_glob, dbutils=dbutils)
+                        partial(dbfs_glob, dbutils=dbutils),
                     )
             except Exception as e:
                 logger.warning(f"Failed to get dbutils, falling back to fsspec: {e}")
@@ -241,8 +243,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
     def _to_spark_path(self, filepath: str) -> str:
         """Convert to Spark-compatible path format."""
-        from kedro_datasets._utils.databricks_utils import strip_dbfs_prefix
-
         filepath = str(filepath)
 
         # Apply DBFS prefix stripping for consistency
@@ -423,12 +423,15 @@ class SparkDatasetV2(AbstractVersionedDataset):
         except Exception as e:
             # Check for specific error messages indicating non-existence
             error_msg = str(e).lower()
-            if any(msg in error_msg for msg in [
-                "path does not exist",
-                "file not found",
-                "is not a delta table",
-                "no such file",
-            ]):
+            if any(
+                msg in error_msg
+                for msg in [
+                    "path does not exist",
+                    "file not found",
+                    "is not a delta table",
+                    "no such file",
+                ]
+            ):
                 return False
             # Re-raise for unexpected errors
             logger.warning(f"Error checking existence of {spark_load_path}: {e}")

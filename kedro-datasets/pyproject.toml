@@ -57,7 +57,7 @@ ibis-dask = ["ibis-framework[dask]<10.0"]
 ibis-databricks = ["ibis-framework[databricks]"]
 ibis-datafusion = ["ibis-framework[datafusion]"]
 ibis-druid = ["ibis-framework[druid]"]
-ibis-duckdb = ["ibis-framework[duckdb]", "duckdb<1.4.0"]
+ibis-duckdb = ["ibis-framework[duckdb]"]
 ibis-exasol = ["ibis-framework[exasol]"]
 ibis-flink = ["ibis-framework", "apache-flink"]
 ibis-impala = ["ibis-framework[impala]"]
@@ -232,7 +232,7 @@ test = [
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
-    "duckdb<1.4.0",
+    "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.7",

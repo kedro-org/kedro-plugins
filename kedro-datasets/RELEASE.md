@@ -3,6 +3,9 @@
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
 
+## Bug fixes and other changes
+- Add HTMLPreview type.
+
 # Release 8.1.0
 ## Major features and improvements
 

@@ -1,4 +1,5 @@
 # Upcoming Release
+
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
@@ -15,6 +16,8 @@
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The `overwrite` save argument is mapped to `mode` for backward compatibility; specifying both results in an error.
+
 ## Bug fixes and other changes
 
 - Added primary key constraint to BaseTable.
@@ -22,7 +25,11 @@
 - Updated the json schema for Kedro 1.0.0.
 
 ## Breaking Changes
+
+- `ibis.TableDataset`: Deprecated `save_args.overwrite` and the `connection` parameter in favor of `save_args.mode` and `credentials`. Using both `overwrite` and `mode` together raises an error; providing both `credentials` and `connection` emits a deprecation warning. The deprecated options will be removed in a future release.
+
 ## Community contributions
+
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 - [gitgud5000](https://github.com/gitgud5000)
 
@@ -55,7 +62,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
 - [Seohyun Park](https://github.com/soyamimi)
 - [Daniel Russell-Brain](https://github.com/killerfridge)
-
 
 # Release 7.0.0
 

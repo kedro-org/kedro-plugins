@@ -1,4 +1,4 @@
-"""Behave step definitions for the cli_scenarios feature."""
+"""Behave step definitions for the cli_scenarios feature. test"""
 
 import re
 import sys

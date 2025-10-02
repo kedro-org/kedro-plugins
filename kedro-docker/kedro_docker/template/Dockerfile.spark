@@ -1,13 +1,10 @@
 ARG BASE_IMAGE=python:3.9-slim
 FROM $BASE_IMAGE as runtime-environment
 
-# Install JDK and required libraries for Arrow
+# Install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
-    apt-get install -y \
-    procps \
-    openjdk-17-jdk-headless \
-    libnss3 \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install -y procps default-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set JVM options to allow Unsafe operations
 ENV JAVA_OPTS="-Dio.netty.tryReflectionSetAccessible=true \

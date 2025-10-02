@@ -1,18 +1,17 @@
 ARG BASE_IMAGE=python:3.9-slim
 FROM $BASE_IMAGE as runtime-environment
 
-# Install JVM
+# install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
-    apt-get install -y procps default-jre-headless && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
-# Set JVM options to allow Unsafe operations
+# set JVM options to allow Unsafe operations
 ENV JAVA_OPTS="-Dio.netty.tryReflectionSetAccessible=true \
     --add-opens=java.base/java.nio=ALL-UNNAMED \
     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
     --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED"
 
-# Set Spark configuration to handle Arrow properly
+# set Spark configuration to handle Arrow properly
 ENV SPARK_SUBMIT_OPTS="-Dio.netty.tryReflectionSetAccessible=true"
 ENV ARROW_PRE_0_15_IPC_FORMAT=1
 

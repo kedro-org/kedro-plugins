@@ -10,7 +10,6 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 # Minimum number of elements required for a message (role, content)
 MIN_MESSAGE_LENGTH = 2
 
-
 class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate, Any]):
     """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
 
@@ -46,12 +45,12 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         self.metadata = metadata
         self._filepath = get_filepath_str(Path(filepath), kwargs.get("protocol"))
 
-        # Pick template
-        if template not in self.TEMPLATES:
+        try:
+            self._template_class = self.TEMPLATES[template]
+        except KeyError:
             raise DatasetError(
-                f"Invalid template '{template}'. Must be one of: {list(self.TEMPLATES.keys())}"
+                f"Invalid template '{template}'. Must be one of: {list(self.TEMPLATES)}"
             )
-        self._template_class = self.TEMPLATES[template]
 
         # Infer dataset type if not explicitly provided
         dataset_config = self._build_dataset_config(dataset)
@@ -126,9 +125,7 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
             return PromptTemplate.from_template(raw_data)
 
         if isinstance(raw_data, dict):
-            if "template" in raw_data and "input_variables" not in raw_data:
-                return PromptTemplate.from_template(raw_data["template"])
-            return PromptTemplate(**raw_data)
+           return PromptTemplate(**raw_data)
 
         raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
 

@@ -129,23 +129,27 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
 
         raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
 
-    def _create_chat_prompt_template(self, raw_data: Any) -> ChatPromptTemplate:
-        """Create a ChatPromptTemplate from loaded data."""
-        if not isinstance(raw_data, dict):
-            raise DatasetError(f"ChatPromptTemplate requires dict data, got: {type(raw_data)}")
+    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> list[tuple[str, str]]:
+        """Validate and normalize chat prompt data."""
+        messages = data.get("messages") if isinstance(data, dict) else data
+        if not isinstance(messages, list) or not messages:
+            raise DatasetError(
+                "ChatPromptTemplate requires a non-empty list of messages "
+                "(either directly or under the 'messages' key in a dict)."
+            )
 
-        if "messages" not in raw_data:
-            raise DatasetError("ChatPromptTemplate requires a 'messages' key in the data")
+        validated_data = [tuple(msg) if isinstance(msg, list) and len(msg) >= MIN_MESSAGE_LENGTH else msg
+                    for msg in messages]
 
-        messages = raw_data["messages"]
-        if not messages or not isinstance(messages, list):
-            raise DatasetError("Messages must be a non-empty list")
+        if any(not isinstance(msg, tuple) or len(msg) != MIN_MESSAGE_LENGTH for msg in validated_data):
+            raise DatasetError(f"Unsupported message type found in messages: {validated_data}")
 
-        converted_messages = [
-            tuple(msg) if isinstance(msg, list) and len(msg) >= MIN_MESSAGE_LENGTH else msg
-            for msg in messages
-        ]
-        return ChatPromptTemplate.from_messages(converted_messages)
+        return validated_data
+
+    def _create_chat_prompt_template(self, data: dict | list[tuple[str, str]]) -> ChatPromptTemplate:
+        """Create a ChatPromptTemplate from validated data."""
+        messages = self._validate_chat_prompt_data(data)
+        return ChatPromptTemplate.from_messages(messages)
 
     def save(self, data: Any) -> None:
         raise DatasetError("Saving is not supported for LangChainPromptDataset")

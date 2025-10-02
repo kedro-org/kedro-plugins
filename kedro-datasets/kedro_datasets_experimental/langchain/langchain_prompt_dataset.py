@@ -54,19 +54,7 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         self._template_class = self.TEMPLATES[template]
 
         # Infer dataset type if not explicitly provided
-        if dataset is None:
-            if self._filepath.endswith(".txt"):
-                dataset = {"type": "text.TextDataset"}
-            elif self._filepath.endswith(".json"):
-                dataset = {"type": "json.JSONDataset"}
-            elif self._filepath.endswith((".yaml", ".yml")):
-                dataset = {"type": "yaml.YAMLDataset"}
-            else:
-                raise DatasetError(f"Cannot auto-detect dataset type for file: {self._filepath}")
-
-        dataset_config = dataset if isinstance(dataset, dict) else {"type": dataset}
-        dataset_config = deepcopy(dataset_config)
-        dataset_config["filepath"] = self._filepath
+        dataset_config = self._build_dataset_config(dataset)
 
         # Handle credentials
         self._credentials = deepcopy(credentials or {})
@@ -95,6 +83,24 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
             self._dataset = dataset_class(**dataset_kwargs)
         except Exception as e:
             raise DatasetError(f"Failed to create underlying dataset: {e}")
+
+    def _build_dataset_config(self, dataset: dict[str, Any] | str | None) -> dict[str, Any]:
+        """Infer and normalize dataset configuration."""
+        if dataset is None:
+            if self._filepath.endswith(".txt"):
+                dataset = {"type": "text.TextDataset"}
+            elif self._filepath.endswith(".json"):
+                dataset = {"type": "json.JSONDataset"}
+            elif self._filepath.endswith((".yaml", ".yml")):
+                dataset = {"type": "yaml.YAMLDataset"}
+            else:
+                raise DatasetError(f"Cannot auto-detect dataset type for file: {self._filepath}")
+
+        dataset_config = dataset if isinstance(dataset, dict) else {"type": dataset}
+        dataset_config = deepcopy(dataset_config)
+        dataset_config["filepath"] = self._filepath
+
+        return dataset_config
 
     def load(self) -> PromptTemplate | ChatPromptTemplate:
         """Load data using underlying dataset and wrap in LangChain template."""

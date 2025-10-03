@@ -7,8 +7,6 @@ from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-# Minimum number of elements required for a message (role, content)
-MIN_MESSAGE_LENGTH = 2
 
 class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate, Any]):
     """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
@@ -119,7 +117,7 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         except Exception as e:
             raise DatasetError(f"Failed to create {self._template_class.__name__}: {e}")
 
-    def _create_prompt_template(self, raw_data: Any) -> PromptTemplate:
+    def _create_prompt_template(self, raw_data: str | dict[str]) -> PromptTemplate:
         """Create a PromptTemplate from loaded data."""
         if isinstance(raw_data, str):
             return PromptTemplate.from_template(raw_data)
@@ -129,22 +127,15 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
 
         raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
 
-    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> list[tuple[str, str]]:
-        """Validate and normalize chat prompt data."""
+    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> None:
+        """Validate that chat prompt data exists and is not empty."""
         messages = data.get("messages") if isinstance(data, dict) else data
-        if not isinstance(messages, list) or not messages:
+        if not messages:
             raise DatasetError(
-                "ChatPromptTemplate requires a non-empty list of messages "
-                "(either directly or under the 'messages' key in a dict)."
+                "ChatPromptTemplate requires a non-empty list of messages"
             )
 
-        validated_data = [tuple(msg) if isinstance(msg, list) and len(msg) >= MIN_MESSAGE_LENGTH else msg
-                    for msg in messages]
-
-        if any(not isinstance(msg, tuple) or len(msg) != MIN_MESSAGE_LENGTH for msg in validated_data):
-            raise DatasetError(f"Unsupported message type found in messages: {validated_data}")
-
-        return validated_data
+        return messages
 
     def _create_chat_prompt_template(self, data: dict | list[tuple[str, str]]) -> ChatPromptTemplate:
         """Create a ChatPromptTemplate from validated data."""

@@ -2,6 +2,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+import langchain_core
 from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition

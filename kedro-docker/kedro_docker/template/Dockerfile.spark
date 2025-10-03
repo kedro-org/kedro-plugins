@@ -3,16 +3,23 @@ FROM $BASE_IMAGE as runtime-environment
 
 # install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
-    apt-get install -y procps openjdk-11-jre-headless && rm -rf /var/lib/apt/lists/*
-
-# set JAVA_HOME
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
 # configure JVM for Arrow
-ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.nio=ALL-UNNAMED \
+ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.lang=ALL-UNNAMED \
+    --add-opens=java.base/java.lang.invoke=ALL-UNNAMED \
+    --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+    --add-opens=java.base/java.io=ALL-UNNAMED \
+    --add-opens=java.base/java.net=ALL-UNNAMED \
+    --add-opens=java.base/java.nio=ALL-UNNAMED \
+    --add-opens=java.base/java.util=ALL-UNNAMED \
+    --add-opens=java.base/java.util.concurrent=ALL-UNNAMED \
+    --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED \
     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
+    --add-opens=java.base/sun.nio.cs=ALL-UNNAMED \
+    --add-opens=java.base/sun.security.action=ALL-UNNAMED \
+    --add-opens=java.base/sun.util.calendar=ALL-UNNAMED \
     --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
-    --add-opens=java.base/sun.misc=ALL-UNNAMED \
     -Dio.netty.tryReflectionSetAccessible=true"
 
 # update pip and install uv

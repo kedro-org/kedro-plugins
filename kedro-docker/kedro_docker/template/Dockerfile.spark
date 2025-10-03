@@ -3,17 +3,17 @@ FROM $BASE_IMAGE as runtime-environment
 
 # install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
-    apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
+    apt-get install -y procps openjdk-11-jre-headless && rm -rf /var/lib/apt/lists/*
 
-# set JVM options to allow Unsafe operations
-ENV JAVA_OPTS="-Dio.netty.tryReflectionSetAccessible=true \
-    --add-opens=java.base/java.nio=ALL-UNNAMED \
+# set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+# configure JVM for Arrow
+ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.nio=ALL-UNNAMED \
     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
-    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED"
-
-# set Spark configuration to handle Arrow properly
-ENV SPARK_SUBMIT_OPTS="-Dio.netty.tryReflectionSetAccessible=true"
-ENV ARROW_PRE_0_15_IPC_FORMAT=1
+    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
+    --add-opens=java.base/sun.misc=ALL-UNNAMED \
+    -Dio.netty.tryReflectionSetAccessible=true"
 
 # update pip and install uv
 RUN python -m pip install -U "pip>=21.2"

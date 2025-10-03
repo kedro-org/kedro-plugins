@@ -11,6 +11,9 @@ ENV JAVA_OPTS="-Dio.netty.tryReflectionSetAccessible=true \
     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
     --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED"
 
+# set Spark configuration to handle Arrow properly
+ENV SPARK_SUBMIT_OPTS="-Dio.netty.tryReflectionSetAccessible=true"
+
 # update pip and install uv
 RUN python -m pip install -U "pip>=21.2"
 RUN pip install uv

@@ -5,30 +5,15 @@ FROM $BASE_IMAGE as runtime-environment
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
     apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
-# configure JVM for Arrow
-ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.lang=ALL-UNNAMED \
-    --add-opens=java.base/java.lang.invoke=ALL-UNNAMED \
-    --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
-    --add-opens=java.base/java.io=ALL-UNNAMED \
-    --add-opens=java.base/java.net=ALL-UNNAMED \
-    --add-opens=java.base/java.nio=ALL-UNNAMED \
-    --add-opens=java.base/java.util=ALL-UNNAMED \
-    --add-opens=java.base/java.util.concurrent=ALL-UNNAMED \
-    --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED \
-    --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
-    --add-opens=java.base/sun.nio.cs=ALL-UNNAMED \
-    --add-opens=java.base/sun.security.action=ALL-UNNAMED \
-    --add-opens=java.base/sun.util.calendar=ALL-UNNAMED \
-    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
-    -Dio.netty.tryReflectionSetAccessible=true"
-
 # update pip and install uv
 RUN python -m pip install -U "pip>=21.2"
 RUN pip install uv
 
 # install project requirements
 COPY requirements.txt /tmp/requirements.txt
-RUN uv pip install --system --no-cache-dir -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
+RUN uv pip install --system --no-cache-dir -r /tmp/requirements.txt && \
+    uv pip install --system --no-cache-dir "pyarrow>=6.0,<12.0" && \
+    rm -f /tmp/requirements.txt
 
 # Debug: Check PySpark version
 RUN python -c "import pyspark; print(f'PySpark version: {pyspark.__version__}')"

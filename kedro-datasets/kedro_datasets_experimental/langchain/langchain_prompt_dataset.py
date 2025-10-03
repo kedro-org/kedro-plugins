@@ -24,7 +24,7 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialize the LangChain prompt dataset.

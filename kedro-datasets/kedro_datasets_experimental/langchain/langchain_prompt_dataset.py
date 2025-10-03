@@ -116,7 +116,34 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
             raise DatasetError(f"Failed to create {self._template_name}: {e}")
 
     def _create_prompt_template(self, raw_data: str | dict[str]) -> PromptTemplate:
-        """Create a PromptTemplate from loaded data."""
+        """
+        Create a `PromptTemplate` from loaded raw data.
+
+        This method supports either a string template or a dictionary
+        containing the prompt configuration.
+
+        Args:
+            raw_data (str | dict): Either a string representing the template,
+                or a dictionary with keys compatible with `PromptTemplate` initialization
+                (e.g., `template`, `input_variables`).
+
+        Returns:
+            PromptTemplate: A LangChain `PromptTemplate` instance initialized
+                with the provided template data.
+
+        Raises:
+            DatasetError: If `raw_data` is not a string or dictionary.
+
+        Examples:
+            >>> dataset._create_prompt_template("Hello {name}!")
+            PromptTemplate(template='Hello {name}!', input_variables=['name'])
+
+            >>> dataset._create_prompt_template({
+            ...     "template": "Hello {name}!",
+            ...     "input_variables": ["name"]
+            ... })
+            PromptTemplate(template='Hello {name}!', input_variables=['name'])
+        """
         if isinstance(raw_data, str):
             return PromptTemplate.from_template(raw_data)
 
@@ -136,7 +163,37 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         return messages
 
     def _create_chat_prompt_template(self, data: dict | list[tuple[str, str]]) -> ChatPromptTemplate:
-        """Create a ChatPromptTemplate from validated data."""
+        """
+        Create a `ChatPromptTemplate` from validated chat data.
+
+        Supports either:
+        - A dictionary in the LangChain chat JSON format (`{"messages": [{"role": "...", "content": "..."}]}`),
+        - Or a list of `(role, content)` tuples.
+
+        Args:
+            data (dict | list[tuple[str, str]]): Chat prompt data to validate and transform.
+
+        Returns:
+            ChatPromptTemplate: A LangChain `ChatPromptTemplate` instance.
+
+        Raises:
+            DatasetError: If  cannot be used to create a `ChatPromptTemplate`.
+
+        Examples:
+            >>> dataset._create_chat_prompt_template({
+            ...     "messages": [
+            ...         {"role": "system", "content": "You are a helpful assistant."},
+            ...         {"role": "user", "content": "Hello, who are you?"}
+            ...     ]
+            ... })
+            ChatPromptTemplate(messages=[...])
+
+            >>> dataset._create_chat_prompt_template([
+            ...     ("user", "Hello"),
+            ...     ("ai", "Hi there!")
+            ... ])
+            ChatPromptTemplate(messages=[...])
+        """
         messages = self._validate_chat_prompt_data(data)
         return ChatPromptTemplate.from_messages(messages)
 

@@ -120,17 +120,3 @@ Feature: Docker commands in new projects
     When I execute the kedro command "docker dive"
     Then I should get an error exit code
     And Standard output should contain a message including "Error: Unable to find image `project-dummy` locally."
-
-Scenario: Execute docker build and run using spark Dockerfile
-    Given I have prepared a config file
-    And I run a non-interactive kedro new using spaceflights-pyspark starter
-    And I have installed the project dependencies
-    And I have removed old docker image of test project
-    When I execute the kedro command "docker build --with-spark"
-    Then I should get a successful exit code
-    And A new docker image for test project should be created
-    # Force output by checking for a specific version string
-    When I execute the kedro command "docker cmd python -c 'import pyspark; print(pyspark.__version__); assert False, f\"DEBUG: PySpark {pyspark.__version__}\"'"
-    When I execute the kedro command "docker run"
-    Then I should get a successful exit code
-    And I should get a message including "Pipeline execution completed"

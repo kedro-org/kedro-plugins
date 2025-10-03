@@ -18,6 +18,9 @@ Feature: Docker commands in new Spark projects
     When I execute the kedro command "docker build --with-spark"
     Then I should get a successful exit code
     And A new docker image for test project should be created
+    # DEBUG: Check PySpark version
+    When I execute the kedro command "docker cmd python -c 'import pyspark; print(\"PySpark version:\", pyspark.__version__)'"
+    Then I should get a message including "PySpark version:"
     When I execute the kedro command "docker run"
     Then I should get a successful exit code
     And I should get a message including "Pipeline execution completed"

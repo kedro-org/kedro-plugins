@@ -186,6 +186,11 @@ def exec_kedro_command(context, command):
     """Execute Kedro command and check the status."""
     make_cmd = [context.kedro] + command.split()
 
+    # Debug: Check Spark version if this is a spark-related command
+    debug_cmd = [context.python, "-c", "import pyspark; print(f'PySpark version: {pyspark.__version__}')"]
+    res = run(debug_cmd, env=context.env, cwd=str(context.root_project_dir))
+    print(f"DEBUG: {res.stdout}")
+
     res = run(make_cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:

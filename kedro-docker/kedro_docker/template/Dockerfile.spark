@@ -5,6 +5,9 @@ FROM $BASE_IMAGE as runtime-environment
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
     apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
+# set Spark configuration to handle Arrow properly
+ENV ARROW_PRE_0_15_IPC_FORMAT=1
+
 # update pip and install uv
 RUN python -m pip install -U "pip>=21.2"
 RUN pip install uv

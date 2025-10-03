@@ -2,7 +2,6 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-import langchain_core
 from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition
@@ -13,8 +12,8 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
     """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
 
     TEMPLATES = {
-        "PromptTemplate": PromptTemplate,
-        "ChatPromptTemplate": ChatPromptTemplate,
+        "PromptTemplate": "_create_prompt_template",
+        "ChatPromptTemplate": "_create_chat_prompt_template",
     }
 
     def __init__(  # noqa: PLR0913
@@ -45,7 +44,8 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         self._filepath = get_filepath_str(Path(filepath), kwargs.get("protocol"))
 
         try:
-            self._template_class = self.TEMPLATES[template]
+            self._template_name = template
+            self._create_template_function = getattr(self, self.TEMPLATES[template])
         except KeyError:
             raise DatasetError(
                 f"Invalid template '{template}'. Must be one of: {list(self.TEMPLATES)}"
@@ -111,12 +111,9 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
             raise DatasetError(f"No data loaded from {self._filepath}")
 
         try:
-            if self._template_class == ChatPromptTemplate:
-                return self._create_chat_prompt_template(raw_data)
-            else:
-                return self._create_prompt_template(raw_data)
+            return self._create_template_function(raw_data)
         except Exception as e:
-            raise DatasetError(f"Failed to create {self._template_class.__name__}: {e}")
+            raise DatasetError(f"Failed to create {self._template_name}: {e}")
 
     def _create_prompt_template(self, raw_data: str | dict[str]) -> PromptTemplate:
         """Create a PromptTemplate from loaded data."""
@@ -152,7 +149,7 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         }
         return {
             "path": self._filepath,
-            "template": self._template_class.__name__,
+            "template": self._template_name,
             "underlying_dataset": self._dataset.__class__.__name__,
             "dataset_config": clean_config,
         }

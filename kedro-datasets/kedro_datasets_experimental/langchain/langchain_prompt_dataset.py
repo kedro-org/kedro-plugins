@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -6,6 +7,8 @@ from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
+
+from kedro_datasets._typing import JSONPreview
 
 
 class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate, Any]):
@@ -213,3 +216,28 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
 
     def _exists(self) -> bool:
         return self._dataset._exists() if hasattr(self._dataset, "_exists") else True
+
+    def preview(self) -> str:
+        """Generate a preview of the prompt data for Kedro-viz.
+
+        Returns:
+            String representation of the prompt data suitable for display
+        """
+        # Use underlying dataset's preview if available
+        if hasattr(self._dataset, 'preview'):
+            try:
+                return self._dataset.preview()
+            except Exception:
+                pass
+
+        # Fallback: load and display raw data
+        try:
+            data = self._dataset.load()
+
+            if isinstance(data, str):
+                return data
+
+            return JSONPreview(json.dumps(data))
+
+        except Exception as e:
+            return f"Error generating preview: {e}"

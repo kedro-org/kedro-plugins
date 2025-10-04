@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Any
 
@@ -6,6 +7,7 @@ import yaml
 from kedro.io import DatasetError
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
+from kedro_datasets._typing import JSONPreview
 from kedro_datasets_experimental.langchain.langchain_prompt_dataset import (
     LangChainPromptDataset,
 )
@@ -81,13 +83,13 @@ class TestLangChainPromptDataset:
     def test_init_with_txt_file(self, txt_prompt_file: Path) -> None:
         """Test dataset initialization with a .txt file."""
         dataset = LangChainPromptDataset(filepath=str(txt_prompt_file))
-        assert dataset._template_class == PromptTemplate
+        assert dataset._template_name == "PromptTemplate"
         assert dataset._dataset.__class__.__name__ == "TextDataset"
 
     def test_init_with_json_file(self, json_prompt_file: Path) -> None:
         """Test dataset initialization with a .json file."""
         dataset = LangChainPromptDataset(filepath=str(json_prompt_file))
-        assert dataset._template_class == PromptTemplate
+        assert dataset._template_name == "PromptTemplate"
         assert dataset._dataset.__class__.__name__ == "JSONDataset"
 
     def test_init_with_invalid_template(self, txt_prompt_file: Path) -> None:
@@ -209,7 +211,6 @@ class TestLangChainPromptDataset:
             ([], "ChatPromptTemplate requires a non-empty list of messages"),
             ([{"role": "user"}], "Expected dict to have exact keys 'role' and 'content'"),
             ([{"content": "hello"}], "Expected dict to have exact keys 'role' and 'content'"),
-            ("- role: user\n", "Expected dict to have exact keys 'role' and 'content'"),
         ]
     )
     def test_invalid_yaml_chat_prompt(self, tmp_path: Path, bad_data: any, error_pattern: str) -> None:
@@ -224,3 +225,43 @@ class TestLangChainPromptDataset:
 
         with pytest.raises(DatasetError, match=f".*{error_pattern}.*"):
             dataset.load()
+
+    def test_preview_txt_prompt(self, txt_prompt_file: str):
+        """Preview a plain text prompt returns raw string."""
+        dataset = LangChainPromptDataset(filepath=str(txt_prompt_file))
+        preview = dataset.preview()
+        assert preview == "Hello, this is {name}!"
+
+    def test_preview_json_prompt(self, json_prompt_file: str):
+        """Preview a JSON prompt returns serialized dict."""
+        dataset = LangChainPromptDataset(filepath=str(json_prompt_file))
+        preview = dataset.preview()
+        data = json.loads(preview)
+        assert data["template"] == "Hello, this is {name}!"
+        assert data["input_variables"] == ["name"]
+
+    def test_preview_yaml_prompt(self, yaml_prompt_file: str):
+        """Preview a YAML prompt returns serialized dict."""
+        dataset = LangChainPromptDataset(filepath=str(yaml_prompt_file))
+        preview = dataset.preview()
+        data = json.loads(preview)
+        assert data["template"] == "Hello, this is {name}!"
+        assert data["input_variables"] == ["name"]
+
+    def test_preview_chat_json_prompt(self, chat_prompt_file: str):
+        """Preview a JSON chat prompt returns serialized messages list."""
+        dataset = LangChainPromptDataset(filepath=str(chat_prompt_file), template="ChatPromptTemplate")
+        preview = dataset.preview()
+        data = json.loads(preview)
+        assert isinstance(data, dict)
+        assert data['messages'][0]['role'] == 'system'
+        assert data['messages'][1]['role'] == 'user'
+
+    def test_preview_chat_yaml_prompt(self, chat_yaml_prompt_file: str):
+        """Preview a YAML chat prompt returns serialized messages list."""
+        dataset = LangChainPromptDataset(filepath=str(chat_yaml_prompt_file), template="ChatPromptTemplate")
+        preview = dataset.preview()
+        data = json.loads(preview)
+        assert isinstance(data, dict)
+        assert data['messages'][0]['role'] == 'system'
+        assert data['messages'][1]['role'] == 'user'

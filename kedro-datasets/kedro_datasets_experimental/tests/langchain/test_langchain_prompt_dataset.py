@@ -230,7 +230,7 @@ class TestLangChainPromptDataset:
         """Preview a plain text prompt returns raw string."""
         dataset = LangChainPromptDataset(filepath=str(txt_prompt_file))
         preview = dataset.preview()
-        assert preview == "Hello, this is {name}!"
+        assert preview == '{"text": "Hello, this is {name}!"}'
 
     def test_preview_json_prompt(self, json_prompt_file: str):
         """Preview a JSON prompt returns serialized dict."""

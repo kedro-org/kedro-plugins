@@ -42,7 +42,10 @@ class TestPptxDataset:
         """Test saving and reloading the dataset."""
         pptx_dataset.save(dummy_data)
         reloaded = pptx_dataset.load()
-        assert dummy_data.slides[0].shapes.title.text == reloaded.slides[0].shapes.title.text
+        assert (
+            dummy_data.slides[0].shapes.title.text
+            == reloaded.slides[0].shapes.title.text
+        )
         assert pptx_dataset._fs_open_args_load == {}
         assert pptx_dataset._fs_open_args_save == {"mode": "wb"}
 
@@ -120,7 +123,10 @@ class TestPptxDatasetVersioned:
         the versioned dataset."""
         versioned_pptx_dataset.save(dummy_data)
         reloaded = versioned_pptx_dataset.load()
-        assert dummy_data.slides[0].shapes.title.text == reloaded.slides[0].shapes.title.text
+        assert (
+            dummy_data.slides[0].shapes.title.text
+            == reloaded.slides[0].shapes.title.text
+        )
 
     def test_no_versions(self, versioned_pptx_dataset):
         """Check the error if no versions are available for load."""

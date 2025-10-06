@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
@@ -11,7 +11,7 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from kedro_datasets._typing import JSONPreview
 
 
-class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate, Any]):
+class LangChainPromptDataset(AbstractDataset[Union(PromptTemplate, ChatPromptTemplate), Any]):
     """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
 
     TEMPLATES = {
@@ -104,7 +104,28 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         return dataset_config
 
     def load(self) -> PromptTemplate | ChatPromptTemplate:
-        """Load data using underlying dataset and wrap in LangChain template."""
+        """
+        Loads the underlying dataset and converts the data into a LangChain prompt template.
+
+        This method retrieves raw prompt data from the underlying dataset (e.g., a JSON or YAML file)
+        and constructs the corresponding LangChain template — either a `PromptTemplate` or
+        `ChatPromptTemplate` — depending on the dataset configuration.
+
+        Raises:
+            DatasetError: If the dataset cannot be loaded, contains no data, or cannot be
+                converted into the expected prompt template.
+
+        Returns:
+            PromptTemplate | ChatPromptTemplate:
+                A fully initialized LangChain prompt object created from the dataset contents.
+
+        Example:
+            >>> dataset.load()
+            ChatPromptTemplate.from_messages([
+                ("system", "You are a helpful assistant."),
+                ("human", "{input}")
+            ])
+        """
         try:
             raw_data = self._dataset.load()
         except Exception as e:
@@ -151,12 +172,13 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
             return PromptTemplate.from_template(raw_data)
 
         if isinstance(raw_data, dict):
-           return PromptTemplate(**raw_data)
+            return PromptTemplate(**raw_data)
 
         raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
 
     def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> None:
-        """Validate that chat prompt data exists and is not empty."""
+        """Validate that chat prompt data exists and is not empty.
+        Returns validated and unpacked messages as a dictionary or a list of tuples."""
         messages = data.get("messages") if isinstance(data, dict) else data
         if not messages:
             raise DatasetError(
@@ -218,7 +240,18 @@ class LangChainPromptDataset(AbstractDataset[PromptTemplate | ChatPromptTemplate
         return self._dataset._exists() if hasattr(self._dataset, "_exists") else True
 
     def preview(self) -> JSONPreview:
-        """Generate a preview of the prompt data for Kedro-Viz."""
+        """
+        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
+
+        Returns:
+            JSONPreview:
+                A Kedro-Viz-compatible object containing a serialized JSON string of the
+                processed data. If an exception occurs during processing, the returned
+                JSONPreview contains an error message instead of the dataset content.
+        Example:
+            >>> dataset.preview()
+            JSONPreview('{"messages": [{"role": "system", "content": "You are..."}]}')
+        """
         try:
             data = self._dataset.load()
 

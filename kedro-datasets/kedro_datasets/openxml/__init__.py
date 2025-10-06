@@ -17,8 +17,6 @@ except (ImportError, RuntimeError):
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={
-        "docx_dataset": ["DocxDataset"],
-        "pptx_dataset": ["PptxDataset"]
-    }
+    __name__,
+    submod_attrs={"docx_dataset": ["DocxDataset"], "pptx_dataset": ["PptxDataset"]},
 )

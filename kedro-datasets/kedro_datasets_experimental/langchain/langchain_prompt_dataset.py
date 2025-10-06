@@ -28,7 +28,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         credentials: Optional credentials for accessing remote filesystems.
         metadata: Arbitrary metadata for catalog introspection.
     """
-    
+
     TEMPLATES = {
         "PromptTemplate": "_create_prompt_template",
         "ChatPromptTemplate": "_create_chat_prompt_template",

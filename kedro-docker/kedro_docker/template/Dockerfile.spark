@@ -11,12 +11,10 @@ RUN pip install uv
 
 # install project requirements
 COPY requirements.txt /tmp/requirements.txt
-RUN uv pip install --system --no-cache-dir -r /tmp/requirements.txt && \
-    uv pip install --system --no-cache-dir "pyarrow>=6.0,<12.0" && \
-    rm -f /tmp/requirements.txt
+RUN uv pip install --system --no-cache-dir -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
 
-# Debug: Check PySpark version
-RUN python -c "import pyspark; print(f'PySpark version: {pyspark.__version__}')"
+RUN python -c "import kedro, sys; print(sys.version); print('kedro', kedro.__version__)"
+RUN python -c "import pyspark, pyarrow; print('pyspark', pyspark.__version__); print('pyarrow', pyarrow.__version__)"
 
 # add kedro user
 ARG KEDRO_UID=999

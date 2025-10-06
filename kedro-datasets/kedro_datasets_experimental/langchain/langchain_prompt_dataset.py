@@ -11,7 +11,7 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from kedro_datasets._typing import JSONPreview
 
 
-class LangChainPromptDataset(AbstractDataset[Union(PromptTemplate, ChatPromptTemplate), Any]):
+class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]): # noqa UP007
     """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
 
     TEMPLATES = {
@@ -262,12 +262,6 @@ class LangChainPromptDataset(AbstractDataset[Union(PromptTemplate, ChatPromptTem
             if isinstance(data, str):
                 # Wrap plain text in a dictionary or Viz doesn't render it
                 data = {"text": data}
-
-            # Restructure output so it's compatible with JSON
-            if isinstance(data, dict) and "messages" in data:
-                msgs = data["messages"]
-                if isinstance(msgs, dict):
-                    data["messages"] = [{"role": k, "content": v} for k, v in msgs.items()]
 
             return JSONPreview(json.dumps(data))
 

@@ -14,9 +14,8 @@ COPY requirements.txt /tmp/requirements.txt
 RUN uv pip install --system --no-cache-dir -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
 
 ARG PYSPARK_VERSION=3.5.1
-ARG PYARROW_VERSION=12.0.1
+ARG PYARROW_VERSION=14.0.2
 RUN uv pip install --system "pyspark==${PYSPARK_VERSION}" "pyarrow==${PYARROW_VERSION}"
-
 
 # add kedro user
 ARG KEDRO_UID=999

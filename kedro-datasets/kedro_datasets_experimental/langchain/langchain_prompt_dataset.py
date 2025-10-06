@@ -27,12 +27,8 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
             fs_args: Optional filesystem arguments for remote storage.
         credentials: Optional credentials for accessing remote filesystems.
         metadata: Arbitrary metadata for catalog introspection.
-
-    Example:
-        >>> dataset = LangChainPromptDataset(filepath="prompt.json", template="PromptTemplate")
-        >>> prompt = dataset.load()
-        >>> print(prompt.format(name="Kedro"))
     """
+    
     TEMPLATES = {
         "PromptTemplate": "_create_prompt_template",
         "ChatPromptTemplate": "_create_chat_prompt_template",

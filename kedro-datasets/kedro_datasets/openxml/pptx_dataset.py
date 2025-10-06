@@ -10,7 +10,6 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-from pptx import Presentation
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
@@ -18,6 +17,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+from pptx import Presentation
 
 
 class PptxDataset(AbstractVersionedDataset[Presentation, Presentation]):

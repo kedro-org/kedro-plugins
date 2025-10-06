@@ -1,11 +1,11 @@
 from pathlib import Path, PurePosixPath
 
 import pytest
-from pptx import Presentation
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
+from pptx import Presentation
 from s3fs.core import S3FileSystem
 
 from kedro_datasets.openxml import PptxDataset

@@ -40,9 +40,7 @@ jobs:
       - name: pip freeze
         run: uv pip freeze --system
       - name: Run end to end tests
-        env:
-          DOCKER_BUILDKIT: "1"
-          BUILDKIT_PROGRESS: plain
+        # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`
+        # isn't supported on Github Actions. See https://github.com/actions/runner/issues/241
         shell: 'script -q -e -c "bash {0}"'
         run: make plugin=${{ inputs.plugin }} e2e-tests
-

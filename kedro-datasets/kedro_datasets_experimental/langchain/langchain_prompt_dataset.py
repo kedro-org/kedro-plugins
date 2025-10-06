@@ -176,9 +176,13 @@ class LangChainPromptDataset(AbstractDataset[Union(PromptTemplate, ChatPromptTem
 
         raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
 
-    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> None:
+    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> dict | list[tuple[str, str]]:
         """Validate that chat prompt data exists and is not empty.
-        Returns validated and unpacked messages as a dictionary or a list of tuples."""
+        Returns validated and unpacked messages as a dictionary or a list of tuples.
+
+        Raises:
+            DatasetError: If the data is empty.
+        """
         messages = data.get("messages") if isinstance(data, dict) else data
         if not messages:
             raise DatasetError(

@@ -12,8 +12,27 @@ from kedro_datasets._typing import JSONPreview
 
 
 class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]): # noqa UP007
-    """Kedro dataset for loading LangChain prompts using existing Kedro datasets."""
+    """
+    A Kedro dataset for loading LangChain prompt templates from text, JSON, or YAML files.
 
+    This dataset wraps existing Kedro datasets (such as TextDataset, JSONDataset, or YAMLDataset)
+    to load prompt configurations and convert them into LangChain `PromptTemplate` or
+    `ChatPromptTemplate` objects.
+
+    Args:
+        filepath: Path to the prompt file.
+        template: Type of LangChain template to use ("PromptTemplate" or "ChatPromptTemplate").
+        dataset: Optional configuration for the underlying Kedro dataset.
+            type: Dataset type (e.g., "text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset").
+            fs_args: Optional filesystem arguments for remote storage.
+        credentials: Optional credentials for accessing remote filesystems.
+        metadata: Arbitrary metadata for catalog introspection.
+
+    Example:
+        >>> dataset = LangChainPromptDataset(filepath="prompt.json", template="PromptTemplate")
+        >>> prompt = dataset.load()
+        >>> print(prompt.format(name="Kedro"))
+    """
     TEMPLATES = {
         "PromptTemplate": "_create_prompt_template",
         "ChatPromptTemplate": "_create_chat_prompt_template",

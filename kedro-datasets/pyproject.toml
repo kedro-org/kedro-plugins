@@ -184,6 +184,8 @@ langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
+langfuse = ["kedro-datasets[langfuse-langfusetracedataset]"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -314,6 +316,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "langfuse",
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",

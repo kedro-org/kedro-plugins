@@ -30,20 +30,20 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     Example YAML catalog:
         my_prompt:
-          type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-          filepath: data/prompts/my_prompt.json
-          template: PromptTemplate
+            type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+            filepath: data/prompts/my_prompt.json
+            template: PromptTemplate
             dataset:
               type: json.JSONDataset
               fs_args:
-              load_args:
+                load_args:
                   encoding: utf-8
-              save_args:
+                save_args:
                   ensure_ascii: false
-          credentials: dev_creds
-          metadata:
+            credentials: dev_creds
+            metadata:
               kedro-viz:
-                layer: raw
+                  layer: raw
 
     Example Python usage:
         >>> from kedro_datasets_experimental.langchain import LangChainPromptDataset

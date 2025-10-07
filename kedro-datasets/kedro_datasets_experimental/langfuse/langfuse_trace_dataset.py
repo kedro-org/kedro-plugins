@@ -234,10 +234,10 @@ class LangfuseTraceDataset(AbstractDataset):
             >>> trace = langfuse.trace(name="my-trace")
         """
         if self._mode == "langchain":
-            from langfuse.langchain import CallbackHandler
+            from langfuse.langchain import CallbackHandler  # noqa PLC0415
             return CallbackHandler()
         elif self._mode == "openai":
-            from langfuse.openai import OpenAI
+            from langfuse.openai import OpenAI  # noqa PLC0415
             client_params = self._build_openai_client_params()
             return OpenAI(**client_params)
         else:

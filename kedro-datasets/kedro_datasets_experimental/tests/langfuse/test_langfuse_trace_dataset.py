@@ -1,6 +1,7 @@
 """Unit tests for LangfuseTraceDataset."""
 
 import pytest
+
 from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
 
 

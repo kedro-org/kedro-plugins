@@ -7,7 +7,6 @@ import yaml
 from kedro.io import DatasetError
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-from kedro_datasets._typing import JSONPreview
 from kedro_datasets_experimental.langchain.langchain_prompt_dataset import (
     LangChainPromptDataset,
 )
@@ -180,6 +179,17 @@ class TestLangChainPromptDataset:
         fs_options = getattr(dataset._dataset._fs, "storage_options", {})
         for k, v in credentials.items():
             assert fs_options.get(k) == v
+
+    def test_chat_prompt_template_with_plain_string(self, tmp_path: Path) -> None:
+        """Test that plain string data raises DatasetError for ChatPromptTemplate."""
+        prompt_file = tmp_path / "plain_string.json"
+        prompt_file.write_text('"Just a plain string, not a chat prompt."')
+        dataset = LangChainPromptDataset(
+            filepath=str(prompt_file),
+            template="ChatPromptTemplate"
+        )
+        with pytest.raises(DatasetError, match="Plain string data is only supported for PromptTemplate, not ChatPromptTemplate."):
+            dataset.load()
 
     @pytest.mark.parametrize(
         "bad_data,error_pattern",

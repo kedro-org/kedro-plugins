@@ -2,6 +2,11 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                 | Location                             |
+|--------------------------------|-------------------------------------------------------------|--------------------------------------|
+| `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

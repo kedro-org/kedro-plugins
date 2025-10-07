@@ -167,6 +167,7 @@ plugins:
           - api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md: Anthropic Claude integration
           - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
+          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse Tracing integration
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -322,6 +323,8 @@ nav:
           - langchain.ChatCohereDataset: api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
           - langchain.ChatOpenAIDataset: api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
           - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
+        - Langfuse:
+          - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - Polars:

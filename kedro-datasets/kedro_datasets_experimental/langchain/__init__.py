@@ -24,6 +24,6 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "_openai": ["ChatOpenAIDataset", "OpenAIEmbeddingsDataset"],
         "_anthropic": ["ChatAnthropicDataset"],
         "_cohere": ["ChatCohereDataset"],
-        "_langchain_prompt_dataset": ["LangChainPromptDataset"],
+        "langchain_prompt_dataset": ["LangChainPromptDataset"],
     },
 )

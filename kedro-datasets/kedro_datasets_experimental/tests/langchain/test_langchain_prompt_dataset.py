@@ -191,6 +191,12 @@ class TestLangChainPromptDataset:
         with pytest.raises(DatasetError, match="Plain string data is only supported for PromptTemplate, not ChatPromptTemplate."):
             dataset.load()
 
+    def test_invalid_dataset_type_raises_error(self, txt_prompt_file: Path) -> None:
+        """Test that using an invalid dataset type raises DatasetError."""
+        invalid_dataset = {"type": "pandas.CSVDataset"}
+        with pytest.raises(DatasetError, match="Unsupported dataset type 'pandas.CSVDataset'"):
+            LangChainPromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
+
     @pytest.mark.parametrize(
         "bad_data,error_pattern",
         [

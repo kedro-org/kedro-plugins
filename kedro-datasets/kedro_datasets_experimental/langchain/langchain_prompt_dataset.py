@@ -120,6 +120,17 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     def _build_dataset_config(self, dataset: dict[str, Any] | str | None) -> dict[str, Any]:
         """Infer and normalize dataset configuration."""
+
+        valid_datasets = {"text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset"}
+
+        if dataset is not None:
+            dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
+            if dataset_type not in valid_datasets:
+                raise DatasetError(
+                    f"Unsupported dataset type '{dataset_type}'. "
+                    f"Allowed dataset types are: {', '.join(valid_datasets)}"
+                )
+
         if dataset is None:
             if self._filepath.endswith(".txt"):
                 dataset = {"type": "text.TextDataset"}

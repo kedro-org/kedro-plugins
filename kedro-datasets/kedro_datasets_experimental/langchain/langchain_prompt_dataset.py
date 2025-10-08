@@ -41,8 +41,14 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
         from kedro_datasets_experimental.langchain import LangChainPromptDataset
-        dataset = LangChainPromptDataset(filepath="data/prompts/my_prompt.json", template="PromptTemplate")
+
+        dataset = LangChainPromptDataset(
+            filepath="data/prompts/my_prompt.json",
+            template="PromptTemplate",
+            dataset={"type": "json.JSONDataset"}
+        )
         prompt = dataset.load()
+
         print(prompt.format(name="Kedro"))
     ```
     """
@@ -123,7 +129,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         Infer and normalize dataset configuration.
 
         Raises:
-            DatasetError: If the dataset type is unsupported or cannot be inferred.
+            DatasetError: If the dataset type is unsupported.
             Currently supported dataset types are: text.TextDataset, json.JSONDataset, yaml.YAMLDataset
 
         Returns:
@@ -132,23 +138,15 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
         valid_datasets = {"text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset"}
 
-        if dataset is not None:
+        if dataset is None:
+            raise DatasetError(f"Underlying dataset type cannot be empty: {self._filepath}")
+        else:
             dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
             if dataset_type not in valid_datasets:
                 raise DatasetError(
                     f"Unsupported dataset type '{dataset_type}'. "
                     f"Allowed dataset types are: {', '.join(valid_datasets)}"
                 )
-
-        if dataset is None:
-            if self._filepath.endswith(".txt"):
-                dataset = {"type": "text.TextDataset"}
-            elif self._filepath.endswith(".json"):
-                dataset = {"type": "json.JSONDataset"}
-            elif self._filepath.endswith((".yaml", ".yml")):
-                dataset = {"type": "yaml.YAMLDataset"}
-            else:
-                raise DatasetError(f"Cannot auto-detect dataset type for file: {self._filepath}")
 
         dataset_config = dataset if isinstance(dataset, dict) else {"type": dataset}
         dataset_config = deepcopy(dataset_config)

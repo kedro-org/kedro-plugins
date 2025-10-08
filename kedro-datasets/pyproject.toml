@@ -188,6 +188,9 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
 
+pdf-pdfdataset = ["pypdf>=3.0.0"]
+pdf = ["kedro-datasets[pdf-pdfdataset]"]
+
 prophet-dataset = ["prophet>=1.1.5"]
 prophet = ["kedro-datasets[prophet]"]
 pytorch-dataset = ["torch"]
@@ -267,6 +270,7 @@ test = [
     "pytest~=7.2",
     "python-docx",
     "redis~=4.1",
+    "reportlab>=3.6.0",
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
@@ -323,6 +327,7 @@ experimental = [
     "prophet>=1.1.5",
     "optuna",
     "u8darts[all]",
+    "pypdf>=3.0.0",
 ]
 
 # All requirements

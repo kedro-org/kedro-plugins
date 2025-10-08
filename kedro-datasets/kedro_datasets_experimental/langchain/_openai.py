@@ -46,7 +46,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     """
     `OpenAIEmbeddingsDataset` loads an OpenAIEmbeddings [langchain](https://python.langchain.com/) model.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
     **catalog.yml**
 
@@ -66,7 +66,7 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
         openai_api_key: <openai-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
@@ -96,7 +96,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     """
     `ChatOpenAIDataset` loads a ChatOpenAI [langchain](https://python.langchain.com/) model.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
     **catalog.yml**
 
@@ -117,7 +117,7 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         openai_api_key: <openai-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import ChatOpenAIDataset

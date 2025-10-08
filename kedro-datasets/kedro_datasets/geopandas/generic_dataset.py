@@ -36,7 +36,7 @@ class GenericDataset(
     allowed geopandas (pandas) options for loading and saving files.
 
     Examples:
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import geopandas as gpd
         >>> from kedro_datasets.geopandas import GenericDataset

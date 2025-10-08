@@ -215,14 +215,16 @@ docs = [
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
-   "Jinja2<3.2.0"
+   "Jinja2<3.2.0",
+   "black",
+   "ruff",
+   "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 
 # Test requirements
 test = [
     "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
-    "behave==1.2.6",
     "biopython~=1.73",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
@@ -231,6 +233,7 @@ test = [
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
+    "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.7",

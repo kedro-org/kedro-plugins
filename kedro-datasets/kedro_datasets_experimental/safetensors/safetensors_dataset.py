@@ -27,7 +27,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         filepath: data/07_model_output/test_model.safetensors
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.safetensors import SafetensorsDataset

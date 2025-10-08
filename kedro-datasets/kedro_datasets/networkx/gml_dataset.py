@@ -26,7 +26,7 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
     Examples:
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import networkx as nx
         >>> from kedro_datasets.networkx import GMLDataset

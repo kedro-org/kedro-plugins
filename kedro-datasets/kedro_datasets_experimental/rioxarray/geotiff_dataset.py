@@ -37,7 +37,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
         filepath: sentinal_data.tif
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
     from kedro_datasets.rioxarray import GeoTIFFDataset

@@ -12,7 +12,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
     using the `transformers <https://pypi.org/project/transformers>`_ library.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         summarizer_model:
@@ -25,7 +25,7 @@ class HFTransformerPipelineDataset(AbstractDataset):
           model_name: Twitter/twhin-bert-base
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
         >>>

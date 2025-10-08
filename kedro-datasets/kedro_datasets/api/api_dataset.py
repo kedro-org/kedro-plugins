@@ -18,7 +18,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         usda:
@@ -34,7 +34,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 year: 2000
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.api import APIDataset
         >>>

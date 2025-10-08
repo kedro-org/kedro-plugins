@@ -74,7 +74,7 @@ repos:
         name: "Black"
         language: system
         pass_filenames: false
-        entry: black kedro-datasets/kedro_datasets kedro-datasets/features kedro-datasets/tests
+        entry: black kedro-datasets/kedro_datasets kedro-datasets/tests
 
       - id: black-kedro-docker
         name: "Black"

@@ -119,7 +119,19 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
             raise DatasetError(f"Failed to create underlying dataset: {e}")
 
     def _build_dataset_config(self, dataset: dict[str, Any] | str | None) -> dict[str, Any]:
-        """Infer and normalize dataset configuration."""
+        """
+        Infer and normalize dataset configuration.
+
+        Raises:
+            DatasetError: If the dataset type is unsupported or cannot be inferred.
+            Currently supported dataset types are:
+            - text.TextDataset
+            - json.JSONDataset
+            - yaml.YAMLDataset
+
+        Returns:
+            dict: A normalized dataset configuration dictionary.
+        """
 
         valid_datasets = {"text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset"}
 

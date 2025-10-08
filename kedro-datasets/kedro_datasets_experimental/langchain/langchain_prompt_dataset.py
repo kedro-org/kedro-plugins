@@ -21,29 +21,29 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
-        my_prompt:
-            type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-            filepath: data/prompts/my_prompt.json
-            template: PromptTemplate
-            dataset:
-              type: json.JSONDataset
-              fs_args:
+    my_prompt:
+        type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+        filepath: data/prompts/my_prompt.json
+        template: PromptTemplate
+        dataset:
+            type: json.JSONDataset
+            fs_args:
                 load_args:
-                  encoding: utf-8
+                    encoding: utf-8
                 save_args:
-                  ensure_ascii: false
-            credentials: dev_creds
-            metadata:
-              kedro-viz:
-                  layer: raw
+                    ensure_ascii: false
+        credentials: dev_creds
+        metadata:
+            kedro-viz:
+                layer: raw
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-        >>> from kedro_datasets_experimental.langchain import LangChainPromptDataset
-        >>> dataset = LangChainPromptDataset(filepath="data/prompts/my_prompt.json", template="PromptTemplate")
-        >>> prompt = dataset.load()
-        >>> print(prompt.format(name="Kedro"))
+        from kedro_datasets_experimental.langchain import LangChainPromptDataset
+        dataset = LangChainPromptDataset(filepath="data/prompts/my_prompt.json", template="PromptTemplate")
+        prompt = dataset.load()
+        print(prompt.format(name="Kedro"))
     ```
     """
 

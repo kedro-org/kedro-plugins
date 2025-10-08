@@ -110,7 +110,7 @@ class TestLangChainPromptDataset:
         """Test loading a simple text prompt."""
         dataset = LangChainPromptDataset(
             filepath=str(txt_prompt_file),
-            dataset={"type": "text.TextDataset"}
+            dataset={"type": "kedro_datasets.text.TextDataset"}
             )
         prompt = dataset.load()
         assert isinstance(prompt, PromptTemplate)
@@ -120,7 +120,7 @@ class TestLangChainPromptDataset:
         """Test loading a JSON prompt configuration."""
         dataset = LangChainPromptDataset(
             filepath=str(json_prompt_file),
-            dataset={"type": "json.JSONDataset"})
+            dataset={"type": "kedro_datasets.json.JSONDataset"})
         prompt = dataset.load()
         assert isinstance(prompt, PromptTemplate)
         assert prompt.format(name="Kedro") == "Hello, this is Kedro!"
@@ -143,7 +143,7 @@ class TestLangChainPromptDataset:
         """Test loading a YAML prompt configuration."""
         dataset = LangChainPromptDataset(
             filepath=str(yaml_prompt_file),
-            dataset={"type": "yaml.YAMLDataset"}
+            dataset={"type": "kedro_datasets.yaml.YAMLDataset"}
             )
         prompt = dataset.load()
         assert isinstance(prompt, PromptTemplate)

@@ -142,7 +142,8 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
             raise DatasetError(f"Underlying dataset type cannot be empty: {self._filepath}")
         else:
             dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
-            if dataset_type not in valid_datasets:
+            normalized_type = ".".join(dataset_type.split(".")[-2:])
+            if normalized_type not in valid_datasets:
                 raise DatasetError(
                     f"Unsupported dataset type '{dataset_type}'. "
                     f"Allowed dataset types are: {', '.join(valid_datasets)}"

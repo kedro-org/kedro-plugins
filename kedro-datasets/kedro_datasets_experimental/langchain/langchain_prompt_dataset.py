@@ -124,10 +124,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
         Raises:
             DatasetError: If the dataset type is unsupported or cannot be inferred.
-            Currently supported dataset types are:
-            - text.TextDataset
-            - json.JSONDataset
-            - yaml.YAMLDataset
+            Currently supported dataset types are: text.TextDataset, json.JSONDataset, yaml.YAMLDataset
 
         Returns:
             dict: A normalized dataset configuration dictionary.

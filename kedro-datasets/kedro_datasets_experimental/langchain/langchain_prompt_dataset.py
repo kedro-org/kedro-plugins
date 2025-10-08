@@ -19,15 +19,6 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     to load prompt configurations and convert them into LangChain `PromptTemplate` or
     `ChatPromptTemplate` objects.
 
-    Args:
-        - filepath: Path to the prompt file.
-        - template: Type of LangChain template to use ("PromptTemplate" or "ChatPromptTemplate").
-        - dataset: Optional configuration for the underlying Kedro dataset.
-            - type: Dataset type (e.g., "text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset").
-            - fs_args: Optional filesystem arguments for remote storage.
-        - credentials: Optional credentials for accessing remote filesystems.
-        - metadata: Arbitrary metadata for catalog introspection.
-
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
         my_prompt:

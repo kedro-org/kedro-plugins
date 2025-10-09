@@ -40,7 +40,17 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-        from kedro_datasets_experimental.langchain import LangChainPromptDataset
+    ```python
+    from kedro_datasets_experimental.langchain import LangChainPromptDataset
+    
+    dataset = LangChainPromptDataset(
+        filepath="data/prompts/my_prompt.json",
+        template="PromptTemplate",
+        dataset={"type": "json.JSONDataset"}
+    )
+    prompt = dataset.load()
+    print(prompt.format(name="Kedro"))
+    ```
 
         dataset = LangChainPromptDataset(
             filepath="data/prompts/my_prompt.json",

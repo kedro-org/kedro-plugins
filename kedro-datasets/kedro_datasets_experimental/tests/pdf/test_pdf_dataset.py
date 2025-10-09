@@ -1,7 +1,8 @@
+import shutil
 from pathlib import Path, PurePosixPath
 
-import pytest
 import pypdf
+import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -107,8 +108,6 @@ class TestPDFDataset:
         assert not pdf_dataset.exists()
 
         # Copy dummy PDF to the expected filepath
-        import shutil
-
         shutil.copy(dummy_pdf_data, pdf_dataset._filepath)
 
         assert pdf_dataset.exists()
@@ -138,7 +137,7 @@ class TestPDFDataset:
         [
             ("s3://bucket/file.pdf", S3FileSystem),
             ("file:///tmp/test.pdf", LocalFileSystem),
-            ("/tmp/test.pdf", LocalFileSystem),
+            ("/tmp/test.pdf", LocalFileSystem),  # nosec
             ("gcs://bucket/file.pdf", GCSFileSystem),
             ("https://example.com/file.pdf", HTTPFileSystem),
         ],

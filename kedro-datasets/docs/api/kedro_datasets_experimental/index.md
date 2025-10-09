@@ -12,7 +12,7 @@ Name | Description
 [langchain.ChatOpenAIDataset](langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
 [langchain.OpenAIEmbeddingsDataset](langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
 [netcdf.NetCDFDataset](netcdf.NetCDFDataset.md) | ``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
-[pdf.PDFDataset](pdf.PDFDataset.md) | ``PDFDataset`` loads data from PDF files using pypdf to extract text from pages. Read-only dataset.
+[pypdf.PDFDataset](pypdf.PDFDataset.md) | ``PDFDataset`` loads data from PDF files using pypdf to extract text from pages. Read-only dataset.
 [polars.PolarsDatabaseDataset](polars.PolarsDatabaseDataset.md) | ``PolarsDatabaseDataset`` implementation to access databases as Polars DataFrames. It supports reading from a SQL query and writing to a database table.
 [prophet.ProphetModelDataset](prophet.ProphetModelDataset.md) | ``ProphetModelDataset`` loads/saves Facebook Prophet models to a JSON file using an underlying filesystem (e.g., local, S3, GCS). It uses Prophet's built-in serialisation to handle the JSON file.
 [pytorch.PyTorchDataset](pytorch.PyTorchDataset.md) | ``PyTorchDataset`` loads and saves PyTorch models' `state_dict` using PyTorch's recommended zipfile serialization protocol. To avoid security issues with Pickle.

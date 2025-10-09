@@ -29,24 +29,24 @@ class PDFDataset(AbstractVersionedDataset[NoReturn, list[str]]):
 
         ```yaml
         my_pdf_document:
-          type: pdf.PDFDataset
+          type: pypdf.PDFDataset
           filepath: data/01_raw/document.pdf
 
         password_protected_pdf:
-          type: pdf.PDFDataset
+          type: pypdf.PDFDataset
           filepath: data/01_raw/protected.pdf
           load_args:
             password: "pass123"  # pragma: allowlist secret
 
         s3_pdf:
-          type: pdf.PDFDataset
+          type: pypdf.PDFDataset
           filepath: s3://your_bucket/document.pdf
           credentials: dev_s3
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-        >>> from kedro_datasets_experimental.pdf import PDFDataset
+        >>> from kedro_datasets_experimental.pypdf import PDFDataset
         >>>
         >>> dataset = PDFDataset(filepath="data/document.pdf")
         >>> pages = dataset.load()

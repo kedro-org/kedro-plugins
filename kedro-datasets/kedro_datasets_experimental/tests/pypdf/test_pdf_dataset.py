@@ -11,7 +11,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from s3fs.core import S3FileSystem
 
-from kedro_datasets_experimental.pdf import PDFDataset
+from kedro_datasets_experimental.pypdf import PDFDataset
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ class TestPDFDataset:
 
     def test_load_missing_file(self, pdf_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset kedro_datasets_experimental.pdf.pdf_dataset.PDFDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets_experimental.pypdf.pdf_dataset.PDFDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             pdf_dataset.load()
 
@@ -184,7 +184,7 @@ class TestPDFDatasetVersioned:
 
     def test_no_versions(self, versioned_pdf_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for kedro_datasets_experimental.pdf.pdf_dataset.PDFDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets_experimental.pypdf.pdf_dataset.PDFDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_pdf_dataset.load()
 

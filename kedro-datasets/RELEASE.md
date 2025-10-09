@@ -12,7 +12,7 @@
 
 | Type                           | Description                                                   | Location                             |
 |--------------------------------|---------------------------------------------------------------|--------------------------------------|
-| `pdf.PDFDataset`               | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pdf`    |
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
 
 # Release 8.1.0
 ## Major features and improvements

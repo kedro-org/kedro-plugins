@@ -325,7 +325,7 @@ nav:
           - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
-        - pypdf:
+        - PyPDF:
           - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:
           - polars.PolarsDatabaseDataset: api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md

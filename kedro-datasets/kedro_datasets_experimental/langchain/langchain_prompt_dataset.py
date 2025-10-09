@@ -40,9 +40,8 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-    ```python
     from kedro_datasets_experimental.langchain import LangChainPromptDataset
-    
+
     dataset = LangChainPromptDataset(
         filepath="data/prompts/my_prompt.json",
         template="PromptTemplate",
@@ -51,22 +50,14 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     prompt = dataset.load()
     print(prompt.format(name="Kedro"))
     ```
-
-        dataset = LangChainPromptDataset(
-            filepath="data/prompts/my_prompt.json",
-            template="PromptTemplate",
-            dataset={"type": "json.JSONDataset"}
-        )
-        prompt = dataset.load()
-
-        print(prompt.format(name="Kedro"))
-    ```
     """
 
     TEMPLATES = {
         "PromptTemplate": "_create_prompt_template",
         "ChatPromptTemplate": "_create_chat_prompt_template",
     }
+
+    VALID_DATASETS = {"text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset"}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -134,9 +125,22 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         except Exception as e:
             raise DatasetError(f"Failed to create underlying dataset: {e}")
 
+    def _validate_dataset_type(self, dataset: dict[str, Any] | str | None) -> None:
+        """Validate that the dataset type is supported and not None."""
+        if dataset is None:
+            raise DatasetError(f"Underlying dataset type cannot be empty: {self._filepath}")
+
+        dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
+        normalized_type = ".".join(dataset_type.split(".")[-2:])
+        if normalized_type not in self.VALID_DATASETS:
+            raise DatasetError(
+                f"Unsupported dataset type '{dataset_type}'. "
+                f"Allowed dataset types are: {', '.join(self.VALID_DATASETS)}"
+            )
+
     def _build_dataset_config(self, dataset: dict[str, Any] | str | None) -> dict[str, Any]:
         """
-        Infer and normalize dataset configuration.
+        Build dataset configuration.
 
         Raises:
             DatasetError: If the dataset type is unsupported.
@@ -145,24 +149,10 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         Returns:
             dict: A normalized dataset configuration dictionary.
         """
-
-        valid_datasets = {"text.TextDataset", "json.JSONDataset", "yaml.YAMLDataset"}
-
-        if dataset is None:
-            raise DatasetError(f"Underlying dataset type cannot be empty: {self._filepath}")
-        else:
-            dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
-            normalized_type = ".".join(dataset_type.split(".")[-2:])
-            if normalized_type not in valid_datasets:
-                raise DatasetError(
-                    f"Unsupported dataset type '{dataset_type}'. "
-                    f"Allowed dataset types are: {', '.join(valid_datasets)}"
-                )
-
+        self._validate_dataset_type(dataset)
         dataset_config = dataset if isinstance(dataset, dict) else {"type": dataset}
         dataset_config = deepcopy(dataset_config)
         dataset_config["filepath"] = self._filepath
-
         return dataset_config
 
     def load(self) -> PromptTemplate | ChatPromptTemplate:

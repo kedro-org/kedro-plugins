@@ -224,6 +224,12 @@ class TestLangChainPromptDataset:
         with pytest.raises(DatasetError, match="Unsupported dataset type 'pandas.CSVDataset'"):
             LangChainPromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
 
+    def test_none_dataset_type_raises_error(self, txt_prompt_file: Path) -> None:
+        """Test that passing no dataset type raises DatasetError."""
+        invalid_dataset = None
+        with pytest.raises(DatasetError, match="Underlying dataset type cannot be empty"):
+            LangChainPromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
+
     @pytest.mark.parametrize(
         "bad_data,error_pattern",
         [

@@ -86,21 +86,21 @@ class LangfuseTraceDataset(AbstractDataset):
             ValueError: If required Langfuse credentials are missing or empty.
 
         Examples:
-            >>> # Basic SDK mode (using default Langfuse cloud)
-            >>> dataset = LangfuseTraceDataset(
+            # Basic SDK mode (using default Langfuse cloud)
+                dataset = LangfuseTraceDataset(
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}
             ... )
 
-            >>> # With custom host
-            >>> dataset = LangfuseTraceDataset(
+            # With custom host
+                dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",
             ...         "host": "https://custom.langfuse.com"
             ...     }
             ... )
 
-            >>> # OpenAI mode with API key
-            >>> dataset = LangfuseTraceDataset(
+            # OpenAI mode with API key
+                dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",
             ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."}
@@ -171,13 +171,13 @@ class LangfuseTraceDataset(AbstractDataset):
             ValueError: If OpenAI credentials are missing or invalid.
 
         Examples:
-            >>> # With API key only
-            >>> params = self._build_openai_client_params()
-            >>> # Returns: {"api_key": "sk-..."}
+            # With API key only
+                params = self._build_openai_client_params()
+                # Returns: {"api_key": "sk-..."}
 
-            >>> # With API key and custom base URL
-            >>> params = self._build_openai_client_params()
-            >>> # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}
+            # With API key and custom base URL
+                params = self._build_openai_client_params()
+                # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}
         """
         # Check if openai section exists
         if "openai" not in self._credentials:
@@ -218,20 +218,20 @@ class LangfuseTraceDataset(AbstractDataset):
             ValueError: If OpenAI mode is used but OpenAI credentials are missing or invalid.
 
         Examples:
-            >>> # LangChain mode
-            >>> dataset = LangfuseTraceDataset(credentials=creds, mode="langchain")
-            >>> callback = dataset.load()
-            >>> chain.invoke(input, config={"callbacks": [callback]})
+            # LangChain mode
+                dataset = LangfuseTraceDataset(credentials=creds, mode="langchain")
+                callback = dataset.load()
+                chain.invoke(input, config={"callbacks": [callback]})
 
-            >>> # OpenAI mode
-            >>> dataset = LangfuseTraceDataset(credentials=creds, mode="openai")
-            >>> client = dataset.load()
-            >>> response = client.chat.completions.create(model="gpt-4", messages=[...])
+            # OpenAI mode
+                dataset = LangfuseTraceDataset(credentials=creds, mode="openai")
+                client = dataset.load()
+                response = client.chat.completions.create(model="gpt-4", messages=[...])
 
-            >>> # SDK mode
-            >>> dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
-            >>> langfuse = dataset.load()
-            >>> trace = langfuse.trace(name="my-trace")
+            # SDK mode
+                dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
+                langfuse = dataset.load()
+                trace = langfuse.trace(name="my-trace")
         """
         if self._mode == "langchain":
             from langfuse.langchain import CallbackHandler  # noqa PLC0415

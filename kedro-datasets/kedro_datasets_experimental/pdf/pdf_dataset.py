@@ -36,7 +36,7 @@ class PDFDataset(AbstractVersionedDataset[NoReturn, list[str]]):
           type: pdf.PDFDataset
           filepath: data/01_raw/protected.pdf
           load_args:
-            password: "pass123"
+            password: "pass123"  # pragma: allowlist secret
 
         s3_pdf:
           type: pdf.PDFDataset

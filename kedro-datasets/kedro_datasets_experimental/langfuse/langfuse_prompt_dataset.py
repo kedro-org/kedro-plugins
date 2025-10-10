@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Union
 
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
@@ -210,7 +210,7 @@ class LangfusePromptDataset(AbstractDataset):
             ... )
 
         Raises:
-            ValueError: If credentials are missing required keys.
+            DatasetError: If credentials are missing required keys.
             NotImplementedError: If filepath has unsupported extension.
         """
         # Validate all parameters before assignment
@@ -245,25 +245,25 @@ class LangfusePromptDataset(AbstractDataset):
             credentials: Credentials dictionary to validate for required keys.
 
         Raises:
-            ValueError: If required credentials are missing or empty, or if
+            DatasetError: If required credentials are missing or empty, or if
                 optional credentials are provided but empty.
             NotImplementedError: If filepath has unsupported extension.
         """
         # Validate required keys
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in credentials:
-                raise ValueError(f"Missing required Langfuse credential: '{key}'")
+                raise DatasetError(f"Missing required Langfuse credential: '{key}'")
 
             # Validate that credential is not empty
             if not credentials[key] or not str(credentials[key]).strip():
-                raise ValueError(f"Langfuse credential '{key}' cannot be empty")
+                raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
 
         # Validate optional keys if present
         for key in OPTIONAL_LANGFUSE_CREDENTIALS:
             if key in credentials:
                 # If host is provided, it cannot be empty
                 if not credentials[key] or not str(credentials[key]).strip():
-                    raise ValueError(f"Langfuse credential '{key}' cannot be empty if provided")
+                    raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
 
         # Validate file extension
         file_path = Path(filepath)
@@ -313,7 +313,7 @@ class LangfusePromptDataset(AbstractDataset):
                 or list of message dictionaries for chat prompts.
 
         Raises:
-            ValueError: If Langfuse API call fails or invalid data format.
+            DatasetError: If Langfuse API call fails or invalid data format.
         """
         create_kwargs = {
             "name": self._prompt_name,
@@ -384,7 +384,7 @@ class LangfusePromptDataset(AbstractDataset):
             Langfuse prompt object if sync is successful.
 
         Raises:
-            ValueError: If either local_data or langfuse_prompt is missing, or if they differ.
+            DatasetError: If either local_data or langfuse_prompt is missing, or if they differ.
         """
         if not local_data or not langfuse_prompt:
             missing_parts = []
@@ -393,7 +393,7 @@ class LangfusePromptDataset(AbstractDataset):
             if not langfuse_prompt:
                 missing_parts.append("remote prompt")
 
-            raise ValueError(
+            raise DatasetError(
                 f"Strict sync policy specified for '{self._prompt_name}' . "
                 f"Both local and remote prompts must exist in strict mode."
                 f"Missing: {' and '.join(missing_parts)}."
@@ -402,7 +402,7 @@ class LangfusePromptDataset(AbstractDataset):
         local_hash = _hash(_get_content(local_data))
         remote_hash = _hash(_get_content(langfuse_prompt.prompt))
         if local_hash != remote_hash:
-            raise ValueError(
+            raise DatasetError(
                 f"Strict sync failed for '{self._prompt_name}': "
                 f"local and remote prompts differ. Use 'local' or 'remote' policy to resolve."
             )
@@ -452,10 +452,10 @@ class LangfusePromptDataset(AbstractDataset):
             Any: Langfuse prompt object after updating local file if needed
 
         Raises:
-            ValueError: If remote prompt doesn't exist
+            DatasetError: If remote prompt doesn't exist
         """
         if not langfuse_prompt:
-            raise ValueError(
+            raise DatasetError(
                 f"Remote sync policy specified for '{self._prompt_name}' "
                 f"but no remote prompt exists in Langfuse. Create the prompt in Langfuse first."
             )
@@ -483,7 +483,7 @@ class LangfusePromptDataset(AbstractDataset):
             Any: Langfuse prompt object after syncing
 
         Raises:
-            FileNotFoundError: If neither local nor remote prompt exists
+            DatasetError: If neither local nor remote prompt exists
         """
         if local_data is not None:
             if langfuse_prompt is None:
@@ -509,7 +509,7 @@ class LangfusePromptDataset(AbstractDataset):
             self.file_dataset.save(normalized_prompt)
             return langfuse_prompt
 
-        raise FileNotFoundError(
+        raise DatasetError(
             f"No prompt found locally or in Langfuse for '{self._prompt_name}'"
         )
 
@@ -530,8 +530,8 @@ class LangfusePromptDataset(AbstractDataset):
             Any: Langfuse prompt object after synchronization
 
         Raises:
-            ValueError: Based on sync_policy conflicts (see individual policy methods)
-            FileNotFoundError: If no prompt found locally or in Langfuse
+            DatasetError: Based on sync_policy conflicts (see individual policy methods)
+            DatasetError: If no prompt found locally or in Langfuse
         """
         if self._sync_policy == "strict":
             return self._sync_strict_policy(local_data, langfuse_prompt)
@@ -561,8 +561,8 @@ class LangfusePromptDataset(AbstractDataset):
                 Raw Langfuse prompt object with full API access
 
         Raises:
-            ValueError: Based on sync_policy conflicts (see _sync_with_langfuse)
-            FileNotFoundError: If no prompt found locally or in Langfuse
+            DatasetError: Based on sync_policy conflicts (see _sync_with_langfuse)
+            DatasetError: If no prompt found locally or in Langfuse
             NotImplementedError: If file extension is not supported
 
         Note:
@@ -611,15 +611,9 @@ class LangfusePromptDataset(AbstractDataset):
 
         try:
             langfuse_prompt = self._langfuse.get_prompt(**self._build_get_kwargs())
-        except ConnectionError as e:
+        except (ConnectionError, TimeoutError) as e:
             logger.warning(
-                f"Network connection error when fetching prompt '{self._prompt_name}': {e}. "
-                f"Falling back to local file sync."
-            )
-            langfuse_prompt = None
-        except TimeoutError as e:
-            logger.warning(
-                f"Timeout error when fetching prompt '{self._prompt_name}': {e}. "
+                f"Network error when fetching prompt '{self._prompt_name}': {e}. "
                 f"Falling back to local file sync."
             )
             langfuse_prompt = None
@@ -653,4 +647,4 @@ class LangfusePromptDataset(AbstractDataset):
                 ) from exc
             return ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
         else:
-            raise ValueError(f"Unsupported mode: {self._mode}. Must be 'sdk' or 'langchain'.")
+            raise DatasetError(f"Unsupported mode: {self._mode}. Must be 'sdk' or 'langchain'.")

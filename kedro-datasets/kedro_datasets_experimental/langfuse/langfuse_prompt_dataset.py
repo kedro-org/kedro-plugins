@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Any, Literal, Union
 from kedro.io import AbstractDataset, DatasetError
 
 if TYPE_CHECKING:
+    from langchain.prompts import ChatPromptTemplate
+
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
-    from langchain.prompts import ChatPromptTemplate
 
 from langfuse import Langfuse
 
@@ -639,7 +640,7 @@ class LangfusePromptDataset(AbstractDataset):
             return langfuse_prompt
         elif self._mode == "langchain":
             try:
-                from langchain.prompts import ChatPromptTemplate
+                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
             except ImportError as exc:
                 raise ImportError(
                     "The 'langchain' package is required when using mode='langchain'. "

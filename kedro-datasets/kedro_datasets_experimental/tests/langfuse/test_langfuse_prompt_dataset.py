@@ -515,7 +515,7 @@ class TestLangfusePromptDatasetNetworkHandling:
 
         with patch("kedro_datasets_experimental.langfuse.langfuse_prompt_dataset.logger") as mock_logger:
             # This should create and then load the prompt locally
-            with patch.object(dataset, 'save') as mock_save:
+            with patch.object(dataset, 'save'):
                 mock_langfuse.get_prompt.side_effect = [ConnectionError("Network error"), Mock()]
                 dataset.load()
                 mock_logger.warning.assert_called()
@@ -536,7 +536,7 @@ class TestLangfusePromptDatasetNetworkHandling:
         )
 
         with patch("kedro_datasets_experimental.langfuse.langfuse_prompt_dataset.logger") as mock_logger:
-            with patch.object(dataset, 'save') as mock_save:
+            with patch.object(dataset, 'save'):
                 mock_langfuse.get_prompt.side_effect = [TimeoutError("Request timeout"), Mock()]
                 dataset.load()
                 mock_logger.warning.assert_called()
@@ -700,7 +700,7 @@ class TestLangfusePromptDatasetEdgeCases:
         )
 
         with patch.object(dataset, 'file_dataset') as mock_file_dataset:
-            result = dataset.load()
+            dataset.load()
 
             # Check that save was called with adapted message type
             save_call_args = mock_file_dataset.save.call_args[0][0]

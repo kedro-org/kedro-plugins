@@ -3,6 +3,12 @@
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
 
+- Added the following new **experimental** datasets:
+
+| Type                                | Description                                              | Location                                |
+| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+
 ## Bug fixes and other changes
 - Add HTMLPreview type.
 

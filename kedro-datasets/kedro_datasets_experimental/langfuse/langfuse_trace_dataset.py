@@ -116,6 +116,7 @@ class LangfuseTraceDataset(AbstractDataset):
         self._credentials = credentials
         self._mode = mode
         self._trace_kwargs = trace_kwargs
+        self._cached_client = None
 
         # Validate Langfuse credentials before setting environment variables
         self._validate_langfuse_credentials()
@@ -206,7 +207,8 @@ class LangfuseTraceDataset(AbstractDataset):
         """Load appropriate tracing client based on configured mode.
 
         Creates and returns the appropriate tracing client for the specified mode.
-        All clients use environment variables set during initialization for authentication.
+        The client is cached after first load to avoid repeated initialisation.
+        All clients use environment variables set during initialisation for authentication.
 
         Returns:
             Tracing client object based on mode:
@@ -233,15 +235,27 @@ class LangfuseTraceDataset(AbstractDataset):
                 langfuse = dataset.load()
                 trace = langfuse.trace(name="my-trace")
         """
+        # Return cached client if available
+        if self._cached_client is not None:
+            return self._cached_client
+
+        # Create and cache the appropriate client
         if self._mode == "langchain":
             from langfuse.langchain import CallbackHandler  # noqa PLC0415
-            return CallbackHandler()
+            self._cached_client = CallbackHandler()
         elif self._mode == "openai":
             from langfuse.openai import OpenAI  # noqa PLC0415
             client_params = self._build_openai_client_params()
-            return OpenAI(**client_params)
+            self._cached_client = OpenAI(**client_params)
         else:
-            return Langfuse()
+            try:
+                from langfuse import get_client  # noqa PLC0415
+                self._cached_client = get_client()
+            except ImportError:
+                from langfuse import Langfuse  # noqa PLC0415
+                self._cached_client = Langfuse()
+
+        return self._cached_client
 
     def save(self, data: Any) -> None:
         """Save operation is not supported for tracing datasets.

@@ -1,16 +1,16 @@
-import json
 import hashlib
+import json
 import logging
 from pathlib import Path
-from typing import Any, Literal, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal, Union
 
 from kedro.io import AbstractDataset
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
+    from langchain.prompts import ChatPromptTemplate
 
-from langchain.prompts import ChatPromptTemplate
 from langfuse import Langfuse
 
 # Type mapping for normalizing Langfuse message types to local storage conventions
@@ -57,34 +57,44 @@ class LangfusePromptDataset(AbstractDataset):
     (langchain mode) or raw Langfuse object (sdk mode).
 
     Sync policies:
-    - local: local file takes precedence (default)
-    - remote: Langfuse version takes precedence
-    - strict: error if local and remote differ
+    - local: local file takes precedence (default). load_args (version/label) are
+      ignored with warning and latest prompt from langfuse is loaded if available,
+      since local files are the source of truth.
+    - remote: Langfuse version takes precedence. load_args are respected.
+    - strict: error if local and remote differ. load_args are respected.
 
     Examples:
         Using catalog YAML configuration:
 
         ```yaml
+        # Local sync policy - local files are source of truth
         intent_prompt:
-          type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+          type: langfuse.LangfusePromptDataset
           filepath: data/prompts/intent.json
           prompt_name: "intent-classifier"
           prompt_type: "chat"
           credentials: langfuse_credentials
           sync_policy: local
           mode: langchain
-          load_args:
-            label: "production"
+          # load_args are ignored in local mode with warning
+          # and latest prompt from langfuse is loaded if available
           save_args:
             labels: ["staging", "v2.1"]
+
+        # Remote sync policy - Langfuse versions are source of truth
+        production_prompt:
+          type: langfuse.LangfusePromptDataset
+          filepath: data/prompts/production.json
+          prompt_name: "intent-classifier"
+          sync_policy: remote
+          load_args:
+            label: "production"  # This is respected in remote mode
         ```
 
         Using Python API:
 
         ```python
-        from kedro_agentic_workflows.datasets.langfuse_prompt_dataset import (
-            LangfusePromptDataset,
-        )
+        from kedro_datasets_experimental.langfuse import LangfusePromptDataset
 
         # Basic usage (using default Langfuse cloud)
         dataset = LangfusePromptDataset(
@@ -119,7 +129,7 @@ class LangfusePromptDataset(AbstractDataset):
         dataset.save(chat_prompt)
         ```
     """
-    def __init__(
+    def __init__(   # noqa: PLR0913
         self,
         filepath: str,
         prompt_name: str,
@@ -150,7 +160,8 @@ class LangfusePromptDataset(AbstractDataset):
             mode: Return type for load() method:
                 - "langchain": Returns ChatPromptTemplate object (default)
                 - "sdk": Returns raw Langfuse prompt object
-            load_args: Dict with loading parameters. Supported keys:
+            load_args: Dict with loading parameters. Only used when sync_policy="remote" or "strict".
+                Ignored with warning when sync_policy="local". Supported keys:
                 - version (int): Specific version number to load
                 - label (str): Specific label to load (e.g., "production", "staging")
                 Note: Cannot specify both version and label simultaneously.
@@ -158,11 +169,29 @@ class LangfusePromptDataset(AbstractDataset):
                 - labels (list[str]): List of labels to assign to new prompt versions
 
         Examples:
-            >>> # Basic usage with default settings (using Langfuse cloud)
+            >>> # Local sync policy (default) - local files are source of truth
             >>> dataset = LangfusePromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
+            ... )
+
+            >>> # Remote sync policy - load specific version from Langfuse
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.yaml",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"version": 3}  # This is respected in remote mode
+            ... )
+
+            >>> # Remote sync policy - load specific label from Langfuse
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/production.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"label": "production"}  # This is respected in remote mode
             ... )
 
             >>> # With custom host
@@ -172,16 +201,7 @@ class LangfusePromptDataset(AbstractDataset):
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "https://custom.langfuse.com"}  # pragma: allowlist secret
             ... )
 
-            >>> # Load specific version with remote-first policy
-            >>> dataset = LangfusePromptDataset(
-            ...     filepath="prompts/intent.yaml",
-            ...     prompt_name="intent-classifier",
-            ...     credentials=creds,
-            ...     sync_policy="remote",
-            ...     load_args={"version": 3}
-            ... )
-
-            >>> # Auto-label new versions when saving
+            >>> # Auto-label new versions when saving (works with any sync policy)
             >>> dataset = LangfusePromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
@@ -273,10 +293,10 @@ class LangfusePromptDataset(AbstractDataset):
         """
         if self._file_dataset is None:
             if self._filepath.suffix.lower() in [".yaml", ".yml"]:
-                from kedro_datasets.yaml import YAMLDataset
+                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
                 self._file_dataset = YAMLDataset(filepath=str(self._filepath))
             elif self._filepath.suffix.lower() == ".json":
-                from kedro_datasets.json import JSONDataset
+                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
                 self._file_dataset = JSONDataset(filepath=str(self._filepath))
             else:
                 raise NotImplementedError(
@@ -285,8 +305,8 @@ class LangfusePromptDataset(AbstractDataset):
                 )
         return self._file_dataset
 
-    def save(self, data: Union[str, list]) -> None:
-        """Save prompt data to local file and create new version in Langfuse.
+    def save(self, data: str | list) -> None:
+        """Create a new version of prompt in Langfuse with the data.
 
         Args:
             data: The prompt content to save. Can be string for text prompts
@@ -295,8 +315,6 @@ class LangfusePromptDataset(AbstractDataset):
         Raises:
             ValueError: If Langfuse API call fails or invalid data format.
         """
-        self.file_dataset.save(data)
-
         create_kwargs = {
             "name": self._prompt_name,
             "prompt": data,
@@ -310,23 +328,51 @@ class LangfusePromptDataset(AbstractDataset):
         self._langfuse.create_prompt(**create_kwargs)
 
     def _build_get_kwargs(self) -> dict[str, Any]:
-        """Build kwargs for fetching prompt from Langfuse based on load_args.
+        """Build kwargs for fetching prompt from Langfuse based on load_args and sync_policy.
+
+        When sync_policy="local", load_args (version/label) are ignored since local files
+        are the source of truth. Users get a warning and the latest version is fetched
+        for synchronization purposes only.
+
+        When sync_policy="remote" or "strict", load_args are respected since remote
+        versions matter for these policies.
 
         Returns:
             Kwargs dictionary for langfuse.get_prompt() with name, type, and
             optional version or label parameters.
         """
         get_kwargs = {"name": self._prompt_name, "type": self._prompt_type}
-        if self._load_args.get("label") is not None:
+
+        # Check if user specified version/label with local sync policy
+        has_load_args = (self._load_args.get("label") is not None or
+                           self._load_args.get("version") is not None)
+
+        if self._sync_policy == "local" and has_load_args:
+            # Warn user that load_args are ignored in local mode
+            specified_args = []
+            if self._load_args.get("label") is not None:
+                specified_args.append(f"label='{self._load_args['label']}'")
+            if self._load_args.get("version") is not None:
+                specified_args.append(f"version={self._load_args['version']}")
+
+            logger.warning(
+                f"Ignoring load_args ({', '.join(specified_args)}) for prompt '{self._prompt_name}' "
+                f"because sync_policy='local'. Local files are the source of truth. "
+                f"To use specific versions/labels, switch to sync_policy='remote'."
+            )
+            # Always fetch latest for local sync policy
+            get_kwargs["label"] = "latest"
+        elif self._load_args.get("label") is not None:
             get_kwargs["label"] = self._load_args["label"]
         elif self._load_args.get("version") is not None:
             get_kwargs["version"] = self._load_args["version"]
         else:
             get_kwargs["label"] = "latest"
+
         return get_kwargs
 
     def _sync_strict_policy(
-        self, local_data: Union[str, list, None], langfuse_prompt: Any | None
+        self, local_data: str | list | None, langfuse_prompt: Any | None
     ) -> Any:
         """Handle strict sync policy - error if local and remote differ.
 
@@ -362,7 +408,7 @@ class LangfusePromptDataset(AbstractDataset):
             )
         return langfuse_prompt
 
-    def _adapt_langfuse_chat_format(self, prompt_data: Union[str, list]) -> Union[str, list]:
+    def _adapt_langfuse_chat_format(self, prompt_data: str | list) -> str | list:
         """Adapt Langfuse chat message format to local storage conventions.
 
         TODO: This exists because Langfuse returns prompts with 'message' type,
@@ -415,7 +461,7 @@ class LangfusePromptDataset(AbstractDataset):
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
-            logger.info(f"Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
+            logger.warning(f"Creating/Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
             self.file_dataset.save(normalized_prompt)
         return langfuse_prompt
 
@@ -424,6 +470,10 @@ class LangfusePromptDataset(AbstractDataset):
     ) -> Any:
         """
         Handle local sync policy - local file takes precedence.
+
+        Local files are the source of truth. When local content differs from remote,
+        the local content is pushed to Langfuse as a new version. If local file is missing
+        but remote exists, the remote content is saved locally.
 
         Args:
             local_data: Content from local file, None if file doesn't exist
@@ -438,6 +488,7 @@ class LangfusePromptDataset(AbstractDataset):
         if local_data is not None:
             if langfuse_prompt is None:
                 # Push local to Langfuse
+                logger.info(f"Creating '{self._prompt_name}' prompt in Langfuse from local file '{self._filepath}' as remote prompt does not exist (local sync policy)")
                 self.save(local_data)
                 return self._langfuse.get_prompt(**self._build_get_kwargs())
 
@@ -445,6 +496,8 @@ class LangfusePromptDataset(AbstractDataset):
             if _hash(_get_content(local_data)) != _hash(
                 _get_content(langfuse_prompt.prompt)
             ):
+                logger.warning(f"Creating a new version of '{self._prompt_name}' prompt in Langfuse from local file '{self._filepath}' as local file prompt content does not match with remote prompt (local sync policy)")
+                # Push local to Langfuse
                 self.save(local_data)
                 return self._langfuse.get_prompt(**self._build_get_kwargs())
             return langfuse_prompt
@@ -452,7 +505,7 @@ class LangfusePromptDataset(AbstractDataset):
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
-            logger.info(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse (local sync policy) as local file is missing")
+            logger.warning(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse as local file is missing (local sync policy)")
             self.file_dataset.save(normalized_prompt)
             return langfuse_prompt
 
@@ -487,7 +540,7 @@ class LangfusePromptDataset(AbstractDataset):
         else:  # local policy (default)
             return self._sync_local_policy(local_data, langfuse_prompt)
 
-    def load(self) -> ChatPromptTemplate | Any:
+    def load(self) -> "ChatPromptTemplate" | Any:
         """
         Load prompt from Langfuse with local file synchronization.
 
@@ -551,6 +604,11 @@ class LangfusePromptDataset(AbstractDataset):
             ...     # Text prompts return simple string templates
             ...     text = prompt.format(user_input="test")
         """
+        # Temporarily suppress Langfuse logger to prevent ERROR logs for 404s
+        langfuse_logger = logging.getLogger('langfuse')
+        original_level = langfuse_logger.level
+        langfuse_logger.setLevel(logging.CRITICAL)
+
         try:
             langfuse_prompt = self._langfuse.get_prompt(**self._build_get_kwargs())
         except ConnectionError as e:
@@ -568,9 +626,12 @@ class LangfusePromptDataset(AbstractDataset):
         except Exception as e:
             logger.warning(
                 f"Unexpected error when fetching prompt '{self._prompt_name}': {type(e).__name__}: {e}. "
-                f"Falling back to local file sync."
+                f"Falling back to loading local file."
             )
             langfuse_prompt = None
+        finally:
+            # Restore original logging level
+            langfuse_logger.setLevel(original_level)
 
         # Load local file if it exists
         local_data = None
@@ -580,8 +641,16 @@ class LangfusePromptDataset(AbstractDataset):
         # Synchronize local and remote
         langfuse_prompt = self._sync_with_langfuse(local_data, langfuse_prompt)
 
-        _RETURN_MODES = {
-            "sdk": lambda prompt: prompt,
-            "langchain": lambda prompt: ChatPromptTemplate.from_messages(prompt.get_langchain_prompt()),
-        }
-        return _RETURN_MODES[self._mode](langfuse_prompt)
+        if self._mode == "sdk":
+            return langfuse_prompt
+        elif self._mode == "langchain":
+            try:
+                from langchain.prompts import ChatPromptTemplate
+            except ImportError as exc:
+                raise ImportError(
+                    "The 'langchain' package is required when using mode='langchain'. "
+                    "Install it with: pip install 'kedro-datasets[langfuse]'"
+                ) from exc
+            return ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
+        else:
+            raise ValueError(f"Unsupported mode: {self._mode}. Must be 'sdk' or 'langchain'.")

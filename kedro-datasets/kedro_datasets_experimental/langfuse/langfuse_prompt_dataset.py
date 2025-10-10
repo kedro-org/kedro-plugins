@@ -52,7 +52,7 @@ class LangfusePromptDataset(AbstractDataset):
     and Langfuse prompt management, supporting version control, labeling, and
     different synchronization policies.
 
-    On save: writes prompt to local file and creates new version in Langfuse.
+    On save: Creates a new version of prompt in Langfuse with the local data.
     On load: synchronizes based on sync_policy and returns LangChain ChatPromptTemplate
     (langchain mode) or raw Langfuse object (sdk mode).
 
@@ -306,7 +306,7 @@ class LangfusePromptDataset(AbstractDataset):
         return self._file_dataset
 
     def save(self, data: str | list) -> None:
-        """Create a new version of prompt in Langfuse with the data.
+        """Create a new version of prompt in Langfuse with the local data.
 
         Args:
             data: The prompt content to save. Can be string for text prompts

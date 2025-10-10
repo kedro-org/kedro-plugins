@@ -8,6 +8,12 @@
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 
+- Added the following new **experimental** datasets:
+
+| Type                                | Description                                              | Location                                |
+| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+
 ## Bug fixes and other changes
 - Add HTMLPreview type.
 

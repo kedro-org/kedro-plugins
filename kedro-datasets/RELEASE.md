@@ -8,6 +8,7 @@
 | Type                                | Description                                              | Location                                |
 | ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| `langfuse.LangFusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

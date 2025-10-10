@@ -1,12 +1,12 @@
 import shutil
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
 import pypdf
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
+from kedro.io.core import PROTOCOL_DELIMITER, DatasetError
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from s3fs.core import S3FileSystem
@@ -22,13 +22,6 @@ def filepath_pdf(tmp_path):
 @pytest.fixture
 def pdf_dataset(filepath_pdf, load_args, fs_args):
     return PDFDataset(filepath=filepath_pdf, load_args=load_args, fs_args=fs_args)
-
-
-@pytest.fixture
-def versioned_pdf_dataset(filepath_pdf, load_version, save_version):
-    return PDFDataset(
-        filepath=filepath_pdf, version=Version(load_version, save_version)
-    )
 
 
 @pytest.fixture
@@ -157,45 +150,3 @@ class TestPDFDataset:
         dataset = PDFDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-
-
-class TestPDFDatasetVersioned:
-    def test_version_str_repr(self, load_version, save_version):
-        """Test that version is in string representation of the class instance
-        when applicable."""
-        filepath = "test.pdf"
-        ds = PDFDataset(filepath=filepath)
-        ds_versioned = PDFDataset(
-            filepath=filepath, version=Version(load_version, save_version)
-        )
-        assert filepath in str(ds)
-        assert "version" not in str(ds)
-
-        assert filepath in str(ds_versioned)
-        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
-        assert ver_str in str(ds_versioned)
-        assert "PDFDataset" in str(ds_versioned)
-        assert "PDFDataset" in str(ds)
-        assert "protocol" in str(ds_versioned)
-        assert "protocol" in str(ds)
-        # Default load_args
-        assert "load_args={'strict': False}" in str(ds)
-        assert "load_args={'strict': False}" in str(ds_versioned)
-
-    def test_no_versions(self, versioned_pdf_dataset):
-        """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for kedro_datasets_experimental.pypdf.pdf_dataset.PDFDataset\(.+\)"
-        with pytest.raises(DatasetError, match=pattern):
-            versioned_pdf_dataset.load()
-
-    def test_exists(self, versioned_pdf_dataset, dummy_pdf_data):
-        """Test `exists` method invocation for versioned dataset."""
-        assert not versioned_pdf_dataset.exists()
-
-    def test_http_filesystem_no_versioning(self):
-        pattern = "Versioning is not supported for HTTP protocols."
-
-        with pytest.raises(DatasetError, match=pattern):
-            PDFDataset(
-                filepath="https://example.com/file.pdf", version=Version(None, None)
-            )

@@ -5,6 +5,7 @@ import sys
 from copy import deepcopy
 from enum import auto
 from typing import TYPE_CHECKING, Any, ClassVar
+from warnings import warn
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum  # pragma: no cover
@@ -14,6 +15,7 @@ else:
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
@@ -166,6 +168,12 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         # Map legacy overwrite if present.
         if "overwrite" in self._save_args:
+            warn(
+                "'overwrite' is deprecated and will be removed in a future release. "
+                "Please use 'mode' instead.",
+                KedroDeprecationWarning,
+                stacklevel=2,
+            )
             legacy = self._save_args.pop("overwrite")
             # Remove any lingering 'mode' key from defaults to avoid
             # leaking into writer kwargs.

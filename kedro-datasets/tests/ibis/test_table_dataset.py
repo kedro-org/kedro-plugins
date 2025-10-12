@@ -6,6 +6,7 @@ from kedro.io import DatasetError
 from packaging.version import Version
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.ibis import FileDataset, TableDataset
 
 _SENTINEL = object()
@@ -177,6 +178,18 @@ class TestTableDataset:
                     "mode": "append",
                     "overwrite": True,
                 },
+            )
+
+    def test_legacy_overwrite_deprecation_warning(
+        self, database_name, connection_config
+    ):
+        """Using legacy overwrite should raise a deprecation warning."""
+        with pytest.warns(KedroDeprecationWarning, match="'overwrite' is deprecated"):
+            TableDataset(
+                table_name="deprecated_overwrite",
+                database=database_name,
+                connection=connection_config,
+                save_args={"overwrite": True},
             )
 
     @pytest.mark.parametrize(

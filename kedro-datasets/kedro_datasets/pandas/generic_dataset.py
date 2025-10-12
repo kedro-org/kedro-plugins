@@ -36,7 +36,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     appropriate type of read/write target on a best effort basis.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         cars:
@@ -64,7 +64,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             format: sas7bdat
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.pandas import GenericDataset

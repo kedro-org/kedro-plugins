@@ -10,7 +10,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     """
     `ChatAnthropicDataset` loads a ChatAnthropic [langchain](https://python.langchain.com/) model.
 
-    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
     **catalog.yml**
 
@@ -31,7 +31,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         anthropic_api_key: <anthropic-api-key>
     ```
 
-    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
     from kedro_datasets_experimental.langchain import ChatAnthropicDataset

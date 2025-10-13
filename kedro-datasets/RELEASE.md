@@ -13,6 +13,14 @@
 ## Bug fixes and other changes
 - Add HTMLPreview type.
 
+## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+
 # Release 8.1.0
 ## Major features and improvements
 

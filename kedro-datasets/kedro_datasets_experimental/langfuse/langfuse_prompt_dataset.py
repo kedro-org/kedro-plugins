@@ -96,6 +96,7 @@ class LangfusePromptDataset(AbstractDataset):
         dataset = LangfusePromptDataset(
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
+            prompt_type="chat",
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -106,6 +107,7 @@ class LangfusePromptDataset(AbstractDataset):
         dataset = LangfusePromptDataset(
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
+            prompt_type="chat",
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -140,15 +142,11 @@ class LangfusePromptDataset(AbstractDataset):
         """
         Initialize LangfusePromptDataset for managing prompts with Langfuse versioning.
 
-        This dataset provides seamless integration between local prompt files (JSON/YAML)
-        and Langfuse prompt management, supporting version control, labeling, and
-        different synchronization policies.
-
         Args:
             filepath: Local file path for storing prompt. Supports .json, .yaml, .yml extensions.
             prompt_name: Unique identifier for the prompt in Langfuse.
             prompt_type: Type of prompt - "chat" for conversation or "text" for single prompts.
-            credentials: Dict with Langfuse credentials. Required: {public_key, secret_key}.
+            credentials: Dictionary with Langfuse credentials. Required: {public_key, secret_key}.
                 Optional: {host} (defaults to Langfuse cloud if not provided).
             sync_policy: How to handle conflicts between local and remote:
                 - "local": Local file takes precedence (default)
@@ -157,12 +155,13 @@ class LangfusePromptDataset(AbstractDataset):
             mode: Return type for load() method:
                 - "langchain": Returns ChatPromptTemplate object (default)
                 - "sdk": Returns raw Langfuse prompt object
-            load_args: Dict with loading parameters. Only used when sync_policy="remote" or "strict".
+            load_args: Dictionary with loading parameters. Only used when sync_policy="remote" or "strict".
                 Ignored with warning when sync_policy="local". Supported keys:
                 - version (int): Specific version number to load
                 - label (str): Specific label to load (e.g., "production", "staging")
-                Note: Cannot specify both version and label simultaneously.
-            save_args: Dict with saving parameters. Supported keys:
+                Note: Langfuse will throw an error if both version and label are used together.
+                So label is preferred over version if provided.
+            save_args: Dictionary with saving parameters. Supported keys:
                 - labels (list[str]): List of labels to assign to new prompt versions
             kwargs: keyword arguments passed to the underlying constructor.
 
@@ -624,7 +623,7 @@ class LangfusePromptDataset(AbstractDataset):
             ...     # Text prompts return simple string templates
             ...     text = prompt.format(user_input="test")
         """
-        # Temporarily suppress Langfuse logger to prevent ERROR logs for 404s
+        # Temporarily suppress Langfuse logger to prevent Langfuse ERROR logs for 404s
         langfuse_logger = logging.getLogger('langfuse')
         original_level = langfuse_logger.level
         langfuse_logger.setLevel(logging.CRITICAL)

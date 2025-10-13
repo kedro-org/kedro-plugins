@@ -1,7 +1,7 @@
 import os
 from typing import Any, Literal
 
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 from langfuse import Langfuse
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
@@ -25,7 +25,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
         ```yaml
         langfuse_trace:
-          type: kedro_agentic_workflows.datasets.langfuse_trace_dataset.LangfuseTraceDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
           credentials: langfuse_credentials
           mode: openai
         ```
@@ -33,7 +33,7 @@ class LangfuseTraceDataset(AbstractDataset):
         Using Python API:
 
         ```python
-        from kedro_agentic_workflows.datasets.langfuse_trace_dataset import LangfuseTraceDataset
+        from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
 
         # Basic usage (using default Langfuse cloud)
         dataset = LangfuseTraceDataset(
@@ -83,7 +83,7 @@ class LangfuseTraceDataset(AbstractDataset):
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
         Raises:
-            ValueError: If required Langfuse credentials are missing or empty.
+            DatasetError: If required Langfuse credentials are missing or empty.
 
         Examples:
             # Basic SDK mode (using default Langfuse cloud)
@@ -132,23 +132,23 @@ class LangfuseTraceDataset(AbstractDataset):
         """Validate Langfuse credentials before setting environment variables.
 
         Raises:
-            ValueError: If Langfuse credentials are missing or invalid.
+            DatasetError: If Langfuse credentials are missing or invalid.
         """
         # Validate required keys
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in self._credentials:
-                raise ValueError(f"Missing required Langfuse credential: '{key}'")
+                raise DatasetError(f"Missing required Langfuse credential: '{key}'")
 
             # Validate that credential is not empty
             if not self._credentials[key] or not str(self._credentials[key]).strip():
-                raise ValueError(f"Langfuse credential '{key}' cannot be empty")
+                raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
 
         # Validate optional keys if present
         for key in OPTIONAL_LANGFUSE_CREDENTIALS:
             if key in self._credentials:
                 # If host is provided, it cannot be empty
                 if not self._credentials[key] or not str(self._credentials[key]).strip():
-                    raise ValueError(f"Langfuse credential '{key}' cannot be empty if provided")
+                    raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
@@ -169,7 +169,7 @@ class LangfuseTraceDataset(AbstractDataset):
             'api_key', optionally includes 'base_url' if provided.
 
         Raises:
-            ValueError: If OpenAI credentials are missing or invalid.
+            DatasetError: If OpenAI credentials are missing or invalid.
 
         Examples:
             # With API key only
@@ -182,17 +182,17 @@ class LangfuseTraceDataset(AbstractDataset):
         """
         # Check if openai section exists
         if "openai" not in self._credentials:
-            raise ValueError("OpenAI mode requires 'openai' section in credentials")
+            raise DatasetError("OpenAI mode requires 'openai' section in credentials")
 
         openai_creds = self._credentials["openai"]
 
         # Check for required API key
         if "openai_api_key" not in openai_creds:
-            raise ValueError("Missing required OpenAI credential: 'openai_api_key'")
+            raise DatasetError("Missing required OpenAI credential: 'openai_api_key'")
 
         # Validate that API key is not empty
         if not openai_creds["openai_api_key"] or not openai_creds["openai_api_key"].strip():
-            raise ValueError("OpenAI API key cannot be empty")
+            raise DatasetError("OpenAI API key cannot be empty")
 
         # Build validated client parameters
         client_params = {"api_key": openai_creds["openai_api_key"]}
@@ -217,7 +217,7 @@ class LangfuseTraceDataset(AbstractDataset):
             - sdk mode: Raw Langfuse client for manual tracing
 
         Raises:
-            ValueError: If OpenAI mode is used but OpenAI credentials are missing or invalid.
+            DatasetError: If OpenAI mode is used but OpenAI credentials are missing or invalid.
 
         Examples:
             # LangChain mode

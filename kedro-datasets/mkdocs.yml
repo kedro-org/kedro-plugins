@@ -176,6 +176,7 @@ plugins:
         Experimental Specialized Formats:
           - api/kedro_datasets_experimental/prophet.ProphetModelDataset.md: Time series with Prophet
           - api/kedro_datasets_experimental/video.VideoDataset.md: Video file processing
+          - api/kedro_datasets_experimental/pypdf.PDFDataset.md: PDF file text extraction
           - api/kedro_datasets_experimental/netcdf.NetCDFDataset.md: NetCDF scientific data
           - api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md: GeoTIFF raster data
           - api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md: Polars database connector
@@ -326,6 +327,8 @@ nav:
           - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - PyPDF:
+          - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:
           - polars.PolarsDatabaseDataset: api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md
         - Prophet:

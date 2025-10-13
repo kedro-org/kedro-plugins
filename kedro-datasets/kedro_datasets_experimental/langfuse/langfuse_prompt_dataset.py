@@ -526,7 +526,7 @@ class LangfusePromptDataset(AbstractDataset):
             return langfuse_prompt
 
         raise DatasetError(
-            f"No prompt found locally or in Langfuse for {self._get_prompt_description()}"
+            f"No prompt found locally at {self._filepath} or in Langfuse for {self._get_prompt_description()}"
         )
 
     def _sync_with_langfuse(

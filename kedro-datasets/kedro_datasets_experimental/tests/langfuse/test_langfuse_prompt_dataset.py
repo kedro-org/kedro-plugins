@@ -11,6 +11,7 @@ from kedro_datasets_experimental.langfuse.langfuse_prompt_dataset import (
     _hash,
 )
 
+
 @pytest.fixture
 def mock_langfuse():
     """Mock Langfuse client for testing."""

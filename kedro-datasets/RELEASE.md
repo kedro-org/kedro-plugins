@@ -1,4 +1,5 @@
 # Upcoming Release
+
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
@@ -8,8 +9,22 @@
 |-----------------------|-----------------------------------------------------------------------------------|--------------------------|
 | `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
 
+- Added the following new **experimental** datasets:
+
+| Type                                | Description                                              | Location                                |
+| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+
 ## Bug fixes and other changes
 - Add HTMLPreview type.
+
+## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+|--------------------------------|---------------------------------------------------------------|--------------------------------------|
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
 
 # Release 8.1.0
 ## Major features and improvements
@@ -20,14 +35,16 @@
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
+
 ## Bug fixes and other changes
 
 - Added primary key constraint to BaseTable.
 - Added save/load with `use_pyarrow=True` save_args for LazyPolarsDataset partitioned parquet files.
 - Updated the json schema for Kedro 1.0.0.
 
-## Breaking Changes
 ## Community contributions
+
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 - [gitgud5000](https://github.com/gitgud5000)
 
@@ -60,7 +77,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
 - [Seohyun Park](https://github.com/soyamimi)
 - [Daniel Russell-Brain](https://github.com/killerfridge)
-
 
 # Release 7.0.0
 

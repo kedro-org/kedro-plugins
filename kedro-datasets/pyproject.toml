@@ -11,6 +11,7 @@ description = "Kedro-Datasets is where you can find all of Kedro's data connecto
 requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
+    "backports.strenum; python_version < '3.11'",
     "kedro>=1.0.0rc1, <2.0.0",
     "lazy_loader",
 ]
@@ -183,10 +184,14 @@ langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pypdf-pdfdataset = ["pypdf>=3.0.0", "cryptography>=3.1"]
+pypdf = ["kedro-datasets[pypdf-pdfdataset]"]
 
 prophet-dataset = ["prophet>=1.1.5"]
 prophet = ["kedro-datasets[prophet]"]
@@ -214,14 +219,16 @@ docs = [
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
-   "Jinja2<3.2.0"
+   "Jinja2<3.2.0",
+   "black",
+   "ruff",
+   "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 
 # Test requirements
 test = [
     "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
-    "behave==1.2.6",
     "biopython~=1.73",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
@@ -230,6 +237,7 @@ test = [
     "delta-spark>=1.0, <3.0",
     "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
+    "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.7",
@@ -264,6 +272,7 @@ test = [
     "pytest~=7.2",
     "python-docx",
     "redis~=4.1",
+    "reportlab>=3.6.0",
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
@@ -320,6 +329,7 @@ experimental = [
     "prophet>=1.1.5",
     "optuna",
     "u8darts[all]",
+    "pypdf>=3.0.0",
 ]
 
 # All requirements
@@ -373,7 +383,7 @@ select = [
 ]
 ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
 "*/{__init__.py}" = ["F821"] # temporarily ignore ruff undefined name errors for dataset aliases
 

@@ -234,6 +234,13 @@ class TestLazyParquetDatasetVersioned:
         reloaded_df = versioned_parquet_dataset.load().collect()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
+    def test_save_using_pyarrow(self, versioned_parquet_dataset, dummy_dataframe):
+        """Test saving dataset with pyarrow."""
+        versioned_parquet_dataset._save_args["use_pyarrow"] = True
+        versioned_parquet_dataset.save(dummy_dataframe.lazy())
+        reloaded_df = versioned_parquet_dataset.load().collect()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
     def test_version_str_repr(self, filepath_pq, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""

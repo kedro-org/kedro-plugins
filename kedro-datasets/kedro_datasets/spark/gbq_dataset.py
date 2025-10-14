@@ -25,7 +25,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
     """``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
 
     Examples:
-        Using the [YAML API](https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html):
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
         my_gbq_spark_data:
@@ -40,7 +40,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
             key: value
         ```
 
-        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.spark import GBQQueryDataset
         >>>

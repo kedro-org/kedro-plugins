@@ -130,7 +130,6 @@ def cleanup_plt():
 
 
 class TestMatplotlibDataset:
-
     @pytest.mark.parametrize("save_args", [{"format": "png"}], indirect=True)
     def test_save_data(
         self, tmp_path, mock_single_plot, plot_dataset, mocked_s3_bucket, save_args

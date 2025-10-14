@@ -167,6 +167,7 @@ plugins:
           - api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md: Anthropic Claude integration
           - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
+          - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -175,6 +176,7 @@ plugins:
         Experimental Specialized Formats:
           - api/kedro_datasets_experimental/prophet.ProphetModelDataset.md: Time series with Prophet
           - api/kedro_datasets_experimental/video.VideoDataset.md: Video file processing
+          - api/kedro_datasets_experimental/pypdf.PDFDataset.md: PDF file text extraction
           - api/kedro_datasets_experimental/netcdf.NetCDFDataset.md: NetCDF scientific data
           - api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md: GeoTIFF raster data
           - api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md: Polars database connector
@@ -322,8 +324,11 @@ nav:
           - langchain.ChatCohereDataset: api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
           - langchain.ChatOpenAIDataset: api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
           - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
+          - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - PyPDF:
+          - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:
           - polars.PolarsDatabaseDataset: api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md
         - Prophet:

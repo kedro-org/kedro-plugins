@@ -174,11 +174,11 @@ class LangfuseTraceDataset(AbstractDataset):
         Examples:
             # With API key only
                 params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-..."}
+                # Returns: {"api_key": "sk-..."}  # pragma: allowlist secret
 
             # With API key and custom base URL
                 params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}
+                # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}  # pragma: allowlist secret
         """
         # Check if openai section exists
         if "openai" not in self._credentials:

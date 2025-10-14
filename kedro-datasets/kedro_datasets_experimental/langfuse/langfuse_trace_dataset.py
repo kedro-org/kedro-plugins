@@ -88,13 +88,13 @@ class LangfuseTraceDataset(AbstractDataset):
         Examples:
             # Basic SDK mode (using default Langfuse cloud)
                 dataset = LangfuseTraceDataset(
-            ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}
+            ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
             ... )
 
             # With custom host
                 dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",
+            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "host": "https://custom.langfuse.com"
             ...     }
             ... )
@@ -102,8 +102,8 @@ class LangfuseTraceDataset(AbstractDataset):
             # OpenAI mode with API key
                 dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",
-            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."}
+            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."} # pragma: allowlist secret
             ...     },
             ...     mode="openai"
             ... )

@@ -48,7 +48,7 @@ class TestLangfuseTraceDataset:
         LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_test",
-                "secret_key": "sk_test",
+                "secret_key": "sk_test", # pragma: allowlist secret
                 "host": "https://custom.langfuse.com"
             }
         )
@@ -71,7 +71,7 @@ class TestLangfuseTraceDataset:
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
 
@@ -96,7 +96,7 @@ class TestLangfuseTraceDataset:
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
 
@@ -120,7 +120,7 @@ class TestLangfuseTraceDataset:
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
 
@@ -135,7 +135,7 @@ class TestLangfuseTraceDataset:
     def test_save_not_implemented(self):
         """Test save raises DatasetError (wrapping NotImplementedError)."""
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"}
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"} # pragma: allowlist secret
         )
 
         # Kedro wraps NotImplementedError in DatasetError
@@ -158,20 +158,20 @@ class TestLangfuseTraceDataset:
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_test",
-                "secret_key": "sk_test",
+                "secret_key": "sk_test", # pragma: allowlist secret
                 "openai": {"openai_api_key": "sk-test"}  # pragma: allowlist secret
             },
             mode="openai"
         )
 
         result = dataset.load()
-        mock_openai_class.assert_called_once_with(api_key="sk-test")
+        mock_openai_class.assert_called_once_with(api_key="sk-test") # pragma: allowlist secret
         assert result == mock_openai_instance
 
     def test_openai_mode_missing_credentials(self):
         """Test OpenAI mode raises error when OpenAI credentials missing."""
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="openai"
         )
 
@@ -181,7 +181,7 @@ class TestLangfuseTraceDataset:
     def test_describe_method(self):
         """Test _describe returns correct format."""
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="langchain"
         )
 

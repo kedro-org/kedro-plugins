@@ -49,9 +49,9 @@ class LangfuseTraceDataset(AbstractDataset):
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...",
+                "secret_key": "sk_...", # pragma: allowlist secret
                 "host": "https://custom.langfuse.com",
-                "openai": {"openai_api_key": "sk-..."}
+                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
             },
             mode="openai"
         )

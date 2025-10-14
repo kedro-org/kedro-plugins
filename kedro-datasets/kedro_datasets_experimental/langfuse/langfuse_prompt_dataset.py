@@ -8,11 +8,13 @@ from kedro.io import AbstractDataset, DatasetError
 
 if TYPE_CHECKING:
     from langchain.prompts import ChatPromptTemplate
+
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
 
-from kedro_datasets._typing import JSONPreview
 from langfuse import Langfuse
+
+from kedro_datasets._typing import JSONPreview
 
 # Supported file extensions for prompt storage
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}

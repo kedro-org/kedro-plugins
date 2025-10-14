@@ -18,7 +18,7 @@ class TestLangfuseTraceDataset:
     def test_empty_credentials(self):
         """Test that dataset raises error when credentials are empty."""
         with pytest.raises(DatasetError, match="cannot be empty"):
-            LangfuseTraceDataset(credentials={"public_key": "", "secret_key": "sk"})
+            LangfuseTraceDataset(credentials={"public_key": "", "secret_key": "sk"})  # pragma: allowlist secret
 
     def test_langchain_mode(self, mocker):
         """Test langchain mode returns CallbackHandler."""
@@ -33,7 +33,7 @@ class TestLangfuseTraceDataset:
         mocker.patch.dict("sys.modules", {"langfuse.langchain": mock_langchain})
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
             mode="langchain"
         )
 
@@ -159,7 +159,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",
-                "openai": {"openai_api_key": "sk-test"}
+                "openai": {"openai_api_key": "sk-test"}  # pragma: allowlist secret
             },
             mode="openai"
         )

@@ -39,8 +39,8 @@ class LangfuseTraceDataset(AbstractDataset):
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...",
-                "openai": {"openai_api_key": "sk-..."}
+                "secret_key": "sk_...", # pragma: allowlist secret
+                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
             },
             mode="openai"
         )
@@ -66,7 +66,7 @@ class LangfuseTraceDataset(AbstractDataset):
             self,
             credentials: dict[str, Any],
             mode: Literal["langchain", "openai", "sdk"] = "sdk",
-            **trace_kwargs
+            **trace_kwargs: Any
     ):
         """Initialize LangfuseTraceDataset and configure environment variables.
 

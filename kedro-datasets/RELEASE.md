@@ -3,6 +3,11 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added the following new datasets:
+
+| Type | Description | Location |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
 
 - Added the following new **experimental** datasets:
 

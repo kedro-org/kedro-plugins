@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- The deprecated MatplotlibWriter dataset is now removed. 
 
 - Added the following new **experimental** datasets:
 

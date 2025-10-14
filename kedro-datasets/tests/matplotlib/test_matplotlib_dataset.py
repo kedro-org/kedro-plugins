@@ -11,8 +11,7 @@ from kedro.io import DatasetError, Version
 from moto import mock_aws
 from s3fs import S3FileSystem
 
-from kedro_datasets import KedroDeprecationWarning
-from kedro_datasets.matplotlib import MatplotlibDataset, MatplotlibWriter
+from kedro_datasets.matplotlib import MatplotlibDataset
 
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}  # pragma: allowlist secret
@@ -117,19 +116,6 @@ def plot_dataset(mocked_s3_bucket, fs_args, save_args, overwrite):
 
 
 @pytest.fixture
-def plot_writer(mocked_s3_bucket, fs_args, save_args, overwrite):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return MatplotlibWriter(
-            filepath=FULL_PATH,
-            credentials=AWS_CREDENTIALS,
-            fs_args=fs_args,
-            save_args=save_args,
-            overwrite=overwrite,
-        )
-
-
-@pytest.fixture
 def versioned_plot_dataset(tmp_path, load_version, save_version):
     filepath = (tmp_path / "matplotlib.png").as_posix()
     return MatplotlibDataset(
@@ -144,17 +130,6 @@ def cleanup_plt():
 
 
 class TestMatplotlibDataset:
-    def test_writer_deprecation_warning(self, tmp_path):
-        """Test that MatplotlibWriter raises a deprecation warning"""
-        with pytest.warns(
-            KedroDeprecationWarning, match="renamed to MatplotlibDataset"
-        ):
-            MatplotlibWriter(filepath=tmp_path / "test.png")
-
-    def test_writer_is_dataset_subclass(self, plot_writer):
-        """Test that MatplotlibWriter is a subclass of MatplotlibDataset"""
-        assert isinstance(plot_writer, MatplotlibDataset)
-        assert isinstance(plot_writer, MatplotlibWriter)
 
     @pytest.mark.parametrize("save_args", [{"format": "png"}], indirect=True)
     def test_save_data(
@@ -262,12 +237,6 @@ class TestMatplotlibDataset:
         pattern = r"Loading not supported for 'MatplotlibDataset'"
         with pytest.raises(DatasetError, match=pattern):
             plot_dataset.load()
-
-    def test_writer_load_fail(self, plot_writer):
-        """Test that the deprecated writer raises appropriate error on load."""
-        pattern = r"Loading not supported for 'MatplotlibWriter'"
-        with pytest.raises(DatasetError, match=pattern):
-            plot_writer.load()
 
     @pytest.mark.usefixtures("s3fs_cleanup")
     def test_exists_single(self, mock_single_plot, plot_dataset):

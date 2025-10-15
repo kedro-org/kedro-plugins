@@ -284,7 +284,9 @@ class TestSparkDatasetV2PathHandling:
         }
 
         for filepath, expected_prefix in protocols.items():
-            dataset = SparkDatasetV2(filepath=filepath, credentials={"account_name": "dummy"})
+            dataset = SparkDatasetV2(
+                filepath=filepath, credentials={"account_name": "dummy"}
+            )
             assert dataset._spark_path.startswith(expected_prefix)
 
 
@@ -314,9 +316,8 @@ class TestSparkDatasetV2ErrorMessages:
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
         dataset = SparkDatasetV2(filepath="test.parquet")
-        import sys
-        monkeypatch.setitem(sys.modules, 'pyspark', None)
-        monkeypatch.setitem(sys.modules, 'pyspark.sql', None)
+        monkeypatch.setitem(sys.modules, "pyspark", None)
+        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
 
         with pytest.raises(DatasetError, match="databricks-connect"):
             dataset.load()
@@ -326,9 +327,8 @@ class TestSparkDatasetV2ErrorMessages:
         monkeypatch.setenv("EMR_RELEASE_LABEL", "emr-7.0.0")
 
         dataset = SparkDatasetV2(filepath="test.parquet")
-        import sys
-        monkeypatch.setitem(sys.modules, 'pyspark', None)
-        monkeypatch.setitem(sys.modules, 'pyspark.sql', None)
+        monkeypatch.setitem(sys.modules, "pyspark", None)
+        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
 
         with pytest.raises(DatasetError, match="pre-installed on EMR"):
             dataset.load()
@@ -339,9 +339,8 @@ class TestSparkDatasetV2ErrorMessages:
         monkeypatch.delenv("EMR_RELEASE_LABEL", raising=False)
 
         dataset = SparkDatasetV2(filepath="test.parquet")
-        import sys
-        monkeypatch.setitem(sys.modules, 'pyspark', None)
-        monkeypatch.setitem(sys.modules, 'pyspark.sql', None)
+        monkeypatch.setitem(sys.modules, "pyspark", None)
+        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
 
         with pytest.raises(DatasetError, match="kedro-datasets\\[spark-local\\]"):
             dataset.load()

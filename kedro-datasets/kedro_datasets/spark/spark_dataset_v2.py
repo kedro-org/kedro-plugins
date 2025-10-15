@@ -72,9 +72,9 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-        >>> from kedro_datasets.spark import SparkDatasetV2
+        >>> import tempfile
         >>> from pyspark.sql import SparkSession
-        >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
+        >>> from pyspark.sql.types import IntegerType, StringType, StructField, StructType
         >>>
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
@@ -82,10 +82,12 @@ class SparkDatasetV2(AbstractVersionedDataset):
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
-        >>> dataset = SparkDatasetV2(filepath="tmp_path/test_data")
-        >>> dataset.save(spark_df)
-        >>> reloaded = dataset.load()
-        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
+        >>> with tempfile.TemporaryDirectory() as tmp_dir:
+        ...     filepath = f"{tmp_dir}/test_data"
+        ...     dataset = SparkDatasetV2(filepath=filepath)
+        ...     dataset.save(spark_df)
+        ...     reloaded = dataset.load()
+        ...     assert Row(name="Bob", age=12) in reloaded.take(4)
 
     """
 

@@ -187,7 +187,8 @@ langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=
 langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
-langfuse = ["kedro-datasets[langfuse-langfusepromptdataset]", "langchain>=0.2.0"]
+langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]

@@ -1,9 +1,12 @@
 import duckdb
 import ibis
+import pandas as pd
 import pytest
+from kedro.io import DatasetError
 from packaging.version import Version
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets import KedroDeprecationWarning
 from kedro_datasets.ibis import FileDataset, TableDataset
 
 _SENTINEL = object()
@@ -37,13 +40,15 @@ def connection_config(request, database):
 
 @pytest.fixture
 def table_dataset(database_name, connection_config, load_args, save_args):
-    return TableDataset(
+    ds = TableDataset(
         table_name="test",
         database=database_name,
         connection=connection_config,
         load_args=load_args,
         save_args=save_args,
     )
+    yield ds
+    getattr(ds._connection, f"drop_{ds._materialized}")("test", force=True)
 
 
 @pytest.fixture
@@ -71,13 +76,16 @@ class TestTableDataset:
 
         # Verify that the appropriate materialization strategy was used.
         con = duckdb.connect(database)
-        assert not con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
+        assert (
+            con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"].size == 0
+        )
         assert "test" in con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
 
     @pytest.mark.parametrize(
-        "connection_config", [{"backend": "polars"}], indirect=True
+        ("connection_config", "save_args"),
+        [({"backend": "polars"}, {"materialized": "table"})],
+        indirect=True,
     )
-    @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
     def test_save_and_load_polars(
         self, table_dataset, connection_config, save_args, dummy_table
     ):
@@ -100,6 +108,139 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
 
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
+    )
+    def test_save_mode_append(self, table_dataset, dummy_table):
+        """Saving with mode=append should add rows to an existing table."""
+        df1 = dummy_table
+        df2 = dummy_table
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        df1 = df1.execute()
+        df2 = df2.execute()
+        reloaded = table_dataset.load().execute()
+        assert len(reloaded) == len(df1) + len(df2)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {"materialized": "table", "mode": "error"},
+            {"materialized": "table", "mode": "errorifexists"},
+        ],
+        indirect=True,
+    )
+    def test_save_mode_error_variants(self, table_dataset, dummy_table):
+        """Saving with error/errorifexists should raise when table exists."""
+        table_dataset.save(dummy_table)
+        with pytest.raises(DatasetError, match='Table with name "test" already exists'):
+            table_dataset.save(dummy_table)
+
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "ignore"}], indirect=True
+    )
+    def test_save_mode_ignore(self, table_dataset, dummy_table):
+        """Saving with ignore should not change existing table."""
+        df1 = dummy_table
+        df2 = dummy_table
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+        df1 = df1.execute()
+
+        reloaded = table_dataset.load().execute()
+        # Should remain as first save only
+        assert_frame_equal(reloaded.reset_index(drop=True), df1.reset_index(drop=True))
+
+    def test_unsupported_save_mode_raises(self, database_name, connection_config):
+        """Providing an unsupported save mode should raise a DatasetError."""
+        with pytest.raises(
+            ValueError, match="'unsupported_mode' is not a valid SaveMode"
+        ):
+            TableDataset(
+                table_name="unsupported_mode",
+                database=database_name,
+                connection=connection_config,
+                save_args={"materialized": "table", "mode": "unsupported_mode"},
+            )
+
+    def test_legacy_overwrite_conflict_raises(self, database_name, connection_config):
+        """Providing both mode and overwrite should raise a ValueError."""
+        with pytest.raises(ValueError):
+            TableDataset(
+                table_name="conflict",
+                database=database_name,
+                connection=connection_config,
+                save_args={
+                    "materialized": "table",
+                    "mode": "append",
+                    "overwrite": True,
+                },
+            )
+
+    def test_legacy_overwrite_deprecation_warning(
+        self, database_name, connection_config
+    ):
+        """Using legacy overwrite should raise a deprecation warning."""
+        with pytest.warns(KedroDeprecationWarning, match="'overwrite' is deprecated"):
+            TableDataset(
+                table_name="deprecated_overwrite",
+                database=database_name,
+                connection=connection_config,
+                save_args={"overwrite": True},
+            )
+
+    @pytest.mark.parametrize(
+        ("connection_config", "save_args"),
+        [({"backend": "polars"}, {"materialized": "table", "mode": "append"})],
+        indirect=True,
+    )
+    def test_append_mode_no_insert_raises(self, table_dataset, dummy_table):
+        """Test that saving with mode=append on a backend without 'insert' raises DatasetError (polars backend)."""
+        # Save once to create the table
+        table_dataset.save(dummy_table)
+        # Try to append again, should raise DatasetError
+        with pytest.raises(DatasetError, match="does not support inserts"):
+            table_dataset.save(dummy_table)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {"materialized": "table", "overwrite": True},
+            {"materialized": "table", "overwrite": False},
+        ],
+        indirect=True,
+    )
+    def test_legacy_overwrite_behavior(self, table_dataset, save_args, dummy_table):
+        """Legacy overwrite should map to overwrite or error behavior."""
+        legacy_overwrite = save_args["overwrite"]
+        df2 = ibis.memtable(pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]}))
+
+        table_dataset.save(dummy_table)  # First save should always work
+        if legacy_overwrite:
+            # Should overwrite existing table with new contents
+            table_dataset.save(df2)
+            df2 = df2.execute()
+            out = table_dataset.load().execute().reset_index(drop=True)
+            assert_frame_equal(out, df2.reset_index(drop=True))
+        else:
+            # Should raise on second save when table exists
+            with pytest.raises(DatasetError):
+                table_dataset.save(df2)
+
+    def test_describe_includes_backend_mode_and_materialized(self, table_dataset):
+        """_describe should expose backend, mode and materialized; nested args exclude database."""
+
+        desc = table_dataset._describe()
+
+        assert {"backend", "mode", "materialized"} <= desc.keys()
+        assert "database" in desc
+        # database key should not be duplicated inside nested args
+        assert "database" not in desc["load_args"]
+        assert "database" not in desc["save_args"]
+
     @pytest.mark.parametrize("load_args", [{"database": "test"}], indirect=True)
     def test_load_extra_params(self, table_dataset, load_args):
         """Test overriding the default load arguments."""
@@ -107,7 +248,7 @@ class TestTableDataset:
             assert table_dataset._load_args[key] == value
 
     @pytest.mark.parametrize("save_args", [{"materialized": "table"}], indirect=True)
-    def test_save_extra_params(self, table_dataset, save_args, dummy_table, database):
+    def test_save_extra_params(self, table_dataset, dummy_table, database):
         """Test overriding the default save arguments."""
         table_dataset.save(dummy_table)
 
@@ -116,7 +257,7 @@ class TestTableDataset:
         assert (
             "test" in con.sql("SELECT * FROM duckdb_tables").fetchnumpy()["table_name"]
         )
-        assert not con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"]
+        assert con.sql("SELECT * FROM duckdb_views").fetchnumpy()["view_name"].size == 0
 
     @pytest.mark.parametrize("database_name", ["test"], indirect=True)
     def test_external_database(

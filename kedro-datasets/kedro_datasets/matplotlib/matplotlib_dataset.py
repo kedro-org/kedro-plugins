@@ -29,22 +29,18 @@ class MatplotlibDataset(
     """``MatplotlibDataset`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         output_plot:
           type: matplotlib.MatplotlibDataset
           filepath: data/08_reporting/output_plot.png
           save_args:
             format: png
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibDataset
@@ -56,9 +52,7 @@ class MatplotlibDataset(
         >>> plt.close()
         >>> plot_dataset.save(fig)
 
-    Example saving a plot as a PDF file:
-
-    .. code-block:: pycon
+        Saving a plot as a PDF file:
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibDataset
@@ -72,9 +66,7 @@ class MatplotlibDataset(
         >>> plt.close()
         >>> pdf_plot_dataset.save(fig)
 
-    Example saving multiple plots in a folder, using a dictionary:
-
-    .. code-block:: pycon
+        Saving multiple plots in a folder, using a dictionary:
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro_datasets.matplotlib import MatplotlibDataset
@@ -90,27 +82,6 @@ class MatplotlibDataset(
         >>> plt.close("all")
         >>> dict_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
         >>> dict_plot_dataset.save(plots_dict)
-
-    Example saving multiple plots in a folder, using a list:
-
-    .. code-block:: pycon
-
-        >>> import matplotlib.pyplot as plt
-        >>> from kedro_datasets.matplotlib import MatplotlibDataset
-        >>>
-        >>> plots_list = []
-        >>> for i in range(5):  # doctest: +ELLIPSIS
-        ...     plots_list.append(plt.figure())
-        ...     plt.plot([i, i + 1, i + 2])
-        ...
-        [<matplotlib.lines.Line2D object at 0x...>]
-        [<matplotlib.lines.Line2D object at 0x...>]
-        [<matplotlib.lines.Line2D object at 0x...>]
-        [<matplotlib.lines.Line2D object at 0x...>]
-        [<matplotlib.lines.Line2D object at 0x...>]
-        >>> plt.close("all")
-        >>> list_plot_dataset = MatplotlibDataset(filepath=tmp_path / "data/08_reporting/plots")
-        >>> list_plot_dataset.save(plots_list)
 
     """
 

@@ -35,12 +35,10 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: pandas.GenericDataset
           file_format: csv
@@ -51,28 +49,25 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           save_args:
             index: False
             date_format: "%Y-%m-%d"
+        ```
 
-    This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
-    Trying to save this dataset will raise a ``DatasetError`` since pandas does not provide an
-    equivalent ``pd.DataFrame.to_sas`` write method.
+        This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
+        Trying to save this dataset will raise a ``DatasetError`` since pandas does not provide an
+        equivalent ``pd.DataFrame.to_sas`` write method.
 
-    .. code-block:: yaml
-
+        ```yaml
         flights:
-           type: pandas.GenericDataset
-           file_format: sas
-           filepath: data/01_raw/airplanes.sas7bdat
-           load_args:
-              format: sas7bdat
+          type: pandas.GenericDataset
+          file_format: sas
+          filepath: data/01_raw/airplanes.sas7bdat
+          load_args:
+            format: sas7bdat
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import GenericDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import GenericDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>

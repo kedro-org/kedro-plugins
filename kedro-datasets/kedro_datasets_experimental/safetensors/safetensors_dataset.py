@@ -16,40 +16,35 @@ from kedro.io.core import (
 
 
 class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
-    """``SafetensorsDataset`` loads/saves data from/to a Safetensors file using an underlying
-    filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-    the specified backend library passed in (defaults to the ``numpy`` library), so it
-    supports all allowed options for loading and Safetensors files.
+    """`SafetensorsDataset` loads/saves data from/to a Safetensors file using an underlying filesystem (e.g., local, S3, GCS).
+    The underlying functionality is supported by the specified backend library (defaults to the `numpy` library), so it supports all allowed options for loading and saving Safetensors files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
 
-    .. code-block:: yaml
+    ```yaml
+    test_model:
+        type: safetensors.SafetensorsDataset
+        filepath: data/07_model_output/test_model.safetensors
+    ```
 
-        test_model:
-          type: safetensors.SafetensorsDataset
-          filepath: data/07_model_output/test_model.safetensors
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    ```python
+    from kedro_datasets_experimental.safetensors import SafetensorsDataset
+    import numpy as np
 
-    .. code-block:: pycon
+    data = {
+        "embedding": np.zeros((512, 1024)),
+        "attention": np.zeros((256, 256))
+    }
+    dataset = SafetensorsDataset(
+        filepath="test.safetensors",
+    )
+    dataset.save(data)
+    reloaded = dataset.load()
+    assert all(np.array_equal(data[key], reloaded[key]) for key in data)
+    ```
 
-        >>> from kedro_datasets_experimental.safetensors import SafetensorsDataset
-        >>> import numpy as np
-        >>>
-        >>> data = {
-        ...     "embedding": np.zeros((512, 1024)),
-        ...     "attention": np.zeros((256, 256))
-        ... }
-        >>> dataset = SafetensorsDataset(
-        ...     filepath="test.safetensors",
-        ... )
-        >>> dataset.save(data)
-        >>> reloaded = dataset.load()
-        >>> assert all(np.array_equal(data[key], reloaded[key]) for key in data)
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

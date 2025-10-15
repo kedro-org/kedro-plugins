@@ -14,13 +14,13 @@ from warnings import warn
 
 import fsspec
 from cachetools import Cache, cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -48,34 +48,28 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    It also supports advanced features like
-    `lazy saving <https://docs.kedro.org/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_.
+    It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
+        ```yaml
 
         station_data:
           type: partitions.PartitionedDataset
           path: data/03_primary/station_data
           dataset:
-            type: pandas.CSVDataset
-            load_args:
-              sep: '\\t'
-            save_args:
-              sep: '\\t'
-              index: true
+          type: pandas.CSVDataset
+          load_args:
+            sep: '\\t'
+          save_args:
+            sep: '\\t'
+            index: true
           filename_suffix: '.dat'
           save_lazily: True
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -111,10 +105,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         >>> # Add the processing logic for individual partition HERE
         >>> # print(partition_data)
 
-    You can also load multiple partitions from a remote storage and combine them
-    like this:
-
-    .. code-block:: pycon
+        You can also load multiple partitions from a remote storage and combine them
+        like this:
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -197,14 +189,15 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
                 is passed as data to save, the partition’s data will not be materialised until it is time to write.
                 Lazy saving example:
-                https://docs.kedro.org/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving
+                https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        from fsspec.utils import infer_storage_options  # for performance reasons
+        # for performance reasons
+        from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 
@@ -228,9 +221,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
 
-        self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials or {})
 
-        self._fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -247,7 +240,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args) or {}
+        self._load_args = deepcopy(load_args or {})
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
         self._invalidate_caches()

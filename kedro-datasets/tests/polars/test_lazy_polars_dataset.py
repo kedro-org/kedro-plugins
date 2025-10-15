@@ -137,7 +137,7 @@ class TestLazyCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset LazyPolarsDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 
@@ -230,6 +230,13 @@ class TestLazyParquetDatasetVersioned:
 
     def test_save_and_load(self, versioned_parquet_dataset, dummy_dataframe):
         """Test saving and reloading the dataset."""
+        versioned_parquet_dataset.save(dummy_dataframe.lazy())
+        reloaded_df = versioned_parquet_dataset.load().collect()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_save_using_pyarrow(self, versioned_parquet_dataset, dummy_dataframe):
+        """Test saving dataset with pyarrow."""
+        versioned_parquet_dataset._save_args["use_pyarrow"] = True
         versioned_parquet_dataset.save(dummy_dataframe.lazy())
         reloaded_df = versioned_parquet_dataset.load().collect()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -345,7 +352,7 @@ class TestLazyParquetDatasetVersioned:
 
     def test_no_versions(self, versioned_parquet_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for LazyPolarsDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_parquet_dataset.load()
 
@@ -354,7 +361,7 @@ class TestLazyParquetDatasetVersioned:
         corresponding Generic (parquet) file for a given save version already exists."""
         versioned_parquet_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for LazyPolarsDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -373,7 +380,7 @@ class TestLazyParquetDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for LazyPolarsDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_dataset.save(dummy_dataframe)

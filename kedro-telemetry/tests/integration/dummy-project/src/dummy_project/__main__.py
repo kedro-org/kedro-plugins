@@ -22,7 +22,7 @@ def _find_run_command(package_name):
             # use run command from installed plugin if it exists
             return run
         # use run command from the framework project
-        from kedro.framework.cli.project import run
+        from kedro.framework.cli.project import run  # noqa: PLC0415
 
         return run
     # fail badly if cli.py exists, but has no `cli` in it

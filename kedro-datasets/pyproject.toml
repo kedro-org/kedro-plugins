@@ -11,7 +11,8 @@ description = "Kedro-Datasets is where you can find all of Kedro's data connecto
 requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "kedro>=0.19.7",
+    "backports.strenum; python_version < '3.11'",
+    "kedro>=1.0.0rc1, <2.0.0",
     "lazy_loader",
 ]
 dynamic = ["readme", "version"]
@@ -89,11 +90,14 @@ networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
 networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
+openxml-docxdataset = ["python-docx"]
+openxml = ["kedro-datasets[openxml-docxdataset]"]
+
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
 
 pandas-csvdataset = ["kedro-datasets[pandas-base]"]
-pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0"]
+pandas-deltatabledataset = ["kedro-datasets[pandas-base]", "deltalake>=0.10.0, <1.0.0"]
 pandas-exceldataset = ["kedro-datasets[pandas-base]", "openpyxl>=3.0.6, <4.0"]
 pandas-featherdataset = ["kedro-datasets[pandas-base]"]
 pandas-gbqtabledataset = ["kedro-datasets[pandas-base]", "pandas-gbq>=0.12.0"]
@@ -133,8 +137,8 @@ plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
 plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
-polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
-polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2, <1.0.0"]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2, <1.0.0"]
 polars = [
     """kedro-datasets[polars-csvdataset,\
     polars-eagerpolarsdataset,\
@@ -180,10 +184,16 @@ langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
+langfuse = ["kedro-datasets[langfuse-langfusetracedataset]", "openai>=2.3.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pypdf-pdfdataset = ["pypdf>=3.0.0", "cryptography>=3.1"]
+pypdf = ["kedro-datasets[pypdf-pdfdataset]"]
 
 prophet-dataset = ["prophet>=1.1.5"]
 prophet = ["kedro-datasets[prophet]"]
@@ -201,27 +211,38 @@ video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
 docs = [
-    "kedro-sphinx-theme==2024.10.2",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
+   "mkdocs>=1.6.1",
+   "mkdocs-material>=9.6.11",
+   "mkdocs-material-extensions>=1.3.1",
+   "mkdocs-mermaid2-plugin>=1.2.1",
+   "mkdocs-autorefs>=1.4.1",
+   "mkdocs-get-deps>=0.2.0",
+   "mkdocstrings>=0.29.1",
+   "mkdocstrings-python>=0.29.1",
+   "linkchecker>=10.2.1",
+   "ipykernel>=5.3, <7.0",
+   "Jinja2<3.2.0",
+   "black",
+   "ruff",
+   "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 
 # Test requirements
 test = [
     "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
-    "behave==1.2.6",
     "biopython~=1.73",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0",
-    "deltalake>=0.10.0",
+    "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
+    "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
-    "gcsfs>=2023.1, <2023.3",
+    "gcsfs>=2023.1, <2023.7",
     "geopandas>=0.8.0, <2.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
@@ -251,7 +272,9 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
+    "python-docx",
     "redis~=4.1",
+    "reportlab>=3.6.0",
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
@@ -268,7 +291,7 @@ test = [
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
-    "datasets",
+    "datasets>=3.0.0",
     "huggingface_hub",
     "transformers[torch]",
 ]
@@ -282,7 +305,7 @@ lint = [
     "import-linter[toml]==1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.0.290",
+    "ruff~=0.12.1",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",
@@ -299,6 +322,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "langfuse",
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
@@ -308,6 +332,7 @@ experimental = [
     "prophet>=1.1.5",
     "optuna",
     "u8darts[all]",
+    "pypdf>=3.0.0",
 ]
 
 # All requirements
@@ -329,23 +354,27 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
-addopts = """
---cov-report xml:coverage.xml \
---cov-report term-missing \
---cov kedro_datasets \
---cov tests \
---ignore tests/template/fake_repo \
---no-cov-on-fail \
--ra \
--W ignore"""
+addopts = [
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=term-missing",
+    "--cov=kedro_datasets",
+    "--cov=tests",
+    "--ignore=tests/template/fake_repo",
+    "--no-cov-on-fail",
+    "-ra",
+    "-W",
+    "ignore"
+]
 
 [tool.ruff]
 line-length = 88
 show-fixes = true
+
+[tool.ruff.lint]
 select = [
     "F",   # Pyflakes
     "W",   # pycodestyle
@@ -355,11 +384,12 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
 "*/{__init__.py}" = ["F821"] # temporarily ignore ruff undefined name errors for dataset aliases
 
 [tool.mypy]
 ignore_missing_imports = true
+disable_error_code = ['no-redef']

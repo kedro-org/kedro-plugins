@@ -25,46 +25,44 @@ class DartsTorchModelDataset(
     The underlying functionality is supported by, and passes arguments through to,
     the Darts library's model load and save methods.
 
-    Example usage for the
-    YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_yaml.html>_:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-        .. code-block:: yaml
+    ```yaml
 
-            darts_model:
-              type: path.to.DartsTorchModelDataset
-              filepath: data/06_models/darts_model.pt
-              model_class: RNNModel
-              load_args:
-                load_method: load
-              save_args:
-                save_model: true
-              versioned: true
+    darts_model:
+        type: path.to.DartsTorchModelDataset
+        filepath: data/06_models/darts_model.pt
+        model_class: RNNModel
+        load_args:
+            load_method: load
+        save_args:
+            save_model: true
+        versioned: true
+    ```
 
-    Example usage for the
-    Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog_api.html>_:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: python
+    ```python
 
-        from path.to.your.module import DartsTorchModelDataset
-        from darts.models import RNNModel
-        from kedro.io.core import Version
+    from path.to.your.module import DartsTorchModelDataset
+    from darts.models import RNNModel
+    from kedro.io.core import Version
 
-        # Initialize the dataset
-        dataset = DartsTorchModelDataset(
-            filepath="data/06_models/darts_model.pt",
-            model_class=RNNModel
-        )
+    # Initialize the dataset
+    dataset = DartsTorchModelDataset(
+        filepath="data/06_models/darts_model.pt",
+        model_class=RNNModel
+    )
 
-        # Assuming model is an instance of RNNModel
-        model = RNNModel(input_chunk_length=12, output_chunk_length=6)
+    # Assuming model is an instance of RNNModel
+    model = RNNModel(input_chunk_length=12, output_chunk_length=6)
 
-        # Save the model
-        dataset.save(model)
+    # Save the model
+    dataset.save(model)
 
-        # Load the model
-        loaded_model = dataset.load()
+    # Load the model
+    loaded_model = dataset.load()
+    ```
 
     """
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}

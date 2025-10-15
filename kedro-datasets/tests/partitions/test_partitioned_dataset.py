@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import s3fs
 from kedro.io import DatasetError
-from kedro.io.data_catalog import CREDENTIALS_KEY
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from moto import mock_aws
 from pandas.testing import assert_frame_equal
 
@@ -249,11 +249,11 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_describe(self, dataset):
         path = str(Path.cwd())
-        pds = PartitionedDataset(path=path, dataset=dataset)
+        pds_descr = PartitionedDataset(path=path, dataset=dataset)._describe()
 
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert "path" in pds_descr and pds_descr["path"] == path
+        assert "dataset_type" in pds_descr and pds_descr["dataset_type"] == "CSVDataset"
+        assert "dataset_config" in pds_descr
 
     def test_load_args(self, mocker):
         fake_partition_name = "fake_partition"
@@ -322,7 +322,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from dataset ParquetDataset(.*)"
+            pattern = r"Failed while loading data from dataset kedro_datasets.pandas.parquet_dataset.ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -348,12 +348,15 @@ class TestPartitionedDatasetLocal:
                 r"Dataset type 'tests\.partitions\.test_partitioned_dataset\.FakeDataset' "
                 r"is invalid\: all dataset types must extend 'AbstractDataset'",
             ),
-            ({}, "'type' is missing from dataset catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
         with pytest.raises(DatasetError, match=error_pattern):
             PartitionedDataset(path=str(Path.cwd()), dataset=dataset_config)
+
+    def test_empty_dataset_config(self):
+        with pytest.raises(KeyError, match="type"):
+            PartitionedDataset(path=str(Path.cwd()), dataset={})
 
     @pytest.mark.parametrize(
         "dataset_config",
@@ -595,10 +598,12 @@ class TestPartitionedDatasetS3:
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
+
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
-        assert mocked_ds.call_count == len(loaded_partitions)
+        # We need to add +1 as one extrac call is done via _pretty_repr()
+        assert mocked_ds.call_count == len(loaded_partitions) + 1
         expected = [
             mocker.call(filepath=f"{s3a_path}/{partition_id}")
             for partition_id in loaded_partitions
@@ -633,14 +638,23 @@ class TestPartitionedDatasetS3:
 
         mocked_ds = mocker.patch.object(pds, "_dataset_type")
         mocked_ds.__name__ = "mocked"
+
         new_partition = "new/data"
         data = "data"
 
         pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
+        mocked_ds.assert_any_call(filepath=f"{s3a_path}/{new_partition}.csv")
+        # We need to add +1 as one extrac call is done via _pretty_repr()
+        assert mocked_ds.call_count == 2
         mocked_ds.return_value.save.assert_called_once_with(data)
 
-    @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.HDFDataset"])
+    @pytest.mark.parametrize(
+        "dataset",
+        [
+            {"type": "pandas.CSVDataset"},
+            {"type": "pandas.HDFDataset", "key": "data"},
+        ],
+    )
     def test_exists(self, dataset, mocked_csvs_in_s3):
         assert PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset).exists()
 
@@ -685,8 +699,8 @@ class TestPartitionedDatasetS3:
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):
         path = f"s3://{BUCKET_NAME}/foo/bar"
-        pds = PartitionedDataset(path=path, dataset=dataset)
+        pds_descr = PartitionedDataset(path=path, dataset=dataset)._describe()
 
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataset" in str(pds)
-        assert "dataset_config" in str(pds)
+        assert "path" in pds_descr and pds_descr["path"] == path
+        assert "dataset_type" in pds_descr and pds_descr["dataset_type"] == "CSVDataset"
+        assert "dataset_config" in pds_descr

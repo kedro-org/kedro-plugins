@@ -52,8 +52,14 @@ test-snowflake-only:
 	cd kedro-datasets && pytest --no-cov --numprocesses 1 --dist loadfile -m snowflake
 	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
-check-datasets-docs:
-	cd kedro-datasets && python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
+build-datasets-docs:
+	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
+	cd kedro-datasets && mkdocs build --strict
+
+fix-markdownlint:
+	npm install -g markdownlint-cli2
+	# markdownlint rules are defined in .markdownlint.yaml
+	markdownlint-cli2 --config kedro-datasets/.markdownlint.yaml --fix "kedro-datasets/docs/**/*.md"
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
@@ -75,6 +81,7 @@ dataset-doctest%:
 	  --ignore kedro_datasets/partitions/partitioned_dataset.py \
 	  --ignore kedro_datasets/redis/redis_dataset.py \
 	  --ignore kedro_datasets/snowflake/snowpark_dataset.py \
+	  --ignore kedro_datasets/spark/gbq_dataset.py \
 	  --ignore kedro_datasets/spark/spark_hive_dataset.py \
 	  --ignore kedro_datasets/spark/spark_jdbc_dataset.py \
 	  $(extra_pytest_arg${*})

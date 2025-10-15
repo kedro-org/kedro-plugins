@@ -16,12 +16,10 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         weather:
           type: spark.SparkJDBCDataset
           table: weather_table
@@ -33,12 +31,9 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
           save_args:
             properties:
               driver: org.postgresql.Driver
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.spark import SparkJDBCDataset
@@ -48,6 +43,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         >>> data = spark.createDataFrame(
         ...     pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         ... )
+        >>>
         >>> url = "jdbc:postgresql://localhost/test"
         >>> table = "table_a"
         >>> connection_properties = {"driver": "org.postgresql.Driver"}
@@ -61,7 +57,6 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         >>>
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>>
         >>> assert data.toPandas().equals(reloaded.toPandas())
 
     """

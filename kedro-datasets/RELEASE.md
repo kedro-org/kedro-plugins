@@ -2,22 +2,76 @@
 
 ## Major features and improvements
 
-- ...
+- Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added the following new **experimental** datasets:
+
+| Type                           | Description                                                 | Location                             |
+|--------------------------------|-------------------------------------------------------------|--------------------------------------|
+| `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+
+## Bug fixes and other changes
+- Add HTMLPreview type.
+- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+- [Guillaume Tauzin](https://github.com/gtauzin)
+
+# Release 8.1.0
+## Major features and improvements
+
+- Added the following new experimental datasets:
+
+| Type                           | Description                                                   | Location                             |
+| ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
+
+## Bug fixes and other changes
+
+- Added primary key constraint to BaseTable.
+- Added save/load with `use_pyarrow=True` save_args for LazyPolarsDataset partitioned parquet files.
+- Updated the json schema for Kedro 1.0.0.
+
+## Community contributions
+
+- [Minura Punchihewa](https://github.com/MinuraPunchihewa)
+- [gitgud5000](https://github.com/gitgud5000)
+
+# Release 8.0.0
+
+## Major features and improvements
+
+- Migrated docs to mkdocs
+- Make `kedro-datasets` compatible with Kedro 1.0.0.
+- Added the following new datasets:
+
+| Type                  | Description                                                                       | Location                 |
+| --------------------- | --------------------------------------------------------------------------------- | ------------------------ |
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 
 - Fixed `PartitionedDataset` to reliably load newly created partitions, particularly with `ParallelRunner`, by ensuring `load()` always re-scans the filesystem .
-- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
+- Add a parameter `encoding` inside the dataset `SQLQueryDataset` to choose the encoding format of the query.
+- Corrected the `APIDataset` docstring to clarify that request parameters should be passed via `load_args`, not as top-level arguments.
 
 ## Breaking changes
 
-- ...
+- `kedro-datasets` now requires Kedro 1.0.0 or higher.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-- [Guillaume Tauzin](https://github.com/gtauzin)
+- [Paul Lemonnier](https://github.com/PaulLemonnier)
+- [Seohyun Park](https://github.com/soyamimi)
+- [Daniel Russell-Brain](https://github.com/killerfridge)
+
 
 # Release 7.0.0
 
@@ -51,6 +105,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+
 
 # Release 6.0.0
 

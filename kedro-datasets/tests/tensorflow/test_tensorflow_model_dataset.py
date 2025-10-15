@@ -32,14 +32,14 @@ if sys.platform == "win32":
 # a subprocess spawned by the parallel runner, so we wrap the import inside fixtures.
 @pytest.fixture(scope="module")
 def tf():
-    import tensorflow as tf
+    import tensorflow as tf  # noqa: PLC0415
 
     return tf
 
 
 @pytest.fixture(scope="module")
 def tensorflow_model_dataset():
-    from kedro_datasets.tensorflow import TensorFlowModelDataset
+    from kedro_datasets.tensorflow import TensorFlowModelDataset  # noqa: PLC0415
 
     return TensorFlowModelDataset
 
@@ -155,7 +155,7 @@ class TestTensorFlowModelDataset:
 
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
-        pattern = r"Failed while loading data from dataset TensorFlowModelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 
@@ -336,7 +336,7 @@ class TestTensorFlowModelDatasetVersioned:
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -358,7 +358,7 @@ class TestTensorFlowModelDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version '{load_version}' "
-            rf"for TensorFlowModelDataset\(.+\)"
+            rf"for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
@@ -379,7 +379,7 @@ class TestTensorFlowModelDatasetVersioned:
 
     def test_no_versions(self, versioned_tf_model_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for TensorFlowModelDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.load()
 

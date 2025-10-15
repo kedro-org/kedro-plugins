@@ -60,7 +60,7 @@ class TestGMLDataset:
 
     def test_load_missing_file(self, gml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset GMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.networkx.gml_dataset.GMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert gml_dataset.load()
 
@@ -109,7 +109,7 @@ class TestGMLDatasetVersioned:
 
     def test_no_versions(self, versioned_gml_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GMLDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.networkx.gml_dataset.GMLDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_gml_dataset.load()
 
@@ -124,7 +124,7 @@ class TestGMLDatasetVersioned:
         version."""
         versioned_gml_dataset.save(dummy_graph_data)
         pattern = (
-            r"Save path \'.+\' for GMLDataset\(.+\) must not "
+            r"Save path \'.+\' for kedro_datasets.networkx.gml_dataset.GMLDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -143,7 +143,7 @@ class TestGMLDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match "
-            rf"load version '{load_version}' for GMLDataset\(.+\)"
+            rf"load version '{load_version}' for kedro_datasets.networkx.gml_dataset.GMLDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_gml_dataset.save(dummy_graph_data)

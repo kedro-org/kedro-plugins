@@ -28,12 +28,10 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``JSONDataset`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         clickstream_dataset:
           type: pandas.JSONDataset
           filepath: abfs://landing_area/primary/click_stream.json
@@ -44,15 +42,12 @@ class JSONDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           filepath: data/01_raw/Video_Games.json
           load_args:
             lines: True
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import JSONDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import JSONDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>

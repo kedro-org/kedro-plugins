@@ -44,12 +44,10 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     This format is used as the default format for both svmlight and the
     libsvm command line programs.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         svm_dataset:
           type: svmlight.SVMLightDataset
           filepath: data/01_raw/location.svm
@@ -68,15 +66,12 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             zero_based: False
           save_args:
             zero_based: False
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.svmlight import SVMLightDataset
         >>> import numpy as np
+        >>> from kedro_datasets.svmlight import SVMLightDataset
         >>>
         >>> # Features and labels.
         >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))

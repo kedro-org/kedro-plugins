@@ -16,11 +16,10 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: dask.CSVDataset
           filepath: s3://bucket_name/path/to/folder
@@ -30,23 +29,23 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             client_kwargs:
               aws_access_key_id: YOUR_KEY
               aws_secret_access_key: YOUR_SECRET
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.dask import CSVDataset
-        >>> import pandas as pd
-        >>> import numpy as np
         >>> import dask.dataframe as dd
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from kedro_datasets.dask import CSVDataset
+        >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=1)
+        >>>
         >>> dataset = CSVDataset(filepath="path/to/folder/*.csv")
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
         >>> assert np.array_equal(ddf.compute(), reloaded.compute())
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -79,8 +78,8 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._filepath = filepath
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         self.metadata = metadata
 

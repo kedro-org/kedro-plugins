@@ -22,11 +22,8 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     """``ImageDataset`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import sys
         >>>

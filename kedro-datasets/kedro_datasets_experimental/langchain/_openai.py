@@ -43,48 +43,47 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
 
 
 class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
-    """``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain <https://python.langchain.com/>`_ model.
+    """
+    `OpenAIEmbeddingsDataset` loads an OpenAIEmbeddings [langchain](https://python.langchain.com/) model.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
-    catalog.yml:
+    **catalog.yml**
 
-    .. code-block:: yaml
+    ```yaml
+    text_embedding_ada_002:
+        type: langchain.OpenAIEmbeddingsDataset
+        kwargs:
+            model: "text-embedding-ada-002"
+        credentials: openai
+    ```
 
-       text_embedding_ada_002:
-         type: langchain.OpenAIEmbeddingsDataset
-         kwargs:
-           model: "text-embedding-ada-002"
-         credentials: openai
+    **credentials.yml**
 
-    credentials.yml:
+    ```yaml
+    openai:
+        openai_api_base: <openai-api-base>
+        openai_api_key: <openai-api-key>
+    ```
 
-    .. code-block:: yaml
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
-       openai:
-         openai_api_base: <openai-api-base>
-         openai_api_key: <openai-api-key>
+    ```python
+    from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    embeddings = OpenAIEmbeddingsDataset(
+        credentials={
+            "openai_api_base": "<openai-api-base>",
+            "openai_api_key": "<openai-api-key>",
+        },
+        kwargs={
+            "model": "text-embedding-ada-002",
+        },
+    ).load()
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
-        >>>
-        >>> embeddings = OpenAIEmbeddingsDataset(
-        ...     credentials={
-        ...         "openai_api_base": "<openai-api-base>",
-        ...         "openai_api_key": "<openai-api-key>",
-        ...     },
-        ...     kwargs={
-        ...         "model": "text-embedding-ada-002",
-        ...     },
-        ... ).load()
-        >>>
-        >>> # See: https://python.langchain.com/docs/integrations/text_embedding/openai
-        >>> embeddings.embed_query("Hello world!")
+    # See: https://python.langchain.com/docs/integrations/text_embedding/openai
+    embeddings.embed_query("Hello world!")
+    ```
 
     """
 
@@ -94,50 +93,50 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
 
 
 class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
-    """``ChatOpenAIDataset`` loads a ChatOpenAI `langchain <https://python.langchain.com/>`_ model.
+    """
+    `ChatOpenAIDataset` loads a ChatOpenAI [langchain](https://python.langchain.com/) model.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
-    catalog.yml:
+    **catalog.yml**
 
-    .. code-block:: yaml
+    ```yaml
+    gpt_3_5_turbo:
+        type: langchain.ChatOpenAIDataset
+        kwargs:
+            model: "gpt-3.5-turbo"
+            temperature: 0.0
+        credentials: openai
+    ```
 
-       gpt_3_5_turbo:
-         type: langchain.ChatOpenAIDataset
-         kwargs:
-           model: "gpt-3.5-turbo"
-           temperature: 0.0
-         credentials: openai
+    **credentials.yml**
 
-    credentials.yml:
+    ```yaml
+    openai:
+        openai_api_base: <openai-api-base>
+        openai_api_key: <openai-api-key>
+    ```
 
-    .. code-block:: yaml
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
-       openai:
-         openai_api_base: <openai-api-base>
-         openai_api_key: <openai-api-key>
+    ```python
+    from kedro_datasets_experimental.langchain import ChatOpenAIDataset
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    llm = ChatOpenAIDataset(
+        credentials={
+            "openai_api_base": "<openai-api-base>",
+            "openai_api_key": "<openai-api-key>",
+        },
+        kwargs={
+            "model": "gpt-3.5-turbo",
+            "temperature": 0.0,
+        },
+    ).load()
 
-    .. code-block:: pycon
+    # See: https://python.langchain.com/docs/integrations/chat/openai
+    llm.invoke("Hello world!")
+    ```
 
-        >>> from kedro_datasets_experimental.langchain import ChatOpenAIDataset
-        >>>
-        >>> llm = ChatOpenAIDataset(
-        ...     credentials={
-        ...         "openai_api_base": "<openai-api-base>",
-        ...         "openai_api_key": "<openai-api-key>",
-        ...     },
-        ...     kwargs={
-        ...         "model": "gpt-3.5-turbo",
-        ...         "temperature": 0.0,
-        ...     },
-        ... ).load()
-        >>>
-        >>> # See: https://python.langchain.com/docs/integrations/chat/openai
-        >>> llm.invoke("Hello world!")
     """
 
     @property

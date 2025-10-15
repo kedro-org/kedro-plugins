@@ -17,11 +17,10 @@ if TYPE_CHECKING:
 class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table]):
     """``FileDataset`` loads/saves data from/to a specified file format.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: ibis.FileDataset
           filepath: data/01_raw/company/cars.csv
@@ -44,12 +43,9 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
           table_name: motorbikes
           connection:
             backend: polars
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import ibis
         >>> from kedro_datasets.ibis import FileDataset
@@ -146,7 +142,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
             self._save_args.update(save_args)
 
     def _connect(self) -> BaseBackend:
-        import ibis
+        import ibis  # noqa: PLC0415
 
         config = deepcopy(self._connection_config)
         backend = getattr(ibis, config.pop("backend"))

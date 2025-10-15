@@ -7,50 +7,50 @@ from langchain_anthropic import ChatAnthropic
 
 
 class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
-    """``ChatAnthropicDataset`` loads a ChatAnthropic `langchain <https://python.langchain.com/>`_ model.
+    """
+    `ChatAnthropicDataset` loads a ChatAnthropic [langchain](https://python.langchain.com/) model.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
-    catalog.yml:
+    **catalog.yml**
 
-    .. code-block:: yaml
+    ```yaml
+    claude_instant_1:
+        type: langchain.ChatAnthropicDataset
+        kwargs:
+            model: "claude-instant-1"
+            temperature: 0.0
+        credentials: anthropic
+    ```
 
-       claude_instant_1:
-         type: langchain.ChatAnthropicDataset
-         kwargs:
-           model: "claude-instant-1"
-           temperature: 0.0
-         credentials: anthropic
+    **credentials.yml**
 
+    ```yaml
+    anthropic:
+        anthropic_api_url: <anthropic-api-base>
+        anthropic_api_key: <anthropic-api-key>
+    ```
 
-    credentials.yml:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
-    .. code-block:: yaml
+    ```python
+    from kedro_datasets_experimental.langchain import ChatAnthropicDataset
 
-       anthropic:
-         anthropic_api_url: <anthropic-api-base>
-         anthropic_api_key: <anthropic-api-key>
+    llm = ChatAnthropicDataset(
+        credentials={
+            "anthropic_api_url": "xxx",
+            "anthropic_api_key": "xxx",
+        },
+        kwargs={
+            "model": "claude-instant-1",
+            "temperature": 0.0,
+        },
+    ).load()
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    # See: https://python.langchain.com/docs/integrations/chat/anthropic
+    llm.invoke("Hello world!")
+    ```
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets_experimental.langchain import ChatAnthropicDataset
-        >>> llm = ChatAnthropicDataset(
-        ...     credentials={
-        ...         "anthropic_api_url": "xxx",
-        ...         "anthropic_api_key": "xxx",
-        ...     },
-        ...     kwargs={
-        ...         "model": "claude-instant-1",
-        ...         "temperature": 0.0,
-        ...     },
-        ... ).load()
-        >>>
-        >>> # See: https://python.langchain.com/docs/integrations/chat/anthropic
-        >>> llm.invoke("Hello world!")
     """
 
     def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):

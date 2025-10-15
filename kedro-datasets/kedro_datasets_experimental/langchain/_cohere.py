@@ -9,50 +9,50 @@ from langchain_cohere import ChatCohere
 
 
 class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
-    """``ChatCohereDataset`` loads a ChatCohere `langchain <https://python.langchain.com/>`_ model.
+    """
+    `ChatCohereDataset` loads a ChatCohere [langchain](https://python.langchain.com/) model.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
 
-    catalog.yml:
+    **catalog.yml**
 
-    .. code-block:: yaml
+    ```yaml
+    command:
+        type: langchain.ChatCohereDataset
+        kwargs:
+            model: "command"
+            temperature: 0.0
+        credentials: cohere
+    ```
 
-       command:
-         type: langchain.ChatCohereDataset
-         kwargs:
-           model: "command"
-           temperature: 0.0
-         credentials: cohere
+    **credentials.yml**
 
+    ```yaml
+    cohere:
+        cohere_api_url: <cohere-api-base>
+        cohere_api_key: <cohere-api-key>
+    ```
 
-    credentials.yml:
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
-    .. code-block:: yaml
+    ```python
+    from kedro_datasets_experimental.langchain import ChatCohereDataset
 
-       cohere:
-         cohere_api_url: <cohere-api-base>
-         cohere_api_key: <cohere-api-key>
+    llm = ChatCohereDataset(
+        credentials={
+            "cohere_api_key": "xxx",
+            "cohere_api_url": "xxx",
+        },
+        kwargs={
+            "model": "command",
+            "temperature": 0.0,
+        },
+    ).load()
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    # See: https://python.langchain.com/v0.1/docs/integrations/chat/cohere/
+    llm.invoke("Hello world!")
+    ```
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets_experimental.langchain import ChatCohereDataset
-        >>> llm = ChatCohereDataset(
-        ...     credentials={
-        ...         "cohere_api_key": "xxx",
-        ...         "cohere_api_url": "xxx",
-        ...     },
-        ...     kwargs={
-        ...         "model": "command",
-        ...         "temperature": 0.0,
-        ...     },
-        ... ).load()
-        >>>
-        >>> # See: https://python.langchain.com/v0.1/docs/integrations/chat/cohere/
-        >>> llm.invoke("Hello world!")
     """
 
     def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):

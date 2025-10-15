@@ -17,12 +17,10 @@ from kedro_datasets._utils.spark_utils import get_spark
 class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataset`` loads data into DeltaTable objects.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         weather@spark:
           type: spark.SparkDataset
           filepath: data/02_intermediate/data.parquet
@@ -31,12 +29,9 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         weather@delta:
           type: spark.DeltaTableDataset
           filepath: data/02_intermediate/data.parquet
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from delta import DeltaTable
         >>> from kedro_datasets.spark import DeltaTableDataset, SparkDataset
@@ -46,17 +41,16 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
-        >>>
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        >>>
         >>> filepath = (tmp_path / "test_data").as_posix()
         >>> dataset = SparkDataset(filepath=filepath, file_format="delta")
         >>> dataset.save(spark_df)
         >>> deltatable_dataset = DeltaTableDataset(filepath=filepath)
         >>> delta_table = deltatable_dataset.load()
-        >>>
         >>> assert isinstance(delta_table, DeltaTable)
+
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

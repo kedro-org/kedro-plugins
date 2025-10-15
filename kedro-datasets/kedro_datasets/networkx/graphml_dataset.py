@@ -21,15 +21,17 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     """``GraphMLDataset`` loads and saves graphs to a GraphML file using an
     underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to
     create GraphML data.
+
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.networkx import GraphMLDataset
         >>> import networkx as nx
+        >>> from kedro_datasets.networkx import GraphMLDataset
+        >>>
         >>> graph = nx.complete_graph(100)
+        >>>
         >>> graph_dataset = GraphMLDataset(filepath=tmp_path / "test.graphml")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()

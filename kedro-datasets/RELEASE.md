@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 - The deprecated MatplotlibWriter dataset is now removed.
 
 - Added the following new **experimental** datasets:

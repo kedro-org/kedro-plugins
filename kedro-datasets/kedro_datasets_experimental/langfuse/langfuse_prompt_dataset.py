@@ -23,6 +23,11 @@ SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
+# Valid parameter values
+VALID_PROMPT_TYPES = {"chat", "text"}
+VALID_SYNC_POLICIES = {"local", "remote", "strict"}
+VALID_MODES = {"langchain", "sdk"}
+
 # Logger for this module
 logger = logging.getLogger(__name__)
 
@@ -47,12 +52,12 @@ class LangfusePromptDataset(AbstractDataset):
     """Kedro dataset for managing prompts with Langfuse versioning and synchronization.
 
     This dataset provides seamless integration between local prompt files (JSON/YAML)
-    and Langfuse prompt management, supporting version control, labeling, and
+    and Langfuse prompt management, supporting version control, labelling, and
     different synchronization policies.
 
     On save: Creates a new version of prompt in Langfuse with the local data.
-    On load: synchronizes based on sync_policy and returns LangChain ChatPromptTemplate
-    (langchain mode) or raw Langfuse object (sdk mode).
+    On load: synchronizes based on sync_policy and returns raw Langfuse object
+    (sdk mode) or LangChain ChatPromptTemplate (langchain mode)
 
     Sync policies:
     - local: local file takes precedence (default). load_args (version/label) are
@@ -110,6 +115,7 @@ class LangfusePromptDataset(AbstractDataset):
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
             prompt_type="chat",
+            mode="langchain",
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -136,10 +142,9 @@ class LangfusePromptDataset(AbstractDataset):
         credentials: dict[str, Any],
         prompt_type: Literal["chat", "text"] = "text",
         sync_policy: Literal["local", "remote", "strict"] = "local",
-        mode: Literal["langchain", "sdk"] = "langchain",
+        mode: Literal["langchain", "sdk"] = "sdk",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        kwargs: dict[str, Any] = None,
     ) -> None:
         """
         Initialize LangfusePromptDataset for managing prompts with Langfuse versioning.
@@ -155,8 +160,8 @@ class LangfusePromptDataset(AbstractDataset):
                 - "remote": Langfuse version takes precedence
                 - "strict": Error if local and remote differ
             mode: Return type for load() method:
-                - "langchain": Returns ChatPromptTemplate object (default)
-                - "sdk": Returns raw Langfuse prompt object
+                - "sdk": Returns raw Langfuse prompt object (default)
+                - "langchain": Returns ChatPromptTemplate object
             load_args: Dictionary with loading parameters. Only used when sync_policy="remote" or "strict".
                 Ignored with warning when sync_policy="local". Supported keys:
                 - version (int): Specific version number to load
@@ -165,7 +170,6 @@ class LangfusePromptDataset(AbstractDataset):
                 So label is preferred over version if provided.
             save_args: Dictionary with saving parameters. Supported keys:
                 - labels (list[str]): List of labels to assign to new prompt versions
-            kwargs: keyword arguments passed to the underlying constructor.
 
         Examples:
             >>> # Local sync policy (default) - local files are source of truth
@@ -213,44 +217,55 @@ class LangfusePromptDataset(AbstractDataset):
             NotImplementedError: If filepath has unsupported extension.
         """
         # Validate all parameters before assignment
-        self._validate_init_params(filepath, credentials)
+        self._validate_init_params(filepath, credentials, prompt_type, sync_policy, mode, load_args, save_args)
 
         self._filepath = Path(filepath)
         self._prompt_name = prompt_name
-        self._prompt_type: Literal["chat", "text"] = prompt_type
+        self._prompt_type: Literal["chat", "text"] = prompt_type or "text"
         self._langfuse = Langfuse(
             public_key=credentials["public_key"],
             secret_key=credentials["secret_key"],
             host=credentials["host"],
         )
-        self._sync_policy = sync_policy
-        self._mode = mode
+        self._sync_policy = sync_policy or "local"
+        self._mode = mode or "sdk"
         self._load_args = load_args or {}
         self._save_args = save_args or {}
         self._file_dataset = None
-        self.kwargs = kwargs or {}
         self._cached_build_args = None
 
     def _validate_init_params(
         self,
         filepath: str,
-        credentials: dict[str, Any]
+        credentials: dict[str, Any],
+        prompt_type: str,
+        sync_policy: str,
+        mode: str,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
     ) -> None:
         """Validate initialization parameters.
 
         Validates that required credentials (public_key, secret_key) are present
         and not empty. Optional credentials (host) are validated only if provided.
+        Also validates enum values and argument types.
 
         Args:
             filepath: File path to validate for supported extensions.
             credentials: Credentials dictionary to validate for required keys.
+            prompt_type: Prompt type to validate (chat, text).
+            sync_policy: Sync policy to validate (local, remote, strict).
+            mode: Mode to validate (langchain, sdk).
+            load_args: Load arguments to validate.
+            save_args: Save arguments to validate.
 
         Raises:
             DatasetError: If required credentials are missing or empty, or if
-                optional credentials are provided but empty.
+                optional credentials are provided but empty, or if argument types are invalid.
             NotImplementedError: If filepath has unsupported extension.
+            ImportError: If langchain package is required but not available.
         """
-        # Validate required keys
+        # Validate required langfuse credential keys
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in credentials:
                 raise DatasetError(f"Missing required Langfuse credential: '{key}'")
@@ -259,7 +274,7 @@ class LangfusePromptDataset(AbstractDataset):
             if not credentials[key] or not str(credentials[key]).strip():
                 raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
 
-        # Validate optional keys if present
+        # Validate optional langfuse credential keys
         for key in OPTIONAL_LANGFUSE_CREDENTIALS:
             if key in credentials:
                 # If host is provided, it cannot be empty
@@ -273,6 +288,58 @@ class LangfusePromptDataset(AbstractDataset):
                 f"Unsupported file extension '{file_path.suffix}'. "
                 f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
             )
+
+        # Validate enum parameters
+        if prompt_type and prompt_type not in VALID_PROMPT_TYPES:
+            raise DatasetError(
+                f"Invalid prompt_type '{prompt_type}'. Must be one of: {', '.join(sorted(VALID_PROMPT_TYPES))}"
+            )
+
+        if sync_policy and sync_policy not in VALID_SYNC_POLICIES:
+            raise DatasetError(
+                f"Invalid sync_policy '{sync_policy}'. Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}"
+            )
+
+        if mode and mode not in VALID_MODES:
+            raise DatasetError(
+                f"Invalid mode '{mode}'. Must be one of: {', '.join(sorted(VALID_MODES))}"
+            )
+
+        # Validate mode-specific requirements
+        if mode == "langchain":
+            try:
+                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
+            except ImportError as exc:
+                raise ImportError(
+                    "The 'langchain' package is required when using mode='langchain'. "
+                    "Install it with: pip install 'kedro-datasets[langfuse]'"
+                ) from exc
+
+        # Validate load_args if provided
+        if load_args is not None:
+            if "version" in load_args and load_args["version"] is not None:
+                if not isinstance(load_args["version"], int):
+                    raise DatasetError(
+                        f"load_args['version'] must be an integer, got {type(load_args['version']).__name__}: {load_args['version']}"
+                    )
+            if "label" in load_args and load_args["label"] is not None:
+                if not isinstance(load_args["label"], str):
+                    raise DatasetError(
+                        f"load_args['label'] must be a string, got {type(load_args['label']).__name__}: {load_args['label']}"
+                    )
+
+        # Validate save_args if provided
+        if save_args is not None:
+            if "labels" in save_args and save_args["labels"] is not None:
+                if not isinstance(save_args["labels"], list):
+                    raise DatasetError(
+                        f"save_args['labels'] must be a list, got {type(save_args['labels']).__name__}: {save_args['labels']}"
+                    )
+                for i, label in enumerate(save_args["labels"]):
+                    if not isinstance(label, str):
+                        raise DatasetError(
+                            f"save_args['labels'][{i}] must be a string, got {type(label).__name__}: {label}"
+                        )
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
@@ -428,11 +495,7 @@ class LangfusePromptDataset(AbstractDataset):
         return langfuse_prompt
 
     def _adapt_langfuse_chat_format(self, prompt_data: str | list) -> str | list:
-        """Remove Langfuse-specific 'type' key from chat messages for compatibility.
-
-        Langfuse stores additional metadata in message objects that may not be compatible
-        with downstream tools. This method creates a clean copy of the data with only
-        the essential message fields preserved.
+        """Remove Langfuse-specific 'type' key from chat messages for local file compatibility.
 
         Args:
             prompt_data: The prompt data from Langfuse (string or list of messages).
@@ -474,7 +537,7 @@ class LangfusePromptDataset(AbstractDataset):
             raise DatasetError(
                 f"Remote sync policy specified for {self._get_prompt_description()} "
                 f"but no remote prompt exists in Langfuse. "
-                f"Create the prompt in Langfuse first."
+                f"Create the prompt in Langfuse first or use 'local' sync policy."
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
@@ -558,72 +621,15 @@ class LangfusePromptDataset(AbstractDataset):
             return self._sync_local_policy(local_data, langfuse_prompt)
 
     def load(self) -> Union["ChatPromptTemplate", Any]:
-        """
-        Load prompt from Langfuse with local file synchronization.
-
-        This method performs the complete load workflow:
-        1. Attempts to fetch prompt from Langfuse using cached configuration parameters
-        2. Handles network/API errors gracefully with fallback to local synchronization
-        3. Loads local file if it exists
-        4. Synchronizes local and remote versions based on sync_policy
-        5. Returns prompt in the format specified by mode parameter
-
-        The method respects load_args for version/label specification and handles
-        various sync scenarios automatically, including first-time loading scenarios.
-        Error messages include detailed context about the exact API parameters used
-        for improved debugging and troubleshooting.
+        """Loads prompt from Langfuse, local file if present, and synchronizes
+        based on sync_policy. Returns prompt in format specified by mode.
 
         Returns:
-            ChatPromptTemplate: If mode="langchain" (default)
-                Ready-to-use LangChain prompt template with variable substitution.
-                Requires 'langchain' package to be installed.
-            Any: If mode="sdk"
-                Raw Langfuse prompt object with full API access
+            ChatPromptTemplate: If mode="langchain", ready-to-use LangChain template.
+            Any: If mode="sdk", raw Langfuse prompt object.
 
         Raises:
-            DatasetError: Based on sync_policy conflicts (see _sync_with_langfuse)
-                or if no prompt found locally or in Langfuse
-            ImportError: If 'langchain' package not installed when mode="langchain"
-
-        Note:
-            Network errors (ConnectionError, TimeoutError) are handled gracefully
-            with warning logs and fallback to local file synchronization.
-            The 'langchain' dependency is optional and only imported when needed.
-
-        Examples:
-            >>> # Load with default settings (latest version, langchain mode)
-            >>> prompt_template = dataset.load()
-            >>> formatted = prompt_template.format(user_input="Hello world")
-
-            >>> # Load specific version in SDK mode
-            >>> dataset_v3 = LangfusePromptDataset(
-            ...     filepath="prompts/intent.json",
-            ...     prompt_name="intent-classifier",
-            ...     credentials=creds,
-            ...     mode="sdk",
-            ...     load_args={"version": 3}
-            ... )
-            >>> langfuse_prompt = dataset_v3.load()
-            >>> print(f"Version: {langfuse_prompt.version}")
-            >>> print(f"Labels: {langfuse_prompt.labels}")
-
-            >>> # Load from staging environment
-            >>> staging_dataset = LangfusePromptDataset(
-            ...     filepath="prompts/staging.yaml",
-            ...     prompt_name="intent-classifier",
-            ...     credentials=creds,
-            ...     sync_policy="remote",
-            ...     load_args={"label": "staging"}
-            ... )
-            >>> prompt = staging_dataset.load()
-
-            >>> # Handle different prompt types
-            >>> if dataset._prompt_type == "chat":
-            ...     # Chat prompts return templates with message formatting
-            ...     messages = prompt.format_messages(user_input="test")
-            ... else:
-            ...     # Text prompts return simple string templates
-            ...     text = prompt.format(user_input="test")
+            DatasetError: If sync_policy conflicts or no prompt found.
         """
         # Temporarily suppress Langfuse logger to prevent Langfuse ERROR logs for 404s
         langfuse_logger = logging.getLogger('langfuse')
@@ -654,13 +660,7 @@ class LangfusePromptDataset(AbstractDataset):
         if self._mode == "sdk":
             return langfuse_prompt
         elif self._mode == "langchain":
-            try:
-                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
-            except ImportError as exc:
-                raise ImportError(
-                    "The 'langchain' package is required when using mode='langchain'. "
-                    "Install it with: pip install 'kedro-datasets[langfuse]'"
-                ) from exc
+            from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
             return ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
         else:
             raise DatasetError(f"Unsupported mode: {self._mode}. Must be 'sdk' or 'langchain'.")

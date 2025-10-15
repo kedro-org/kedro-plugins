@@ -3,18 +3,13 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
-- Added the following new experimental datasets:
-
-| Type                           | Description                                                 | Location                             |
-|--------------------------------|-------------------------------------------------------------|--------------------------------------|
-| `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
-
 - Added the following new **experimental** datasets:
 
 | Type                                | Description                                              | Location                                |
 | ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
-| `langfuse.LangFusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
+| `langfuse.LangfusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
+| `langfuse.LangfuseTraceDataset` | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

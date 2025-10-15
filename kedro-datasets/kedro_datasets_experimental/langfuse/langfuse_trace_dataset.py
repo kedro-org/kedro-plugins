@@ -25,7 +25,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
         ```yaml
         langfuse_trace:
-          type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+          type: langfuse.LangfuseTraceDataset
           credentials: langfuse_credentials
           mode: openai
         ```

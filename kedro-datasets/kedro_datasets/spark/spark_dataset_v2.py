@@ -176,8 +176,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
     def _get_filesystem_ops(self) -> tuple:
         """Get filesystem operations with DBFS optimization."""
-        # Special handling for DBFS to avoid performance issues
-        # This addresses the critical performance issue raised by deepyaman
         if self.protocol == "dbfs" and deployed_on_databricks():
             try:
                 spark = self._get_spark()

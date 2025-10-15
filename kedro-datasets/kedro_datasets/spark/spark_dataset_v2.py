@@ -73,7 +73,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import tempfile
-        >>> from pyspark.sql import SparkSession
+        >>> from pyspark.sql import Row, SparkSession
         >>> from pyspark.sql.types import IntegerType, StringType, StructField, StructType
         >>>
         >>> schema = StructType(
@@ -88,7 +88,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
         ...     dataset.save(spark_df)
         ...     reloaded = dataset.load()
         ...     assert Row(name="Bob", age=12) in reloaded.take(4)
-
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

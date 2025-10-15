@@ -5,12 +5,12 @@
 - Group datasets documentation according to the dependencies to clean up the nav bar.
 - Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 - The deprecated MatplotlibWriter dataset is now removed.
-
 - Added the following new **experimental** datasets:
 
-| Type                                | Description                                              | Location                                |
-| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
-| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| Type                                | Description                                                 | Location                                |
+|-------------------------------------|-------------------------------------------------------------|-----------------------------------------|
+| `langfuse.LangfuseTraceDataset`     | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts                 | `kedro_datasets_experimental.langchain` |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

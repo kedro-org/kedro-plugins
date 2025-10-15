@@ -258,6 +258,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         # Map to Spark protocols
         spark_protocols = {
             "s3": "s3a",  # Spark prefers s3a://
+            "s3n": "s3a",
             "gs": "gs",
             "abfs": "abfs",
             "wasbs": "wasbs",

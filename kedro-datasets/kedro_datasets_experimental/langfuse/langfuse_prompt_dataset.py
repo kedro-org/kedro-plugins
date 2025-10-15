@@ -234,62 +234,39 @@ class LangfusePromptDataset(AbstractDataset):
         self._file_dataset = None
         self._cached_build_args = None
 
-    def _validate_init_params(
-        self,
-        filepath: str,
-        credentials: dict[str, Any],
-        prompt_type: str,
-        sync_policy: str,
-        mode: str,
-        load_args: dict[str, Any] | None = None,
-        save_args: dict[str, Any] | None = None,
-    ) -> None:
-        """Validate initialization parameters.
-
-        Validates that required credentials (public_key, secret_key) are present
-        and not empty. Optional credentials (host) are validated only if provided.
-        Also validates enum values and argument types.
+    def _validate_credentials(self, credentials: dict[str, Any]) -> None:
+        """Validate Langfuse credentials.
 
         Args:
-            filepath: File path to validate for supported extensions.
-            credentials: Credentials dictionary to validate for required keys.
-            prompt_type: Prompt type to validate (chat, text).
-            sync_policy: Sync policy to validate (local, remote, strict).
-            mode: Mode to validate (langchain, sdk).
-            load_args: Load arguments to validate.
-            save_args: Save arguments to validate.
+            credentials: Credentials dictionary to validate.
 
         Raises:
-            DatasetError: If required credentials are missing or empty, or if
-                optional credentials are provided but empty, or if argument types are invalid.
-            NotImplementedError: If filepath has unsupported extension.
-            ImportError: If langchain package is required but not available.
+            DatasetError: If required credentials are missing or empty.
         """
-        # Validate required langfuse credential keys
+        # Validate required keys
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in credentials:
                 raise DatasetError(f"Missing required Langfuse credential: '{key}'")
-
-            # Validate that credential is not empty
             if not credentials[key] or not str(credentials[key]).strip():
                 raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
 
-        # Validate optional langfuse credential keys
+        # Validate optional keys
         for key in OPTIONAL_LANGFUSE_CREDENTIALS:
             if key in credentials:
-                # If host is provided, it cannot be empty
                 if not credentials[key] or not str(credentials[key]).strip():
                     raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
 
-        # Validate file extension
-        file_path = Path(filepath)
-        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
-            raise NotImplementedError(
-                f"Unsupported file extension '{file_path.suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-            )
+    def _validate_enum_params(self, prompt_type: str, sync_policy: str, mode: str) -> None:
+        """Validate enum parameters.
 
-        # Validate enum parameters
+        Args:
+            prompt_type: Prompt type to validate.
+            sync_policy: Sync policy to validate.
+            mode: Mode to validate.
+
+        Raises:
+            DatasetError: If parameter values are invalid.
+        """
         if prompt_type and prompt_type not in VALID_PROMPT_TYPES:
             raise DatasetError(
                 f"Invalid prompt_type '{prompt_type}'. Must be one of: {', '.join(sorted(VALID_PROMPT_TYPES))}"
@@ -305,17 +282,16 @@ class LangfusePromptDataset(AbstractDataset):
                 f"Invalid mode '{mode}'. Must be one of: {', '.join(sorted(VALID_MODES))}"
             )
 
-        # Validate mode-specific requirements
-        if mode == "langchain":
-            try:
-                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
-            except ImportError as exc:
-                raise ImportError(
-                    "The 'langchain' package is required when using mode='langchain'. "
-                    "Install it with: pip install 'kedro-datasets[langfuse]'"
-                ) from exc
+    def _validate_args(self, load_args: dict[str, Any] | None, save_args: dict[str, Any] | None) -> None:
+        """Validate load_args and save_args.
 
-        # Validate load_args if provided
+        Args:
+            load_args: Load arguments to validate.
+            save_args: Save arguments to validate.
+
+        Raises:
+            DatasetError: If argument types are invalid.
+        """
         if load_args is not None:
             if "version" in load_args and load_args["version"] is not None:
                 if not isinstance(load_args["version"], int):
@@ -328,7 +304,6 @@ class LangfusePromptDataset(AbstractDataset):
                         f"load_args['label'] must be a string, got {type(load_args['label']).__name__}: {load_args['label']}"
                     )
 
-        # Validate save_args if provided
         if save_args is not None:
             if "labels" in save_args and save_args["labels"] is not None:
                 if not isinstance(save_args["labels"], list):
@@ -340,6 +315,55 @@ class LangfusePromptDataset(AbstractDataset):
                         raise DatasetError(
                             f"save_args['labels'][{i}] must be a string, got {type(label).__name__}: {label}"
                         )
+
+    def _validate_init_params(  # noqa: PLR0913
+        self,
+        filepath: str,
+        credentials: dict[str, Any],
+        prompt_type: str,
+        sync_policy: str,
+        mode: str,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+    ) -> None:
+        """Validate initialization parameters.
+
+        Args:
+            filepath: File path to validate for supported extensions.
+            credentials: Credentials dictionary to validate.
+            prompt_type: Prompt type to validate.
+            sync_policy: Sync policy to validate.
+            mode: Mode to validate.
+            load_args: Load arguments to validate.
+            save_args: Save arguments to validate.
+
+        Raises:
+            DatasetError: If parameters are invalid.
+            NotImplementedError: If filepath has unsupported extension.
+            ImportError: If langchain package is required but not available.
+        """
+        # Validate file extension
+        file_path = Path(filepath)
+        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
+            raise NotImplementedError(
+                f"Unsupported file extension '{file_path.suffix}'. "
+                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
+            )
+
+        # Validate mode-specific requirements
+        if mode == "langchain":
+            try:
+                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
+            except ImportError as exc:
+                raise ImportError(
+                    "The 'langchain' package is required when using mode='langchain'. "
+                    "Install it with: pip install 'kedro-datasets[langfuse]'"
+                ) from exc
+
+        # Delegate to specialized validation methods
+        self._validate_credentials(credentials)
+        self._validate_enum_params(prompt_type, sync_policy, mode)
+        self._validate_args(load_args, save_args)
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.

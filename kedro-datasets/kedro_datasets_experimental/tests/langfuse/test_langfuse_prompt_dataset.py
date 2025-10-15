@@ -113,7 +113,8 @@ def langfuse_dataset(filepath_json_chat, mock_credentials, mock_langfuse):
     return LangfusePromptDataset(
         filepath=filepath_json_chat,
         prompt_name="test-prompt",
-        credentials=mock_credentials
+        credentials=mock_credentials,
+        mode="langchain"
     )
 
 
@@ -130,7 +131,7 @@ class TestLangfusePromptDatasetInit:
         assert dataset._prompt_name == "test-prompt"
         assert dataset._prompt_type == "text"  # default
         assert dataset._sync_policy == "local"  # default
-        assert dataset._mode == "langchain"  # default
+        assert dataset._mode == "sdk"  # default
 
     def test_init_all_params(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test initialization with all parameters."""

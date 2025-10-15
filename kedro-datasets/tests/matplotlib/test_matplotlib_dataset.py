@@ -265,22 +265,6 @@ class TestMatplotlibDataset:
             inspect.signature(plot_dataset.preview).return_annotation == "ImagePreview"
         )
 
-    # Test that deprecated writer also works
-    def test_writer_save_data(
-        self, tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket
-    ):
-        """Test saving with deprecated writer class still works."""
-        plot_writer.save(mock_single_plot)
-
-        download_path = tmp_path / "downloaded_image.png"
-        actual_filepath = tmp_path / "locally_saved.png"
-
-        mock_single_plot.savefig(str(actual_filepath))
-
-        mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
-
-        assert actual_filepath.read_bytes() == download_path.read_bytes()
-
 
 class TestMatplotlibDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

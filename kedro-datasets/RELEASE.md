@@ -7,6 +7,7 @@
 
 | Type                           | Description                                                 | Location                             |
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
+| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 
 - Added the following new **experimental** datasets:

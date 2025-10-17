@@ -1,5 +1,8 @@
 # Upcoming Release
 
+## Major features and improvements
+* Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+
 ## Bug fixes and other changes
 * Removed `_VERBOSE` legacy code usage.
 

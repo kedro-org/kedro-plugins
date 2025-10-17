@@ -6,6 +6,7 @@
 
 Name | Description
 -----|------------
+[chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads and saves data to ChromaDB vector database collections.
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
 [langchain.ChatAnthropicDataset](langchain.ChatAnthropicDataset.md) | ``ChatAnthropicDataset`` loads a ChatAnthropic `langchain` model.
 [langchain.ChatCohereDataset](langchain.ChatCohereDataset.md) | ``ChatCohereDataset`` loads a ChatCohere `langchain` model.

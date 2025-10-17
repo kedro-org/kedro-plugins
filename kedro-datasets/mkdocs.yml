@@ -163,6 +163,7 @@ plugins:
           - api/kedro_datasets_experimental/index.md: Experimental features documentation
 
         Experimental LLM and AI:
+          - api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md: ChromaDB vector database integration
           - api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md: OpenAI chat integration
           - api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md: Anthropic Claude integration
           - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models

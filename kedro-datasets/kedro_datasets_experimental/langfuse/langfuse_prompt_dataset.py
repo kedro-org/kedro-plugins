@@ -225,7 +225,7 @@ class LangfusePromptDataset(AbstractDataset):
         self._langfuse = Langfuse(
             public_key=credentials["public_key"],
             secret_key=credentials["secret_key"],
-            host=credentials["host"],
+            host=credentials.get("host"),
         )
         self._sync_policy = sync_policy or "local"
         self._mode = mode or "sdk"
@@ -560,8 +560,8 @@ class LangfusePromptDataset(AbstractDataset):
         if not langfuse_prompt:
             raise DatasetError(
                 f"Remote sync policy specified for {self._get_prompt_description()} "
-                f"but no remote prompt exists in Langfuse. "
-                f"Create the prompt in Langfuse first or use 'local' sync policy."
+                "but no remote prompt exists in Langfuse. Confirm that you've configured "
+                f"the correct Langfuse host and create the prompt in Langfuse first or use 'local' sync policy."
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)

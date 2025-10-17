@@ -1,5 +1,5 @@
-import pytest
 import chromadb
+import pytest
 from kedro.io.core import DatasetError
 
 from kedro_datasets_experimental.chromadb import ChromaDBDataset
@@ -49,10 +49,10 @@ class TestChromaDBDataset:
         """Test saving and loading data."""
         # Save data
         chromadb_dataset.save(sample_data)
-        
+
         # Load data back
         loaded_data = chromadb_dataset.load()
-        
+
         # Verify the data
         assert loaded_data["documents"] == sample_data["documents"]
         assert loaded_data["ids"] == sample_data["ids"]
@@ -62,7 +62,7 @@ class TestChromaDBDataset:
         """Test the exists method."""
         # Initially, collection shouldn't exist or be empty
         assert not chromadb_dataset.exists()
-        
+
         # After saving data, it should exist
         chromadb_dataset.save(sample_data)
         assert chromadb_dataset.exists()
@@ -73,7 +73,7 @@ class TestChromaDBDataset:
         invalid_data = {"documents": ["test doc"]}
         with pytest.raises(DatasetError, match="Data must contain 'documents' and 'ids' keys"):
             chromadb_dataset.save(invalid_data)
-        
+
         # Missing 'documents'
         invalid_data = {"ids": ["doc1"]}
         with pytest.raises(DatasetError, match="Data must contain 'documents' and 'ids' keys"):
@@ -88,14 +88,14 @@ class TestChromaDBDataset:
         """Test loading data with query arguments."""
         # Save initial data
         chromadb_dataset.save(sample_data)
-        
+
         # Create a new dataset instance with load args
         dataset_with_query = ChromaDBDataset(
             collection_name="test_collection",
             client_type="ephemeral",
             load_args={"n_results": 2}
         )
-        
+
         # Load with query - should return limited results
         loaded_data = dataset_with_query.load()
         assert len(loaded_data["documents"]) <= 2
@@ -107,10 +107,10 @@ class TestChromaDBDataset:
             "ids": ["doc1"],
             "embeddings": [[0.1, 0.2, 0.3]]
         }
-        
+
         # Should not raise an error
         chromadb_dataset.save(data_with_embeddings)
-        
+
         # Verify data was saved
         loaded_data = chromadb_dataset.load()
         assert loaded_data["documents"] == ["Test document"]
@@ -120,10 +120,10 @@ class TestChromaDBDataset:
         """Test ChromaDB with persistent client."""
         # Save data
         persistent_chromadb_dataset.save(sample_data)
-        
+
         # Load data back
         loaded_data = persistent_chromadb_dataset.load()
-        
+
         # Verify the data
         assert loaded_data["documents"] == sample_data["documents"]
         assert loaded_data["ids"] == sample_data["ids"]
@@ -131,7 +131,7 @@ class TestChromaDBDataset:
     def test_describe(self, chromadb_dataset):
         """Test the describe method."""
         description = chromadb_dataset._describe()
-        
+
         assert description["collection_name"] == "test_collection"
         assert description["client_type"] == "ephemeral"
         assert isinstance(description["client_settings"], dict)
@@ -155,7 +155,7 @@ class TestChromaDBDataset:
             client_type="http",
             client_settings={"host": "localhost", "port": 8000}
         )
-        
+
         description = dataset._describe()
         assert description["client_type"] == "http"
         assert description["client_settings"]["host"] == "localhost"
@@ -169,10 +169,10 @@ class TestChromaDBDataset:
             client_type="ephemeral",
             metadata={"version": "1.0", "description": "Test dataset"}
         )
-        
+
         # Metadata should be stored
         assert dataset_with_metadata.metadata == {"version": "1.0", "description": "Test dataset"}
-        
+
         # Normal operations should still work
         dataset_with_metadata.save(sample_data)
         loaded_data = dataset_with_metadata.load()
@@ -183,10 +183,10 @@ class TestChromaDBDataset:
         # Create two dataset instances pointing to the same collection
         dataset1 = ChromaDBDataset(collection_name="shared_collection", client_type="ephemeral")
         dataset2 = ChromaDBDataset(collection_name="shared_collection", client_type="ephemeral")
-        
+
         # Save data with first dataset
         dataset1.save(sample_data)
-        
+
         # Load data with second dataset - Note: this might not work with ephemeral clients
         # as they don't share state, but the test verifies the pattern
         try:
@@ -201,7 +201,7 @@ class TestChromaDBDataset:
         """Test loading from an empty collection."""
         # Load from empty collection should return empty lists
         loaded_data = chromadb_dataset.load()
-        
+
         assert loaded_data["documents"] == []
         assert loaded_data["ids"] == []
         assert loaded_data["metadatas"] == []

@@ -7,14 +7,19 @@ from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
 import chromadb
-from kedro.io.core import AbstractDataset, DatasetError, get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractDataset,
+    DatasetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
     """``ChromaDBDataset`` loads and saves data from/to ChromaDB collections.
-    
+
     ChromaDB is a vector database for building AI applications. This dataset allows you to
     interact with ChromaDB collections for storing and retrieving documents with embeddings.
 
@@ -137,13 +142,13 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 - "embeddings": List of embeddings (if included)
         """
         collection = self._get_collection()
-        
+
         # Prepare load arguments
         load_args = {
             "include": ["documents", "metadatas", "embeddings"],
             **self._load_args
         }
-        
+
         try:
             # Get all documents if no specific query is provided
             if "where" in load_args or "where_document" in load_args or "n_results" in load_args:
@@ -151,7 +156,7 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
             else:
                 # Get all documents in the collection
                 result = collection.get(**load_args)
-                
+
             return {
                 "documents": result.get("documents", []),
                 "metadatas": result.get("metadatas", []),
@@ -173,12 +178,12 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         """
         if not isinstance(data, dict):
             raise DatasetError(f"Data must be a dictionary, got {type(data)}")
-            
+
         if "documents" not in data or "ids" not in data:
             raise DatasetError("Data must contain 'documents' and 'ids' keys")
-            
+
         collection = self._get_collection()
-        
+
         try:
             # Prepare the data for ChromaDB
             add_kwargs = {
@@ -186,16 +191,16 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 "ids": data["ids"],
                 **self._save_args
             }
-            
+
             # Add optional fields if present
             if "metadatas" in data:
                 add_kwargs["metadatas"] = data["metadatas"]
             if "embeddings" in data:
                 add_kwargs["embeddings"] = data["embeddings"]
-                
+
             # Add documents to collection
             collection.add(**add_kwargs)
-            
+
         except Exception as e:
             raise DatasetError(f"Failed to save data to ChromaDB collection '{self._collection_name}': {e}")
 

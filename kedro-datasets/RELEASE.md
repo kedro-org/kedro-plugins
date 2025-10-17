@@ -7,10 +7,11 @@
 
 | Type                           | Description                                                 | Location                             |
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
-| `pypdf.PDFDataset`             | Kedro dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
-| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
-| `langfuse.LangfusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
 | `langfuse.LangfuseTraceDataset` | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
+| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`             | Kedro dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+| `langfuse.LangfusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
+
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

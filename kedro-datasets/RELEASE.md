@@ -3,6 +3,8 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
+- Added credentials support in `ibis.TableDataset`.
 - Added the following new **experimental** datasets:
 
 | Type                           | Description                                                 | Location                             |
@@ -10,6 +12,7 @@
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
 | `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.
@@ -19,6 +22,7 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [gitgud5000](https://github.com/gitgud5000)
 
 # Release 8.1.0
 ## Major features and improvements
@@ -29,7 +33,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
 
-- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
 
 ## Bug fixes and other changes
 

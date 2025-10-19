@@ -374,7 +374,6 @@ class TestTableDataset:
                     ("user", "admin"),
                 ),
             ),
-            # https://github.com/kedro-org/kedro-plugins/pull/560#discussion_r1536083525
             (
                 [],
                 {
@@ -390,7 +389,6 @@ class TestTableDataset:
                     ("query", (("driver", "ODBC Driver 17 for SQL Server"),)),
                 ),
             ),
-            # https://github.com/kedro-org/kedro-plugins/pull/893#discussion_r1804632435
             (
                 None,
                 None,

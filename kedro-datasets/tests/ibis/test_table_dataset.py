@@ -416,6 +416,32 @@ class TestTableDataset:
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections
 
+    @pytest.mark.parametrize(
+        "credentials,expected_exception,expected_message",
+        [
+            (
+                "postgresql://user:pass@localhost/db",
+                ValueError,
+                "Connection string credentials are not supported",
+            ),
+            (123, TypeError, "Credentials must be a dict"),
+            (["backend", "duckdb"], TypeError, "Credentials must be a dict"),
+            (("backend", "duckdb"), TypeError, "Credentials must be a dict"),
+            (True, TypeError, "Credentials must be a dict"),
+        ],
+    )
+    def test_invalid_credentials_types_raise(
+        self, database_name, connection_config, credentials, expected_exception, expected_message
+    ):
+        """Test that invalid credentials types raise appropriate exceptions."""
+        with pytest.raises(expected_exception, match=expected_message):
+            TableDataset(
+                table_name="test",
+                database=database_name,
+                connection=connection_config,
+                credentials=credentials,
+            )
+
     def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
         """Test interoperability of Ibis datasets sharing a database."""
         dummy_table = file_dataset.load()

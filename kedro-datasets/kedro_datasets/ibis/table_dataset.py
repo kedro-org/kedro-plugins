@@ -148,11 +148,15 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._table_name = table_name
         self._database = database
-        self._connection_config = connection or (
-            self.DEFAULT_CONNECTION_CONFIG if not credentials else credentials
-        )
+        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         # Credentials overlay connection config
-        self._connection_config.update(credentials or {})
+        if credentials:
+            if isinstance(credentials, dict):
+                self._connection_config.update(credentials)
+            elif isinstance(credentials, str):
+                raise ValueError("Connection string credentials are not supported for Ibis TableDataset.")
+            else:
+                raise TypeError("Credentials must be a dict or None.")
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.

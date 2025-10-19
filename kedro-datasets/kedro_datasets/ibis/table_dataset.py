@@ -33,7 +33,7 @@ class SaveMode(StrEnum):
 
 
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
-    """`TableDataset` loads/saves data from/to Ibis table expressions.
+    """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):

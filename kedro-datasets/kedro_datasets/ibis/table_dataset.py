@@ -58,7 +58,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
           save_args:
             materialized: view
             mode: overwrite
-    ```
+        ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 

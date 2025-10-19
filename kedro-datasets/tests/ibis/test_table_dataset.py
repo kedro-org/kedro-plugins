@@ -361,7 +361,7 @@ class TestTableDataset:
         [
             (
                 {"backend": "duckdb", "database": "file.db", "extensions": ["spatial"]},
-                {"user": "admin", "password": "secret"},
+                {"user": "admin", "password": "secret"}, #pragma: allowlist secret
                 (
                     ("backend", "duckdb"),
                     ("database", "file.db"),

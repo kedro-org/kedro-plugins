@@ -37,13 +37,21 @@ def connection_config(request, database):
         else request.param
     )
 
+@pytest.fixture(params=[_SENTINEL])
+def credentials_config(request, database):
+    return (
+        None
+        if request.param is _SENTINEL  # `None` is a valid value to test
+        else request.param
+    )
 
 @pytest.fixture
-def table_dataset(database_name, connection_config, load_args, save_args):
+def table_dataset(database_name, connection_config, credentials_config, load_args, save_args):
     ds = TableDataset(
         table_name="test",
         database=database_name,
         connection=connection_config,
+        credentials=credentials_config,
         load_args=load_args,
         save_args=save_args,
     )
@@ -347,6 +355,61 @@ class TestTableDataset:
         mocker.patch(f"ibis.{backend}")
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections
+
+    @pytest.mark.parametrize(
+        ("connection_config", "credentials_config", "key"),
+        [
+            (
+                {"backend": "duckdb", "database": "file.db", "extensions": ["spatial"]},
+                {"user": "admin", "password": "secret"},
+                (
+                    ("backend", "duckdb"),
+                    ("database", "file.db"),
+                    ("extensions", ("spatial",)),
+                    ("password", "secret"),
+                    ("user", "admin"),
+                ),
+            ),
+            # https://github.com/kedro-org/kedro-plugins/pull/560#discussion_r1536083525
+            (
+                [],
+                {
+                    "host": "xxx.sql.azuresynapse.net",
+                    "database": "xxx",
+                    "query": {"driver": "ODBC Driver 17 for SQL Server"},
+                    "backend": "mssql",
+                },
+                (
+                    ("backend", "mssql"),
+                    ("database", "xxx"),
+                    ("host", "xxx.sql.azuresynapse.net"),
+                    ("query", (("driver", "ODBC Driver 17 for SQL Server"),)),
+                ),
+            ),
+            # https://github.com/kedro-org/kedro-plugins/pull/893#discussion_r1804632435
+            (
+                None,
+                None,
+                (
+                    ("backend", "duckdb"),
+                    ("database", ":memory:"),
+                ),
+            ),
+        ],
+        indirect=["connection_config","credentials_config"],
+    )
+    def test_connection_config_with_credentials(self, mocker, table_dataset, connection_config, credentials_config, key):
+        # Fix: handle non-dict connection_config/credentials_config
+        if isinstance(connection_config, dict) and "backend" in connection_config:
+            backend = connection_config["backend"]
+        elif isinstance(credentials_config, dict) and "backend" in credentials_config:
+            backend = credentials_config["backend"]
+        else:
+            backend = "duckdb"
+        mocker.patch(f"ibis.{backend}")
+        table_dataset.load()
+        assert ("ibis", key) in table_dataset._connections
+
 
     def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
         """Test interoperability of Ibis datasets sharing a database."""

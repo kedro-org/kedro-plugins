@@ -96,6 +96,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         table_name: str,
         database: str | None = None,
         connection: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | str | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -126,6 +127,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            credentials: Connection information (e.g.
+                user, password, token, account). If provided, these values
+                overlay the base `connection` configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -144,7 +148,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._table_name = table_name
         self._database = database
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        self._connection_config = connection or (
+            self.DEFAULT_CONNECTION_CONFIG if not credentials else credentials
+        )
+        # Credentials overlay connection config
+        self._connection_config.update(credentials or {})
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.

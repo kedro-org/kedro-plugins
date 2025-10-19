@@ -37,6 +37,7 @@ def connection_config(request, database):
         else request.param
     )
 
+
 @pytest.fixture(params=[_SENTINEL])
 def credentials_config(request, database):
     return (
@@ -45,8 +46,11 @@ def credentials_config(request, database):
         else request.param
     )
 
+
 @pytest.fixture
-def table_dataset(database_name, connection_config, credentials_config, load_args, save_args):
+def table_dataset(
+    database_name, connection_config, credentials_config, load_args, save_args
+):
     ds = TableDataset(
         table_name="test",
         database=database_name,
@@ -361,7 +365,7 @@ class TestTableDataset:
         [
             (
                 {"backend": "duckdb", "database": "file.db", "extensions": ["spatial"]},
-                {"user": "admin", "password": "secret"}, #pragma: allowlist secret
+                {"user": "admin", "password": "secret"},  # pragma: allowlist secret
                 (
                     ("backend", "duckdb"),
                     ("database", "file.db"),
@@ -396,9 +400,11 @@ class TestTableDataset:
                 ),
             ),
         ],
-        indirect=["connection_config","credentials_config"],
+        indirect=["connection_config", "credentials_config"],
     )
-    def test_connection_config_with_credentials(self, mocker, table_dataset, connection_config, credentials_config, key):
+    def test_connection_config_with_credentials(
+        self, mocker, table_dataset, connection_config, credentials_config, key
+    ):
         # Fix: handle non-dict connection_config/credentials_config
         if isinstance(connection_config, dict) and "backend" in connection_config:
             backend = connection_config["backend"]
@@ -409,7 +415,6 @@ class TestTableDataset:
         mocker.patch(f"ibis.{backend}")
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections
-
 
     def test_save_data_loaded_using_file_dataset(self, file_dataset, table_dataset):
         """Test interoperability of Ibis datasets sharing a database."""

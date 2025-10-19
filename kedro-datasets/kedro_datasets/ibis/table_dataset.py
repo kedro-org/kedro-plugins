@@ -154,7 +154,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             if isinstance(credentials, dict):
                 self._connection_config.update(credentials)
             elif isinstance(credentials, str):
-                raise ValueError("Connection string credentials are not supported for Ibis TableDataset.")
+                raise ValueError(
+                    "Connection string credentials are not supported for Ibis TableDataset."
+                )
             else:
                 raise TypeError("Credentials must be a dict or None.")
         self.metadata = metadata

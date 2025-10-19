@@ -420,7 +420,7 @@ class TestTableDataset:
         "credentials,expected_exception,expected_message",
         [
             (
-                "postgresql://user:pass@localhost/db",
+                "postgresql://xxx:xxx@localhost/db",
                 ValueError,
                 "Connection string credentials are not supported",
             ),
@@ -431,7 +431,12 @@ class TestTableDataset:
         ],
     )
     def test_invalid_credentials_types_raise(
-        self, database_name, connection_config, credentials, expected_exception, expected_message
+        self,
+        database_name,
+        connection_config,
+        credentials,
+        expected_exception,
+        expected_message,
     ):
         """Test that invalid credentials types raise appropriate exceptions."""
         with pytest.raises(expected_exception, match=expected_message):

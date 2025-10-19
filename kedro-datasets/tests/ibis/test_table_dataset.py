@@ -420,7 +420,7 @@ class TestTableDataset:
         "credentials,expected_exception,expected_message",
         [
             (
-                "postgresql://xxx:xxx@localhost/db", # pragma: allowlist secret
+                "postgresql://xxx:xxx@localhost/db",  # pragma: allowlist secret
                 ValueError,
                 "Connection string credentials are not supported",
             ),

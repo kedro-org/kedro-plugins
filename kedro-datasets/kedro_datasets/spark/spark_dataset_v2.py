@@ -244,6 +244,14 @@ class SparkDatasetV2(AbstractVersionedDataset):
         """Convert to Spark-compatible path format."""
         filepath = str(filepath)
 
+        # Unity Catalog Volumes do not add file:// prefix
+        if filepath.startswith("/Volumes"):
+            return filepath  # Pass as-is to Spark
+
+        # DBFS handling
+        if filepath.startswith("/dbfs/"):
+            return f"dbfs:/{filepath[6:]}"
+
         # Apply DBFS prefix stripping for consistency
         filepath = strip_dbfs_prefix(filepath)
 

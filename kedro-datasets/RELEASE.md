@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+- Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
 - Group datasets documentation according to the dependencies to clean up the nav bar.
 - Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
 - Added credentials support in `ibis.TableDataset`.

@@ -33,7 +33,7 @@ class SaveMode(StrEnum):
 
 
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
-    """`TableDataset` loads/saves data from/to Ibis table expressions.
+    """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -58,7 +58,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
           save_args:
             materialized: view
             mode: overwrite
-    ```
+        ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
@@ -96,6 +96,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         table_name: str,
         database: str | None = None,
         connection: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | str | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
@@ -126,6 +127,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            credentials: Connection information (e.g.
+                user, password, token, account). If provided, these values
+                overlay the base `connection` configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -145,6 +149,16 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         self._table_name = table_name
         self._database = database
         self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        # Credentials overlay connection config
+        if credentials:
+            if isinstance(credentials, dict):
+                self._connection_config.update(credentials)
+            elif isinstance(credentials, str):
+                raise ValueError(
+                    "Connection string credentials are not supported for Ibis TableDataset."
+                )
+            else:
+                raise TypeError("Credentials must be a dict or None.")
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.

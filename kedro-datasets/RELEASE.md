@@ -3,28 +3,22 @@
 ## Major features and improvements
 
 - Group datasets documentation according to the dependencies to clean up the nav bar.
-- Added the following new experimental datasets:
+- Added the following new **experimental** datasets:
 
 | Type                           | Description                                                 | Location                             |
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
-
-- Added the following new **experimental** datasets:
-
-| Type                                | Description                                              | Location                                |
-| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.
+- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
 
-## Major features and improvements
+## Community contributions
 
-- Added the following new experimental datasets:
-
-| Type                           | Description                                                   | Location                             |
-|--------------------------------|---------------------------------------------------------------|--------------------------------------|
-| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+Many thanks to the following Kedroids for contributing PRs to this release:
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 8.1.0
 ## Major features and improvements
@@ -77,6 +71,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
 - [Seohyun Park](https://github.com/soyamimi)
 - [Daniel Russell-Brain](https://github.com/killerfridge)
+
 
 # Release 7.0.0
 

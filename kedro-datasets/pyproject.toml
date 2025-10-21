@@ -90,7 +90,8 @@ networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
 openxml-docxdataset = ["python-docx"]
-openxml = ["kedro-datasets[openxml-docxdataset]"]
+openxml-pptxdataset = ["python-pptx"]
+openxml = ["kedro-datasets[openxml-docxdataset]", "kedro-datasets[openxml-pptxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
@@ -273,6 +274,7 @@ test = [
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "python-docx",
+    "python-pptx",
     "redis~=4.1",
     "reportlab>=3.6.0",
     "requests-mock~=1.6",

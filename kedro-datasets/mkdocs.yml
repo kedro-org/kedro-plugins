@@ -266,6 +266,7 @@ nav:
           - networkx.JSONDataset: api/kedro_datasets/networkx.JSONDataset.md
         - OpenXML:
           - docx.DocxDataset: api/kedro_datasets/openxml.DocxDataset.md
+          - pptx.PptxDataset: api/kedro_datasets/openxml.PptxDataset.md
         - Pandas:
           - pandas.CSVDataset: api/kedro_datasets/pandas.CSVDataset.md
           - pandas.DeltaTableDataset: api/kedro_datasets/pandas.DeltaTableDataset.md

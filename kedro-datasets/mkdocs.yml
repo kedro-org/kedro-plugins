@@ -141,7 +141,6 @@ plugins:
 
         Visualization and Plotting:
           - api/kedro_datasets/matplotlib.MatplotlibDataset.md: Matplotlib figure storage
-          - api/kedro_datasets/matplotlib.MatplotlibWriter.md: Save matplotlib plots
           - api/kedro_datasets/plotly.PlotlyDataset.md: Interactive Plotly visualizations
           - api/kedro_datasets/plotly.JSONDataset.md: Plotly JSON format
           - api/kedro_datasets/plotly.HTMLDataset.md: Plotly HTML output
@@ -168,6 +167,7 @@ plugins:
           - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
+          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse Tracing integration
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -260,7 +260,6 @@ nav:
           - matlab.MatlabDataset: api/kedro_datasets/matlab.MatlabDataset.md
         - Matplotlib:
           - matplotlib.MatplotlibDataset: api/kedro_datasets/matplotlib.MatplotlibDataset.md
-          - matplotlib.MatplotlibWriter: api/kedro_datasets/matplotlib.MatplotlibWriter.md
         - NetworkX:
           - networkx.GMLDataset: api/kedro_datasets/networkx.GMLDataset.md
           - networkx.GraphMLDataset: api/kedro_datasets/networkx.GraphMLDataset.md
@@ -326,6 +325,8 @@ nav:
           - langchain.ChatOpenAIDataset: api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
           - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
           - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
+        - Langfuse:
+          - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - PyPDF:

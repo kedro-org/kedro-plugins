@@ -317,7 +317,7 @@ final_prompt = template.format(
 
 #### Version Management
 
-##### Labeling Strategy
+##### Labelling Strategy
 
 ```python
 # Semantic versioning with labels
@@ -399,6 +399,8 @@ credentials = {
 }
 ```
 
+---
+
 #### Unsupported File Extension
 
 ```
@@ -406,6 +408,8 @@ NotImplementedError: Unsupported file extension '.txt'
 ```
 
 ##### Solution: Use supported formats: `.json`, `.yaml`, or `.yml`
+
+---
 
 #### Sync Conflicts
 
@@ -418,6 +422,8 @@ DatasetError: Strict sync failed: local and remote prompts differ
 - Use `sync_policy="remote"` to prefer Langfuse versions
 - Manually resolve conflicts and re-sync
 
+---
+
 #### Import Errors
 
 ```
@@ -427,6 +433,8 @@ ImportError: The 'langchain' package is required when using mode='langchain'
 ```bash
 pip install "kedro-datasets[langfuse]"  # Full installation
 ```
+
+---
 
 #### Invalid Credentials
 
@@ -439,6 +447,8 @@ Error when fetching prompt from langfuse: 401 Unauthorized
 - Check if keys have proper permissions
 - Ensure host URL is correct for self-hosted instances
 
+---
+
 #### Missing Prompts
 
 ```
@@ -448,6 +458,8 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 ##### Solution:
 - Create prompt in Langfuse first, or
 - Switch to `sync_policy="local"` to create from local file
+
+---
 
 #### Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)

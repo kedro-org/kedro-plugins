@@ -42,7 +42,7 @@ For complete functionality including LangChain integration:
 pip install "kedro-datasets[langfuse]"
 ```
 
-**Requirements:**
+#### Requirements:
 - Python 3.9+
 - Kedro
 - Langfuse SDK
@@ -52,7 +52,7 @@ pip install "kedro-datasets[langfuse]"
 
 #### File Format Support
 
-**JSON Format**
+##### JSON Format
 
 ```json
 [
@@ -67,7 +67,7 @@ pip install "kedro-datasets[langfuse]"
 ]
 ```
 
-**YAML Format**
+##### YAML Format
 
 ```yaml
 - role: system
@@ -78,17 +78,15 @@ pip install "kedro-datasets[langfuse]"
 
 #### Prompt Types
 
-**Text Prompts**
+##### Text Prompts
 Simple string templates with variable placeholders:
 
 ```json
 "Classify the following text as positive, negative, or neutral: {input}"
 ```
 
-**Chat Prompts**
+##### Chat Prompts
 Conversational format with role-based messages:
-
-**JSON:**
 
 ```json
 [
@@ -111,7 +109,7 @@ Conversational format with role-based messages:
 | **`remote`** | ⬇️ Synced from Langfuse | ✅ Source of truth | Production, team collaboration |
 | **`strict`** | ✅ Must match remote | ✅ Must match local | Critical deployments, validation |
 
-**Choosing the Right Policy**
+##### Choosing the Right Policy
 
 - **Development**: Use `local` - iterate quickly on prompts in your IDE
 - **Staging**: Use `remote` with specific labels (`label: "staging"`)
@@ -120,7 +118,7 @@ Conversational format with role-based messages:
 
 #### Modes
 
-**SDK Mode (default)**
+##### SDK Mode (default)
 Returns raw Langfuse prompt objects for maximum flexibility:
 
 ```python
@@ -148,7 +146,7 @@ version = intent_ds.version
 compiled_prompt = intent_ds.compile(user_query="Hello world!")
 ```
 
-**LangChain Mode**
+##### LangChain Mode
 
 Returns ready-to-use `ChatPromptTemplate` objects:
 
@@ -166,7 +164,7 @@ formatted = template.format(user_query="Hello world")
 
 #### Catalog Configuration (YAML)
 
-**Local Sync Policy - Development**
+##### Local Sync Policy - Development
 
 ```yaml
 intent_prompt:
@@ -181,7 +179,7 @@ intent_prompt:
     labels: ["development", "v2.1"]
 ```
 
-**Remote Sync Policy - Production**
+##### Remote Sync Policy - Production
 ```yaml
 production_prompt:
   type: langfuse.LangfusePromptDataset
@@ -195,7 +193,7 @@ production_prompt:
     label: "production"  # Load specific production version
 ```
 
-**Strict Sync Policy - CI/CD**
+##### Strict Sync Policy - CI/CD
 
 ```yaml
 validation_prompt:
@@ -212,7 +210,7 @@ validation_prompt:
 
 #### Python API Examples
 
-**Basic Usage**
+##### Basic Usage
 ```python
 from kedro_datasets_experimental.langfuse import LangfusePromptDataset
 
@@ -227,7 +225,7 @@ dataset = LangfusePromptDataset(
 )
 ```
 
-**Advanced Configuration**
+##### Advanced Configuration
 ```python
 # Full configuration with custom host
 dataset = LangfusePromptDataset(
@@ -248,7 +246,7 @@ dataset = LangfusePromptDataset(
 
 #### Credentials Management
 
-**Catalog Configuration**
+##### Catalog Configuration
 ```yaml
 # conf/local/credentials.yml
 # Store securely and should
@@ -260,7 +258,7 @@ langfuse_credentials:
 
 ### Real-World Use Cases
 
-**Intent Classification**
+##### Intent Classification
 
 ```python
 # Multi-intent classification system
@@ -278,7 +276,7 @@ prompt = template.format(user_input="I want to file a new claim")
 
 You can read more about this use case on [kedro-academy](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows#-prompt-management)
 
-**Response Generation**
+##### Response Generation
 ```python
 # Dynamic response generation
 response_dataset = LangfusePromptDataset(
@@ -295,7 +293,7 @@ response = template.format(
 )
 ```
 
-**RAG Applications**
+##### RAG Applications
 ```python
 # Retrieval-Augmented Generation
 rag_dataset = LangfusePromptDataset(
@@ -319,7 +317,7 @@ final_prompt = template.format(
 
 #### Version Management
 
-**Labeling Strategy**
+##### Labeling Strategy
 
 ```python
 # Semantic versioning with labels
@@ -331,7 +329,7 @@ dataset = LangfusePromptDataset(
 )
 ```
 
-**Version-Specific Loading**
+##### Version-Specific Loading
 ```python
 # Load specific versions
 historical_dataset = LangfusePromptDataset(load_args={"version": 3})  # Load version 3
@@ -343,7 +341,8 @@ labeled_dataset = LangfusePromptDataset(
 
 #### Configuration Reference
 
-**Load Args (Remote/Strict Policies Only)**
+##### Load Args (Remote/Strict Policies Only)
+
 ```python
 load_args = {
     "version": 3,  # Specific version number
@@ -351,7 +350,7 @@ load_args = {
 }
 ```
 
-**Save Args (All Policies)**
+##### Save Args (All Policies)
 ```python
 save_args = {"labels": ["v2.0", "staging", "experimental"]}  # List of labels
 ```
@@ -400,7 +399,7 @@ credentials = {
 }
 ```
 
-#### Unsupported File Extension**
+#### Unsupported File Extension
 
 ```
 NotImplementedError: Unsupported file extension '.txt'

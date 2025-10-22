@@ -4,10 +4,10 @@
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Langfuse](https://img.shields.io/badge/langfuse-integration-orange)](https://langfuse.com/)
 
-# LangfusePromptDataset
+## LangfusePromptDataset
 A Kedro dataset for seamless AI prompt management with Langfuse versioning, synchronization, and team collaboration. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 
-## Quick Start
+### Quick Start
 
 ```python
 from kedro_datasets_experimental.langfuse import LangfusePromptDataset
@@ -28,15 +28,15 @@ dataset = LangfusePromptDataset(
 prompt = dataset.load()
 ```
 
-## Installation
+### Installation
 
-### SDK Mode Only
+#### SDK Mode Only
 For basic Langfuse integration without LangChain dependencies:
 ```bash
 pip install "kedro-datasets[langfuse-langfusepromptdataset]"
 ```
 
-### Full Installation
+#### Full Installation
 For complete functionality including LangChain integration:
 ```bash
 pip install "kedro-datasets[langfuse]"
@@ -48,18 +48,18 @@ pip install "kedro-datasets[langfuse]"
 - Langfuse SDK
 - LangChain (optional, for `mode="langchain"`)
 
-## Core Features
+### Core Features
 
-### Prompt Types
+#### Prompt Types
 
-#### Text Prompts
+**Text Prompts**
 Simple string templates with variable placeholders:
 
 ```json
 "Classify the following text as positive, negative, or neutral: {input}"
 ```
 
-#### Chat Prompts
+**Chat Prompts**
 Conversational format with role-based messages:
 
 **JSON:**
@@ -86,7 +86,7 @@ Conversational format with role-based messages:
   content: "{question}"
 ```
 
-### Sync Policies
+#### Sync Policies
 
 | Policy | Local File | Remote (Langfuse) | Use Case |
 |--------|------------|-------------------|----------|
@@ -94,16 +94,16 @@ Conversational format with role-based messages:
 | **`remote`** | ⬇️ Synced from Langfuse | ✅ Source of truth | Production, team collaboration |
 | **`strict`** | ✅ Must match remote | ✅ Must match local | Critical deployments, validation |
 
-#### Choosing the Right Policy
+**Choosing the Right Policy**
 
 - **Development**: Use `local` - iterate quickly on prompts in your IDE
 - **Staging**: Use `remote` with specific labels (`label: "staging"`)
 - **Production**: Use `remote` with production labels (`label: "production"`)
 - **CI/CD**: Use `strict` to ensure consistency across environments
 
-### Modes
+#### Modes
 
-#### SDK Mode (default)
+**SDK Mode (default)**
 Returns raw Langfuse prompt objects for maximum flexibility:
 
 ```python
@@ -131,8 +131,9 @@ version = intent_ds.version
 compiled_prompt = intent_ds.compile(user_query="Hello world!")
 ```
 
-#### LangChain Mode
-Returns ready-to-use ChatPromptTemplate objects:
+**LangChain Mode**
+
+Returns ready-to-use `ChatPromptTemplate` objects:
 
 ```python
 dataset = LangfusePromptDataset(mode="langchain", ...)
@@ -144,9 +145,10 @@ template = dataset.load()
 formatted = template.format(user_query="Hello world")
 ```
 
-## File Format Support
+### File Format Support
 
-### JSON Format
+**JSON Format**
+
 ```json
 // For text prompts
 "Classify the sentiment: {input}"
@@ -164,7 +166,8 @@ formatted = template.format(user_query="Hello world")
 ]
 ```
 
-### YAML Format
+**YAML Format**
+
 ```yaml
 # For text prompts
 "Analyze the following text: {input}"
@@ -176,11 +179,12 @@ formatted = template.format(user_query="Hello world")
   content: "{query}"
 ```
 
-## Configuration Examples
+### Configuration Examples
 
-### Catalog Configuration (YAML)
+#### Catalog Configuration (YAML)
 
-#### Local Sync Policy - Development
+**Local Sync Policy - Development**
+
 ```yaml
 intent_prompt:
   type: langfuse.LangfusePromptDataset
@@ -194,7 +198,7 @@ intent_prompt:
     labels: ["development", "v2.1"]
 ```
 
-#### Remote Sync Policy - Production
+**Remote Sync Policy - Production**
 ```yaml
 production_prompt:
   type: langfuse.LangfusePromptDataset
@@ -208,7 +212,8 @@ production_prompt:
     label: "production"  # Load specific production version
 ```
 
-#### Strict Sync Policy - CI/CD
+**Strict Sync Policy - CI/CD**
+
 ```yaml
 validation_prompt:
   type: langfuse.LangfusePromptDataset
@@ -222,9 +227,9 @@ validation_prompt:
     version: 5  # Specific version for validation
 ```
 
-### Python API Examples
+#### Python API Examples
 
-#### Basic Usage
+**Basic Usage**
 ```python
 from kedro_datasets_experimental.langfuse import LangfusePromptDataset
 
@@ -239,7 +244,7 @@ dataset = LangfusePromptDataset(
 )
 ```
 
-#### Advanced Configuration
+**Advanced Configuration**
 ```python
 # Full configuration with custom host
 dataset = LangfusePromptDataset(
@@ -258,9 +263,9 @@ dataset = LangfusePromptDataset(
 )
 ```
 
-### Credentials Management
+#### Credentials Management
 
-#### Catalog Configuration
+**Catalog Configuration**
 ```yaml
 # conf/local/credentials.yml
 # Store securely and should
@@ -270,9 +275,9 @@ langfuse_credentials:
   secret_key: "sk_your_secret_key"  # pragma: allowlist secret
 ```
 
-## Real-World Use Cases
+### Real-World Use Cases
 
-#### Intent Classification
+**Intent Classification**
 
 ```python
 # Multi-intent classification system
@@ -290,7 +295,7 @@ prompt = template.format(user_input="I want to file a new claim")
 
 You can read more about this use case on [kedro-academy](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows#-prompt-management)
 
-#### Response Generation
+**Response Generation**
 ```python
 # Dynamic response generation
 response_dataset = LangfusePromptDataset(
@@ -307,7 +312,7 @@ response = template.format(
 )
 ```
 
-#### RAG Applications
+**RAG Applications**
 ```python
 # Retrieval-Augmented Generation
 rag_dataset = LangfusePromptDataset(
@@ -327,11 +332,12 @@ final_prompt = template.format(
 )
 ```
 
-## Advanced Features
+### Advanced Features
 
-### Version Management
+#### Version Management
 
-#### Labeling Strategy
+**Labeling Strategy**
+
 ```python
 # Semantic versioning with labels
 dataset.save(prompt_content)  # Auto-creates new version
@@ -342,7 +348,7 @@ dataset = LangfusePromptDataset(
 )
 ```
 
-#### Version-Specific Loading
+**Version-Specific Loading**
 ```python
 # Load specific versions
 historical_dataset = LangfusePromptDataset(load_args={"version": 3})  # Load version 3
@@ -352,9 +358,9 @@ labeled_dataset = LangfusePromptDataset(
 )
 ```
 
-## API Reference
+### API Reference
 
-### Constructor Parameters
+#### Constructor Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -367,9 +373,9 @@ labeled_dataset = LangfusePromptDataset(
 | `load_args` | `dict` | `{}` | Load parameters: `{version?, label?}` |
 | `save_args` | `dict` | `{}` | Save parameters: `{labels?}` |
 
-### Key Methods
+#### Key Methods
 
-#### `load() -> Union[ChatPromptTemplate, Any]`
+**`load() -> Union[ChatPromptTemplate, Any]`**
 Loads prompt with synchronization based on sync_policy.
 
 **Returns:**
@@ -380,18 +386,18 @@ and `langfuse.model.ChatPromptClient` in case of `prompt_type=chat`  if `mode="s
 **Raises:**
 - `DatasetError`: Sync conflicts, missing prompts, network errors
 
-#### `save(data: str | list) -> None`
+**`save(data: str | list) -> None`**
 Creates new prompt version in Langfuse.
 
 **Parameters:**
 - `data`: Prompt content (string for text, list for chat)
 
-#### `preview() -> JSONPreview`
+**`preview() -> JSONPreview`**
 Returns JSON preview for Kedro-Viz compatibility.
 
-### Configuration Reference
+#### Configuration Reference
 
-#### Load Args (Remote/Strict Policies Only)
+**Load Args (Remote/Strict Policies Only)**
 ```python
 load_args = {
     "version": 3,  # Specific version number
@@ -399,16 +405,16 @@ load_args = {
 }
 ```
 
-#### Save Args (All Policies)
+**Save Args (All Policies)**
 ```python
 save_args = {"labels": ["v2.0", "staging", "experimental"]}  # List of labels
 ```
 
-## Troubleshooting
+### Troubleshooting
 
-### Common Errors
+#### Common Errors
 
-#### Missing Credentials
+**Missing Credentials**
 ```
 DatasetError: Missing required Langfuse credential: 'public_key'
 ```
@@ -420,13 +426,13 @@ credentials = {
 }
 ```
 
-#### Unsupported File Extension
+**Unsupported File Extension**
 ```
 NotImplementedError: Unsupported file extension '.txt'
 ```
 **Solution:** Use supported formats: `.json`, `.yaml`, or `.yml`
 
-#### Sync Conflicts
+**Sync Conflicts**
 ```
 DatasetError: Strict sync failed: local and remote prompts differ
 ```
@@ -435,7 +441,7 @@ DatasetError: Strict sync failed: local and remote prompts differ
 - Use `sync_policy="remote"` to prefer Langfuse versions
 - Manually resolve conflicts and re-sync
 
-#### Import Errors
+**Import Errors**
 ```
 ImportError: The 'langchain' package is required when using mode='langchain'
 ```
@@ -444,9 +450,9 @@ ImportError: The 'langchain' package is required when using mode='langchain'
 pip install "kedro-datasets[langfuse]"  # Full installation
 ```
 
-### Authentication Issues
+#### Authentication Issues
 
-#### Invalid Credentials
+**Invalid Credentials**
 ```
 Error when fetching prompt from langfuse: 401 Unauthorized
 ```
@@ -455,7 +461,7 @@ Error when fetching prompt from langfuse: 401 Unauthorized
 - Check if keys have proper permissions
 - Ensure host URL is correct for self-hosted instances
 
-#### Missing Prompts
+**Missing Prompts**
 ```
 DatasetError: Remote sync policy specified but no remote prompt exists
 ```
@@ -463,9 +469,9 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 - Create prompt in Langfuse first, or
 - Switch to `sync_policy="local"` to create from local file
 
-## Integration Examples
+### Integration Examples
 
-### Kedro Pipeline Integration
+#### Kedro Pipeline Integration
 
 ```python
 # nodes.py
@@ -491,9 +497,9 @@ def create_pipeline():
     )
 ```
 
-### Issues
+#### Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)
 
-### Related Resources
+#### Related Resources
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)
 - **Langfuse**: [Langfuse prompt management](https://langfuse.com/docs/prompt-management)

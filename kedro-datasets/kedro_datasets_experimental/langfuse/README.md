@@ -1,4 +1,4 @@
-# Langfuse Prompt Dataset
+# LangfusePromptDataset
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)

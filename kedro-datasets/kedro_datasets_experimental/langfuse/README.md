@@ -12,7 +12,7 @@ A Kedro dataset for seamless AI prompt management with Langfuse versioning, sync
 ```python
 from kedro_datasets_experimental.langfuse import LangfusePromptDataset
 
-# Load and use a prompt in 5 lines
+# Load and use a prompt
 dataset = LangfusePromptDataset(
     filepath="prompts/intent.json",
     prompt_name="intent-classifier",
@@ -50,6 +50,32 @@ pip install "kedro-datasets[langfuse]"
 
 ### Core Features
 
+#### File Format Support
+
+**JSON Format**
+
+```json
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant."
+  },
+  {
+    "role": "human",
+    "content": "{user_input}"
+  }
+]
+```
+
+**YAML Format**
+
+```yaml
+- role: system
+  content: You are an expert analyst.
+- role: human
+  content: "{query}"
+```
+
 #### Prompt Types
 
 **Text Prompts**
@@ -75,15 +101,6 @@ Conversational format with role-based messages:
     "content": "{user_query}"
   }
 ]
-```
-
-**YAML:**
-
-```yaml
-- role: system
-  content: You are an expert financial advisor.
-- role: human
-  content: "{question}"
 ```
 
 #### Sync Policies
@@ -143,40 +160,6 @@ template = dataset.load()
 
 # Ready to use
 formatted = template.format(user_query="Hello world")
-```
-
-### File Format Support
-
-**JSON Format**
-
-```json
-// For text prompts
-"Classify the sentiment: {input}"
-
-// For chat prompts
-[
-  {
-    "role": "system",
-    "content": "You are a helpful assistant."
-  },
-  {
-    "role": "human",
-    "content": "{user_input}"
-  }
-]
-```
-
-**YAML Format**
-
-```yaml
-# For text prompts
-"Analyze the following text: {input}"
-
-# For chat prompts
-- role: system
-  content: You are an expert analyst.
-- role: human
-  content: "{query}"
 ```
 
 ### Configuration Examples
@@ -358,43 +341,6 @@ labeled_dataset = LangfusePromptDataset(
 )
 ```
 
-### API Reference
-
-#### Constructor Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `filepath` | `str` | Required | Local file path (`.json`, `.yaml`, `.yml`) |
-| `prompt_name` | `str` | Required | Unique identifier in Langfuse |
-| `credentials` | `dict` | Required | Langfuse auth: `{public_key, secret_key, host?}` |
-| `prompt_type` | `Literal["chat", "text"]` | `"text"` | Prompt format type |
-| `sync_policy` | `Literal["local", "remote", "strict"]` | `"local"` | Sync behavior |
-| `mode` | `Literal["sdk", "langchain"]` | `"sdk"` | Controls the return type of `load` method |
-| `load_args` | `dict` | `{}` | Load parameters: `{version?, label?}` |
-| `save_args` | `dict` | `{}` | Save parameters: `{labels?}` |
-
-#### Key Methods
-
-**`load() -> Union[ChatPromptTemplate, Any]`**
-Loads prompt with synchronization based on sync_policy.
-
-**Returns:**
-- `ChatPromptTemplate` if `mode="langchain"`.
-- Langfuse prompt object i.e., `langfuse.model.TextPromptClient` in case of `prompt_type=text`
-and `langfuse.model.ChatPromptClient` in case of `prompt_type=chat`  if `mode="sdk"`
-
-**Raises:**
-- `DatasetError`: Sync conflicts, missing prompts, network errors
-
-**`save(data: str | list) -> None`**
-Creates new prompt version in Langfuse.
-
-**Parameters:**
-- `data`: Prompt content (string for text, list for chat)
-
-**`preview() -> JSONPreview`**
-Returns JSON preview for Kedro-Viz compatibility.
-
 #### Configuration Reference
 
 **Load Args (Remote/Strict Policies Only)**
@@ -409,65 +355,6 @@ load_args = {
 ```python
 save_args = {"labels": ["v2.0", "staging", "experimental"]}  # List of labels
 ```
-
-### Troubleshooting
-
-#### Common Errors
-
-**Missing Credentials**
-```
-DatasetError: Missing required Langfuse credential: 'public_key'
-```
-**Solution:** Add all required credentials to your configuration:
-```python
-credentials = {
-    "public_key": "pk_...",
-    "secret_key": "sk_...",  # pragma: allowlist secret
-}
-```
-
-**Unsupported File Extension**
-```
-NotImplementedError: Unsupported file extension '.txt'
-```
-**Solution:** Use supported formats: `.json`, `.yaml`, or `.yml`
-
-**Sync Conflicts**
-```
-DatasetError: Strict sync failed: local and remote prompts differ
-```
-**Solution:**
-- Use `sync_policy="local"` to prefer local files
-- Use `sync_policy="remote"` to prefer Langfuse versions
-- Manually resolve conflicts and re-sync
-
-**Import Errors**
-```
-ImportError: The 'langchain' package is required when using mode='langchain'
-```
-**Solution:**
-```bash
-pip install "kedro-datasets[langfuse]"  # Full installation
-```
-
-#### Authentication Issues
-
-**Invalid Credentials**
-```
-Error when fetching prompt from langfuse: 401 Unauthorized
-```
-**Solution:**
-- Verify public_key and secret_key are correct
-- Check if keys have proper permissions
-- Ensure host URL is correct for self-hosted instances
-
-**Missing Prompts**
-```
-DatasetError: Remote sync policy specified but no remote prompt exists
-```
-**Solution:**
-- Create prompt in Langfuse first, or
-- Switch to `sync_policy="local"` to create from local file
 
 ### Integration Examples
 
@@ -496,6 +383,72 @@ def create_pipeline():
         ]
     )
 ```
+
+### Troubleshooting
+
+#### Missing Credentials
+
+```
+DatasetError: Missing required Langfuse credential: 'public_key'
+```
+
+##### Solution: Add all required credentials to your configuration:
+```python
+credentials = {
+    "public_key": "pk_...",
+    "secret_key": "sk_...",  # pragma: allowlist secret
+}
+```
+
+#### Unsupported File Extension**
+
+```
+NotImplementedError: Unsupported file extension '.txt'
+```
+
+##### Solution: Use supported formats: `.json`, `.yaml`, or `.yml`
+
+#### Sync Conflicts
+
+```
+DatasetError: Strict sync failed: local and remote prompts differ
+```
+
+##### Solution:
+- Use `sync_policy="local"` to prefer local files
+- Use `sync_policy="remote"` to prefer Langfuse versions
+- Manually resolve conflicts and re-sync
+
+#### Import Errors
+
+```
+ImportError: The 'langchain' package is required when using mode='langchain'
+```
+##### Solution:
+```bash
+pip install "kedro-datasets[langfuse]"  # Full installation
+```
+
+#### Invalid Credentials
+
+```
+Error when fetching prompt from langfuse: 401 Unauthorized
+```
+
+##### Solution:
+- Verify public_key and secret_key are correct
+- Check if keys have proper permissions
+- Ensure host URL is correct for self-hosted instances
+
+#### Missing Prompts
+
+```
+DatasetError: Remote sync policy specified but no remote prompt exists
+```
+
+##### Solution:
+- Create prompt in Langfuse first, or
+- Switch to `sync_policy="local"` to create from local file
 
 #### Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)

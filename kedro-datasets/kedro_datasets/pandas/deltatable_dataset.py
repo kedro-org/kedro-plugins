@@ -153,13 +153,6 @@ class DeltaTableDataset(AbstractDataset):
 
         self._version = self._load_args.get("version", None)
 
-        if self._filepath and self._catalog_type:
-            raise DatasetError(
-                "DeltaTableDataset can either load from "
-                "filepath or catalog_type. Please provide "
-                "one of either filepath or catalog_type."
-            )
-
         if self._filepath:
             try:
                 self._delta_table = DeltaTable(
@@ -169,13 +162,22 @@ class DeltaTableDataset(AbstractDataset):
                 )
             except TableNotFoundError:
                 self.is_empty_dir = True
-        else:
-            self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=DataCatalog[self._catalog_type],  # type: ignore[misc]
-                data_catalog_id=self._catalog_name,
-                database_name=self._database or "",
-                table_name=self._table or "",
-            )
+        elif self._catalog_type:
+            if self._catalog_type.upper() == "AWS":
+                table_uri = f"glue:///{self._database}/{self._table}"
+            elif self._catalog_type.upper() == "UNITY":
+                table_uri = f"unity://{self._catalog_name}/{self._database}/{self._table}"
+            else:
+                raise ValueError(f"Unsupported catalog type: {self._catalog_type}")
+
+            try:
+                self._delta_table = DeltaTable(
+                    table_uri=table_uri,
+                    storage_options=self.fs_args,
+                    version=self._version,
+                )
+            except TableNotFoundError:
+                self.is_empty_dir = True
 
     @property
     def fs_args(self) -> dict[str, Any]:

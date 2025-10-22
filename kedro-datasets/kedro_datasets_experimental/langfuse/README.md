@@ -1,9 +1,10 @@
-# LangfusePromptDataset
+# Langfuse Integration
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Langfuse](https://img.shields.io/badge/langfuse-integration-orange)](https://langfuse.com/)
 
+# LangfusePromptDataset
 A Kedro dataset for seamless AI prompt management with Langfuse versioning, synchronization, and team collaboration. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 
 ## Quick Start

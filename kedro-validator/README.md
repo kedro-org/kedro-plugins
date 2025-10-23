@@ -20,13 +20,13 @@ Kedro Validator introduces optional native Pydantic-based parameter validation t
 
 ## Features
 
--  **Early Parameter Validation**: Validates parameters during Kedro context creation
--  **Pydantic Support**: Full support for Pydantic BaseModel with Field constraints
--  **Dataclass Support**: Native support for Python dataclasses
--  **Comprehensive Error Reporting**: Detailed error messages with node and pipeline context
--  **Optional Dependencies**: Pydantic is an optional dependency for backward compatibility
--  **Performance Optimized**: Minimal impact on session creation time
--  **Hook-based Architecture**: Integrates seamlessly with Kedro's plugin system
+- **Early Parameter Validation**: Validates parameters during Kedro context creation
+- **Pydantic Support**: Full support for Pydantic BaseModel with Field constraints
+- **Dataclass Support**: Native support for Python dataclasses
+- **Comprehensive Error Reporting**: Detailed error messages with node and pipeline context
+- **Optional Dependencies**: Pydantic is an optional dependency for backward compatibility
+- **Performance Optimized**: Minimal impact on session creation time
+- **Hook-based Architecture**: Integrates seamlessly with Kedro's plugin system
 
 ## Installation
 

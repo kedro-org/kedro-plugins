@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro-validator"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro-Validator"
+requires-python = ">=3.9"
+license = {text = "Apache Software License (Apache 2.0)"}
+dependencies = [
+    "kedro>=0.18.0, <2.0.0",
+]
+dynamic = ["readme", "version"]
+
+[project.urls]
+Source = "https://github.com/kedro-org/kedro-plugins/tree/main/kedro-validator"
+Documentation = "https://github.com/kedro-org/kedro-plugins/blob/main/kedro-validator/README.md"
+Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
+
+[project.optional-dependencies]
+pydantic = [
+    "pydantic>=2.0,<3.0",
+]
+
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist[psutil]~=2.2.1",
+    "PyYAML==5.3.1", # Temporary fix, to be removed
+    "wheel",
+]
+
+lint = [
+    "bandit>=1.6.2, <2.0",
+    "black~=22.0",
+    "detect-secrets~=1.5.0",
+    "mypy~=1.0",
+    "pre-commit>=2.9.2",
+    "ruff~=0.12.1",
+    # mypy requirements
+    "types-requests",
+    "types-PyYAML",
+]
+
+[project.entry-points."kedro.cli_hooks"]
+kedro-validator = "kedro_validator.plugin:validator_hook"
+
+[project.entry-points."kedro.hooks"]
+kedro-validator = "kedro_validator.plugin:validator_hook"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["kedro_validator"]
+zip-safe = false
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro_validator.__version__"}
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+
+[tool.ruff.lint]
+select = [
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
+    "T201", # Print Statement
+]
+ignore = ["E501"]  # Black takes care of line-too-long
+
+[tool.ruff.lint.isort]
+known-first-party = ["kedro_validator"]

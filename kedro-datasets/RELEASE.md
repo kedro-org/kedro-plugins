@@ -15,6 +15,7 @@
 
 | Type                           | Description                                                 | Location                             |
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
+| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
 | `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |

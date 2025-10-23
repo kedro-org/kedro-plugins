@@ -1,6 +1,6 @@
 # Langfuse Integration
 
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Langfuse](https://img.shields.io/badge/langfuse-integration-orange)](https://langfuse.com/)
 
@@ -368,13 +368,13 @@ def classify_intent(prompt_template: ChatPromptTemplate, user_input: str):
 
 
 # pipeline.py
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, Node
 
 
 def create_pipeline():
     return Pipeline(
         [
-            node(
+            Node(
                 func=classify_intent,
                 inputs=["intent_prompt", "user_input"],
                 outputs="classified_intent",

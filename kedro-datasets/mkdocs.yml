@@ -7,7 +7,7 @@ theme:
   name: material
   custom_dir: docs/overrides/
   palette:
-     # Palette toggle for light mode
+    # Palette toggle for light mode
     - scheme: light
       toggle:
         icon: material/white-balance-sunny
@@ -345,3 +345,12 @@ nav:
           - safetensors.SafetensorsDataset: api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md
         - Video:
           - video.VideoDataset: api/kedro_datasets_experimental/video.VideoDataset.md
+
+not_in_nav: |
+  readme.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

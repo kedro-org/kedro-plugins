@@ -6,6 +6,23 @@ from kedro.framework.hooks import hook_impl
 class KedroValidationHook:
     """Validate params against dataclasses or Pydantic models referenced by node functions."""
 
+    def __init__(self):
+        self.validated_models = {}
+
+    def _get_nested_param(self, params: Dict[str, Any], param_key: str) -> Any:
+        """Get parameter value supporting nested paths"""
+        if '.' not in param_key:
+            return params.get(param_key)
+
+        keys = param_key.split('.')
+        value = params
+        for key in keys:
+            if isinstance(value, dict) and key in value:
+                value = value[key]
+            else:
+                return None
+        return value
+
     @hook_impl
     def after_context_created(self, context) -> None:
         """
@@ -29,8 +46,6 @@ class KedroValidationHook:
                 sig = inspect.signature(func)
                 type_hints = get_type_hints(func, include_extras=False)
 
-                # Node.inputs can be a list or dict mapping.
-                # mapping dataset_name -> arg_name (best-effort).
                 dataset_to_arg = {}
                 node_inputs = getattr(node, "inputs", None)
                 if isinstance(node_inputs, dict):
@@ -42,7 +57,6 @@ class KedroValidationHook:
                     for idx, ds in enumerate(node_inputs):
                         if idx < len(param_names):
                             dataset_to_arg[ds] = param_names[idx]
-                # else: leave empty
 
                 # Inspect params:* dataset inputs
                 for ds_name, arg_name in dataset_to_arg.items():
@@ -54,8 +68,9 @@ class KedroValidationHook:
                     print("Param DS Name", ds_name)
                     # extract param key (strip prefix)
                     param_key = ds_name.split(":", 1)[1]
-                    # support nested lookups like "params:train" -> context.params['train']
-                    raw_value = params.get(param_key)
+
+                    # support nested lookups like "params:project.database" -> context.params['project']['database']
+                    raw_value = self._get_nested_param(params, param_key)
                     if raw_value is None:
                         # If param absent, collect problem (could be optional)
                         problems.append({
@@ -83,7 +98,9 @@ class KedroValidationHook:
                         if BaseModel and inspect.isclass(expected) and issubclass(expected, BaseModel):
                             # instantiate/validate
                             try:
-                                expected.model_validate(raw_value)
+                                validated_instance = expected.model_validate(raw_value)
+                                # Store the validated model instance
+                                self.validated_models[param_key] = validated_instance
                             except Exception as exc:
                                 problems.append({
                                     "node": node.name or getattr(func, "__name__", "<unknown>"),
@@ -94,7 +111,9 @@ class KedroValidationHook:
                         elif dataclasses.is_dataclass(expected):
                             # For dataclasses: try to instantiate
                             try:
-                                expected(**(raw_value if isinstance(raw_value, dict) else {}))
+                                validated_instance = expected(**(raw_value if isinstance(raw_value, dict) else {}))
+                                # Store the validated dataclass instance
+                                self.validated_models[param_key] = validated_instance
                             except Exception as exc:
                                 problems.append({
                                     "node": node.name or getattr(func, "__name__", "<unknown>"),
@@ -120,5 +139,26 @@ class KedroValidationHook:
             for p in problems:
                 lines.append(f"- pipeline={p['pipeline']} node={p['node']} param={p['param_key']}: {p['error']}")
             raise RuntimeError("\n".join(lines))
+
+    @hook_impl
+    def before_node_run(self, node, catalog, inputs, is_async, run_id):
+        """Replace parameter inputs with validated model instances if available."""
+        if not hasattr(node, 'inputs') or not node.inputs or not inputs:
+            return inputs
+
+        # Create a copy of inputs to modify
+        modified_inputs = dict(inputs)
+        inputs_changed = False
+
+        # For parameter datasets, replace the raw value with validated model instance
+        for input_key, input_value in list(modified_inputs.items()):
+            # Check if this input corresponds to a parameter dataset
+            if isinstance(input_key, str) and input_key.startswith("params:"):
+                param_key = input_key.split(":", 1)[1]
+                if param_key in self.validated_models:
+                    modified_inputs[input_key] = self.validated_models[param_key]
+                    inputs_changed = True
+
+        return modified_inputs if inputs_changed else inputs
 
 validator_hook = KedroValidationHook()

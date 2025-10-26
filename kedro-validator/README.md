@@ -32,19 +32,19 @@ Kedro Validator introduces optional native Pydantic-based parameter validation t
 
 ### Basic Installation
 ```bash
-pip install kedro-validator
+uv pip install kedro-validator
 ```
 
 ### With Pydantic Support
 ```bash
-pip install kedro-validator[pydantic]
+uv pip install kedro-validator[pydantic]
 ```
 
 ### Development Installation
 ```bash
 git clone https://github.com/kedro-org/kedro-plugins.git
 cd kedro-plugins/kedro-validator
-pip install -e .[pydantic]
+uv pip install -e ".[pydantic]"
 ```
 
 **Requirements:**
@@ -62,7 +62,7 @@ pip install -e .[pydantic]
 
 ### 2. Install Kedro Validator
    ```bash
-   pip install kedro-validator[pydantic]
+   uv pip install kedro-validator[pydantic]
    ```
 
 ### 3. Define Parameter Models

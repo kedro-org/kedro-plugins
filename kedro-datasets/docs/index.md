@@ -25,6 +25,7 @@ Name | Description
 [networkx.GraphMLDataset](api/kedro_datasets/networkx.GraphMLDataset.md) | ``GraphMLDataset`` loads and saves graphs to a GraphML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
 [networkx.JSONDataset](api/kedro_datasets/networkx.JSONDataset.md) | NetworkX ``JSONDataset`` loads and saves graphs to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.
 [openxml.DocxDataset](api/kedro_datasets/openxml.DocxDataset.md) | ``DocxDataset`` loads/saves data from/to a .docx file using an underlying filesystem (e.g.: local, S3, GCS). It uses python-docx to handle the .docx file.
+[openxml.PptxDataset](api/kedro_datasets/openxml.PptxDataset.md) | ``PptxDataset`` loads/saves data from/to a .pptx file using an underlying filesystem (e.g.: local, S3, GCS). It uses python-pptx to handle the .pptx file.
 [pandas.CSVDataset](api/kedro_datasets/pandas.CSVDataset.md) | A dataset that loads and saves data to/from CSV files using pandas.
 [pandas.DeltaTableDataset](api/kedro_datasets/pandas.DeltaTableDataset.md) | ``DeltaTableDataset`` loads/saves delta tables from/to a filesystem (e.g.: local, S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles load and save using a pandas dataframe.
 [pandas.ExcelDataset](api/kedro_datasets/pandas.ExcelDataset.md) | ``ExcelDataset`` loads/saves data from/to a Excel file using an underlying filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.

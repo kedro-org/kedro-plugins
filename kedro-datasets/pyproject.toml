@@ -90,7 +90,8 @@ networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
 openxml-docxdataset = ["python-docx"]
-openxml = ["kedro-datasets[openxml-docxdataset]"]
+openxml-pptxdataset = ["python-pptx"]
+openxml = ["kedro-datasets[openxml-docxdataset]", "kedro-datasets[openxml-pptxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
@@ -185,8 +186,9 @@ langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-comm
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
-langfuse = ["kedro-datasets[langfuse-langfusetracedataset]", "openai>=2.3.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -272,6 +274,7 @@ test = [
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "python-docx",
+    "python-pptx",
     "redis~=4.1",
     "reportlab>=3.6.0",
     "requests-mock~=1.6",

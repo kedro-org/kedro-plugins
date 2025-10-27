@@ -37,8 +37,12 @@ class KedroValidationHook:
             pipelines = {}
 
         problems = []
+        pipeline_dict = dict(pipelines)
+        for pipeline_name, pipeline in pipeline_dict.items():
 
-        for pipeline_name, pipeline in (pipelines.items() if hasattr(pipelines, "items") else getattr(pipelines, "__dict__", {}).items()):
+            if pipeline_name == "__default__":
+                continue
+
             for node in getattr(pipeline, "nodes", []):
                 func = getattr(node, "func", None)
                 if func is None:

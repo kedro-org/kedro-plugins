@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Kedro Version](https://img.shields.io/badge/kedro-1.0.0%2B-orange.svg)](https://kedro.org)
 
-A Kedro plugin that provides early parameter validation using Pydantic models and dataclasses for type-safe, fail-fast pipeline execution.
+A Kedro plugin that provides early parameter validation using Pydantic models and dataclasses for type-safe, fail-fast pipeline execution. Validates parameters during context creation and automatically converts validated configurations into strongly-typed instances for your pipeline nodes.
 
 ## Overview
 
@@ -14,15 +14,19 @@ Kedro Validator introduces optional native Pydantic-based parameter validation t
 
 - **Fail-fast validation**: Catch parameter errors before pipeline execution starts
 - **Type safety**: Leverage Python's type system with runtime validation
+- **Automatic type conversion**: Parameters are automatically converted to strongly-typed instances
 - **Clear error messages**: Get detailed feedback on validation failures
+- **Nested parameter support**: Full support for nested parameter structures
 - **Backward compatible**: Optional dependency that doesn't affect existing projects
 - **Future-ready**: Foundation for JSON Schema export and UI auto-generation
 
 ## Features
 
 - **Early Parameter Validation**: Validates parameters during Kedro context creation
+- **Runtime Type Conversion**: Automatically converts validated parameters to typed instances
 - **Pydantic Support**: Full support for Pydantic BaseModel with Field constraints
 - **Dataclass Support**: Native support for Python dataclasses
+- **Nested Parameters**: Support for complex nested parameter structures with dot notation
 - **Comprehensive Error Reporting**: Detailed error messages with node and pipeline context
 - **Optional Dependencies**: Pydantic is an optional dependency for backward compatibility
 - **Performance Optimized**: Minimal impact on session creation time
@@ -74,7 +78,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 
-class ModelOptions(BaseModel):
+class TrainingConfig(BaseModel):
     test_size: float = Field(
         ..., description="Proportion of test split (e.g. 0.2 for 20%)"
     )
@@ -92,7 +96,7 @@ from typing import List
 
 
 @dataclass
-class ModelOptionsDC:
+class TrainingConfigDC:
     test_size: float
     random_state: int
     features: List[str] = field(default_factory=list)
@@ -117,19 +121,20 @@ class ModelOptionsDC:
 import pandas as pd
 
 
-def split_data(data: pd.DataFrame, parameters: ModelOptions) -> tuple:
+def split_data(data: pd.DataFrame, config: TrainingConfig) -> tuple:
     """Splits data into features and targets training and test sets.
 
     Args:
         data: Data containing features and target.
-        parameters: Parameters defined in parameters/data_science.yml.
+        config: Validated training configuration instance.
     Returns:
         Split data.
     """
-    X = data[parameters["features"]]
+    # Note: config is now a TrainingConfig instance, not a dictionary
+    X = data[config.features]  # Use attribute access
     y = data["price"]
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=parameters["test_size"], random_state=parameters["random_state"]
+        X, y, test_size=config.test_size, random_state=config.random_state
     )
     return X_train, X_test, y_train, y_test
 ```
@@ -138,7 +143,7 @@ def split_data(data: pd.DataFrame, parameters: ModelOptions) -> tuple:
 
 ```yaml
 # conf/base/parameters_data_science.yml
-model_options:
+training_config:
   test_size: 0.2
   random_state: 3
   features:
@@ -166,7 +171,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=split_data,
-                inputs=["model_input_table", "params:model_options"],
+                inputs=["model_input_table", "params:training_config"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
@@ -196,19 +201,48 @@ If validation fails (replace a string value in param `random_state: some`), you'
 
 ```
 RuntimeError: Parameter validation failed:
-- pipeline=__default__ node=split_data_node param=model_options: pydantic validation failed: 1 validation error for ModelOptions
+- pipeline=__default__ node=split_data_node param=training_config: pydantic validation failed: 1 validation error for TrainingConfig
 random_state
   Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='some', input_type=str]
     For further information visit https://errors.pydantic.dev/2.11/v/int_parsing
-- pipeline=data_science node=split_data_node param=model_options: pydantic validation failed: 1 validation error for ModelOptions
+- pipeline=data_science node=split_data_node param=training_config: pydantic validation failed: 1 validation error for TrainingConfig
 random_state
   Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='some', input_type=str]
     For further information visit https://errors.pydantic.dev/2.11/v/int_parsing
 ```
 
+## How It Works
+
+The Kedro Validator plugin operates in two phases:
+
+### 1. Validation Phase (Context Creation)
+- **When**: During `kedro run` startup, after context creation
+- **What**: Validates all `params:*` inputs against function type annotations
+- **Result**: Fails fast with clear error messages if validation fails
+
+### 2. Type Conversion Phase (Node Execution)
+- **When**: Before each node runs
+- **What**: Automatically converts raw parameter dictionaries to validated typed instances
+- **Result**: Your functions receive strongly-typed objects instead of dictionaries
+
+```python
+# Before: Dictionary access (error-prone)
+def old_way(data: pd.DataFrame, parameters: dict) -> tuple:
+    test_size = parameters["test_size"]  # Could fail at runtime
+    features = parameters["features"]  # No type safety
+
+
+# After: Attribute access (type-safe)
+def new_way(data: pd.DataFrame, config: TrainingConfig) -> tuple:
+    test_size = config.test_size  # Type-safe, validated
+    features = config.features  # IDE autocomplete support
+```
+
 ## Advanced Usage
 
 ### Nested Parameter Models
+
+Kedro Validator supports complex nested parameter structures:
 
 ```python
 class DatabaseConfig(BaseModel):
@@ -217,14 +251,22 @@ class DatabaseConfig(BaseModel):
     database: str
 
 
-class MLConfig(BaseModel):
-    model_type: str = Field(regex="^(linear|tree|neural)$")
+class ProcessingConfig(BaseModel):
+    algorithm: str = Field(pattern="^(linear|tree|neural)$")
     hyperparams: dict
 
 
 class ProjectParams(BaseModel):
     database: DatabaseConfig
-    ml: MLConfig
+    processing: ProcessingConfig
+
+
+# Your node function receives a fully validated nested structure
+def process_data(data: pd.DataFrame, config: ProjectParams) -> dict:
+    # All nested attributes are type-safe and validated
+    connection_string = f"postgresql://{config.database.host}:{config.database.port}/{config.database.database}"
+    algorithm = config.processing.algorithm
+    return {"connection": connection_string, "algorithm": algorithm}
 ```
 
 ```yaml
@@ -234,10 +276,28 @@ project:
     host: "localhost"
     port: 5432
     database: "kedro_db"
-  ml:
-    model_type: "linear"
+  processing:
+    algorithm: "linear"
     hyperparams:
       learning_rate: 0.01
+```
+
+```python
+# Pipeline usage
+node(
+    func=process_data,
+    inputs=["raw_data", "params:project"],  # Uses entire project config
+    outputs="processed_data",
+    name="process_data_node",
+)
+
+# Or access nested parameters directly
+node(
+    func=connect_to_db,
+    inputs=["params:project.database"],  # Uses only database config
+    outputs="connection",
+    name="connect_node",
+)
 ```
 
 ### Custom Validators
@@ -301,12 +361,34 @@ mypy kedro_validator
 
 ### Hook Implementation
 
-The plugin implements the `after_context_created` hook to perform validation:
+The plugin implements two hooks for complete parameter validation and type conversion:
 
+#### 1. Validation Hook
 ```python
 @hook_impl
 def after_context_created(self, context) -> None:
-    """Validate parameters against function annotations."""
+    """Validate parameters against function annotations during context creation.
+
+    This hook:
+    - Inspects all pipeline nodes for params:* inputs
+    - Validates raw parameter values against function type annotations
+    - Stores validated model instances for later use
+    - Fails fast with detailed error messages if validation fails
+    """
+```
+
+#### 2. Type Conversion Hook
+```python
+@hook_impl
+def before_node_run(self, node, catalog, inputs, is_async, run_id):
+    """Replace parameter dictionaries with validated model instances before node execution.
+
+    This hook:
+    - Intercepts node execution
+    - Replaces params:* inputs with validated typed instances
+    - Enables attribute-based access instead of dictionary access
+    - Maintains full type safety throughout pipeline execution
+    """
 ```
 
 ### Supported Annotations

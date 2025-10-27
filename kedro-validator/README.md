@@ -1,6 +1,6 @@
 # Kedro Validator
 
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/kedro-validator/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://pypi.org/project/kedro-validator/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Kedro Version](https://img.shields.io/badge/kedro-1.0.0%2B-orange.svg)](https://kedro.org)
 

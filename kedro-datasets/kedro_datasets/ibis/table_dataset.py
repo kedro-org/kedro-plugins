@@ -129,7 +129,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 If not provided, connect to DuckDB in in-memory mode.
             credentials: Connection information (e.g.
                 user, password, token, account). If provided, these values
-                overlay the base `connection` configuration.
+                override the base `connection` configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -148,17 +148,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         self._table_name = table_name
         self._database = database
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
-        # Credentials overlay connection config
-        if credentials:
-            if isinstance(credentials, dict):
-                self._connection_config.update(credentials)
-            elif isinstance(credentials, str):
-                raise ValueError(
-                    "Connection string credentials are not supported for Ibis TableDataset."
-                )
-            else:
-                raise TypeError("Credentials must be a dict or None.")
+        _connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        _credentials = deepcopy(credentials) or {}
+        self._connection_config = {**_connection_config, **_credentials}
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.

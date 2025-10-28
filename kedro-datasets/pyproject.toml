@@ -238,7 +238,7 @@ test = [
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
-    "delta-spark>=3.2; python_version >= '3.12'",
+    "delta-spark>=4.0; python_version >= '3.12'",
     "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
     "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
@@ -268,7 +268,7 @@ test = [
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
-    "pyspark>=3.0, <4.0; python_version < '3.11'",
+    "pyspark>=3.0, <4.0; python_version <= '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0; python_version >= '3.12'",
     "pytest-cov~=3.0",

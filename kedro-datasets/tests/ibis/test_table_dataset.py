@@ -397,19 +397,20 @@ class TestTableDataset:
                     ("database", ":memory:"),
                 ),
             ),
+            (
+                {"backend": "duckdb", "database": "file.db"},
+                {"backend": "mssql", "password": "secret"},  # pragma: allowlist secret
+                (
+                    ("backend", "mssql"),
+                    ("database", "file.db"),
+                    ("password", "secret"),
+                ),
+            ),
         ],
         indirect=["connection_config", "credentials_config"],
     )
-    def test_connection_config_with_credentials(
-        self, mocker, table_dataset, connection_config, credentials_config, key
-    ):
-        # Fix: handle non-dict connection_config/credentials_config
-        if isinstance(connection_config, dict) and "backend" in connection_config:
-            backend = connection_config["backend"]
-        elif isinstance(credentials_config, dict) and "backend" in credentials_config:
-            backend = credentials_config["backend"]
-        else:
-            backend = "duckdb"
+    def test_connection_config_with_credentials(self, mocker, table_dataset, key):
+        backend = table_dataset._connection_config["backend"]
         mocker.patch(f"ibis.{backend}")
         table_dataset.load()
         assert ("ibis", key) in table_dataset._connections

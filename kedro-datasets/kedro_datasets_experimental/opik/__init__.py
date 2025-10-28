@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementations for Langfuse integration."""
+"""``AbstractDataset`` implementations for Opik integration."""
 
 from typing import Any
 

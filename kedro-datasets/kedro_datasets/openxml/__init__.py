@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementation to load/save data from/to a Docx file."""
+"""``AbstractDataset`` implementation to load/save data from/to OpenXML files."""
 
 from typing import Any
 
@@ -9,8 +9,14 @@ try:
 except (ImportError, RuntimeError):
     DocxDataset: Any
 
+try:
+    from .pptx_dataset import PptxDataset
+except (ImportError, RuntimeError):
+    PptxDataset: Any
+
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 
 __getattr__, __dir__, __all__ = lazy.attach(
-    __name__, submod_attrs={"docx_dataset": ["DocxDataset"]}
+    __name__,
+    submod_attrs={"docx_dataset": ["DocxDataset"], "pptx_dataset": ["PptxDataset"]},
 )

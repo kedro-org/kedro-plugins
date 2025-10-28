@@ -2,29 +2,31 @@
 
 ## Major features and improvements
 
+- Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+- Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
 - Group datasets documentation according to the dependencies to clean up the nav bar.
-- Added the following new experimental datasets:
+- Added the following new datasets:
+
+| Type | Description | Location |
+|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
+
+- Added the following new **experimental** datasets:
 
 | Type                           | Description                                                 | Location                             |
 |--------------------------------|-------------------------------------------------------------|--------------------------------------|
 | `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
-
-- Added the following new **experimental** datasets:
-
-| Type                                | Description                                              | Location                                |
-| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
 | `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.
+- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
 
-## Major features and improvements
+## Community contributions
 
-- Added the following new experimental datasets:
-
-| Type                           | Description                                                   | Location                             |
-|--------------------------------|---------------------------------------------------------------|--------------------------------------|
-| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+Many thanks to the following Kedroids for contributing PRs to this release:
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 8.1.0
 ## Major features and improvements
@@ -77,6 +79,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Paul Lemonnier](https://github.com/PaulLemonnier)
 - [Seohyun Park](https://github.com/soyamimi)
 - [Daniel Russell-Brain](https://github.com/killerfridge)
+
 
 # Release 7.0.0
 

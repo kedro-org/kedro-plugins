@@ -237,7 +237,7 @@ test = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
-    "delta-spark>=1.0, <3.2; python_version < '3.11'",
+    "delta-spark>=1.0, <3.0; python_version < '3.11'",
     "delta-spark>=2.2, <3.2; python_version == '3.11'",
     "delta-spark>=3.2; python_version >= '3.12'",
     "deltalake>=0.10.0, <1.0.0",

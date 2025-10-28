@@ -5,21 +5,22 @@
 - Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 - Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
 - Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
+- Added credentials support to `ibis.TableDataset`.
 - Added the following new datasets:
 
-| Type | Description | Location |
-|-----------------------|-----------------------------------------------------------------------------------|--------------------------|
+| Type                  | Description                                                                             | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
 | `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
 
 - Added the following new **experimental** datasets:
 
-| Type                           | Description                                                 | Location                             |
-|--------------------------------|-------------------------------------------------------------|--------------------------------------|
-| `langfuse.LangfuseTraceDataset` | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
-| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
-| `pypdf.PDFDataset`             | Kedro dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
-| `langfuse.LangfusePromptDataset`    | Kedro dataset for managing Langfuse prompts              | `kedro_datasets_experimental.langfuse`  |
-
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `langfuse.LangfuseTraceDataset`    | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                     | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
+| `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.
@@ -29,8 +30,10 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [gitgud5000](https://github.com/gitgud5000)
 
 # Release 8.1.0
+
 ## Major features and improvements
 
 - Added the following new experimental datasets:
@@ -38,8 +41,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 | Type                           | Description                                                   | Location                             |
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
-
-- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
 
 ## Bug fixes and other changes
 
@@ -82,7 +83,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Seohyun Park](https://github.com/soyamimi)
 - [Daniel Russell-Brain](https://github.com/killerfridge)
 
-
 # Release 7.0.0
 
 ## Major features and improvements
@@ -115,7 +115,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
-
 
 # Release 6.0.0
 

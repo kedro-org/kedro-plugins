@@ -96,7 +96,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
         table_name: str,
         database: str | None = None,
         connection: dict[str, Any] | None = None,
-        credentials: dict[str, Any] | str | None = None,
+        credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,

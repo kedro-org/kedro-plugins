@@ -1,11 +1,12 @@
+import logging
 import os
-from typing import Any, Literal, TYPE_CHECKING
+from typing import Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
-from opik import configure
+from opik import configure, track
 
-if TYPE_CHECKING:
-    from opik import track
+
+logger = logging.getLogger(__name__)
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
@@ -26,7 +27,6 @@ class OpikTraceDataset(AbstractDataset):
         self._cached_client = None
 
         self._validate_opik_credentials()
-        self._set_opik_environment()
         self._configure_opik()
 
     def _validate_opik_credentials(self) -> None:
@@ -39,20 +39,31 @@ class OpikTraceDataset(AbstractDataset):
             if key in self._credentials and not str(self._credentials[key]).strip():
                 raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
 
-    def _set_opik_environment(self) -> None:
-        """Set Opik environment variables."""
-        os.environ["OPIK_API_KEY"] = self._credentials["api_key"]
-        os.environ["OPIK_WORKSPACE"] = self._credentials["workspace"]
-
-        if "project_name" in self._credentials:
-            os.environ["OPIK_PROJECT_NAME"] = self._credentials["project_name"]
-
-        if "url_override" in self._credentials:
-            os.environ["OPIK_URL_OVERRIDE"] = self._credentials["url_override"]
-
     def _configure_opik(self) -> None:
-        """Initialize Opik global configuration."""
-        configure()
+        """Initialize Opik global configuration with awareness of project switching."""
+        project_name = self._credentials.get("project_name")
+
+        # Try to detect an existing configuration and warn if switching projects
+        existing_project = os.getenv("OPIK_PROJECT_NAME")
+        if existing_project and project_name and project_name != existing_project:
+            logger.warning(
+                f"Opik is already configured for project '{existing_project}'. "
+                f"New project '{project_name}' will be ignored — traces will still "
+                f"be logged to the first configured project. "
+                f"Restart the Python process or reload the 'opik' module to switch projects.",
+            )
+
+        # Set or update the environment variable
+        if project_name:
+            os.environ["OPIK_PROJECT_NAME"] = project_name
+
+        # Configure Opik (repeated calls are safe but project name won't change)
+        configure(
+            api_key=self._credentials["api_key"],
+            workspace=self._credentials["workspace"],
+            url=self._credentials.get("url_override"),
+            force=True,
+        )
 
     def _build_openai_client_params(self) -> dict[str, str]:
         """Validate and build OpenAI client parameters from credentials.

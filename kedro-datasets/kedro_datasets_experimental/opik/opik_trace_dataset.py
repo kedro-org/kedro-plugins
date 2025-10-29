@@ -5,7 +5,7 @@ from kedro.io import AbstractDataset, DatasetError
 from opik import configure
 
 if TYPE_CHECKING:
-    from opik import track, flush
+    from opik import track
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
@@ -52,12 +52,7 @@ class OpikTraceDataset(AbstractDataset):
 
     def _configure_opik(self) -> None:
         """Initialize Opik global configuration."""
-        configure(
-            api_key=self._credentials["api_key"],
-            workspace=self._credentials["workspace"],
-            project_name=self._credentials.get("project_name"),
-            url_override=self._credentials.get("url_override"),
-        )
+        configure()
 
     def _build_openai_client_params(self) -> dict[str, str]:
         """Validate and build OpenAI client parameters from credentials.
@@ -116,20 +111,21 @@ class OpikTraceDataset(AbstractDataset):
     def _load_sdk_client(self):
         """Return a simple SDK client object for tracing via decorators."""
         try:
-            from opik import track, flush
+            from opik import track
+
+            # Simple namespace-like wrapper to mimic a "client"
+            # Opik SDK does not provide a client object with .track;
+            # instead, we import the track decorator (and flush if needed) directly.
+            # This wrapper exposes them as attributes so the dataset interface
+            # is consistent with OpenAI and LangChain modes.
+            class SDKClient:
+                pass
+
+            SDKClient.track = staticmethod(track)
+
+            return SDKClient()
         except ImportError as e:
             raise DatasetError("Opik SDK client not available.") from e
-
-        # Simple namespace-like wrapper to mimic a "client"
-        # Opik SDK does not provide a client object with .track/flush;
-        # instead, we import the track decorator and flush function directly.
-        # This wrapper exposes them as attributes so the dataset interface
-        # is consistent with OpenAI and LangChain modes.
-        class SDKClient:
-            track = staticmethod(track)
-            flush = staticmethod(flush)
-
-        return SDKClient()
 
     def _load_openai_client(self):
         """Return an OpenAI client wrapped with Opik tracing."""

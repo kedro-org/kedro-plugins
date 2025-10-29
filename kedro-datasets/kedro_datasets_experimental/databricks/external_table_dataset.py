@@ -75,13 +75,20 @@ class ExternalTableDataset(BaseTableDataset):
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    ```python
+```python
     from kedro_datasets.databricks import ExternalTableDataset
     from pyspark.sql import SparkSession
     from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
     import importlib_metadata
 
     DELTA_VERSION = importlib_metadata.version("delta-spark")
+    major_version = int(DELTA_VERSION.split('.')[0])
+    delta_package = (
+        f"io.delta:delta-spark_2.13:{DELTA_VERSION}" 
+        if major_version >= 4 
+        else f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+    )
+    
     schema = StructType([
         StructField("name", StringType(), True),
         StructField("age", IntegerType(), True)
@@ -90,7 +97,7 @@ class ExternalTableDataset(BaseTableDataset):
 
     spark_df = (
         SparkSession.builder.config(
-            "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+            "spark.jars.packages", delta_package
         )
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
@@ -110,7 +117,7 @@ class ExternalTableDataset(BaseTableDataset):
     dataset.save(spark_df)
     reloaded = dataset.load()
     assert Row(name="Bob", age=12) in reloaded.take(4)
-    ```
+```
 
     """
 

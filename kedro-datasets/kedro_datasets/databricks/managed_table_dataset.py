@@ -56,13 +56,19 @@ class ManagedTableDataset(BaseTableDataset):
         >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
         >>>
         >>> DELTA_VERSION = importlib.metadata.version("delta-spark")
+        >>> major_version = int(DELTA_VERSION.split('.')[0])
+        >>> delta_package = (
+        ...     f"io.delta:delta-spark_2.13:{DELTA_VERSION}" 
+        ...     if major_version >= 4 
+        ...     else f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        ... )
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>> spark_df = (
         ...     SparkSession.builder.config(
-        ...         "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        ...         "spark.jars.packages", delta_package
         ...     )
         ...     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         ...     .config(
@@ -76,6 +82,7 @@ class ManagedTableDataset(BaseTableDataset):
         >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
+
 
     """
 

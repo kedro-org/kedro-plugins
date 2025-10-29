@@ -18,9 +18,20 @@ DELTA_VERSION = importlib_metadata.version("delta-spark")
 
 @pytest.fixture(scope="class", autouse=True)
 def spark_session():
+    
+    # Delta 4.0+ uses different Maven coordinates
+    major_version = int(DELTA_VERSION.split('.')[0])
+    
+    if major_version >= 4:
+        # Delta 4.x with PySpark 4.x uses Scala 2.13
+        delta_package = f"io.delta:delta-spark_2.13:{DELTA_VERSION}"
+    else:
+        # Delta 2.x/3.x with PySpark 3.x uses Scala 2.12
+        delta_package = f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+
     spark = (
         SparkSession.builder.appName("test")
-        .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")
+        .config("spark.jars.packages", delta_package)
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",

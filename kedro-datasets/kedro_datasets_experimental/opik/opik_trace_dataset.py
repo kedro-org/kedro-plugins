@@ -1,8 +1,11 @@
 import os
-from typing import Any, Literal
+from typing import Any, Literal, TYPE_CHECKING
 
 from kedro.io import AbstractDataset, DatasetError
-from opik import configure, get_client
+from opik import configure
+
+if TYPE_CHECKING:
+    from opik import track, flush
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
@@ -111,11 +114,22 @@ class OpikTraceDataset(AbstractDataset):
         return self._cached_client
 
     def _load_sdk_client(self):
-        """Return the actual Opik client instance."""
+        """Return a simple SDK client object for tracing via decorators."""
         try:
-            return get_client()
+            from opik import track, flush
         except ImportError as e:
             raise DatasetError("Opik SDK client not available.") from e
+
+        # Simple namespace-like wrapper to mimic a "client"
+        # Opik SDK does not provide a client object with .track/flush;
+        # instead, we import the track decorator and flush function directly.
+        # This wrapper exposes them as attributes so the dataset interface
+        # is consistent with OpenAI and LangChain modes.
+        class SDKClient:
+            track = staticmethod(track)
+            flush = staticmethod(flush)
+
+        return SDKClient()
 
     def _load_openai_client(self):
         """Return an OpenAI client wrapped with Opik tracing."""

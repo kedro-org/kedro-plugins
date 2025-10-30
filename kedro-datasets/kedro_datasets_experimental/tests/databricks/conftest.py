@@ -21,7 +21,7 @@ def spark_session():
 
     # Delta 4.0+ uses different Maven coordinates
     major_version = int(DELTA_VERSION.split('.')[0])
-    
+
     if major_version >= 4:
         # Delta 4.x with PySpark 4.x uses Scala 2.13
         delta_package = f"io.delta:delta-spark_2.13:{DELTA_VERSION}"

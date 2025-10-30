@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-import pytest
 import pyspark
+import pytest
 from kedro.io.core import DatasetError
 from psutil import Popen
 from pyspark import SparkContext

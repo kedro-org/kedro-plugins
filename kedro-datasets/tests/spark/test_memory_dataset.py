@@ -14,7 +14,7 @@ def _update_spark_df(data, idx, jdx, value):
 
     # Cast column to string before injecting mixed type value
     data = data.withColumn(cname, col(cname).cast("string"))
-    
+
     return data.withColumn(
         cname, when(col("__id") == jdx, value).otherwise(col(cname))
     ).drop("__id")

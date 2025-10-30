@@ -58,8 +58,8 @@ class ManagedTableDataset(BaseTableDataset):
         >>> DELTA_VERSION = importlib.metadata.version("delta-spark")
         >>> major_version = int(DELTA_VERSION.split('.')[0])
         >>> delta_package = (
-        ...     f"io.delta:delta-spark_2.13:{DELTA_VERSION}" 
-        ...     if major_version >= 4 
+        ...     f"io.delta:delta-spark_2.13:{DELTA_VERSION}"
+        ...     if major_version >= 4
         ...     else f"io.delta:delta-core_2.12:{DELTA_VERSION}"
         ... )
         >>> schema = StructType(

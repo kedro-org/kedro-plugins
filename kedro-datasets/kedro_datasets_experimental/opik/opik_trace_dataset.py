@@ -139,9 +139,8 @@ class OpikTraceDataset(AbstractDataset):
                 f"be logged to the first configured project.\n"
                 f"To apply the new project, restart the Kedro session or reload the 'opik' module.",
             )
-
         # Set or update the environment variable (used by Opik SDK)
-        if project_name:
+        elif project_name:
             os.environ["OPIK_PROJECT_NAME"] = project_name
 
         # Configure Opik (repeated calls are safe but project name won't change)

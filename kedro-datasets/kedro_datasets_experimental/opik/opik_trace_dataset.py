@@ -213,8 +213,8 @@ class OpikTraceDataset(AbstractDataset):
     def _load_openai_client(self) -> Any:
         """Return an OpenAI client wrapped with Opik tracing integration."""
         try:
-            import openai
-            from opik.integrations.openai import track_openai
+            import openai  # noqa: PLC0415
+            from opik.integrations.openai import track_openai  # noqa: PLC0415
         except ImportError as e:
             raise DatasetError("OpenAI or Opik OpenAI integration not available.") from e
 
@@ -233,7 +233,7 @@ class OpikTraceDataset(AbstractDataset):
     def _load_langchain_tracer(self) -> Any:
         """Return an OpikTracer callback for LangChain or LCEL integration."""
         try:
-            from opik.integrations.langchain import OpikTracer
+            from opik.integrations.langchain import OpikTracer  # noqa: PLC0415
         except ImportError as e:
             raise DatasetError("Opik LangChain integration not available.") from e
 

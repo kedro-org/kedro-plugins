@@ -1,7 +1,8 @@
 import os
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 from kedro.io import DatasetError
 
 from kedro_datasets_experimental.opik.opik_trace_dataset import OpikTraceDataset

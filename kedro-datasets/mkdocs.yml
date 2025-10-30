@@ -7,7 +7,7 @@ theme:
   name: material
   custom_dir: docs/overrides/
   palette:
-     # Palette toggle for light mode
+    # Palette toggle for light mode
     - scheme: light
       toggle:
         icon: material/white-balance-sunny
@@ -167,6 +167,7 @@ plugins:
           - api/kedro_datasets_experimental/langchain.ChatCohereDataset.md: Cohere chat models
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
+          - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
           - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse Tracing integration
           - api/kedro_datasets_experimental/opik.OpikPromptDataset.md: Opik prompt integration
 
@@ -327,6 +328,7 @@ nav:
           - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
           - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
         - Langfuse:
+          - langfuse.LangfusePromptDataset: api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md
           - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
@@ -346,3 +348,12 @@ nav:
           - safetensors.SafetensorsDataset: api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md
         - Video:
           - video.VideoDataset: api/kedro_datasets_experimental/video.VideoDataset.md
+
+not_in_nav: |
+  readme.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

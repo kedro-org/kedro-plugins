@@ -12,6 +12,7 @@ Name | Description
 [langchain.ChatOpenAIDataset](langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
 [langchain.OpenAIEmbeddingsDataset](langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
 [langchain.LangChainPromptDataset](langchain.LangChainPromptDataset.md) | ``LangChainPromptDataset`` loads a `langchain` prompt template.
+[langfuse.LangfusePromptDataset](langfuse.LangfusePromptDataset.md) | ``LangfusePromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.
 [langfuse.LangfuseTraceDataset](langfuse.LangfuseTraceDataset.md) | ``LangfuseTraceDataset`` provides Langfuse tracing clients for LLM observability and monitoring.
 [netcdf.NetCDFDataset](netcdf.NetCDFDataset.md) | ``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
 [opik.OpikPromptDataset](opik.OpikPromptDataset.md) | ``OpikPromptDataset`` manages LangChain prompts with Opik versioning support.

@@ -512,6 +512,10 @@
                   "type": ["string", "null"],
                   "description": "The name of the database to read from or create in. Can be a dotted string or tuple for multi-level hierarchy."
                 },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying database."
+                },
                 "connection": {
                   "type": "object",
                   "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in-memory."

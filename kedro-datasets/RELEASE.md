@@ -13,11 +13,12 @@
 
 - Added the following new **experimental** datasets:
 
-| Type                           | Description                                                 | Location                             |
-|--------------------------------|-------------------------------------------------------------|--------------------------------------|
-| `langfuse.LangfuseTraceDataset` | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse` |
-| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
-| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+| Type                               | Description                                                 | Location                                |
+|------------------------------------|-------------------------------------------------------------|-----------------------------------------|
+| `langfuse.LangfuseTraceDataset`    | A dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                 | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`                 | A dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts  | `kedro_datasets_experimental.opik`      |
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

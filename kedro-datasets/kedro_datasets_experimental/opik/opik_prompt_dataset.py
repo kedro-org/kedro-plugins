@@ -316,13 +316,7 @@ class OpikPromptDataset(AbstractDataset):
             Tuple of (Prompt object or None, prompt data as str/list or None).
         """
         try:
-            # Note: If Opik supports version/label in the future, add here:
-            # if self._sync_policy != "local" and self._load_args:
-            #     opik_prompt = self._opik_client.get_prompt(
-            #         name=self._prompt_name,
-            #         version=self._load_args.get("version"),
-            #         label=self._load_args.get("label")
-            #     )
+            # TODO: If Opik supports version/label in the future, add logic here to fetch prompt by version/label using self._load_args.
 
             opik_prompt = self._opik_client.get_prompt(name=self._prompt_name)
             prompt_data = opik_prompt.prompt

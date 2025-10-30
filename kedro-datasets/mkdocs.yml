@@ -168,7 +168,8 @@ plugins:
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
           - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
-          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse Tracing integration
+          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
+          - api/kedro_datasets_experimental/opik.OpikTraceDataset.md: Opik tracing integration
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -331,6 +332,8 @@ nav:
           - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - Opik:
+          - opik.OpikTraceDataset: api/kedro_datasets_experimental/opik.OpikTraceDataset.md
         - PyPDF:
           - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:

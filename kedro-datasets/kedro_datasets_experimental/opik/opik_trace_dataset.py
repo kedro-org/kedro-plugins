@@ -19,9 +19,10 @@ class OpikTraceDataset(AbstractDataset):
     to ensure that subsequent traces are correctly logged to the specified workspace and project.
 
     **Modes:**
+
     - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
     - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
-    - `langchain`: Returns an `OpikTracer` callback handler for LangChain/LCEL integration.
+    - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
 
     **Examples**
 
@@ -91,6 +92,7 @@ class OpikTraceDataset(AbstractDataset):
     ```
 
     **Notes**
+
     - Opik configuration is global within the Python process.
       Using multiple `OpikTraceDataset` instances with different projects in the same session
       may cause all traces to log to the first configured project.

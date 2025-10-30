@@ -207,5 +207,11 @@ def expected_upsert_multiple_primary_spark_df(spark_session: SparkSession):
 
 
 @pytest.fixture
-def external_location():
-    return os.environ.get("DATABRICKS_EXTERNAL_LOCATION")
+def external_location(tmp_path):
+    """Provide a valid external table location for Delta tests.
+
+    Default to a temporary local path instead of None,
+    because Spark 4.x / Delta 4.x no longer tolerate 'None/' paths.
+    """
+    env_location = os.environ.get("DATABRICKS_EXTERNAL_LOCATION")
+    return env_location or str(tmp_path / "external")

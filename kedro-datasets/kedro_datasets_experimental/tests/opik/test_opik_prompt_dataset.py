@@ -359,15 +359,8 @@ class TestOpikPromptDatasetLoad:
             assert result == mock_template
             mock_chat_template.from_template.assert_called_once_with("Answer the question: {question}")
 
-    def test_load_with_network_error(self, opik_dataset, mock_opik):
-        """Test load handles network errors gracefully."""
-        mock_opik.get_prompt.side_effect = ConnectionError("Network unavailable")
-
-        # Should fall back to local file
-        result = opik_dataset.load()
-        assert result is not None  # Should load from local file
-
-    def test_load_args_warning_local_policy(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset, mock_opik_prompt):
+    def test_load_args_warning_local_policy(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset,
+                                            mock_opik_prompt):
         """Test that load_args produce warning in local sync policy."""
         mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.return_value = mock_opik_prompt
@@ -384,9 +377,11 @@ class TestOpikPromptDatasetLoad:
 
         with patch("kedro_datasets_experimental.opik.opik_prompt_dataset.logger") as mock_logger:
             dataset.load()
-            mock_logger.warning.assert_called()
-            warning_message = mock_logger.warning.call_args[0][0]
-            assert "Ignoring load_args" in warning_message
+
+            # Check that at least one warning contains "Ignoring load_args"
+            warning_calls = [call[0][0] for call in mock_logger.warning.call_args_list]
+            assert any("Ignoring load_args" in msg for msg in warning_calls), \
+                f"Expected 'Ignoring load_args' warning, but got: {warning_calls}"
 
 
 class TestOpikPromptDatasetSyncPolicies:

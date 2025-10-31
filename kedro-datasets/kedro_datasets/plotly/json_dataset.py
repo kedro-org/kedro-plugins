@@ -52,7 +52,7 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
-    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w", "encoding": "utf-8"}}
 
     def __init__(  # noqa: PLR0913
         self,

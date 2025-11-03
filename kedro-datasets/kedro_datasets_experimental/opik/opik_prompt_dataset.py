@@ -269,7 +269,7 @@ class OpikPromptDataset(AbstractDataset):
         }
 
     def save(self, data: str | list[dict[str, str]]) -> None:
-        """Save prompt to local file and create new version in Opik.
+        """Save prompt to Opik.
 
         Args:
             data: The prompt content to save. Can be string for text prompts
@@ -284,14 +284,6 @@ class OpikPromptDataset(AbstractDataset):
         if self._prompt_type == "text" and not isinstance(data, str):
             raise DatasetError("Text prompts must be a string")
 
-        # Save locally first
-        try:
-            self._filepath.parent.mkdir(parents=True, exist_ok=True)
-            self.file_dataset.save(data)
-        except Exception as e:
-            raise DatasetError(f"Failed to save prompt locally to {self._filepath}: {e}")
-
-        # Push to Opik
         try:
             create_kwargs = {
                 "name": self._prompt_name,
@@ -439,7 +431,6 @@ class OpikPromptDataset(AbstractDataset):
                 f"from Opik as local file is missing (local sync policy)"
             )
             try:
-                self._filepath.parent.mkdir(parents=True, exist_ok=True)
                 self.file_dataset.save(prompt_data)
             except Exception as e:
                 raise DatasetError(f"Failed to sync Opik prompt to local file: {e}")
@@ -460,6 +451,36 @@ class OpikPromptDataset(AbstractDataset):
             return self._sync_remote_policy(local_data, opik_prompt)
         else:  # local policy (default)
             return self._sync_local_policy(local_data, opik_prompt)
+
+    def _convert_to_langchain_template(
+            self, prompt_data: str | list | None
+    ) -> "ChatPromptTemplate":
+        """Convert prompt data to LangChain ChatPromptTemplate.
+
+        Args:
+            prompt_data: Raw prompt data (string or list of messages).
+
+        Returns:
+            ChatPromptTemplate ready for use in LangChain pipelines.
+
+        Raises:
+            DatasetError: If prompt data format is invalid.
+        """
+        from langchain_core.prompts import ChatPromptTemplate  # noqa: PLC0415
+
+        if isinstance(prompt_data, list):
+            try:
+                messages = [(m["role"], m["content"]) for m in prompt_data]
+                return ChatPromptTemplate.from_messages(messages)
+            except (KeyError, TypeError) as e:
+                raise DatasetError(f"Invalid chat prompt format: {e}")
+
+        if isinstance(prompt_data, str):
+            return ChatPromptTemplate.from_template(prompt_data)
+
+        raise DatasetError(
+            f"Unsupported prompt data format for '{self._prompt_name}': {type(prompt_data)}"
+        )
 
     def load(self) -> Union["ChatPromptTemplate", Any]:
         """Load prompt with synchronisation logic.
@@ -509,22 +530,7 @@ class OpikPromptDataset(AbstractDataset):
         if self._mode == "sdk":
             return opik_prompt
         elif self._mode == "langchain":
-            from langchain_core.prompts import ChatPromptTemplate  # noqa: PLC0415
-
-            # Convert to ChatPromptTemplate
-            if isinstance(prompt_data, list):
-                try:
-                    messages = [(m["role"], m["content"]) for m in prompt_data]
-                    return ChatPromptTemplate.from_messages(messages)
-                except (KeyError, TypeError) as e:
-                    raise DatasetError(f"Invalid chat prompt format: {e}")
-
-            if isinstance(prompt_data, str):
-                return ChatPromptTemplate.from_template(prompt_data)
-
-            raise DatasetError(
-                f"Unsupported prompt data format for '{self._prompt_name}': {type(prompt_data)}"
-            )
+            return self._convert_to_langchain_template(prompt_data)
         else:
             raise DatasetError(f"Unsupported mode: {self._mode}")
 

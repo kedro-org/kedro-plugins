@@ -639,3 +639,29 @@ class TestOpikPromptDatasetUtilityMethods:
         mock_opik.get_dataset.assert_called_once_with(name="prompts-test-prompt")
         mock_opik.create_dataset.assert_not_called()
         assert dataset._dataset == mock_opik_dataset
+
+    def test_convert_to_langchain_template_chat(self, opik_dataset):
+        """Test conversion of chat messages to ChatPromptTemplate."""
+        chat_data = [
+            {"role": "system", "content": "You are helpful"},
+            {"role": "user", "content": "{input}"}
+        ]
+
+        with patch("langchain_core.prompts.ChatPromptTemplate") as mock_template:
+            mock_template.from_messages.return_value = Mock()
+            result = opik_dataset._convert_to_langchain_template(chat_data)
+
+            mock_template.from_messages.assert_called_once_with([
+                ("system", "You are helpful"),
+                ("user", "{input}")
+            ])
+
+    def test_convert_to_langchain_template_text(self, opik_dataset):
+        """Test conversion of text prompt to ChatPromptTemplate."""
+        text_data = "Answer: {question}"
+
+        with patch("langchain_core.prompts.ChatPromptTemplate") as mock_template:
+            mock_template.from_template.return_value = Mock()
+            result = opik_dataset._convert_to_langchain_template(text_data)
+
+            mock_template.from_template.assert_called_once_with("Answer: {question}")

@@ -649,7 +649,7 @@ class TestOpikPromptDatasetUtilityMethods:
 
         with patch("langchain_core.prompts.ChatPromptTemplate") as mock_template:
             mock_template.from_messages.return_value = Mock()
-            result = opik_dataset._convert_to_langchain_template(chat_data)
+            opik_dataset._convert_to_langchain_template(chat_data)
 
             mock_template.from_messages.assert_called_once_with([
                 ("system", "You are helpful"),
@@ -662,6 +662,6 @@ class TestOpikPromptDatasetUtilityMethods:
 
         with patch("langchain_core.prompts.ChatPromptTemplate") as mock_template:
             mock_template.from_template.return_value = Mock()
-            result = opik_dataset._convert_to_langchain_template(text_data)
+            opik_dataset._convert_to_langchain_template(text_data)
 
             mock_template.from_template.assert_called_once_with("Answer: {question}")

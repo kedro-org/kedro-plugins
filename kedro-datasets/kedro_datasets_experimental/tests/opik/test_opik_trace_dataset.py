@@ -91,7 +91,7 @@ def test_openai_missing_credentials_raises(configure_mock, base_credentials):
 def test_openai_missing_section_raises(configure_mock, base_credentials):
     """Test that missing OpenAI section raises DatasetError."""
     dataset = OpikTraceDataset(base_credentials, mode="openai")
-    with pytest.raises(DatasetError, match="requires an 'openai' section"):
+    with pytest.raises(DatasetError, match="Missing 'openai' section in OpikTraceDataset credentials."):
         dataset.load()
 
 

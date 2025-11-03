@@ -136,10 +136,13 @@ class OpikTraceDataset(AbstractDataset):
         existing_project = os.getenv("OPIK_PROJECT_NAME")
         if existing_project and project_name and project_name != existing_project:
             logger.warning(
-                f"Opik is already configured for project '{existing_project}'. "
-                f"New project '{project_name}' will be ignored — traces will still "
-                f"be logged to the first configured project.\n"
-                f"To apply the new project, restart the Kedro session or reload the 'opik' module.",
+                f"Opik is already configured for project '{existing_project}', "
+                f"as defined by the environment variable OPIK_PROJECT_NAME. "
+                f"The active project cannot be changed dynamically — the new project "
+                f"'{project_name}' will be ignored, and all traces will continue "
+                f"to be logged under '{existing_project}'.\n\n"
+                f"To log traces to a different project, unset the environment variable "
+                f"`OPIK_PROJECT_NAME` before running your pipeline or in the interactive session."
             )
         # Set or update the environment variable (used by Opik SDK)
         elif project_name:
@@ -156,7 +159,10 @@ class OpikTraceDataset(AbstractDataset):
     def _build_openai_client_params(self) -> dict[str, str]:
         """Validate and construct OpenAI client parameters from credentials."""
         if "openai" not in self._credentials:
-            raise DatasetError("OpenAI mode requires an 'openai' section in credentials")
+            raise DatasetError(
+                "Missing 'openai' section in OpikTraceDataset credentials. "
+                "For OpenAI mode, include an 'openai' block inside your credentials."
+            )
 
         openai_creds = self._credentials["openai"]
 
@@ -206,6 +212,7 @@ class OpikTraceDataset(AbstractDataset):
         instead, the `track` decorator is imported at the module level.
         This wrapper mimics a client interface for consistency across modes.
         """
+
         # Simple namespace-like wrapper to mimic a "client"
         class SDKClient:
             track = staticmethod(track)
@@ -218,22 +225,28 @@ class OpikTraceDataset(AbstractDataset):
             import openai  # noqa: PLC0415
             from opik.integrations.openai import track_openai  # noqa: PLC0415
         except ImportError as e:
-            raise DatasetError("OpenAI or Opik OpenAI integration not available.") from e
+            raise DatasetError(
+                "OpenAI or Opik OpenAI integration not available. "
+                "Ensure you have installed the required dependencies: "
+                "pip install openai opik"
+            ) from e
 
         params = self._build_openai_client_params()
         client = openai.OpenAI(**params)
 
         project_name = self._trace_kwargs.get("project_name")
-        if project_name and os.getenv("OPIK_PROJECT_NAME") and project_name != os.getenv("OPIK_PROJECT_NAME"):
+        env_project = os.getenv("OPIK_PROJECT_NAME")
+        if project_name and env_project and project_name != env_project:
             logger.warning(
-                "Project name passed via trace_kwargs differs from OPIK_PROJECT_NAME; "
-                "environment value will take precedence."
+                f"Project name mismatch detected: trace_kwargs specifies '{project_name}', "
+                f"but environment variable OPIK_PROJECT_NAME is set to '{env_project}'. "
+                f"The environment value will take precedence."
             )
 
         return track_openai(client, project_name=project_name) if project_name else track_openai(client)
 
     def _load_langchain_tracer(self) -> Any:
-        """Return an OpikTracer callback for LangChain or LCEL integration."""
+        """Return an OpikTracer callback for LangChain integration."""
         try:
             from opik.integrations.langchain import OpikTracer  # noqa: PLC0415
         except ImportError as e:

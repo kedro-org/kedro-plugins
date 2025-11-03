@@ -38,6 +38,7 @@ def _hash(data: str | list) -> str:
 def _get_content(data: str | list) -> str:
     """
     Extract comparable text content from a prompt.
+
     - If string: return as-is.
     - If list of messages: join their `content`.
     """
@@ -58,56 +59,58 @@ class OpikPromptDataset(AbstractDataset):
     (sdk mode) or LangChain ChatPromptTemplate (langchain mode).
 
     Sync policies:
-    - local: Local file takes precedence (default). Load_args are ignored with warning
-      since local files are the source of truth.
-    - remote: Opik version takes precedence. Load_args are respected if supported.
-    - strict: Error if local and remote differ. Load_args are respected if supported.
+        - local: Local file takes precedence (default). Load_args are ignored with warning
+          since local files are the source of truth.
+        - remote: Opik version takes precedence. Load_args are respected if supported.
+        - strict: Error if local and remote differ. Load_args are respected if supported.
 
     Examples:
         Using catalog YAML configuration:
-```yaml
-        # Local sync policy - local files are source of truth
-        customer_prompt:
-          type: opik.OpikPromptDataset
-          filepath: data/prompts/customer.json
-          prompt_name: customer_support_v1
-          prompt_type: chat
-          credentials: opik_credentials
-          sync_policy: local
-          mode: langchain
 
-        # Remote sync policy - Opik versions are source of truth
-        production_prompt:
-          type: opik.OpikPromptDataset
-          filepath: data/prompts/production.yaml
-          prompt_name: customer_support_v1
-          sync_policy: remote
-          mode: sdk
-```
+        .. code-block:: yaml
+
+            # Local sync policy - local files are source of truth
+            customer_prompt:
+              type: opik.OpikPromptDataset
+              filepath: data/prompts/customer.json
+              prompt_name: customer_support_v1
+              prompt_type: chat
+              credentials: opik_credentials
+              sync_policy: local
+              mode: langchain
+
+            # Remote sync policy - Opik versions are source of truth
+            production_prompt:
+              type: opik.OpikPromptDataset
+              filepath: data/prompts/production.yaml
+              prompt_name: customer_support_v1
+              sync_policy: remote
+              mode: sdk
 
         Using Python API:
-```python
-        from kedro_datasets_experimental.opik import OpikPromptDataset
 
-        # Create dataset for chat prompt
-        dataset = OpikPromptDataset(
-            filepath="data/prompts/customer_support.json",
-            prompt_name="customer_support_v1",
-            prompt_type="chat",
-            credentials={"api_key": "opik_...", "workspace": "my-workspace"}
-        )
+        .. code-block:: python
 
-        # Load prompt as LangChain ChatPromptTemplate
-        prompt_template = dataset.load()
-        formatted = prompt_template.format(question="How are you?")
+            from kedro_datasets_experimental.opik import OpikPromptDataset
 
-        # Save with metadata
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello, {question}"}
-        ]
-        dataset.save(messages)
-```
+            # Create dataset for chat prompt
+            dataset = OpikPromptDataset(
+                filepath="data/prompts/customer_support.json",
+                prompt_name="customer_support_v1",
+                prompt_type="chat",
+                credentials={"api_key": "opik_...", "workspace": "my-workspace"}
+            )
+
+            # Load prompt as LangChain ChatPromptTemplate
+            prompt_template = dataset.load()
+            formatted = prompt_template.format(question="How are you?")
+
+            # Save with metadata
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "Hello, {question}"}
+            ]
+            dataset.save(messages)
     """
 
     def __init__(  # noqa: PLR0913
@@ -328,7 +331,18 @@ class OpikPromptDataset(AbstractDataset):
     def _sync_strict_policy(
             self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
-        """Handle strict sync policy - error if local and remote differ."""
+        """Handle strict sync policy - error if local and remote differ.
+
+        Args:
+            local_data: Local prompt data (string or list of messages) or None.
+            opik_prompt: Opik Prompt object or None.
+
+        Returns:
+            Tuple of (Prompt object, prompt data).
+
+        Raises:
+            DatasetError: If local and remote prompts don't match or if either is missing.
+        """
         if not local_data or not opik_prompt:
             missing_parts = []
             if not local_data:
@@ -363,7 +377,18 @@ class OpikPromptDataset(AbstractDataset):
     def _sync_remote_policy(
             self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
-        """Handle remote sync policy - Opik version takes precedence."""
+        """Handle remote sync policy - Opik version takes precedence.
+
+        Args:
+            local_data: Local prompt data (string or list of messages) or None.
+            opik_prompt: Opik Prompt object or None.
+
+        Returns:
+            Tuple of (Prompt object, prompt data).
+
+        Raises:
+            DatasetError: If no remote prompt exists in Opik.
+        """
         if not opik_prompt:
             raise DatasetError(
                 f"Remote sync policy specified for '{self._prompt_name}' "
@@ -389,7 +414,18 @@ class OpikPromptDataset(AbstractDataset):
     def _sync_local_policy(
             self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
-        """Handle local sync policy - local file takes precedence."""
+        """Handle local sync policy - local file takes precedence.
+
+        Args:
+            local_data: Local prompt data (string or list of messages) or None.
+            opik_prompt: Opik Prompt object or None.
+
+        Returns:
+            Tuple of (Prompt object, prompt data).
+
+        Raises:
+            DatasetError: If no prompt found locally or in Opik.
+        """
         if local_data is not None:
             if opik_prompt is None:
                 logger.info(
@@ -444,7 +480,15 @@ class OpikPromptDataset(AbstractDataset):
     def _sync_with_opik(
             self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
-        """Synchronise local file and Opik prompt based on sync policy."""
+        """Synchronise local file and Opik prompt based on sync policy.
+
+        Args:
+            local_data: Local prompt data (string or list of messages) or None.
+            opik_prompt: Opik Prompt object or None.
+
+        Returns:
+            Tuple of (Prompt object, prompt data) after synchronisation.
+        """
         if self._sync_policy == "strict":
             return self._sync_strict_policy(local_data, opik_prompt)
         elif self._sync_policy == "remote":

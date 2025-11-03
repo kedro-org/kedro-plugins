@@ -333,7 +333,7 @@ nav:
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - Opik:
-            - Opik.OpikPromptDataset: api/kedro_datasets_experimental/opik.OpikPromptDataset.md
+            - opik.OpikPromptDataset: api/kedro_datasets_experimental/opik.OpikPromptDataset.md
         - PyPDF:
           - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:

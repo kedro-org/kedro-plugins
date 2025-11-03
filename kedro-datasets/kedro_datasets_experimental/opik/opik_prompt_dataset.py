@@ -1,4 +1,4 @@
-"""Opik prompt dataset for managing LangChain prompts."""
+"""Opik prompt dataset for seamless integration between local prompt files (JSON/YAML) and Opik prompt management"""
 
 import hashlib
 import json

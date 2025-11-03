@@ -25,7 +25,7 @@ def mock_opik():
 def mock_credentials():
     """Valid Opik credentials for testing."""
     return {
-        "api_key": "opik_test_12345",
+        "api_key": "opik_test_12345", # pragma: allowlist secret
         "workspace": "test-workspace",
         "project_name": "test-project"
     }

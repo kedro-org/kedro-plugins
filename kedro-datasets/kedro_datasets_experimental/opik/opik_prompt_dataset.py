@@ -98,7 +98,7 @@ class OpikPromptDataset(AbstractDataset):
                 filepath="data/prompts/customer_support.json",
                 prompt_name="customer_support_v1",
                 prompt_type="chat",
-                credentials={"api_key": "opik_...", "workspace": "my-workspace"}
+                credentials={"api_key": "opik_...", "workspace": "my-workspace"} # pragma: allowlist secret
             )
 
             # Load prompt as LangChain ChatPromptTemplate

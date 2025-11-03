@@ -29,7 +29,7 @@ class OpikTraceDataset(AbstractDataset):
     Using catalog YAML configuration:
     ```yaml
     opik_trace:
-      type: opik.OpikTraceDataset
+      type: kedro_datasets_experimental.opik.OpikTraceDataset
       credentials: opik_credentials
       mode: openai
     ```
@@ -140,7 +140,7 @@ class OpikTraceDataset(AbstractDataset):
                 f"as defined by the environment variable OPIK_PROJECT_NAME. "
                 f"The active project cannot be changed dynamically — the new project "
                 f"'{project_name}' will be ignored, and all traces will continue "
-                f"to be logged under '{existing_project}'.\n\n"
+                f"to be logged under '{existing_project}'.\n"
                 f"To log traces to a different project, unset the environment variable "
                 f"`OPIK_PROJECT_NAME` before running your pipeline or in the interactive session."
             )

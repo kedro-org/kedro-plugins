@@ -157,11 +157,17 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         }
 
         try:
-            # Get all documents if no specific query is provided
-            if "where" in load_args or "where_document" in load_args or "n_results" in load_args:
+            # Use get() for retrieving all documents, query() requires search parameters
+            if "where" in load_args or "where_document" in load_args:
+                # Use query when filtering
+                if "n_results" not in load_args:
+                    load_args["n_results"] = 10  # Default limit for queries
                 result = collection.query(**load_args)
             else:
-                # Get all documents in the collection
+                # Use get() for retrieving all documents
+                if "n_results" in load_args:
+                    # Convert n_results to limit for get() method
+                    load_args["limit"] = load_args.pop("n_results")
                 result = collection.get(**load_args)
 
             return {

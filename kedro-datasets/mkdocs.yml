@@ -319,6 +319,8 @@ nav:
           - yaml.YAMLDataset: api/kedro_datasets/yaml.YAMLDataset.md
       - Experimental Datasets:
         - Overview: api/kedro_datasets_experimental/index.md
+        - ChromaDB:
+          - chromadb.ChromaDBDataset: api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md
         - Databricks:
           - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - Langchain:

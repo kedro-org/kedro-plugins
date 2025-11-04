@@ -228,15 +228,14 @@ class TestChromaDBDataset:
 
     def test_empty_collection_load(self, chromadb_dataset):
         """Test loading from an empty collection."""
+        # First create an empty collection by accessing it
+        chromadb_dataset._get_collection()
+        
         # Load from empty collection should return empty lists
         loaded_data = chromadb_dataset.load()
 
         assert loaded_data["documents"] == []
         assert loaded_data["ids"] == []
         assert loaded_data["metadatas"] == []
-        # Handle numpy array or list for embeddings
-        embeddings = loaded_data["embeddings"]
-        if hasattr(embeddings, 'size'):  # numpy array
-            assert embeddings.size == 0
-        else:  # regular list
-            assert embeddings == []
+        # Check embeddings length instead of direct comparison (avoids numpy array comparison issue)
+        assert len(loaded_data["embeddings"]) == 0

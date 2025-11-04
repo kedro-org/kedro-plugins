@@ -147,8 +147,8 @@ class TestChromaDBDataset:
             )
 
     def test_http_client_config(self):
-        """Test HTTP client configuration."""
-        # This test creates the dataset but doesn't try to connect
+        """Test HTTP client configuration without connecting."""
+        # This test creates the dataset but doesn't trigger client creation
         # since we don't have a real HTTP server running
         dataset = ChromaDBDataset(
             collection_name="test_collection",
@@ -156,10 +156,14 @@ class TestChromaDBDataset:
             client_settings={"host": "localhost", "port": 8000}
         )
 
+        # Test the configuration is stored correctly
         description = dataset._describe()
         assert description["client_type"] == "http"
         assert description["client_settings"]["host"] == "localhost"
         assert description["client_settings"]["port"] == 8000
+        
+        # Test that the client is not created yet (lazy initialization)
+        assert dataset._client is None
 
     def test_metadata_handling(self, chromadb_dataset, sample_data):
         """Test that metadata is properly handled."""

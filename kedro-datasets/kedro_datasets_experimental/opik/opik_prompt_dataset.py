@@ -117,10 +117,10 @@ class OpikPromptDataset(AbstractDataset):
         self,
         filepath: str,
         prompt_name: str,
+        credentials: dict[str, Any],
         prompt_type: Literal["chat", "text"] = "text",
         sync_policy: Literal["local", "remote", "strict"] = "local",
         mode: Literal["langchain", "sdk"] = "sdk",
-        credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         **opik_kwargs: Any
@@ -165,7 +165,7 @@ class OpikPromptDataset(AbstractDataset):
 
         # Initialise Opik client
         try:
-            self._opik_client = Opik(**(credentials or {}), **opik_kwargs)
+            self._opik_client = Opik(**credentials, **opik_kwargs)
         except Exception as e:
             raise DatasetError(f"Failed to initialise Opik client: {e}")
 
@@ -246,6 +246,9 @@ class OpikPromptDataset(AbstractDataset):
 
         Returns:
             JSONDataset for .json files, YAMLDataset for .yaml/.yml files.
+
+        Raises:
+            NotImplementedError: If file extension is not supported.
         """
         if self._file_dataset is None:
             if self._filepath.suffix.lower() in [".yaml", ".yml"]:
@@ -392,7 +395,12 @@ class OpikPromptDataset(AbstractDataset):
         if not opik_prompt:
             raise DatasetError(
                 f"Remote sync policy specified for '{self._prompt_name}' "
-                f"but no remote prompt exists in Opik. Create the prompt in Opik first."
+                f"but no remote prompt exists in Opik. Create the prompt in Opik first.\n"
+                f"You can create it by:\n"
+                f"1. Switching to sync_policy='local' and running once to push local to Opik\n"
+                f"2. Using the Opik web UI at your configured workspace\n"
+                f"3. Using the Opik Python SDK directly: "
+                f"opik_client.create_prompt(name='{self._prompt_name}', prompt=...)"
             )
 
         opik_data = opik_prompt.prompt
@@ -403,7 +411,7 @@ class OpikPromptDataset(AbstractDataset):
                 pass
 
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(opik_data)):
-            logger.warning(
+            logger.info(
                 f"Creating/Overwriting local file '{self._filepath}' with remote prompt "
                 f"'{self._prompt_name}' from Opik (remote sync policy)"
             )
@@ -444,7 +452,7 @@ class OpikPromptDataset(AbstractDataset):
                     pass
 
             if _hash(_get_content(local_data)) != _hash(_get_content(opik_data)):
-                logger.warning(
+                logger.info(
                     f"Creating a new version of '{self._prompt_name}' prompt in Opik from local file "
                     f"'{self._filepath}' as local file content differs from remote (local sync policy)"
                 )
@@ -462,7 +470,7 @@ class OpikPromptDataset(AbstractDataset):
                 except json.JSONDecodeError:
                     pass
 
-            logger.warning(
+            logger.info(
                 f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' "
                 f"from Opik as local file is missing (local sync policy)"
             )

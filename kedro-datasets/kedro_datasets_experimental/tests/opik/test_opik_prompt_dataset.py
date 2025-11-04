@@ -110,14 +110,15 @@ def opik_dataset(filepath_json_chat, mock_credentials, mock_opik, mock_opik_data
 class TestOpikPromptDatasetInit:
     """Test OpikPromptDataset initialisation."""
 
-    def test_init_minimal_params(self, filepath_json_chat, mock_opik, mock_opik_dataset):
+    def test_init_minimal_params(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test initialisation with minimal required parameters."""
         mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
-            prompt_type="chat"
+            prompt_type="chat",
+            credentials=mock_credentials
         )
 
         assert dataset._prompt_name == "test-prompt"
@@ -156,7 +157,8 @@ class TestOpikPromptDatasetInit:
             OpikPromptDataset(
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
-                prompt_type="invalid"
+                prompt_type="invalid",
+                credentials=mock_credentials
             )
 
     def test_init_invalid_sync_policy(self, filepath_json_chat, mock_opik):
@@ -166,7 +168,8 @@ class TestOpikPromptDatasetInit:
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
                 prompt_type="chat",
-                sync_policy="invalid"
+                sync_policy="invalid",
+                credentials=mock_credentials
             )
 
     def test_init_invalid_mode(self, filepath_json_chat, mock_opik):
@@ -176,7 +179,8 @@ class TestOpikPromptDatasetInit:
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
                 prompt_type="chat",
-                mode="invalid"
+                mode="invalid",
+                credentials=mock_credentials
             )
 
     def test_init_unsupported_file_extension(self, tmp_path, mock_opik):
@@ -188,7 +192,8 @@ class TestOpikPromptDatasetInit:
             OpikPromptDataset(
                 filepath=str(unsupported_file),
                 prompt_name="test-prompt",
-                prompt_type="text"
+                prompt_type="text",
+                credentials=mock_credentials
             )
 
     def test_init_opik_client_failure(self, filepath_json_chat, mock_credentials):
@@ -215,7 +220,8 @@ class TestOpikPromptDatasetInit:
                         filepath=filepath_json_chat,
                         prompt_name="test-prompt",
                         prompt_type="chat",
-                        mode="langchain"
+                        mode="langchain",
+                        credentials=mock_credentials
                     )
 
 

@@ -65,9 +65,7 @@ class OpikPromptDataset(AbstractDataset):
         - strict: Error if local and remote differ. Load_args are respected if supported.
 
     Examples:
-        Using catalog YAML configuration:
-
-        .. code-block:: yaml
+        Using catalog YAML configuration::
 
             # Local sync policy - local files are source of truth
             customer_prompt:
@@ -87,9 +85,7 @@ class OpikPromptDataset(AbstractDataset):
               sync_policy: remote
               mode: sdk
 
-        Using Python API:
-
-        .. code-block:: python
+        Using Python API::
 
             from kedro_datasets_experimental.opik import OpikPromptDataset
 
@@ -98,7 +94,7 @@ class OpikPromptDataset(AbstractDataset):
                 filepath="data/prompts/customer_support.json",
                 prompt_name="customer_support_v1",
                 prompt_type="chat",
-                credentials={"api_key": "opik_...", "workspace": "my-workspace"} # pragma: allowlist secret
+                credentials={"api_key": "opik_...", "workspace": "my-workspace"}  # pragma: allowlist secret
             )
 
             # Load prompt as LangChain ChatPromptTemplate

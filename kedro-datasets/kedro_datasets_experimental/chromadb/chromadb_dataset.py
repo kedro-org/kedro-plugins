@@ -215,6 +215,9 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
             collection.add(**add_kwargs)
 
         except Exception as e:
+    raise DatasetError(
+        f"Failed to load data from ChromaDB collection '{self._collection_name}'"
+    ) from e
             raise DatasetError(f"Failed to save data to ChromaDB collection '{self._collection_name}': {e}")
 
     def exists(self) -> bool:

@@ -86,8 +86,8 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         self._save_args = save_args or {}
         self.metadata = metadata
 
-        # Initialize ChromaDB client
-        self._client = self._create_client()
+        # Initialize ChromaDB client - delay creation until needed
+        self._client = None
         self._collection = None
 
     def _create_client(self) -> chromadb.Client:
@@ -111,14 +111,21 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 f"Must be one of: 'ephemeral', 'persistent', 'http'"
             )
 
+    def _get_client(self):
+        """Get or create the ChromaDB client."""
+        if self._client is None:
+            self._client = self._create_client()
+        return self._client
+
     def _get_collection(self):
         """Get or create the ChromaDB collection."""
         if self._collection is None:
+            client = self._get_client()
             try:
-                self._collection = self._client.get_collection(name=self._collection_name)
+                self._collection = client.get_collection(name=self._collection_name)
             except Exception:
                 # Collection doesn't exist, create it
-                self._collection = self._client.create_collection(name=self._collection_name)
+                self._collection = client.create_collection(name=self._collection_name)
         return self._collection
 
     def _describe(self) -> dict[str, Any]:
@@ -207,7 +214,14 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
     def exists(self) -> bool:
         """Checks if the collection exists and contains data."""
         try:
-            collection = self._get_collection()
+            # Use the same collection instance if we already have it
+            if self._collection is not None:
+                count = self._collection.count()
+                return count > 0
+
+            # Otherwise try to get the collection from the client
+            client = self._get_client()
+            collection = client.get_collection(name=self._collection_name)
             count = collection.count()
             return count > 0
         except Exception:

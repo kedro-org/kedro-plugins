@@ -2,19 +2,12 @@
 
 from __future__ import annotations
 
-import logging
-from pathlib import PurePosixPath
-from typing import Any, NoReturn
+from typing import Any
 
 import chromadb
-from kedro.io.core import (
-    AbstractDataset,
-    DatasetError,
-    get_filepath_str,
-    get_protocol_and_path,
-)
-
-logger = logging.getLogger(__name__)
+from chromadb.api.models.Collection import Collection
+from chromadb.errors import NotFoundError
+from kedro.io.core import AbstractDataset, DatasetError
 
 
 class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
@@ -53,6 +46,9 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         >>> print(loaded_data["documents"])  # ['This is a document', 'This is another document']
 
     """
+    # Attribute annotations for IDEs / type-checkers (instance values set in __init__)
+    _client: chromadb.Client | None
+    _collection: Collection | None
 
     def __init__(  # noqa: PLR0913
         self,
@@ -85,8 +81,7 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         self._load_args = load_args or {}
         self._save_args = save_args or {}
         self.metadata = metadata
-
-        # Initialize ChromaDB client - delay creation until needed
+        # Initialize instance attributes (actual annotations are at class-level)
         self._client = None
         self._collection = None
 
@@ -117,15 +112,19 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
             self._client = self._create_client()
         return self._client
 
-    def _get_collection(self):
+    def _get_collection(self, create_if_missing: bool = True):
         """Get or create the ChromaDB collection."""
         if self._collection is None:
             client = self._get_client()
             try:
                 self._collection = client.get_collection(name=self._collection_name)
-            except Exception:
-                # Collection doesn't exist, create it
-                self._collection = client.create_collection(name=self._collection_name)
+            except NotFoundError:
+                if create_if_missing:
+                    # Collection doesn't exist, create it
+                    self._collection = client.create_collection(name=self._collection_name)
+                else:
+                    # Don't create collection, return None instead of raising
+                    return None
         return self._collection
 
     def _describe(self) -> dict[str, Any]:
@@ -148,7 +147,11 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 - "ids": List of document IDs
                 - "embeddings": List of embeddings (if included)
         """
-        collection = self._get_collection()
+        collection = self._get_collection(create_if_missing=False)
+
+        # If collection doesn't exist, return empty result rather than creating it
+        if collection is None:
+            return {"documents": [], "metadatas": [], "ids": [], "embeddings": []}
 
         # Prepare load arguments
         load_args = {
@@ -177,7 +180,9 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 "embeddings": result.get("embeddings", [])
             }
         except Exception as e:
-            raise DatasetError(f"Failed to load data from ChromaDB collection '{self._collection_name}': {e}")
+            raise DatasetError(
+                f"Failed to load data from ChromaDB collection '{self._collection_name}': {e}"
+            ) from e
 
     def save(self, data: dict[str, Any]) -> None:
         """Saves data to the ChromaDB collection.
@@ -195,7 +200,10 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         if "documents" not in data or "ids" not in data:
             raise DatasetError("Data must contain 'documents' and 'ids' keys")
 
-        collection = self._get_collection()
+        collection = self._get_collection(create_if_missing=True)
+
+        if collection is None:
+            raise DatasetError(f"Failed to access or create ChromaDB collection '{self._collection_name}'")
 
         try:
             # Prepare the data for ChromaDB
@@ -215,10 +223,9 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
             collection.add(**add_kwargs)
 
         except Exception as e:
-    raise DatasetError(
-        f"Failed to load data from ChromaDB collection '{self._collection_name}'"
-    ) from e
-            raise DatasetError(f"Failed to save data to ChromaDB collection '{self._collection_name}': {e}")
+            raise DatasetError(
+                f"Failed to save data to ChromaDB collection '{self._collection_name}': {e}"
+            ) from e
 
     def exists(self) -> bool:
         """Checks if the collection exists and contains data."""
@@ -229,8 +236,7 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 return count > 0
 
             # Otherwise try to get the collection from the client
-            client = self._get_client()
-            collection = client.get_collection(name=self._collection_name)
+            collection = self._get_collection(create_if_missing=False)
             count = collection.count()
             return count > 0
         except Exception:

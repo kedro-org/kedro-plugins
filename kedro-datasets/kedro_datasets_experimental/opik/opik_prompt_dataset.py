@@ -71,7 +71,7 @@ class OpikPromptDataset(AbstractDataset):
 
             # Local sync policy - local files are source of truth
             customer_prompt:
-              type: opik.OpikPromptDataset
+              type: kedro_datasets_experimental.opik.OpikPromptDataset
               filepath: data/prompts/customer.json
               prompt_name: customer_support_v1
               prompt_type: chat
@@ -81,7 +81,7 @@ class OpikPromptDataset(AbstractDataset):
 
             # Remote sync policy - Opik versions are source of truth
             production_prompt:
-              type: opik.OpikPromptDataset
+              type: kedro_datasets_experimental.opik.OpikPromptDataset
               filepath: data/prompts/production.yaml
               prompt_name: customer_support_v1
               sync_policy: remote
@@ -114,16 +114,16 @@ class OpikPromptDataset(AbstractDataset):
     """
 
     def __init__(  # noqa: PLR0913
-            self,
-            filepath: str,
-            prompt_name: str,
-            prompt_type: Literal["chat", "text"] = "text",
-            sync_policy: Literal["local", "remote", "strict"] = "local",
-            mode: Literal["langchain", "sdk"] = "sdk",
-            credentials: dict[str, Any] | None = None,
-            load_args: dict[str, Any] | None = None,
-            save_args: dict[str, Any] | None = None,
-            **opik_kwargs: Any
+        self,
+        filepath: str,
+        prompt_name: str,
+        prompt_type: Literal["chat", "text"] = "text",
+        sync_policy: Literal["local", "remote", "strict"] = "local",
+        mode: Literal["langchain", "sdk"] = "sdk",
+        credentials: dict[str, Any] | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+        **opik_kwargs: Any
     ):
         """Initialise OpikPromptDataset with local and remote configuration.
 
@@ -173,11 +173,11 @@ class OpikPromptDataset(AbstractDataset):
         self._ensure_dataset_exists()
 
     def _validate_init_params(
-            self,
-            filepath: str,
-            prompt_type: str,
-            sync_policy: str,
-            mode: str
+        self,
+        filepath: str,
+        prompt_type: str,
+        sync_policy: str,
+        mode: str
     ) -> None:
         """Validate initialisation parameters.
 
@@ -329,7 +329,7 @@ class OpikPromptDataset(AbstractDataset):
             return None, None
 
     def _sync_strict_policy(
-            self, local_data: str | list | None, opik_prompt: Prompt | None
+        self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
         """Handle strict sync policy - error if local and remote differ.
 
@@ -375,7 +375,7 @@ class OpikPromptDataset(AbstractDataset):
         return opik_prompt, opik_data
 
     def _sync_remote_policy(
-            self, local_data: str | list | None, opik_prompt: Prompt | None
+        self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
         """Handle remote sync policy - Opik version takes precedence.
 
@@ -412,7 +412,7 @@ class OpikPromptDataset(AbstractDataset):
         return opik_prompt, opik_data
 
     def _sync_local_policy(
-            self, local_data: str | list | None, opik_prompt: Prompt | None
+        self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
         """Handle local sync policy - local file takes precedence.
 
@@ -478,7 +478,7 @@ class OpikPromptDataset(AbstractDataset):
         )
 
     def _sync_with_opik(
-            self, local_data: str | list | None, opik_prompt: Prompt | None
+        self, local_data: str | list | None, opik_prompt: Prompt | None
     ) -> tuple[Prompt | None, str | list | None]:
         """Synchronise local file and Opik prompt based on sync policy.
 
@@ -497,7 +497,7 @@ class OpikPromptDataset(AbstractDataset):
             return self._sync_local_policy(local_data, opik_prompt)
 
     def _convert_to_langchain_template(
-            self, prompt_data: str | list | None
+        self, prompt_data: str | list | None
     ) -> "ChatPromptTemplate":
         """Convert prompt data to LangChain ChatPromptTemplate.
 

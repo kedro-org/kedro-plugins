@@ -190,7 +190,7 @@ langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
 langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 opik-opikpromptdataset = ["opik>=1.0.0"]
-opik = ["kedro-datasets[opik-opikpromptdataset]"]
+opik = ["kedro-datasets[opik-opikpromptdataset]", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -334,7 +334,7 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
-    "opik>=1.0.0",
+    "opik",
     "optuna",
     "u8darts[all]",
     "pypdf>=3.0.0",

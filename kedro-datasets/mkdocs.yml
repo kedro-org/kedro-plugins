@@ -175,6 +175,9 @@ plugins:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
           - api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md: Safe tensor serialization
 
+        Experimental Hyperparameter Tuning:
+          - api/kedro_datasets_experimental/optuna.StudyDataset.md: Distributed hyperparameter tuning with Optuna
+
         Experimental Specialized Formats:
           - api/kedro_datasets_experimental/prophet.ProphetModelDataset.md: Time series with Prophet
           - api/kedro_datasets_experimental/video.VideoDataset.md: Video file processing
@@ -334,6 +337,8 @@ nav:
           - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
+        - Optuna:
+          - optuna.StudyDataset: api/kedro_datasets_experimental/optuna.StudyDataset.md
         - PyPDF:
           - pypdf.PDFDataset: api/kedro_datasets_experimental/pypdf.PDFDataset.md
         - Polars:

@@ -1,3 +1,5 @@
+import uuid
+
 import chromadb
 import pytest
 from kedro.io.core import DatasetError
@@ -27,7 +29,6 @@ def sample_data():
 def chromadb_dataset():
     """ChromaDB dataset with ephemeral client for testing."""
     # Use unique collection name to avoid test interference
-    import uuid
     unique_name = f"test_collection_{uuid.uuid4().hex[:8]}"
     return ChromaDBDataset(
         collection_name=unique_name,
@@ -39,7 +40,6 @@ def chromadb_dataset():
 def persistent_chromadb_dataset(tmp_path):
     """ChromaDB dataset with persistent client for testing."""
     # Use unique collection name to avoid test interference
-    import uuid
     unique_name = f"test_collection_{uuid.uuid4().hex[:8]}"
     return ChromaDBDataset(
         collection_name=unique_name,
@@ -115,7 +115,7 @@ class TestChromaDBDataset:
             "ids": ["initial_doc"]
         }
         chromadb_dataset.save(initial_data)
-        
+
         # Now try with custom embeddings that match the established dimension
         # ChromaDB uses 384-dim embeddings by default, so skip this test
         # or use a collection with compatible embedding function
@@ -180,7 +180,7 @@ class TestChromaDBDataset:
         assert description["client_type"] == "http"
         assert description["client_settings"]["host"] == "localhost"
         assert description["client_settings"]["port"] == 8000
-        
+
         # Test that the client is not created yet (lazy initialization)
         assert dataset._client is None
 
@@ -204,9 +204,8 @@ class TestChromaDBDataset:
     def test_collection_reuse(self, sample_data):
         """Test that multiple dataset instances can use the same collection."""
         # Use a unique collection name for this test
-        import uuid
         collection_name = f"shared_collection_{uuid.uuid4().hex[:8]}"
-        
+
         # Create two dataset instances pointing to the same collection
         dataset1 = ChromaDBDataset(collection_name=collection_name, client_type="ephemeral")
         dataset2 = ChromaDBDataset(collection_name=collection_name, client_type="ephemeral")
@@ -230,7 +229,7 @@ class TestChromaDBDataset:
         """Test loading from an empty collection."""
         # First create an empty collection by accessing it
         chromadb_dataset._get_collection()
-        
+
         # Load from empty collection should return empty lists
         loaded_data = chromadb_dataset.load()
 

@@ -116,13 +116,13 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         self._study_name = self._validate_study_name(study_name=study_name)
 
         credentials = self._validate_credentials(backend=backend, credentials=credentials)
-        storage = URL.create(
+        storage_url = URL.create(
             drivername=backend,
             database=database,
             **credentials,
         )
 
-        self._storage = str(storage)
+        self._storage_url = storage_url
         self.metadata = metadata
 
         filepath = None
@@ -286,8 +286,10 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         pruner_config = load_args.pop("pruner")
         pruner = self._get_pruner(pruner_config)
 
+        storage_url_str = self._storage_url.render_as_string(hide_password=False)
+        storage = optuna.storages.RDBStorage(url=storage_url_str)
         study = optuna.load_study(
-            storage=self._storage,
+            storage=storage,
             study_name=self._get_load_study_name(),
             sampler=sampler,
             pruner=pruner,
@@ -297,25 +299,29 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
 
     def save(self, study: optuna.Study) -> None:
         save_study_name = self._get_save_study_name()
+
+        storage_url_str = self._storage_url.render_as_string(hide_password=False)
         if self._backend == "sqlite":
             os.makedirs(os.path.dirname(self._filepath), exist_ok=True)
 
             if not os.path.isfile(self._filepath):
                 optuna.create_study(
-                    storage=self._storage,
+                    storage=storage_url_str,
                 )
+
+        storage = optuna.storages.RDBStorage(url=storage_url_str)
 
         # To overwrite an existing study, we need to first delete it if it exists
         if self._study_name_exists(save_study_name):
             optuna.delete_study(
-                storage=self._storage,
+                storage=storage,
                 study_name=save_study_name,
             )
 
         optuna.copy_study(
             from_study_name=study.study_name,
             from_storage=study._storage,
-            to_storage=self._storage,
+            to_storage=storage,
             to_study_name=save_study_name,
         )
 
@@ -323,11 +329,15 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         if self._backend == "sqlite" and not os.path.isfile(self._database):
             return False
 
-        study_names = optuna.study.get_all_study_names(storage=self._storage)
+        storage_url_str = self._storage_url.render_as_string(hide_password=False)
+        storage = optuna.storages.RDBStorage(url=storage_url_str)
+        study_names = optuna.study.get_all_study_names(storage=storage)
         return study_name in study_names
 
     def _study_name_glob(self, pattern):
-        study_names = optuna.study.get_all_study_names(storage=self._storage)
+        storage_url_str = self._storage_url.render_as_string(hide_password=False)
+        storage = optuna.storages.RDBStorage(url=storage_url_str)
+        study_names = optuna.study.get_all_study_names(storage=storage)
         for study_name in study_names:
             if fnmatch.fnmatch(study_name, pattern):
                 yield study_name

@@ -59,54 +59,58 @@ class OpikPromptDataset(AbstractDataset):
     (sdk mode) or LangChain ChatPromptTemplate (langchain mode).
 
     Sync policies:
-        - local: Local file takes precedence (default). Load_args are ignored with warning
-          since local files are the source of truth.
-        - remote: Opik version takes precedence. Load_args are respected if supported.
-        - strict: Error if local and remote differ. Load_args are respected if supported.
+    - local: Local file takes precedence (default). Load_args are ignored with warning
+      since local files are the source of truth.
+    - remote: Opik version takes precedence. Load_args are respected if supported.
+    - strict: Error if local and remote differ. Load_args are respected if supported.
 
     Examples:
-        Using catalog YAML configuration::
+        Using catalog YAML configuration:
 
-            # Local sync policy - local files are source of truth
-            customer_prompt:
-              type: kedro_datasets_experimental.opik.OpikPromptDataset
-              filepath: data/prompts/customer.json
-              prompt_name: customer_support_v1
-              prompt_type: chat
-              credentials: opik_credentials
-              sync_policy: local
-              mode: langchain
+        ```yaml
+        # Local sync policy - local files are source of truth
+        customer_prompt:
+          type: kedro_datasets_experimental.opik.OpikPromptDataset
+          filepath: data/prompts/customer.json
+          prompt_name: customer_support_v1
+          prompt_type: chat
+          credentials: opik_credentials
+          sync_policy: local
+          mode: langchain
 
-            # Remote sync policy - Opik versions are source of truth
-            production_prompt:
-              type: kedro_datasets_experimental.opik.OpikPromptDataset
-              filepath: data/prompts/production.yaml
-              prompt_name: customer_support_v1
-              sync_policy: remote
-              mode: sdk
+        # Remote sync policy - Opik versions are source of truth
+        production_prompt:
+          type: kedro_datasets_experimental.opik.OpikPromptDataset
+          filepath: data/prompts/production.yaml
+          prompt_name: customer_support_v1
+          sync_policy: remote
+          mode: sdk
+        ```
 
-        Using Python API::
+        Using Python API:
 
-            from kedro_datasets_experimental.opik import OpikPromptDataset
+        ```python
+        from kedro_datasets_experimental.opik import OpikPromptDataset
 
-            # Create dataset for chat prompt
-            dataset = OpikPromptDataset(
-                filepath="data/prompts/customer_support.json",
-                prompt_name="customer_support_v1",
-                prompt_type="chat",
-                credentials={"api_key": "opik_...", "workspace": "my-workspace"}  # pragma: allowlist secret
-            )
+        # Create dataset for chat prompt
+        dataset = OpikPromptDataset(
+            filepath="data/prompts/customer_support.json",
+            prompt_name="customer_support_v1",
+            prompt_type="chat",
+            credentials={"api_key": "opik_...", "workspace": "my-workspace"}  # pragma: allowlist secret
+        )
 
-            # Load prompt as LangChain ChatPromptTemplate
-            prompt_template = dataset.load()
-            formatted = prompt_template.format(question="How are you?")
+        # Load prompt as LangChain ChatPromptTemplate
+        prompt_template = dataset.load()
+        formatted = prompt_template.format(question="How are you?")
 
-            # Save with metadata
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Hello, {question}"}
-            ]
-            dataset.save(messages)
+        # Save with metadata
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Hello, {question}"}
+        ]
+        dataset.save(messages)
+        ```
     """
 
     def __init__(  # noqa: PLR0913

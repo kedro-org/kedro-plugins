@@ -97,7 +97,6 @@ def mock_opik_dataset():
 @pytest.fixture
 def opik_dataset(filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
     """Basic OpikPromptDataset for testing."""
-    mock_opik.get_dataset.return_value = mock_opik_dataset
     return OpikPromptDataset(
         filepath=filepath_json_chat,
         prompt_name="test-prompt",
@@ -110,9 +109,23 @@ def opik_dataset(filepath_json_chat, mock_credentials, mock_opik, mock_opik_data
 class TestOpikPromptDatasetInit:
     """Test OpikPromptDataset initialisation."""
 
+    def test_init_minimal_params(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
+        """Test initialisation with minimal required parameters."""
+
+        dataset = OpikPromptDataset(
+            filepath=filepath_json_chat,
+            prompt_name="test-prompt",
+            prompt_type="chat",
+            credentials=mock_credentials
+        )
+
+        assert dataset._prompt_name == "test-prompt"
+        assert dataset._prompt_type == "chat"
+        assert dataset._sync_policy == "local"  # default
+        assert dataset._mode == "sdk"  # default
+
     def test_init_all_params(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test initialisation with all parameters."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         load_args = {"version": 1}  # For future use
         save_args = {"metadata": {"environment": "test"}}
@@ -195,7 +208,6 @@ class TestOpikPromptDatasetInit:
 
     def test_init_langchain_mode_without_package(self, filepath_json_chat, mock_opik, mock_opik_dataset):
         """Test initialisation with langchain mode when package not installed."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         with patch("kedro_datasets_experimental.opik.opik_prompt_dataset.TYPE_CHECKING", False):
             with patch.dict("sys.modules", {"langchain_core.prompts": None}):
@@ -214,7 +226,6 @@ class TestOpikPromptDatasetSave:
 
     def test_save_text_prompt(self, filepath_json_text, mock_credentials, mock_opik, mock_opik_dataset):
         """Test saving a text prompt."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=filepath_json_text,
@@ -234,7 +245,6 @@ class TestOpikPromptDatasetSave:
 
     def test_save_chat_prompt(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test saving a chat prompt."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=filepath_json_chat,
@@ -257,7 +267,6 @@ class TestOpikPromptDatasetSave:
 
     def test_save_with_metadata(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test saving a prompt with additional metadata."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         save_args = {"metadata": {"environment": "production", "version": "2.0"}}
         dataset = OpikPromptDataset(
@@ -283,7 +292,6 @@ class TestOpikPromptDatasetSave:
 
     def test_save_invalid_text_format(self, filepath_json_text, mock_credentials, mock_opik, mock_opik_dataset):
         """Test saving invalid text format raises DatasetError."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=filepath_json_text,
@@ -326,7 +334,6 @@ class TestOpikPromptDatasetLoad:
 
     def test_load_langchain_mode_text(self, filepath_json_text, mock_credentials, mock_opik, mock_opik_dataset):
         """Test successful load in LangChain mode with text prompt."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         mock_text_prompt = Mock()
         mock_text_prompt.prompt = "Answer the question: {question}"
@@ -352,7 +359,6 @@ class TestOpikPromptDatasetLoad:
     def test_load_args_warning_local_policy(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset,
                                             mock_opik_prompt):
         """Test that load_args produce warning in local sync policy."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.return_value = mock_opik_prompt
 
         dataset = OpikPromptDataset(
@@ -379,7 +385,6 @@ class TestOpikPromptDatasetSyncPolicies:
 
     def test_sync_local_no_remote(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test local sync policy when no remote prompt exists."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.side_effect = Exception("Prompt not found")
 
         dataset = OpikPromptDataset(
@@ -398,7 +403,6 @@ class TestOpikPromptDatasetSyncPolicies:
 
     def test_sync_remote_no_remote_fails(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test remote sync policy when no remote prompt exists raises DatasetError."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.return_value = None
 
         dataset = OpikPromptDataset(
@@ -416,7 +420,6 @@ class TestOpikPromptDatasetSyncPolicies:
     def test_sync_strict_no_local_fails(self, tmp_path, mock_credentials, mock_opik, mock_opik_dataset, mock_opik_prompt):
         """Test strict sync policy when no local file exists raises DatasetError."""
         non_existent_file = (tmp_path / "nonexistent.json").as_posix()
-        mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.return_value = mock_opik_prompt
 
         dataset = OpikPromptDataset(
@@ -433,7 +436,6 @@ class TestOpikPromptDatasetSyncPolicies:
 
     def test_sync_strict_mismatch_fails(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test strict sync policy when local and remote differ raises DatasetError."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         # Create different remote prompt
         mock_remote_prompt = Mock()
@@ -457,7 +459,6 @@ class TestOpikPromptDatasetSyncPolicies:
 
     def test_sync_remote_updates_local(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test remote sync policy updates local file when different."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         # Remote has different content
         mock_remote_prompt = Mock()
@@ -496,7 +497,6 @@ class TestOpikPromptDatasetFileFormats:
     def test_file_format_loading(self, request, mock_credentials, mock_opik, mock_opik_dataset, mock_opik_prompt, filepath_fixture, prompt_type):
         """Test loading different file formats."""
         filepath = request.getfixturevalue(filepath_fixture)
-        mock_opik.get_dataset.return_value = mock_opik_dataset
         mock_opik.get_prompt.return_value = mock_opik_prompt
 
         dataset = OpikPromptDataset(
@@ -533,7 +533,6 @@ class TestOpikPromptDatasetUtilityMethods:
     def test_file_dataset_property(self, request, mock_credentials, mock_opik, mock_opik_dataset, filepath_fixture, expected_class):
         """Test file_dataset property returns correct dataset type."""
         filepath = request.getfixturevalue(filepath_fixture)
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=filepath,
@@ -584,7 +583,6 @@ class TestOpikPromptDatasetUtilityMethods:
     def test_preview_nonexistent_file(self, tmp_path, mock_credentials, mock_opik, mock_opik_dataset):
         """Test preview returns error message for nonexistent file."""
         nonexistent_file = (tmp_path / "nonexistent.json").as_posix()
-        mock_opik.get_dataset.return_value = mock_opik_dataset
 
         dataset = OpikPromptDataset(
             filepath=nonexistent_file,

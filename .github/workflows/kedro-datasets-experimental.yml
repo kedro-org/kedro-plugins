@@ -1,4 +1,6 @@
 name: Run checks on kedro-datasets-experimental
+permissions:
+  contents: read
 
 on:
   workflow_call:

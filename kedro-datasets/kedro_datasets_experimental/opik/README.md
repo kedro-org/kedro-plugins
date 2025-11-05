@@ -1,6 +1,6 @@
 # Opik Integration
 
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Opik](https://img.shields.io/badge/opik-integration-purple)](https://www.comet.com/site/products/opik/)
 
@@ -41,7 +41,7 @@ pip install "kedro-datasets[opik]"
 ```
 
 #### Requirements:
-- Python 3.9+
+- Python 3.10+
 - Kedro
 - Opik SDK
 - LangChain Core (optional, for `mode="langchain"`)

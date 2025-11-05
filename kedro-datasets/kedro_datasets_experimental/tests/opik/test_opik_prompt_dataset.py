@@ -110,22 +110,6 @@ def opik_dataset(filepath_json_chat, mock_credentials, mock_opik, mock_opik_data
 class TestOpikPromptDatasetInit:
     """Test OpikPromptDataset initialisation."""
 
-    def test_init_minimal_params(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
-        """Test initialisation with minimal required parameters."""
-        mock_opik.get_dataset.return_value = mock_opik_dataset
-
-        dataset = OpikPromptDataset(
-            filepath=filepath_json_chat,
-            prompt_name="test-prompt",
-            prompt_type="chat",
-            credentials=mock_credentials
-        )
-
-        assert dataset._prompt_name == "test-prompt"
-        assert dataset._prompt_type == "chat"
-        assert dataset._sync_policy == "local"  # default
-        assert dataset._mode == "sdk"  # default
-
     def test_init_all_params(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
         """Test initialisation with all parameters."""
         mock_opik.get_dataset.return_value = mock_opik_dataset

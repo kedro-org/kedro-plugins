@@ -72,7 +72,7 @@ class LangfusePromptDataset(AbstractDataset):
         ```yaml
         # Local sync policy - local files are source of truth
         intent_prompt:
-          type: langfuse.LangfusePromptDataset
+          type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
           filepath: data/prompts/intent.json
           prompt_name: "intent-classifier"
           prompt_type: "chat"

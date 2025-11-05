@@ -25,7 +25,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
         ```yaml
         langfuse_trace:
-          type: langfuse.LangfuseTraceDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
           credentials: langfuse_credentials
           mode: openai
         ```
@@ -39,21 +39,21 @@ class LangfuseTraceDataset(AbstractDataset):
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...", # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
+                "secret_key": "sk_...",  # pragma: allowlist secret
+                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
             },
-            mode="openai"
+            mode="openai",
         )
 
         # With custom host
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...", # pragma: allowlist secret
+                "secret_key": "sk_...",  # pragma: allowlist secret
                 "host": "https://custom.langfuse.com",
-                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
+                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
             },
-            mode="openai"
+            mode="openai",
         )
 
         # Load tracing client

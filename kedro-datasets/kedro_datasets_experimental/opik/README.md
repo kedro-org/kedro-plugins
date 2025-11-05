@@ -245,21 +245,6 @@ opik_credentials:
   project_name: "your-project"  # optional
 ```
 
-##### Shared Credentials with OpikTraceDataset
-```yaml
-# Both datasets can share the same credentials
-opik_credentials:
-  # Opik platform credentials
-  api_key: "opik_..."  # pragma: allowlist secret
-  workspace: "my-workspace"
-  project_name: "my-project"
-
-  # OpenAI credentials for OpikTraceDataset
-  openai:
-    openai_api_key: "sk-..."  # pragma: allowlist secret
-    openai_api_base: "https://api.openai.com/v1"
-```
-
 ### Real-World Use Cases
 
 ##### Customer Support Assistant

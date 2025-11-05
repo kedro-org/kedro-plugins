@@ -59,10 +59,10 @@ class OpikPromptDataset(AbstractDataset):
     (sdk mode) or LangChain ChatPromptTemplate (langchain mode).
 
     Sync policies:
-    - local: Local file takes precedence (default). Load_args are ignored with warning
-      since local files are the source of truth.
-    - remote: Opik version takes precedence. Load_args are respected if supported.
-    - strict: Error if local and remote differ. Load_args are respected if supported.
+        local: Local file takes precedence (default). Load_args are ignored with warning
+            since local files are the source of truth.
+        remote: Opik version takes precedence. Load_args are respected if supported.
+        strict: Error if local and remote differ. Load_args are respected if supported.
 
     Examples:
         Using catalog YAML configuration:

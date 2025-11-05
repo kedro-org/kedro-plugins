@@ -55,11 +55,12 @@ class LangfusePromptDataset(AbstractDataset):
     and Langfuse prompt management, supporting version control, labelling, and
     different synchronization policies.
 
-    On save: Creates a new version of prompt in Langfuse with the local data.
-    On load: synchronizes based on sync_policy and returns raw Langfuse object
+    - On save: Creates a new version of prompt in Langfuse with the local data.
+    - On load: synchronizes based on sync_policy and returns raw Langfuse object
     (sdk mode) or LangChain ChatPromptTemplate (langchain mode)
 
     Sync policies:
+
     - local: local file takes precedence (default). load_args (version/label) are
       ignored with warning and latest prompt from langfuse is loaded if available,
       since local files are the source of truth.

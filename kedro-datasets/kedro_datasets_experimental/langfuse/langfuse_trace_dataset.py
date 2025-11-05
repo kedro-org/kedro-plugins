@@ -15,6 +15,7 @@ class LangfuseTraceDataset(AbstractDataset):
     Environment variables are automatically configured during initialization.
 
     Modes:
+
     - langchain: Returns CallbackHandler for LangChain integration
     - openai: Returns wrapped OpenAI client with automatic tracing
     - sdk: Returns raw Langfuse client for manual tracing

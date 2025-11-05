@@ -339,7 +339,6 @@ nav:
         - Opik:
           - opik.OpikPromptDataset: api/kedro_datasets_experimental/opik.OpikPromptDataset.md
           - opik.OpikTraceDataset: api/kedro_datasets_experimental/opik.OpikTraceDataset.md
-
         - Optuna:
           - optuna.StudyDataset: api/kedro_datasets_experimental/optuna.StudyDataset.md
         - PyPDF:

@@ -2,7 +2,6 @@ import os
 from typing import Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
-from langfuse import Langfuse
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}

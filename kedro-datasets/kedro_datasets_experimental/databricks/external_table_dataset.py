@@ -79,9 +79,9 @@ class ExternalTableDataset(BaseTableDataset):
 from kedro_datasets.databricks import ExternalTableDataset
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-import importlib_metadata
+import importlib.metadata
 
-DELTA_VERSION = importlib_metadata.version("delta-spark")
+DELTA_VERSION = importlib.metadata.version("delta-spark")
 major_version = int(DELTA_VERSION.split(".")[0])
 delta_package = (
     f"io.delta:delta-spark_2.13:{DELTA_VERSION}"

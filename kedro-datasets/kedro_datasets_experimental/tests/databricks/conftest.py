@@ -6,14 +6,13 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 import os
 
-# importlib_metadata needs backport for python 3.8 and older
-import importlib_metadata
+import importlib.metadata
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-DELTA_VERSION = importlib_metadata.version("delta-spark")
+DELTA_VERSION = importlib.metadata.version("delta-spark")
 
 
 @pytest.fixture(scope="class", autouse=True)

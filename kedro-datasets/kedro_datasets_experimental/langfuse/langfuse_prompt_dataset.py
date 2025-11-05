@@ -55,17 +55,19 @@ class LangfusePromptDataset(AbstractDataset):
     and Langfuse prompt management, supporting version control, labelling, and
     different synchronization policies.
 
-    - On save: Creates a new version of prompt in Langfuse with the local data.
-    - On load: synchronizes based on sync_policy and returns raw Langfuse object
-    (sdk mode) or LangChain ChatPromptTemplate (langchain mode)
+    **On save / load behaviour:**
 
-    Sync policies:
+    - **On save:** Creates a new version of the prompt in Langfuse with the local data.
+    - **On load:** Synchronizes based on ``sync_policy`` and returns a raw Langfuse object
+      (SDK mode) or a LangChain ``ChatPromptTemplate`` (langchain mode).
 
-    - local: local file takes precedence (default). load_args (version/label) are
-      ignored with warning and latest prompt from langfuse is loaded if available,
+    **Sync policies:**
+
+    - **local:** Local file takes precedence (default). ``load_args`` (version/label) are
+      ignored with a warning, and the latest prompt from Langfuse is loaded if available,
       since local files are the source of truth.
-    - remote: Langfuse version takes precedence. load_args are respected.
-    - strict: error if local and remote differ. load_args are respected.
+    - **remote:** Langfuse version takes precedence. ``load_args`` are respected.
+    - **strict:** Raises an error if local and remote differ. ``load_args`` are respected.
 
     Examples:
         Using catalog YAML configuration:

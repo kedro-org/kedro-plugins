@@ -14,11 +14,11 @@ class LangfuseTraceDataset(AbstractDataset):
     enabling seamless integration with different AI frameworks and direct SDK usage.
     Environment variables are automatically configured during initialization.
 
-    Modes:
+    **Modes:**
 
-    - langchain: Returns CallbackHandler for LangChain integration
-    - openai: Returns wrapped OpenAI client with automatic tracing
-    - sdk: Returns raw Langfuse client for manual tracing
+    - **langchain:** Returns a `CallbackHandler` for LangChain integration.
+    - **openai:** Returns a wrapped OpenAI client with automatic tracing.
+    - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
         Using catalog YAML configuration:

@@ -186,9 +186,9 @@ langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-comm
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
-langfuse-langfusepromptdataset = ["langfuse>=2.0.0", "langchain>=0.2.0 <1.0"]
+langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
-langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0 <1.0"]
 opik-opiktracedataset = ["opik>=1.8.0"]
 opik = ["kedro-datasets[opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 

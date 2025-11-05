@@ -168,7 +168,6 @@ plugins:
           - api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
           - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
-          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse Tracing integration
           - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
           - api/kedro_datasets_experimental/opik.OpikPromptDataset.md: Opik prompt integration
           - api/kedro_datasets_experimental/opik.OpikTraceDataset.md: Opik tracing integration

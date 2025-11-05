@@ -203,7 +203,7 @@ dataset = OpikPromptDataset(
     filepath="prompts/support.json",
     prompt_name="support_assistant",
     credentials={
-        "api_key": "opik_...",
+        "api_key": "opik_...",  # pragma: allowlist secret
         "workspace": "my-workspace",
     },
 )
@@ -253,10 +253,10 @@ opik_credentials:
   api_key: "opik_..."  # pragma: allowlist secret
   workspace: "my-workspace"
   project_name: "my-project"
-  
+
   # OpenAI credentials for OpikTraceDataset
   openai:
-    openai_api_key: "sk-..."
+    openai_api_key: "sk-..."  # pragma: allowlist secret
     openai_api_base: "https://api.openai.com/v1"
 ```
 

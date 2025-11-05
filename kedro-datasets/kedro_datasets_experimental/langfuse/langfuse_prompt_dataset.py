@@ -86,7 +86,7 @@ class LangfusePromptDataset(AbstractDataset):
 
         # Remote sync policy - Langfuse versions are source of truth
         production_prompt:
-          type: langfuse.LangfusePromptDataset
+          type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
           filepath: data/prompts/production.json
           prompt_name: "intent-classifier"
           sync_policy: remote

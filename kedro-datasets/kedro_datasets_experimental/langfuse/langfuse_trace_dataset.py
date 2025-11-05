@@ -62,10 +62,10 @@ class LangfuseTraceDataset(AbstractDataset):
     """
 
     def __init__(
-            self,
-            credentials: dict[str, Any],
-            mode: Literal["langchain", "openai", "sdk"] = "sdk",
-            **trace_kwargs: Any
+        self,
+        credentials: dict[str, Any],
+        mode: Literal["langchain", "openai", "sdk"] = "sdk",
+        **trace_kwargs: Any
     ):
         """Initialize LangfuseTraceDataset and configure environment variables.
 

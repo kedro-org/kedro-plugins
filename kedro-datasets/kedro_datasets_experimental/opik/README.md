@@ -389,7 +389,7 @@ DatasetError: Failed to initialise Opik client
 ##### Solution: Ensure all required credentials are provided:
 ```python
 credentials = {
-    "api_key": "opik_...",
+    "api_key": "opik_...",  # pragma: allowlist secret
     "workspace": "your-workspace",
 }
 ```

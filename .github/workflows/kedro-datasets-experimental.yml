@@ -1,0 +1,39 @@
+name: Run checks on kedro-datasets
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - main
+    paths:
+      - "kedro-datasets/kedro_datasets_experimental/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "kedro-datasets/kedro_datasets_experimental/**"
+
+jobs:
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.10", "3.11", "3.12" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install the latest version of uv with Python ${{matrix.python-version}}
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          python-version: ${{ matrix.python-version }}
+          activate-environment: true
+      - name: Install dependencies
+        run: |
+          uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
+          cd kedro-datasets
+          uv pip install --system "kedro-datasets[experimental,test] @ ."
+          uv pip freeze
+      - name: Run unit tests for kedro_datasets_experimental
+        run: pytest kedro-datasets/kedro_datasets_experimental/tests

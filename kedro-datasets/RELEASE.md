@@ -21,7 +21,9 @@
 | `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                     | `kedro_datasets_experimental.langchain` |
 | `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
 | `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts      | `kedro_datasets_experimental.opik`      |
 | `opik.OpikTraceDataset`            | Kedro dataset to provide Opik tracing clients and callbacks     | `kedro_datasets_experimental.opik`      |
+
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.

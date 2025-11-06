@@ -11,6 +11,7 @@ description = "Kedro-Datasets is where you can find all of Kedro's data connecto
 requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
+    "backports.strenum; python_version < '3.11'",
     "kedro>=1.0.0rc1, <2.0.0",
     "lazy_loader",
 ]
@@ -80,9 +81,8 @@ json = ["kedro-datasets[json-jsondataset]"]
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
-matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -90,7 +90,8 @@ networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
 openxml-docxdataset = ["python-docx"]
-openxml = ["kedro-datasets[openxml-docxdataset]"]
+openxml-pptxdataset = ["python-pptx"]
+openxml = ["kedro-datasets[openxml-docxdataset]", "kedro-datasets[openxml-pptxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
@@ -183,10 +184,19 @@ langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
 langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
 langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
 langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain-langchainpromptdataset = ["langchain>=0.2.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
+langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+opik-opiktracedataset = ["opik>=1.8.0"]
+opik = ["kedro-datasets[opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
+
+pypdf-pdfdataset = ["pypdf>=3.0.0", "cryptography>=3.1"]
+pypdf = ["kedro-datasets[pypdf-pdfdataset]"]
 
 prophet-dataset = ["prophet>=1.1.5"]
 prophet = ["kedro-datasets[prophet]"]
@@ -266,7 +276,9 @@ test = [
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "python-docx",
+    "python-pptx",
     "redis~=4.1",
+    "reportlab>=3.6.0",
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
@@ -314,6 +326,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "langfuse",
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
@@ -321,8 +334,10 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
+    "opik",
     "optuna",
     "u8darts[all]",
+    "pypdf>=3.0.0",
 ]
 
 # All requirements
@@ -376,7 +391,7 @@ select = [
 ]
 ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]
 "*/{__init__.py}" = ["F821"] # temporarily ignore ruff undefined name errors for dataset aliases
 

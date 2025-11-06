@@ -2,6 +2,7 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -166,7 +167,9 @@ class DeltaTableDataset(AbstractDataset):
             if self._catalog_type.upper() == "AWS":
                 table_uri = f"glue:///{self._database}/{self._table}"
             elif self._catalog_type.upper() == "UNITY":
-                table_uri = f"unity://{self._catalog_name}/{self._database}/{self._table}"
+                table_uri = (
+                    f"unity://{self._catalog_name}/{self._database}/{self._table}"
+                )
             else:
                 raise ValueError(f"Unsupported catalog type: {self._catalog_type}")
 

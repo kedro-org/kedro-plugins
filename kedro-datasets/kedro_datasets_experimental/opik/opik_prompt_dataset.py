@@ -54,15 +54,19 @@ class OpikPromptDataset(AbstractDataset):
     and Opik's prompt management system, supporting version control, metadata tracking,
     and different synchronisation policies.
 
-    On save: Creates a new version of prompt in Opik with the local data.
-    On load: Synchronises based on sync_policy and returns raw Opik object
-    (sdk mode) or LangChain ChatPromptTemplate (langchain mode).
+    **On save / load behaviour:**
 
-    Sync policies:
-        local: Local file takes precedence (default). Load_args are ignored with warning
-            since local files are the source of truth.
-        remote: Opik version takes precedence. Load_args are respected if supported.
-        strict: Error if local and remote differ. Load_args are respected if supported.
+    - **On save:** Creates a new version of the prompt in Opik with the local data.
+    - **On load:** Synchronises based on `sync_policy` and returns either the raw
+      Opik object (SDK mode) or a LangChain `ChatPromptTemplate` (LangChain mode).
+
+    **Sync policies:**
+
+    - **local:** Local file takes precedence (default). `load_args` are ignored with a
+      warning, since local files are the source of truth.
+    - **remote:** Opik version takes precedence. `load_args` are respected if supported.
+    - **strict:** Raises an error if local and remote differ. `load_args` are respected
+      if supported
 
     Examples:
         Using catalog YAML configuration:
@@ -97,7 +101,10 @@ class OpikPromptDataset(AbstractDataset):
             filepath="data/prompts/customer_support.json",
             prompt_name="customer_support_v1",
             prompt_type="chat",
-            credentials={"api_key": "opik_...", "workspace": "my-workspace"}  # pragma: allowlist secret
+            credentials={
+                "api_key": "opik_...",  # pragma: allowlist secret
+                "workspace": "my-workspace",
+            },
         )
 
         # Load prompt as LangChain ChatPromptTemplate
@@ -107,7 +114,7 @@ class OpikPromptDataset(AbstractDataset):
         # Save with metadata
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello, {question}"}
+            {"role": "user", "content": "Hello, {question}"},
         ]
         dataset.save(messages)
         ```

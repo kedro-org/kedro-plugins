@@ -48,27 +48,7 @@ def _get_content(data: str | list) -> str:
 
 
 class OpikPromptDataset(AbstractDataset):
-    """
-    Kedro dataset for managing prompts with Opik versioning and synchronisation.
-
-    This dataset provides seamless integration between local prompt files (JSON/YAML)
-    and Opik's prompt management system, supporting version control, metadata tracking,
-    and different synchronisation policies.
-
-    **On save / load behaviour:**
-
-    - **On save:** Creates a new version of the prompt in Opik with the local data.
-    - **On load:** Synchronises based on `sync_policy` and returns either the raw
-      Opik object (SDK mode) or a LangChain `ChatPromptTemplate` (LangChain mode).
-
-    **Sync policies:**
-
-    - **local:** Local file takes precedence (default). `load_args` are ignored with a
-      warning, since local files are the source of truth.
-    - **remote:** Opik version takes precedence. `load_args` are respected if supported.
-    - **strict:** Raises an error if local and remote differ. `load_args` are respected
-      if supported.
-    """
+    """Kedro dataset for managing prompts with Opik versioning and synchronisation.
 
     This dataset provides seamless integration between local prompt files (JSON/YAML)
     and Opik's prompt management system, supporting version control, metadata tracking,

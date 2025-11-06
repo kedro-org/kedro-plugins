@@ -9,7 +9,7 @@ from copy import deepcopy
 from typing import Any
 
 import pandas as pd
-from deltalake import DataCatalog, DeltaTable, Metadata
+from deltalake import DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataset, DatasetError
@@ -85,7 +85,7 @@ class DeltaTableDataset(AbstractDataset):
         self,
         *,
         filepath: str | None = None,
-        catalog_type: DataCatalog | None = None,
+        catalog_type: str | None = None,
         catalog_name: str | None = None,
         database: str | None = None,
         table: str | None = None,
@@ -154,6 +154,13 @@ class DeltaTableDataset(AbstractDataset):
 
         self._version = self._load_args.get("version", None)
 
+        if self._filepath and self._catalog_type:
+            raise DatasetError(
+                "DeltaTableDataset can either load from "
+                "filepath or catalog_type. Please provide "
+                "one of either filepath or catalog_type."
+            )
+
         if self._filepath:
             try:
                 self._delta_table = DeltaTable(
@@ -173,14 +180,11 @@ class DeltaTableDataset(AbstractDataset):
             else:
                 raise ValueError(f"Unsupported catalog type: {self._catalog_type}")
 
-            try:
-                self._delta_table = DeltaTable(
-                    table_uri=table_uri,
-                    storage_options=self.fs_args,
-                    version=self._version,
-                )
-            except TableNotFoundError:
-                self.is_empty_dir = True
+            self._delta_table = DeltaTable(
+                table_uri=table_uri,
+                storage_options=self.fs_args,
+                version=self._version,
+            )
 
     @property
     def fs_args(self) -> dict[str, Any]:

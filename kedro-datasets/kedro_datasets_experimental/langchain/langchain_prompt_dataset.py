@@ -6,7 +6,13 @@ from typing import Any, Union
 from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
+try:
+    # LangChain >= 1.0
+    from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+except ImportError:
+    # LangChain < 1.0
+    from langchain.prompts import ChatPromptTemplate, PromptTemplate
+
 
 from kedro_datasets._typing import JSONPreview
 
@@ -45,7 +51,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     dataset = LangChainPromptDataset(
         filepath="data/prompts/my_prompt.json",
         template="PromptTemplate",
-        dataset={"type": "json.JSONDataset"}
+        dataset={"type": "json.JSONDataset"},
     )
     prompt = dataset.load()
     print(prompt.format(name="Kedro"))

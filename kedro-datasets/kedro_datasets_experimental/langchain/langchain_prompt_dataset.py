@@ -6,6 +6,7 @@ from typing import Any, Union
 from kedro.io import AbstractDataset, DatasetError
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import get_filepath_str, parse_dataset_definition
+
 try:
     # LangChain >= 1.0
     from langchain_core.prompts import ChatPromptTemplate, PromptTemplate

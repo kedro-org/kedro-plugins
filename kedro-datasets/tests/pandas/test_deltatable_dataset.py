@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import pytest
-from deltalake import DataCatalog, Metadata
+from deltalake import Metadata
 from kedro.io.core import DatasetError
 from pandas.testing import assert_frame_equal
 
@@ -121,12 +121,11 @@ class TestDeltaTableDataset:
             "kedro_datasets.pandas.deltatable_dataset.DeltaTable"
         )
         _ = DeltaTableDataset(catalog_type="AWS", database="db", table="tbl")
-        mock_delta_table.from_data_catalog.assert_called_once()
-        mock_delta_table.from_data_catalog.assert_called_with(
-            data_catalog=DataCatalog.AWS,
-            data_catalog_id=None,
-            database_name="db",
-            table_name="tbl",
+        mock_delta_table.assert_called_once()
+        mock_delta_table.assert_called_with(
+            table_uri="glue:///db/tbl",
+            storage_options={},
+            version=None,
         )
 
     def test_from_databricks_unity_catalog(self, mocker):
@@ -137,17 +136,16 @@ class TestDeltaTableDataset:
         _ = DeltaTableDataset(
             catalog_type="UNITY", catalog_name="id", database="db", table="tbl"
         )
-        mock_delta_table.from_data_catalog.assert_called_once()
-        mock_delta_table.from_data_catalog.assert_called_with(
-            data_catalog=DataCatalog.UNITY,
-            data_catalog_id="id",
-            database_name="db",
-            table_name="tbl",
+        mock_delta_table.assert_called_once()
+        mock_delta_table.assert_called_with(
+            table_uri="unity://id/db/tbl",
+            storage_options={},
+            version=None,
         )
 
     def test_from_unsupported_catalog(self):
         """Test dataset creation from unsupported catalog."""
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             DeltaTableDataset(catalog_type="unsupported", database="db", table="tbl")
 
     def test_unsupported_write_mode(self, filepath):

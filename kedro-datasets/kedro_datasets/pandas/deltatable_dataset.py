@@ -2,13 +2,14 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
 from typing import Any
 
 import pandas as pd
-from deltalake import DataCatalog, DeltaTable, Metadata
+from deltalake import DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataset, DatasetError
@@ -84,7 +85,7 @@ class DeltaTableDataset(AbstractDataset):
         self,
         *,
         filepath: str | None = None,
-        catalog_type: DataCatalog | None = None,
+        catalog_type: str | None = None,
         catalog_name: str | None = None,
         database: str | None = None,
         table: str | None = None,
@@ -169,12 +170,20 @@ class DeltaTableDataset(AbstractDataset):
                 )
             except TableNotFoundError:
                 self.is_empty_dir = True
-        else:
-            self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=DataCatalog[self._catalog_type],  # type: ignore[misc]
-                data_catalog_id=self._catalog_name,
-                database_name=self._database or "",
-                table_name=self._table or "",
+        elif self._catalog_type:
+            if self._catalog_type.upper() == "AWS":
+                table_uri = f"glue:///{self._database}/{self._table}"
+            elif self._catalog_type.upper() == "UNITY":
+                table_uri = (
+                    f"unity://{self._catalog_name}/{self._database}/{self._table}"
+                )
+            else:
+                raise ValueError(f"Unsupported catalog type: {self._catalog_type}")
+
+            self._delta_table = DeltaTable(
+                table_uri=table_uri,
+                storage_options=self.fs_args,
+                version=self._version,
             )
 
     @property

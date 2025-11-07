@@ -26,12 +26,14 @@
 ## Bug fixes and other changes
 - Add HTMLPreview type.
 - Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
+- Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [gitgud5000](https://github.com/gitgud5000)
+- [SRIKAR-8-77](https://github.com/SRIKAR-8-77)
 
 # Release 8.1.0
 

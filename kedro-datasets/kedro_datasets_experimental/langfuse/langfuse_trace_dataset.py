@@ -2,7 +2,6 @@ import os
 from typing import Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
-from langfuse import Langfuse
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
@@ -15,17 +14,18 @@ class LangfuseTraceDataset(AbstractDataset):
     enabling seamless integration with different AI frameworks and direct SDK usage.
     Environment variables are automatically configured during initialization.
 
-    Modes:
-    - langchain: Returns CallbackHandler for LangChain integration
-    - openai: Returns wrapped OpenAI client with automatic tracing
-    - sdk: Returns raw Langfuse client for manual tracing
+    **Modes:**
+
+    - **langchain:** Returns a `CallbackHandler` for LangChain integration.
+    - **openai:** Returns a wrapped OpenAI client with automatic tracing.
+    - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
         Using catalog YAML configuration:
 
         ```yaml
         langfuse_trace:
-          type: langfuse.LangfuseTraceDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
           credentials: langfuse_credentials
           mode: openai
         ```
@@ -39,21 +39,21 @@ class LangfuseTraceDataset(AbstractDataset):
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...", # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
+                "secret_key": "sk_...",  # pragma: allowlist secret
+                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
             },
-            mode="openai"
+            mode="openai",
         )
 
         # With custom host
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...", # pragma: allowlist secret
+                "secret_key": "sk_...",  # pragma: allowlist secret
                 "host": "https://custom.langfuse.com",
-                "openai": {"openai_api_key": "sk-..."} # pragma: allowlist secret
+                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
             },
-            mode="openai"
+            mode="openai",
         )
 
         # Load tracing client
@@ -63,10 +63,10 @@ class LangfuseTraceDataset(AbstractDataset):
     """
 
     def __init__(
-            self,
-            credentials: dict[str, Any],
-            mode: Literal["langchain", "openai", "sdk"] = "sdk",
-            **trace_kwargs: Any
+        self,
+        credentials: dict[str, Any],
+        mode: Literal["langchain", "openai", "sdk"] = "sdk",
+        **trace_kwargs: Any
     ):
         """Initialize LangfuseTraceDataset and configure environment variables.
 

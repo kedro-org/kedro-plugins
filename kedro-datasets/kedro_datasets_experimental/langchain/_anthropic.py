@@ -27,7 +27,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     ```yaml
     anthropic:
-        anthropic_api_url: <anthropic-api-base>  # Optional, defaults to https://api.anthropic.com
+        anthropic_api_url: <anthropic-api-base>  # Optional, defaults to Anthropic default
         anthropic_api_key: <anthropic-api-key>   # Optional if ANTHROPIC_API_KEY is set
     ```
 

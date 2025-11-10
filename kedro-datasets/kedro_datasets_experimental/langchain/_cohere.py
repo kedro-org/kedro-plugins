@@ -29,7 +29,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
 
     ```yaml
     cohere:
-        cohere_api_url: <cohere-api-base>  # Optional, defaults to https://api.cohere.com
+        cohere_api_url: <cohere-api-base>  # Optional, defaults to Cohere default
         cohere_api_key: <cohere-api-key>   # Optional if COHERE_API_KEY is set
     ```
 

@@ -17,29 +17,51 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
     def constructor(self) -> OPENAI_TYPE:
         """Return the OpenAI class to construct in the _load method."""
 
-    def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
+    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
         """Constructor.
 
         Args:
-            credentials: must contain `openai_api_base` and `openai_api_key`.
+            credentials (Optional): contains `openai_api_key` and `openai_api_base`.
+                If not provided, will use environment variables OPENAI_API_KEY and OPENAI_API_BASE.
             kwargs: keyword arguments passed to the underlying constructor.
         """
-        self.openai_api_base = credentials["openai_api_base"]
-        self.openai_api_key = credentials["openai_api_key"]
+        self.credentials = credentials or {}
         self.kwargs = kwargs or {}
 
     def _describe(self) -> dict[str, Any]:
+        """Returns a description of the dataset.
+
+        Returns:
+            dict[str, Any]: Dictionary containing the kwargs passed to the OpenAI constructor.
+        """
         return {**self.kwargs}
 
     def save(self, data: None) -> NoReturn:
+        """Save operation is not supported for OpenAI datasets.
+
+        Raises:
+            DatasetError: Always raised as this dataset is read-only.
+        """
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def load(self) -> OPENAI_TYPE:
-        return self.constructor(
-            openai_api_base=self.openai_api_base,
-            openai_api_key=self.openai_api_key,
-            **self.kwargs,
-        )
+        """Load and return an OpenAI model instance.
+
+        Constructs an OpenAI instance using the provided kwargs and optional
+        credentials. If credentials are not provided, the OpenAI instance
+        will automatically use environment variables OPENAI_API_KEY and
+        OPENAI_API_BASE for authentication.
+
+        Returns:
+            OPENAI_TYPE: A configured OpenAI model instance.
+        """
+        init_kwargs = {**self.kwargs}
+        if "openai_api_key" in self.credentials:
+            init_kwargs["api_key"] = self.credentials["openai_api_key"]
+        if "openai_api_base" in self.credentials:
+            init_kwargs["base_url"] = self.credentials["openai_api_base"]
+
+        return self.constructor(**init_kwargs)
 
 
 class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
@@ -55,15 +77,21 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
         type: langchain.OpenAIEmbeddingsDataset
         kwargs:
             model: "text-embedding-ada-002"
-        credentials: openai
+        credentials: openai  # Optional, can use environment variables instead
     ```
 
-    **credentials.yml**
+    **credentials.yml** (optional if using environment variables)
 
     ```yaml
     openai:
-        openai_api_base: <openai-api-base>
-        openai_api_key: <openai-api-key>
+        openai_api_base: <openai-api-base>  # Optional, defaults to OpenAI default
+        openai_api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
+    ```
+
+    **Or use environment variables:**
+    ```bash
+    export OPENAI_API_KEY=<your-api-key>
+    export OPENAI_API_BASE=<openai-api-base>  # Optional
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
@@ -71,11 +99,19 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     ```python
     from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
 
+    # With explicit credentials
     embeddings = OpenAIEmbeddingsDataset(
         credentials={
             "openai_api_base": "<openai-api-base>",
             "openai_api_key": "<openai-api-key>",
         },
+        kwargs={
+            "model": "text-embedding-ada-002",
+        },
+    ).load()
+
+    # Or without credentials (using environment variables)
+    embeddings = OpenAIEmbeddingsDataset(
         kwargs={
             "model": "text-embedding-ada-002",
         },
@@ -106,15 +142,21 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
         kwargs:
             model: "gpt-3.5-turbo"
             temperature: 0.0
-        credentials: openai
+        credentials: openai  # Optional, can use environment variables instead
     ```
 
-    **credentials.yml**
+    **credentials.yml** (optional if using environment variables)
 
     ```yaml
     openai:
-        openai_api_base: <openai-api-base>
-        openai_api_key: <openai-api-key>
+        openai_api_base: <openai-api-base>  # Optional, defaults to OpenAI default
+        openai_api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
+    ```
+
+    **Or use environment variables:**
+    ```bash
+    export OPENAI_API_KEY=<your-api-key>
+    export OPENAI_API_BASE=<openai-api-base>  # Optional
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
@@ -122,11 +164,20 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     ```python
     from kedro_datasets_experimental.langchain import ChatOpenAIDataset
 
+    # With explicit credentials
     llm = ChatOpenAIDataset(
         credentials={
             "openai_api_base": "<openai-api-base>",
             "openai_api_key": "<openai-api-key>",
         },
+        kwargs={
+            "model": "gpt-3.5-turbo",
+            "temperature": 0.0,
+        },
+    ).load()
+
+    # Or without credentials (using environment variables)
+    llm = ChatOpenAIDataset(
         kwargs={
             "model": "gpt-3.5-turbo",
             "temperature": 0.0,

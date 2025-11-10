@@ -4,23 +4,33 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
+import importlib.metadata
 import os
 
-# importlib_metadata needs backport for python 3.8 and older
-import importlib_metadata
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-DELTA_VERSION = importlib_metadata.version("delta-spark")
+DELTA_VERSION = importlib.metadata.version("delta-spark")
 
 
 @pytest.fixture(scope="class", autouse=True)
 def spark_session():
+
+    # Delta 4.0+ uses different Maven coordinates
+    major_version = int(DELTA_VERSION.split('.')[0])
+
+    if major_version >= 4:
+        # Delta 4.x with PySpark 4.x uses Scala 2.13
+        delta_package = f"io.delta:delta-spark_2.13:{DELTA_VERSION}"
+    else:
+        # Delta 2.x/3.x with PySpark 3.x uses Scala 2.12
+        delta_package = f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+
     spark = (
         SparkSession.builder.appName("test")
-        .config("spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}")
+        .config("spark.jars.packages", delta_package)
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",

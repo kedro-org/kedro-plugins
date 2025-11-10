@@ -42,7 +42,7 @@ lint = [
     "detect-secrets~=1.5.0",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.12.1",
+    "ruff~=0.14.4",
 ]
 
 [project.entry-points."kedro.project_commands"]

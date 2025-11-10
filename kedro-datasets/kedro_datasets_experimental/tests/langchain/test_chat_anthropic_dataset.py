@@ -13,7 +13,7 @@ def anthropic_credentials():
     """Fixture for standard Anthropic credentials."""
     return {
         "anthropic_api_url": "https://api.anthropic.com/v1",
-        "anthropic_api_key": "sk-ant-test-key"
+        "anthropic_api_key": "sk-ant-test-key"  # pragma: allowlist-secret
     }
 
 
@@ -22,7 +22,7 @@ def custom_anthropic_credentials():
     """Fixture for custom Anthropic credentials."""
     return {
         "anthropic_api_url": "https://custom.anthropic.com/v1",
-        "anthropic_api_key": "sk-ant-custom-key"
+        "anthropic_api_key": "sk-ant-custom-key"    # pragma: allowlist-secret
     }
 
 
@@ -55,22 +55,22 @@ class TestChatAnthropicDataset:
     def test_init_with_valid_credentials(self, anthropic_credentials, anthropic_kwargs):
         """Test dataset initialization with valid credentials."""
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=anthropic_kwargs)
-        
+
         assert dataset.anthropic_api_url == "https://api.anthropic.com/v1"
-        assert dataset.anthropic_api_key == "sk-ant-test-key"
+        assert dataset.anthropic_api_key == "sk-ant-test-key"   # pragma: allowlist-secret
         assert dataset.kwargs == anthropic_kwargs
 
     def test_init_with_missing_api_url(self):
         """Test dataset initialization with missing anthropic_api_url raises KeyError."""
-        credentials = {"anthropic_api_key": "sk-ant-test-key"}  # missing anthropic_api_url
-        
+        credentials = {"anthropic_api_key": "sk-ant-test-key"}  # missing anthropic_api_url # pragma: allowlist-secret
+
         with pytest.raises(KeyError, match="anthropic_api_url"):
             ChatAnthropicDataset(credentials=credentials)
 
     def test_init_with_missing_api_key(self):
         """Test dataset initialization with missing anthropic_api_key raises KeyError."""
         credentials = {"anthropic_api_url": "https://api.anthropic.com/v1"}  # missing anthropic_api_key
-        
+
         with pytest.raises(KeyError, match="anthropic_api_key"):
             ChatAnthropicDataset(credentials=credentials)
 
@@ -94,12 +94,12 @@ class TestChatAnthropicDataset:
         """Test that load method creates ChatAnthropic instance."""
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         result = anthropic_dataset.load()
-        
+
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://api.anthropic.com/v1",
-            anthropic_api_key="sk-ant-test-key",
+            anthropic_api_key="sk-ant-test-key",    # pragma: allowlist-secret
             model="claude-instant-1",
             temperature=0.0
         )
@@ -110,13 +110,13 @@ class TestChatAnthropicDataset:
         """Test load method works without additional kwargs."""
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials)
         result = dataset.load()
-        
+
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://api.anthropic.com/v1",
-            anthropic_api_key="sk-ant-test-key"
+            anthropic_api_key="sk-ant-test-key" # pragma: allowlist-secret
         )
         assert result == mock_instance
 
@@ -125,13 +125,13 @@ class TestChatAnthropicDataset:
         """Test load method with multiple kwargs."""
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         dataset = ChatAnthropicDataset(credentials=custom_anthropic_credentials, kwargs=complex_anthropic_kwargs)
         result = dataset.load()
-        
+
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://custom.anthropic.com/v1",
-            anthropic_api_key="sk-ant-custom-key",
+            anthropic_api_key="sk-ant-custom-key",  # pragma: allowlist-secret
             model="claude-3-opus-20240229",
             temperature=0.7,
             max_tokens=1000,
@@ -143,13 +143,13 @@ class TestChatAnthropicDataset:
         """Test describe method returns complex kwargs."""
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=complex_anthropic_kwargs)
         description = dataset._describe()
-        
+
         assert description == complex_anthropic_kwargs
 
     def test_empty_credentials_dict(self):
         """Test that empty credentials dict raises KeyError."""
         credentials = {}
-        
+
         with pytest.raises(KeyError):
             ChatAnthropicDataset(credentials=credentials)
 
@@ -159,22 +159,22 @@ class TestAnthropicCredentialsValidation:
 
     def test_missing_anthropic_api_url(self):
         """Test that missing anthropic_api_url raises KeyError."""
-        credentials = {"anthropic_api_key": "sk-ant-test-key"}
-        
+        credentials = {"anthropic_api_key": "sk-ant-test-key"}  # pragma: allowlist-secret
+
         with pytest.raises(KeyError, match="anthropic_api_url"):
             ChatAnthropicDataset(credentials=credentials)
 
     def test_missing_anthropic_api_key(self):
         """Test that missing anthropic_api_key raises KeyError."""
         credentials = {"anthropic_api_url": "https://api.anthropic.com/v1"}
-        
+
         with pytest.raises(KeyError, match="anthropic_api_key"):
             ChatAnthropicDataset(credentials=credentials)
 
     def test_both_credentials_missing(self):
         """Test that missing both credentials raises KeyError."""
         credentials = {}
-        
+
         with pytest.raises(KeyError):
             ChatAnthropicDataset(credentials=credentials)
 
@@ -186,14 +186,14 @@ class TestAnthropicIntegration:
         """Test ChatAnthropicDataset integration without API calls."""
         # Verify properties without calling load() to avoid API calls
         assert anthropic_dataset.anthropic_api_url == "https://api.anthropic.com/v1"
-        assert anthropic_dataset.anthropic_api_key == "sk-ant-test-key"
+        assert anthropic_dataset.anthropic_api_key == "sk-ant-test-key" # pragma: allowlist-secret
         assert anthropic_dataset.kwargs == {"model": "claude-instant-1", "temperature": 0.0}
         assert anthropic_dataset._describe() == {"model": "claude-instant-1", "temperature": 0.0}
 
     def test_credentials_storage(self, anthropic_credentials, anthropic_kwargs):
         """Test that credentials are properly stored in dataset instance."""
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=anthropic_kwargs)
-        
+
         assert dataset.anthropic_api_url == anthropic_credentials["anthropic_api_url"]
         assert dataset.anthropic_api_key == anthropic_credentials["anthropic_api_key"]
 
@@ -205,9 +205,9 @@ class TestAnthropicEdgeCases:
         """Test dataset works with special characters in credentials."""
         credentials = {
             "anthropic_api_url": "https://api.anthropic.com/v1?param=value&other=test",
-            "anthropic_api_key": "sk-ant-key-with-dashes_and_underscores"
+            "anthropic_api_key": "sk-ant-key-with-dashes_and_underscores"   # pragma: allowlist-secret
         }
-        
+
         dataset = ChatAnthropicDataset(credentials=credentials)
         assert dataset.anthropic_api_url == credentials["anthropic_api_url"]
         assert dataset.anthropic_api_key == credentials["anthropic_api_key"]
@@ -222,16 +222,16 @@ class TestAnthropicEdgeCases:
             "stop_sequences": ["END", "STOP"],
             "top_k": 40
         }
-        
+
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=kwargs)
         result = dataset.load()
-        
+
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://api.anthropic.com/v1",
-            anthropic_api_key="sk-ant-test-key",
+            anthropic_api_key="sk-ant-test-key",    # pragma: allowlist-secret
             **kwargs
         )
         assert result == mock_instance
@@ -240,16 +240,16 @@ class TestAnthropicEdgeCases:
         """Test that modifying external credentials dict doesn't affect dataset."""
         credentials = {
             "anthropic_api_url": "https://api.anthropic.com/v1",
-            "anthropic_api_key": "sk-ant-test-key"
+            "anthropic_api_key": "sk-ant-test-key"  # pragma: allowlist-secret
         }
-        
+
         dataset = ChatAnthropicDataset(credentials=credentials)
-        
+
         # Modify original credentials
-        credentials["anthropic_api_key"] = "modified-key"
-        
+        credentials["anthropic_api_key"] = "modified-key"   # pragma: allowlist-secret
+
         # Dataset should still have original credentials
-        assert dataset.anthropic_api_key == "sk-ant-test-key"
+        assert dataset.anthropic_api_key == "sk-ant-test-key"   # pragma: allowlist-secret
 
     def test_empty_string_credentials(self):
         """Test behavior with empty string credentials."""
@@ -257,7 +257,7 @@ class TestAnthropicEdgeCases:
             "anthropic_api_url": "",
             "anthropic_api_key": ""
         }
-        
+
         dataset = ChatAnthropicDataset(credentials=credentials)
         assert dataset.anthropic_api_url == ""
         assert dataset.anthropic_api_key == ""
@@ -267,31 +267,31 @@ class TestAnthropicEdgeCases:
         """Test that load method correctly passes credentials to ChatAnthropic parameters."""
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials)
         dataset.load()
-        
+
         # Verify the correct parameter passing
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://api.anthropic.com/v1",
-            anthropic_api_key="sk-ant-test-key"
+            anthropic_api_key="sk-ant-test-key" # pragma: allowlist-secret
         )
 
     def test_describe_empty_kwargs(self, anthropic_credentials):
         """Test describe method with empty kwargs."""
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials)
         description = dataset._describe()
-        
+
         assert description == {}
 
     def test_describe_returns_copy_of_kwargs(self, anthropic_credentials):
         """Test that describe returns a copy of kwargs, not reference."""
         kwargs = {"model": "claude-instant-1", "temperature": 0.5}
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=kwargs)
-        
+
         description = dataset._describe()
         description["new_param"] = "new_value"
-        
+
         # Original kwargs should not be modified
         assert "new_param" not in dataset.kwargs
         assert dataset.kwargs == {"model": "claude-instant-1", "temperature": 0.5}
@@ -308,16 +308,16 @@ class TestAnthropicEdgeCases:
             "stop_sequences": ["Human:", "Assistant:"],
             "stream": False
         }
-        
+
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
-        
+
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=kwargs)
         result = dataset.load()
-        
+
         mock_chat_anthropic.assert_called_once_with(
             anthropic_api_url="https://api.anthropic.com/v1",
-            anthropic_api_key="sk-ant-test-key",
+            anthropic_api_key="sk-ant-test-key",    # pragma: allowlist-secret
             **kwargs
         )
         assert result == mock_instance
@@ -331,7 +331,7 @@ class TestAnthropicEdgeCases:
             "claude-3-opus-20240229",
             "claude-3-haiku-20240307"
         ]
-        
+
         for model in claude_models:
             kwargs = {"model": model}
             dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=kwargs)

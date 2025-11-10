@@ -13,7 +13,7 @@ def cohere_credentials():
     """Fixture for standard Cohere credentials."""
     return {
         "cohere_api_url": "https://api.cohere.ai/v1",
-        "cohere_api_key": "test-cohere-key"
+        "cohere_api_key": "test-cohere-key" # pragma: allowlist-secret
     }
 
 
@@ -22,7 +22,7 @@ def custom_cohere_credentials():
     """Fixture for custom Cohere credentials."""
     return {
         "cohere_api_url": "https://custom.cohere.ai/v1",
-        "cohere_api_key": "custom-cohere-key"
+        "cohere_api_key": "custom-cohere-key"   # pragma: allowlist-secret
     }
 
 
@@ -55,22 +55,22 @@ class TestChatCohereDataset:
     def test_init_with_valid_credentials(self, cohere_credentials, cohere_kwargs):
         """Test dataset initialization with valid credentials."""
         dataset = ChatCohereDataset(credentials=cohere_credentials, kwargs=cohere_kwargs)
-        
+
         assert dataset.cohere_api_url == "https://api.cohere.ai/v1"
-        assert dataset.cohere_api_key == "test-cohere-key"
+        assert dataset.cohere_api_key == "test-cohere-key"  # pragma: allowlist-secret
         assert dataset.kwargs == cohere_kwargs
 
     def test_init_with_missing_api_url(self):
         """Test dataset initialization with missing cohere_api_url raises KeyError."""
-        credentials = {"cohere_api_key": "test-cohere-key"}  # missing cohere_api_url
-        
+        credentials = {"cohere_api_key": "test-cohere-key"}  # missing cohere_api_url   # pragma: allowlist-secret
+
         with pytest.raises(KeyError, match="cohere_api_url"):
             ChatCohereDataset(credentials=credentials)
 
     def test_init_with_missing_api_key(self):
         """Test dataset initialization with missing cohere_api_key raises KeyError."""
         credentials = {"cohere_api_url": "https://api.cohere.ai/v1"}  # missing cohere_api_key
-        
+
         with pytest.raises(KeyError, match="cohere_api_key"):
             ChatCohereDataset(credentials=credentials)
 
@@ -94,11 +94,11 @@ class TestChatCohereDataset:
         """Test that load method creates ChatCohere instance."""
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
-        
+
         result = cohere_dataset.load()
-        
+
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="test-cohere-key",
+            cohere_api_key="test-cohere-key",   # pragma: allowlist-secret
             base_url="https://api.cohere.ai/v1",
             model="command",
             temperature=0.0
@@ -110,12 +110,12 @@ class TestChatCohereDataset:
         """Test load method works without additional kwargs."""
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
-        
+
         dataset = ChatCohereDataset(credentials=cohere_credentials)
         result = dataset.load()
-        
+
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="test-cohere-key",
+            cohere_api_key="test-cohere-key",   # pragma: allowlist-secret
             base_url="https://api.cohere.ai/v1"
         )
         assert result == mock_instance
@@ -125,12 +125,12 @@ class TestChatCohereDataset:
         """Test load method with multiple kwargs."""
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
-        
+
         dataset = ChatCohereDataset(credentials=custom_cohere_credentials, kwargs=complex_cohere_kwargs)
         result = dataset.load()
-        
+
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="custom-cohere-key",
+            cohere_api_key="custom-cohere-key", # pragma: allowlist-secret
             base_url="https://custom.cohere.ai/v1",
             model="command-r",
             temperature=0.5,
@@ -143,13 +143,13 @@ class TestChatCohereDataset:
         """Test describe method returns complex kwargs."""
         dataset = ChatCohereDataset(credentials=cohere_credentials, kwargs=complex_cohere_kwargs)
         description = dataset._describe()
-        
+
         assert description == complex_cohere_kwargs
 
     def test_empty_credentials_dict(self):
         """Test that empty credentials dict raises KeyError."""
         credentials = {}
-        
+
         with pytest.raises(KeyError):
             ChatCohereDataset(credentials=credentials)
 
@@ -159,22 +159,22 @@ class TestCohereCredentialsValidation:
 
     def test_missing_cohere_api_url(self):
         """Test that missing cohere_api_url raises KeyError."""
-        credentials = {"cohere_api_key": "test-cohere-key"}
-        
+        credentials = {"cohere_api_key": "test-cohere-key"} # pragma: allowlist-secret
+
         with pytest.raises(KeyError, match="cohere_api_url"):
             ChatCohereDataset(credentials=credentials)
 
     def test_missing_cohere_api_key(self):
         """Test that missing cohere_api_key raises KeyError."""
         credentials = {"cohere_api_url": "https://api.cohere.ai/v1"}
-        
+
         with pytest.raises(KeyError, match="cohere_api_key"):
             ChatCohereDataset(credentials=credentials)
 
     def test_both_credentials_missing(self):
         """Test that missing both credentials raises KeyError."""
         credentials = {}
-        
+
         with pytest.raises(KeyError):
             ChatCohereDataset(credentials=credentials)
 
@@ -186,14 +186,14 @@ class TestCohereIntegration:
         """Test ChatCohereDataset integration without API calls."""
         # Verify properties without calling load() to avoid API calls
         assert cohere_dataset.cohere_api_url == "https://api.cohere.ai/v1"
-        assert cohere_dataset.cohere_api_key == "test-cohere-key"
+        assert cohere_dataset.cohere_api_key == "test-cohere-key"   # pragma: allowlist-secret
         assert cohere_dataset.kwargs == {"model": "command", "temperature": 0.0}
         assert cohere_dataset._describe() == {"model": "command", "temperature": 0.0}
 
     def test_credentials_storage(self, cohere_credentials, cohere_kwargs):
         """Test that credentials are properly stored in dataset instance."""
         dataset = ChatCohereDataset(credentials=cohere_credentials, kwargs=cohere_kwargs)
-        
+
         assert dataset.cohere_api_url == cohere_credentials["cohere_api_url"]
         assert dataset.cohere_api_key == cohere_credentials["cohere_api_key"]
 
@@ -202,12 +202,12 @@ class TestCohereIntegration:
         """Test that load method correctly maps credentials to ChatCohere parameters."""
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
-        
+
         dataset = ChatCohereDataset(credentials=cohere_credentials)
         dataset.load()
-        
+
         # Verify the correct parameter mapping
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="test-cohere-key",  # mapped from cohere_api_key
+            cohere_api_key="test-cohere-key",  # mapped from cohere_api_key    # pragma: allowlist-secret
             base_url="https://api.cohere.ai/v1"  # mapped from cohere_api_url to base_url
         )

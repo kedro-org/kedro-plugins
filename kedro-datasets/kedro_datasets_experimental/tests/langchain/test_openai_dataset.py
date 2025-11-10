@@ -18,7 +18,7 @@ def openai_credentials():
     """Fixture for standard OpenAI credentials."""
     return {
         "openai_api_base": "https://api.openai.com/v1",
-        "openai_api_key": "sk-test-key"
+        "openai_api_key": "sk-test-key" # pragma: allowlist-secret
     }
 
 
@@ -27,7 +27,7 @@ def custom_openai_credentials():
     """Fixture for custom OpenAI credentials."""
     return {
         "openai_api_base": "https://custom.openai.com/v1",
-        "openai_api_key": "sk-custom-key"
+        "openai_api_key": "sk-custom-key"   # pragma: allowlist-secret
     }
 
 
@@ -82,15 +82,15 @@ class TestOpenAIDataset:
     def test_init_with_valid_credentials(self, test_openai_dataset, openai_credentials, chat_kwargs):
         """Test dataset initialization with valid credentials."""
         dataset = test_openai_dataset(credentials=openai_credentials, kwargs=chat_kwargs)
-        
+
         assert dataset.openai_api_base == "https://api.openai.com/v1"
-        assert dataset.openai_api_key == "sk-test-key"
+        assert dataset.openai_api_key == "sk-test-key"  # pragma: allowlist-secret
         assert dataset.kwargs == chat_kwargs
 
     def test_init_with_missing_credentials(self, test_openai_dataset):
         """Test dataset initialization with missing credentials raises KeyError."""
-        credentials = {"openai_api_key": "sk-test-key"}  # missing openai_api_base
-        
+        credentials = {"openai_api_key": "sk-test-key"}  # missing openai_api_base  # pragma: allowlist-secret
+
         with pytest.raises(KeyError):
             test_openai_dataset(credentials=credentials)
 
@@ -103,13 +103,13 @@ class TestOpenAIDataset:
         """Test the _describe method returns kwargs."""
         dataset = test_openai_dataset(credentials=openai_credentials, kwargs=chat_kwargs)
         description = dataset._describe()
-        
+
         assert description == chat_kwargs
 
     def test_save_raises_error(self, test_openai_dataset, openai_credentials):
         """Test that save method raises DatasetError."""
         dataset = test_openai_dataset(credentials=openai_credentials)
-        
+
         with pytest.raises(DatasetError, match="TestDataset is a read only dataset type"):
             dataset.save(data="test")
 
@@ -118,18 +118,18 @@ class TestOpenAIDataset:
         mock_constructor = Mock()
         mock_instance = Mock()
         mock_constructor.return_value = mock_instance
-        
+
         class TestDataset(OpenAIDataset):
             @property
             def constructor(self):
                 return mock_constructor
-        
+
         dataset = TestDataset(credentials=openai_credentials, kwargs=chat_kwargs)
         result = dataset.load()
-        
+
         mock_constructor.assert_called_once_with(
             openai_api_base="https://api.openai.com/v1",
-            openai_api_key="sk-test-key",
+            openai_api_key="sk-test-key",   # pragma: allowlist-secret
             model="gpt-3.5-turbo",
             temperature=0.7
         )
@@ -148,12 +148,12 @@ class TestOpenAIEmbeddingsDataset:
         """Test that load method creates OpenAIEmbeddings instance."""
         mock_instance = Mock()
         mock_openai_embeddings.return_value = mock_instance
-        
+
         result = embeddings_dataset.load()
-        
+
         mock_openai_embeddings.assert_called_once_with(
             openai_api_base="https://api.openai.com/v1",
-            openai_api_key="sk-test-key",
+            openai_api_key="sk-test-key",   # pragma: allowlist-secret
             model="text-embedding-ada-002"
         )
         assert result == mock_instance
@@ -163,13 +163,13 @@ class TestOpenAIEmbeddingsDataset:
         """Test load method works without additional kwargs."""
         mock_instance = Mock()
         mock_openai_embeddings.return_value = mock_instance
-        
+
         dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials)
         result = dataset.load()
-        
+
         mock_openai_embeddings.assert_called_once_with(
             openai_api_base="https://api.openai.com/v1",
-            openai_api_key="sk-test-key"
+            openai_api_key="sk-test-key"    # pragma: allowlist-secret
         )
         assert result == mock_instance
 
@@ -178,7 +178,7 @@ class TestOpenAIEmbeddingsDataset:
         kwargs = {"model": "text-embedding-ada-002", "chunk_size": 1000}
         dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials, kwargs=kwargs)
         description = dataset._describe()
-        
+
         assert description == kwargs
 
     def test_save_raises_error(self, embeddings_dataset):
@@ -199,12 +199,12 @@ class TestChatOpenAIDataset:
         """Test that load method creates ChatOpenAI instance."""
         mock_instance = Mock()
         mock_chat_openai.return_value = mock_instance
-        
+
         result = chat_dataset.load()
-        
+
         mock_chat_openai.assert_called_once_with(
             openai_api_base="https://api.openai.com/v1",
-            openai_api_key="sk-test-key",
+            openai_api_key="sk-test-key",   # pragma: allowlist-secret
             model="gpt-3.5-turbo",
             temperature=0.7
         )
@@ -215,13 +215,13 @@ class TestChatOpenAIDataset:
         """Test load method with multiple kwargs."""
         mock_instance = Mock()
         mock_chat_openai.return_value = mock_instance
-        
+
         dataset = ChatOpenAIDataset(credentials=custom_openai_credentials, kwargs=complex_chat_kwargs)
         result = dataset.load()
-        
+
         mock_chat_openai.assert_called_once_with(
             openai_api_base="https://custom.openai.com/v1",
-            openai_api_key="sk-custom-key",
+            openai_api_key="sk-custom-key", # pragma: allowlist-secret
             model="gpt-4",
             temperature=0.0,
             max_tokens=100,
@@ -234,7 +234,7 @@ class TestChatOpenAIDataset:
         kwargs = {"model": "gpt-4", "temperature": 0.0, "max_tokens": 500}
         dataset = ChatOpenAIDataset(credentials=openai_credentials, kwargs=kwargs)
         description = dataset._describe()
-        
+
         assert description == kwargs
 
     def test_save_raises_error(self, chat_dataset):
@@ -249,8 +249,8 @@ class TestCredentialsValidation:
     @pytest.mark.parametrize("dataset_class", [OpenAIEmbeddingsDataset, ChatOpenAIDataset])
     def test_missing_openai_api_base(self, dataset_class):
         """Test that missing openai_api_base raises KeyError."""
-        credentials = {"openai_api_key": "sk-test-key"}
-        
+        credentials = {"openai_api_key": "sk-test-key"} # pragma: allowlist-secret
+
         with pytest.raises(KeyError, match="openai_api_base"):
             dataset_class(credentials=credentials)
 
@@ -258,7 +258,7 @@ class TestCredentialsValidation:
     def test_missing_openai_api_key(self, dataset_class):
         """Test that missing openai_api_key raises KeyError."""
         credentials = {"openai_api_base": "https://api.openai.com/v1"}
-        
+
         with pytest.raises(KeyError, match="openai_api_key"):
             dataset_class(credentials=credentials)
 
@@ -266,7 +266,7 @@ class TestCredentialsValidation:
     def test_empty_credentials_dict(self, dataset_class):
         """Test that empty credentials dict raises KeyError."""
         credentials = {}
-        
+
         with pytest.raises(KeyError):
             dataset_class(credentials=credentials)
 
@@ -279,7 +279,7 @@ class TestIntegration:
         # Verify properties without calling load() to avoid API calls
         assert embeddings_dataset.constructor == OpenAIEmbeddings
         assert embeddings_dataset.openai_api_base == "https://api.openai.com/v1"
-        assert embeddings_dataset.openai_api_key == "sk-test-key"
+        assert embeddings_dataset.openai_api_key == "sk-test-key"   # pragma: allowlist-secret
         assert embeddings_dataset.kwargs == {"model": "text-embedding-ada-002"}
         assert embeddings_dataset._describe() == {"model": "text-embedding-ada-002"}
 
@@ -288,7 +288,7 @@ class TestIntegration:
         # Verify properties without calling load() to avoid API calls
         assert chat_dataset.constructor == ChatOpenAI
         assert chat_dataset.openai_api_base == "https://api.openai.com/v1"
-        assert chat_dataset.openai_api_key == "sk-test-key"
+        assert chat_dataset.openai_api_key == "sk-test-key" # pragma: allowlist-secret
         assert chat_dataset.kwargs == {"model": "gpt-3.5-turbo", "temperature": 0.7}
         assert chat_dataset._describe() == {"model": "gpt-3.5-turbo", "temperature": 0.7}
 
@@ -309,9 +309,9 @@ class TestEdgeCases:
         """Test dataset works with special characters in credentials."""
         credentials = {
             "openai_api_base": "https://api.openai.com/v1?param=value&other=test",
-            "openai_api_key": "sk-test-key-with-dashes_and_underscores"
+            "openai_api_key": "sk-test-key-with-dashes_and_underscores" # pragma: allowlist-secret
         }
-        
+
         dataset = OpenAIEmbeddingsDataset(credentials=credentials)
         assert dataset.openai_api_base == credentials["openai_api_base"]
         assert dataset.openai_api_key == credentials["openai_api_key"]
@@ -325,16 +325,16 @@ class TestEdgeCases:
             "deployment": "test-deployment",
             "headers": {"Custom-Header": "value"}
         }
-        
+
         mock_instance = Mock()
         mock_openai_embeddings.return_value = mock_instance
-        
+
         dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials, kwargs=kwargs)
         result = dataset.load()
-        
+
         mock_openai_embeddings.assert_called_once_with(
             openai_api_base="https://api.openai.com/v1",
-            openai_api_key="sk-test-key",
+            openai_api_key="sk-test-key",   # pragma: allowlist-secret
             **kwargs
         )
         assert result == mock_instance
@@ -342,13 +342,12 @@ class TestEdgeCases:
     def test_kwargs_immutability(self, openai_credentials):
         """Test that modifying external kwargs dict doesn't affect dataset."""
         kwargs = {"model": "gpt-3.5-turbo"}
-        
+
         dataset = ChatOpenAIDataset(credentials=openai_credentials, kwargs=kwargs)
-        
+
         # Modify original kwargs
         kwargs["temperature"] = 0.9
-        
+
         # Dataset should still have original kwargs
         assert dataset.kwargs == {"model": "gpt-3.5-turbo"}
         assert dataset._describe() == {"model": "gpt-3.5-turbo"}
-

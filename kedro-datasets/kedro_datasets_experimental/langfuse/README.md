@@ -43,7 +43,7 @@ pip install "kedro-datasets[langfuse]"
 ```
 
 #### Requirements:
-- Python 3.9+
+- Python 3.10+
 - Kedro
 - Langfuse SDK
 - LangChain (optional, for `mode="langchain"`)

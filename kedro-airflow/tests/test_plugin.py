@@ -378,10 +378,11 @@ def test_create_airflow_all_dags(cli_runner, metadata):
 def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     command = ["airflow", "create", "--all", "-p", "ds"]
     result = cli_runner.invoke(commands, command, obj=metadata)
+
     assert result.exit_code == 2
     assert (
         "Error: Invalid value for '--all' / '--pipeline': The options are mutually exclusive."
-        in result.stdout
+        in result.stderr
     )
 
 
@@ -415,5 +416,5 @@ def test_group_by_invalid_value(cli_runner, metadata):
     assert result.exit_code == 2
     assert (
         "Error: Invalid value for '-g' / '--group-by': invalid choice: asdasdasd. (choose from memory, namespace)"
-        in result.stdout
+        in result.stderr
     )

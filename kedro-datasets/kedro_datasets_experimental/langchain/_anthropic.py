@@ -24,6 +24,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     ```
 
     **credentials.yml** (optional if using environment variables)
+    If credentials are passed through `credentials.yml`, they take precedence over environment variables.
 
     ```yaml
     anthropic:
@@ -85,7 +86,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to ChatAnthropic.
         """
-        return {**self.kwargs}
+        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        return {**credentials,**self.kwargs}
 
     def save(self, data: None) -> NoReturn:
         """Save operation is not supported for ChatAnthropicDataset.

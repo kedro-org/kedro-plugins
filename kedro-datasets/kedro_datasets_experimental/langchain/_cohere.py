@@ -26,6 +26,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     ```
 
     **credentials.yml** (optional if using environment variables)
+    If credentials are passed through `credentials.yml`, they take precedence over environment variables.
 
     ```yaml
     cohere:
@@ -87,7 +88,8 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to ChatCohere.
         """
-        return {**self.kwargs}
+        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        return {**credentials,**self.kwargs}
 
     def save(self, data: None) -> NoReturn:
         """Save operation is not supported for ChatCohereDataset.

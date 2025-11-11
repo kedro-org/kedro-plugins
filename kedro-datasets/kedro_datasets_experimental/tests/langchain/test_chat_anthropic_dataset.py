@@ -52,7 +52,7 @@ class TestAnthropicDataset:
         """Test the _describe method returns kwargs."""
         dataset = ChatAnthropicDataset(credentials=anthropic_credentials, kwargs=anthropic_kwargs)
         description = dataset._describe()
-        assert description == anthropic_kwargs
+        assert description == {**{k: "***" for k in anthropic_credentials.keys()}, **anthropic_kwargs}
 
     def test_save_raises_error(self, anthropic_credentials):
         """Test that save method raises DatasetError."""

@@ -73,7 +73,7 @@ class TestOpenAIDataset:
         """Test the _describe method returns kwargs."""
         dataset = test_openai_dataset(credentials=openai_credentials, kwargs=chat_kwargs)
         description = dataset._describe()
-        assert description == chat_kwargs
+        assert description == {**{k: "***" for k in openai_credentials.keys()}, **chat_kwargs}
 
     def test_save_raises_error(self, test_openai_dataset, openai_credentials):
         """Test that save method raises DatasetError."""
@@ -174,7 +174,7 @@ class TestOpenAIEmbeddingsDataset:
         """Test the _describe method returns kwargs."""
         dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials, kwargs=embeddings_kwargs)
         description = dataset._describe()
-        assert description == embeddings_kwargs
+        assert description == {**{k: "***" for k in openai_credentials.keys()}, **embeddings_kwargs}
 
     def test_save_raises_error(self, openai_credentials):
         """Test that save method raises DatasetError."""

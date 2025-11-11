@@ -52,7 +52,7 @@ class TestCohereDataset:
         """Test the _describe method returns kwargs."""
         dataset = ChatCohereDataset(credentials=cohere_credentials, kwargs=cohere_kwargs)
         description = dataset._describe()
-        assert description == cohere_kwargs
+        assert description == {**{k: "***" for k in cohere_credentials.keys()}, **cohere_kwargs}
 
     def test_save_raises_error(self, cohere_credentials):
         """Test that save method raises DatasetError."""

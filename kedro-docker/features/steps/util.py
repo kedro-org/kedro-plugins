@@ -3,10 +3,11 @@
 import tempfile
 import urllib
 import venv
+from collections.abc import Callable
 from pathlib import Path
 from threading import Thread
 from time import sleep, time
-from typing import Any, Callable
+from typing import Any
 
 import docker
 

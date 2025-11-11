@@ -311,7 +311,7 @@ lint = [
     "import-linter[toml]==1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.12.1",
+    "ruff~=0.14.4",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",

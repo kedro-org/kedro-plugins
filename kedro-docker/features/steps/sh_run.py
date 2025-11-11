@@ -1,13 +1,12 @@
 import shlex
 import subprocess
 from collections.abc import Sequence
-from typing import Union
 
 import psutil
 
 
 def run(
-    cmd: Union[str, Sequence],
+    cmd: str | Sequence,
     split: bool = True,
     print_output: bool = False,
     **kwargs: str,

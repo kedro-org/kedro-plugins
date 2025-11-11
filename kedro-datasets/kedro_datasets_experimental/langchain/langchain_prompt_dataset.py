@@ -291,6 +291,11 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
             ChatPromptTemplate(messages=[...])
         """
         messages = self._validate_chat_prompt_data(data)
+
+        # Convert dict messages to tuples if necessary (for compatibility with older LangChain versions)
+        if isinstance(messages, list) and all(isinstance(m, dict) for m in messages):
+            return ChatPromptTemplate.from_messages([(m["role"], m["content"]) for m in messages])
+
         return ChatPromptTemplate.from_messages(messages)
 
     def save(self, data: Any) -> None:

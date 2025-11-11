@@ -259,8 +259,8 @@ class TestLangChainPromptDataset:
         [
             ({}, "ChatPromptTemplate requires a non-empty list of messages"),
             ([], "ChatPromptTemplate requires a non-empty list of messages"),
-            ([{"role": "user"}], "Expected dict to have exact keys 'role' and 'content'"),
-            ([{"content": "hello"}], "Expected dict to have exact keys 'role' and 'content'"),
+            ([{"role": "user"}], "Failed to create ChatPromptTemplate: 'content"),
+            ([{"content": "hello"}], "Failed to create ChatPromptTemplate: 'role'"),
         ]
     )
     def test_invalid_yaml_chat_prompt(self, tmp_path: Path, bad_data: any, error_pattern: str) -> None:

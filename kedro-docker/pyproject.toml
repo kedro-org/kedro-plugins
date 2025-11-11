@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Docker makes it easy to package Kedro projects with Docker."
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "anyconfig~=0.10.0",  # not directly required, pinned by Snyk to avoid a vulnerability
@@ -42,7 +42,7 @@ lint = [
     "detect-secrets~=1.5.0",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.12.1",
+    "ruff~=0.14.4",
 ]
 
 [project.entry-points."kedro.project_commands"]

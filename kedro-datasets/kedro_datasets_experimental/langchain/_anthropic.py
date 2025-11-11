@@ -87,7 +87,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
             dict[str, Any]: Dictionary containing the kwargs passed to ChatAnthropic.
         """
         credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
-        return {**credentials,**self.kwargs}
+        return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:
         """Save operation is not supported for ChatAnthropicDataset.

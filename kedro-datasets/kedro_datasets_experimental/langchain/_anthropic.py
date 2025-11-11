@@ -73,7 +73,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         """Constructor.
 
         Args:
-            credentials (Optional): contains `anthropic_api_key` and `anthropic_api_url`.
+            credentials (Optional): contains `api_key` and `base_url`.
                 If not provided, will use environment variables ANTHROPIC_API_KEY and ANTHROPIC_API_URL.
             kwargs: keyword arguments passed to the ChatAnthropic constructor.
         """

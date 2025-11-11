@@ -75,7 +75,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         """Constructor.
 
         Args:
-            credentials (Optional): contains `cohere_api_key` and `cohere_api_url`.
+            credentials (Optional): contains `api_key` and `base_url`.
                 If not provided, will use environment variables COHERE_API_KEY and CO_API_URL.
             kwargs: keyword arguments passed to the ChatCohere constructor.
         """

@@ -381,7 +381,7 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
 
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value for '--all' / '--pipeline': The options are mutually exclusive."
+        "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
         in result.stderr
     )
 
@@ -415,6 +415,6 @@ def test_group_by_invalid_value(cli_runner, metadata):
 
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value for '-g' / '--group-by': invalid choice: asdasdasd. (choose from memory, namespace)"
+        "Error: Invalid value for '-g' / '--group-by': 'asdasdasd' is not one of 'memory', 'namespace'."
         in result.stderr
     )

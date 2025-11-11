@@ -260,7 +260,7 @@ def test_custom_template_nonexistent(cli_runner, metadata):
 
     assert result.exit_code == 2
     assert (
-        f"Error: Invalid value for '-j' / '--jinja-file': Path '{template_name}' does not exist."
+        f"Error: Invalid value for '-j' / '--jinja-file': File '{template_name}' does not exist."
         in result.stderr
     )
 

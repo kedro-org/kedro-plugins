@@ -12,6 +12,8 @@ on:
 
 jobs:
   lint:
+    permissions:
+      contents: read
     defaults:
       run:
         shell: bash

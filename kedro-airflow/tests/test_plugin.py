@@ -257,10 +257,11 @@ def test_custom_template_nonexistent(cli_runner, metadata):
     template_name = "non_existent_custom_template.j2"
     command = ["airflow", "create", "-j", template_name]
     result = cli_runner.invoke(commands, command, obj=metadata)
+
     assert result.exit_code == 2
     assert (
         f"Error: Invalid value for '-j' / '--jinja-file': Path '{template_name}' does not exist."
-        in result.stdout
+        in result.stderr
     )
 
 

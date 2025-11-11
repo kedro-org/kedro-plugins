@@ -12,8 +12,8 @@ from kedro_datasets_experimental.langchain._anthropic import ChatAnthropicDatase
 def anthropic_credentials():
     """Fixture for standard Anthropic credentials."""
     return {
-        "anthropic_api_url": "https://api.anthropic.com/v1",
-        "anthropic_api_key": "sk-ant-test-key"  # pragma: allowlist-secret
+        "base_url": "https://api.anthropic.com/v1",
+        "api_key": "sk-ant-test-key"  # pragma: allowlist-secret
     }
 
 
@@ -42,7 +42,7 @@ class TestAnthropicDataset:
 
     def test_init_with_partial_credentials(self):
         """Test dataset initialization with partial credentials works."""
-        credentials = {"anthropic_api_key": "sk-ant-test-key"}  # pragma: allowlist-secret
+        credentials = {"api_key": "sk-ant-test-key"}  # pragma: allowlist-secret
         dataset = ChatAnthropicDataset(credentials=credentials)
 
         assert dataset.credentials == credentials
@@ -92,7 +92,7 @@ class TestAnthropicDataset:
     @patch('kedro_datasets_experimental.langchain._anthropic.ChatAnthropic')
     def test_load_with_partial_credentials_api_key_only(self, mock_chat_anthropic):
         """Test that providing only api_key works (url falls back to env)."""
-        credentials = {"anthropic_api_key": "sk-ant-test-key"}  # pragma: allowlist-secret
+        credentials = {"api_key": "sk-ant-test-key"}  # pragma: allowlist-secret
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
 
@@ -105,7 +105,7 @@ class TestAnthropicDataset:
     @patch('kedro_datasets_experimental.langchain._anthropic.ChatAnthropic')
     def test_load_with_partial_credentials_api_url_only(self, mock_chat_anthropic):
         """Test that providing only api_url works (key falls back to env)."""
-        credentials = {"anthropic_api_url": "https://custom.anthropic.com/v1"}
+        credentials = {"base_url": "https://custom.anthropic.com/v1"}
         mock_instance = Mock()
         mock_chat_anthropic.return_value = mock_instance
 

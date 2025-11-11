@@ -12,8 +12,8 @@ from kedro_datasets_experimental.langchain._cohere import ChatCohereDataset
 def cohere_credentials():
     """Fixture for standard Cohere credentials."""
     return {
-        "cohere_api_url": "https://api.cohere.ai/v1",
-        "cohere_api_key": "test-cohere-key" # pragma: allowlist-secret
+        "base_url": "https://api.cohere.ai/v1",
+        "api_key": "test-cohere-key" # pragma: allowlist-secret
     }
 
 
@@ -42,7 +42,7 @@ class TestCohereDataset:
 
     def test_init_with_partial_credentials(self):
         """Test dataset initialization with partial credentials works."""
-        credentials = {"cohere_api_key": "test-cohere-key"}  # pragma: allowlist-secret
+        credentials = {"api_key": "test-cohere-key"}  # pragma: allowlist-secret
         dataset = ChatCohereDataset(credentials=credentials)
 
         assert dataset.credentials == credentials
@@ -70,7 +70,7 @@ class TestCohereDataset:
         result = dataset.load()
 
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="test-cohere-key",   # pragma: allowlist-secret
+            api_key="test-cohere-key",   # pragma: allowlist-secret
             base_url="https://api.cohere.ai/v1",
             model="command",
             temperature=0.0
@@ -92,20 +92,20 @@ class TestCohereDataset:
     @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
     def test_load_with_partial_credentials_api_key_only(self, mock_chat_cohere):
         """Test that providing only api_key works (url falls back to env)."""
-        credentials = {"cohere_api_key": "test-cohere-key"}  # pragma: allowlist-secret
+        credentials = {"api_key": "test-cohere-key"}  # pragma: allowlist-secret
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
 
         dataset = ChatCohereDataset(credentials=credentials)
         result = dataset.load()
 
-        mock_chat_cohere.assert_called_once_with(cohere_api_key="test-cohere-key")  # pragma: allowlist-secret
+        mock_chat_cohere.assert_called_once_with(api_key="test-cohere-key")  # pragma: allowlist-secret
         assert result == mock_instance
 
     @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
     def test_load_with_partial_credentials_api_url_only(self, mock_chat_cohere):
         """Test that providing only api_url works (key falls back to env)."""
-        credentials = {"cohere_api_url": "https://custom.cohere.ai/v1"}
+        credentials = {"base_url": "https://custom.cohere.ai/v1"}
         mock_instance = Mock()
         mock_chat_cohere.return_value = mock_instance
 
@@ -132,7 +132,7 @@ class TestCohereDataset:
         result = dataset.load()
 
         mock_chat_cohere.assert_called_once_with(
-            cohere_api_key="test-cohere-key",   # pragma: allowlist-secret
+            api_key="test-cohere-key",   # pragma: allowlist-secret
             base_url="https://api.cohere.ai/v1",
             **kwargs
         )

@@ -27,8 +27,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     ```yaml
     anthropic:
-        anthropic_api_url: <anthropic-api-base>  # Optional, defaults to Anthropic default
-        anthropic_api_key: <anthropic-api-key>   # Optional if ANTHROPIC_API_KEY is set
+        base_url: <anthropic-api-base>  # Optional, defaults to Anthropic default
+        api_key: <anthropic-api-key>   # Optional if ANTHROPIC_API_KEY is set
     ```
 
     **Or use environment variables:**
@@ -45,8 +45,8 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     # With explicit credentials
     llm = ChatAnthropicDataset(
         credentials={
-            "anthropic_api_url": "xxx",
-            "anthropic_api_key": "xxx",
+            "base_url": "xxx",
+            "api_key": "xxx",
         },
         kwargs={
             "model": "claude-instant-1",
@@ -106,10 +106,4 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             ChatAnthropic: A configured ChatAnthropic model instance.
         """
-        init_kwargs = {**self.kwargs}
-        if "anthropic_api_key" in self.credentials:
-            init_kwargs["api_key"] = self.credentials["anthropic_api_key"]
-        if "anthropic_api_url" in self.credentials:
-            init_kwargs["base_url"] = self.credentials["anthropic_api_url"]
-
-        return ChatAnthropic(**init_kwargs)
+        return ChatAnthropic(**self.credentials, **self.kwargs)

@@ -17,8 +17,8 @@ from kedro_datasets_experimental.langchain._openai import (
 def openai_credentials():
     """Fixture for standard OpenAI credentials."""
     return {
-        "openai_api_base": "https://api.openai.com/v1",
-        "openai_api_key": "sk-test-key" # pragma: allowlist-secret
+        "base_url": "https://api.openai.com/v1",
+        "api_key": "sk-test-key" # pragma: allowlist-secret
     }
 
 
@@ -160,7 +160,7 @@ class TestOpenAIEmbeddingsDataset:
     @patch('kedro_datasets_experimental.langchain._openai.OpenAIEmbeddings')
     def test_load_with_partial_credentials_api_key_only(self, mock_openai_embeddings):
         """Test that providing only api_key works (base_url falls back to env)."""
-        credentials = {"openai_api_key": "sk-test-key"}  # pragma: allowlist-secret
+        credentials = {"api_key": "sk-test-key"}  # pragma: allowlist-secret
         mock_instance = Mock()
         mock_openai_embeddings.return_value = mock_instance
 

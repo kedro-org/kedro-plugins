@@ -29,8 +29,8 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
 
     ```yaml
     cohere:
-        cohere_api_url: <cohere-api-base>  # Optional, defaults to Cohere default
-        cohere_api_key: <cohere-api-key>   # Optional if COHERE_API_KEY is set
+        base_url: <cohere-api-base>  # Optional, defaults to Cohere default
+        api_key: <cohere-api-key>   # Optional if COHERE_API_KEY is set
     ```
 
     **Or use environment variables:**
@@ -47,8 +47,8 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     # With explicit credentials
     llm = ChatCohereDataset(
         credentials={
-            "cohere_api_key": "xxx",
-            "cohere_api_url": "xxx",
+            "api_key": "xxx",
+            "base_url": "xxx",
         },
         kwargs={
             "model": "command",
@@ -108,10 +108,4 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         Returns:
             ChatCohere: A configured ChatCohere model instance.
         """
-        init_kwargs = {**self.kwargs}
-        if "cohere_api_key" in self.credentials:
-            init_kwargs["cohere_api_key"] = self.credentials["cohere_api_key"]
-        if "cohere_api_url" in self.credentials:
-            init_kwargs["base_url"] = self.credentials["cohere_api_url"]
-
-        return ChatCohere(**init_kwargs)
+        return ChatCohere(**self.credentials, **self.kwargs)

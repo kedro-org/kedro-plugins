@@ -21,7 +21,7 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
         """Constructor.
 
         Args:
-            credentials (Optional): contains `openai_api_key` and `openai_api_base`.
+            credentials (Optional): contains `api_key` and `base_url`.
                 If not provided, will use environment variables OPENAI_API_KEY and OPENAI_API_BASE.
             kwargs: keyword arguments passed to the underlying constructor.
         """
@@ -55,13 +55,7 @@ class OpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_TYPE]):
         Returns:
             OPENAI_TYPE: A configured OpenAI model instance.
         """
-        init_kwargs = {**self.kwargs}
-        if "openai_api_key" in self.credentials:
-            init_kwargs["api_key"] = self.credentials["openai_api_key"]
-        if "openai_api_base" in self.credentials:
-            init_kwargs["base_url"] = self.credentials["openai_api_base"]
-
-        return self.constructor(**init_kwargs)
+        return self.constructor(**self.credentials, **self.kwargs)
 
 
 class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
@@ -84,8 +78,8 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
 
     ```yaml
     openai:
-        openai_api_base: <openai-api-base>  # Optional, defaults to OpenAI default
-        openai_api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
+        base_url: <openai-api-base>  # Optional, defaults to OpenAI default
+        api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
     ```
 
     **Or use environment variables:**
@@ -102,8 +96,8 @@ class OpenAIEmbeddingsDataset(OpenAIDataset[OpenAIEmbeddings]):
     # With explicit credentials
     embeddings = OpenAIEmbeddingsDataset(
         credentials={
-            "openai_api_base": "<openai-api-base>",
-            "openai_api_key": "<openai-api-key>",
+            "base_url": "<openai-api-base>",
+            "api_key": "<openai-api-key>",
         },
         kwargs={
             "model": "text-embedding-ada-002",
@@ -149,8 +143,8 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
 
     ```yaml
     openai:
-        openai_api_base: <openai-api-base>  # Optional, defaults to OpenAI default
-        openai_api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
+        base_url: <openai-api-base>  # Optional, defaults to OpenAI default
+        api_key: <openai-api-key>   # Optional if OPENAI_API_KEY is set
     ```
 
     **Or use environment variables:**
@@ -167,8 +161,8 @@ class ChatOpenAIDataset(OpenAIDataset[ChatOpenAI]):
     # With explicit credentials
     llm = ChatOpenAIDataset(
         credentials={
-            "openai_api_base": "<openai-api-base>",
-            "openai_api_key": "<openai-api-key>",
+            "base_url": "<openai-api-base>",
+            "api_key": "<openai-api-key>",
         },
         kwargs={
             "model": "gpt-3.5-turbo",

@@ -259,7 +259,7 @@ def test_custom_template_nonexistent(cli_runner, metadata):
     result = cli_runner.invoke(commands, command, obj=metadata)
     assert result.exit_code == 2
     assert (
-        f"Error: Invalid value for '-j' / '--jinja-file': File '{template_name}' does not exist."
+        f"Error: Invalid value for '-j' / '--jinja-file': Path '{template_name}' does not exist."
         in result.stdout
     )
 
@@ -379,7 +379,7 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     result = cli_runner.invoke(commands, command, obj=metadata)
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
+        "Error: Invalid value for '--all' / '--pipeline': The options are mutually exclusive."
         in result.stdout
     )
 
@@ -413,6 +413,6 @@ def test_group_by_invalid_value(cli_runner, metadata):
 
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value for '-g' / '--group-by': 'asdasdasd' is not one of 'memory', 'namespace'."
+        "Error: Invalid value for '-g' / '--group-by': invalid choice: asdasdasd. (choose from memory, namespace)"
         in result.stdout
     )

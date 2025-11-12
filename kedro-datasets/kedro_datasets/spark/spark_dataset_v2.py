@@ -332,42 +332,24 @@ class SparkDatasetV2(AbstractVersionedDataset):
         return SparkSession.builder.getOrCreate()
 
     @staticmethod
-    def _load_schema_from_file(schema: dict[str, Any] | None) -> StructType | None:
-        """Load schema from file if provided."""
+    def _load_schema_from_file(self, schema: dict[str, Any] | None) -> StructType | None:
         if schema is None:
             return None
 
-        if not isinstance(schema, dict):
-            # Assume it's already a StructType
-            return schema
-
         filepath = schema.get("filepath")
         if not filepath:
-            raise DatasetError(
-                "Schema dict must have 'filepath' attribute. "
-                "Please provide a path to a JSON-serialised 'pyspark.sql.types.StructType'."
-            )
+            raise DatasetError("Schema dict must have 'filepath' attribute.")
 
+        # Use Spark to read schema file for Unity Catalog compatibility
+        spark = self._get_spark()
         try:
-            import fsspec  # noqa: PLC0415
-            from pyspark.sql.types import StructType  # noqa: PLC0415
-        except ImportError as e:
-            if "pyspark" in str(e):
-                raise ImportError("PySpark required to process schema") from e
-            raise ImportError("fsspec required for schema loading") from e
-
-        protocol, path = get_protocol_and_path(filepath)
-        fs = fsspec.filesystem(protocol, **schema.get("credentials", {}))
-
-        try:
-            with fs.open(path, "r") as f:
-                schema_json = json.load(f)
+            # Read as text file using Spark
+            schema_text = spark.read.text(filepath).collect()[0][0]
+            schema_json = json.loads(schema_text)
             return StructType.fromJson(schema_json)
-        except Exception as e:
-            raise DatasetError(
-                f"Failed to load schema from {filepath}. "
-                f"Ensure it contains valid JSON-serialised StructType."
-            ) from e
+        except Exception as exc:
+            # Fall back to fsspec for non-Unity paths
+            return self._load_schema_from_file_fsspec(schema)
 
     def load(self) -> DataFrame:
         """Load data using Spark"""

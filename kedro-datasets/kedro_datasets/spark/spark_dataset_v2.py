@@ -38,7 +38,7 @@ from kedro_datasets._utils.spark_utils import (
 logger = logging.getLogger(__name__)
 
 
-class SparkDatasetV2(AbstractVersionedDataset[DataFrame, DataFrame]):
+class SparkDatasetV2(AbstractVersionedDataset):
     """``SparkDatasetV2`` loads and saves Spark dataframes.
 
     Examples:

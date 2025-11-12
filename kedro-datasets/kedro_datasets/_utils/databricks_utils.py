@@ -124,12 +124,14 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
         # /dbfs/path -> dbfs protocol with /path
         return "dbfs", filepath[6:]  # Remove /dbfs prefix
     elif filepath.startswith("dbfs:/"):
-        # dbfs:/path -> already in correct format
-        return get_protocol_and_path(filepath)
+        # dbfs:/path -> Fix: handle single slash DBFS format
+        # Don't use get_protocol_and_path for DBFS
+        return "dbfs", filepath[6:]  # Remove "dbfs:/" to get the path
     elif filepath.startswith("/Volumes"):
         # Unity Catalog volumes
         return "file", filepath
     else:
+        # For standard protocols with ://
         return get_protocol_and_path(filepath)
 
 
@@ -169,18 +171,15 @@ def to_spark_path(filepath: str, protocol: str = "", path: str = "") -> str:
     Returns:
         Spark-compatible path string.
     """
-    filepath = str(filepath)
-
-    # Apply DBFS prefix stripping for consistency
-    filepath = strip_dbfs_prefix(filepath)
-
     if not protocol:
-        protocol, path = get_protocol_and_path(filepath)
+        protocol, path = parse_spark_filepath(filepath)
 
-    # Special handling for Databricks paths
+    # For Databricks paths
     if protocol == "dbfs":
         # Ensure dbfs:/ format for Spark
-        return f"dbfs:/{path}"
+        if not path.startswith("/"):
+            path = "/" + path
+        return f"dbfs:{path}"
 
     # Map to Spark protocols
     spark_protocols = {
@@ -205,6 +204,6 @@ def to_spark_path(filepath: str, protocol: str = "", path: str = "") -> str:
             path = f"/{path}"
         return f"file://{path}"
     elif not spark_protocol:
-        return path
+        return filepath  # Return original if we can't parse
     else:
         return f"{spark_protocol}://{path}"

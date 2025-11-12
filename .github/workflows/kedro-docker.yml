@@ -17,6 +17,9 @@ on:
       - "kedro-datasets/**"
       - "kedro-telemetry/**"
 
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     strategy:

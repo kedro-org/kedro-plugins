@@ -12,8 +12,12 @@ Name | Description
 [langchain.ChatOpenAIDataset](langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
 [langchain.OpenAIEmbeddingsDataset](langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
 [langchain.LangChainPromptDataset](langchain.LangChainPromptDataset.md) | ``LangChainPromptDataset`` loads a `langchain` prompt template.
+[langfuse.LangfusePromptDataset](langfuse.LangfusePromptDataset.md) | ``LangfusePromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.
 [langfuse.LangfuseTraceDataset](langfuse.LangfuseTraceDataset.md) | ``LangfuseTraceDataset`` provides Langfuse tracing clients for LLM observability and monitoring.
 [netcdf.NetCDFDataset](netcdf.NetCDFDataset.md) | ``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
+[opik.OpikPromptDataset](opik.OpikPromptDataset.md) | ``OpikPromptDataset`` manages prompts with Opik versioning support, returning either raw SDK objects or LangChain templates.
+[opik.OpikTraceDataset](opik.OpikTraceDataset.md) | ``OpikTraceDataset`` provides Opik tracing clients for observability and monitoring.
+[optuna.StudyDataset](optuna.StudyDataset.md) | ``StudyDataset`` loads/saves an Optuna study, enabling distributed hyperparameter tuning.
 [pypdf.PDFDataset](pypdf.PDFDataset.md) | ``PDFDataset`` loads data from PDF files using pypdf to extract text from pages. Read-only dataset.
 [polars.PolarsDatabaseDataset](polars.PolarsDatabaseDataset.md) | ``PolarsDatabaseDataset`` implementation to access databases as Polars DataFrames. It supports reading from a SQL query and writing to a database table.
 [prophet.ProphetModelDataset](prophet.ProphetModelDataset.md) | ``ProphetModelDataset`` loads/saves Facebook Prophet models to a JSON file using an underlying filesystem (e.g., local, S3, GCS). It uses Prophet's built-in serialisation to handle the JSON file.

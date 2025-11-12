@@ -5,6 +5,8 @@ on:
       - 'kedro-datasets/kedro_datasets/**'
 jobs:
   required-reviews:
+    permissions:
+      pull-requests: read
     name: Required Reviews
     runs-on: ubuntu-latest
     steps:

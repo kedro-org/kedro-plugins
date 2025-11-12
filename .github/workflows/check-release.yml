@@ -7,6 +7,8 @@ on:
 
 jobs:
   check-version:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -52,6 +54,8 @@ jobs:
     uses: ./.github/workflows/kedro-telemetry.yml
 
   build-publish:
+    permissions:
+      contents: write
     needs: [ check-version, airflow-test, docker-test, datasets-test, telemetry-test ]
     if: |
       always() &&

@@ -3,11 +3,16 @@ from fnmatch import fnmatch
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Union
 
+from kedro.io.core import get_protocol_and_path
 from pyspark.sql import SparkSession
 
 if TYPE_CHECKING:
     from databricks.connect import DatabricksSession
     from pyspark.dbutils import DBUtils
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def parse_glob_pattern(pattern: str) -> str:
@@ -103,3 +108,103 @@ def dbfs_exists(pattern: str, dbutils: "DBUtils") -> bool:
 def deployed_on_databricks() -> bool:
     """Check if running on Databricks."""
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
+
+
+def parse_spark_filepath(filepath: str) -> tuple[str, str]:
+    """Parse filepath handling special cases like DBFS and Unity Catalog.
+
+    Args:
+        filepath: Path to parse.
+
+    Returns:
+        Tuple of (protocol, path).
+    """
+    # Handle DBFS paths
+    if filepath.startswith("/dbfs/"):
+        # /dbfs/path -> dbfs protocol with /path
+        return "dbfs", filepath[6:]  # Remove /dbfs prefix
+    elif filepath.startswith("dbfs:/"):
+        # dbfs:/path -> already in correct format
+        return get_protocol_and_path(filepath)
+    elif filepath.startswith("/Volumes"):
+        # Unity Catalog volumes
+        return "file", filepath
+    else:
+        return get_protocol_and_path(filepath)
+
+
+def validate_databricks_path(filepath: str) -> None:
+    """Warn about potential Databricks path issues.
+
+    Args:
+        filepath: Path to validate.
+    """
+    if (
+        deployed_on_databricks()
+        and not (
+            filepath.startswith("/dbfs")
+            or filepath.startswith("dbfs:/")
+            or filepath.startswith("/Volumes")
+        )
+        and not any(
+            filepath.startswith(f"{p}://")
+            for p in ["s3", "s3a", "s3n", "gs", "abfs", "wasbs"]
+        )
+    ):
+        logger.warning(
+            "Using SparkDataset on Databricks without the `/dbfs/`, `dbfs:/`, or `/Volumes` prefix "
+            "in the filepath is a known source of error. You must add this prefix to %s",
+            filepath,
+        )
+
+
+def to_spark_path(filepath: str, protocol: str = "", path: str = "") -> str:
+    """Convert any path to Spark-compatible format.
+
+    Args:
+        filepath: Original filepath (used if protocol/path not provided).
+        protocol: Detected protocol.
+        path: Path component without protocol.
+
+    Returns:
+        Spark-compatible path string.
+    """
+    filepath = str(filepath)
+
+    # Apply DBFS prefix stripping for consistency
+    filepath = strip_dbfs_prefix(filepath)
+
+    if not protocol:
+        protocol, path = get_protocol_and_path(filepath)
+
+    # Special handling for Databricks paths
+    if protocol == "dbfs":
+        # Ensure dbfs:/ format for Spark
+        return f"dbfs:/{path}"
+
+    # Map to Spark protocols
+    spark_protocols = {
+        "s3": "s3a",  # Spark prefers s3a://
+        "s3n": "s3a",
+        "gs": "gs",
+        "abfs": "abfs",
+        "wasbs": "wasbs",
+        "file": "file",
+        "": "file",
+    }
+
+    spark_protocol = spark_protocols.get(protocol, protocol)
+
+    # Handle local paths
+    if spark_protocol == "file":
+        # Unity Catalog volumes don't use file:// prefix
+        if path.startswith("/Volumes"):
+            return path
+        # Regular local files need file:// prefix
+        if not path.startswith("/"):
+            path = f"/{path}"
+        return f"file://{path}"
+    elif not spark_protocol:
+        return path
+    else:
+        return f"{spark_protocol}://{path}"

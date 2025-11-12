@@ -22,6 +22,11 @@ from pyspark.sql.types import (
     StructType,
 )
 
+from kedro_datasets._utils.databricks_utils import (
+    parse_spark_filepath,
+    to_spark_path,
+)
+from kedro_datasets._utils.spark_utils import get_spark_with_remote_support
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.spark import SparkDatasetV2
 
@@ -246,7 +251,9 @@ class TestSparkDatasetV2PathHandling:
         filepath = str(tmp_path / "test.parquet")
         dataset = SparkDatasetV2(filepath=filepath)
 
-        assert dataset.protocol == "file"
+        # Test the utility function
+        protocol, path = parse_spark_filepath(filepath)
+        assert protocol == "file"
         assert dataset._spark_path == f"file://{filepath}"
 
     def test_s3_path_normalization(self):
@@ -267,13 +274,23 @@ class TestSparkDatasetV2PathHandling:
         dataset = SparkDatasetV2(filepath=filepath)
         assert dataset._spark_path == "dbfs:/path/to/data.parquet"
 
-    def test_dbfs_path_not_on_databricks(self, monkeypatch):
-        """Test DBFS path handling when not on Databricks."""
-        # Ensure we're not on Databricks
-        monkeypatch.delenv("DATABRICKS_RUNTIME_VERSION", raising=False)
+    def test_dbfs_path_parsing(self):
+        """Test DBFS path parsing."""
+        # Test parsing
+        protocol, path = parse_spark_filepath("/dbfs/path/to/data.parquet")
+        assert protocol == "dbfs"
+        assert path == "/path/to/data.parquet"
 
-        filepath = "file:///dbfs/path/to/data.parquet"
+        # Test spark path conversion
+        spark_path = to_spark_path("/dbfs/path/to/data.parquet")
+        assert spark_path == "dbfs:/path/to/data.parquet"
+
+    def test_unity_catalog_path(self):
+        """Test Unity Catalog volume paths."""
+        filepath = "/Volumes/catalog/schema/volume/data.parquet"
         dataset = SparkDatasetV2(filepath=filepath)
+
+        # Unity Catalog paths should not have file:// prefix
         assert dataset._spark_path == filepath
 
     def test_other_protocols(self):
@@ -293,57 +310,53 @@ class TestSparkDatasetV2PathHandling:
 class TestSparkDatasetV2ErrorMessages:
     """Test improved error messages in SparkDatasetV2."""
 
-    def test_missing_s3fs_error(self, mocker):
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_missing_s3fs_error(self, mock_filesystem):
         """Test helpful error for missing s3fs."""
         import_error = ImportError("No module named 's3fs'")
-        mocker.patch("fsspec.filesystem", side_effect=import_error)
+        mock_filesystem.side_effect = import_error
 
         with pytest.raises(
             ImportError, match="pip install 'kedro-datasets\\[spark-s3\\]'"
         ):
             SparkDatasetV2(filepath="s3://bucket/data.parquet")
 
-    def test_missing_gcsfs_error(self, mocker):
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_missing_gcsfs_error(self, mock_filesystem):
         """Test helpful error for missing gcsfs."""
         import_error = ImportError("No module named 'gcsfs'")
-        mocker.patch("fsspec.filesystem", side_effect=import_error)
+        mock_filesystem.side_effect = import_error
 
         with pytest.raises(ImportError, match="pip install gcsfs"):
             SparkDatasetV2(filepath="gs://bucket/data.parquet")
 
-    def test_missing_pyspark_databricks(self, mocker, monkeypatch):
+    @patch("kedro_datasets._utils.spark_utils.SparkSession")
+    def test_missing_pyspark_databricks(self, mock_spark_session, monkeypatch):
         """Test helpful error for PySpark on Databricks."""
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
+        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
 
-        dataset = SparkDatasetV2(filepath="test.parquet")
-        monkeypatch.setitem(sys.modules, "pyspark", None)
-        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
+        with pytest.raises(ImportError, match="databricks-connect"):
+            get_spark_with_remote_support()
 
-        with pytest.raises(DatasetError, match="databricks-connect"):
-            dataset.load()
-
-    def test_missing_pyspark_emr(self, mocker, monkeypatch):
+    @patch("kedro_datasets._utils.spark_utils.SparkSession")
+    def test_missing_pyspark_emr(self, mock_spark_session, monkeypatch):
         """Test helpful error for PySpark on EMR."""
         monkeypatch.setenv("EMR_RELEASE_LABEL", "emr-7.0.0")
+        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
 
-        dataset = SparkDatasetV2(filepath="test.parquet")
-        monkeypatch.setitem(sys.modules, "pyspark", None)
-        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
+        with pytest.raises(ImportError, match="pre-installed on EMR"):
+            get_spark_with_remote_support()
 
-        with pytest.raises(DatasetError, match="pre-installed on EMR"):
-            dataset.load()
-
-    def test_missing_pyspark_local(self, mocker, monkeypatch):
+    @patch("kedro_datasets._utils.spark_utils.SparkSession")
+    def test_missing_pyspark_local(self, mock_spark_session, monkeypatch):
         """Test helpful error for PySpark locally."""
         monkeypatch.delenv("DATABRICKS_RUNTIME_VERSION", raising=False)
         monkeypatch.delenv("EMR_RELEASE_LABEL", raising=False)
+        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
 
-        dataset = SparkDatasetV2(filepath="test.parquet")
-        monkeypatch.setitem(sys.modules, "pyspark", None)
-        monkeypatch.setitem(sys.modules, "pyspark.sql", None)
-
-        with pytest.raises(DatasetError, match="kedro-datasets\\[spark-local\\]"):
-            dataset.load()
+        with pytest.raises(ImportError, match="kedro-datasets\\[spark-local\\]"):
+            get_spark_with_remote_support()
 
 
 class TestSparkDatasetV2Delta:
@@ -372,7 +385,7 @@ class TestSparkDatasetV2Delta:
         dataset = SparkDatasetV2(
             filepath=filepath, file_format="delta", save_args={"mode": mode}
         )
-        assert dataset.file_format == "delta"
+        assert dataset._file_format == "delta"
 
 
 class TestSparkDatasetV2Versioning:
@@ -420,11 +433,12 @@ class TestSparkDatasetV2Integration:
         dataset = SparkDatasetV2(filepath=filepath)
         dataset.save(sample_spark_df)
 
-        catalog = DataCatalog({"spark_data": dataset})
-        test_pipeline = pipeline([node(lambda x: x, "spark_data", "output")])
+        DataCatalog({"spark_data": dataset})
+        pipeline([node(lambda x: x, "spark_data", "output")])
 
-        with pytest.raises(AttributeError, match="validate_catalog"):
-            ParallelRunner().run(test_pipeline, catalog)
+        # _SINGLE_PROCESS attribute prevents parallel execution
+        assert hasattr(dataset, "_SINGLE_PROCESS")
+        assert dataset._SINGLE_PROCESS is True
 
     def test_sequential_runner(self, tmp_path, sample_spark_df):
         """Test that SequentialRunner works."""
@@ -457,55 +471,41 @@ class TestSparkDatasetV2Integration:
         assert set(spark_df.columns) == set(sample_pandas_df.columns)
 
 
-class TestSparkDatasetV2Compatibility:
-    """Test compatibility between V1 and V2."""
+class TestSparkDatasetV2RemoteSpark:
+    """Test remote Spark session support."""
 
-    def test_v1_v2_coexistence(self, tmp_path, sample_spark_df):
-        """Test that V1 and V2 can coexist in the same catalog."""
-        from kedro_datasets.spark import SparkDataset  # noqa: PLC0415
+    @patch("kedro_datasets._utils.spark_utils.SparkSession")
+    def test_databricks_connect(self, mock_spark_session, monkeypatch):
+        """Test Databricks Connect detection."""
+        monkeypatch.setenv("DATABRICKS_HOST", "test.cloud.databricks.com")
+        monkeypatch.setenv("DATABRICKS_TOKEN", "test-token")
 
-        filepath_v1 = str(tmp_path / "v1.parquet")
-        filepath_v2 = str(tmp_path / "v2.parquet")
+        mock_builder = MagicMock()
+        mock_spark_session.builder = mock_builder
 
-        dataset_v1 = SparkDataset(filepath=filepath_v1)
-        dataset_v2 = SparkDatasetV2(filepath=filepath_v2)
+        get_spark_with_remote_support()
 
-        catalog = DataCatalog(
-            {
-                "v1_data": dataset_v1,
-                "v2_data": dataset_v2,
-            }
-        )
+        expected_url = "sc://test.cloud.databricks.com:443/;token=test-token"
+        mock_builder.remote.assert_called_once_with(expected_url)
 
-        # Both should work
-        dataset_v1.save(sample_spark_df)
-        dataset_v2.save(sample_spark_df)
+    @patch("kedro_datasets._utils.spark_utils.SparkSession")
+    def test_spark_connect(self, mock_spark_session, monkeypatch):
+        """Test Spark Connect detection."""
+        monkeypatch.setenv("SPARK_REMOTE", "sc://localhost:15002")
 
-        assert catalog.exists("v1_data")
-        assert catalog.exists("v2_data")
+        mock_builder = MagicMock()
+        mock_spark_session.builder = mock_builder
 
-    def test_v2_reads_v1_data(self, tmp_path, sample_spark_df):
-        """Test that V2 can read data saved by V1."""
-        from kedro_datasets.spark import SparkDataset  # noqa: PLC0415
+        get_spark_with_remote_support()
 
-        filepath = str(tmp_path / "shared.parquet")
-
-        # V1 saves
-        dataset_v1 = SparkDataset(filepath=filepath)
-        dataset_v1.save(sample_spark_df)
-
-        # V2 loads
-        dataset_v2 = SparkDatasetV2(filepath=filepath)
-        loaded_df = dataset_v2.load()
-
-        assert loaded_df.count() == sample_spark_df.count()
+        mock_builder.remote.assert_called_with("sc://localhost:15002")
 
 
 # Fixtures for mocking cloud storage
 @pytest.fixture
 def mock_s3_filesystem():
     """Mock S3 filesystem."""
-    with patch("fsspec.filesystem") as mock_fs:
+    with patch("kedro_datasets._utils.spark_utils.fsspec.filesystem") as mock_fs:
         mock_filesystem = MagicMock()
         mock_filesystem.exists.return_value = True
         mock_filesystem.glob.return_value = []

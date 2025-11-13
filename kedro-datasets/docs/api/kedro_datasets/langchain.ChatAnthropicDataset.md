@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.langchain.ChatAnthropicDataset
+::: kedro_datasets.langchain.ChatAnthropicDataset
     options:
         members: true
         show_source: true

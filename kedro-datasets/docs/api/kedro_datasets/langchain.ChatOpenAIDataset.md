@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.langchain.ChatOpenAIDataset
+::: kedro_datasets.langchain.ChatOpenAIDataset
     options:
         members: true
         show_source: true

@@ -71,9 +71,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
 
     """
 
-    def __init__(
-        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
-    ):
+    def __init__(self, credentials: dict[str, str] = {}, kwargs: dict[str, Any] = {}):
         """Constructor.
 
         Args:
@@ -114,4 +112,4 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         Returns:
             ChatCohere: A configured ChatCohere model instance.
         """
-        return ChatCohere(**self.credentials, **self.kwargs)
+        return ChatCohere(**self.credentials, **self.kwargs)  # type: ignore[arg-type]

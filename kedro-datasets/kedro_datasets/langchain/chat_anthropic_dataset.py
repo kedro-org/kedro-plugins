@@ -69,9 +69,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     """
 
-    def __init__(
-        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
-    ):
+    def __init__(self, credentials: dict[str, str] = {}, kwargs: dict[str, Any] = {}):
         """Constructor.
 
         Args:
@@ -112,4 +110,4 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             ChatAnthropic: A configured ChatAnthropic model instance.
         """
-        return ChatAnthropic(**self.credentials, **self.kwargs)
+        return ChatAnthropic(**self.credentials, **self.kwargs)  # type: ignore[arg-type]

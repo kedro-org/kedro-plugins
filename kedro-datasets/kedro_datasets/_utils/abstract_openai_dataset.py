@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Any, Generic, NoReturn, TypeVar
 
 from kedro.io import AbstractDataset, DatasetError
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 OPENAI_TYPE = TypeVar("OPENAI_TYPE")
 
@@ -13,12 +14,10 @@ class AbstractOpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_T
 
     @property
     @abstractmethod
-    def constructor(self) -> OPENAI_TYPE:
+    def constructor(self) -> type[OPENAI_TYPE]:
         """Return the OpenAI class to construct in the _load method."""
 
-    def __init__(
-        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
-    ):
+    def __init__(self, credentials: dict[str, str] = {}, kwargs: dict[str, Any] = {}):
         """Constructor.
 
         Args:

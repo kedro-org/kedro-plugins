@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Any, Generic, NoReturn, TypeVar
 
 from kedro.io import AbstractDataset, DatasetError
+
 OPENAI_TYPE = TypeVar("OPENAI_TYPE")
 
 
@@ -15,7 +16,9 @@ class AbstractOpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_T
     def constructor(self) -> OPENAI_TYPE:
         """Return the OpenAI class to construct in the _load method."""
 
-    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
+    def __init__(
+        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
+    ):
         """Constructor.
 
         Args:
@@ -32,8 +35,10 @@ class AbstractOpenAIDataset(AbstractDataset[None, OPENAI_TYPE], Generic[OPENAI_T
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to the OpenAI constructor.
         """
-        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
-        return {**credentials,**self.kwargs}
+        credentials = (
+            {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        )
+        return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:
         """Save operation is not supported for OpenAI datasets.

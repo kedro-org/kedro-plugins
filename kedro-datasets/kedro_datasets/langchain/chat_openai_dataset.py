@@ -1,6 +1,8 @@
 """Defines an interface to common OpenAI models."""
 from langchain_openai import ChatOpenAI
+
 from kedro_datasets._utils.abstract_openai_dataset import AbstractOpenAIDataset
+
 
 class ChatOpenAIDataset(AbstractOpenAIDataset[ChatOpenAI]):
     """

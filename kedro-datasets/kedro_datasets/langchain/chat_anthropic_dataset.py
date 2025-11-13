@@ -47,7 +47,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     llm = ChatAnthropicDataset(
         credentials={
             "base_url": "xxx",
-            "api_key": "xxx",
+            "api_key": "xxx",  # pragma: allowlist secret
         },
         kwargs={
             "model": "claude-instant-1",
@@ -69,7 +69,9 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     """
 
-    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
+    def __init__(
+        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
+    ):
         """Constructor.
 
         Args:
@@ -86,7 +88,9 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to ChatAnthropic.
         """
-        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        credentials = (
+            {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        )
         return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:

@@ -48,7 +48,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     # With explicit credentials
     llm = ChatCohereDataset(
         credentials={
-            "api_key": "xxx",
+            "api_key": "xxx",  # pragma: allowlist secret
             "base_url": "xxx",
         },
         kwargs={
@@ -71,7 +71,9 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
 
     """
 
-    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
+    def __init__(
+        self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None
+    ):
         """Constructor.
 
         Args:
@@ -88,8 +90,10 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to ChatCohere.
         """
-        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
-        return {**credentials,**self.kwargs}
+        credentials = (
+            {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        )
+        return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:
         """Save operation is not supported for ChatCohereDataset.

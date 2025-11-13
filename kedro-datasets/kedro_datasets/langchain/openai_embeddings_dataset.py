@@ -1,5 +1,7 @@
 from langchain_openai import OpenAIEmbeddings
+
 from kedro_datasets._utils.abstract_openai_dataset import AbstractOpenAIDataset
+
 
 class OpenAIEmbeddingsDataset(AbstractOpenAIDataset[OpenAIEmbeddings]):
     """

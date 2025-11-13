@@ -19,10 +19,10 @@ Name | Description
 [ibis.FileDataset](api/kedro_datasets/ibis.FileDataset.md) | ``FileDataset`` loads/saves data from/to a specified file format.
 [ibis.TableDataset](api/kedro_datasets/ibis.TableDataset.md) | `TableDataset` loads/saves data from/to Ibis table expressions.
 [json.JSONDataset](api/kedro_datasets/json.JSONDataset.md) | ``JSONDataset`` loads/saves data from/to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
-[langchain.ChatAnthropicDataset](langchain.ChatAnthropicDataset.md) | ``ChatAnthropicDataset`` loads a ChatAnthropic `langchain` model.
-[langchain.ChatCohereDataset](langchain.ChatCohereDataset.md) | ``ChatCohereDataset`` loads a ChatCohere `langchain` model.
-[langchain.ChatOpenAIDataset](langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
-[langchain.OpenAIEmbeddingsDataset](langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
+[langchain.ChatAnthropicDataset](api/kedro_datasets/langchain.ChatAnthropicDataset.md) | ``ChatAnthropicDataset`` loads a ChatAnthropic `langchain` model.
+[langchain.ChatCohereDataset](api/kedro_datasets/langchain.ChatCohereDataset.md) | ``ChatCohereDataset`` loads a ChatCohere `langchain` model.
+[langchain.ChatOpenAIDataset](api/kedro_datasets/langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
+[langchain.OpenAIEmbeddingsDataset](api/kedro_datasets/langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
 [matlab.MatlabDataset](api/kedro_datasets/matlab.MatlabDataset.md) | `MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 [matplotlib.MatplotlibDataset](api/kedro_datasets/matplotlib.MatplotlibDataset.md) | ``MatplotlibDataset`` saves one or more Matplotlib objects as image files to an underlying filesystem (e.g. local, S3, GCS).
 [networkx.GMLDataset](api/kedro_datasets/networkx.GMLDataset.md) | ``GMLDataset`` loads and saves graphs to a GML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GML data.

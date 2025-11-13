@@ -78,10 +78,10 @@ ibis = ["ibis-framework"]
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
 
-langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
-langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
-langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
-langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
+langchain-chatopenaidataset = ["langchain-openai>=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai>=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic>=0.1.13", "langchain-community>=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere>=0.1.5", "langchain-community>=0.2.0"]
 
 
 matlab-matlabdataset = ["scipy"]

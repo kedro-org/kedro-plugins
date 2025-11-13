@@ -20,15 +20,22 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         kwargs:
             model: "claude-instant-1"
             temperature: 0.0
-        credentials: anthropic
+        credentials: anthropic  # Optional, can use environment variables instead
     ```
 
-    **credentials.yml**
+    **credentials.yml** (optional if using environment variables)
+    If credentials are passed through `credentials.yml`, they take precedence over environment variables.
 
     ```yaml
     anthropic:
-        anthropic_api_url: <anthropic-api-base>
-        anthropic_api_key: <anthropic-api-key>
+        base_url: <anthropic-api-base>  # Optional, defaults to Anthropic default
+        api_key: <anthropic-api-key>   # Optional if ANTHROPIC_API_KEY is set
+    ```
+
+    **Or use environment variables:**
+    ```bash
+    export ANTHROPIC_API_KEY=<your-api-key>
+    export ANTHROPIC_API_URL=<anthropic-api-base>  # Optional
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
@@ -36,11 +43,20 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     ```python
     from kedro_datasets_experimental.langchain import ChatAnthropicDataset
 
+    # With explicit credentials
     llm = ChatAnthropicDataset(
         credentials={
-            "anthropic_api_url": "xxx",
-            "anthropic_api_key": "xxx",
+            "base_url": "xxx",
+            "api_key": "xxx",
         },
+        kwargs={
+            "model": "claude-instant-1",
+            "temperature": 0.0,
+        },
+    ).load()
+
+    # Or without credentials (using environment variables)
+    llm = ChatAnthropicDataset(
         kwargs={
             "model": "claude-instant-1",
             "temperature": 0.0,
@@ -53,26 +69,43 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     """
 
-    def __init__(self, credentials: dict[str, str], kwargs: dict[str, Any] = None):
+    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
         """Constructor.
 
         Args:
-            credentials: must contain `anthropic_api_url` and `anthropic_api_key`.
+            credentials (Optional): contains `api_key` and `base_url`.
+                If not provided, will use environment variables ANTHROPIC_API_KEY and ANTHROPIC_API_URL.
             kwargs: keyword arguments passed to the ChatAnthropic constructor.
         """
-        self.anthropic_api_url = credentials["anthropic_api_url"]
-        self.anthropic_api_key = credentials["anthropic_api_key"]
+        self.credentials = credentials or {}
         self.kwargs = kwargs or {}
 
     def _describe(self) -> dict[str, Any]:
-        return {**self.kwargs}
+        """Returns a description of the dataset.
+
+        Returns:
+            dict[str, Any]: Dictionary containing the kwargs passed to ChatAnthropic.
+        """
+        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:
+        """Save operation is not supported for ChatAnthropicDataset.
+
+        Raises:
+            DatasetError: Always raised as this dataset is read-only.
+        """
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def load(self) -> ChatAnthropic:
-        return ChatAnthropic(
-            anthropic_api_url=self.anthropic_api_url,
-            anthropic_api_key=self.anthropic_api_key,
-            **self.kwargs,
-        )
+        """Load and return a ChatAnthropic model instance.
+
+        Constructs a ChatAnthropic instance using the provided kwargs and optional
+        credentials. If credentials are not provided, the ChatAnthropic instance
+        will automatically use environment variables ANTHROPIC_API_KEY and
+        ANTHROPIC_API_URL for authentication.
+
+        Returns:
+            ChatAnthropic: A configured ChatAnthropic model instance.
+        """
+        return ChatAnthropic(**self.credentials, **self.kwargs)

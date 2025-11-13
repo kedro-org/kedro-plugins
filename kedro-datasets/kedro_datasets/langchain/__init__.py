@@ -4,9 +4,10 @@ from typing import Any
 import lazy_loader as lazy
 
 try:
-    from ._anthropic import ChatAnthropicDataset
-    from ._cohere import ChatCohereDataset
-    from ._openai import ChatOpenAIDataset, OpenAIEmbeddingsDataset
+    from .chat_anthropic_dataset import ChatAnthropicDataset
+    from .chat_cohere_dataset import ChatCohereDataset
+    from .chat_openai_dataset import ChatOpenAIDataset
+    from .openai_embeddings_dataset OpenAIEmbeddingsDataset
 
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues

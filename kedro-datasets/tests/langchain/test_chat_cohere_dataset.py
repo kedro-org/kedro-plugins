@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from kedro.io import DatasetError
 
-from kedro_datasets_experimental.langchain._cohere import ChatCohereDataset
+from kedro_datasets.langchain.chat_cohere_dataset import ChatCohereDataset
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ class TestCohereDataset:
         with pytest.raises(DatasetError, match="ChatCohereDataset is a read only dataset type"):
             dataset.save(data="test")
 
-    @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
+    @patch('kedro_datasets.langchain.chat_cohere_dataset.ChatCohere')
     def test_load_with_credentials(self, mock_chat_cohere, cohere_credentials, cohere_kwargs):
         """Test that load method creates ChatCohere instance with credentials."""
         mock_instance = Mock()
@@ -77,7 +77,7 @@ class TestCohereDataset:
         )
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
+    @patch('kedro_datasets.langchain.chat_cohere_dataset.ChatCohere')
     def test_load_without_credentials(self, mock_chat_cohere):
         """Test that load method works without credentials (uses environment variables)."""
         mock_instance = Mock()
@@ -89,7 +89,7 @@ class TestCohereDataset:
         mock_chat_cohere.assert_called_once_with()
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
+    @patch('kedro_datasets.langchain.chat_cohere_dataset.ChatCohere')
     def test_load_with_partial_credentials_api_key_only(self, mock_chat_cohere):
         """Test that providing only api_key works (url falls back to env)."""
         credentials = {"api_key": "test-cohere-key"}  # pragma: allowlist-secret
@@ -102,7 +102,7 @@ class TestCohereDataset:
         mock_chat_cohere.assert_called_once_with(api_key="test-cohere-key")  # pragma: allowlist-secret
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
+    @patch('kedro_datasets.langchain.chat_cohere_dataset.ChatCohere')
     def test_load_with_partial_credentials_api_url_only(self, mock_chat_cohere):
         """Test that providing only api_url works (key falls back to env)."""
         credentials = {"base_url": "https://custom.cohere.ai/v1"}
@@ -115,7 +115,7 @@ class TestCohereDataset:
         mock_chat_cohere.assert_called_once_with(base_url="https://custom.cohere.ai/v1")
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._cohere.ChatCohere')
+    @patch('kedro_datasets.langchain.chat_cohere_dataset.ChatCohere')
     def test_load_with_complex_kwargs(self, mock_chat_cohere, cohere_credentials):
         """Test load method with complex kwargs."""
         kwargs = {

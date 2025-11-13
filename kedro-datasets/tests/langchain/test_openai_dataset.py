@@ -6,11 +6,9 @@ import pytest
 from kedro.io import DatasetError
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-from kedro_datasets_experimental.langchain._openai import (
-    ChatOpenAIDataset,
-    OpenAIDataset,
-    OpenAIEmbeddingsDataset,
-)
+from kedro_datasets.langchain.chat_openai_dataset import ChatOpenAIDataset
+from kedro_datasets.langchain.openai_embeddings_dataset import OpenAIEmbeddingsDataset
+from kedro_datasets._utils.abstract_openai_dataset import AbstractOpenAIDataset
 
 
 @pytest.fixture
@@ -37,7 +35,7 @@ def embeddings_kwargs():
 @pytest.fixture
 def test_openai_dataset():
     """Fixture that creates a concrete TestDataset for base class testing."""
-    class TestDataset(OpenAIDataset):
+    class TestDataset(AbstractOpenAIDataset):
         @property
         def constructor(self):
             return Mock
@@ -87,7 +85,7 @@ class TestOpenAIDataset:
         mock_instance = Mock()
         mock_constructor.return_value = mock_instance
 
-        class TestDataset(OpenAIDataset):
+        class TestDataset(AbstractOpenAIDataset):
             @property
             def constructor(self):
                 return mock_constructor
@@ -109,7 +107,7 @@ class TestOpenAIDataset:
         mock_instance = Mock()
         mock_constructor.return_value = mock_instance
 
-        class TestDataset(OpenAIDataset):
+        class TestDataset(AbstractOpenAIDataset):
             @property
             def constructor(self):
                 return mock_constructor
@@ -129,7 +127,7 @@ class TestOpenAIEmbeddingsDataset:
         dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials)
         assert dataset.constructor == OpenAIEmbeddings
 
-    @patch('kedro_datasets_experimental.langchain._openai.OpenAIEmbeddings')
+    @patch('kedro_datasets.langchain.openai_embeddings_dataset.OpenAIEmbeddings')
     def test_load_with_credentials(self, mock_openai_embeddings, openai_credentials, embeddings_kwargs):
         """Test that load method creates OpenAIEmbeddings instance with credentials."""
         mock_instance = Mock()
@@ -145,7 +143,7 @@ class TestOpenAIEmbeddingsDataset:
         )
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._openai.OpenAIEmbeddings')
+    @patch('kedro_datasets.langchain.openai_embeddings_dataset.OpenAIEmbeddings')
     def test_load_without_credentials(self, mock_openai_embeddings):
         """Test that load method works without credentials (uses environment variables)."""
         mock_instance = Mock()
@@ -157,7 +155,7 @@ class TestOpenAIEmbeddingsDataset:
         mock_openai_embeddings.assert_called_once_with()
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._openai.OpenAIEmbeddings')
+    @patch('kedro_datasets.langchain.openai_embeddings_dataset.OpenAIEmbeddings')
     def test_load_with_partial_credentials_api_key_only(self, mock_openai_embeddings):
         """Test that providing only api_key works (base_url falls back to env)."""
         credentials = {"api_key": "sk-test-key"}  # pragma: allowlist-secret
@@ -191,7 +189,7 @@ class TestChatOpenAIDataset:
         dataset = ChatOpenAIDataset(credentials=openai_credentials)
         assert dataset.constructor == ChatOpenAI
 
-    @patch('kedro_datasets_experimental.langchain._openai.ChatOpenAI')
+    @patch('kedro_datasets.langchain.chat_openai_dataset.ChatOpenAI')
     def test_load_with_credentials(self, mock_chat_openai, openai_credentials, chat_kwargs):
         """Test that load method creates ChatOpenAI instance with credentials."""
         mock_instance = Mock()
@@ -208,7 +206,7 @@ class TestChatOpenAIDataset:
         )
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._openai.ChatOpenAI')
+    @patch('kedro_datasets.langchain.chat_openai_dataset.ChatOpenAI')
     def test_load_without_credentials(self, mock_chat_openai):
         """Test that load method works without credentials (uses environment variables)."""
         mock_instance = Mock()
@@ -220,7 +218,7 @@ class TestChatOpenAIDataset:
         mock_chat_openai.assert_called_once_with()
         assert result == mock_instance
 
-    @patch('kedro_datasets_experimental.langchain._openai.ChatOpenAI')
+    @patch('kedro_datasets.langchain.chat_openai_dataset.ChatOpenAI')
     def test_load_with_complex_kwargs(self, mock_chat_openai, openai_credentials):
         """Test load method with complex kwargs."""
         kwargs = {

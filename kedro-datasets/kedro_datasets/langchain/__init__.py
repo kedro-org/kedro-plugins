@@ -21,7 +21,7 @@ except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
     ChatOpenAIDataset: Any
 
-try:  
+try:
     from .openai_embeddings_dataset import OpenAIEmbeddingsDataset
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues

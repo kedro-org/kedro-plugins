@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.langchain.OpenAIEmbeddingsDataset
+::: kedro_datasets.langchain.OpenAIEmbeddingsDataset
     options:
         members: true
         show_source: true

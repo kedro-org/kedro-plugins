@@ -185,8 +185,8 @@ class TestOpenAIEmbeddingsDataset:
         result = dataset.load()
 
         mock_openai_embeddings.assert_called_once_with(
-            api_key="sk-test-key"
-        )  # pragma: allowlist-secret
+            api_key="sk-test-key"  # pragma: allowlist-secret
+        )
         assert result == mock_instance
 
     def test_describe(self, openai_credentials, embeddings_kwargs):

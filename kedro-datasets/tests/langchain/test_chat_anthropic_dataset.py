@@ -113,8 +113,8 @@ class TestAnthropicDataset:
         result = dataset.load()
 
         mock_chat_anthropic.assert_called_once_with(
-            api_key="sk-ant-test-key"
-        )  # pragma: allowlist-secret
+            api_key="sk-ant-test-key"  # pragma: allowlist-secret
+        )
         assert result == mock_instance
 
     @patch("kedro_datasets.langchain.chat_anthropic_dataset.ChatAnthropic")

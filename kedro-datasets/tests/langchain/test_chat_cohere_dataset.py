@@ -113,8 +113,8 @@ class TestCohereDataset:
         result = dataset.load()
 
         mock_chat_cohere.assert_called_once_with(
-            api_key="test-cohere-key"
-        )  # pragma: allowlist-secret
+            api_key="test-cohere-key"  # pragma: allowlist-secret
+        )
         assert result == mock_instance
 
     @patch("kedro_datasets.langchain.chat_cohere_dataset.ChatCohere")

@@ -265,10 +265,10 @@ nav:
         - JSON:
           - json.JSONDataset: api/kedro_datasets/json.JSONDataset.md
         - Langchain:
-          - langchain.ChatAnthropicDataset: api/kedro_datasets_experimental/langchain.ChatAnthropicDataset.md
-          - langchain.ChatCohereDataset: api/kedro_datasets_experimental/langchain.ChatCohereDataset.md
-          - langchain.ChatOpenAIDataset: api/kedro_datasets_experimental/langchain.ChatOpenAIDataset.md
-          - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets_experimental/langchain.OpenAIEmbeddingsDataset.md
+          - langchain.ChatAnthropicDataset: api/kedro_datasets/langchain.ChatAnthropicDataset.md
+          - langchain.ChatCohereDataset: api/kedro_datasets/langchain.ChatCohereDataset.md
+          - langchain.ChatOpenAIDataset: api/kedro_datasets/langchain.ChatOpenAIDataset.md
+          - langchain.OpenAIEmbeddingsDataset: api/kedro_datasets/langchain.OpenAIEmbeddingsDataset.md
         - Matlab:
           - matlab.MatlabDataset: api/kedro_datasets/matlab.MatlabDataset.md
         - Matplotlib:

@@ -41,7 +41,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
-    from kedro_datasets_experimental.langchain import ChatAnthropicDataset
+    from kedro_datasets.langchain import ChatAnthropicDataset
 
     # With explicit credentials
     llm = ChatAnthropicDataset(

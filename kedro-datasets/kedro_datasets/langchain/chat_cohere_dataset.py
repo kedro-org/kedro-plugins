@@ -43,7 +43,7 @@ class ChatCohereDataset(AbstractDataset[None, ChatCohere]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
-    from kedro_datasets_experimental.langchain import ChatCohereDataset
+    from kedro_datasets.langchain import ChatCohereDataset
 
     # With explicit credentials
     llm = ChatCohereDataset(

@@ -37,7 +37,7 @@ class OpenAIEmbeddingsDataset(AbstractOpenAIDataset[OpenAIEmbeddings]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
-    from kedro_datasets_experimental.langchain import OpenAIEmbeddingsDataset
+    from kedro_datasets.langchain import OpenAIEmbeddingsDataset
 
     # With explicit credentials
     embeddings = OpenAIEmbeddingsDataset(

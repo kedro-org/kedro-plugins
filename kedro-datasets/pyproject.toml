@@ -78,6 +78,12 @@ ibis = ["ibis-framework"]
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
 
+langchain-chatopenaidataset = ["langchain-openai>=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai>=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic>=0.1.13", "langchain-community>=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere>=0.1.5", "langchain-community>=0.2.0"]
+
+
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
@@ -180,12 +186,8 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 darts-torch-model-dataset = ["u8darts-all"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
-langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
-langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
-langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
-langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
 langchain-langchainpromptdataset = ["langchain>=0.3.0"]
-langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-langchainpromptdataset]"]
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
 langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
@@ -256,6 +258,10 @@ test = [
     "joblib>=0.14",
     "jupyterlab>=3.0",
     "jupyter~=1.0",
+    "langchain-openai>=0.1.7",
+    "langchain-cohere>=0.1.5",
+    "langchain-anthropic>=0.1.13",
+    "langchain-community>=0.2.0",
     "lxml~=4.6",
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",

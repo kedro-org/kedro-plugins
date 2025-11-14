@@ -41,13 +41,13 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
 
     ```python
-    from kedro_datasets_experimental.langchain import ChatAnthropicDataset
+    from kedro_datasets.langchain import ChatAnthropicDataset
 
     # With explicit credentials
     llm = ChatAnthropicDataset(
         credentials={
             "base_url": "xxx",
-            "api_key": "xxx",
+            "api_key": "xxx",  # pragma: allowlist secret
         },
         kwargs={
             "model": "claude-instant-1",
@@ -69,7 +69,7 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
 
     """
 
-    def __init__(self, credentials: dict[str, str] = None, kwargs: dict[str, Any] = None):
+    def __init__(self, credentials: dict[str, str] = {}, kwargs: dict[str, Any] = {}):
         """Constructor.
 
         Args:
@@ -86,7 +86,9 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             dict[str, Any]: Dictionary containing the kwargs passed to ChatAnthropic.
         """
-        credentials = {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        credentials = (
+            {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        )
         return {**credentials, **self.kwargs}
 
     def save(self, data: None) -> NoReturn:
@@ -108,4 +110,4 @@ class ChatAnthropicDataset(AbstractDataset[None, ChatAnthropic]):
         Returns:
             ChatAnthropic: A configured ChatAnthropic model instance.
         """
-        return ChatAnthropic(**self.credentials, **self.kwargs)
+        return ChatAnthropic(**self.credentials, **self.kwargs)  # type: ignore[arg-type]

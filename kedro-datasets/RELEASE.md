@@ -1,6 +1,12 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.0.0
+
+## Major features and improvements
 
 - Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 - Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
@@ -12,6 +18,15 @@
 | Type                  | Description                                                                             | Location                 |
 |-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
 | `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
+
+- Graduated the following **experimental** datasets to core:
+
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `langchain.ChatOpenAIDataset`    | Kedro dataset for loading a ChatOpenAI LangChain model. | `kedro_datasets.langchain`  |
+| `langchain.OpenAIEmbeddingsDataset` | Kedro dataset for loading an OpenAIEmbeddings model. | `kedro_datasets.langchain` |
+| `langchain.ChatAnthropicDataset`  | A dataset for loading a ChatAnthropic LangChain model.   | `kedro_datasets.langchain`     |
+| `langchain.ChatCohereDataset`   | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain`  |
 
 - Added the following new **experimental** datasets:
 
@@ -34,6 +49,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [gitgud5000](https://github.com/gitgud5000)
+- [Armand Masseau](https://github.com/armandmasseaugit)
 
 # Release 8.1.0
 

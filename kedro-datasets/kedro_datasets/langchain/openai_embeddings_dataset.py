@@ -1,9 +1,10 @@
+from typing import Any, NoReturn
+
+from kedro.io import AbstractDataset, DatasetError
 from langchain_openai import OpenAIEmbeddings
 
-from kedro_datasets._utils.abstract_openai_dataset import AbstractOpenAIDataset
 
-
-class OpenAIEmbeddingsDataset(AbstractOpenAIDataset[OpenAIEmbeddings]):
+class OpenAIEmbeddingsDataset(AbstractDataset[None, OpenAIEmbeddings]):
     """
     `OpenAIEmbeddingsDataset` loads an OpenAIEmbeddings [langchain](https://python.langchain.com/) model.
 
@@ -63,6 +64,45 @@ class OpenAIEmbeddingsDataset(AbstractOpenAIDataset[OpenAIEmbeddings]):
 
     """
 
-    @property
-    def constructor(self) -> type[OpenAIEmbeddings]:
-        return OpenAIEmbeddings
+    def __init__(self, credentials: dict[str, str] = {}, kwargs: dict[str, Any] = {}):
+        """Constructor.
+
+        Args:
+            credentials (Optional): contains `api_key` and `base_url`.
+                If not provided, will use environment variables OPENAI_API_KEY and OPENAI_API_BASE.
+            kwargs: keyword arguments passed to the underlying constructor.
+        """
+        self.credentials = credentials or {}
+        self.kwargs = kwargs or {}
+
+    def _describe(self) -> dict[str, Any]:
+        """Returns a description of the dataset.
+
+        Returns:
+            dict[str, Any]: Dictionary containing the kwargs passed to the OpenAI constructor.
+        """
+        credentials = (
+            {k: "***" for k in self.credentials.keys()} if self.credentials else {}
+        )
+        return {**credentials, **self.kwargs}
+
+    def save(self, data: None) -> NoReturn:
+        """Save operation is not supported for OpenAI datasets.
+
+        Raises:
+            DatasetError: Always raised as this dataset is read-only.
+        """
+        raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
+
+    def load(self) -> OpenAIEmbeddings:
+        """Load and return an OpenAI model instance.
+
+        Constructs an OpenAI instance using the provided kwargs and optional
+        credentials. If credentials are not provided, the OpenAI instance
+        will automatically use environment variables OPENAI_API_KEY and
+        OPENAI_API_BASE for authentication.
+
+        Returns:
+            OPENAI_TYPE: A configured OpenAI model instance.
+        """
+        return OpenAIEmbeddings(**self.credentials, **self.kwargs)  # type: ignore[arg-type]

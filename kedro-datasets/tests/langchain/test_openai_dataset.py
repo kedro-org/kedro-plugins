@@ -31,115 +31,58 @@ def embeddings_kwargs():
     return {"model": "text-embedding-ada-002"}
 
 
-@pytest.fixture
-def test_openai_dataset():
-    """Fixture that creates a concrete TestDataset for base class testing."""
+class TestOpenAIEmbeddingsDataset:
+    """Test the OpenAIEmbeddingsDataset class."""
 
-    class TestDataset(AbstractOpenAIDataset):
-        @property
-        def constructor(self):
-            return Mock
-
-    return TestDataset
-
-
-class TestOpenAIDataset:
-    """Test the base OpenAIDataset class."""
-
-    def test_init_with_credentials(
-        self, test_openai_dataset, openai_credentials, chat_kwargs
-    ):
+    def test_init_with_credentials(self, openai_credentials, chat_kwargs):
         """Test dataset initialization with credentials."""
-        dataset = test_openai_dataset(
-            credentials=openai_credentials, kwargs=chat_kwargs
+        dataset = OpenAIEmbeddingsDataset(
+            credentials=openai_credentials, kwargs=embeddings_kwargs
         )
 
         assert dataset.credentials == openai_credentials
-        assert dataset.kwargs == chat_kwargs
+        assert dataset.kwargs == embeddings_kwargs
 
-    def test_init_without_credentials(self, test_openai_dataset):
+    def test_init_without_credentials(self):
         """Test dataset initialization without credentials (uses environment variables)."""
-        dataset = test_openai_dataset()
+        dataset = OpenAIEmbeddingsDataset()
 
         assert dataset.credentials == {}
         assert dataset.kwargs == {}
 
-    def test_init_with_partial_credentials(self, test_openai_dataset):
+    def test_init_with_partial_credentials(self):
         """Test dataset initialization with partial credentials works."""
-        credentials = {"openai_api_key": "sk-test-key"}  # pragma: allowlist-secret
-        dataset = test_openai_dataset(credentials=credentials)
+        credentials = {"api_key": "sk-test-key"}  # pragma: allowlist-secret
+        dataset = OpenAIEmbeddingsDataset(credentials=credentials)
 
         assert dataset.credentials == credentials
         assert dataset.kwargs == {}
 
-    def test_describe(self, test_openai_dataset, openai_credentials, chat_kwargs):
+    def test_describe(self, openai_credentials, embeddings_kwargs):
         """Test the _describe method returns kwargs."""
-        dataset = test_openai_dataset(
-            credentials=openai_credentials, kwargs=chat_kwargs
+        dataset = OpenAIEmbeddingsDataset(
+            credentials=openai_credentials, kwargs=embeddings_kwargs
         )
         description = dataset._describe()
         assert description == {
             **{k: "***" for k in openai_credentials.keys()},
-            **chat_kwargs,
+            **embeddings_kwargs,
         }
 
-    def test_save_raises_error(self, test_openai_dataset, openai_credentials):
+    @pytest.mark.parametrize(
+        "dataset_class,expected_name",
+        [
+            (ChatOpenAIDataset, "ChatOpenAIDataset"),
+            (OpenAIEmbeddingsDataset, "OpenAIEmbeddingsDataset"),
+        ],
+    )
+    def test_save_raises_error(self, dataset_class, expected_name, openai_credentials):
         """Test that save method raises DatasetError."""
-        dataset = test_openai_dataset(credentials=openai_credentials)
+        dataset = dataset_class(credentials=openai_credentials)
         with pytest.raises(
-            DatasetError, match="TestDataset is a read only dataset type"
+            DatasetError, match=f"{expected_name} is a read only dataset type"
         ):
             dataset.save(data="test")
-
-    def test_load_calls_constructor_with_credentials(
-        self, openai_credentials, chat_kwargs
-    ):
-        """Test that load method calls constructor with correct arguments."""
-        mock_constructor = Mock()
-        mock_instance = Mock()
-        mock_constructor.return_value = mock_instance
-
-        class TestDataset(AbstractOpenAIDataset):
-            @property
-            def constructor(self):
-                return mock_constructor
-
-        dataset = TestDataset(credentials=openai_credentials, kwargs=chat_kwargs)
-        result = dataset.load()
-
-        mock_constructor.assert_called_once_with(
-            api_key="sk-test-key",  # pragma: allowlist-secret
-            base_url="https://api.openai.com/v1",
-            model="gpt-3.5-turbo",
-            temperature=0.7,
-        )
-        assert result == mock_instance
-
-    def test_load_without_credentials(self):
-        """Test that load method works without credentials (uses environment variables)."""
-        mock_constructor = Mock()
-        mock_instance = Mock()
-        mock_constructor.return_value = mock_instance
-
-        class TestDataset(AbstractOpenAIDataset):
-            @property
-            def constructor(self):
-                return mock_constructor
-
-        dataset = TestDataset()
-        result = dataset.load()
-
-        mock_constructor.assert_called_once_with()
-        assert result == mock_instance
-
-
-class TestOpenAIEmbeddingsDataset:
-    """Test the OpenAIEmbeddingsDataset class."""
-
-    def test_constructor_property(self, openai_credentials):
-        """Test that constructor property returns OpenAIEmbeddings."""
-        dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials)
-        assert dataset.constructor == OpenAIEmbeddings
 
     @patch("kedro_datasets.langchain.openai_embeddings_dataset.OpenAIEmbeddings")
     def test_load_with_credentials(
@@ -188,33 +131,50 @@ class TestOpenAIEmbeddingsDataset:
         )
         assert result == mock_instance
 
-    def test_describe(self, openai_credentials, embeddings_kwargs):
-        """Test the _describe method returns kwargs."""
-        dataset = OpenAIEmbeddingsDataset(
-            credentials=openai_credentials, kwargs=embeddings_kwargs
-        )
-        description = dataset._describe()
-        assert description == {
-            **{k: "***" for k in openai_credentials.keys()},
-            **embeddings_kwargs,
-        }
-
-    def test_save_raises_error(self, openai_credentials):
-        """Test that save method raises DatasetError."""
-        dataset = OpenAIEmbeddingsDataset(credentials=openai_credentials)
-        with pytest.raises(
-            DatasetError, match="OpenAIEmbeddingsDataset is a read only dataset type"
-        ):
-            dataset.save(data="test")
-
 
 class TestChatOpenAIDataset:
     """Test the ChatOpenAIDataset class."""
 
-    def test_constructor_property(self, openai_credentials):
-        """Test that constructor property returns ChatOpenAI."""
+    def test_init_with_credentials(self, openai_credentials, chat_kwargs):
+        """Test dataset initialization with credentials."""
+        dataset = ChatOpenAIDataset(credentials=openai_credentials, kwargs=chat_kwargs)
+
+        assert dataset.credentials == openai_credentials
+        assert dataset.kwargs == chat_kwargs
+
+    def test_init_without_credentials(
+        self,
+    ):
+        """Test dataset initialization without credentials (uses environment variables)."""
+        dataset = ChatOpenAIDataset()
+
+        assert dataset.credentials == {}
+        assert dataset.kwargs == {}
+
+    def test_init_with_partial_credentials(self):
+        """Test dataset initialization with partial credentials works."""
+        credentials = {"api_key": "sk-test-key"}  # pragma: allowlist-secret
+        dataset = ChatOpenAIDataset(credentials=credentials)
+
+        assert dataset.credentials == credentials
+        assert dataset.kwargs == {}
+
+    def test_describe(self, openai_credentials, chat_kwargs):
+        """Test the _describe method returns kwargs."""
+        dataset = ChatOpenAIDataset(credentials=openai_credentials, kwargs=chat_kwargs)
+        description = dataset._describe()
+        assert description == {
+            **{k: "***" for k in openai_credentials.keys()},
+            **chat_kwargs,
+        }
+
+    def test_save_raises_error(self, openai_credentials):
+        """Test that save method raises DatasetError."""
         dataset = ChatOpenAIDataset(credentials=openai_credentials)
-        assert dataset.constructor == ChatOpenAI
+        with pytest.raises(
+            DatasetError, match="ChatOpenAIDataset is a read only dataset type"
+        ):
+            dataset.save(data="test")
 
     @patch("kedro_datasets.langchain.chat_openai_dataset.ChatOpenAI")
     def test_load_with_credentials(
@@ -266,6 +226,6 @@ class TestChatOpenAIDataset:
         mock_chat_openai.assert_called_once_with(
             api_key="sk-test-key",  # pragma: allowlist-secret
             base_url="https://api.openai.com/v1",
-            **kwargs
+            **kwargs,
         )
         assert result == mock_instance

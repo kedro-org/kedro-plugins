@@ -69,9 +69,8 @@ dask-csvdataset = ["dask[dataframe]>=2021.10"]
 dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
-databricks-managedtabledataset = ["kedro-datasets[spark-core,spark-s3]"]
-databricks-externaltabledataset = ["kedro-datasets[spark-core,spark-s3]"]
-databricks = ["kedro-datasets[databricks-managedtabledataset,databricks-externaltabledataset]"]
+databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
+databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
 geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona>=1.8, <2.0"]
 geopandas = ["kedro-datasets[geopandas-genericdataset]"]

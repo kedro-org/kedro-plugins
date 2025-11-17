@@ -520,7 +520,10 @@ class TestSparkDatasetV2CloudStorage:
         """Test S3 with credentials."""
         dataset = SparkDatasetV2(
             filepath="s3://bucket/data.parquet",
-            credentials={"key": "test_key", "secret": "test_secret"},
+            credentials={
+                "key": "test_key",
+                "secret": "test_secret",
+            },  # pragma: allowlist secret
         )
 
         # Verify s3a:// normalization
@@ -539,7 +542,7 @@ class TestSparkDatasetV2CloudStorage:
         """Test Azure Blob Storage handling."""
         dataset = SparkDatasetV2(
             filepath="abfs://container@account.dfs.core.windows.net/data.parquet",
-            credentials={"account_key": "test_key"},
+            credentials={"account_key": "test_key"},  # pragma: allowlist secret
         )
 
         assert dataset._spark_path.startswith("abfs://")

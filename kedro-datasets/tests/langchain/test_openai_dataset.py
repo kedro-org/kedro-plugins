@@ -4,7 +4,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from kedro.io import DatasetError
-from kedro_datasets._utils.abstract_openai_dataset import AbstractOpenAIDataset
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from kedro_datasets.langchain.chat_openai_dataset import ChatOpenAIDataset

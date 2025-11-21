@@ -308,6 +308,11 @@ def _format_project_statistics_data(
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
     if hasattr(catalog, "keys") and callable(catalog.keys):
         dataset_names = catalog.keys()
+        dataset_types = {}
+        for ds_name in dataset_names:
+            if not ds_name.startswith(("parameters", "params:")):
+                ds_type = catalog.get_type(ds_name)
+                dataset_types[ds_type] = dataset_types.get(ds_type, 0) + 1
     else:
         dataset_names = catalog.list()  # type: ignore
 
@@ -321,6 +326,9 @@ def _format_project_statistics_data(
         len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
     )
     project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
+    project_statistics_properties["dataset_types"] = (
+        dataset_types if "dataset_types" in locals() else {}
+    )
     return project_statistics_properties
 
 

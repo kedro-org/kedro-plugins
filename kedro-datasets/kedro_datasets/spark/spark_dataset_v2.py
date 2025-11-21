@@ -5,9 +5,10 @@
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from functools import partial
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 from kedro.io.core import (
@@ -151,6 +152,13 @@ class SparkDatasetV2(AbstractVersionedDataset):
         # Parse filepath and detect protocol
         protocol, path = parse_spark_filepath(filepath)
 
+        # Handle relative paths for local files
+        if protocol == "file" and not os.path.isabs(path):
+            path = str(Path(path).resolve())
+
+        self._protocol = protocol
+        self._path = path
+
         # Validate Databricks paths
         validate_databricks_path(filepath)
 
@@ -171,9 +179,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
             if isinstance(self._schema, dict):
                 self._schema = load_spark_schema_from_file(self._schema)
 
-        # Store Spark-compatible path
-        self._spark_path = to_spark_path(filepath)
-
         # Call parent constructor
         super().__init__(
             filepath=PurePosixPath(path),
@@ -192,7 +197,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
             Data from filepath as pyspark dataframe.
         """
         load_path = self._get_load_path()
-        spark_load_path = to_spark_path(str(load_path))
+        spark_load_path = to_spark_path(str(load_path), self._protocol, str(load_path))
 
         spark = get_spark_with_remote_support()
 
@@ -213,35 +218,28 @@ class SparkDatasetV2(AbstractVersionedDataset):
             data: PySpark dataframe to save.
         """
         save_path = self._get_save_path()
-        spark_save_path = to_spark_path(str(save_path))
+        spark_save_path = to_spark_path(str(save_path), self._protocol, str(save_path))
+
+        # Create a copy of save_args to avoid mutation
+        save_args = self._save_args.copy()
+
+        # Extract mode and partitionBy
+        mode = save_args.pop("mode", None)
+        partition_by = save_args.pop("partitionBy", None)
 
         # Prepare writer
         writer = data.write
-
-        # Apply mode if specified
-        mode = self._save_args.pop("mode", None)
         if mode:
             writer = writer.mode(mode)
-
-        # Apply partitioning if specified
-        partition_by = self._save_args.pop("partitionBy", None)
         if partition_by:
             writer = writer.partitionBy(partition_by)
 
-        # Save with format and options
-        writer.format(self._file_format).options(**self._save_args).save(
-            spark_save_path
-        )
-
-        # Restore save_args for potential reuse
-        if mode:
-            self._save_args["mode"] = mode
-        if partition_by:
-            self._save_args["partitionBy"] = partition_by
+        # Save with remaining options
+        writer.format(self._file_format).options(**save_args).save(spark_save_path)
 
     def _exists(self) -> bool:
         load_path = self._get_load_path()
-        spark_load_path = to_spark_path(str(load_path))
+        spark_load_path = to_spark_path(str(load_path), self._protocol, str(load_path))
 
         try:
             spark = get_spark_with_remote_support()
@@ -264,11 +262,12 @@ class SparkDatasetV2(AbstractVersionedDataset):
             # Re-raise for unexpected errors
             logger.warning(f"Error checking existence of {spark_load_path}: {exc}")
             raise
-        return True
 
     def _describe(self) -> dict[str, Any]:
+        # Use the stored protocol and path to reconstruct the Spark path
+        spark_path = to_spark_path(self._path, self._protocol, self._path)
         return {
-            "filepath": self._spark_path,
+            "filepath": spark_path,
             "file_format": self._file_format,
             "load_args": self._load_args,
             "save_args": self._save_args,

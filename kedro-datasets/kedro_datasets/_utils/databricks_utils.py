@@ -160,7 +160,7 @@ def validate_databricks_path(filepath: str) -> None:
         )
 
 
-def to_spark_path(filepath: str, protocol: str = "", path: str = "") -> str:
+def to_spark_path(filepath: str, protocol: str, path: str) -> str:
     """Convert any path to Spark-compatible format.
 
     Args:
@@ -171,9 +171,6 @@ def to_spark_path(filepath: str, protocol: str = "", path: str = "") -> str:
     Returns:
         Spark-compatible path string.
     """
-    if not protocol:
-        protocol, path = parse_spark_filepath(filepath)
-
     # For Databricks paths
     if protocol == "dbfs":
         # Ensure dbfs:/ format for Spark

@@ -306,9 +306,9 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
+    dataset_types: dict[str, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
         dataset_names = catalog.keys()
-        dataset_types = {}
         for ds_name in dataset_names:
             if not ds_name.startswith(("parameters", "params:")):
                 ds_type = catalog.get_type(ds_name)
@@ -316,20 +316,16 @@ def _format_project_statistics_data(
     else:
         dataset_names = catalog.list()  # type: ignore
 
-    project_statistics_properties = {}
-    project_statistics_properties["number_of_datasets"] = sum(
-        1
-        for c in dataset_names
-        if not c.startswith("parameters") and not c.startswith("params:")
-    )
-    project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
-    )
-    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
-    project_statistics_properties["dataset_types"] = (
-        dataset_types if "dataset_types" in locals() else {}
-    )
-    return project_statistics_properties
+    return {
+        "number_of_datasets": sum(
+            1
+            for c in dataset_names
+            if not c.startswith("parameters") and not c.startswith("params:")
+        ),
+        "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
+        "number_of_pipelines": len(project_pipelines.keys()),
+        "dataset_types": dataset_types,
+    }
 
 
 def _get_heap_app_id() -> str:

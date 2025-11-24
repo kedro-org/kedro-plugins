@@ -306,7 +306,7 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
-    dataset_types: dict[str, int] = {}
+    dataset_types: dict[str | None, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
         dataset_names = catalog.keys()
         for ds_name in dataset_names:

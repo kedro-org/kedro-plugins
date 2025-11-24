@@ -1,5 +1,6 @@
 # Upcoming release
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+* Updated collection of command usage information to include which starter is used when creating a new project.
 
 # Release 0.6.5
 * Disabled data collection for CI/CD environments running in `kedro-org` repositories to avoid capturing internal usage metrics.

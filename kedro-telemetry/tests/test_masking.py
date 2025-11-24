@@ -180,7 +180,7 @@ class TestCLIMasking:
             (
                 ["new", "--starter=my_starter", "--name=my_project"],
                 ["new", "--starter", "my_starter", "--name", MASK],
-            )
+            ),
         ],
     )
     def test_mask_kedro_cli(

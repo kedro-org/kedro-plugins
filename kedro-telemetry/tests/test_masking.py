@@ -181,6 +181,14 @@ class TestCLIMasking:
                 ["new", "--starter=my_starter", "--name=my_project"],
                 ["new", "--starter", "my_starter", "--name", MASK],
             ),
+            (
+                ["new", "--starter", "my_starter", "--name=my_project"],
+                ["new", "--starter", "my_starter", "--name", MASK],
+            ),
+            (
+                ["new", "-s=my_starter", "-n=my_project"],
+                ["new", "-s", "my_starter", "-n", MASK],
+            ),
         ],
     )
     def test_mask_kedro_cli(

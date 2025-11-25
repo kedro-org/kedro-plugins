@@ -103,7 +103,6 @@ def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> li
         output.append(command_args[arg_index])
         current_CLI = current_CLI[command_args[arg_index]]
         arg_index += 1
-
     # Mask everything except parameter keywords
     prev_arg = None
     for arg in command_args[arg_index:]:
@@ -111,7 +110,7 @@ def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> li
             if "=" in arg:
                 arg_left, arg_right = arg.split("=", 1)
                 is_valid_param = arg_left in current_CLI
-                is_starter = arg_left == "--starter"
+                is_starter = arg_left in ("--starter", "-s")
 
                 if is_valid_param:
                     output.append(arg_left)
@@ -125,7 +124,7 @@ def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> li
                 output.append(arg if is_valid_param else MASK)
                 prev_arg = arg if is_valid_param else None
         else:
-            output.append(arg if prev_arg == "--starter" else MASK)
+            is_starter = prev_arg in ("--starter", "-s")
+            output.append(arg if is_starter else MASK)
             prev_arg = None
-
     return output

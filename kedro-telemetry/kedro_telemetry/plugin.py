@@ -312,7 +312,7 @@ def _format_project_statistics_data(
         dataset_names = catalog.keys()
         for ds_name in dataset_names:
             if not ds_name.startswith(("parameters", "params:")):
-                ds_type = catalog.get_type(ds_name)
+                ds_type = catalog.get_type(ds_name) or ""
                 if (
                     ds_type.startswith("kedro_datasets.")
                     or ds_type.startswith("kedro.io.")

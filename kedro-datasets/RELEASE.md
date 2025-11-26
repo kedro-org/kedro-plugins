@@ -1,6 +1,12 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.0.0
+
+## Major features and improvements
 
 - Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 - Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
@@ -13,6 +19,15 @@
 |-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
 | `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
 
+- Graduated the following **experimental** datasets to core:
+
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `langchain.ChatOpenAIDataset`    | Kedro dataset for loading a ChatOpenAI LangChain model. | `kedro_datasets.langchain`  |
+| `langchain.OpenAIEmbeddingsDataset` | Kedro dataset for loading an OpenAIEmbeddings model. | `kedro_datasets.langchain` |
+| `langchain.ChatAnthropicDataset`  | A dataset for loading a ChatAnthropic LangChain model.   | `kedro_datasets.langchain`     |
+| `langchain.ChatCohereDataset`   | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain`  |
+
 - Added the following new **experimental** datasets:
 
 | Type                               | Description                                                     | Location                                |
@@ -22,6 +37,9 @@
 | `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
 | `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
 | `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts      | `kedro_datasets_experimental.opik`      |
+| `opik.OpikTraceDataset`            | Kedro dataset to provide Opik tracing clients and callbacks     | `kedro_datasets_experimental.opik`      |
+
 
 ## Bug fixes and other changes
 - Add HTMLPreview type.
@@ -32,6 +50,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [gitgud5000](https://github.com/gitgud5000)
+- [Armand Masseau](https://github.com/armandmasseaugit)
 
 # Release 8.1.0
 

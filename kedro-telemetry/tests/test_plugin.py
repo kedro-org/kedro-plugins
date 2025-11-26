@@ -193,7 +193,7 @@ class TestKedroTelemetryHook:
             "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
             "To hide this message, explicitly grant or deny consent. "
-            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            "Read more at https://docs.kedro.org/en/stable/about/telemetry/"
             in record.message
             for record in caplog.records
         )

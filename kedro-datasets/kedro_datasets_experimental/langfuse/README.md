@@ -43,7 +43,7 @@ pip install "kedro-datasets[langfuse]"
 ```
 
 #### Requirements:
-- Python 3.9+
+- Python 3.10+
 - Kedro
 - Langfuse SDK
 - LangChain (optional, for `mode="langchain"`)
@@ -168,7 +168,7 @@ formatted = template.format(user_query="Hello world")
 
 ```yaml
 intent_prompt:
-  type: langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/prompts/intent.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -182,7 +182,7 @@ intent_prompt:
 ##### Remote Sync Policy - Production
 ```yaml
 production_prompt:
-  type: langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/prompts/production.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -197,7 +197,7 @@ production_prompt:
 
 ```yaml
 validation_prompt:
-  type: langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/prompts/validation.yaml
   prompt_name: "intent-classifier"
   prompt_type: "chat"

@@ -12,6 +12,8 @@ on:
 
 jobs:
   e2e-tests:
+    permissions:
+      contents: read
     defaults:
       run:
         shell: bash

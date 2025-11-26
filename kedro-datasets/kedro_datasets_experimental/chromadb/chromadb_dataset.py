@@ -123,19 +123,19 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 f"Must be one of: 'ephemeral', 'persistent', 'http'"
             )
 
-    def _get_client(self):
+    def _get_client(self) -> chromadb.Client:
         """Get or create the ChromaDB client."""
         if self._client is None:
             self._client = self._create_client()
         return self._client
 
-    def _get_collection(self, create_if_missing: bool = True):
+    def _get_collection(self, create_if_missing: bool = True) -> Collection | None:
         """Get or create the ChromaDB collection.
-        
+
         Args:
             create_if_missing: If True, creates the collection if it doesn't exist.
                               If False, returns None when collection is not found.
-                              
+
         Returns:
             Collection object if found/created, None if not found and create_if_missing=False.
         """

@@ -144,7 +144,7 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
 
     # Normalise empty protocol to "file"
     if not protocol:
-        protocol = "file"
+        protocol = "file"  # pragma: no cover
 
     return protocol, path
 

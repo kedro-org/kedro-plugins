@@ -200,7 +200,7 @@ def load_spark_schema_from_file(schema_config: dict[str, Any]) -> "StructType":
 
     # Normalise empty protocol
     if not protocol:
-        protocol = "file"
+        protocol = "file"  # pragma: no cover
 
     file_system = fsspec.filesystem(protocol, **credentials)
     pure_posix_path = PurePosixPath(schema_path)

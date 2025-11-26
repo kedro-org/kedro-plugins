@@ -43,8 +43,16 @@ def get_spark() -> Union[SparkSession, "DatabricksSession"]:
 def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
     """Get Spark session with support for Spark Connect and Databricks Connect.
 
+    This function attempts to create a Spark session in the following order:
+    1. Databricks Connect (if DATABRICKS_HOST and DATABRICKS_TOKEN are set)
+    2. Spark Connect (if SPARK_REMOTE is set)
+    3. Classic local Spark session
+
     Returns:
         SparkSession instance.
+
+    Raises:
+        ImportError: If PySpark is not installed with helpful installation hints.
     """
     try:
         from pyspark.sql import SparkSession  # noqa: PLC0415
@@ -72,18 +80,18 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
     # Try Databricks Connect first (for remote development)
     if "DATABRICKS_HOST" in os.environ and "DATABRICKS_TOKEN" in os.environ:
         try:
-            # Databricks Connect configuration
             logger.debug("Attempting to use Databricks Connect")
+            host = os.environ["DATABRICKS_HOST"]
+            token = os.environ["DATABRICKS_TOKEN"]
             builder = SparkSession.builder
-            builder.remote(
-                f"sc://{os.environ['DATABRICKS_HOST']}:443/;token={os.environ['DATABRICKS_TOKEN']}"
-            )
+            builder.remote(f"sc://{host}:443/;token={token}")
             return builder.getOrCreate()
         except Exception as exc:
             logger.debug(f"Databricks Connect failed, falling back: {exc}")
 
     # Try Spark Connect (Spark 3.4+)
-    if spark_remote := os.environ.get("SPARK_REMOTE"):
+    spark_remote = os.environ.get("SPARK_REMOTE")
+    if spark_remote:
         try:
             logger.debug(f"Using Spark Connect: {spark_remote}")
             return SparkSession.builder.remote(spark_remote).getOrCreate()
@@ -95,15 +103,20 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
     return SparkSession.builder.getOrCreate()
 
 
-def get_spark_filesystem(protocol: str, credentials: dict[str, Any] | None = None):
-    """Get fsspec filesystem instance with Spark-specific mappings.
+def get_spark_filesystem(
+    protocol: str, credentials: dict[str, Any] | None = None
+) -> fsspec.AbstractFileSystem:
+    """Get fsspec filesystem instance with Spark-specific protocol mappings.
 
     Args:
-        protocol: Filesystem protocol.
+        protocol: Filesystem protocol (e.g., 's3a', 'gs', 'abfs').
         credentials: Optional credentials for filesystem access.
 
     Returns:
         Filesystem instance.
+
+    Raises:
+        ImportError: If required filesystem package is not installed.
     """
     credentials = credentials or {}
 
@@ -111,7 +124,16 @@ def get_spark_filesystem(protocol: str, credentials: dict[str, Any] | None = Non
     protocol_map = {
         "s3a": "s3",
         "s3n": "s3",
-        "dbfs": "file",  # DBFS is mounted as local when using fsspec
+        "s3": "s3",
+        "gs": "gcs",
+        "gcs": "gcs",
+        "abfs": "abfs",
+        "abfss": "abfs",
+        "wasbs": "abfs",
+        "wasb": "abfs",
+        "hdfs": "hdfs",
+        "dbfs": "file",  # DBFS is mounted as local filesystem when using fsspec
+        "file": "file",
         "": "file",
     }
 
@@ -121,27 +143,35 @@ def get_spark_filesystem(protocol: str, credentials: dict[str, Any] | None = Non
         return fsspec.filesystem(fsspec_protocol, **credentials)
     except ImportError as exc:
         # Provide targeted help for missing filesystem implementations
-        error_msg = str(exc)
-        if "s3fs" in error_msg:
+        error_msg = str(exc).lower()
+
+        if "s3fs" in error_msg or fsspec_protocol == "s3":
             msg = (
                 "s3fs not installed. Install with:\n"
                 "  pip install 'kedro-datasets[spark-s3]' or\n"
                 "  pip install s3fs"
             )
-        elif "gcsfs" in error_msg:
+        elif "gcsfs" in error_msg or fsspec_protocol == "gcs":
             msg = (
                 "gcsfs not installed. Install with:\n"
                 "  pip install 'kedro-datasets[spark-gcs]' or\n"
                 "  pip install gcsfs"
             )
-        elif "adlfs" in error_msg or "azure" in error_msg:
+        elif "adlfs" in error_msg or "azure" in error_msg or fsspec_protocol == "abfs":
             msg = (
                 "adlfs not installed for Azure. Install with:\n"
                 "  pip install 'kedro-datasets[spark-azure]' or\n"
                 "  pip install adlfs"
             )
+        elif "hdfs" in error_msg or fsspec_protocol == "hdfs":
+            msg = (
+                "HDFS support requires PyArrow. Install with:\n"
+                "  pip install 'kedro-datasets[spark-hdfs]' or\n"
+                "  pip install pyarrow"
+            )
         else:
-            msg = f"Missing filesystem implementation: {error_msg}"
+            msg = f"Missing filesystem implementation for '{protocol}': {error_msg}"
+
         raise ImportError(msg) from exc
 
 
@@ -149,10 +179,14 @@ def load_spark_schema_from_file(schema_config: dict[str, Any]) -> "StructType":
     """Load Spark schema from JSON file.
 
     Args:
-        schema_config: Dictionary with 'filepath' and optional 'credentials'.
+        schema_config: Dictionary with 'filepath' key pointing to a JSON file
+            containing a serialized StructType, and optional 'credentials' key.
 
     Returns:
         StructType loaded from file.
+
+    Raises:
+        DatasetError: If filepath is not specified or file contents are invalid.
     """
     filepath = schema_config.get("filepath")
     if not filepath:
@@ -163,15 +197,26 @@ def load_spark_schema_from_file(schema_config: dict[str, Any]) -> "StructType":
 
     credentials = deepcopy(schema_config.get("credentials")) or {}
     protocol, schema_path = get_protocol_and_path(filepath)
+
+    # Normalise empty protocol
+    if not protocol:
+        protocol = "file"
+
     file_system = fsspec.filesystem(protocol, **credentials)
     pure_posix_path = PurePosixPath(schema_path)
 
-    # Open schema file
+    # Open and parse schema file
     with file_system.open(str(pure_posix_path)) as fs_file:
         try:
             from pyspark.sql.types import StructType  # noqa: PLC0415
 
-            return StructType.fromJson(json.loads(fs_file.read()))
+            schema_json = json.loads(fs_file.read())
+            return StructType.fromJson(schema_json)
+        except json.JSONDecodeError as exc:
+            raise DatasetError(
+                f"Contents of 'schema.filepath' ({schema_path}) are invalid JSON. "
+                f"Please provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
+            ) from exc
         except Exception as exc:
             raise DatasetError(
                 f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please "

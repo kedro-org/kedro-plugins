@@ -45,7 +45,7 @@ def dbfs_glob(pattern: str, dbutils: "DBUtils") -> list[str]:
         dbutils: dbutils instance to operate with DBFS.
 
     Returns:
-            List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
+        List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
     """
     pattern = strip_dbfs_prefix(pattern)
     prefix = parse_glob_pattern(pattern)
@@ -119,25 +119,32 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
     Returns:
         Tuple of (protocol, path).
     """
-    # Handle DBFS paths
+    # Handle DBFS paths with /dbfs/ prefix
     if filepath.startswith("/dbfs/"):
         # /dbfs/path -> dbfs protocol with /path
-        path = filepath[6:]  # Remove /dbfs prefix
+        path = filepath[5:]  # Remove /dbfs prefix, keep leading /
+        return "dbfs", path
+
+    # Handle DBFS paths with dbfs:/ prefix (single slash format)
+    if filepath.startswith("dbfs:/") and not filepath.startswith("dbfs://"):
+        # dbfs:/path -> dbfs protocol with /path
+        path = filepath[5:]  # Remove "dbfs:", keep the path
         if not path.startswith("/"):
             path = "/" + path
         return "dbfs", path
-    elif filepath.startswith("dbfs:/"):
-        # dbfs:/path -> Fix: handle single slash DBFS format
-        path = filepath[6:]  # Remove "dbfs:/"
-        if not path.startswith("/"):
-            path = "/" + path
-        return "dbfs", path
-    elif filepath.startswith("/Volumes"):
-        # Unity Catalog volumes
+
+    # Handle Unity Catalog volumes
+    if filepath.startswith("/Volumes"):
         return "file", filepath
-    else:
-        # For standard protocols with ://
-        return get_protocol_and_path(filepath)
+
+    # For standard protocols with ://
+    protocol, path = get_protocol_and_path(filepath)
+
+    # Normalise empty protocol to "file"
+    if not protocol:
+        protocol = "file"
+
+    return protocol, path
 
 
 def validate_databricks_path(filepath: str) -> None:
@@ -146,57 +153,60 @@ def validate_databricks_path(filepath: str) -> None:
     Args:
         filepath: Path to validate.
     """
-    if (
-        deployed_on_databricks()
-        and not (
-            filepath.startswith("/dbfs")
-            or filepath.startswith("dbfs:/")
-            or filepath.startswith("/Volumes")
-        )
-        and not any(
-            filepath.startswith(f"{p}://")
-            for p in ["s3", "s3a", "s3n", "gs", "abfs", "wasbs"]
-        )
-    ):
+    if not deployed_on_databricks():
+        return
+
+    # Check if path has a valid Databricks format
+    valid_prefixes = ("/dbfs", "dbfs:/", "/Volumes")
+    cloud_protocols = ("s3://", "s3a://", "s3n://", "gs://", "abfs://", "wasbs://")
+
+    has_valid_prefix = any(filepath.startswith(p) for p in valid_prefixes)
+    has_cloud_protocol = any(filepath.startswith(p) for p in cloud_protocols)
+
+    if not has_valid_prefix and not has_cloud_protocol:
         logger.warning(
-            "Using SparkDataset on Databricks without the `/dbfs/`, `dbfs:/`, or `/Volumes` prefix "
-            "in the filepath is a known source of error. You must add this prefix to %s",
+            "Using SparkDataset on Databricks without the `/dbfs/`, `dbfs:/`, or "
+            "`/Volumes` prefix in the filepath may cause errors. Consider adding "
+            "the appropriate prefix to: %s",
             filepath,
         )
 
 
-def to_spark_path(filepath: str, protocol: str, path: str) -> str:
-    """Convert any path to Spark-compatible format.
+def to_spark_path(protocol: str, path: str) -> str:
+    """Convert protocol and path to Spark-compatible format.
 
     Args:
-        filepath: Original filepath (used if protocol/path not provided).
-        protocol: Detected protocol.
+        protocol: Detected protocol (e.g., 'file', 's3', 'dbfs').
         path: Path component without protocol.
 
     Returns:
         Spark-compatible path string.
     """
-    # For Databricks paths
+    # For Databricks DBFS paths
     if protocol == "dbfs":
         # Ensure dbfs:/ format for Spark
         if not path.startswith("/"):
             path = "/" + path
         return f"dbfs:{path}"
 
-    # Map to Spark protocols
+    # Map protocols to Spark-preferred protocols
     spark_protocols = {
         "s3": "s3a",  # Spark prefers s3a://
         "s3n": "s3a",
+        "s3a": "s3a",
         "gs": "gs",
+        "gcs": "gs",
         "abfs": "abfs",
+        "abfss": "abfss",
         "wasbs": "wasbs",
+        "wasb": "wasb",
+        "hdfs": "hdfs",
         "file": "file",
-        "": "file",
     }
 
     spark_protocol = spark_protocols.get(protocol, protocol)
 
-    # Handle local paths
+    # Handle local/file paths
     if spark_protocol == "file":
         # Unity Catalog volumes don't use file:// prefix
         if path.startswith("/Volumes"):
@@ -205,7 +215,13 @@ def to_spark_path(filepath: str, protocol: str, path: str) -> str:
         if not path.startswith("/"):
             path = f"/{path}"
         return f"file://{path}"
-    elif not spark_protocol:
-        return filepath  # Return original if we can't parse
-    else:
+
+    # Handle cloud and other protocols
+    if spark_protocol:
+        # Remove any existing protocol prefix from path
+        if "://" in path:
+            path = path.split("://", 1)[1]
         return f"{spark_protocol}://{path}"
+
+    # Fallback: return path as-is if we can't determine protocol
+    return path

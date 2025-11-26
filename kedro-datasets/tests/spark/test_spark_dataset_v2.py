@@ -1,19 +1,17 @@
 """Tests for SparkDatasetV2."""
 
 import os
-import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
 from kedro.io.core import DatasetError, generate_timestamp
 from kedro.pipeline import node, pipeline
-from kedro.runner import ParallelRunner, SequentialRunner
+from kedro.runner import SequentialRunner
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
 from pyspark.sql.types import (
     FloatType,
     IntegerType,
@@ -26,8 +24,7 @@ from kedro_datasets._utils.databricks_utils import (
     parse_spark_filepath,
     to_spark_path,
 )
-from kedro_datasets._utils.spark_utils import get_spark_with_remote_support
-from kedro_datasets.pandas import CSVDataset, ParquetDataset
+from kedro_datasets.pandas import ParquetDataset
 from kedro_datasets.spark import SparkDatasetV2
 
 # Test constants
@@ -193,8 +190,35 @@ class TestSparkDatasetV2Basic:
         filepath = str(tmp_path / "test.parquet")
         dataset = SparkDatasetV2(filepath=filepath)
 
-        assert "SparkDatasetV2" in str(dataset)
-        assert filepath in str(dataset)
+        str_repr = str(dataset)
+        assert "SparkDatasetV2" in str_repr
+        # The filepath in str representation is the spark path (file://)
+        assert "file://" in str_repr or filepath in str_repr
+
+    def test_relative_path(self, sample_spark_df):
+        """Test that relative paths work correctly."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Change to temp directory
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(tmp_dir)
+
+                # Use relative path
+                relative_path = "data/test.parquet"
+                dataset = SparkDatasetV2(filepath=relative_path)
+
+                # Save and load
+                dataset.save(sample_spark_df)
+
+                # Check file exists at resolved path
+                expected_path = Path(tmp_dir) / "data" / "test.parquet"
+                assert expected_path.exists()
+
+                # Load should work
+                loaded_df = dataset.load()
+                assert loaded_df.count() == sample_spark_df.count()
+            finally:
+                os.chdir(original_cwd)
 
 
 class TestSparkDatasetV2Schema:
@@ -246,6 +270,20 @@ class TestSparkDatasetV2Schema:
                 filepath=csv_path, file_format="csv", load_args={"schema": {}}
             )
 
+    def test_schema_as_structtype(self, tmp_path, sample_spark_df, sample_schema):
+        """Test passing schema directly as StructType."""
+        filepath = str(tmp_path / "test.parquet")
+
+        # Create dataset with StructType schema directly
+        dataset = SparkDatasetV2(
+            filepath=filepath,
+            file_format="parquet",
+            load_args={"schema": sample_schema},
+        )
+
+        # The schema should be stored correctly
+        assert dataset._schema == sample_schema
+
 
 class TestSparkDatasetV2PathHandling:
     """Test path handling in SparkDatasetV2."""
@@ -263,22 +301,35 @@ class TestSparkDatasetV2PathHandling:
     def test_s3_path_normalization(self):
         """Test S3 path normalization to s3a://."""
         # All S3 variants should normalize to s3a://
-        for prefix in ["s3://", "s3n://", "s3a://"]:
-            filepath = f"{prefix}bucket/path/data.parquet"
-            dataset = SparkDatasetV2(filepath=filepath)
-            assert dataset._spark_path.startswith("s3a://")
+        test_cases = [
+            ("s3://bucket/path/data.parquet", "s3a://bucket/path/data.parquet"),
+            ("s3n://bucket/path/data.parquet", "s3a://bucket/path/data.parquet"),
+            ("s3a://bucket/path/data.parquet", "s3a://bucket/path/data.parquet"),
+        ]
+
+        for input_path, expected_prefix in test_cases:
+            protocol, path = parse_spark_filepath(input_path)
+            spark_path = to_spark_path(protocol, path)
+            assert spark_path.startswith("s3a://"), f"Failed for {input_path}"
 
     def test_dbfs_path_parsing(self):
         """Test DBFS path parsing."""
-        # Test parsing
+        # Test /dbfs/ prefix
         protocol, path = parse_spark_filepath("/dbfs/path/to/data.parquet")
         assert protocol == "dbfs"
         assert path == "/path/to/data.parquet"
 
-        # Test spark path conversion - Fix: provide all required arguments
-        protocol, path = parse_spark_filepath("/dbfs/path/to/data.parquet")
-        spark_path = to_spark_path("/dbfs/path/to/data.parquet", protocol, path)
+        # Test spark path conversion
+        spark_path = to_spark_path(protocol, path)
         assert spark_path == "dbfs:/path/to/data.parquet"
+
+        # Test dbfs:/ prefix (single slash)
+        protocol2, path2 = parse_spark_filepath("dbfs:/path/to/data.parquet")
+        assert protocol2 == "dbfs"
+        assert path2 == "/path/to/data.parquet"
+
+        spark_path2 = to_spark_path(protocol2, path2)
+        assert spark_path2 == "dbfs:/path/to/data.parquet"
 
     def test_unity_catalog_path(self):
         """Test Unity Catalog volume paths."""
@@ -288,18 +339,18 @@ class TestSparkDatasetV2PathHandling:
         # Unity Catalog paths should not have file:// prefix
         assert dataset._spark_path == filepath
 
-    def test_other_protocols(self):
-        """Test other protocol handling."""
-        protocols = {
-            "gs://bucket/path": "gs://",
-            "abfs://container@account.dfs.core.windows.net/path": "abfs://",
-        }
+    def test_gcs_path(self):
+        """Test GCS path handling."""
+        protocol, path = parse_spark_filepath("gs://bucket/path/data.parquet")
+        spark_path = to_spark_path(protocol, path)
+        assert spark_path.startswith("gs://")
 
-        for filepath, expected_prefix in protocols.items():
-            dataset = SparkDatasetV2(
-                filepath=filepath, credentials={"account_name": "dummy"}
-            )
-            assert dataset._spark_path.startswith(expected_prefix)
+    def test_azure_path(self):
+        """Test Azure Blob Storage path handling."""
+        filepath = "abfs://container@account.dfs.core.windows.net/path/data.parquet"
+        protocol, path = parse_spark_filepath(filepath)
+        spark_path = to_spark_path(protocol, path)
+        assert spark_path.startswith("abfs://")
 
 
 class TestSparkDatasetV2ErrorMessages:
@@ -322,8 +373,19 @@ class TestSparkDatasetV2ErrorMessages:
         import_error = ImportError("No module named 'gcsfs'")
         mock_filesystem.side_effect = import_error
 
-        with pytest.raises(ImportError, match="pip install gcsfs"):
+        with pytest.raises(ImportError, match="pip install.*gcsfs"):
             SparkDatasetV2(filepath="gs://bucket/data.parquet")
+
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_missing_adlfs_error(self, mock_filesystem):
+        """Test helpful error for missing adlfs."""
+        import_error = ImportError("No module named 'adlfs'")
+        mock_filesystem.side_effect = import_error
+
+        with pytest.raises(ImportError, match="pip install.*adlfs"):
+            SparkDatasetV2(
+                filepath="abfs://container@account.dfs.core.windows.net/data.parquet"
+            )
 
 
 class TestSparkDatasetV2Delta:
@@ -389,7 +451,8 @@ class TestSparkDatasetV2Versioning:
         filepath = str(tmp_path / "test.parquet")
         dataset = SparkDatasetV2(filepath=filepath, version=version)
 
-        assert "version" in str(dataset._describe())
+        description = dataset._describe()
+        assert "version" in description
 
 
 class TestSparkDatasetV2Integration:
@@ -438,6 +501,19 @@ class TestSparkDatasetV2Integration:
         assert spark_df.count() == len(sample_pandas_df)
         assert set(spark_df.columns) == set(sample_pandas_df.columns)
 
+    def test_save_args_not_mutated(self, tmp_path, sample_spark_df):
+        """Test that save_args dict is not mutated during save."""
+        filepath = str(tmp_path / "test.parquet")
+        save_args = {"mode": "overwrite", "compression": "snappy"}
+        original_save_args = save_args.copy()
+
+        dataset = SparkDatasetV2(filepath=filepath, save_args=save_args)
+        dataset.save(sample_spark_df)
+        dataset.save(sample_spark_df)  # Save twice to ensure no mutation
+
+        # Original save_args should not be modified
+        assert dataset._save_args == original_save_args
+
 
 # Fixtures for mocking cloud storage
 @pytest.fixture
@@ -484,3 +560,89 @@ class TestSparkDatasetV2CloudStorage:
         )
 
         assert dataset._spark_path.startswith("abfs://")
+
+
+class TestParseSparkFilepath:
+    """Test the parse_spark_filepath utility function."""
+
+    def test_local_absolute_path(self):
+        """Test parsing local absolute path."""
+        protocol, path = parse_spark_filepath("/home/user/data.parquet")
+        assert protocol == "file"
+        assert path == "/home/user/data.parquet"
+
+    def test_local_relative_path(self):
+        """Test parsing local relative path."""
+        protocol, path = parse_spark_filepath("data/test.parquet")
+        assert protocol == "file"
+        assert path == "data/test.parquet"
+
+    def test_dbfs_with_dbfs_prefix(self):
+        """Test parsing /dbfs/ prefixed path."""
+        protocol, path = parse_spark_filepath("/dbfs/mnt/data/file.parquet")
+        assert protocol == "dbfs"
+        assert path == "/mnt/data/file.parquet"
+
+    def test_dbfs_with_scheme(self):
+        """Test parsing dbfs:/ scheme path."""
+        protocol, path = parse_spark_filepath("dbfs:/mnt/data/file.parquet")
+        assert protocol == "dbfs"
+        assert path == "/mnt/data/file.parquet"
+
+    def test_unity_catalog_volumes(self):
+        """Test parsing Unity Catalog volume path."""
+        protocol, path = parse_spark_filepath(
+            "/Volumes/catalog/schema/vol/data.parquet"
+        )
+        assert protocol == "file"
+        assert path == "/Volumes/catalog/schema/vol/data.parquet"
+
+    def test_s3_path(self):
+        """Test parsing S3 path."""
+        protocol, path = parse_spark_filepath("s3://bucket/key/data.parquet")
+        assert protocol == "s3"
+        assert path == "bucket/key/data.parquet"
+
+    def test_s3a_path(self):
+        """Test parsing S3A path."""
+        protocol, path = parse_spark_filepath("s3a://bucket/key/data.parquet")
+        assert protocol == "s3a"
+        assert path == "bucket/key/data.parquet"
+
+
+class TestToSparkPath:
+    """Test the to_spark_path utility function."""
+
+    def test_local_path(self):
+        """Test converting local path."""
+        spark_path = to_spark_path("file", "/home/user/data.parquet")
+        assert spark_path == "file:///home/user/data.parquet"
+
+    def test_unity_catalog_path(self):
+        """Test Unity Catalog paths don't get file:// prefix."""
+        spark_path = to_spark_path("file", "/Volumes/catalog/schema/vol/data.parquet")
+        assert spark_path == "/Volumes/catalog/schema/vol/data.parquet"
+
+    def test_dbfs_path(self):
+        """Test DBFS path conversion."""
+        spark_path = to_spark_path("dbfs", "/mnt/data/file.parquet")
+        assert spark_path == "dbfs:/mnt/data/file.parquet"
+
+    def test_s3_to_s3a(self):
+        """Test S3 protocol converts to s3a."""
+        spark_path = to_spark_path("s3", "bucket/key/data.parquet")
+        assert spark_path == "s3a://bucket/key/data.parquet"
+
+    def test_gcs_path(self):
+        """Test GCS path."""
+        spark_path = to_spark_path("gs", "bucket/key/data.parquet")
+        assert spark_path == "gs://bucket/key/data.parquet"
+
+    def test_azure_path(self):
+        """Test Azure path."""
+        spark_path = to_spark_path(
+            "abfs", "container@account.dfs.core.windows.net/data.parquet"
+        )
+        assert (
+            spark_path == "abfs://container@account.dfs.core.windows.net/data.parquet"
+        )

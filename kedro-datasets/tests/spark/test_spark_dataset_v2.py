@@ -33,18 +33,6 @@ BUCKET_NAME = "test_bucket"
 SCHEMA_FILE_NAME = "schema.json"
 
 
-@pytest.fixture(scope="module")
-def spark_session():
-    """Create a Spark session for testing."""
-    spark = (
-        SparkSession.builder.master("local[2]")
-        .appName("TestSparkDatasetV2")
-        .getOrCreate()
-    )
-    yield spark
-    spark.stop()
-
-
 @pytest.fixture
 def sample_spark_df(spark_session):
     """Create a sample Spark DataFrame."""

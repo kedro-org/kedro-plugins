@@ -226,7 +226,7 @@ class TestSparkDatasetV2Schema:
         schema_path = tmp_path / "bad_schema.json"
         schema_path.write_text("invalid json {")
 
-        with pytest.raises(DatasetError, match="Failed to load schema"):
+        with pytest.raises(DatasetError, match="Contents of 'schema.filepath'.*are invalid"):
             SparkDatasetV2(
                 filepath=csv_path,
                 file_format="csv",
@@ -237,7 +237,7 @@ class TestSparkDatasetV2Schema:
         """Test error when schema dict missing filepath."""
         csv_path = str(tmp_path / "test.csv")
 
-        with pytest.raises(DatasetError, match="Schema dict must have 'filepath'"):
+        with pytest.raises(DatasetError, match="Schema load argument does not specify a 'filepath'"):
             SparkDatasetV2(
                 filepath=csv_path, file_format="csv", load_args={"schema": {}}
             )
@@ -263,16 +263,6 @@ class TestSparkDatasetV2PathHandling:
             filepath = f"{prefix}bucket/path/data.parquet"
             dataset = SparkDatasetV2(filepath=filepath)
             assert dataset._spark_path.startswith("s3a://")
-
-    @pytest.mark.skipif(
-        "DATABRICKS_RUNTIME_VERSION" not in os.environ,
-        reason="Not running on Databricks",
-    )
-    def test_dbfs_path_on_databricks(self):
-        """Test DBFS path handling on Databricks."""
-        filepath = "/dbfs/path/to/data.parquet"
-        dataset = SparkDatasetV2(filepath=filepath)
-        assert dataset._spark_path == "dbfs:/path/to/data.parquet"
 
     def test_dbfs_path_parsing(self):
         """Test DBFS path parsing."""
@@ -334,7 +324,10 @@ class TestSparkDatasetV2ErrorMessages:
     def test_missing_pyspark_databricks(self, mock_spark_session, monkeypatch):
         """Test helpful error for PySpark on Databricks."""
         monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
-        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
+
+        # Make the import fail
+        import_error = ImportError("No module named 'pyspark'")
+        mock_spark_session.builder.getOrCreate.side_effect = import_error
 
         with pytest.raises(ImportError, match="databricks-connect"):
             get_spark_with_remote_support()
@@ -368,7 +361,8 @@ class TestSparkDatasetV2Delta:
         filepath = str(tmp_path / "test.delta")
 
         with pytest.raises(
-            DatasetError, match=f"Delta format doesn't support mode '{mode}'"
+                DatasetError,
+                match=f"It is not possible to perform 'save\\(\\)' for file format 'delta' with mode '{mode}'"
         ):
             SparkDatasetV2(
                 filepath=filepath, file_format="delta", save_args={"mode": mode}

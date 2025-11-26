@@ -122,11 +122,13 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
     # Handle DBFS paths
     if filepath.startswith("/dbfs/"):
         # /dbfs/path -> dbfs protocol with /path
-        return "dbfs", filepath[6:]  # Remove /dbfs prefix
+        return "dbfs", "/" + filepath[6:].lstrip("/")  # Ensure leading slash
     elif filepath.startswith("dbfs:/"):
         # dbfs:/path -> Fix: handle single slash DBFS format
-        # Don't use get_protocol_and_path for DBFS
-        return "dbfs", filepath[6:]  # Remove "dbfs:/" to get the path
+        path = filepath[6:]  # Remove "dbfs:/"
+        if not path.startswith("/"):
+            path = "/" + path
+        return "dbfs", path
     elif filepath.startswith("/Volumes"):
         # Unity Catalog volumes
         return "file", filepath

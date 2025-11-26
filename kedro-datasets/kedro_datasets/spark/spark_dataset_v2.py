@@ -190,6 +190,11 @@ class SparkDatasetV2(AbstractVersionedDataset):
         # Validate delta format
         self._handle_delta_format()
 
+    @property
+    def _spark_path(self) -> str:
+        """Get the Spark-compatible path for this dataset."""
+        return to_spark_path(self._path, self._protocol, self._path)
+
     def _load(self) -> DataFrame:
         """Loads data from filepath.
 

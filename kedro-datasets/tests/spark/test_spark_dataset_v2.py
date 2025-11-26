@@ -536,8 +536,8 @@ class TestSparkDatasetV2CloudStorage:
             filepath="s3://bucket/data.parquet",
             credentials={
                 "key": "test_key",
-                "secret": "test_secret",
-            },  # pragma: allowlist secret
+                "secret": "test_secret",  # pragma: allowlist secret
+            },
         )
 
         # Verify s3a:// normalization

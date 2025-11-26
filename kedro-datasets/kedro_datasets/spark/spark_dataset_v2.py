@@ -199,9 +199,9 @@ class SparkDatasetV2(AbstractVersionedDataset):
         load_path = self._get_load_path()
         spark_load_path = to_spark_path(str(load_path), self._protocol, str(load_path))
 
-        spark = get_spark_with_remote_support()
+        spark_session = get_spark_with_remote_support()
 
-        reader = spark.read
+        reader = spark_session.read
         if self._schema:
             reader = reader.schema(self._schema)
 
@@ -242,9 +242,9 @@ class SparkDatasetV2(AbstractVersionedDataset):
         spark_load_path = to_spark_path(str(load_path), self._protocol, str(load_path))
 
         try:
-            spark = get_spark_with_remote_support()
+            spark_session = get_spark_with_remote_support()
             # Try to read the metadata without loading data
-            spark.read.format(self._file_format).load(spark_load_path).schema
+            spark_session.read.format(self._file_format).load(spark_load_path).schema
             return True
         except Exception as exc:
             # Check for specific error messages indicating non-existence
@@ -289,8 +289,8 @@ class SparkDatasetV2(AbstractVersionedDataset):
         """
         if protocol == "dbfs" and deployed_on_databricks():
             try:
-                spark = get_spark_with_remote_support()
-                dbutils = get_dbutils(spark)
+                spark_session = get_spark_with_remote_support()
+                dbutils = get_dbutils(spark_session)
                 if dbutils:
                     logger.debug("Using optimised DBFS operations via dbutils")
                     return (

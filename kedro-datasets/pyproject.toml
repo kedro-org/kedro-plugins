@@ -29,7 +29,7 @@ networkx-base = ["networkx~=3.4"]
 
 # Spark dependencies
 spark-core = []  # No dependencies
-spark-local = ["pyspark>=2.2,<4.0"]  # For local development
+spark-local = ["pyspark>=2.2,<5.0"]  # For local development
 spark-databricks = []  # Uses Databricks runtime Spark
 spark-emr = []  # Uses EMR runtime Spark
 

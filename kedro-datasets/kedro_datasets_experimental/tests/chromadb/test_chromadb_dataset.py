@@ -90,6 +90,36 @@ class TestChromaDBDataset:
         with pytest.raises(DatasetError, match="Data must be a dictionary"):
             chromadb_dataset.save(["not", "a", "dict"])
 
+    def test_vector_similarity_query(self, chromadb_dataset, sample_data):
+        """Test vector similarity queries without loading entire collection."""
+        # Save initial data
+        chromadb_dataset.save(sample_data)
+
+        # Create a new dataset instance with query args for similarity search
+        query_dataset = ChromaDBDataset(
+            collection_name=chromadb_dataset._collection_name,
+            client_type="ephemeral",
+            load_args={
+                "query_texts": ["machine learning"],
+                "n_results": 2,
+                "include": ["documents", "metadatas", "distances"]
+            }
+        )
+
+        # Load with vector query - should return limited results based on similarity
+        results = query_dataset.load()
+
+        # Should return limited results (not the entire collection)
+        assert len(results["documents"]) <= 2
+        assert "distances" in results  # Query results include distances
+
+        # Verify it's actually a similarity search result
+        assert isinstance(results["documents"], list)
+        if results["documents"]:
+            # Should contain documents similar to "machine learning"
+            assert any("machine" in doc.lower() or "learning" in doc.lower()
+                      for doc in results["documents"])
+
     def test_load_with_query_args(self, chromadb_dataset, sample_data):
         """Test loading data with query arguments."""
         # Save initial data

@@ -44,6 +44,17 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         >>> # Load data from ChromaDB
         >>> loaded_data = dataset.load()
         >>> print(loaded_data["documents"])  # ['This is a document', 'This is another document']
+        >>>
+        >>> # Query for similar vectors (efficient for large datasets)
+        >>> query_dataset = ChromaDBDataset(
+        ...     collection_name="documents",
+        ...     load_args={
+        ...         "query_texts": ["machine learning"],
+        ...         "n_results": 5,
+        ...         "include": ["documents", "metadatas", "distances"]
+        ...     }
+        ... )
+        >>> results = query_dataset.load()  # Returns top-5 similar documents
 
     """
     # Attribute annotations for IDEs / type-checkers (instance values set in __init__)
@@ -70,6 +81,12 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
                 For "http", use {"host": "localhost", "port": 8000}.
             load_args: Additional arguments for loading data from ChromaDB collection.
                 Can include "where", "where_document", "include", "n_results", etc.
+                For vector similarity queries, use:
+                - "query_embeddings": List of embeddings to query for similarity
+                - "query_texts": List of texts to query for similarity
+                - "n_results": Number of results to return (default: 10)
+                - "where": Metadata filter conditions
+                - "where_document": Document content filter conditions
             save_args: Additional arguments for saving data to ChromaDB collection.
                 Can include "embeddings" if you want to provide custom embeddings.
             metadata: Any arbitrary metadata.
@@ -160,14 +177,14 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         }
 
         try:
-            # Use get() for retrieving all documents, query() requires search parameters
-            if "where" in load_args or "where_document" in load_args:
-                # Use query when filtering
+            # Use query() for vector similarity search or filtering
+            if any(key in load_args for key in ["query_embeddings", "query_texts", "where", "where_document"]):
+                # Vector similarity query - more efficient for large datasets
                 if "n_results" not in load_args:
                     load_args["n_results"] = 10  # Default limit for queries
                 result = collection.query(**load_args)
             else:
-                # Use get() for retrieving all documents
+                # Use get() for retrieving all documents (not recommended for large collections)
                 if "n_results" in load_args:
                     # Convert n_results to limit for get() method
                     load_args["limit"] = load_args.pop("n_results")

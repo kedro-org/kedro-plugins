@@ -122,7 +122,10 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
     # Handle DBFS paths
     if filepath.startswith("/dbfs/"):
         # /dbfs/path -> dbfs protocol with /path
-        return "dbfs", "/" + filepath[6:].lstrip("/")  # Ensure leading slash
+        path = filepath[6:]  # Remove /dbfs prefix
+        if not path.startswith("/"):
+            path = "/" + path
+        return "dbfs", path
     elif filepath.startswith("dbfs:/"):
         # dbfs:/path -> Fix: handle single slash DBFS format
         path = filepath[6:]  # Remove "dbfs:/"

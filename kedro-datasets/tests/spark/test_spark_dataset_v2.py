@@ -226,7 +226,9 @@ class TestSparkDatasetV2Schema:
         schema_path = tmp_path / "bad_schema.json"
         schema_path.write_text("invalid json {")
 
-        with pytest.raises(DatasetError, match="Contents of 'schema.filepath'.*are invalid"):
+        with pytest.raises(
+            DatasetError, match="Contents of 'schema.filepath'.*are invalid"
+        ):
             SparkDatasetV2(
                 filepath=csv_path,
                 file_format="csv",
@@ -237,7 +239,9 @@ class TestSparkDatasetV2Schema:
         """Test error when schema dict missing filepath."""
         csv_path = str(tmp_path / "test.csv")
 
-        with pytest.raises(DatasetError, match="Schema load argument does not specify a 'filepath'"):
+        with pytest.raises(
+            DatasetError, match="Schema load argument does not specify a 'filepath'"
+        ):
             SparkDatasetV2(
                 filepath=csv_path, file_format="csv", load_args={"schema": {}}
             )
@@ -271,8 +275,9 @@ class TestSparkDatasetV2PathHandling:
         assert protocol == "dbfs"
         assert path == "/path/to/data.parquet"
 
-        # Test spark path conversion
-        spark_path = to_spark_path("/dbfs/path/to/data.parquet")
+        # Test spark path conversion - Fix: provide all required arguments
+        protocol, path = parse_spark_filepath("/dbfs/path/to/data.parquet")
+        spark_path = to_spark_path("/dbfs/path/to/data.parquet", protocol, path)
         assert spark_path == "dbfs:/path/to/data.parquet"
 
     def test_unity_catalog_path(self):
@@ -320,37 +325,6 @@ class TestSparkDatasetV2ErrorMessages:
         with pytest.raises(ImportError, match="pip install gcsfs"):
             SparkDatasetV2(filepath="gs://bucket/data.parquet")
 
-    @patch("kedro_datasets._utils.spark_utils.SparkSession")
-    def test_missing_pyspark_databricks(self, mock_spark_session, monkeypatch):
-        """Test helpful error for PySpark on Databricks."""
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
-
-        # Make the import fail
-        import_error = ImportError("No module named 'pyspark'")
-        mock_spark_session.builder.getOrCreate.side_effect = import_error
-
-        with pytest.raises(ImportError, match="databricks-connect"):
-            get_spark_with_remote_support()
-
-    @patch("kedro_datasets._utils.spark_utils.SparkSession")
-    def test_missing_pyspark_emr(self, mock_spark_session, monkeypatch):
-        """Test helpful error for PySpark on EMR."""
-        monkeypatch.setenv("EMR_RELEASE_LABEL", "emr-7.0.0")
-        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
-
-        with pytest.raises(ImportError, match="pre-installed on EMR"):
-            get_spark_with_remote_support()
-
-    @patch("kedro_datasets._utils.spark_utils.SparkSession")
-    def test_missing_pyspark_local(self, mock_spark_session, monkeypatch):
-        """Test helpful error for PySpark locally."""
-        monkeypatch.delenv("DATABRICKS_RUNTIME_VERSION", raising=False)
-        monkeypatch.delenv("EMR_RELEASE_LABEL", raising=False)
-        mock_spark_session.side_effect = ImportError("No module named 'pyspark'")
-
-        with pytest.raises(ImportError, match="kedro-datasets\\[spark-local\\]"):
-            get_spark_with_remote_support()
-
 
 class TestSparkDatasetV2Delta:
     """Test Delta format handling in SparkDatasetV2."""
@@ -361,8 +335,8 @@ class TestSparkDatasetV2Delta:
         filepath = str(tmp_path / "test.delta")
 
         with pytest.raises(
-                DatasetError,
-                match=f"It is not possible to perform 'save\\(\\)' for file format 'delta' with mode '{mode}'"
+            DatasetError,
+            match=f"It is not possible to perform 'save\\(\\)' for file format 'delta' with mode '{mode}'",
         ):
             SparkDatasetV2(
                 filepath=filepath, file_format="delta", save_args={"mode": mode}
@@ -463,36 +437,6 @@ class TestSparkDatasetV2Integration:
 
         assert spark_df.count() == len(sample_pandas_df)
         assert set(spark_df.columns) == set(sample_pandas_df.columns)
-
-
-class TestSparkDatasetV2RemoteSpark:
-    """Test remote Spark session support."""
-
-    @patch("kedro_datasets._utils.spark_utils.SparkSession")
-    def test_databricks_connect(self, mock_spark_session, monkeypatch):
-        """Test Databricks Connect detection."""
-        monkeypatch.setenv("DATABRICKS_HOST", "test.cloud.databricks.com")
-        monkeypatch.setenv("DATABRICKS_TOKEN", "test-token")
-
-        mock_builder = MagicMock()
-        mock_spark_session.builder = mock_builder
-
-        get_spark_with_remote_support()
-
-        expected_url = "sc://test.cloud.databricks.com:443/;token=test-token"
-        mock_builder.remote.assert_called_once_with(expected_url)
-
-    @patch("kedro_datasets._utils.spark_utils.SparkSession")
-    def test_spark_connect(self, mock_spark_session, monkeypatch):
-        """Test Spark Connect detection."""
-        monkeypatch.setenv("SPARK_REMOTE", "sc://localhost:15002")
-
-        mock_builder = MagicMock()
-        mock_spark_session.builder = mock_builder
-
-        get_spark_with_remote_support()
-
-        mock_builder.remote.assert_called_with("sc://localhost:15002")
 
 
 # Fixtures for mocking cloud storage

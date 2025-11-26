@@ -266,7 +266,7 @@ test = [
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
-    "networkx==3.4",
+    "networkx==3.4", # pinned strictly to support Python >= 3.10
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
     "pandas>=2.0",

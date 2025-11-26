@@ -537,7 +537,7 @@ class TestSparkDatasetV2CloudStorage:
             credentials={
                 "key": "test_key",
                 "secret": "test_secret",
-            },  # pragma: allowlist secret
+            },
         )
 
         # Verify s3a:// normalization
@@ -547,7 +547,7 @@ class TestSparkDatasetV2CloudStorage:
         """Test GCS handling."""
         dataset = SparkDatasetV2(
             filepath="gs://bucket/data.parquet",
-            credentials={"token": "path/to/token.json"},
+            credentials={"token": "path/to/token.json"}, # pragma: allowlist secret
         )
 
         assert dataset._spark_path.startswith("gs://")

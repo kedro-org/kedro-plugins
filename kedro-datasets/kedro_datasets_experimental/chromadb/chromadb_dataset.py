@@ -130,7 +130,15 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         return self._client
 
     def _get_collection(self, create_if_missing: bool = True):
-        """Get or create the ChromaDB collection."""
+        """Get or create the ChromaDB collection.
+        
+        Args:
+            create_if_missing: If True, creates the collection if it doesn't exist.
+                              If False, returns None when collection is not found.
+                              
+        Returns:
+            Collection object if found/created, None if not found and create_if_missing=False.
+        """
         if self._collection is None:
             client = self._get_client()
             try:

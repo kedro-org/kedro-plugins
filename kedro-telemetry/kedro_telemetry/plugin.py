@@ -306,22 +306,34 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
+    dataset_types: dict[str | None, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
+        # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
         dataset_names = catalog.keys()
+        for ds_name in dataset_names:
+            if not ds_name.startswith(("parameters", "params:")):
+                ds_type = catalog.get_type(ds_name) or ""
+                if (
+                    ds_type.startswith("kedro_datasets.")
+                    or ds_type.startswith("kedro.io.")
+                    or ds_type.startswith("kedro_datasets_experimental.")
+                ):
+                    dataset_types[ds_type] = dataset_types.get(ds_type, 0) + 1
+                else:
+                    dataset_types["custom"] = dataset_types.get("custom", 0) + 1
     else:
         dataset_names = catalog.list()  # type: ignore
 
-    project_statistics_properties = {}
-    project_statistics_properties["number_of_datasets"] = sum(
-        1
-        for c in dataset_names
-        if not c.startswith("parameters") and not c.startswith("params:")
-    )
-    project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
-    )
-    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
-    return project_statistics_properties
+    return {
+        "number_of_datasets": sum(
+            1
+            for c in dataset_names
+            if not c.startswith("parameters") and not c.startswith("params:")
+        ),
+        "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
+        "number_of_pipelines": len(project_pipelines.keys()),
+        "dataset_types": dataset_types,
+    }
 
 
 def _get_heap_app_id() -> str:

@@ -77,9 +77,49 @@ class TestGetSparkWithRemoteSupport:
 
         get_spark_with_remote_support()
 
+    @patch("pyspark.sql.SparkSession")
+    def test_spark_connect_fails_falls_back_to_classic(self, mock_spark_session):
+        """Test fallback to classic Spark when Spark Connect fails."""
+        env = {"SPARK_REMOTE": "sc://localhost:15002"}
+
+        with patch.dict(os.environ, env, clear=True):
+            mock_builder = MagicMock()
+            mock_spark_session.builder = mock_builder
+            # First remote() call fails
+            mock_builder.remote.side_effect = Exception("Spark Connect failed")
+            mock_builder.getOrCreate.return_value = MagicMock()
+
+            get_spark_with_remote_support()
+            # Should still call getOrCreate after remote fails
+            mock_builder.getOrCreate.assert_called()
+
 
 class TestGetSparkFilesystemErrors:
     """Test error message paths in get_spark_filesystem."""
+
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_s3fs_import_error(self, mock_fs):
+        """Test S3 import error message."""
+        mock_fs.side_effect = ImportError("No module named 's3fs'")
+
+        with pytest.raises(ImportError, match="s3fs.*not installed"):
+            get_spark_filesystem("s3")
+
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_gcsfs_import_error(self, mock_fs):
+        """Test GCS import error message."""
+        mock_fs.side_effect = ImportError("No module named 'gcsfs'")
+
+        with pytest.raises(ImportError, match="gcsfs"):
+            get_spark_filesystem("gcs")
+
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_adlfs_import_error(self, mock_fs):
+        """Test Azure import error message."""
+        mock_fs.side_effect = ImportError("No module named 'adlfs'")
+
+        with pytest.raises(ImportError, match="adlfs"):
+            get_spark_filesystem("abfs")
 
     @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
     def test_hdfs_import_error(self, mock_fs):

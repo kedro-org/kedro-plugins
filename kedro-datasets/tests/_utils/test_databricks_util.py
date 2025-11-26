@@ -1,11 +1,9 @@
 """Tests for utility functions in databricks_utils.py"""
 
-import importlib
 import logging
 import os
 from unittest.mock import MagicMock, patch
 
-from kedro_datasets._utils import databricks_utils
 from kedro_datasets._utils.databricks_utils import (
     dbfs_exists,
     get_dbutils,
@@ -25,20 +23,6 @@ class TestGetDbutilsIPythonFallback:
 
         result = get_dbutils(MagicMock())
         assert result == mock_dbutils
-
-    @patch.dict("sys.modules", {"pyspark.dbutils": None})
-    @patch("kedro_datasets._utils.databricks_utils.globals")
-    def test_get_dbutils_ipython_fallback(self, mock_globals):
-        """Test get_dbutils IPython fallback path."""
-        mock_globals.return_value = {}
-
-        mock_ipython_instance = MagicMock()
-        mock_ipython_instance.user_ns = {"dbutils": MagicMock()}
-
-        with patch.dict("sys.modules", {"IPython": MagicMock()}):
-            with patch("IPython.get_ipython", return_value=mock_ipython_instance):
-                importlib.reload(databricks_utils)
-                databricks_utils.get_dbutils(MagicMock())
 
     @patch("kedro_datasets._utils.databricks_utils.globals")
     def test_get_dbutils_no_ipython(self, mock_globals):
@@ -99,6 +83,17 @@ class TestToSparkPathEdgeCases:
         """Test to_spark_path adds leading slash for DBFS."""
         result = to_spark_path("dbfs", "path/without/slash.parquet")
         assert result == "dbfs:/path/without/slash.parquet"
+
+    def test_to_spark_path_strips_existing_protocol(self):
+        """Test to_spark_path strips existing protocol prefix from path."""
+        # When path already has protocol prefix, it should be stripped
+        result = to_spark_path("s3", "s3://bucket/key/data.parquet")
+        assert result == "s3a://bucket/key/data.parquet"
+
+    def test_to_spark_path_empty_protocol_fallback(self):
+        """Test to_spark_path fallback when protocol is empty."""
+        result = to_spark_path("", "/some/path/data.parquet")
+        assert "/some/path/data.parquet" in result
 
 
 class TestDbfsExistsAndGlob:

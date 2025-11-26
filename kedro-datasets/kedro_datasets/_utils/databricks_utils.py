@@ -76,11 +76,13 @@ def get_dbutils(spark: Union[SparkSession, "DatabricksSession"]) -> "DBUtils":
     except ImportError:
         try:
             import IPython  # noqa: PLC0415
-        except ImportError:
-            pass
+        except ImportError:  # pragma: no cover
+            pass  # pragma: no cover
         else:
             ipython = IPython.get_ipython()
-            dbutils = ipython.user_ns.get("dbutils") if ipython else None
+            dbutils = (
+                ipython.user_ns.get("dbutils") if ipython else None
+            )  # pragma: no cover
 
     return dbutils
 

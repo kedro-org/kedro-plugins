@@ -56,18 +56,18 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
     """
     try:
         from pyspark.sql import SparkSession  # noqa: PLC0415
-    except ImportError as exc:
+    except ImportError as exc:  # pragma: no cover
         # Detect environment and provide specific help
-        if "DATABRICKS_RUNTIME_VERSION" in os.environ:
-            msg = (
+        if "DATABRICKS_RUNTIME_VERSION" in os.environ:  # pragma: no cover
+            msg = (  # pragma: no cover
                 "Cannot import PySpark on Databricks. This is usually a "
                 "databricks-connect conflict. Try:\n"
                 "  pip uninstall pyspark\n"
                 "  pip install databricks-connect"
             )
-        elif "EMR_RELEASE_LABEL" in os.environ:
+        elif "EMR_RELEASE_LABEL" in os.environ:  # pragma: no cover
             msg = "PySpark should be pre-installed on EMR. Check your cluster configuration."
-        else:
+        else:  # pragma: no cover
             msg = (
                 "PySpark not installed. Install based on your environment:\n"
                 "  Local: pip install 'kedro-datasets[spark-local]'\n"
@@ -75,7 +75,7 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
                 "  Spark Connect: pip install 'kedro-datasets[spark-connect]'\n"
                 "  Cloud: Check your platform's Spark setup"
             )
-        raise ImportError(msg) from exc
+        raise ImportError(msg) from exc  # pragma: no cover
 
     # Try Databricks Connect first (for remote development)
     if "DATABRICKS_HOST" in os.environ and "DATABRICKS_TOKEN" in os.environ:

@@ -7,6 +7,12 @@ from typing import Any
 import click
 
 MASK = "*****"
+STARTERS = [
+    "astro-airflow-iris",
+    "databricks-iris",
+    "spaceflights-pandas",
+    "spaceflights-pyspark",
+]
 
 
 def _recurse_cli(
@@ -118,13 +124,15 @@ def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> li
                 else:
                     prev_arg = None
 
-                output.append(arg_right if is_starter else MASK)
+                output.append(
+                    arg_right if is_starter and arg_right in STARTERS else MASK
+                )
             else:
                 is_valid_param = arg in current_CLI
                 output.append(arg if is_valid_param else MASK)
                 prev_arg = arg if is_valid_param else None
         else:
             is_starter = prev_arg in ("--starter", "-s")
-            output.append(arg if is_starter else MASK)
+            output.append(arg if is_starter and arg in STARTERS else MASK)
             prev_arg = None
     return output

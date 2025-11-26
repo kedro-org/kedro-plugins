@@ -178,16 +178,16 @@ class TestCLIMasking:
                 ["run", "--params", MASK, "--pipeline", MASK],
             ),
             (
-                ["new", "--starter=my_starter", "--name=my_project"],
-                ["new", "--starter", "my_starter", "--name", MASK],
+                ["new", "--starter=spaceflights-pandas", "--name=my_project"],
+                ["new", "--starter", "spaceflights-pandas", "--name", MASK],
             ),
             (
                 ["new", "--starter", "my_starter", "--name=my_project"],
-                ["new", "--starter", "my_starter", "--name", MASK],
+                ["new", "--starter", MASK, "--name", MASK],
             ),
             (
-                ["new", "-s=my_starter", "-n=my_project"],
-                ["new", "-s", "my_starter", "-n", MASK],
+                ["new", "-s=databricks-iris", "-n=my_project"],
+                ["new", "-s", "databricks-iris", "-n", MASK],
             ),
         ],
     )

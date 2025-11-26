@@ -176,3 +176,21 @@ class TestLoadSparkSchemaErrors:
 
         with pytest.raises(DatasetError, match="invalid"):
             load_spark_schema_from_file({"filepath": "/path/to/schema.json"})
+
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_schema_relative_path_uses_file_protocol(self, mock_fs):
+        """Test that relative schema path defaults to file protocol."""
+        mock_filesystem = MagicMock()
+        mock_file = MagicMock()
+        mock_file.read.return_value = "not valid json {"
+        mock_file.__enter__ = MagicMock(return_value=mock_file)
+        mock_file.__exit__ = MagicMock(return_value=False)
+        mock_filesystem.open.return_value = mock_file
+        mock_fs.return_value = mock_filesystem
+
+        # Use relative path (no protocol) - should default to "file"
+        with pytest.raises(DatasetError):
+            load_spark_schema_from_file({"filepath": "relative/schema.json"})
+
+        # Verify fsspec was called with "file" protocol
+        mock_fs.assert_called_once_with("file")

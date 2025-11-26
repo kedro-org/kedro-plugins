@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 from kedro_datasets._utils.databricks_utils import (
     dbfs_exists,
     get_dbutils,
+    parse_spark_filepath,
     to_spark_path,
     validate_databricks_path,
 )
@@ -122,3 +123,20 @@ class TestDbfsExistsAndGlob:
 
         dbfs_exists("/dbfs/mnt/data", mock_dbutils)
         mock_dbutils.fs.ls.assert_called_with("/mnt/data")
+
+
+class TestParseSparkFilepath:
+    """Test parse_spark_filepath edge cases."""
+
+    def test_dbfs_path_without_leading_slash(self):
+        """Test dbfs: path where path part doesn't start with /."""
+        # dbfs:path (no slash after colon) should add leading slash
+        protocol, path = parse_spark_filepath("dbfs:path/to/file.parquet")
+        assert protocol == "dbfs"
+        assert path == "/path/to/file.parquet"
+
+    def test_relative_path_gets_file_protocol(self):
+        """Test that relative path gets file protocol."""
+        protocol, path = parse_spark_filepath("relative/path/data.parquet")
+        assert protocol == "file"
+        assert path == "relative/path/data.parquet"

@@ -230,6 +230,13 @@ class ChromaDBDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
     def exists(self) -> bool:
         """Checks if the collection exists and contains data."""
         try:
+            collection = self._collection or self._get_collection(create_if_missing=False)
+            # In case both return None
+            if collection is None:
+                return False
+            return collection.count() > 0
+        except Exception:
+            return False
             # Use the same collection instance if we already have it
             if self._collection is not None:
                 count = self._collection.count()

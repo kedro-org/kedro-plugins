@@ -537,7 +537,7 @@ class TestSparkDatasetV2CloudStorage:
             credentials={
                 "key": "test_key",
                 "secret": "test_secret",
-            },
+            },  # pragma: allowlist secret
         )
 
         # Verify s3a:// normalization
@@ -547,7 +547,7 @@ class TestSparkDatasetV2CloudStorage:
         """Test GCS handling."""
         dataset = SparkDatasetV2(
             filepath="gs://bucket/data.parquet",
-            credentials={"token": "path/to/token.json"}, # pragma: allowlist secret
+            credentials={"token": "path/to/token.json"},
         )
 
         assert dataset._spark_path.startswith("gs://")
@@ -560,6 +560,123 @@ class TestSparkDatasetV2CloudStorage:
         )
 
         assert dataset._spark_path.startswith("abfs://")
+
+
+class TestSparkDatasetV2ExistsErrorHandling:
+    """Test _exists method error handling."""
+
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_spark_with_remote_support")
+    def test_exists_unexpected_error_raises(self, mock_get_spark, tmp_path):
+        """Test that unexpected errors in _exists are re-raised after logging."""
+        # Create a dataset
+        filepath = str(tmp_path / "test.parquet")
+
+        with patch("kedro_datasets._utils.spark_utils.fsspec.filesystem") as mock_fs:
+            mock_filesystem = MagicMock()
+            mock_filesystem.exists.return_value = True
+            mock_filesystem.glob.return_value = []
+            mock_fs.return_value = mock_filesystem
+
+            dataset = SparkDatasetV2(filepath=filepath)
+
+        # Mock Spark to raise an unexpected error (not a "path does not exist" error)
+        mock_spark = MagicMock()
+        mock_spark.read.format.return_value.load.side_effect = Exception(
+            "Unexpected cluster error"
+        )
+        mock_get_spark.return_value = mock_spark
+
+        # Should re-raise the unexpected error
+        with pytest.raises(Exception, match="Unexpected cluster error"):
+            dataset._exists()
+
+
+class TestSparkDatasetV2DBFSOperations:
+    """Test DBFS-specific operations."""
+
+    @patch("kedro_datasets.spark.spark_dataset_v2.deployed_on_databricks")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_spark_with_remote_support")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_dbutils")
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_dbfs_uses_dbutils_when_available(
+        self, mock_fsspec, mock_get_dbutils, mock_get_spark, mock_deployed
+    ):
+        """Test that DBFS paths use dbutils when available on Databricks."""
+        # Setup mocks
+        mock_deployed.return_value = True
+        mock_spark = MagicMock()
+        mock_get_spark.return_value = mock_spark
+
+        mock_dbutils = MagicMock()
+        mock_get_dbutils.return_value = mock_dbutils
+
+        # Create dataset with DBFS path
+        dataset = SparkDatasetV2(filepath="/dbfs/mnt/data/test.parquet")
+
+        # Verify dbutils was retrieved
+        mock_get_dbutils.assert_called_once()
+
+        # The exists and glob functions should be partials using dbutils
+        # We can verify this by checking the dataset was created successfully
+        assert dataset._protocol == "dbfs"
+
+    @patch("kedro_datasets.spark.spark_dataset_v2.deployed_on_databricks")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_spark_with_remote_support")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_dbutils")
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_dbfs_falls_back_to_fsspec_when_dbutils_fails(
+        self, mock_fsspec, mock_get_dbutils, mock_get_spark, mock_deployed
+    ):
+        """Test that DBFS falls back to fsspec when dbutils fails."""
+        # Setup mocks
+        mock_deployed.return_value = True
+        mock_spark = MagicMock()
+        mock_get_spark.return_value = mock_spark
+
+        # Make get_dbutils raise an exception
+        mock_get_dbutils.side_effect = Exception("dbutils not available")
+
+        # Setup fsspec fallback
+        mock_filesystem = MagicMock()
+        mock_filesystem.exists.return_value = True
+        mock_filesystem.glob.return_value = []
+        mock_fsspec.return_value = mock_filesystem
+
+        # Create dataset with DBFS path - should fall back to fsspec
+        dataset = SparkDatasetV2(filepath="/dbfs/mnt/data/test.parquet")
+
+        # Verify fsspec was used as fallback
+        mock_fsspec.assert_called()
+        assert dataset._protocol == "dbfs"
+
+    @patch("kedro_datasets.spark.spark_dataset_v2.deployed_on_databricks")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_spark_with_remote_support")
+    @patch("kedro_datasets.spark.spark_dataset_v2.get_dbutils")
+    @patch("kedro_datasets._utils.spark_utils.fsspec.filesystem")
+    def test_dbfs_falls_back_when_dbutils_returns_none(
+        self, mock_fsspec, mock_get_dbutils, mock_get_spark, mock_deployed
+    ):
+        """Test that DBFS falls back to fsspec when dbutils returns None."""
+        # Setup mocks
+        mock_deployed.return_value = True
+        mock_spark = MagicMock()
+        mock_get_spark.return_value = mock_spark
+
+        # Make get_dbutils return None
+        mock_get_dbutils.return_value = None
+
+        # Setup fsspec fallback
+        mock_filesystem = MagicMock()
+        mock_filesystem.exists.return_value = True
+        mock_filesystem.glob.return_value = []
+        mock_fsspec.return_value = mock_filesystem
+
+        # Create dataset with DBFS path - should fall back to fsspec
+        dataset = SparkDatasetV2(filepath="/dbfs/mnt/data/test.parquet")
+
+        # Verify fsspec was used as fallback
+        mock_fsspec.assert_called()
+        assert dataset._protocol == "dbfs"
 
 
 class TestParseSparkFilepath:

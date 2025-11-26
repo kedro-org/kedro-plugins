@@ -187,10 +187,16 @@ class SparkDatasetV2(AbstractVersionedDataset):
             protocol, filepath, credentials
         )
 
-        # Initialize attributes
+        # Initialise attributes
         self._file_format = file_format
-        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(deepcopy(load_args) or {})}
-        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(deepcopy(save_args) or {})}
+        self._load_args = {
+            **self.DEFAULT_LOAD_ARGS,
+            **(deepcopy(load_args) if load_args is not None else {}),
+        }
+        self._save_args = {
+            **self.DEFAULT_SAVE_ARGS,
+            **(deepcopy(save_args) if save_args is not None else {}),
+        }
         self._credentials = credentials
         self.metadata = metadata
 

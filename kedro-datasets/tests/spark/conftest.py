@@ -5,7 +5,9 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
+import shutil
 import sys
+from pathlib import Path
 
 import pytest
 from delta import configure_spark_with_delta_pip
@@ -15,8 +17,8 @@ from pyspark.sql import SparkSession
 
 def _setup_spark_session(warehouse_dir=None):
     builder = (
-        SparkSession.builder.appName("MyApp")
-        .master("local[*]")
+        SparkSession.builder.appName("KedroSparkTest")
+        .master("local[1]")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",
@@ -24,15 +26,16 @@ def _setup_spark_session(warehouse_dir=None):
         )
     )
 
-    # --- Windows Specific Configuration ---
-    if sys.platform == "win32" and warehouse_dir:
-        # 1. Use the short path passed from the fixture to avoid path limit errors
-        builder = builder.config("spark.sql.warehouse.dir", warehouse_dir)
-        # 2. Fix for "LocalHost lookup" slowness on Windows CI
+    if sys.platform == "win32":
+        builder = builder.config("spark.hadoop.io.native.lib.available", "false")
+
+        # Fix localhost resolution slowness
         builder = builder.config("spark.driver.host", "127.0.0.1")
         builder = builder.config("spark.driver.bindAddress", "127.0.0.1")
-        # 3. Fix for specific Windows/Hadoop native library crashes
-        builder = builder.config("spark.hadoop.io.native.lib.available", "false")
+
+        # Explicit warehouse dir to ensure we stay inside C:\tmp
+        if warehouse_dir:
+            builder = builder.config("spark.sql.warehouse.dir", warehouse_dir)
 
     return configure_spark_with_delta_pip(builder).getOrCreate()
 
@@ -42,13 +45,19 @@ def spark_session(tmp_path_factory):
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     lock = root_tmp_dir / "semaphore.lock"
 
-    # We only care about explicitly setting this on Windows
-    warehouse_dir = None
-    if sys.platform == "win32":
-        warehouse_dir = (root_tmp_dir / "spark-warehouse").as_posix()
+    warehouse_dir = root_tmp_dir / "spark-warehouse"
+
+    # Ensure the warehouse exists
+    if not warehouse_dir.exists():
+        warehouse_dir.mkdir(parents=True, exist_ok=True)
+
+    # Convert to posix path (forward slashes) for Spark URL compatibility
+    warehouse_posix = warehouse_dir.as_posix()
+    if sys.platform == "win32" and not warehouse_posix.startswith("file:"):
+        warehouse_posix = f"file:///{warehouse_posix}"
 
     with FileLock(lock):
-        spark = _setup_spark_session(warehouse_dir)
+        spark = _setup_spark_session(warehouse_posix)
 
     yield spark
     spark.stop()

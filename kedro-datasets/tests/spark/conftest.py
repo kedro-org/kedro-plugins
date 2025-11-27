@@ -5,8 +5,6 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-import sys
-
 import pytest
 from delta import configure_spark_with_delta_pip
 from filelock import FileLock
@@ -22,9 +20,6 @@ def _setup_spark_session():
             "spark.sql.catalog.spark_catalog",
             "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
-        # Explicitly set Python executable for workers (fixes Windows CI)
-        .config("spark.pyspark.python", sys.executable)
-        .config("spark.pyspark.driver.python", sys.executable)
     ).getOrCreate()
 
 

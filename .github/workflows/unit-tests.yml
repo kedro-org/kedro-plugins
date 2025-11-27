@@ -66,6 +66,5 @@ jobs:
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         env:
-          PYSPARK_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
-          PYSPARK_DRIVER_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
+          SPARK_LOCAL_IP: 127.0.0.1
         run: make test-no-spark

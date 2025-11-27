@@ -49,7 +49,7 @@ sign-off:
 # When SparkDatasetV2 replaces SparkDataset, this target can be removed and Windows can use dataset-tests.
 test-no-spark: dataset-doctests-no-spark
 	cd kedro-datasets && pytest tests --no-cov --ignore tests/spark --ignore tests/databricks --numprocesses 4 --dist loadfile
-	cd kedro-datasets && pytest tests/spark/test_spark_dataset_v2.py --no-cov --numprocesses 1
+	cd kedro-datasets && pytest tests/spark/test_spark_dataset_v2.py --no-cov --numprocesses 1 --basetemp=C:/tmp/py
 
 
 # kedro-datasets/snowflake tests skipped from default scope

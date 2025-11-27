@@ -40,6 +40,14 @@ jobs:
           Copy-Item C:\hadoop\bin\hadoop.dll C:\Windows\System32\
           echo "HADOOP_HOME=C:\hadoop" >> $env:GITHUB_ENV
           echo "C:\hadoop\bin" >> $env:GITHUB_PATH
+          # Spark often tries to write here by default on Windows
+          New-Item -ItemType Directory -Force -Path C:\tmp\hive
+          & C:\hadoop\bin\winutils.exe chmod -R 777 C:\tmp\hive
+          
+          # Pytest creates its temp files here (AppData\Local\Temp). 
+          # Winutils needs explicit permission to create subfolders here.
+          $env:TEMP = $env:USERPROFILE + "\AppData\Local\Temp"
+          & C:\hadoop\bin\winutils.exe chmod -R 777 $env:TEMP
 
       - name: Install the latest version of uv with Python ${{inputs.python-version}}
         uses: astral-sh/setup-uv@v6

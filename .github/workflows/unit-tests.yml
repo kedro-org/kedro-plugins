@@ -27,7 +27,7 @@ jobs:
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '11'
           distribution: 'temurin'
 
       - name: Set up Hadoop for Windows

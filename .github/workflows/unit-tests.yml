@@ -54,6 +54,14 @@ jobs:
           make plugin=${{ inputs.plugin }} install-test-requirements
           uv pip freeze
 
+      - name: Set PySpark Python for Windows
+        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        shell: pwsh
+        run: |
+          $pythonPath = python -c "import sys; print(sys.executable)"
+          echo "PYSPARK_PYTHON=$pythonPath" >> $env:GITHUB_ENV
+          echo "PYSPARK_DRIVER_PYTHON=$pythonPath" >> $env:GITHUB_ENV
+
       - name: Run unit tests for kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test

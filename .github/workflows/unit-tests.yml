@@ -24,14 +24,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java for Windows
-        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Set up Apache Spark for Windows
-        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         uses: vemonet/setup-spark@v1
         with:
           spark-version: '4.0.1'

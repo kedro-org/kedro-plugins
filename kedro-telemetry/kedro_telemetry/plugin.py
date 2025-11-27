@@ -185,7 +185,6 @@ class KedroTelemetryHook:
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
         masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
-
         self._user_uuid = _get_or_create_uuid()
 
         event_properties = _get_project_properties(self._user_uuid, project_path)

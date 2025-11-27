@@ -67,6 +67,6 @@ jobs:
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         env:
           SPARK_LOCAL_IP: 127.0.0.1
-          PYSPARK_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
-          PYSPARK_DRIVER_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
+          PYSPARK_PYTHON: python
+          PYSPARK_DRIVER_PYTHON: python
         run: make test-no-spark

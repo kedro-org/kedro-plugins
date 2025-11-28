@@ -8,6 +8,12 @@ import fsspec
 from kedro.io.core import DatasetError, get_protocol_and_path
 from pyspark.sql import SparkSession
 
+# Databricks Connect: only imported at runtime if available
+try:
+    from databricks.connect import DatabricksSession
+except ImportError:
+    DatabricksSession = None  # allows graceful fallback
+
 if TYPE_CHECKING:
     from databricks.connect import DatabricksSession
     from pyspark.sql.types import StructType
@@ -81,11 +87,7 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
     if "DATABRICKS_HOST" in os.environ and "DATABRICKS_TOKEN" in os.environ:
         try:
             logger.debug("Attempting to use Databricks Connect")
-            host = os.environ["DATABRICKS_HOST"]
-            token = os.environ["DATABRICKS_TOKEN"]
-            builder = SparkSession.builder
-            builder.remote(f"sc://{host}:443/;token={token}")
-            return builder.getOrCreate()
+            return DatabricksSession.builder.serverless(True).getOrCreate()
         except Exception as exc:
             logger.debug(f"Databricks Connect failed, falling back: {exc}")
 

@@ -85,11 +85,17 @@ def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
 
     # Try Databricks Connect first (for remote development)
     if "DATABRICKS_HOST" in os.environ and "DATABRICKS_TOKEN" in os.environ:
-        try:
-            logger.debug("Attempting to use Databricks Connect")
-            return DatabricksSession.builder.serverless(True).getOrCreate()
-        except Exception as exc:
-            logger.debug(f"Databricks Connect failed, falling back: {exc}")
+        if DatabricksSession is not None:
+            try:
+                logger.debug("Attempting to use Databricks Connect")
+                return DatabricksSession.builder.serverless(True).getOrCreate()
+            except Exception as exc:
+                logger.debug(f"Databricks Connect failed, falling back: {exc}")
+        else:
+            logger.debug(
+                "DATABRICKS_HOST and DATABRICKS_TOKEN are set but "
+                "databricks-connect is not installed"
+            )
 
     # Try Spark Connect (Spark 3.4+)
     spark_remote = os.environ.get("SPARK_REMOTE")

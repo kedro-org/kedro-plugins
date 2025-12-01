@@ -20,16 +20,17 @@ class TestGetSparkWithRemoteSupport:
         os.environ,
         {"DATABRICKS_HOST": "host.databricks.com", "DATABRICKS_TOKEN": "token123"},
     )
-    @patch("pyspark.sql.SparkSession")
-    def test_databricks_connect_path(self, mock_spark_session):
+    @patch("kedro_datasets._utils.spark_utils.DatabricksSession")
+    def test_databricks_connect_path(self, mock_databricks_session):
         """Test Databricks Connect environment path."""
         mock_builder = MagicMock()
-        mock_spark_session.builder = mock_builder
-        mock_builder.remote.return_value = mock_builder
+        mock_databricks_session.builder = mock_builder
+        mock_builder.serverless.return_value = mock_builder
         mock_builder.getOrCreate.return_value = MagicMock()
 
         get_spark_with_remote_support()
-        mock_builder.remote.assert_called_once()
+        mock_builder.serverless.assert_called_once_with(True)
+        mock_builder.getOrCreate.assert_called_once()
 
     @patch.dict(os.environ, {"SPARK_REMOTE": "sc://localhost:15002"}, clear=False)
     @patch("pyspark.sql.SparkSession")

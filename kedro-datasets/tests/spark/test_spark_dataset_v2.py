@@ -208,6 +208,20 @@ class TestSparkDatasetV2Basic:
             finally:
                 os.chdir(original_cwd)
 
+    def test_save_pandas_dataframe(self, tmp_path, sample_pandas_df):
+        """Test saving a Pandas DataFrame directly (auto-converts to Spark)."""
+        filepath = str(tmp_path / "test_pandas.parquet")
+        dataset = SparkDatasetV2(filepath=filepath)
+
+        # Save Pandas DataFrame directly
+        dataset.save(sample_pandas_df)
+        assert Path(filepath).exists()
+
+        # Load and verify
+        loaded_df = dataset.load()
+        assert loaded_df.count() == len(sample_pandas_df)
+        assert set(loaded_df.columns) == set(sample_pandas_df.columns)
+
 
 class TestSparkDatasetV2Schema:
     """Test schema handling in SparkDatasetV2."""

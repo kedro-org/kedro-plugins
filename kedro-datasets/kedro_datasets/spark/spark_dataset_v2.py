@@ -261,6 +261,8 @@ class SparkDatasetV2(AbstractVersionedDataset):
             data: PySpark DataFrame or Pandas DataFrame to save.
                   Pandas DataFrames will be automatically converted to Spark.
         """
+        import pandas as pd  # noqa: PLC0415
+
         spark_session = get_spark_with_remote_support()
 
         # Convert Pandas DataFrame to Spark DataFrame if needed

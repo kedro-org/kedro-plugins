@@ -94,6 +94,34 @@ class TestGetSparkWithRemoteSupport:
             # Should still call getOrCreate after remote fails
             mock_builder.getOrCreate.assert_called()
 
+    @patch.dict(
+        os.environ,
+        {"DATABRICKS_HOST": "host.databricks.com", "DATABRICKS_TOKEN": "token123"},
+    )
+    @patch("kedro_datasets._utils.spark_utils.DatabricksSession")
+    @patch("pyspark.sql.SparkSession")
+    def test_databricks_connect_exception_falls_back_to_classic(
+        self, mock_spark_session, mock_databricks_session
+    ):
+        """Test fallback to classic Spark when DatabricksSession raises exception."""
+        # Make DatabricksSession.builder.serverless().getOrCreate() raise exception
+        mock_db_builder = MagicMock()
+        mock_databricks_session.builder = mock_db_builder
+        mock_db_builder.serverless.return_value = mock_db_builder
+        mock_db_builder.getOrCreate.side_effect = Exception("Connection failed")
+
+        # Setup classic SparkSession fallback
+        mock_spark_builder = MagicMock()
+        mock_spark_session.builder = mock_spark_builder
+        mock_spark_builder.getOrCreate.return_value = MagicMock()
+
+        get_spark_with_remote_support()
+
+        # Verify Databricks was attempted
+        mock_db_builder.serverless.assert_called_once_with(True)
+        # Verify fallback was used
+        mock_spark_builder.getOrCreate.assert_called_once()
+
 
 class TestGetSparkFilesystemErrors:
     """Test error message paths in get_spark_filesystem."""

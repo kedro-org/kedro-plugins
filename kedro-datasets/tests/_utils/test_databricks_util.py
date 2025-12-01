@@ -32,7 +32,7 @@ class TestGetDbutilsIPythonFallback:
 
         with patch.dict("sys.modules", {"pyspark.dbutils": None, "IPython": None}):
             result = get_dbutils(MagicMock())
-            assert result is None or result is not None
+            assert result is None
 
 
 class TestValidateDatabricksPath:

@@ -1,3 +1,7 @@
+"""Utility functions for Databricks."""
+from __future__ import annotations
+
+import logging
 import os
 from fnmatch import fnmatch
 from pathlib import PurePosixPath
@@ -9,8 +13,6 @@ from pyspark.sql import SparkSession
 if TYPE_CHECKING:
     from databricks.connect import DatabricksSession
     from pyspark.dbutils import DBUtils
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
     return path[len(prefix) :] if path.startswith(prefix) else path
 
 
-def dbfs_glob(pattern: str, dbutils: "DBUtils") -> list[str]:
+def dbfs_glob(pattern: str, dbutils: DBUtils) -> list[str]:
     """Perform a custom glob search in DBFS using the provided pattern.
     It is assumed that version paths are managed by Kedro only.
 
@@ -63,7 +65,7 @@ def dbfs_glob(pattern: str, dbutils: "DBUtils") -> list[str]:
     return sorted(matched)
 
 
-def get_dbutils(spark: Union[SparkSession, "DatabricksSession"]) -> "DBUtils":
+def get_dbutils(spark: SparkSession | DatabricksSession) -> DBUtils:
     """Get the instance of 'dbutils' or None if the one could not be found."""
     dbutils = globals().get("dbutils")
     if dbutils:
@@ -87,7 +89,7 @@ def get_dbutils(spark: Union[SparkSession, "DatabricksSession"]) -> "DBUtils":
     return dbutils
 
 
-def dbfs_exists(pattern: str, dbutils: "DBUtils") -> bool:
+def dbfs_exists(pattern: str, dbutils: DBUtils) -> bool:
     """Perform an `ls` list operation in DBFS using the provided pattern.
     It is assumed that version paths are managed by Kedro.
     Broad `Exception` is present due to `dbutils.fs.ExecutionError` that

@@ -1,4 +1,8 @@
+"""Utility functions for Spark."""
+from __future__ import annotations
+
 import json
+import logging
 import os
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -18,12 +22,10 @@ if TYPE_CHECKING:
     from databricks.connect import DatabricksSession
     from pyspark.sql.types import StructType
 
-import logging
-
 logger = logging.getLogger(__name__)
 
 
-def get_spark() -> Union[SparkSession, "DatabricksSession"]:
+def get_spark() -> SparkSession | DatabricksSession:
     """
     Returns the SparkSession. In case databricks-connect is available we use it for
     extended configuration mechanisms and notebook compatibility,
@@ -46,7 +48,7 @@ def get_spark() -> Union[SparkSession, "DatabricksSession"]:
     return spark
 
 
-def get_spark_with_remote_support() -> Union[SparkSession, "DatabricksSession"]:
+def get_spark_with_remote_support() -> SparkSession | DatabricksSession:
     """Get Spark session with support for Spark Connect and Databricks Connect.
 
     This function attempts to create a Spark session in the following order:
@@ -183,7 +185,7 @@ def get_spark_filesystem(
         raise ImportError(msg) from exc
 
 
-def load_spark_schema_from_file(schema_config: dict[str, Any]) -> "StructType":
+def load_spark_schema_from_file(schema_config: dict[str, Any]) -> StructType:
     """Load Spark schema from JSON file.
 
     Args:

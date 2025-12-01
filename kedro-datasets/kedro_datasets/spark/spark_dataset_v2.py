@@ -18,6 +18,7 @@ from kedro.io.core import (
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
     from pyspark.sql import DataFrame
     from pyspark.sql.types import StructType
 
@@ -103,6 +104,13 @@ class SparkDatasetV2(AbstractVersionedDataset):
         ...     dataset.save(spark_df)
         ...     reloaded = dataset.load()
         ...     assert Row(name="Bob", age=12) in reloaded.take(4)
+
+        You can also save Pandas DataFrames directly they will be automatically
+        converted to Spark DataFrames:
+
+        >>> import pandas as pd
+        >>> pandas_df = pd.DataFrame({"name": ["Alex", "Bob"], "age": [31, 12]})
+        >>> dataset.save(pandas_df)  # Automatically converts to Spark DataFrame
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -246,12 +254,19 @@ class SparkDatasetV2(AbstractVersionedDataset):
             .load(spark_load_path)
         )
 
-    def _save(self, data: DataFrame) -> None:
+    def _save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves pyspark dataframe.
 
         Args:
-            data: PySpark dataframe to save.
+            data: PySpark DataFrame or Pandas DataFrame to save.
+                  Pandas DataFrames will be automatically converted to Spark.
         """
+        spark_session = get_spark_with_remote_support()
+
+        # Convert Pandas DataFrame to Spark DataFrame if needed
+        if isinstance(data, pd.DataFrame):
+            data = spark_session.createDataFrame(data)
+
         save_path = self._get_save_path()
         spark_save_path = to_spark_path(self._protocol, str(save_path))
 

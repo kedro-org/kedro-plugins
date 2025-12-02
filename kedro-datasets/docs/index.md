@@ -58,6 +58,7 @@ Name | Description
 [spark.DeltaTableDataset](api/kedro_datasets/spark.DeltaTableDataset.md) | ``DeltaTableDataset`` loads data into DeltaTable objects.
 [spark.GBQQueryDataset](api/kedro_datasets/spark.GBQQueryDataset.md) | ``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
 [spark.SparkDataset](api/kedro_datasets/spark.SparkDataset.md) | ``SparkDataset`` loads and saves Spark dataframes.
+[spark.SparkDatasetV2](api/kedro_datasets/spark.SparkDatasetV2.md) | ``SparkDatasetV2`` loads and saves Spark dataframes with support for Spark Connect, Databricks Connect, and automatic Pandas-to-Spark conversion.
 [spark.SparkHiveDataset](api/kedro_datasets/spark.SparkHiveDataset.md) |``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
 [spark.SparkJDBCDataset](api/kedro_datasets/spark.SparkJDBCDataset.md) |``SparkJDBCDataset`` loads data from a database table accessible via JDBC URL url and connection properties and saves the content of a PySpark DataFrame to an external database table via JDBC.
 [spark.SparkStreamingDataset](api/kedro_datasets/spark.SparkStreamingDataset.md) |``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.

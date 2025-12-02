@@ -1,6 +1,13 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+- Added the following new datasets:
+
+| Type                  | Description                                                                                                    | Location                |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|-------------------------|
+| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic Pandas-to-Spark conversion | `kedro_datasets.spark` |
+
 ## Bug fixes and other changes
 ## Community contributions
 

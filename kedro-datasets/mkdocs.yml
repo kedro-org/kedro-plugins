@@ -67,7 +67,6 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-            paths: [src]
             import:
               - https://docs.kedro.org/en/stable/objects.inv
               - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
@@ -117,6 +116,7 @@ plugins:
 
         Big Data and Distributed Computing:
           - api/kedro_datasets/spark.SparkDataset.md: Apache Spark DataFrames
+          - api/kedro_datasets/spark.SparkDatasetV2.md: Spark DataFrames with Connect support
           - api/kedro_datasets/spark.SparkHiveDataset.md: Spark Hive tables
           - api/kedro_datasets/spark.SparkJDBCDataset.md: Spark JDBC connections
           - api/kedro_datasets/spark.SparkStreamingDataset.md: Spark streaming data
@@ -317,6 +317,7 @@ nav:
           - spark.DeltaTableDataset: api/kedro_datasets/spark.DeltaTableDataset.md
           - spark.GBQQueryDataset: api/kedro_datasets/spark.GBQQueryDataset.md
           - spark.SparkDataset: api/kedro_datasets/spark.SparkDataset.md
+          - spark.SparkDatasetV2: api/kedro_datasets/spark.SparkDatasetV2.md
           - spark.SparkHiveDataset: api/kedro_datasets/spark.SparkHiveDataset.md
           - spark.SparkJDBCDataset: api/kedro_datasets/spark.SparkJDBCDataset.md
           - spark.SparkStreamingDataset: api/kedro_datasets/spark.SparkStreamingDataset.md

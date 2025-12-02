@@ -55,6 +55,10 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          inventories:
+            - https://docs.kedro.org/en/stable/objects.inv
+            - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+          paths: [src]
           options:
             show_root_toc_entry: true
             show_source: false #currently doesn't show source at correct level, and not for pydantic models
@@ -67,10 +71,6 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-            inventories:
-              - https://docs.kedro.org/en/stable/objects.inv
-              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
-            paths: [src]
   - llmstxt:
       markdown_description: |
         Kedro-Datasets provides a collection of data connectors for various file formats and storage systems,

@@ -201,6 +201,9 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+chromadb-chromadbdataset = ["chromadb>=1.0.0"]
+chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
+
 darts-torch-model-dataset = ["u8darts-all"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
@@ -255,6 +258,7 @@ test = [
     "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
     "biopython~=1.73",
+    "chromadb>=1.0.0",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",

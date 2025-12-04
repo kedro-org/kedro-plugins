@@ -169,6 +169,7 @@ plugins:
           - api/kedro_datasets/langchain.OpenAIEmbeddingsDataset.md: OpenAI embeddings
 
         Experimental LLM and AI:
+          - api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md: ChromaDB vector database integration
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
           - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
           - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
@@ -332,6 +333,8 @@ nav:
           - yaml.YAMLDataset: api/kedro_datasets/yaml.YAMLDataset.md
       - Experimental Datasets:
         - Overview: api/kedro_datasets_experimental/index.md
+        - ChromaDB:
+          - chromadb.ChromaDBDataset: api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md
         - Databricks:
           - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - Langchain:

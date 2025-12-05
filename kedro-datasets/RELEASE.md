@@ -15,6 +15,8 @@
 | `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
 
 ## Bug fixes and other changes
+- Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
+
 ## Community contributions
 
 - [Armand Masseau](https://github.com/armandmasseaugit)
@@ -59,7 +61,6 @@
 ## Bug fixes and other changes
 - Add HTMLPreview type.
 - Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
-- Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
 
 ## Community contributions
 

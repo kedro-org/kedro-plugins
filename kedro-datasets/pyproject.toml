@@ -19,15 +19,46 @@ dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
 pandas-base = ["pandas>=1.3, <3.0"]
-spark-base = ["pyspark>=2.2, <4.0"]
+spark-base = ["pyspark>=2.2, <5.0"]
 hdfs-base = ["hdfs>=2.5.8, <3.0"]
 s3fs-base = ["s3fs>=2021.4"]
 polars-base = ["polars>=0.18.0"]
 plotly-base = ["plotly>=4.8.0, <6.0"]
-delta-base = ["delta-spark>=1.0, <4.0"]
+delta-base = ["delta-spark>=1.0, <5.0"]
 networkx-base = ["networkx~=3.4"]
 
-# Individual Datasets
+# Spark dependencies
+spark-core = []  # No dependencies
+spark-local = ["pyspark>=2.2,<5.0"]  # For local development
+spark-databricks = []  # Uses Databricks runtime Spark
+spark-emr = []  # Uses EMR runtime Spark
+
+# Filesystem specific packages for Spark
+spark-s3 = ["s3fs>=2021.4"]
+spark-gcs = ["gcsfs>=2023.1, <2023.7"]
+spark-azure = ["adlfs>=2023.1"]
+spark-hdfs = ["pyarrow>=7.0"]  # PyArrow includes HDFS support
+
+# Convenience bundles
+spark = ["kedro-datasets[spark-local,spark-s3]"]  # Most common setup
+spark-cloud = ["kedro-datasets[spark-s3,spark-gcs,spark-azure]"]  # All cloud filesystems
+
+# Individual Spark datasets
+spark-deltatabledataset = ["kedro-datasets[spark-core,delta-base]"]
+spark-sparkdataset = ["kedro-datasets[spark-core]"]
+spark-sparkhivedataset = ["kedro-datasets[spark-core]"]
+spark-sparkjdbcdataset = ["kedro-datasets[spark-core]"]
+spark-sparkstreamingdataset = ["kedro-datasets[spark-core]"]
+
+spark-all = [
+    """kedro-datasets[spark-deltatabledataset,\
+    spark-sparkdataset,\
+    spark-sparkhivedataset,\
+    spark-sparkjdbcdataset,\
+    spark-sparkstreamingdataset,\
+    spark-local,\
+    spark-cloud]"""
+]
 api-apidataset = ["requests~=2.20"]
 api = ["kedro-datasets[api-apidataset]"]
 
@@ -78,12 +109,17 @@ ibis = ["ibis-framework"]
 json-jsondataset = []
 json = ["kedro-datasets[json-jsondataset]"]
 
+langchain-chatopenaidataset = ["langchain-openai>=0.1.7"]
+langchain-openaiembeddingsdataset = ["langchain-openai>=0.1.7"]
+langchain-chatanthropicdataset = ["langchain-anthropic>=0.1.13", "langchain-community>=0.2.0"]
+langchain-chatcoheredataset = ["langchain-cohere>=0.1.5", "langchain-community>=0.2.0"]
+
+
 matlab-matlabdataset = ["scipy"]
 matlab = ["kedro-datasets[matlab-matlabdataset]"]
 
-matplotlib-matplotlibwriter = ["matplotlib>=3.0.3, <4.0"]
 matplotlib-matplotlibdataset = ["matplotlib>=3.0.3, <4.0"]
-matplotlib = ["kedro-datasets[matplotlib-matplotlibwriter,matplotlib-matplotlibdataset]"]
+matplotlib = ["kedro-datasets[matplotlib-matplotlibdataset]"]
 
 networkx-gmldataset = ["kedro-datasets[networkx-base]"]
 networkx-graphmldataset = ["kedro-datasets[networkx-base]"]
@@ -91,7 +127,8 @@ networkx-jsondataset = ["kedro-datasets[networkx-base]"]
 networkx = ["kedro-datasets[networkx-base]"]
 
 openxml-docxdataset = ["python-docx"]
-openxml = ["kedro-datasets[openxml-docxdataset]"]
+openxml-pptxdataset = ["python-pptx"]
+openxml = ["kedro-datasets[openxml-docxdataset]", "kedro-datasets[openxml-pptxdataset]"]
 
 optuna-studydataset = ["optuna"]
 optuna = ["kedro-datasets[optuna-studydataset]"]
@@ -151,19 +188,6 @@ redis = ["kedro-datasets[redis-pickledataset]"]
 snowflake-snowparktabledataset = ["snowflake-snowpark-python>=1.23"]
 snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 
-spark-deltatabledataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base,delta-base]"]
-spark-sparkdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
-spark-sparkhivedataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
-spark-sparkjdbcdataset = ["kedro-datasets[spark-base]"]
-spark-sparkstreamingdataset = ["kedro-datasets[spark-base,hdfs-base,s3fs-base]"]
-spark = [
-    """kedro-datasets[spark-deltatabledataset,\
-    spark-sparkdataset,\
-    spark-sparkhivedataset,\
-    spark-sparkjdbcdataset,\
-    spark-sparkstreamingdataset]"""
-]
-
 svmlight-svmlightdataset = ["scikit-learn>=1.0.2", "scipy>=1.7.3"]
 svmlight = ["kedro-datasets[svmlight-svmlightdataset]"]
 
@@ -177,15 +201,20 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
+chromadb-chromadbdataset = ["chromadb>=1.0.0"]
+chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
+
 darts-torch-model-dataset = ["u8darts-all"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
-langchain-chatopenaidataset = ["langchain-openai~=0.1.7"]
-langchain-openaiembeddingsdataset = ["langchain-openai~=0.1.7"]
-langchain-chatanthropicdataset = ["langchain-anthropic~=0.1.13", "langchain-community~=0.2.0"]
-langchain-chatcoheredataset = ["langchain-cohere~=0.1.5", "langchain-community~=0.2.0"]
-langchain-langchainpromptdataset = ["langchain>=0.2.0"]
-langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset]"]
+langchain-langchainpromptdataset = ["langchain>=0.3.0"]
+langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-langchainpromptdataset]"]
+langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
+langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+opik-opikpromptdataset = ["opik>=1.8.0"]
+opik-opiktracedataset = ["opik>=1.8.0"]
+opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -215,7 +244,6 @@ docs = [
    "mkdocs-mermaid2-plugin>=1.2.1",
    "mkdocs-autorefs>=1.4.1",
    "mkdocs-get-deps>=0.2.0",
-   "mkdocstrings>=0.29.1",
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
@@ -230,14 +258,15 @@ test = [
     "accelerate<0.32",  # Temporary pin
     "adlfs~=2023.1",
     "biopython~=1.73",
+    "chromadb>=1.0.0",
     "cloudpickle~=2.2.1",
     "compress-pickle[lz4]~=2.1.0",
     "coverage>=7.2.0",
     "dask[complete]>=2021.10",
-    "delta-spark>=1.0, <3.0",
+    "delta-spark>=1.0, <3.0; python_version <= '3.11'",
+    "delta-spark>=4.0; python_version >= '3.12'",
     "deltalake>=0.10.0, <1.0.0",
     "dill~=0.3.1",
-    "duckdb<1.4.0", # https://github.com/ibis-project/ibis/issues/11621
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
     "gcsfs>=2023.1, <2023.7",
@@ -250,11 +279,15 @@ test = [
     "joblib>=0.14",
     "jupyterlab>=3.0",
     "jupyter~=1.0",
+    "langchain-openai>=0.1.7",
+    "langchain-cohere>=0.1.5",
+    "langchain-anthropic>=0.1.13",
+    "langchain-community>=0.2.0",
     "lxml~=4.6",
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",
-    "networkx~=3.4",
+    "networkx==3.4", # pinned strictly to support Python >= 3.10
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
     "pandas>=2.0",
@@ -264,13 +297,15 @@ test = [
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
-    "pyspark>=3.0; python_version < '3.11'",
-    "pyspark>=3.4; python_version >= '3.11'",
+    "pyspark>=3.0, <4.0; python_version < '3.11'",
+    "pyspark>=3.4, <4.0; python_version == '3.11'",
+    "pyspark>=4.0; python_version >= '3.12'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "python-docx",
+    "python-pptx",
     "redis~=4.1",
     "reportlab>=3.6.0",
     "requests-mock~=1.6",
@@ -303,7 +338,7 @@ lint = [
     "import-linter[toml]==1.2.6",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.12.1",
+    "ruff~=0.14.4",
     # mypy related dependencies
     "types-cachetools",
     "types-PyYAML",
@@ -320,6 +355,7 @@ experimental = [
     "langchain-cohere",
     "langchain-anthropic",
     "langchain-community",
+    "langfuse",
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
@@ -327,6 +363,7 @@ experimental = [
     "torch",
     "opencv-python~=4.5.5.64",
     "prophet>=1.1.5",
+    "opik",
     "optuna",
     "u8darts[all]",
     "pypdf>=3.0.0",
@@ -351,7 +388,7 @@ version = {attr = "kedro_datasets.__version__"}
 fail_under = 100
 show_missing = true
 # temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py"]
+omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/spark/spark_hive_dataset.py", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py"]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

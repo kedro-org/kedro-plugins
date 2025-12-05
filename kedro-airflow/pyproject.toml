@@ -8,7 +8,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "kedro>=1.0.0rc1, <2.0.0",
@@ -42,7 +42,7 @@ lint = [
     "detect-secrets~=1.5.0",
     "mypy~=1.0",
     "pre-commit>=2.9.2",
-    "ruff~=0.12.1",
+    "ruff~=0.14.4",
     # mypy requirements
     "types-PyYAML",
     "types-cachetools",

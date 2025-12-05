@@ -2,26 +2,72 @@
 
 ## Major features and improvements
 
-- Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added the following new datasets:
+
+| Type                  | Description                                                                                                    | Location                |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|-------------------------|
+| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic Pandas-to-Spark conversion | `kedro_datasets.spark` |
 
 - Added the following new **experimental** datasets:
 
-| Type                                | Description                                              | Location                                |
-| ----------------------------------- | -------------------------------------------------------- | --------------------------------------- |
-| `langchain.LangChainPromptDataset`  | Kedro dataset for loading LangChain prompts              | `kedro_datasets_experimental.langchain` |
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
 
 ## Bug fixes and other changes
-- Add HTMLPreview type.
+## Community contributions
+
+- [Armand Masseau](https://github.com/armandmasseaugit)
+
+# Release 9.0.0
 
 ## Major features and improvements
 
-- Added the following new experimental datasets:
+- Removed the deprecated `MatplotlibWriter` datset. Matplotlib objects can now be handled using `MatplotlibDataset`.
+- Group datasets documentation according to the dependencies to clean up the nav bar.
+- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
+- Added credentials support to `ibis.TableDataset`.
+- Added the following new datasets:
 
-| Type                           | Description                                                   | Location                             |
-|--------------------------------|---------------------------------------------------------------|--------------------------------------|
-| `pypdf.PDFDataset`             | A dataset to read PDF files and extract text using pypdf      | `kedro_datasets_experimental.pypdf`  |
+| Type                  | Description                                                                             | Location                 |
+|-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
+| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
+
+- Graduated the following **experimental** datasets to core:
+
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `langchain.ChatOpenAIDataset`    | Kedro dataset for loading a ChatOpenAI LangChain model. | `kedro_datasets.langchain`  |
+| `langchain.OpenAIEmbeddingsDataset` | Kedro dataset for loading an OpenAIEmbeddings model. | `kedro_datasets.langchain` |
+| `langchain.ChatAnthropicDataset`  | A dataset for loading a ChatAnthropic LangChain model.   | `kedro_datasets.langchain`     |
+| `langchain.ChatCohereDataset`   | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain`  |
+
+- Added the following new **experimental** datasets:
+
+| Type                               | Description                                                     | Location                                |
+|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
+| `langfuse.LangfuseTraceDataset`    | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                     | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
+| `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
+| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts      | `kedro_datasets_experimental.opik`      |
+| `opik.OpikTraceDataset`            | Kedro dataset to provide Opik tracing clients and callbacks     | `kedro_datasets_experimental.opik`      |
+
+
+## Bug fixes and other changes
+- Add HTMLPreview type.
+- Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+- [Guillaume Tauzin](https://github.com/gtauzin)
+- [gitgud5000](https://github.com/gitgud5000)
+- [Armand Masseau](https://github.com/armandmasseaugit)
 
 # Release 8.1.0
+
 ## Major features and improvements
 
 - Added the following new experimental datasets:
@@ -29,8 +75,6 @@
 | Type                           | Description                                                   | Location                             |
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
 | `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
-
-- Added `mode` save argument to `ibis.TableDataset`, supporting "append", "overwrite", "error"/"errorifexists", and "ignore" save modes. The deprecated `overwrite` save argument is mapped to `mode` for backward compatibility and will be removed in a future release. Specifying both `mode` and `overwrite` results in an error.
 
 ## Bug fixes and other changes
 
@@ -105,7 +149,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Szymon Cogiel](https://github.com/SzymonCogiel)
 - [Abhishek Bhatia](https://github.com/abhi8893)
 - [Guillaume Tauzin](https://github.com/gtauzin)
-
 
 # Release 6.0.0
 

@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pyspark
 import pytest
 from kedro.io.core import DatasetError
 from psutil import Popen
@@ -13,6 +14,12 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from kedro_datasets.spark import SparkHiveDataset
 
 TESTSPARKDIR = "test_spark_dir"
+
+# Hive support was removed from Spark 4.x in favour of Catalog V2 / DataSourceV2.
+# These tests are skipped because enableHiveSupport() no longer works in Spark ≥ 4.x.
+spark_major = int(pyspark.__version__.split(".")[0])
+if spark_major >= 4:
+    pytestmark = pytest.mark.skip(reason="Hive catalog not available in Spark 4.x")
 
 
 @pytest.fixture(scope="module")

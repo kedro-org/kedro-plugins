@@ -24,7 +24,6 @@
               "json.JSONDataset",
               "matlab.MatlabDataset",
               "matplotlib.MatplotlibDataset",
-              "matplotlib.MatplotlibWriter",
               "networkx.GMLDataset",
               "networkx.GraphMLDataset",
               "networkx.JSONDataset",
@@ -513,6 +512,10 @@
                   "type": ["string", "null"],
                   "description": "The name of the database to read from or create in. Can be a dotted string or tuple for multi-level hierarchy."
                 },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying database."
+                },
                 "connection": {
                   "type": "object",
                   "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in-memory."
@@ -639,41 +642,6 @@
                 "metadata": {
                   "type": ["object", "null"],
                   "description": "Arbitrary metadata, ignored by Kedro but may be used by users or external plugins."
-                }
-              }
-            }
-          },
-          {
-            "if": {
-              "properties": {
-                "type": {
-                  "const": "matplotlib.MatplotlibWriter"
-                }
-              }
-            },
-            "then": {
-              "required": [
-                "filepath"
-              ],
-              "properties": {
-                "filepath": {
-                  "type": "string",
-                  "description": "Filepath in POSIX format to a matplot object file(s) prefixed with a protocol\nlike `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be\nused. The prefix should be any protocol supported by ``fsspec``."
-                },
-                "fs_args": {
-                  "type": "object",
-                  "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested key `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
-                },
-                "credentials": {
-                  "type": [
-                    "object",
-                    "string"
-                  ],
-                  "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``S3FileSystem`` it should look like:\n`{'key': '<id>', 'secret': '<key>'}}`"
-                },
-                "save_args": {
-                  "type": "object",
-                  "description": "Save args passed to `plt.savefig`. See\nhttps://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html"
                 }
               }
             }

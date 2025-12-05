@@ -54,17 +54,16 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
         ```yaml
-
         station_data:
           type: partitions.PartitionedDataset
           path: data/03_primary/station_data
           dataset:
-          type: pandas.CSVDataset
-          load_args:
-            sep: '\\t'
-          save_args:
-            sep: '\\t'
-            index: true
+            type: pandas.CSVDataset
+            load_args:
+              sep: '\\t'
+            save_args:
+              sep: '\\t'
+              index: true
           filename_suffix: '.dat'
           save_lazily: True
         ```
@@ -88,7 +87,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     path=str(tmp_path / "df_with_partition"),
         ...     dataset="pandas.CSVDataset",
         ...     filename_suffix=".csv",
-        ...     save_lazily=False
+        ...     save_lazily=False,
         ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.

@@ -17,6 +17,9 @@ on:
       - "kedro-docker/**"
       - "kedro-telemetry/**"
 
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     strategy:
@@ -37,6 +40,8 @@ jobs:
       python-version: "3.11"
 
   check-docs:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

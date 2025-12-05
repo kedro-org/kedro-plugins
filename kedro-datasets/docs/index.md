@@ -19,13 +19,17 @@ Name | Description
 [ibis.FileDataset](api/kedro_datasets/ibis.FileDataset.md) | ``FileDataset`` loads/saves data from/to a specified file format.
 [ibis.TableDataset](api/kedro_datasets/ibis.TableDataset.md) | `TableDataset` loads/saves data from/to Ibis table expressions.
 [json.JSONDataset](api/kedro_datasets/json.JSONDataset.md) | ``JSONDataset`` loads/saves data from/to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
+[langchain.ChatAnthropicDataset](api/kedro_datasets/langchain.ChatAnthropicDataset.md) | ``ChatAnthropicDataset`` loads a ChatAnthropic `langchain` model.
+[langchain.ChatCohereDataset](api/kedro_datasets/langchain.ChatCohereDataset.md) | ``ChatCohereDataset`` loads a ChatCohere `langchain` model.
+[langchain.ChatOpenAIDataset](api/kedro_datasets/langchain.ChatOpenAIDataset.md) | OpenAI dataset used to access credentials at runtime.
+[langchain.OpenAIEmbeddingsDataset](api/kedro_datasets/langchain.OpenAIEmbeddingsDataset.md) | ``OpenAIEmbeddingsDataset`` loads a OpenAIEmbeddings `langchain` model.
 [matlab.MatlabDataset](api/kedro_datasets/matlab.MatlabDataset.md) | `MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 [matplotlib.MatplotlibDataset](api/kedro_datasets/matplotlib.MatplotlibDataset.md) | ``MatplotlibDataset`` saves one or more Matplotlib objects as image files to an underlying filesystem (e.g. local, S3, GCS).
-[matplotlib.MatplotlibWriter](api/kedro_datasets/matplotlib.MatplotlibWriter.md) | DEPRECATED
 [networkx.GMLDataset](api/kedro_datasets/networkx.GMLDataset.md) | ``GMLDataset`` loads and saves graphs to a GML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GML data.
 [networkx.GraphMLDataset](api/kedro_datasets/networkx.GraphMLDataset.md) | ``GraphMLDataset`` loads and saves graphs to a GraphML file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
 [networkx.JSONDataset](api/kedro_datasets/networkx.JSONDataset.md) | NetworkX ``JSONDataset`` loads and saves graphs to a JSON file using an underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to create JSON data.
 [openxml.DocxDataset](api/kedro_datasets/openxml.DocxDataset.md) | ``DocxDataset`` loads/saves data from/to a .docx file using an underlying filesystem (e.g.: local, S3, GCS). It uses python-docx to handle the .docx file.
+[openxml.PptxDataset](api/kedro_datasets/openxml.PptxDataset.md) | ``PptxDataset`` loads/saves data from/to a .pptx file using an underlying filesystem (e.g.: local, S3, GCS). It uses python-pptx to handle the .pptx file.
 [pandas.CSVDataset](api/kedro_datasets/pandas.CSVDataset.md) | A dataset that loads and saves data to/from CSV files using pandas.
 [pandas.DeltaTableDataset](api/kedro_datasets/pandas.DeltaTableDataset.md) | ``DeltaTableDataset`` loads/saves delta tables from/to a filesystem (e.g.: local, S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles load and save using a pandas dataframe.
 [pandas.ExcelDataset](api/kedro_datasets/pandas.ExcelDataset.md) | ``ExcelDataset`` loads/saves data from/to a Excel file using an underlying filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
@@ -54,6 +58,7 @@ Name | Description
 [spark.DeltaTableDataset](api/kedro_datasets/spark.DeltaTableDataset.md) | ``DeltaTableDataset`` loads data into DeltaTable objects.
 [spark.GBQQueryDataset](api/kedro_datasets/spark.GBQQueryDataset.md) | ``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
 [spark.SparkDataset](api/kedro_datasets/spark.SparkDataset.md) | ``SparkDataset`` loads and saves Spark dataframes.
+[spark.SparkDatasetV2](api/kedro_datasets/spark.SparkDatasetV2.md) | ``SparkDatasetV2`` loads and saves Spark dataframes with support for Spark Connect, Databricks Connect, and automatic Pandas-to-Spark conversion.
 [spark.SparkHiveDataset](api/kedro_datasets/spark.SparkHiveDataset.md) |``SparkHiveDataset`` loads and saves Spark dataframes stored on Hive.
 [spark.SparkJDBCDataset](api/kedro_datasets/spark.SparkJDBCDataset.md) |``SparkJDBCDataset`` loads data from a database table accessible via JDBC URL url and connection properties and saves the content of a PySpark DataFrame to an external database table via JDBC.
 [spark.SparkStreamingDataset](api/kedro_datasets/spark.SparkStreamingDataset.md) |``SparkStreamingDataset`` loads data to Spark Streaming Dataframe objects.

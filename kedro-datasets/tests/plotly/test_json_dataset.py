@@ -40,7 +40,7 @@ class TestJSONDataset:
         reloaded = json_dataset.load()
         assert dummy_plot == reloaded
         assert json_dataset._fs_open_args_load == {}
-        assert json_dataset._fs_open_args_save == {"mode": "w"}
+        assert json_dataset._fs_open_args_save == {"mode": "w", "encoding": "utf-8"}
 
     def test_exists(self, json_dataset, dummy_plot):
         """Test `exists` method invocation for both existing and

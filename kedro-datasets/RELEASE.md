@@ -15,9 +15,12 @@
 | `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
 
 ## Bug fixes and other changes
+- Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
+
 ## Community contributions
 
 - [Armand Masseau](https://github.com/armandmasseaugit)
+- [SRIKAR-8-77](https://github.com/SRIKAR-8-77)
 
 # Release 9.0.0
 
@@ -64,7 +67,6 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [gitgud5000](https://github.com/gitgud5000)
-- [Armand Masseau](https://github.com/armandmasseaugit)
 
 # Release 8.1.0
 

@@ -13,6 +13,8 @@ on:
 jobs:
 
   unit-tests:
+    permissions:
+      contents: read
     runs-on: ${{ inputs.os }}
     defaults:
       run:

@@ -25,7 +25,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 [project.optional-dependencies]
 test = [
     "apache-airflow<3.0; python_version <= 3.12",
-    "apache-airflow=~3.1; python_version > 3.12",
+    "apache-airflow~=3.1; python_version > 3.12",
     "behave",
     "coverage>=7.2.0",
     "kedro-datasets",

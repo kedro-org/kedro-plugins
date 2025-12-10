@@ -17,6 +17,7 @@
 
 ## Bug fixes and other changes
 - Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
+- Fix `plotly.JSONDataset` encoding errors by defaulting thesave encoding to UTF-8.
 
 ## Community contributions
 

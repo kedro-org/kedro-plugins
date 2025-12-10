@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+- Added support for Python 3.13.
 
 - Added the following new datasets:
 

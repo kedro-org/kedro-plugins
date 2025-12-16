@@ -5,6 +5,12 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
+# Ensure all matplotlib doctests use a headless backend in CI and Windows.
+# This prevents `_tkinter.TclError: Can't find a usable init.tcl` on headless runners.
+import matplotlib
+
+matplotlib.use("Agg")  # noqa: E402  # must come before pyplot import anywhere
+
 from collections.abc import Callable
 from unittest.mock import MagicMock
 

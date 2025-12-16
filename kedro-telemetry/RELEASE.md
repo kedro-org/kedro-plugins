@@ -1,5 +1,8 @@
 # Upcoming release
+
+# Release 0.7.0
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+* Update links on the telemetry message log to point to the correct documentation page.
 * Updated collection of command usage information to include which starter is used when creating a new project.
 * Update collection of project statistics to include what types of datasets are used in the project. This will not include dataset type name if a custom dataset is used.
 

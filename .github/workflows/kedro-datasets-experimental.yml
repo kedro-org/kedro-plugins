@@ -16,7 +16,7 @@ on:
       - "kedro-datasets/kedro_datasets_experimental/**"
 
 jobs:
-  unit-tests:
+  unit-tests-experimental:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]

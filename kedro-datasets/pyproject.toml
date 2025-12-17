@@ -369,6 +369,27 @@ experimental = [
     "pypdf>=3.0.0",
 ]
 
+experimental_test = [
+    "langchain-openai",
+    "langchain-cohere",
+    "langchain-anthropic",
+    "langchain-community",
+    "langfuse",
+    "openai>=2.3.0", 
+    "langchain>=0.2.0"
+    "h5netcdf>=1.2.0",
+    "netcdf4>=1.6.4",
+    "xarray>=2023.1.0",
+    "rioxarray",
+    "torch",
+    "opencv-python~=4.12.0.88",
+    "prophet>=1.1.5",
+    "opik",
+    "optuna",
+    "u8darts[all]",
+    "pypdf>=3.0.0",
+]
+
 # All requirements
 all = ["kedro-datasets[test,docs,lint]"]
 

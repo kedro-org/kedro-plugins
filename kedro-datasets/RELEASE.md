@@ -1,4 +1,9 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.1.0
 
 ## Major features and improvements
 - Added support for Python 3.13.

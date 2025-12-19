@@ -1,9 +1,12 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+## Community contributions
+
+# Release 9.1.1
+## Bug fixes and other changes
 - Bump lxml version for xmldataset requirements if Python version is 3.13 and above.
 
-## Community contributions
 
 # Release 9.1.0
 

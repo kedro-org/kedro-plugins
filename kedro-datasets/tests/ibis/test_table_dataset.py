@@ -136,6 +136,45 @@ class TestTableDataset:
         reloaded = table_dataset.load().execute()
         assert len(reloaded) == len(df1) + len(df2)
 
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize("database_name", ["my_schema"], indirect=True)
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
+    )
+    def test_save_mode_append_with_database(
+        self, table_dataset, database_name, dummy_table
+    ):
+        """Saving with mode=append should work with non-default database/schema.
+
+        This test verifies the fix for the issue where _exists() doesn't check
+        the correct schema when database parameter is specified.
+        """
+        # Create a non-default schema/database
+        table_dataset.connection.create_database(database_name)
+
+        # First save - creates the table
+        df1 = dummy_table
+        table_dataset.save(df1)
+
+        # Verify table exists in the correct schema
+        assert table_dataset._exists()
+        assert table_dataset._table_name in table_dataset.connection.list_tables(
+            database=database_name
+        )
+
+        # Second save - should append, not fail
+        df2 = dummy_table
+        table_dataset.save(df2)
+
+        # Verify data was appended correctly
+        df1 = df1.execute()
+        df2 = df2.execute()
+        reloaded = table_dataset.load().execute()
+        assert len(reloaded) == len(df1) + len(df2)
+
     @pytest.mark.parametrize(
         "save_args",
         [

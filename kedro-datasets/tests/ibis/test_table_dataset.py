@@ -120,6 +120,20 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
 
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_exists_with_database(self, table_dataset, database_name, dummy_table):
+        """`exists` method should work with a non-default database."""
+        # Create a non-default database.
+        table_dataset.connection.create_database(database_name)
+
+        assert not table_dataset.exists()
+        table_dataset.save(dummy_table)
+        assert table_dataset.exists()
+
     @pytest.mark.parametrize(
         "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
     )
@@ -148,7 +162,7 @@ class TestTableDataset:
     def test_save_mode_append_with_database(
         self, table_dataset, database_name, dummy_table
     ):
-        """Saving with mode=append should work with non-default database.
+        """Saving with mode=append should work with a non-default database.
 
         This test verifies the fix for the issue where exists() doesn't
         check the correct schema when database parameter is specified;

@@ -402,6 +402,7 @@ experimental_test = [
     "s3fs>=2021.04",
     "reportlab>=3.6.0",
     "chromadb>=1.0.0",
+    "dask[complete]>=2021.10",
 ]
 
 # All requirements

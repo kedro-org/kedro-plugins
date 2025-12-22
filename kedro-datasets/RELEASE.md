@@ -1,6 +1,9 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+
 ## Community contributions
 
 # Release 9.1.1

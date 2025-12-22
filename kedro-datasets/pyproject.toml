@@ -370,6 +370,8 @@ experimental = [
 ]
 
 experimental_test = [
+    "delta-spark>=1.0, <3.0; python_version <= '3.11'",
+    "delta-spark>=4.0; python_version >= '3.12'",
     "langchain-openai",
     "langchain-cohere",
     "langchain-anthropic",

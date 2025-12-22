@@ -375,7 +375,7 @@ experimental_test = [
     "langchain-anthropic",
     "langchain-community",
     "langfuse",
-    "openai>=2.3.0", 
+    "openai>=2.3.0",
     "langchain>=0.2.0",
     "h5netcdf>=1.2.0",
     "netcdf4>=1.6.4",

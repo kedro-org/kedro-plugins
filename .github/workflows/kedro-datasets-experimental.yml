@@ -35,7 +35,7 @@ jobs:
         run: |
           uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
           cd kedro-datasets
-          uv pip install "kedro-datasets[experimental_test,test] @ ."
+          uv pip install "kedro-datasets[experimental_test] @ ."
           uv pip freeze
       - name: Run unit tests for kedro_datasets_experimental
         run: pytest kedro-datasets/kedro_datasets_experimental/tests

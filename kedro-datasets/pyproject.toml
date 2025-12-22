@@ -397,6 +397,7 @@ experimental_test = [
     "pytest~=7.2",
     "u8darts[all]",
     "pypdf>=3.0.0",
+    "moto==5.0.0",
 ]
 
 # All requirements

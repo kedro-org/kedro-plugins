@@ -145,7 +145,11 @@ pandas-jsondataset = ["kedro-datasets[pandas-base]"]
 pandas-parquetdataset = ["kedro-datasets[pandas-base]", "pyarrow>=6.0"]
 pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"]
 pandas-sqlquerydataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc>=4.0"]
-pandas-xmldataset = ["kedro-datasets[pandas-base]", "lxml~=4.6"]
+pandas-xmldataset = [
+    "kedro-datasets[pandas-base]",
+    "lxml~=5.2; python_version >= '3.13'",
+    "lxml~=4.6; python_version < '3.13'"
+]
 pandas = [
     """kedro-datasets[pandas-csvdataset,\
     pandas-deltatabledataset,\
@@ -299,7 +303,7 @@ test = [
     "pyodbc~=5.0",
     "pyspark>=3.0, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
-    "pyspark>=4.0; python_version >= '3.12'",
+    "pyspark>=4.0, <4.1; python_version >= '3.12'",  # Temporary pin till delta-spark is compatible
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",

@@ -1,4 +1,17 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+
+## Community contributions
+
+# Release 9.1.1
+## Bug fixes and other changes
+- Bump lxml version for xmldataset requirements if Python version is 3.13 and above.
+
+
+# Release 9.1.0
 
 ## Major features and improvements
 - Added support for Python 3.13.

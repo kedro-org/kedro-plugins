@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=python:3.10-slim
-FROM $BASE_IMAGE as runtime-environment
+FROM $BASE_IMAGE AS runtime-environment
 
 # install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
@@ -19,16 +19,19 @@ WORKDIR /home/kedro_docker
 USER kedro_docker
 
 FROM runtime-environment
+
 # copy the whole project except what is in .dockerignore
 ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 COPY --chown=${KEDRO_UID}:${KEDRO_GID} . .
 
 USER root
+# Explicitly install pyspark to ensure correct version for Python version
+RUN uv pip install --system --no-cache-dir pyspark
+# Install project dependencies from pyproject.toml
 RUN uv pip install --system --no-cache-dir -e .
-
-# Switch back to kedro user
 USER kedro_docker
 
 EXPOSE 8888
+
 CMD ["kedro", "run"]

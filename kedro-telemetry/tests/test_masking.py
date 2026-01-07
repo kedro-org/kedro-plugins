@@ -177,6 +177,18 @@ class TestCLIMasking:
                 ["run", "--params=hello=4", "--pipeline=my_pipeline"],
                 ["run", "--params", MASK, "--pipeline", MASK],
             ),
+            (
+                ["new", "--starter=spaceflights-pandas", "--name=my_project"],
+                ["new", "--starter", "spaceflights-pandas", "--name", MASK],
+            ),
+            (
+                ["new", "--starter", "my_starter", "--name=my_project"],
+                ["new", "--starter", MASK, "--name", MASK],
+            ),
+            (
+                ["new", "-s=databricks-iris", "-n=my_project"],
+                ["new", "-s", "databricks-iris", "-n", MASK],
+            ),
         ],
     )
     def test_mask_kedro_cli(

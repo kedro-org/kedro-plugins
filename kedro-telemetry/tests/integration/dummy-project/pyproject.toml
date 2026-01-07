@@ -13,7 +13,7 @@ dummy-project = "dummy_project.__main__:main"
 [tool.kedro]
 package_name = "dummy_project"
 project_name = "dummy_project"
-kedro_init_version = "1.0.0rc1"
+kedro_init_version = "1.1.0"
 tools = [ "None",]
 example_pipeline = "True"
 source_dir = "src"

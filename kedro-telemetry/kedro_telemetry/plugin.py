@@ -185,7 +185,6 @@ class KedroTelemetryHook:
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
         masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
-
         self._user_uuid = _get_or_create_uuid()
 
         event_properties = _get_project_properties(self._user_uuid, project_path)
@@ -246,7 +245,7 @@ class KedroTelemetryHook:
                 "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
                 "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
                 "To hide this message, explicitly grant or deny consent. "
-                "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+                "Read more at https://docs.kedro.org/en/stable/about/telemetry/"
             )
 
         try:
@@ -306,22 +305,34 @@ def _format_project_statistics_data(
 ):
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
+    dataset_types: dict[str | None, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
+        # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
         dataset_names = catalog.keys()
+        for ds_name in dataset_names:
+            if not ds_name.startswith(("parameters", "params:")):
+                ds_type = catalog.get_type(ds_name) or ""
+                if (
+                    ds_type.startswith("kedro_datasets.")
+                    or ds_type.startswith("kedro.io.")
+                    or ds_type.startswith("kedro_datasets_experimental.")
+                ):
+                    dataset_types[ds_type] = dataset_types.get(ds_type, 0) + 1
+                else:
+                    dataset_types["custom"] = dataset_types.get("custom", 0) + 1
     else:
         dataset_names = catalog.list()  # type: ignore
 
-    project_statistics_properties = {}
-    project_statistics_properties["number_of_datasets"] = sum(
-        1
-        for c in dataset_names
-        if not c.startswith("parameters") and not c.startswith("params:")
-    )
-    project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
-    )
-    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
-    return project_statistics_properties
+    return {
+        "number_of_datasets": sum(
+            1
+            for c in dataset_names
+            if not c.startswith("parameters") and not c.startswith("params:")
+        ),
+        "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
+        "number_of_pipelines": len(project_pipelines.keys()),
+        "dataset_types": dataset_types,
+    }
 
 
 def _get_heap_app_id() -> str:

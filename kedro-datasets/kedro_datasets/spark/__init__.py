@@ -20,6 +20,11 @@ except (ImportError, RuntimeError):
     SparkDataset: Any
 
 try:
+    from .spark_dataset_v2 import SparkDatasetV2
+except (ImportError, RuntimeError):
+    SparkDatasetV2: Any
+
+try:
     from .spark_hive_dataset import SparkHiveDataset
 except (ImportError, RuntimeError):
     SparkHiveDataset: Any

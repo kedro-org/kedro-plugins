@@ -24,9 +24,11 @@ ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 COPY --chown=${KEDRO_UID}:${KEDRO_GID} . .
 
-# Install project dependencies from pyproject.toml
+USER root
 RUN uv pip install --system --no-cache-dir -e .
 
-EXPOSE 8888
+# Switch back to kedro user
+USER kedro_docker
 
+EXPOSE 8888
 CMD ["kedro", "run"]

@@ -176,6 +176,6 @@ def test_load_missing_file(tmp_path):
     """Check the error when trying to load missing file."""
     dataset = GeoTIFFDataset(filepath=str(tmp_path / "tmp.tif"))
     assert not dataset._exists(), "File unexpectedly exists"
-    pattern = r"Failed while loading data from dataset GeoTIFFDataset\(.*\)"
+    pattern = r"Failed while loading data from dataset kedro_datasets_experimental.rioxarray.geotiff_dataset.GeoTIFFDataset\(.*\)"
     with pytest.raises(DatasetError, match=pattern):
         dataset.load()

@@ -342,6 +342,11 @@ nav:
         - Langfuse:
           - langfuse.LangfusePromptDataset: api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md
           - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
+        - MLRun:
+          - mlrun.MLRunAbstractDataset: api/kedro_datasets_experimental/mlrun.MLRunAbstractDataset.md
+          - mlrun.MLRunDataframeDataset: api/kedro_datasets_experimental/mlrun.MLRunDataframeDataset.md
+          - mlrun.MLRunModel: api/kedro_datasets_experimental/mlrun.MLRunModel.md
+          - mlrun.MLRunResult: api/kedro_datasets_experimental/mlrun.MLRunResult.md
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - Opik:

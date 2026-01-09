@@ -10,9 +10,13 @@
 
 - Added the following new **experimental** datasets:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
+| Type                       | Description                                                                    | Location                               |
+| -------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
+| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections. | `kedro_datasets_experimental.chromadb` |
+| `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun`    |
 
 ## Bug fixes and other changes
 - Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
@@ -74,9 +78,9 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added the following new experimental datasets:
 
-| Type                           | Description                                                   | Location                             |
-| ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
-| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+| Type                           | Description                                                    | Location                             |
+| ------------------------------ | -------------------------------------------------------------- | ------------------------------------ |
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars. | `kedro_datasets_experimental.polars` |
 
 ## Bug fixes and other changes
 

@@ -8,18 +8,19 @@ from typing import TYPE_CHECKING, Any, ClassVar
 import ibis.expr.types as ir
 from kedro.io import AbstractVersionedDataset, DatasetError, Version
 
+from kedro_datasets._utils import ConnectionMixin
+
 if TYPE_CHECKING:
     from ibis import BaseBackend
 
 
-class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
+class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table]):
     """``FileDataset`` loads/saves data from/to a specified file format.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: ibis.FileDataset
           filepath: data/01_raw/company/cars.csv
@@ -42,12 +43,9 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
           table_name: motorbikes
           connection:
             backend: polars
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import ibis
         >>> from kedro_datasets.ibis import FileDataset
@@ -73,7 +71,7 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {}
 
-    _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
+    _CONNECTION_GROUP: ClassVar[str] = "ibis"
 
     def __init__(  # noqa: PLR0913
         self,
@@ -143,33 +141,22 @@ class FileDataset(AbstractVersionedDataset[ir.Table, ir.Table]):
         if save_args is not None:
             self._save_args.update(save_args)
 
+    def _connect(self) -> BaseBackend:
+        import ibis  # noqa: PLC0415
+
+        config = deepcopy(self._connection_config)
+        backend = getattr(ibis, config.pop("backend"))
+        return backend.connect(**config)
+
     @property
     def connection(self) -> BaseBackend:
         """The ``Backend`` instance for the connection configuration."""
-
-        def hashable(value):
-            """Return a hashable key for a potentially-nested object."""
-            if isinstance(value, dict):
-                return tuple((k, hashable(v)) for k, v in sorted(value.items()))
-            if isinstance(value, list):
-                return tuple(hashable(x) for x in value)
-            return value
-
-        cls = type(self)
-        key = hashable(self._connection_config)
-        if key not in cls._connections:
-            import ibis
-
-            config = deepcopy(self._connection_config)
-            backend = getattr(ibis, config.pop("backend"))
-            cls._connections[key] = backend.connect(**config)
-
-        return cls._connections[key]
+        return self._connection
 
     def load(self) -> ir.Table:
         load_path = self._get_load_path()
         reader = getattr(self.connection, f"read_{self._file_format}")
-        return reader(load_path, self._table_name, **self._load_args)
+        return reader(load_path, table_name=self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
         save_path = self._get_save_path()

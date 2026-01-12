@@ -22,7 +22,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "info",
     "ipython",
     "jupyter",
-    "micropkg",
     "new",
     "package",
     "pipeline",
@@ -61,7 +60,7 @@ def fake_metadata(fake_root_dir):
 class TestCLIMasking:
     def test_get_cli_structure_raw(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -85,7 +84,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_depth(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -125,7 +124,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_help(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -163,8 +162,8 @@ class TestCLIMasking:
                 ["run", "--pipeline", MASK],
             ),
             (
-                ["catalog", "list"],
-                ["catalog", "list"],
+                ["catalog", "describe-datasets"],
+                ["catalog", "describe-datasets"],
             ),
             (
                 ["pipeline", "create", "mypipeline"],
@@ -178,13 +177,25 @@ class TestCLIMasking:
                 ["run", "--params=hello=4", "--pipeline=my_pipeline"],
                 ["run", "--params", MASK, "--pipeline", MASK],
             ),
+            (
+                ["new", "--starter=spaceflights-pandas", "--name=my_project"],
+                ["new", "--starter", "spaceflights-pandas", "--name", MASK],
+            ),
+            (
+                ["new", "--starter", "my_starter", "--name=my_project"],
+                ["new", "--starter", MASK, "--name", MASK],
+            ),
+            (
+                ["new", "-s=databricks-iris", "-n=my_project"],
+                ["new", "-s", "databricks-iris", "-n", MASK],
+            ),
         ],
     )
     def test_mask_kedro_cli(
         self, input_command_args, expected_masked_args, fake_metadata, mocker
     ):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )

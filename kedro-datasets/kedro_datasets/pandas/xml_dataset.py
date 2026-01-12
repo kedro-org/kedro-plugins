@@ -26,14 +26,11 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``XMLDataset`` loads/saves data from/to a XML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import XMLDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import XMLDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>

@@ -11,6 +11,10 @@ def _update_spark_df(data, idx, jdx, value):
         col("_1.*"), col("_2").alias("__id")
     )
     cname = data.columns[idx]
+
+    # Cast column to string before injecting mixed type value
+    data = data.withColumn(cname, col(cname).cast("string"))
+
     return data.withColumn(
         cname, when(col("__id") == jdx, value).otherwise(col(cname))
     ).drop("__id")
@@ -63,4 +67,6 @@ def test_load_returns_same_spark_object(memory_dataset, spark_data_frame):
 
 def test_str_representation(memory_dataset):
     """Test string representation of the dataset"""
-    assert "MemoryDataset(data=<DataFrame>)" in str(memory_dataset)
+    assert "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')" in str(
+        memory_dataset
+    )

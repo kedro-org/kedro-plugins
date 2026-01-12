@@ -22,26 +22,24 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads/saves data from/to HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         usda:
           type: api.APIDataset
           url: https://quickstats.nass.usda.gov
-          params:
-            key: SOME_TOKEN,
-            format: JSON,
-            commodity_desc: CORN,
-            statisticcat_des: YIELD,
-            agg_level_desc: STATE,
-            year: 2000
+          load_args:
+              params:
+                key: SOME_TOKEN
+                format: JSON
+                commodity_desc: CORN
+                statisticcat_des: YIELD
+                agg_level_desc: STATE
+                year: 2000
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.api import APIDataset
         >>>
@@ -57,10 +55,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ... )
         >>> data = dataset.load()
 
-    ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
-    methods.
-
-    .. code-block:: pycon
+        ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
+        methods:
 
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
@@ -78,6 +74,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     used if the input of save method is a list. It will divide the request into chunks
     of size `chunk_size`. For example, here we will send two requests each containing
     one row of our example DataFrame.
+
     If the data passed to the save method is not a list, ``APIDataset`` will check if it
     can be loaded as JSON. If true, it will send the data unchanged in a single request.
     Otherwise, the ``_save`` method will try to dump the data in JSON format and execute

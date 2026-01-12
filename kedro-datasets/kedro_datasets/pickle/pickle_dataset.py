@@ -26,12 +26,10 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         test_model: # simple example without compression
           type: pickle.PickleDataset
           filepath: data/07_model_output/test_model.pkl
@@ -44,15 +42,12 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
           credentials: s3_credentials
           save_args:
             compress: lz4
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pickle import PickleDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
@@ -92,7 +87,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         file on a specific filesystem. ``PickleDataset`` supports custom backends to
         serialise/deserialise objects.
 
-        Example backends that are compatible (non-exhaustive):
+        Example backends that are compatible - non-exhaustive:
             * `pickle`
             * `joblib`
             * `dill`

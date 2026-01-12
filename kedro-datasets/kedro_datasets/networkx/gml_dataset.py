@@ -22,15 +22,17 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     """``GMLDataset`` loads and saves graphs to a GML file using an
     underlying filesystem (e.g.: local, S3, GCS). NetworkX is used to
     create GML data.
+
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.networkx import GMLDataset
         >>> import networkx as nx
+        >>> from kedro_datasets.networkx import GMLDataset
+        >>>
         >>> graph = nx.complete_graph(100)
+        >>>
         >>> graph_dataset = GMLDataset(filepath=tmp_path / "test.gml")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()

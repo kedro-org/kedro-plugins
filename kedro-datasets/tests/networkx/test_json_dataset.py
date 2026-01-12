@@ -39,9 +39,7 @@ def versioned_json_dataset(filepath_json, load_version, save_version):
 
 @pytest.fixture
 def json_dataset_args(filepath_json):
-    return JSONDataset(
-        filepath=filepath_json, load_args={"attrs": ATTRS}, save_args={"attrs": ATTRS}
-    )
+    return JSONDataset(filepath=filepath_json, load_args=ATTRS, save_args=ATTRS)
 
 
 @pytest.fixture()
@@ -60,7 +58,7 @@ class TestJSONDataset:
 
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset JSONDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.networkx.json_dataset.JSONDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             assert json_dataset.load()
 
@@ -70,7 +68,14 @@ class TestJSONDataset:
             "networkx.node_link_data", wraps=networkx.node_link_data
         )
         json_dataset_args.save(dummy_graph_data)
-        patched_save.assert_called_once_with(dummy_graph_data, attrs=ATTRS)
+        patched_save.assert_called_once_with(
+            dummy_graph_data,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
+        )
 
         patched_load = mocker.patch(
             "networkx.node_link_graph", wraps=networkx.node_link_graph
@@ -91,7 +96,11 @@ class TestJSONDataset:
                     {"from": 1, "to": 2},
                 ],
             },
-            attrs=ATTRS,
+            source="from",
+            target="to",
+            name="fake_id",
+            key="fake_key",
+            link="fake_link",
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 
@@ -147,7 +156,7 @@ class TestJSONDatasetVersioned:
 
     def test_no_versions(self, versioned_json_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for JSONDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.networkx.json_dataset.JSONDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_json_dataset.load()
 
@@ -162,7 +171,7 @@ class TestJSONDatasetVersioned:
         version."""
         versioned_json_dataset.save(dummy_graph_data)
         pattern = (
-            r"Save path \'.+\' for JSONDataset\(.+\) must not "
+            r"Save path \'.+\' for kedro_datasets.networkx.json_dataset.JSONDataset\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -181,7 +190,7 @@ class TestJSONDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for JSONDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.networkx.json_dataset.JSONDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_dataset.save(dummy_graph_data)

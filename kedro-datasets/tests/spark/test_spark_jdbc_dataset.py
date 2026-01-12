@@ -88,7 +88,7 @@ def test_except_bad_credentials(mocker, spark_jdbc_args_credentials_with_none_pa
 
 def test_load(mocker, spark_jdbc_args):
     spark = mocker.patch(
-        "kedro_datasets.spark.spark_jdbc_dataset._get_spark"
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
     ).return_value
     dataset = SparkJDBCDataset(**spark_jdbc_args)
     dataset.load()
@@ -97,7 +97,7 @@ def test_load(mocker, spark_jdbc_args):
 
 def test_load_credentials(mocker, spark_jdbc_args_credentials):
     spark = mocker.patch(
-        "kedro_datasets.spark.spark_jdbc_dataset._get_spark"
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
     ).return_value
     dataset = SparkJDBCDataset(**spark_jdbc_args_credentials)
     dataset.load()
@@ -110,7 +110,7 @@ def test_load_credentials(mocker, spark_jdbc_args_credentials):
 
 def test_load_args(mocker, spark_jdbc_args_save_load):
     spark = mocker.patch(
-        "kedro_datasets.spark.spark_jdbc_dataset._get_spark"
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
     ).return_value
     dataset = SparkJDBCDataset(**spark_jdbc_args_save_load)
     dataset.load()

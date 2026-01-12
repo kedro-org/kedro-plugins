@@ -1,9 +1,8 @@
 import pytest
 from delta import DeltaTable
-from kedro.io import DataCatalog
 from kedro.io.core import DatasetError
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.pipeline import node, pipeline
 from kedro.runner import ParallelRunner
 from packaging.version import Version
 from pyspark import __version__
@@ -72,12 +71,12 @@ class TestDeltaTableDataset:
         delta_ds = DeltaTableDataset(filepath="")
         if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.deltatable_dataset._get_spark",
+                "kedro_datasets.spark.deltatable_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.deltatable_dataset._get_spark",
+                "kedro_datasets.spark.deltatable_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):
@@ -91,11 +90,11 @@ class TestDeltaTableDataset:
             _ = x + 1  # pragma: no cover
 
         delta_ds = DeltaTableDataset(filepath="")
-        catalog = DataCatalog({"delta_in": delta_ds})
-        pipeline = modular_pipeline([node(no_output, "delta_in", None)])
+        catalog = SharedMemoryDataCatalog({"delta_in": delta_ds})
+        test_pipeline = pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following datasets cannot be used with "
             r"multiprocessing: \['delta_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)

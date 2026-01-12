@@ -24,13 +24,14 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     create JSON data.
     See https://networkx.org/documentation/stable/tutorial.html for details.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.networkx import JSONDataset
         >>> import networkx as nx
+        >>> from kedro_datasets.networkx import JSONDataset
+        >>>
         >>> graph = nx.complete_graph(100)
+        >>>
         >>> graph_dataset = JSONDataset(filepath=tmp_path / "test.json")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
@@ -59,10 +60,10 @@ class JSONDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
             filepath: Filepath in POSIX format to the NetworkX graph JSON file.
             load_args: Arguments passed on to ``networkx.node_link_graph``.
                 See the details in
-                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
+                https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_graph.html
             save_args: Arguments passed on to ``networkx.node_link_data``.
                 See the details in
-                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
+                https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

@@ -17,12 +17,15 @@ on:
       - "kedro-docker/**"
       - "kedro-telemetry/**"
 
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.10", "3.11", "3.12" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-datasets
@@ -37,6 +40,8 @@ jobs:
       python-version: "3.11"
 
   check-docs:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -58,6 +63,23 @@ jobs:
         run: |
           cd kedro-datasets
           uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
-      - name: Documentation check for kedro-datasets
+      - name: Build datasets documentation
         run: |
-          make check-datasets-docs
+          make build-datasets-docs
+      - name: Check markdown formatting
+        run: |
+          make fix-markdownlint
+      - name: Link Checker
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: false
+          args: --max-concurrency 32 --exclude "@.lycheeignore" site/
+          workingDirectory: kedro-datasets
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
+    with:
+      plugin: kedro-datasets
+      os: ubuntu-latest
+      python-version: "3.11"

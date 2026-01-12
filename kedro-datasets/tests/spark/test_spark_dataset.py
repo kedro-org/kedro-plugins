@@ -9,8 +9,8 @@ import pandas as pd
 import pytest
 from kedro.io import DataCatalog, Version
 from kedro.io.core import DatasetError, generate_timestamp
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.pipeline import node, pipeline
 from kedro.runner import ParallelRunner, SequentialRunner
 from moto import mock_aws
 from packaging.version import Version as PackagingVersion
@@ -26,14 +26,14 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
+from kedro_datasets._utils.databricks_utils import (
+    dbfs_exists,
+    dbfs_glob,
+    get_dbutils,
+)
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.spark import SparkDataset
-from kedro_datasets.spark.spark_dataset import (
-    _dbfs_exists,
-    _dbfs_glob,
-    _get_dbutils,
-)
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -343,8 +343,10 @@ class TestSparkDataset:
             spark_dataset = SparkDataset(
                 filepath=filepath, file_format="csv", load_args={"header": True}
             )
-            assert "SparkDataset" in str(spark_dataset)
-            assert f"filepath={filepath}" in str(spark_dataset)
+            assert "kedro_datasets.spark.spark_dataset.SparkDataset" in str(
+                spark_dataset
+            )
+            assert f"filepath='{filepath}" in str(spark_dataset)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
@@ -410,12 +412,12 @@ class TestSparkDataset:
         spark_dataset = SparkDataset(filepath="")
         if SPARK_VERSION >= PackagingVersion("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.spark_dataset._get_spark",
+                "kedro_datasets.spark.spark_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.spark_dataset._get_spark",
+                "kedro_datasets.spark.spark_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):
@@ -424,14 +426,14 @@ class TestSparkDataset:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
         """Test ParallelRunner with SparkDataset fails."""
-        catalog = DataCatalog({"spark_in": spark_in})
-        pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
+        catalog = SharedMemoryDataCatalog({"spark_in": spark_in})
+        test_pipeline = pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
             r"The following datasets cannot be used with "
             r"multiprocessing: \['spark_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_s3_glob_refresh(self):
         spark_dataset = SparkDataset(filepath="s3a://bucket/data")
@@ -455,40 +457,40 @@ class TestSparkDataset:
         # test that warning is not raised when not on Databricks
         filepath = "my_project/data/02_intermediate/processed_data"
         expected_message = (
-            "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
+            "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix in the "
             f"filepath is a known source of error. You must add this prefix to {filepath}."
         )
         SparkDataset(filepath="my_project/data/02_intermediate/processed_data")
         assert expected_message not in caplog.text
 
-    def test_dbfs_prefix_warning_on_databricks_with_prefix(self, monkeypatch, caplog):
-        # test that warning is not raised when on Databricks and filepath has /dbfs prefix
-        filepath = "/dbfs/my_project/data/02_intermediate/processed_data"
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataset(filepath=filepath)
-        assert caplog.text == ""
+    @pytest.mark.parametrize(
+        "filepath,should_warn",
+        [
+            ("/dbfs/my_project/data/02_intermediate/processed_data", False),
+            ("my_project/data/02_intermediate/processed_data", True),
+            ("s3://my_project/data/02_intermediate/processed_data", False),
+            ("/Volumes/catalog/schema/table", False),
+        ],
+    )
+    def test_prefix_warning_on_databricks(
+        self, filepath, should_warn, monkeypatch, caplog
+    ):
+        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "14.3")
 
-    def test_dbfs_prefix_warning_on_databricks_no_prefix(self, monkeypatch, caplog):
-        # test that warning is raised when on Databricks and filepath does not have /dbfs prefix
-        filepath = "my_project/data/02_intermediate/processed_data"
-        expected_message = (
-            "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
-            f"filepath is a known source of error. You must add this prefix to {filepath}"
+        SparkDataset(filepath=filepath)
+
+        warning_msg = (
+            "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix"
         )
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataset(filepath=filepath)
-        assert expected_message in caplog.text
-
-    def test_dbfs_prefix_warning_databricks_s3(self, monkeypatch, caplog):
-        # test that warning is not raised when on Databricks using an s3 path
-        monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "7.3")
-        SparkDataset(filepath="s3://my_project/data/02_intermediate/processed_data")
-        assert caplog.text == ""
+        if should_warn:
+            assert warning_msg in caplog.text
+        else:
+            assert warning_msg not in caplog.text
 
 
 class TestSparkDatasetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_local.load()
 
@@ -529,7 +531,7 @@ class TestSparkDatasetVersionedLocal:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -544,7 +546,7 @@ class TestSparkDatasetVersionedLocal:
         versioned_local.save(sample_spark_df)
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -636,7 +638,7 @@ class TestSparkDatasetVersionedDBFS:
         pattern = "/tmp/file/*/file"
         expected = ["/dbfs/tmp/file/date1/file", "/dbfs/tmp/file/date2/file"]
 
-        result = _dbfs_glob(pattern, dbutils_mock)
+        result = dbfs_glob(pattern, dbutils_mock)
         assert result == expected
         dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
 
@@ -650,15 +652,15 @@ class TestSparkDatasetVersionedDBFS:
             FileInfo("/tmp/file/"),
         ]
 
-        assert _dbfs_exists(test_path, dbutils_mock)
+        assert dbfs_exists(test_path, dbutils_mock)
 
         # add side effect to test that non-existence is handled
         dbutils_mock.fs.ls.side_effect = Exception()
-        assert not _dbfs_exists(test_path, dbutils_mock)
+        assert not dbfs_exists(test_path, dbutils_mock)
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset.get_dbutils",
             return_value=None,
         )
 
@@ -669,7 +671,7 @@ class TestSparkDatasetVersionedDBFS:
 
     def test_ds_init_dbutils_available(self, mocker):
         get_dbutils_mock = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_dbutils",
+            "kedro_datasets.spark.spark_dataset.get_dbutils",
             return_value="mock",
         )
 
@@ -677,23 +679,23 @@ class TestSparkDatasetVersionedDBFS:
 
         get_dbutils_mock.assert_called_once()
         assert dataset._glob_function.__class__.__name__ == "partial"
-        assert dataset._glob_function.func.__name__ == "_dbfs_glob"
+        assert dataset._glob_function.func.__name__ == "dbfs_glob"
         assert dataset._glob_function.keywords == {
             "dbutils": get_dbutils_mock.return_value
         }
 
     def test_get_dbutils_from_globals(self, mocker):
         mocker.patch(
-            "kedro_datasets.spark.spark_dataset.globals",
+            "kedro_datasets._utils.databricks_utils.globals",
             return_value={"dbutils": "dbutils_from_globals"},
         )
-        assert _get_dbutils("spark") == "dbutils_from_globals"
+        assert get_dbutils("spark") == "dbutils_from_globals"
 
     def test_get_dbutils_from_pyspark(self, mocker):
         dbutils_mock = mocker.Mock()
         dbutils_mock.DBUtils.return_value = "dbutils_from_pyspark"
         mocker.patch.dict("sys.modules", {"pyspark.dbutils": dbutils_mock})
-        assert _get_dbutils("spark") == "dbutils_from_pyspark"
+        assert get_dbutils("spark") == "dbutils_from_pyspark"
         dbutils_mock.DBUtils.assert_called_once_with("spark")
 
     def test_get_dbutils_from_ipython(self, mocker):
@@ -702,13 +704,13 @@ class TestSparkDatasetVersionedDBFS:
             "dbutils": "dbutils_from_ipython"
         }
         mocker.patch.dict("sys.modules", {"IPython": ipython_mock})
-        assert _get_dbutils("spark") == "dbutils_from_ipython"
+        assert get_dbutils("spark") == "dbutils_from_ipython"
         ipython_mock.get_ipython.assert_called_once_with()
 
     def test_get_dbutils_no_modules(self, mocker):
         mocker.patch("kedro_datasets.spark.spark_dataset.globals", return_value={})
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
-        assert _get_dbutils("spark") is None
+        assert get_dbutils("spark") is None
 
     @pytest.mark.parametrize("os_name", ["nt", "posix"])
     def test_regular_path_in_different_os(self, os_name, mocker):
@@ -731,13 +733,13 @@ class TestSparkDatasetVersionedS3:
 
     @pytest.mark.xfail
     def test_no_version(self, versioned_dataset_s3):
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
         mocked_glob = mocker.patch.object(versioned_dataset_s3, "_glob_function")
         mocked_glob.return_value = [
@@ -762,7 +764,7 @@ class TestSparkDatasetVersionedS3:
             version=Version(ts, None),
         )
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
         ds_s3.load()
 
@@ -796,7 +798,7 @@ class TestSparkDatasetVersionedS3:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
@@ -810,7 +812,7 @@ class TestSparkDatasetVersionedS3:
         mocker.patch.object(versioned_dataset_s3, "_exists_function", return_value=True)
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -819,13 +821,13 @@ class TestSparkDatasetVersionedS3:
         mocked_spark_df.write.save.assert_not_called()
 
     def test_repr(self, versioned_dataset_s3, version):
-        assert "filepath=s3a://" in str(versioned_dataset_s3)
+        assert "filepath='s3a://" in str(versioned_dataset_s3)
         assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_dataset_s3
         )
 
         dataset_s3 = SparkDataset(filepath=f"s3a://{BUCKET_NAME}/{FILENAME}")
-        assert "filepath=s3a://" in str(dataset_s3)
+        assert "filepath='s3a://" in str(dataset_s3)
         assert "version=" not in str(dataset_s3)
 
 
@@ -838,7 +840,7 @@ class TestSparkDatasetVersionedHdfs:
 
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
-        pattern = r"Did not find any versions for SparkDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_hdfs.load()
 
@@ -857,7 +859,7 @@ class TestSparkDatasetVersionedHdfs:
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
 
         versioned_hdfs.load()
@@ -876,7 +878,7 @@ class TestSparkDatasetVersionedHdfs:
             filepath=f"hdfs://{HDFS_PREFIX}", version=Version(ts, None)
         )
         get_spark = mocker.patch(
-            "kedro_datasets.spark.spark_dataset._get_spark",
+            "kedro_datasets.spark.spark_dataset.get_spark",
         )
 
         versioned_hdfs.load()
@@ -922,7 +924,7 @@ class TestSparkDatasetVersionedHdfs:
 
         pattern = (
             rf"Save version '{exact_version.save}' did not match load version "
-            rf"'{exact_version.load}' for SparkDataset\(.+\)"
+            rf"'{exact_version.load}' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\)"
         )
 
         with pytest.warns(UserWarning, match=pattern):
@@ -943,7 +945,7 @@ class TestSparkDatasetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path '.+' for SparkDataset\(.+\) must not exist "
+            r"Save path '.+' for kedro_datasets.spark.spark_dataset.SparkDataset\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -965,13 +967,13 @@ class TestSparkDatasetVersionedHdfs:
 
     def test_repr(self, version):
         versioned_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
-        assert "filepath=hdfs://" in str(versioned_hdfs)
+        assert "filepath='hdfs://" in str(versioned_hdfs)
         assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_hdfs
         )
 
         dataset_hdfs = SparkDataset(filepath=f"hdfs://{HDFS_PREFIX}")
-        assert "filepath=hdfs://" in str(dataset_hdfs)
+        assert "filepath='hdfs://" in str(dataset_hdfs)
         assert "version=" not in str(dataset_hdfs)
 
 
@@ -991,8 +993,8 @@ def data_catalog(tmp_path):
 class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataset(load) -> node -> Spark (save)."""
-        pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        test_pipeline = pipeline([node(identity, "spark_in", "spark_out")])
+        SequentialRunner(is_async=is_async).run(test_pipeline, data_catalog)
 
         save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
@@ -1000,21 +1002,21 @@ class TestDataFlowSequentialRunner:
 
     def test_spark_pickle(self, is_async, data_catalog):
         """SparkDataset(load) -> node -> PickleDataset (save)"""
-        pipeline = modular_pipeline([node(identity, "spark_in", "pickle_ds")])
+        test_pipeline = pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialised due to.*"
         with pytest.raises(DatasetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+            SequentialRunner(is_async=is_async).run(test_pipeline, data_catalog)
 
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataset(load) -> node -> MemoryDataset (save and then load) ->
         node -> SparkDataset (save)"""
-        pipeline = modular_pipeline(
+        test_pipeline = pipeline(
             [
                 node(identity, "spark_in", "memory_ds"),
                 node(identity, "memory_ds", "spark_out"),
             ]
         )
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, data_catalog)
 
         save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))

@@ -5,11 +5,16 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
+# Ensure all matplotlib doctests use a headless backend in CI and Windows.
+# This prevents `_tkinter.TclError: Can't find a usable init.tcl` on headless runners.
+import matplotlib
+
+matplotlib.use("Agg")  # noqa: E402  # must come before pyplot import anywhere
+
 from collections.abc import Callable
 from unittest.mock import MagicMock
 
 import aiobotocore.awsrequest
-import aiobotocore.endpoint
 import aiohttp
 import aiohttp.client_reqrep
 import aiohttp.typedefs
@@ -36,6 +41,11 @@ class MockAWSResponse(aiobotocore.awsrequest.AioAWSResponse):
         self.status_code = response.status_code
         self.raw = MockHttpClientResponse(response)
 
+    @property
+    def headers(self) -> dict:
+        # This is accessed directly in some cases
+        return self._moto_response.headers
+
     # adapt async methods to use moto's response
     async def _content_prop(self) -> bytes:
         return self._moto_response.content
@@ -53,18 +63,25 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
         self.content = MagicMock(aiohttp.StreamReader)
         self.content.read = read
         self.response = response
+        self._headers = {
+            k.encode("utf-8"): str(v).encode("utf-8")
+            for k, v in self.response.headers.items()
+        }
+
+    @property
+    def headers(self) -> dict:
+        # This is required by aiobotocore during streaming
+        return self.response.headers
 
     @property
     def raw_headers(self) -> aiohttp.typedefs.RawHeaders:
-        # Return the headers encoded the way that aiobotocore expects them
-        return {
-            k.encode("utf-8"): str(v).encode("utf-8")
-            for k, v in self.response.headers.items()
-        }.items()
+        return self._headers.items()
 
 
 @fixture(scope="session", autouse=True)
 def patch_aiobotocore():
+    import aiobotocore.endpoint  # noqa: PLC0415
+
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
             http_response: botocore.awsrequest.AWSResponse,

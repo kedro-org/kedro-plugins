@@ -1,7 +1,19 @@
 # Upcoming Release
+* Update for Kedro 1.0.0 compatibility by using `pipeline.group_nodes_by()` for grouping by namespace or `None`, and applying the new `DataCatalog` API syntax.
+* Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 
 # Release 0.10.0
+* Fixed check whether a dataset is a `MemoryDataset`.
+* Added the option to group nodes by namespace.
+* The CLI option `--group-in-memory` was altered to `--group-by`, which can receive the values `memory` or `namespace`. Functionality for grouping by memory was not altered.
+
+# Release 0.9.2
 * Removed support for Python 3.8
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Felix Scherz](https://github.com/felixscherz)
 
 # Release 0.9.1
 * Added support to specify `--conf-source` which would point to the runtime configuration directory to be used for running the DAG in airflow. This configuration path is added to the generated DAG.

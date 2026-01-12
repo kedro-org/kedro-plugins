@@ -98,6 +98,7 @@ def excel_dataset(dummy_dataframe: pl.DataFrame, filepath_excel):
     return EagerPolarsDataset(
         filepath=filepath_excel.as_posix(),
         file_format="excel",
+        load_args={"engine": "xlsx2csv"},
     )
 
 
@@ -441,7 +442,7 @@ class TestEagerCSVDatasetVersioned:
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for EagerPolarsDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.polars.eager_polars_dataset.EagerPolarsDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_csv_dataset.load()
 
@@ -456,7 +457,7 @@ class TestEagerCSVDatasetVersioned:
         corresponding Generic (csv) file for a given save version already exists."""
         versioned_csv_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for EagerPolarsDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.polars.eager_polars_dataset.EagerPolarsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -475,7 +476,7 @@ class TestEagerCSVDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for EagerPolarsDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.polars.eager_polars_dataset.EagerPolarsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_dataset.save(dummy_dataframe)

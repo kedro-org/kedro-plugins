@@ -1,7 +1,27 @@
 # Upcoming release
 
 # Release 0.7.0
-* Removed support for Python 3.8
+* Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+* Update links on the telemetry message log to point to the correct documentation page.
+* Updated collection of command usage information to include which starter is used when creating a new project.
+* Update collection of project statistics to include what types of datasets are used in the project. This will not include dataset type name if a custom dataset is used.
+
+# Release 0.6.5
+* Disabled data collection for CI/CD environments running in `kedro-org` repositories to avoid capturing internal usage metrics.
+
+# Release 0.6.4
+* Updated logic to only show the message that Kedro is sending telemetry if the user hasn't explicitly granted permission.
+* Replaced dependency on `toml` with `tomli` (before Python 3.11) and `tomli-w`.
+
+# Release 0.6.3
+* Updated catalog API usage to comply with both new and old catalogs.
+
+# Release 0.6.2
+* Removed support for Python 3.8.
+* Added support for Python 3.13.
+
+## Thanks for supporting contributions
+* [Felix Scherz](https://github.com/felixscherz)
 
 # Release 0.6.1
 * Changed Kedro CLI loading method to improve loading times.
@@ -31,8 +51,8 @@
 * Updated the plugin to also share the tools selected during project creation with Heap.
 
 # Release 0.3.0
-* Added support for Python 3.11
-* Removed support for Python 3.7
+* Added support for Python 3.11.
+* Removed support for Python 3.7.
 
 # Release 0.2.5
 * Migrate all project metadata to static `pyproject.toml`.
@@ -81,7 +101,7 @@ A fix must go beyond just releasing a bugfix for `kedro-telemetry`. Additionally
 # Release 0.2.1
 
 ## Bug fixes and other changes
-* Removed explicit `PyYAML` requirement since it is already a dependency of `Kedro`
+* Removed explicit `PyYAML` requirement since it is already a dependency of `Kedro`.
 
 ## Bug fixes and other changes
 * `kedro telemetry` raising errors will no longer stop `kedro` running pipelines.
@@ -90,9 +110,9 @@ A fix must go beyond just releasing a bugfix for `kedro-telemetry`. Additionally
 # Release 0.2.0
 
 ## Bug fixes and other changes
-* Add compatibility with `kedro` 0.18.0
-* Add compatibility with Python 3.9 and 3.10
-* Remove compatibility with Python 3.6
+* Add compatibility with `kedro` 0.18.0.
+* Add compatibility with Python 3.9 and 3.10.
+* Remove compatibility with Python 3.6.
 
 # Release 0.1.4
 

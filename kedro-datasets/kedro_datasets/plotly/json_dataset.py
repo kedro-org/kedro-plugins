@@ -25,37 +25,36 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         scatter_plot:
           type: plotly.JSONDataset
           filepath: data/08_reporting/scatter_plot.json
           save_args:
             engine: auto
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.plotly import JSONDataset
         >>> import plotly.express as px
+        >>> from kedro_datasets.plotly import JSONDataset
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        >>>
         >>> dataset = JSONDataset(filepath=tmp_path / "test.json")
         >>> dataset.save(fig)
         >>> reloaded = dataset.load()
         >>> assert fig == reloaded
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
-    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w", "encoding": "utf-8"}
+    }
 
     def __init__(  # noqa: PLR0913
         self,

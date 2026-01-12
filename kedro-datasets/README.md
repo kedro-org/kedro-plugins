@@ -3,7 +3,7 @@
 <!-- Note that the contents of this file are also used in the documentation, see docs/source/index.md -->
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md)
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro-datasets/)
+[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/kedro-datasets/)
 [![PyPI Version](https://badge.fury.io/py/kedro-datasets.svg)](https://pypi.org/project/kedro-datasets/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 
@@ -49,7 +49,7 @@ These data connectors are supported with the APIs of `pandas`, `spark`, `network
 
 [The Data Catalog](https://docs.kedro.org/en/stable/data/data_catalog.html) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
 
-Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/api/kedro_datasets.html).
+Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets.html).
 
 ## How can I create my own `AbstractDataset` implementation?
 Take a look at our [instructions on how to create your own `AbstractDataset` implementation](https://docs.kedro.org/en/stable/data/how_to_create_a_custom_dataset.html).

@@ -77,7 +77,7 @@ def _get_docker_ipython_output(context):
         return context.ipython_stdout
 
     try:
-        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=128)
+        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=256)
     finally:
         kill_docker_containers(context.project_name)
 
@@ -144,6 +144,8 @@ def create_project_from_config_file(context, starter_name):
         cwd=str(context.temp_dir),
     )
 
+    assert res.returncode == 0
+
     # add a consent file to prevent telemetry from prompting for input during e2e test
     telemetry_file = context.root_project_dir / ".telemetry"
     telemetry_file.write_text("consent: false", encoding="utf-8")
@@ -177,8 +179,6 @@ def create_project_from_config_file(context, starter_name):
         """
         )
     )
-
-    assert res.returncode == 0
 
 
 @given('I have executed the kedro command "{command}"')

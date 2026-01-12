@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -24,130 +23,23 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
+from kedro_datasets._utils.databricks_utils import (
+    dbfs_exists,
+    dbfs_glob,
+    deployed_on_databricks,
+    get_dbutils,
+    parse_glob_pattern,
+    split_filepath,
+    strip_dbfs_prefix,
+)
+from kedro_datasets._utils.spark_utils import get_spark
+
 logger = logging.getLogger(__name__)
-
-
-def _get_spark() -> Any:
-    """
-    Returns the SparkSession. In case databricks-connect is available we use it for
-    extended configuration mechanisms and notebook compatibility,
-    otherwise we use classic pyspark.
-    """
-    try:
-        # When using databricks-connect >= 13.0.0 (a.k.a databricks-connect-v2)
-        # the remote session is instantiated using the databricks module
-        # If the databricks-connect module is installed, we use a remote session
-        from databricks.connect import DatabricksSession
-
-        # We can't test this as there's no Databricks test env available
-        spark = DatabricksSession.builder.getOrCreate()  # pragma: no cover
-
-    except ImportError:
-        # For "normal" spark sessions that don't use databricks-connect
-        # we get spark normally
-        spark = SparkSession.builder.getOrCreate()
-
-    return spark
-
-
-def _parse_glob_pattern(pattern: str) -> str:
-    special = ("*", "?", "[")
-    clean = []
-    for part in pattern.split("/"):
-        if any(char in part for char in special):
-            break
-        clean.append(part)
-    return "/".join(clean)
-
-
-def _split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
-    split_ = str(filepath).split("://", 1)
-    if len(split_) == 2:  # noqa: PLR2004
-        return split_[0] + "://", split_[1]
-    return "", split_[0]
-
-
-def _strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
-    return path[len(prefix) :] if path.startswith(prefix) else path
-
-
-def _dbfs_glob(pattern: str, dbutils: Any) -> list[str]:
-    """Perform a custom glob search in DBFS using the provided pattern.
-    It is assumed that version paths are managed by Kedro only.
-
-    Args:
-        pattern: Glob pattern to search for.
-        dbutils: dbutils instance to operate with DBFS.
-
-    Returns:
-            List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
-    """
-    pattern = _strip_dbfs_prefix(pattern)
-    prefix = _parse_glob_pattern(pattern)
-    matched = set()
-    filename = pattern.split("/")[-1]
-
-    for file_info in dbutils.fs.ls(prefix):
-        if file_info.isDir():
-            path = str(
-                PurePosixPath(_strip_dbfs_prefix(file_info.path, "dbfs:")) / filename
-            )
-            if fnmatch(path, pattern):
-                path = "/dbfs" + path
-                matched.add(path)
-    return sorted(matched)
-
-
-def _get_dbutils(spark: SparkSession) -> Any:
-    """Get the instance of 'dbutils' or None if the one could not be found."""
-    dbutils = globals().get("dbutils")
-    if dbutils:
-        return dbutils
-
-    try:
-        from pyspark.dbutils import DBUtils
-
-        dbutils = DBUtils(spark)
-    except ImportError:
-        try:
-            import IPython
-        except ImportError:
-            pass
-        else:
-            ipython = IPython.get_ipython()
-            dbutils = ipython.user_ns.get("dbutils") if ipython else None
-
-    return dbutils
-
-
-def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
-    """Perform an `ls` list operation in DBFS using the provided pattern.
-    It is assumed that version paths are managed by Kedro.
-    Broad `Exception` is present due to `dbutils.fs.ExecutionError` that
-    cannot be imported directly.
-    Args:
-        pattern: Filepath to search for.
-        dbutils: dbutils instance to operate with DBFS.
-    Returns:
-        Boolean value if filepath exists.
-    """
-    pattern = _strip_dbfs_prefix(pattern)
-    file = _parse_glob_pattern(pattern)
-    try:
-        dbutils.fs.ls(file)
-        return True
-    except Exception:
-        return False
-
-
-def _deployed_on_databricks() -> bool:
-    """Check if running on Databricks."""
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -174,7 +66,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         Returns:
             List of HDFS paths that satisfy the glob pattern.
         """
-        prefix = _parse_glob_pattern(pattern) or "/"
+        prefix = parse_glob_pattern(pattern) or "/"
         matched = set()
         try:
             for dpath, _, fnames in self.walk(prefix):
@@ -195,12 +87,10 @@ class KedroHdfsInsecureClient(InsecureClient):
 class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     """``SparkDataset`` loads and saves Spark dataframes.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         weather:
           type: spark.SparkDataset
           filepath: s3a://your_bucket/data/01_raw/weather/*
@@ -228,31 +118,25 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
           type: spark.SparkDataset
           filepath: data/02_intermediate/data.parquet
           file_format: parquet
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
+        >>> from kedro_datasets.spark import SparkDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-        >>>
-        >>> from kedro_datasets.spark import SparkDataset
         >>>
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
-        >>>
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> dataset = SparkDataset(filepath=tmp_path / "test_data")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
-        >>>
         >>> assert Row(name="Bob", age=12) in reloaded.take(4)
+
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -308,19 +192,19 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         credentials = deepcopy(credentials) or {}
-        fs_prefix, filepath = _split_filepath(filepath)
+        fs_prefix, filepath = split_filepath(filepath)
         path = PurePosixPath(filepath)
         exists_function = None
         glob_function = None
         self.metadata = metadata
 
         if (
-            not filepath.startswith("/dbfs/")
+            not (filepath.startswith("/dbfs") or filepath.startswith("/Volumes"))
             and fs_prefix not in (protocol + "://" for protocol in CLOUD_PROTOCOLS)
-            and _deployed_on_databricks()
+            and deployed_on_databricks()
         ):
             logger.warning(
-                "Using SparkDataset on Databricks without the `/dbfs/` prefix in the "
+                "Using SparkDataset on Databricks without the `/dbfs/` or `/Volumes` prefix in the "
                 "filepath is a known source of error. You must add this prefix to %s",
                 filepath,
             )
@@ -349,10 +233,10 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         elif filepath.startswith("/dbfs/"):
             # dbfs add prefix to Spark path by default
             # See https://github.com/kedro-org/kedro-plugins/issues/117
-            dbutils = _get_dbutils(_get_spark())
+            dbutils = get_dbutils(get_spark())
             if dbutils:
-                glob_function = partial(_dbfs_glob, dbutils=dbutils)
-                exists_function = partial(_dbfs_exists, dbutils=dbutils)
+                glob_function = partial(dbfs_glob, dbutils=dbutils)
+                exists_function = partial(dbfs_exists, dbutils=dbutils)
         else:
             filesystem = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
             exists_function = filesystem.exists
@@ -414,8 +298,8 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         }
 
     def load(self) -> DataFrame:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
-        read_obj = _get_spark().read
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
+        read_obj = get_spark().read
 
         # Pass schema if defined
         if self._schema:
@@ -424,14 +308,14 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         return read_obj.load(load_path, self._file_format, **self._load_args)
 
     def save(self, data: DataFrame) -> None:
-        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
+        save_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
         data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
-        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
+        load_path = strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
-            _get_spark().read.load(load_path, self._file_format)
+            get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
             # `AnalysisException.desc` is deprecated with pyspark >= 3.4
             message = exception.desc if hasattr(exception, "desc") else str(exception)

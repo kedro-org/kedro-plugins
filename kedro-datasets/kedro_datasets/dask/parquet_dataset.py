@@ -1,5 +1,6 @@
 """``ParquetDataset`` is a dataset used to load and save data to parquet files using Dask
 dataframe"""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -14,13 +15,12 @@ from kedro.io.core import AbstractDataset, get_protocol_and_path
 class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     """``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
-    https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
+    https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: dask.ParquetDataset
           filepath: s3://bucket_name/path/to/folder
@@ -30,17 +30,14 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             client_kwargs:
               aws_access_key_id: YOUR_KEY
               aws_secret_access_key: YOUR_SECRET
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import dask.dataframe as dd
         >>> import pandas as pd
-        >>> from kedro_datasets.dask import ParquetDataset
         >>> import numpy as np
+        >>> from kedro_datasets.dask import ParquetDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [6, 7]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
@@ -50,18 +47,14 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         ... )
         >>> dataset.save(ddf)
         >>> reloaded = dataset.load()
-        >>>
         >>> assert np.array_equal(ddf.compute(), reloaded.compute())
 
-    The output schema can also be explicitly specified using
-    `Triad <https://triad.readthedocs.io/en/latest/api/\
-    triad.collections.html#module-triad.collections.schema>`_.
-    This is processed to map specific columns to
-    `PyArrow field types <https://arrow.apache.org/docs/python/api/\
-    datatypes.html>`_ or schema. For instance:
+        The output schema can also be explicitly specified using
+        [Triad](https://triad.readthedocs.io/en/latest/api/triad.collections.html#module-triad.collections.schema).
+        This is processed to map specific columns to
+        [PyArrow field types](https://arrow.apache.org/docs/python/api/datatypes.html) or schema. For instance:
 
-    .. code-block:: yaml
-
+        ```yaml
         parquet_dataset:
           type: dask.ParquetDataset
           filepath: "s3://bucket_name/path/to/folder"
@@ -75,6 +68,8 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
               col1: [int32]
               col2: [int32]
               col3: [[int32]]
+        ```
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -97,19 +92,19 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             filepath: Filepath in POSIX format to a parquet file
                 parquet collection or the directory of a multipart parquet.
             load_args: Additional loading options `dask.dataframe.read_parquet`:
-                https://docs.dask.org/en/latest/generated/dask.dataframe.read_parquet.html
+                https://docs.dask.org/en/stable/generated/dask.dataframe.read_parquet.html
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
-                https://docs.dask.org/en/latest/generated/dask.dataframe.to_parquet.html
+                https://docs.dask.org/en/stable/generated/dask.dataframe.to_parquet.html
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
-                https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html#optional-parameters
+                https://docs.dask.org/en/stable/how-to/connect-to-remote-data.html#optional-parameters
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._filepath = filepath
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         self.metadata = metadata
 

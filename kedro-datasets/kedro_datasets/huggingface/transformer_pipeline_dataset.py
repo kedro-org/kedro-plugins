@@ -11,29 +11,29 @@ class HFTransformerPipelineDataset(AbstractDataset):
     """``HFTransformerPipelineDataset`` loads pretrained Hugging Face transformers
     using the `transformers <https://pypi.org/project/transformers>`_ library.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
+        ```yaml
+        summarizer_model:
+          type: huggingface.HFTransformerPipelineDataset
+          task: summarization
 
-       summarizer_model:
-         type: huggingface.HFTransformerPipelineDataset
-         task: summarization
+        fill_mask_model:
+          type: huggingface.HFTransformerPipelineDataset
+          task: fill-mask
+          model_name: Twitter/twhin-bert-base
+        ```
 
-       fill_mask_model:
-         type: huggingface.HFTransformerPipelineDataset
-         task: fill-mask
-         model_name: Twitter/twhin-bert-base
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    Example usage for the :doc:`Python API <kedro:data/advanced_data_catalog_usage>`:
-
-    .. code-block:: pycon
-
-       >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
-       >>> dataset = HFTransformerPipelineDataset(
-       ...     task="text-classification", model_name="prajjwal1/bert-tiny"
-       ... )
-       >>> model = dataset.load()
-       >>> assert model("Hello world")[0]["label"].startswith("LABEL_")
+        >>> from kedro_datasets.huggingface import HFTransformerPipelineDataset
+        >>>
+        >>> dataset = HFTransformerPipelineDataset(
+        ...     task="text-classification", model_name="prajjwal1/bert-tiny"
+        ... )
+        >>> model = dataset.load()
+        >>> assert model("Hello world")[0]["label"].startswith("LABEL_")
 
     """
 

@@ -6,6 +6,7 @@ from google.cloud.exceptions import NotFound
 from kedro.io.core import DatasetError
 from pandas.testing import assert_frame_equal
 
+from kedro_datasets._utils import ConnectionMixin
 from kedro_datasets.pandas import GBQQueryDataset, GBQTableDataset
 
 DATASET = "dataset"
@@ -94,7 +95,7 @@ class TestGBQDataset:
 
     def test_load_missing_file(self, gbq_dataset, mocker):
         """Check the error when trying to load missing table."""
-        pattern = r"Failed while loading data from dataset GBQTableDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.gbq_dataset.GBQTableDataset\(.*\)"
         mocked_read_gbq = mocker.patch(
             "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
         )
@@ -141,6 +142,7 @@ class TestGBQDataset:
         )
         mocked_read_gbq.return_value = dummy_dataframe
         mocked_df = mocker.Mock()
+        gbq_dataset._connection._credentials = None
 
         gbq_dataset.save(mocked_df)
         loaded_data = gbq_dataset.load()
@@ -190,11 +192,12 @@ class TestGBQDataset:
         with pytest.raises(DatasetError, match=pattern):
             GBQTableDataset(dataset=dataset, table_name=table_name)
 
-    def test_credentials_propagation(self, mocker):
+    # NOTE: tests for json and filepath are not DRY, keeping them separate for clarity
+    def test_credentials_propagation_json(self, mocker):
         credentials = {"token": "my_token"}
         credentials_obj = "credentials"
         mocked_credentials = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.Credentials",
+            "kedro_datasets.pandas.gbq_dataset.ServiceAccountCredentials.from_service_account_info",
             return_value=credentials_obj,
         )
         mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
@@ -205,12 +208,40 @@ class TestGBQDataset:
             credentials=credentials,
             project=PROJECT,
         )
+        dataset.exists()  # Do something to trigger the client creation.
 
-        assert dataset._credentials == credentials_obj
-        mocked_credentials.assert_called_once_with(**credentials)
+        mocked_credentials.assert_called_once_with(credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
         )
+
+        # Clear connections
+        ConnectionMixin._connections = {}
+
+    def test_credentials_propagation_filepath(self, mocker):
+        credentials = "path/to/credentials.json"
+        credentials_obj = "credentials"
+        mocked_credentials = mocker.patch(
+            "kedro_datasets.pandas.gbq_dataset.ServiceAccountCredentials.from_service_account_file",
+            return_value=credentials_obj,
+        )
+        mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
+
+        dataset = GBQTableDataset(
+            dataset=DATASET,
+            table_name=TABLE_NAME,
+            credentials=credentials,
+            project=PROJECT,
+        )
+        dataset.exists()  # Do something to trigger the client creation.
+
+        mocked_credentials.assert_called_once_with(credentials)
+        mocked_bigquery.Client.assert_called_once_with(
+            project=PROJECT, credentials=credentials_obj, location=None
+        )
+
+        # Clear connections
+        ConnectionMixin._connections = {}
 
 
 class TestGBQQueryDataset:
@@ -231,26 +262,42 @@ class TestGBQQueryDataset:
         for key, value in load_args.items():
             assert gbq_sql_dataset._load_args[key] == value
 
-    def test_credentials_propagation(self, mocker):
+    # NOTE: tests for json and filepath are not DRY, keeping them separate for clarity
+    def test_credentials_propagation_json(self, mocker):
         credentials = {"token": "my_token"}
         credentials_obj = "credentials"
         mocked_credentials = mocker.patch(
-            "kedro_datasets.pandas.gbq_dataset.Credentials",
+            "kedro_datasets.pandas.gbq_dataset.ServiceAccountCredentials.from_service_account_info",
             return_value=credentials_obj,
         )
-        mocked_bigquery = mocker.patch("kedro_datasets.pandas.gbq_dataset.bigquery")
 
         dataset = GBQQueryDataset(
             sql=SQL_QUERY,
             credentials=credentials,
             project=PROJECT,
         )
+        dataset.exists()  # Do something to trigger the client creation.
 
         assert dataset._credentials == credentials_obj
-        mocked_credentials.assert_called_once_with(**credentials)
-        mocked_bigquery.Client.assert_called_once_with(
-            project=PROJECT, credentials=credentials_obj, location=None
+        mocked_credentials.assert_called_once_with(credentials)
+
+    def test_credentials_propagation_filepath(self, mocker):
+        credentials = "path/to/credentials.json"
+        credentials_obj = "credentials"
+        mocked_credentials = mocker.patch(
+            "kedro_datasets.pandas.gbq_dataset.ServiceAccountCredentials.from_service_account_file",
+            return_value=credentials_obj,
         )
+
+        dataset = GBQQueryDataset(
+            sql=SQL_QUERY,
+            credentials=credentials,
+            project=PROJECT,
+        )
+        dataset.exists()  # Do something to trigger the client creation.
+
+        assert dataset._credentials == credentials_obj
+        mocked_credentials.assert_called_once_with(credentials)
 
     def test_load(self, mocker, gbq_sql_dataset, dummy_dataframe):
         """Test `load` method invocation"""
@@ -292,7 +339,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation"""
         str_repr = str(gbq_sql_dataset)
         assert (
-            f"GBQQueryDataset(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='{SQL_QUERY}', filepath='None', load_args='{{}}')"
             in str_repr
         )
         assert sql_file not in str_repr
@@ -301,7 +348,7 @@ class TestGBQQueryDataset:
         """Test the dataset instance string representation with filepath arg."""
         str_repr = str(gbq_sql_file_dataset)
         assert (
-            f"GBQQueryDataset(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            f"kedro_datasets.pandas.gbq_dataset.GBQQueryDataset(sql='None', filepath='{str(sql_file)}', load_args='{{}}')"
             in str_repr
         )
         assert SQL_QUERY not in str_repr

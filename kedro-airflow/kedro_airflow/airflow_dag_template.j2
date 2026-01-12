@@ -65,18 +65,21 @@ with DAG(
     )
 ) as dag:
     tasks = {
-    {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
-            task_id="{{ node_name | safe | slugify  }}",
+    {%- for group in node_objs %}
+        "{{ group.name | slugify }}": KedroOperator(
+            task_id="{{ group.name | slugify }}",
             package_name=package_name,
             pipeline_name=pipeline_name,
-            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
+            node_name={% if group.nodes | length > 1 %}[{% endif %}{% for node in group.nodes %}"{{ node }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if group.nodes | length > 1 %}]{% endif %},
             project_path=project_path,
             env=env,
             conf_source=conf_source,
-        ),
-{% endfor %}    }
+        ){% if not loop.last %},{% endif %}
+    {%- endfor %}
+    }
 
-    {% for parent_node, child_nodes in dependencies.items() -%}
-    {% for child in child_nodes %}    tasks["{{ parent_node | safe | slugify }}"] >> tasks["{{ child | safe | slugify }}"]
-    {% endfor %}
+    {%- for group in node_objs %}
+    {%- for dep in group.dependencies %}
+    tasks["{{ dep | slugify }}"] >> tasks["{{ group.name | slugify }}"]
+    {%- endfor %}
     {%- endfor %}

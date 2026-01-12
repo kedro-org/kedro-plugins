@@ -1,27 +1,44 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
-import warnings
+import sys
 from copy import deepcopy
+from enum import auto
 from typing import TYPE_CHECKING, Any, ClassVar
+from warnings import warn
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum  # pragma: no cover
+else:
+    from backports.strenum import StrEnum  # pragma: no cover
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError
 
 from kedro_datasets import KedroDeprecationWarning
+from kedro_datasets._utils import ConnectionMixin
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
 
 
-class TableDataset(AbstractDataset[ir.Table, ir.Table]):
+class SaveMode(StrEnum):
+    """`SaveMode` is used to specify the expected behavior of saving a table."""
+
+    APPEND = auto()
+    OVERWRITE = auto()
+    ERROR = auto()
+    ERRORIFEXISTS = auto()
+    IGNORE = auto()
+
+
+class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
     """``TableDataset`` loads/saves data from/to Ibis table expressions.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: ibis.TableDataset
           table_name: cars
@@ -30,6 +47,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
             database: company.db
           save_args:
             materialized: table
+            mode: append
 
         motorbikes:
           type: ibis.TableDataset
@@ -37,12 +55,12 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
           connection:
             backend: duckdb
             database: company.db
+          save_args:
+            materialized: view
+            mode: overwrite
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import ibis
         >>> from kedro_datasets.ibis import TableDataset
@@ -67,23 +85,23 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {
         "materialized": "view",
-        "overwrite": True,
+        "mode": "overwrite",
     }
 
-    _connections: ClassVar[dict[tuple[tuple[str, str]], BaseBackend]] = {}
+    _CONNECTION_GROUP: ClassVar[str] = "ibis"
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
-        file_format: str | None = None,
-        table_name: str | None = None,
+        table_name: str,
+        database: str | None = None,
         connection: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new ``TableDataset`` pointing to a table (or file).
+        """Creates a new ``TableDataset`` pointing to a table.
 
         ``TableDataset`` connects to the Ibis backend object constructed
         from the connection configuration. The `backend` key provided in
@@ -93,8 +111,7 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
         `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
         #ibis.duckdb.connect>`_).
 
-        If ``table_name`` is given (and ``filepath`` isn't), the dataset
-        establishes a connection to the relevant table for the execution
+        The dataset establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute
         is deferred until materialization, when the expression is saved.
         In practice, this happens when another ``TableDataset`` instance
@@ -102,101 +119,127 @@ class TableDataset(AbstractDataset[ir.Table, ir.Table]):
 
         Args:
             table_name: The name of the table or view to read or create.
+            database: The name of the database to read the table or view
+                from or create the table or view in. If not passed, then
+                the current database is used. Provide a tuple of strings
+                (e.g. `("catalog", "database")`) or a dotted string path
+                (e.g. `"catalog.database"`) to reference a table or view
+                in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            credentials: Connection information (e.g.
+                user, password, token, account). If provided, these values
+                override the base `connection` configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using
                 a different materialization strategy, supply a value for
-                `materialized` in `save_args`.
+                `materialized` in `save_args`. The `mode` parameter controls
+                the behavior when saving data:
+                - _"overwrite"_: Overwrite existing data in the table.
+                - _"append"_: Append contents of the new data to the existing table (does not overwrite).
+                - _"error"_ or _"errorifexists"_: Throw an exception if the table already exists.
+                - _"ignore"_: Silently ignore the operation if the table already exists.
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
-        if filepath is None and table_name is None:
-            raise DatasetError(
-                "Must provide at least one of `filepath` or `table_name`."
-            )
 
-        if filepath is not None or file_format is not None:
-            warnings.warn(
-                "Use 'FileDataset' to load and save files with an Ibis "
-                "backend; the functionality will be removed from 'Table"
-                "Dataset' in Kedro-Datasets 6.0.0",
-                KedroDeprecationWarning,
-                stacklevel=2,
-            )
-
-        self._filepath = filepath
-        self._file_format = file_format
         self._table_name = table_name
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        self._database = database
+        _connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        _credentials = deepcopy(credentials) or {}
+        self._connection_config = {**_connection_config, **_credentials}
         self.metadata = metadata
 
         # Set load and save arguments, overwriting defaults if provided.
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+        if database is not None:
+            self._load_args["database"] = database
 
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+        if database is not None:
+            self._save_args["database"] = database
 
         self._materialized = self._save_args.pop("materialized")
+
+        # Handle mode/overwrite conflict.
+        if save_args and "mode" in save_args and "overwrite" in self._save_args:
+            raise ValueError("Cannot specify both 'mode' and deprecated 'overwrite'.")
+
+        # Map legacy overwrite if present.
+        if "overwrite" in self._save_args:
+            warn(
+                "'overwrite' is deprecated and will be removed in a future release. "
+                "Please use 'mode' instead.",
+                KedroDeprecationWarning,
+                stacklevel=2,
+            )
+            legacy = self._save_args.pop("overwrite")
+            # Remove any lingering 'mode' key from defaults to avoid
+            # leaking into writer kwargs.
+            del self._save_args["mode"]
+            mode = "overwrite" if legacy else "error"
+        else:
+            mode = self._save_args.pop("mode")
+
+        self._mode = SaveMode(mode)
+
+    def _connect(self) -> BaseBackend:
+        import ibis  # noqa: PLC0415
+
+        config = deepcopy(self._connection_config)
+        backend = getattr(ibis, config.pop("backend"))
+        return backend.connect(**config)
 
     @property
     def connection(self) -> BaseBackend:
         """The ``Backend`` instance for the connection configuration."""
-
-        def hashable(value):
-            """Return a hashable key for a potentially-nested object."""
-            if isinstance(value, dict):
-                return tuple((k, hashable(v)) for k, v in sorted(value.items()))
-            if isinstance(value, list):
-                return tuple(hashable(x) for x in value)
-            return value
-
-        cls = type(self)
-        key = hashable(self._connection_config)
-        if key not in cls._connections:
-            import ibis
-
-            config = deepcopy(self._connection_config)
-            backend = getattr(ibis, config.pop("backend"))
-            cls._connections[key] = backend.connect(**config)
-
-        return cls._connections[key]
+        return self._connection
 
     def load(self) -> ir.Table:
-        if self._filepath is not None:
-            if self._file_format is None:
-                raise NotImplementedError
-
-            reader = getattr(self.connection, f"read_{self._file_format}")
-            return reader(self._filepath, self._table_name, **self._load_args)
-        else:
-            return self.connection.table(self._table_name)
+        return self.connection.table(self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
-        if self._table_name is None:
-            raise DatasetError("Must provide `table_name` for materialization.")
-
         writer = getattr(self.connection, f"create_{self._materialized}")
-        writer(self._table_name, data, **self._save_args)
+        if self._mode == "append":
+            if not self._exists():
+                writer(self._table_name, data, overwrite=False, **self._save_args)
+            elif hasattr(self.connection, "insert"):
+                self.connection.insert(self._table_name, data, **self._save_args)
+            else:
+                raise DatasetError(
+                    f"The {self.connection.name} backend for Ibis does not support inserts."
+                )
+        elif self._mode == "overwrite":
+            writer(self._table_name, data, overwrite=True, **self._save_args)
+        elif self._mode in {"error", "errorifexists"}:
+            writer(self._table_name, data, overwrite=False, **self._save_args)
+        elif self._mode == "ignore" and not self._exists():
+            writer(self._table_name, data, overwrite=False, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
+        load_args = deepcopy(self._load_args)
+        save_args = deepcopy(self._save_args)
+        load_args.pop("database", None)
+        save_args.pop("database", None)
         return {
-            "filepath": self._filepath,
-            "file_format": self._file_format,
             "table_name": self._table_name,
+            "database": self._database,
             "backend": self._connection_config["backend"],
-            "load_args": self._load_args,
-            "save_args": self._save_args,
+            "load_args": load_args,
+            "save_args": save_args,
             "materialized": self._materialized,
+            "mode": self._mode,
         }
 
     def _exists(self) -> bool:
         return (
-            self._table_name is not None and self._table_name in self.connection.tables
+            self._table_name is not None
+            and self._table_name in self.connection.list_tables(database=self._database)
         )

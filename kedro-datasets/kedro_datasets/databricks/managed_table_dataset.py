@@ -33,11 +33,10 @@ class ManagedTableDataset(BaseTableDataset):
     dataset to function properly. Follow the instructions in that starter to
     setup your project for this dataset.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         names_and_ages@spark:
           type: databricks.ManagedTableDataset
           table: names_and_ages
@@ -46,26 +45,30 @@ class ManagedTableDataset(BaseTableDataset):
           type: databricks.ManagedTableDataset
           table: names_and_ages
           dataframe_type: pandas
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
+        >>> import importlib.metadata
+        >>>
         >>> from kedro_datasets.databricks import ManagedTableDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import IntegerType, Row, StringType, StructField, StructType
-        >>> import importlib_metadata
         >>>
-        >>> DELTA_VERSION = importlib_metadata.version("delta-spark")
+        >>> DELTA_VERSION = importlib.metadata.version("delta-spark")
+        >>> major_version = int(DELTA_VERSION.split('.')[0])
+        >>> delta_package = (
+        ...     f"io.delta:delta-spark_2.13:{DELTA_VERSION}"
+        ...     if major_version >= 4
+        ...     else f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        ... )
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
         >>> spark_df = (
         ...     SparkSession.builder.config(
-        ...         "spark.jars.packages", f"io.delta:delta-core_2.12:{DELTA_VERSION}"
+        ...         "spark.jars.packages", delta_package
         ...     )
         ...     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         ...     .config(
@@ -75,10 +78,12 @@ class ManagedTableDataset(BaseTableDataset):
         ...     .getOrCreate()
         ...     .createDataFrame(data, schema)
         ... )
+        >>>
         >>> dataset = ManagedTableDataset(table="names_and_ages", write_mode="overwrite")
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
-        >>> assert Row(name="Bob", age=12) in reloaded.take(4)
+
+
     """
 
     def __init__(  # noqa: PLR0913

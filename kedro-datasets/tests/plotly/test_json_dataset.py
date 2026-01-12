@@ -40,7 +40,7 @@ class TestJSONDataset:
         reloaded = json_dataset.load()
         assert dummy_plot == reloaded
         assert json_dataset._fs_open_args_load == {}
-        assert json_dataset._fs_open_args_save == {"mode": "w"}
+        assert json_dataset._fs_open_args_save == {"mode": "w", "encoding": "utf-8"}
 
     def test_exists(self, json_dataset, dummy_plot):
         """Test `exists` method invocation for both existing and
@@ -51,7 +51,7 @@ class TestJSONDataset:
 
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset JSONDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.plotly.json_dataset.JSONDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             json_dataset.load()
 

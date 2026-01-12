@@ -29,8 +29,14 @@ from kedro_airflow.plugin import commands
         # All the datasets are MemoryDataset(), so we have only one joined node without dependencies
         (
             "__default__",
-            ["airflow", "create", "--group-in-memory"],
+            ["airflow", "create", "--group-by", "memory"],
             'task_id="node0-node1-node2-node3-node4",',
+        ),
+        # As the example pipeline is not namespaced, each node is treated as a separate task.
+        (
+            "__default__",
+            ["airflow", "create", "--group-by", "namespace"],
+            'task_id="node0",',
         ),
     ],
 )
@@ -251,10 +257,11 @@ def test_custom_template_nonexistent(cli_runner, metadata):
     template_name = "non_existent_custom_template.j2"
     command = ["airflow", "create", "-j", template_name]
     result = cli_runner.invoke(commands, command, obj=metadata)
+
     assert result.exit_code == 2
     assert (
         f"Error: Invalid value for '-j' / '--jinja-file': File '{template_name}' does not exist."
-        in result.stdout
+        in result.stderr
     )
 
 
@@ -371,10 +378,11 @@ def test_create_airflow_all_dags(cli_runner, metadata):
 def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     command = ["airflow", "create", "--all", "-p", "ds"]
     result = cli_runner.invoke(commands, command, obj=metadata)
+
     assert result.exit_code == 2
     assert (
         "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
-        in result.stdout
+        in result.stderr
     )
 
 
@@ -391,3 +399,22 @@ def test_create_airflow_conf_source(cli_runner, metadata):
         dag_code = [line.strip() for line in f.read().splitlines()]
         assert expected_airflow_dag in dag_code
     dag_file.unlink()
+
+
+@pytest.mark.parametrize("value", ["memory", "MEMORY", "namespace", "NaMeSpAcE"])
+def test_group_by_valid_commands(cli_runner, metadata, value):
+    command = ["airflow", "create", "--group-by", value]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0
+
+
+def test_group_by_invalid_value(cli_runner, metadata):
+    command = ["airflow", "create", "--group-by", "asdasdasd"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 2
+    assert (
+        "Error: Invalid value for '-g' / '--group-by': 'asdasdasd' is not one of 'memory', 'namespace'."
+        in result.stderr
+    )

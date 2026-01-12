@@ -11,7 +11,7 @@ from kedro.io.core import AbstractDataset, DatasetError
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro_datasets.spark.spark_dataset import _get_spark
+from kedro_datasets._utils.spark_utils import get_spark
 
 
 class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
@@ -28,35 +28,27 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
       to external changes to the target table while executing. Upsert methodology works by
       leveraging Spark DataFrame execution plan checkpointing.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         hive_dataset:
           type: spark.SparkHiveDataset
           database: hive_database
           table: table_name
           write_mode: overwrite
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
+        >>> from kedro_datasets.spark import SparkHiveDataset
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import StructField, StringType, IntegerType, StructType
-        >>>
-        >>> from kedro_datasets.spark import SparkHiveDataset
         >>>
         >>> schema = StructType(
         ...     [StructField("name", StringType(), True), StructField("age", IntegerType(), True)]
         ... )
-        >>>
         >>> data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
-        >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> dataset = SparkHiveDataset(
@@ -64,8 +56,8 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         ... )
         >>> dataset.save(spark_df)
         >>> reloaded = dataset.load()
-        >>>
         >>> reloaded.take(4)
+
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
@@ -149,7 +141,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         )
 
     def load(self) -> DataFrame:
-        return _get_spark().read.table(self._full_table_address)
+        return get_spark().read.table(self._full_table_address)
 
     def save(self, data: DataFrame) -> None:
         self._validate_save(data)
@@ -201,7 +193,7 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
 
     def _exists(self) -> bool:
         return (
-            _get_spark()
+            get_spark()
             ._jsparkSession.catalog()
             .tableExists(self._database, self._table)
         )

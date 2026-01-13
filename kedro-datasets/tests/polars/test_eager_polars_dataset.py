@@ -1,7 +1,7 @@
+import inspect
 from pathlib import Path, PurePosixPath
 from time import sleep
 
-import inspect
 import pandas as pd
 import polars as pl
 import pytest

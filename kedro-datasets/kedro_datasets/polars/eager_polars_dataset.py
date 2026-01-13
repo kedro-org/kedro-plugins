@@ -21,6 +21,7 @@ from kedro.io.core import (
 
 from kedro_datasets._typing import TablePreview
 
+
 class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """``polars.EagerPolarsDataset`` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the

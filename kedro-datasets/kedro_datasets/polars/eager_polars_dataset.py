@@ -19,6 +19,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
 
 class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """``polars.EagerPolarsDataset`` loads/saves data from/to a data file using an underlying
@@ -202,3 +203,24 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        data = dataset_copy.load()
+        data_dict = data.to_dict(as_series=False)
+        preview_dict = {
+            "index": list(range(len(data_dict[next(iter(data_dict))])))[:nrows],
+            "columns": list(data_dict.keys()),
+            "data": [list(row) for row in zip(*data_dict.values())][:nrows],
+        }
+        return TablePreview(preview_dict)

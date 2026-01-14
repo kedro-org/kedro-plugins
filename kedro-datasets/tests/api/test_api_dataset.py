@@ -1,5 +1,6 @@
 import base64
 import json
+import pickle
 import socket
 from typing import Any
 
@@ -395,3 +396,229 @@ class TestAPIDataset:
             DatasetError, match="Failed to connect to the remote server"
         ):
             api_dataset.save(TEST_SAVE_DATA[0])
+
+
+class TestAPIDatasetWrappedDataset:
+    """Test suite for the wrapped dataset response storage feature."""
+
+    def test_wrapped_dataset_with_json_extension(self, requests_mock, tmp_path):
+        """
+        When saving a POST request with JSON extension,
+        The API response should be stored in a JSONDataset.
+        """
+        response_data = {"result": "success", "data": [1, 2, 3]}
+        json_file = tmp_path / "response.json"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+            extension="json",
+            wrapped_dataset={"filepath": str(json_file)},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+            headers=TEST_HEADERS,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"input": "data"})
+        assert isinstance(response, requests.Response)
+        assert response.json() == response_data
+
+        # Verify the response was stored in the wrapped dataset
+        assert json_file.exists()
+        with open(json_file) as f:
+            stored_data = json.load(f)
+        assert stored_data == response_data
+
+    def test_wrapped_dataset_with_text_extension(self, requests_mock, tmp_path):
+        """
+        When saving a PUT request with text extension,
+        The API response text should be stored in a TextDataset.
+        """
+        response_text = "Operation completed successfully"
+        text_file = tmp_path / "response.txt"
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="PUT",
+            save_args={"headers": TEST_HEADERS},
+            extension="text",
+            wrapped_dataset={"filepath": str(text_file)},
+        )
+        requests_mock.register_uri(
+            "PUT",
+            TEST_URL,
+            text=response_text,
+            headers=TEST_HEADERS,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"update": "payload"})
+        assert isinstance(response, requests.Response)
+        assert response.text == response_text
+
+        # Verify the response was stored in the wrapped dataset
+        assert text_file.exists()
+        with open(text_file) as f:
+            stored_data = f.read()
+        assert stored_data == response_text
+
+    def test_wrapped_dataset_with_pickle_extension(self, requests_mock, tmp_path):
+        """
+        When saving with pickle extension,
+        The full API Response object should be stored in a PickleDataset.
+        """
+        response_data = {"status": "ok", "message": "Data processed"}
+        pickle_file = tmp_path / "response.pkl"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            extension="pickle",
+            wrapped_dataset={"filepath": str(pickle_file)},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Verify the response was stored in the wrapped dataset
+        assert pickle_file.exists()
+        with open(pickle_file, "rb") as f:
+            stored_response = pickle.load(f)
+        assert isinstance(stored_response, requests.Response)
+
+    def test_load_from_wrapped_dataset_json(self, requests_mock, tmp_path):
+        """
+        When loading with POST method and wrapped dataset configured,
+        Should return the data from the wrapped JSONDataset.
+        """
+        stored_data = {"cached": "response", "value": 42}
+        json_file = tmp_path / "response.json"
+
+        # Pre-create the JSON file
+        with open(json_file, "w") as f:
+            json.dump(stored_data, f)
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            extension="json",
+            wrapped_dataset={"filepath": str(json_file)},
+        )
+
+        # Load should return the data from wrapped dataset
+        loaded_data = api_dataset.load()
+        assert loaded_data == stored_data
+
+    def test_no_wrapped_dataset_save_returns_response(self, requests_mock):
+        """
+        When saving without wrapped dataset configuration,
+        Should return the response without storing it.
+        """
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return {"result": "ok"}
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+            headers=TEST_HEADERS,
+        )
+
+        response = api_dataset.save.__wrapped__(api_dataset, TEST_SAVE_DATA)
+        assert isinstance(response, requests.Response)
+        assert response.json() == {"result": "ok"}
+
+    def test_wrapped_dataset_with_unknown_extension(self, tmp_path):
+        """
+        When using an unknown extension,
+        Should raise a DatasetError.
+        """
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            extension="unknown_format",
+            wrapped_dataset={"filepath": str(tmp_path / "response.data")},
+        )
+
+        with pytest.raises(DatasetError, match="Unknown extension for WrappedDataset"):
+            # Access wrapped_dataset property to trigger initialization
+            _ = api_dataset.wrapped_dataset
+
+    def test_describe_with_wrapped_dataset(self, requests_mock, tmp_path):
+        """
+        When describing an APIDataset with wrapped dataset,
+        The description should include wrapped dataset info.
+        """
+        json_file = tmp_path / "response.json"
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            extension="json",
+            wrapped_dataset={"filepath": str(json_file)},
+        )
+        requests_mock.register_uri("POST", TEST_URL, json={})
+
+        description = api_dataset._describe()
+        assert "url" in description
+        assert "method" in description
+        assert "wrapped_dataset" in description
+        assert "filepath" in description["wrapped_dataset"]
+
+    def test_save_with_chunks_and_wrapped_dataset(self, requests_mock, tmp_path):
+        """
+        When saving chunked data with wrapped dataset,
+        Only the final response should be stored.
+        """
+        response_data = {"processed": True}
+        json_file = tmp_path / "response.json"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"chunk_size": 2},
+            extension="json",
+            wrapped_dataset={"filepath": str(json_file)},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save a list that will be chunked (3 items with chunk_size=2 = 2 requests)
+        chunked_data = [{"id": 1}, {"id": 2}, {"id": 3}]
+        response = api_dataset.save.__wrapped__(api_dataset, chunked_data)
+        assert isinstance(response, requests.Response)
+
+        # Verify the final response was stored
+        assert json_file.exists()
+        with open(json_file) as f:
+            stored_data = json.load(f)
+        assert stored_data == response_data

@@ -3,8 +3,9 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 from __future__ import annotations
 
+import json as json_  # make pylint happy
 from copy import deepcopy
-from typing import Any, Type
+from typing import Any
 
 import requests
 from kedro.io.core import AbstractDataset, DatasetError
@@ -12,7 +13,6 @@ from kedro.io.memory_dataset import MemoryDataset
 from requests import Session, sessions
 from requests.auth import AuthBase
 
-import json as json_  # make pylint happy
 from kedro_datasets.json import JSONDataset
 from kedro_datasets.pickle.pickle_dataset import PickleDataset
 from kedro_datasets.text import TextDataset
@@ -161,7 +161,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         self.metadata = metadata
         self._extension = extension
         self._wrapped_dataset_args = wrapped_dataset
-        self._wrapped_dataset = None
+        self._wrapped_dataset: JSONDataset | TextDataset | PickleDataset | MemoryDataset | None = (
+            None
+        )
 
     @staticmethod
     def _convert_type(value: Any):
@@ -178,7 +180,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)
-        if self._extension:
+        if self._extension and self.wrapped_dataset is not None:
             request_args_cp["wrapped_dataset"] = self.wrapped_dataset._describe()
         return request_args_cp
 
@@ -193,12 +195,15 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def load(self) -> requests.Response | str | Any:
+    def load(self) -> requests.Response:
         if self._request_args["method"] == "GET":
             with sessions.Session() as session:
                 return self._execute_request(session)
-        elif self._request_args["method"] in ["PUT", "POST"] and self.wrapped_dataset is not None:
-            return self.wrapped_dataset.load()
+        elif (
+            self._request_args["method"] in ["PUT", "POST"]
+            and self.wrapped_dataset is not None
+        ):
+            return self.wrapped_dataset.load()  # type: ignore[return-value]
 
         raise DatasetError("Only GET method is supported for load")
 
@@ -233,18 +238,21 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     def save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
-                response: requests.Response = self._execute_save_with_chunks(json_data=data)
+                response: requests.Response = self._execute_save_with_chunks(
+                    json_data=data
+                )
             else:
                 response: requests.Response = self._execute_save_request(json_data=data)
 
-            if self._wrapped_dataset is None:
+            wrapped = self.wrapped_dataset
+            if wrapped is None:
                 return response
             if self._extension == "json":
-                self.wrapped_dataset.save(response.json()) #TODO(npfp): expose json loads arguments
+                wrapped.save(response.json())  # TODO(npfp): expose json loads arguments
             elif self._extension == "text":
-                self.wrapped_dataset.save(response.text)
+                wrapped.save(response.text)
             elif self._extension:
-                self.wrapped_dataset.save(response)
+                wrapped.save(response)  # type: ignore[arg-type]
             return response
 
         raise DatasetError("Use PUT or POST methods for save")
@@ -257,7 +265,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     @property
     def _nested_dataset_type(
         self,
-    ) -> Type[JSONDataset | PickleDataset | MemoryDataset]:
+    ) -> type[JSONDataset | TextDataset | PickleDataset | MemoryDataset]:
         if self._extension == "json":
             return JSONDataset
         elif self._extension == "text":
@@ -265,7 +273,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         elif self._extension == "pickle":
             return PickleDataset
         elif self._extension == "memory":
-            #I'm not sure we need this
+            # I'm not sure we need this
             return MemoryDataset
         else:
             raise DatasetError(
@@ -275,10 +283,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     @property
     def wrapped_dataset(
         self,
-    ) -> JSONDataset | PickleDataset | MemoryDataset | None:
+    ) -> JSONDataset | TextDataset | PickleDataset | MemoryDataset | None:
         """The wrapped dataset where response data is stored."""
         if self._wrapped_dataset is None and self._extension is not None:
-            self._wrapped_dataset = self._nested_dataset_type(
-                **self._wrapped_dataset_args
-            )
+            wrapped_args = self._wrapped_dataset_args or {}
+            self._wrapped_dataset = self._nested_dataset_type(**wrapped_args)
         return self._wrapped_dataset

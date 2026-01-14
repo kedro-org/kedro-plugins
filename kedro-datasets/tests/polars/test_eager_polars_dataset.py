@@ -329,7 +329,8 @@ class TestEagerParquetDatasetVersioned:
         previewed = versioned_parquet_dataset.preview(nrows=nrows)
         assert previewed == expected
         assert (
-            inspect.signature(versioned_parquet_dataset.preview).return_annotation == "TablePreview"
+            inspect.signature(versioned_parquet_dataset.preview).return_annotation
+            == "TablePreview"
         )
 
 
@@ -459,7 +460,8 @@ class TestEagerIPCDatasetVersioned:
         previewed = versioned_ipc_dataset.preview(nrows=nrows)
         assert previewed == expected
         assert (
-            inspect.signature(versioned_ipc_dataset.preview).return_annotation == "TablePreview"
+            inspect.signature(versioned_ipc_dataset.preview).return_annotation
+            == "TablePreview"
         )
 
 
@@ -683,7 +685,8 @@ class TestEagerCSVDatasetVersioned:
         previewed = versioned_csv_dataset.preview(nrows=nrows)
         assert previewed == expected
         assert (
-            inspect.signature(versioned_csv_dataset.preview).return_annotation == "TablePreview"
+            inspect.signature(versioned_csv_dataset.preview).return_annotation
+            == "TablePreview"
         )
 
 

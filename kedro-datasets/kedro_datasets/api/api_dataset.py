@@ -273,7 +273,6 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         elif self._extension == "pickle":
             return PickleDataset
         elif self._extension == "memory":
-            # I'm not sure we need this
             return MemoryDataset
         else:
             raise DatasetError(

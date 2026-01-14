@@ -503,6 +503,36 @@ class TestAPIDatasetWrappedDataset:
             stored_response = pickle.load(f)
         assert isinstance(stored_response, requests.Response)
 
+    def test_wrapped_dataset_with_memory_extension(self, requests_mock):
+        """
+        When saving with memory extension,
+        The full API Response object should be stored in a MemoryDataset.
+        """
+        response_data = {"stored": "in_memory"}
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            extension="memory",
+            wrapped_dataset={},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Load from memory dataset to verify it was stored
+        loaded_response = api_dataset.load()
+        assert isinstance(loaded_response, requests.Response)
+
     def test_load_from_wrapped_dataset_json(self, requests_mock, tmp_path):
         """
         When loading with POST method and wrapped dataset configured,

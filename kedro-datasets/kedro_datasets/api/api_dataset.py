@@ -8,13 +8,10 @@ from copy import deepcopy
 from typing import Any
 
 import requests
-from kedro.io.core import AbstractDataset, DatasetError
-from kedro.io.memory_dataset import MemoryDataset
+from kedro.io.core import AbstractDataset, DatasetError, parse_dataset_definition
 from requests import Session, sessions
-from requests.auth import AuthBase
 
 from kedro_datasets.json import JSONDataset
-from kedro_datasets.pickle.pickle_dataset import PickleDataset
 from kedro_datasets.text import TextDataset
 
 
@@ -67,10 +64,33 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ... )
         >>> dataset.save(example_table)
 
+        To store API responses, use the `response_dataset` parameter to automatically
+        persist the response to a file or data store:
+
+        ```yaml
+        api_with_response_storage:
+          type: api.APIDataset
+          url: https://api.example.com/data
+          method: POST
+          response_dataset:
+            type: json.JSONDataset
+            filepath: data/api_response.json
+        ```
+
+        Or using the Python API:
+
+        >>> dataset = APIDataset(
+        ...     url="https://api.example.com/data",
+        ...     method="POST",
+        ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},
+        ... )
+        >>> response = dataset.save({"key": "value"})
+        >>> # The response data is automatically saved to response.json
+
     On initialisation, we can specify all the necessary parameters in the save args
     dictionary. The default HTTP(S) method is POST but PUT is also supported. Two
     important parameters to keep in mind are timeout and chunk_size. `timeout` defines
-    how long  our program waits for a response after a request. `chunk_size`, is only
+    how long our program waits for a response after a request. `chunk_size`, is only
     used if the input of save method is a list. It will divide the request into chunks
     of size `chunk_size`. For example, here we will send two requests each containing
     one row of our example DataFrame.
@@ -97,10 +117,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         method: str = "GET",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
+        credentials: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
-        extension: str | None = None,
-        wrapped_dataset: dict[str, Any] | None = None,
+        response_dataset: str | type[AbstractDataset] | dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
@@ -118,6 +137,21 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 list. An ``AuthBase`` instance can be provided for more complex cases.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
+            response_dataset: Optional dataset to automatically store API responses.
+                The API response is stored based on the dataset type:
+
+                - `JSONDataset`: Stores `response.json()` (parsed JSON data)
+                - `TextDataset`: Stores `response.text` (response body as string)
+                - Other datasets (e.g., `PickleDataset`, `MemoryDataset`): Stores the
+                  full `requests.Response` object
+
+                Can be specified as:
+
+                - A string type identifier: `"json.JSONDataset"`
+                - A dict with `"type"` key: `{"type": "json.JSONDataset", "filepath": "..."}`
+                - A dataset class (advanced usage)
+
+                If `None` (default), responses are not automatically stored.
 
         Raises:
             ValueError: if both ``auth`` and ``credentials`` are specified or used
@@ -125,11 +159,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         """
         super().__init__()
 
-        # GET method means load
         if method == "GET":
             self._params = load_args or {}
 
-        # PUT, POST means save
         elif method in ["PUT", "POST"]:
             self._params = deepcopy(self.DEFAULT_SAVE_ARGS)
             if save_args is not None:
@@ -159,11 +191,22 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         }
 
         self.metadata = metadata
-        self._extension = extension
-        self._wrapped_dataset_args = wrapped_dataset
-        self._wrapped_dataset: JSONDataset | TextDataset | PickleDataset | MemoryDataset | None = (
-            None
-        )
+
+        # Initialize response dataset if provided
+        self._response_dataset_type: type[AbstractDataset[Any, Any]] | None = None
+        self._response_dataset_config: dict[str, Any] | None = None
+        self._response_dataset_instance: AbstractDataset[Any, Any] | None = None
+
+        if response_dataset is not None:
+            dataset_config = (
+                response_dataset
+                if isinstance(response_dataset, dict)
+                else {"type": response_dataset}
+            )
+            (
+                self._response_dataset_type,
+                self._response_dataset_config,
+            ) = parse_dataset_definition(dataset_config)
 
     @staticmethod
     def _convert_type(value: Any):
@@ -176,13 +219,31 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             return tuple(value)
         return value
 
+    @property
+    def _response_dataset(self) -> AbstractDataset | None:
+        """Lazily create and cache the response dataset instance."""
+        if self._response_dataset_type is None:
+            return None
+
+        if self._response_dataset_instance is None:
+            # Type guard: _response_dataset_config is not None when _response_dataset_type is not None
+            assert self._response_dataset_config is not None
+            self._response_dataset_instance = self._response_dataset_type(
+                **self._response_dataset_config
+            )
+
+        return self._response_dataset_instance
+
     def _describe(self) -> dict[str, Any]:
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)
-        if self._extension and self.wrapped_dataset is not None:
-            request_args_cp["wrapped_dataset"] = self.wrapped_dataset._describe()
-        return request_args_cp
+
+        result = dict(request_args_cp)
+        if self._response_dataset is not None:
+            result["response_dataset"] = self._response_dataset._describe()
+
+        return result
 
     def _execute_request(self, session: Session) -> requests.Response:
         try:
@@ -201,9 +262,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 return self._execute_request(session)
         elif (
             self._request_args["method"] in ["PUT", "POST"]
-            and self.wrapped_dataset is not None
+            and self._response_dataset is not None
         ):
-            return self.wrapped_dataset.load()  # type: ignore[return-value]
+            return self._response_dataset.load()  # type: ignore[return-value]
 
         raise DatasetError("Only GET method is supported for load")
 
@@ -244,15 +305,16 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             else:
                 response: requests.Response = self._execute_save_request(json_data=data)
 
-            wrapped = self.wrapped_dataset
-            if wrapped is None:
-                return response
-            if self._extension == "json":
-                wrapped.save(response.json())  # TODO(npfp): expose json loads arguments
-            elif self._extension == "text":
-                wrapped.save(response.text)
-            elif self._extension:
-                wrapped.save(response)  # type: ignore[arg-type]
+            if self._response_dataset is not None:
+                if isinstance(self._response_dataset, JSONDataset):
+                    extracted_data = response.json()
+                elif isinstance(self._response_dataset, TextDataset):
+                    extracted_data = response.text
+                else:
+                    extracted_data = response
+
+                self._response_dataset.save(extracted_data)
+
             return response
 
         raise DatasetError("Use PUT or POST methods for save")
@@ -261,30 +323,3 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         with sessions.Session() as session:
             response = self._execute_request(session)
         return response.ok
-
-    @property
-    def _nested_dataset_type(
-        self,
-    ) -> type[JSONDataset | TextDataset | PickleDataset | MemoryDataset]:
-        if self._extension == "json":
-            return JSONDataset
-        elif self._extension == "text":
-            return TextDataset
-        elif self._extension == "pickle":
-            return PickleDataset
-        elif self._extension == "memory":
-            return MemoryDataset
-        else:
-            raise DatasetError(
-                f"Unknown extension for WrappedDataset: {self._extension}"
-            )
-
-    @property
-    def wrapped_dataset(
-        self,
-    ) -> JSONDataset | TextDataset | PickleDataset | MemoryDataset | None:
-        """The wrapped dataset where response data is stored."""
-        if self._wrapped_dataset is None and self._extension is not None:
-            wrapped_args = self._wrapped_dataset_args or {}
-            self._wrapped_dataset = self._nested_dataset_type(**wrapped_args)
-        return self._wrapped_dataset

@@ -398,13 +398,13 @@ class TestAPIDataset:
             api_dataset.save(TEST_SAVE_DATA[0])
 
 
-class TestAPIDatasetWrappedDataset:
+class TestAPIDatasetResponseDataset:
     """Test suite for the wrapped dataset response storage feature."""
 
-    def test_wrapped_dataset_with_json_extension(self, requests_mock, tmp_path):
+    def test_response_dataset_with_json(self, requests_mock, tmp_path):
         """
-        When saving a POST request with JSON extension,
-        The API response should be stored in a JSONDataset.
+        When saving a POST request with JSONDataset response storage,
+        The API response should be stored in the dataset.
         """
         response_data = {"result": "success", "data": [1, 2, 3]}
         json_file = tmp_path / "response.json"
@@ -416,8 +416,7 @@ class TestAPIDatasetWrappedDataset:
             url=TEST_URL,
             method="POST",
             save_args={"headers": TEST_HEADERS},
-            extension="json",
-            wrapped_dataset={"filepath": str(json_file)},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
         )
         requests_mock.register_uri(
             "POST",
@@ -431,16 +430,16 @@ class TestAPIDatasetWrappedDataset:
         assert isinstance(response, requests.Response)
         assert response.json() == response_data
 
-        # Verify the response was stored in the wrapped dataset
+        # Verify the response was stored in the response dataset
         assert json_file.exists()
         with open(json_file) as f:
             stored_data = json.load(f)
         assert stored_data == response_data
 
-    def test_wrapped_dataset_with_text_extension(self, requests_mock, tmp_path):
+    def test_response_dataset_with_text(self, requests_mock, tmp_path):
         """
-        When saving a PUT request with text extension,
-        The API response text should be stored in a TextDataset.
+        When saving a PUT request with TextDataset response storage,
+        The API response should be stored as text.
         """
         response_text = "Operation completed successfully"
         text_file = tmp_path / "response.txt"
@@ -449,8 +448,7 @@ class TestAPIDatasetWrappedDataset:
             url=TEST_URL,
             method="PUT",
             save_args={"headers": TEST_HEADERS},
-            extension="text",
-            wrapped_dataset={"filepath": str(text_file)},
+            response_dataset={"type": "text.TextDataset", "filepath": str(text_file)},
         )
         requests_mock.register_uri(
             "PUT",
@@ -464,16 +462,16 @@ class TestAPIDatasetWrappedDataset:
         assert isinstance(response, requests.Response)
         assert response.text == response_text
 
-        # Verify the response was stored in the wrapped dataset
+        # Verify the response was stored in the response dataset
         assert text_file.exists()
         with open(text_file) as f:
             stored_data = f.read()
         assert stored_data == response_text
 
-    def test_wrapped_dataset_with_pickle_extension(self, requests_mock, tmp_path):
+    def test_response_dataset_with_pickle(self, requests_mock, tmp_path):
         """
-        When saving with pickle extension,
-        The full API Response object should be stored in a PickleDataset.
+        When saving with PickleDataset response storage,
+        The full API Response object should be stored.
         """
         response_data = {"status": "ok", "message": "Data processed"}
         pickle_file = tmp_path / "response.pkl"
@@ -484,8 +482,10 @@ class TestAPIDatasetWrappedDataset:
         api_dataset = APIDataset(
             url=TEST_URL,
             method="POST",
-            extension="pickle",
-            wrapped_dataset={"filepath": str(pickle_file)},
+            response_dataset={
+                "type": "pickle.PickleDataset",
+                "filepath": str(pickle_file),
+            },
         )
         requests_mock.register_uri(
             "POST",
@@ -497,7 +497,7 @@ class TestAPIDatasetWrappedDataset:
         response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
         assert isinstance(response, requests.Response)
 
-        # Verify the response was stored in the wrapped dataset
+        # Verify the response was stored in the response dataset
         assert pickle_file.exists()
         with open(pickle_file, "rb") as f:
             stored_response = pickle.load(f)
@@ -505,8 +505,8 @@ class TestAPIDatasetWrappedDataset:
 
     def test_wrapped_dataset_with_memory_extension(self, requests_mock):
         """
-        When saving with memory extension,
-        The full API Response object should be stored in a MemoryDataset.
+        When saving with MemoryDataset response storage,
+        The full API Response object should be stored in memory.
         """
         response_data = {"stored": "in_memory"}
 
@@ -516,8 +516,7 @@ class TestAPIDatasetWrappedDataset:
         api_dataset = APIDataset(
             url=TEST_URL,
             method="POST",
-            extension="memory",
-            wrapped_dataset={},
+            response_dataset={"type": "kedro.io.MemoryDataset"},
         )
         requests_mock.register_uri(
             "POST",
@@ -533,10 +532,10 @@ class TestAPIDatasetWrappedDataset:
         loaded_response = api_dataset.load()
         assert isinstance(loaded_response, requests.Response)
 
-    def test_load_from_wrapped_dataset_json(self, requests_mock, tmp_path):
+    def test_load_from_response_dataset_json(self, requests_mock, tmp_path):
         """
-        When loading with POST method and wrapped dataset configured,
-        Should return the data from the wrapped JSONDataset.
+        When loading with POST method and response_dataset configured,
+        Should return the data from the response dataset.
         """
         stored_data = {"cached": "response", "value": 42}
         json_file = tmp_path / "response.json"
@@ -548,17 +547,16 @@ class TestAPIDatasetWrappedDataset:
         api_dataset = APIDataset(
             url=TEST_URL,
             method="POST",
-            extension="json",
-            wrapped_dataset={"filepath": str(json_file)},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
         )
 
-        # Load should return the data from wrapped dataset
+        # Load should return the data from response dataset
         loaded_data = api_dataset.load()
         assert loaded_data == stored_data
 
-    def test_no_wrapped_dataset_save_returns_response(self, requests_mock):
+    def test_no_response_dataset_save_returns_response(self, requests_mock):
         """
-        When saving without wrapped dataset configuration,
+        When saving without response_dataset configuration,
         Should return the response without storing it.
         """
 
@@ -581,46 +579,40 @@ class TestAPIDatasetWrappedDataset:
         assert isinstance(response, requests.Response)
         assert response.json() == {"result": "ok"}
 
-    def test_wrapped_dataset_with_unknown_extension(self, tmp_path):
+    def test_response_dataset_with_unknown_type(self, tmp_path):
         """
-        When using an unknown extension,
-        Should raise a DatasetError.
+        When using an unknown dataset type,
+        Should raise a DatasetError during initialization.
         """
-        api_dataset = APIDataset(
-            url=TEST_URL,
-            method="POST",
-            extension="unknown_format",
-            wrapped_dataset={"filepath": str(tmp_path / "response.data")},
-        )
+        with pytest.raises(DatasetError):
+            APIDataset(
+                url=TEST_URL,
+                method="POST",
+                response_dataset={"type": "nonexistent.FakeDataset"},
+            )
 
-        with pytest.raises(DatasetError, match="Unknown extension for WrappedDataset"):
-            # Access wrapped_dataset property to trigger initialization
-            _ = api_dataset.wrapped_dataset
-
-    def test_describe_with_wrapped_dataset(self, requests_mock, tmp_path):
+    def test_describe_with_response_dataset(self, requests_mock, tmp_path):
         """
-        When describing an APIDataset with wrapped dataset,
-        The description should include wrapped dataset info.
+        When describing an APIDataset with response_dataset,
+        The description should include response dataset info.
         """
         json_file = tmp_path / "response.json"
 
         api_dataset = APIDataset(
             url=TEST_URL,
             method="POST",
-            extension="json",
-            wrapped_dataset={"filepath": str(json_file)},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
         )
         requests_mock.register_uri("POST", TEST_URL, json={})
 
         description = api_dataset._describe()
         assert "url" in description
         assert "method" in description
-        assert "wrapped_dataset" in description
-        assert "filepath" in description["wrapped_dataset"]
+        assert "response_dataset" in description
 
-    def test_save_with_chunks_and_wrapped_dataset(self, requests_mock, tmp_path):
+    def test_save_with_chunks_and_response_dataset(self, requests_mock, tmp_path):
         """
-        When saving chunked data with wrapped dataset,
+        When saving chunked data with response_dataset,
         Only the final response should be stored.
         """
         response_data = {"processed": True}
@@ -633,8 +625,7 @@ class TestAPIDatasetWrappedDataset:
             url=TEST_URL,
             method="POST",
             save_args={"chunk_size": 2},
-            extension="json",
-            wrapped_dataset={"filepath": str(json_file)},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
         )
         requests_mock.register_uri(
             "POST",

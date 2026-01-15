@@ -45,7 +45,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        +...             "news_site": "NASA",
+        ...             "news_site": "NASA",
         ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },

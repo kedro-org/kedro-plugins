@@ -220,12 +220,6 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        dataset_copy._load_args = {**dataset_copy._load_args, "n_rows": nrows}
-        data = dataset_copy.load()
-        data_dict = data.to_dict(as_series=False)
-        preview_dict = {
-            "index": list(range(len(data_dict[next(iter(data_dict))]))),
-            "columns": list(data_dict.keys()),
-            "data": [list(row) for row in zip(*data_dict.values())],
-        }
-        return TablePreview(preview_dict)
+        data = dataset_copy.load().limit(nrows if type(nrows) == int else 5)
+        data_dict = data.to_pandas().to_dict(orient="split")
+        return TablePreview(data_dict)

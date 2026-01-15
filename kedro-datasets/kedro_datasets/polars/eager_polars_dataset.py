@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -217,11 +218,6 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """
         # Create a copy so it doesn't contaminate the original dataset
         dataset_copy = self._copy()
-        data = dataset_copy.load()
-        data_dict = data.to_dict(as_series=False)
-        preview_dict = {
-            "index": list(range(len(data_dict[next(iter(data_dict))])))[:nrows],
-            "columns": list(data_dict.keys()),
-            "data": [list(row) for row in zip(*data_dict.values())][:nrows],
-        }
-        return TablePreview(preview_dict)
+        data = dataset_copy.load().limit(nrows if type(nrows) == int else 5)
+        data_dict = data.to_pandas().to_dict(orient="split")
+        return TablePreview(data_dict)

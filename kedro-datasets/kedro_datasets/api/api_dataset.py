@@ -45,7 +45,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...     url="https://api.spaceflightnewsapi.net/v4/articles",
         ...     load_args={
         ...         "params": {
-        ...             "news_site": "NASA",
+        +...             "news_site": "NASA",
         ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
         ...         }
         ...     },
@@ -70,7 +70,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ```yaml
         api_with_response_storage:
           type: api.APIDataset
-          url: https://api.example.com/data
+          url: https://dummyjson.com/products/add
           method: POST
           response_dataset:
             type: json.JSONDataset
@@ -80,7 +80,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         Or using the Python API:
 
         >>> dataset = APIDataset(
-        ...     url="https://api.example.com/data",
+        ...     url="https://dummyjson.com/products/add",
         ...     method="POST",
         ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},
         ... )

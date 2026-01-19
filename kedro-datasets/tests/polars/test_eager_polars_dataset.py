@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -149,6 +150,52 @@ class TestEagerExcelDataset:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
         assert dataset._version_cache.currsize == 0
 
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, excel_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        excel_dataset.save(dummy_dataframe)
+        previewed = excel_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(excel_dataset.preview).return_annotation == "TablePreview"
+        )
+
 
 class TestEagerParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore):
@@ -239,6 +286,53 @@ class TestEagerParquetDatasetVersioned:
         )
         assert ds_new.resolve_load_version() == second_load_version
 
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_parquet_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_parquet_dataset.save(dummy_dataframe)
+        previewed = versioned_parquet_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_parquet_dataset.preview).return_annotation
+            == "TablePreview"
+        )
+
 
 class TestEagerIPCDatasetVersioned:
     def test_save_and_load(self, versioned_ipc_dataset, dummy_dataframe):
@@ -322,6 +416,53 @@ class TestEagerIPCDatasetVersioned:
             version=Version(None, None),
         )
         assert ds_new.resolve_load_version() == second_load_version
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_ipc_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_ipc_dataset.save(dummy_dataframe)
+        previewed = versioned_ipc_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_ipc_dataset.preview).return_annotation
+            == "TablePreview"
+        )
 
 
 class TestEagerCSVDatasetVersioned:
@@ -500,6 +641,53 @@ class TestEagerCSVDatasetVersioned:
         Path(csv_dataset._filepath.as_posix()).unlink()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_csv_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_csv_dataset.save(dummy_dataframe)
+        previewed = versioned_csv_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_csv_dataset.preview).return_annotation
+            == "TablePreview"
+        )
 
 
 class TestBadEagerPolarsDataset:

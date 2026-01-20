@@ -18,6 +18,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
     - **langchain:** Returns a `CallbackHandler` for LangChain integration.
     - **openai:** Returns a wrapped OpenAI client with automatic tracing.
+    - **autogen:** Returns a `LangfuseSpanProcessor` for AutoGen integration.
     - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
@@ -59,13 +60,24 @@ class LangfuseTraceDataset(AbstractDataset):
         # Load tracing client
         client = dataset.load()
         response = client.chat.completions.create(...)  # Automatically traced
+
+        # AutoGen mode for agent tracing
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_...",
+                "secret_key": "sk_...",  # pragma: allowlist secret
+            },
+            mode="autogen",
+        )
+        span_processor = dataset.load()
+        # Use with AutoGen's runtime logging
         ```
     """
 
     def __init__(
         self,
         credentials: dict[str, Any],
-        mode: Literal["langchain", "openai", "sdk"] = "sdk",
+        mode: Literal["langchain", "openai", "autogen", "sdk"] = "sdk",
         **trace_kwargs: Any
     ):
         """Initialize LangfuseTraceDataset and configure environment variables.
@@ -79,7 +91,7 @@ class LangfuseTraceDataset(AbstractDataset):
                 {public_key, secret_key}. Optional keys: {host} (defaults to
                 Langfuse cloud if not provided). For OpenAI mode, may also include
                 openai section with {openai_api_key, openai_api_base}.
-            mode: Tracing mode - "langchain", "openai", or "sdk" (default).
+            mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
         Raises:
@@ -106,6 +118,14 @@ class LangfuseTraceDataset(AbstractDataset):
             ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."} # pragma: allowlist secret
             ...     },
             ...     mode="openai"
+            ... )
+
+            # AutoGen mode for agent tracing
+                dataset = LangfuseTraceDataset(
+            ...     credentials={
+            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...     },
+            ...     mode="autogen"
             ... )
 
         Note:
@@ -203,6 +223,34 @@ class LangfuseTraceDataset(AbstractDataset):
 
         return client_params
 
+    def _build_autogen_span_processor(self) -> Any:
+        """Build and return a LangfuseSpanProcessor for AutoGen integration.
+
+        Creates a span processor that integrates with AutoGen's OpenTelemetry-based
+        runtime logging system. The processor uses environment variables set during
+        initialization for authentication with Langfuse.
+
+        Returns:
+            LangfuseSpanProcessor configured for AutoGen tracing.
+
+        Raises:
+            DatasetError: If required dependencies are not installed.
+
+        Note:
+            Requires the langfuse package with OpenTelemetry support.
+            The span processor can be used with AutoGen's runtime_logging module
+            or directly with OpenTelemetry's TracerProvider.
+        """
+        try:
+            from langfuse.opentelemetry import LangfuseSpanProcessor  # noqa: PLC0415
+        except ImportError as exc:
+            raise DatasetError(
+                "AutoGen mode requires langfuse with OpenTelemetry support. "
+                "Install with: pip install 'langfuse[opentelemetry]'"
+            ) from exc
+
+        return LangfuseSpanProcessor(**self._trace_kwargs)
+
     def load(self) -> Any:
         """Load appropriate tracing client based on configured mode.
 
@@ -214,10 +262,11 @@ class LangfuseTraceDataset(AbstractDataset):
             Tracing client object based on mode:
             - langchain mode: CallbackHandler for LangChain integration
             - openai mode: Wrapped OpenAI client with automatic tracing
+            - autogen mode: LangfuseSpanProcessor for AutoGen integration
             - sdk mode: Raw Langfuse client for manual tracing
 
         Raises:
-            DatasetError: If OpenAI mode is used but OpenAI credentials are missing or invalid.
+            DatasetError: If mode-specific dependencies are missing or credentials are invalid.
 
         Examples:
             # LangChain mode
@@ -230,6 +279,15 @@ class LangfuseTraceDataset(AbstractDataset):
                 client = dataset.load()
                 response = client.chat.completions.create(model="gpt-4", messages=[...])
 
+            # AutoGen mode
+                dataset = LangfuseTraceDataset(credentials=creds, mode="autogen")
+                span_processor = dataset.load()
+                # Option 1: Use with TracerProvider
+                from opentelemetry.sdk.trace import TracerProvider
+                provider = TracerProvider()
+                provider.add_span_processor(span_processor)
+                # Option 2: Use with AutoGen's runtime logging (if supported)
+
             # SDK mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
                 langfuse = dataset.load()
@@ -241,19 +299,21 @@ class LangfuseTraceDataset(AbstractDataset):
 
         # Create and cache the appropriate client
         if self._mode == "langchain":
-            from langfuse.langchain import CallbackHandler  # noqa PLC0415
-            self._cached_client = CallbackHandler()
+            from langfuse.langchain import CallbackHandler  # noqa: PLC0415
+            self._cached_client = CallbackHandler(**self._trace_kwargs)
         elif self._mode == "openai":
-            from langfuse.openai import OpenAI  # noqa PLC0415
+            from langfuse.openai import OpenAI  # noqa: PLC0415
             client_params = self._build_openai_client_params()
             self._cached_client = OpenAI(**client_params)
+        elif self._mode == "autogen":
+            self._cached_client = self._build_autogen_span_processor()
         else:
             try:
-                from langfuse import get_client  # noqa PLC0415
+                from langfuse import get_client  # noqa: PLC0415
                 self._cached_client = get_client()
             except ImportError:
-                from langfuse import Langfuse  # noqa PLC0415
-                self._cached_client = Langfuse()
+                from langfuse import Langfuse  # noqa: PLC0415
+                self._cached_client = Langfuse(**self._trace_kwargs)
 
         return self._cached_client
 

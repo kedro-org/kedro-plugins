@@ -187,3 +187,102 @@ class TestLangfuseTraceDataset:
 
         description = dataset._describe()
         assert description == {"mode": "langchain", "credentials": "***"}
+
+    def test_autogen_mode(self, mocker):
+        """Test AutoGen mode returns LangfuseSpanProcessor."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Create mock OpenTelemetry module
+        mock_otel_module = MagicMock()
+        mock_span_processor_class = MagicMock()
+        mock_span_processor_instance = MagicMock()
+        mock_span_processor_class.return_value = mock_span_processor_instance
+        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+
+        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
+            mode="autogen"
+        )
+
+        result = dataset.load()
+        mock_span_processor_class.assert_called_once_with()
+        assert result == mock_span_processor_instance
+
+    def test_autogen_mode_with_trace_kwargs(self, mocker):
+        """Test AutoGen mode passes trace_kwargs to LangfuseSpanProcessor."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Create mock OpenTelemetry module
+        mock_otel_module = MagicMock()
+        mock_span_processor_class = MagicMock()
+        mock_span_processor_instance = MagicMock()
+        mock_span_processor_class.return_value = mock_span_processor_instance
+        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+
+        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
+            mode="autogen",
+            sample_rate=0.5,
+            debug=True
+        )
+
+        result = dataset.load()
+        mock_span_processor_class.assert_called_once_with(sample_rate=0.5, debug=True)
+        assert result == mock_span_processor_instance
+
+    def test_autogen_mode_caching(self, mocker):
+        """Test that AutoGen mode caches the span processor."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Create mock OpenTelemetry module
+        mock_otel_module = MagicMock()
+        mock_span_processor_class = MagicMock()
+        mock_span_processor_instance = MagicMock()
+        mock_span_processor_class.return_value = mock_span_processor_instance
+        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+
+        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
+            mode="autogen"
+        )
+
+        # Call load twice
+        result1 = dataset.load()
+        result2 = dataset.load()
+
+        # Should only create span processor once due to caching
+        mock_span_processor_class.assert_called_once()
+        assert result1 is result2  # Same instance
+
+    def test_autogen_mode_sets_environment_variables(self, mocker):
+        """Test that AutoGen mode correctly sets Langfuse environment variables."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test_autogen",
+                "secret_key": "sk_test_autogen",  # pragma: allowlist secret
+                "host": "https://custom.langfuse.com"
+            },
+            mode="autogen"
+        )
+
+        assert os.environ["LANGFUSE_PUBLIC_KEY"] == "pk_test_autogen"
+        assert os.environ["LANGFUSE_SECRET_KEY"] == "sk_test_autogen"  # pragma: allowlist secret
+        assert os.environ["LANGFUSE_HOST"] == "https://custom.langfuse.com"
+
+    def test_describe_method_autogen_mode(self):
+        """Test _describe returns correct format for autogen mode."""
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
+            mode="autogen"
+        )
+
+        description = dataset._describe()
+        assert description == {"mode": "autogen", "credentials": "***"}

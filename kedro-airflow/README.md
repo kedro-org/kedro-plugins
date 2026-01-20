@@ -156,15 +156,42 @@ The default template provided by `kedro-airflow` uses the `BaseOperator`.
 
 ### Can I group nodes together?
 
-When running Kedro nodes using Airflow, MemoryDatasets are often not shared across operators.
-This will cause the DAG run to fail.
+The `--group-by` option allows you to group Kedro nodes into single Airflow tasks. This is useful for reducing the overhead of task scheduling and for handling datasets that cannot be shared across distributed workers.
 
-MemoryDatasets may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running needing multiple executors).
+#### Grouping by memory
 
-Nodes that are connected through MemoryDatasets are grouped together via the `--group-in-memory` flag.
-This preserves the option to have logical separation in Kedro, with little computational overhead.
+When running Kedro nodes using Airflow, `MemoryDataset`s are often not shared across operators, which can cause the DAG run to fail.
 
-It is possible to use [task groups](https://docs.astronomer.io/learn/task-groups) by changing the template.
+`MemoryDataset`s may be used to provide logical separation between nodes in Kedro, without the overhead of needing to write to disk (and in the case of distributed running, needing multiple executors).
+
+Nodes that are connected through `MemoryDataset`s can be grouped together using the `--group-by memory` flag:
+
+```bash
+kedro airflow create --group-by memory
+```
+
+This preserves the option to have logical separation in Kedro, with little computational overhead. Nodes connected via `MemoryDataset`s will be combined into a single Airflow task.
+
+#### Grouping by namespace
+
+If your Kedro pipeline uses [namespaces](https://docs.kedro.org/en/stable/build/namespaces/) to organise nodes, you can group all nodes within the same namespace into a single Airflow task using the `--group-by namespace` flag:
+
+```bash
+kedro airflow create --group-by namespace
+```
+
+This is particularly useful when:
+- You have logically grouped nodes using namespaces and want to execute them together
+- You want to reduce the number of Airflow tasks while maintaining the namespace structure from your Kedro pipeline
+- Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
+
+Nodes without a namespace will each be converted to individual Airflow tasks.
+
+For more information about namespaces in Kedro, see the [namespaces documentation](https://docs.kedro.org/en/stable/build/namespaces/).
+
+#### Using task groups for visualisation
+
+It is possible to use [Airflow task groups](https://docs.astronomer.io/learn/task-groups) by changing the template.
 See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-use-a-different-jinja2-template) for instructions on using custom templates.
 
 ## Can I contribute?

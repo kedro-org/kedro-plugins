@@ -19,6 +19,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
+
 logger = logging.getLogger(__name__)
 
 
@@ -205,3 +207,19 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        data = dataset_copy.load().limit(nrows if type(nrows) is int else 5)
+        data_dict = data.to_pandas().to_dict(orient="split")
+        return TablePreview(data_dict)

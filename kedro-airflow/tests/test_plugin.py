@@ -418,3 +418,50 @@ def test_group_by_invalid_value(cli_runner, metadata):
         "Error: Invalid value for '-g' / '--group-by': 'asdasdasd' is not one of 'memory', 'namespace'."
         in result.stderr
     )
+
+
+def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
+    """Check that namespace grouping generates DAG using --namespace parameter."""
+    command = ["airflow", "create", "--group-by", "namespace"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    assert dag_file.exists()
+
+    dag_content = dag_file.read_text()
+
+    # Verify that the execute method contains namespaces parameter logic
+    assert 'if self.group_type == "namespace":' in dag_content
+    assert "session.run(self.pipeline_name, namespaces=[self.namespace])" in dag_content
+
+    # Verify that group_type parameter is being passed
+    assert "group_type=" in dag_content
+
+    # Verify that namespace parameter is being passed
+    assert "namespace=" in dag_content
+
+    dag_file.unlink()
+
+
+def test_memory_grouping_uses_node_names_parameter(cli_runner, metadata):
+    """Check that memory grouping uses node_names parameter."""
+    command = ["airflow", "create", "--group-by", "memory"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    assert dag_file.exists()
+
+    dag_content = dag_file.read_text()
+
+    # Verify that the execute method has node_names
+    assert "session.run(self.pipeline_name, node_names=self.node_name)" in dag_content
+
+    # Verify the conditional logic exists
+    assert "else:" in dag_content
+    assert "if isinstance(self.node_name, str):" in dag_content
+
+    dag_file.unlink()

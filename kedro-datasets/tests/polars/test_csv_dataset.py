@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -344,6 +345,52 @@ class TestCSVDatasetVersioned:
         Path(csv_dataset._filepath.as_posix()).unlink()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, csv_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        csv_dataset.save(dummy_dataframe)
+        previewed = csv_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(csv_dataset.preview).return_annotation == "TablePreview"
+        )
 
 
 class TestCSVDatasetS3:

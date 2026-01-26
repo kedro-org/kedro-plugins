@@ -10,6 +10,7 @@ from typing import Any
 import requests
 from kedro.io.core import AbstractDataset, DatasetError, parse_dataset_definition
 from requests import Session, sessions
+from requests.auth import AuthBase
 
 from kedro_datasets.json import JSONDataset
 from kedro_datasets.text import TextDataset
@@ -117,7 +118,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         method: str = "GET",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        credentials: dict[str, Any] | None = None,
+        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
         metadata: dict[str, Any] | None = None,
         response_dataset: str | type[AbstractDataset] | dict[str, Any] | None = None,
     ) -> None:
@@ -256,17 +257,24 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def load(self) -> requests.Response:
-        if self._request_args["method"] == "GET":
-            with sessions.Session() as session:
-                return self._execute_request(session)
-        elif (
-            self._request_args["method"] in ["PUT", "POST"]
-            and self._response_dataset is not None
-        ):
-            return self._response_dataset.load()  # type: ignore[return-value]
+    def get_last_response(self) -> requests.Response:
+        if self._response_dataset is None:
+            raise DatasetError(
+                "No response_dataset configured; cannot retrieve persisted response."
+            )
 
-        raise DatasetError("Only GET method is supported for load")
+        return self._response_dataset.load()  # type: ignore[return-value]
+
+    def load(self) -> requests.Response:
+        if self._request_args["method"] != "GET":
+            raise DatasetError(
+                "Only GET method is supported for load()."
+                "Use save() to send data or get_last_response() to retrieve "
+                "a persisted response."
+            )
+
+        with sessions.Session() as session:
+            return self._execute_request(session)
 
     def _execute_save_with_chunks(
         self,
@@ -320,6 +328,10 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         raise DatasetError("Use PUT or POST methods for save")
 
     def _exists(self) -> bool:
+        if self._request_args["method"] != "GET":
+            return False
+
         with sessions.Session() as session:
             response = self._execute_request(session)
+
         return response.ok

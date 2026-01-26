@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 import requests
 from kedro.io.core import DatasetError
+from kedro.io.memory_dataset import MemoryDataset
 from requests.auth import HTTPBasicAuth
 
 from kedro_datasets.api import APIDataset
@@ -243,6 +244,19 @@ class TestAPIDataset:
         )
 
         assert api_dataset.exists()
+
+    def test_exists_false_for_post_method(self, requests_mock):
+        """
+        For non-GET requests, ``exists()`` should return False
+        and should not execute the HTTP request.
+        """
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+        )
+
+        assert not api_dataset.exists()
 
     def test_http_error(self, requests_mock):
         api_dataset = APIDataset(
@@ -528,8 +542,8 @@ class TestAPIDatasetResponseDataset:
         response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
         assert isinstance(response, requests.Response)
 
-        # Load from memory dataset to verify it was stored
-        loaded_response = api_dataset.load()
+        # Retrieve from memory dataset to verify it was stored
+        loaded_response = api_dataset.get_last_response()
         assert isinstance(loaded_response, requests.Response)
 
     def test_load_from_response_dataset_json(self, requests_mock, tmp_path):
@@ -551,7 +565,7 @@ class TestAPIDatasetResponseDataset:
         )
 
         # Load should return the data from response dataset
-        loaded_data = api_dataset.load()
+        loaded_data = api_dataset.get_last_response()
         assert loaded_data == stored_data
 
     def test_no_response_dataset_save_returns_response(self, requests_mock):
@@ -643,3 +657,34 @@ class TestAPIDatasetResponseDataset:
         with open(json_file) as f:
             stored_data = json.load(f)
         assert stored_data == response_data
+
+    def test_response_dataset_with_dataset_class(self, requests_mock):
+        """
+        When response_dataset is provided as a dataset class (advanced usage),
+        The API response should be stored according to the dataset behavior.
+        """
+        response_data = {"advanced": "usage"}
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset=MemoryDataset,  # dataset class, not string or dict
+        )
+
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"input": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Verify stored response
+        stored_response = api_dataset.get_last_response()
+        assert isinstance(stored_response, requests.Response)
+        assert stored_response.json() == response_data

@@ -568,6 +568,19 @@ class TestAPIDatasetResponseDataset:
         loaded_data = api_dataset.get_last_response()
         assert loaded_data == stored_data
 
+    def test_get_last_response_without_response_dataset_raises(self):
+        """
+        get_last_response() should raise DatasetError
+        when no response_dataset is configured.
+        """
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+        )
+
+        with pytest.raises(DatasetError, match="No response_dataset configured"):
+            api_dataset.get_last_response()
+
     def test_no_response_dataset_save_returns_response(self, requests_mock):
         """
         When saving without response_dataset configuration,

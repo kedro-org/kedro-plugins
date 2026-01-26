@@ -3,6 +3,7 @@
 ## Bug fixes and other changes
 
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+- Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
 
 ## Community contributions
 

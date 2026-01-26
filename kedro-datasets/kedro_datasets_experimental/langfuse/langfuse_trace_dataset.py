@@ -282,11 +282,20 @@ class LangfuseTraceDataset(AbstractDataset):
             # AutoGen mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="autogen")
                 span_processor = dataset.load()
-                # Option 1: Use with TracerProvider
+
+                # Set up OpenTelemetry with the Langfuse span processor
                 from opentelemetry.sdk.trace import TracerProvider
+                from opentelemetry import trace
+
                 provider = TracerProvider()
                 provider.add_span_processor(span_processor)
-                # Option 2: Use with AutoGen's runtime logging (if supported)
+                trace.set_tracer_provider(provider)
+
+                # Now AutoGen agents will be automatically traced
+                from autogen import AssistantAgent, UserProxyAgent
+                assistant = AssistantAgent("assistant", llm_config={"model": "gpt-4"})
+                user_proxy = UserProxyAgent("user", human_input_mode="NEVER")
+                user_proxy.initiate_chat(assistant, message="Hello!")  # Traced to Langfuse
 
             # SDK mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")

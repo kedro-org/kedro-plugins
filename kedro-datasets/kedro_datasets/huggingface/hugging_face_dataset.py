@@ -28,7 +28,7 @@ class HFDataset(AbstractDataset):
         >>> disable_progress_bar()  # for doctest to pass
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
-        >>> dataset = HFDataset(dataset_name="openai_humaneval")
+        >>> dataset = HFDataset(dataset_name="yelp_review_full")
         >>> ds = dataset.load()
 
     """

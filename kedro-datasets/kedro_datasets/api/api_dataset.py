@@ -77,9 +77,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         - For other datasets (e.g. ``PickleDataset``, ``MemoryDataset``): stores the
           full ``requests.Response`` object
 
-        The persisted response can be retrieved later using:
-
-        >>> response = dataset.get_last_response() # doctest: +SKIP
+        You can later retrieve the persisted response by calling
+        ``dataset.get_last_response()`` on the dataset instance.
 
         ```yaml
         api_with_response_storage:

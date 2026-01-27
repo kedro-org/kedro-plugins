@@ -34,6 +34,7 @@ class HFDataset(AbstractDataset):
         ... except Exception as e:
         ...     print(type(e), e)
         ...     raise
+        ...
         >>> assert "test" in ds
         >>> assert len(ds["test"]) == 164
 

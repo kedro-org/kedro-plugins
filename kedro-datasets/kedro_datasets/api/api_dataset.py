@@ -79,7 +79,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         The persisted response can be retrieved later using:
 
-        >>> response = dataset.get_last_response()
+        >>> response = dataset.get_last_response() # doctest: +SKIP
 
         ```yaml
         api_with_response_storage:

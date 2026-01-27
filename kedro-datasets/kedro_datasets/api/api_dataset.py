@@ -4,6 +4,7 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 from __future__ import annotations
 
 import json as json_  # make pylint happy
+import math
 from copy import deepcopy
 from typing import Any
 
@@ -65,8 +66,20 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ... )
         >>> dataset.save(example_table)
 
-        To store API responses, use the `response_dataset` parameter to automatically
-        persist the response to a file or data store:
+        ``APIDataset`` can automatically persist the output of ``POST`` and ``PUT``
+        requests via the ``response_dataset`` parameter. This is useful for auditing,
+        debugging, or reusing API responses downstream in a pipeline.
+
+        When ``response_dataset`` is configured, the behavior is:
+
+        - For ``JSONDataset``: stores ``response.json()`` (parsed JSON payload)
+        - For ``TextDataset``: stores ``response.text`` (raw response body)
+        - For other datasets (e.g. ``PickleDataset``, ``MemoryDataset``): stores the
+          full ``requests.Response`` object
+
+        The persisted response can be retrieved later using:
+
+        >>> response = dataset.get_last_response()
 
         ```yaml
         api_with_response_storage:
@@ -257,7 +270,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def get_last_response(self) -> requests.Response:
+    def get_last_response(self) -> Any:
         if self._response_dataset is None:
             raise DatasetError(
                 "No response_dataset configured; cannot retrieve persisted response."
@@ -265,7 +278,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return self._response_dataset.load()  # type: ignore[return-value]
 
-    def load(self) -> requests.Response:
+    def load(self) -> Any:
         if self._request_args["method"] != "GET":
             raise DatasetError(
                 "Only GET method is supported for load()."
@@ -281,7 +294,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         json_data: list[dict[str, Any]],
     ) -> requests.Response:
         chunk_size = self._chunk_size
-        n_chunks = len(json_data) // chunk_size + 1
+        n_chunks = math.ceil(len(json_data) / chunk_size)
 
         for i in range(n_chunks):
             send_data = json_data[i * chunk_size : (i + 1) * chunk_size]

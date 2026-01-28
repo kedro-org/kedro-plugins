@@ -187,7 +187,7 @@ class TestLangChainPromptDataset:
         desc = dataset._describe()
         assert desc["template"] == "PromptTemplate"
         assert desc["underlying_dataset"] == "TextDataset"
-        assert desc["path"] == str(txt_prompt_file)
+        assert desc["path"] == str(txt_prompt_file.resolve())
 
     def test_exists(self, txt_prompt_file: Path) -> None:
         """Test the _exists method."""

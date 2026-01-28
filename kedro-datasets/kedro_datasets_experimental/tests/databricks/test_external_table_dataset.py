@@ -1,5 +1,6 @@
-import pytest
 import sys
+
+import pytest
 from kedro.io.core import DatasetError
 from pyspark.sql import DataFrame
 

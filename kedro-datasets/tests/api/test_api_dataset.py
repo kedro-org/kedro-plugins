@@ -1,11 +1,13 @@
 import base64
 import json
+import pickle
 import socket
 from typing import Any
 
 import pytest
 import requests
 from kedro.io.core import DatasetError
+from kedro.io.memory_dataset import MemoryDataset
 from requests.auth import HTTPBasicAuth
 
 from kedro_datasets.api import APIDataset
@@ -243,6 +245,19 @@ class TestAPIDataset:
 
         assert api_dataset.exists()
 
+    def test_exists_false_for_post_method(self, requests_mock):
+        """
+        For non-GET requests, ``exists()`` should return False
+        and should not execute the HTTP request.
+        """
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+        )
+
+        assert not api_dataset.exists()
+
     def test_http_error(self, requests_mock):
         api_dataset = APIDataset(
             url=TEST_URL,
@@ -395,3 +410,294 @@ class TestAPIDataset:
             DatasetError, match="Failed to connect to the remote server"
         ):
             api_dataset.save(TEST_SAVE_DATA[0])
+
+
+class TestAPIDatasetResponseDataset:
+    """Test suite for the wrapped dataset response storage feature."""
+
+    def test_response_dataset_with_json(self, requests_mock, tmp_path):
+        """
+        When saving a POST request with JSONDataset response storage,
+        The API response should be stored in the dataset.
+        """
+        response_data = {"result": "success", "data": [1, 2, 3]}
+        json_file = tmp_path / "response.json"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+            headers=TEST_HEADERS,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"input": "data"})
+        assert isinstance(response, requests.Response)
+        assert response.json() == response_data
+
+        # Verify the response was stored in the response dataset
+        assert json_file.exists()
+        with open(json_file) as f:
+            stored_data = json.load(f)
+        assert stored_data == response_data
+
+    def test_response_dataset_with_text(self, requests_mock, tmp_path):
+        """
+        When saving a PUT request with TextDataset response storage,
+        The API response should be stored as text.
+        """
+        response_text = "Operation completed successfully"
+        text_file = tmp_path / "response.txt"
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="PUT",
+            save_args={"headers": TEST_HEADERS},
+            response_dataset={"type": "text.TextDataset", "filepath": str(text_file)},
+        )
+        requests_mock.register_uri(
+            "PUT",
+            TEST_URL,
+            text=response_text,
+            headers=TEST_HEADERS,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"update": "payload"})
+        assert isinstance(response, requests.Response)
+        assert response.text == response_text
+
+        # Verify the response was stored in the response dataset
+        assert text_file.exists()
+        with open(text_file) as f:
+            stored_data = f.read()
+        assert stored_data == response_text
+
+    def test_response_dataset_with_pickle(self, requests_mock, tmp_path):
+        """
+        When saving with PickleDataset response storage,
+        The full API Response object should be stored.
+        """
+        response_data = {"status": "ok", "message": "Data processed"}
+        pickle_file = tmp_path / "response.pkl"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset={
+                "type": "pickle.PickleDataset",
+                "filepath": str(pickle_file),
+            },
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Verify the response was stored in the response dataset
+        assert pickle_file.exists()
+        with open(pickle_file, "rb") as f:
+            stored_response = pickle.load(f)
+        assert isinstance(stored_response, requests.Response)
+
+    def test_wrapped_dataset_with_memory_extension(self, requests_mock):
+        """
+        When saving with MemoryDataset response storage,
+        The full API Response object should be stored in memory.
+        """
+        response_data = {"stored": "in_memory"}
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset={"type": "kedro.io.MemoryDataset"},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"test": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Retrieve from memory dataset to verify it was stored
+        loaded_response = api_dataset.get_last_response()
+        assert isinstance(loaded_response, requests.Response)
+
+    def test_load_from_response_dataset_json(self, requests_mock, tmp_path):
+        """
+        When loading with POST method and response_dataset configured,
+        Should return the data from the response dataset.
+        """
+        stored_data = {"cached": "response", "value": 42}
+        json_file = tmp_path / "response.json"
+
+        # Pre-create the JSON file
+        with open(json_file, "w") as f:
+            json.dump(stored_data, f)
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
+        )
+
+        # Load should return the data from response dataset
+        loaded_data = api_dataset.get_last_response()
+        assert loaded_data == stored_data
+
+    def test_get_last_response_without_response_dataset_raises(self):
+        """
+        get_last_response() should raise DatasetError
+        when no response_dataset is configured.
+        """
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+        )
+
+        with pytest.raises(DatasetError, match="No response_dataset configured"):
+            api_dataset.get_last_response()
+
+    def test_no_response_dataset_save_returns_response(self, requests_mock):
+        """
+        When saving without response_dataset configuration,
+        Should return the response without storing it.
+        """
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return {"result": "ok"}
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"headers": TEST_HEADERS},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+            headers=TEST_HEADERS,
+        )
+
+        response = api_dataset.save.__wrapped__(api_dataset, TEST_SAVE_DATA)
+        assert isinstance(response, requests.Response)
+        assert response.json() == {"result": "ok"}
+
+    def test_response_dataset_with_unknown_type(self, tmp_path):
+        """
+        When using an unknown dataset type,
+        Should raise a DatasetError during initialization.
+        """
+        with pytest.raises(DatasetError):
+            APIDataset(
+                url=TEST_URL,
+                method="POST",
+                response_dataset={"type": "nonexistent.FakeDataset"},
+            )
+
+    def test_describe_with_response_dataset(self, requests_mock, tmp_path):
+        """
+        When describing an APIDataset with response_dataset,
+        The description should include response dataset info.
+        """
+        json_file = tmp_path / "response.json"
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
+        )
+        requests_mock.register_uri("POST", TEST_URL, json={})
+
+        description = api_dataset._describe()
+        assert "url" in description
+        assert "method" in description
+        assert "response_dataset" in description
+
+    def test_save_with_chunks_and_response_dataset(self, requests_mock, tmp_path):
+        """
+        When saving chunked data with response_dataset,
+        Only the final response should be stored.
+        """
+        response_data = {"processed": True}
+        json_file = tmp_path / "response.json"
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            save_args={"chunk_size": 2},
+            response_dataset={"type": "json.JSONDataset", "filepath": str(json_file)},
+        )
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save a list that will be chunked (3 items with chunk_size=2 = 2 requests)
+        chunked_data = [{"id": 1}, {"id": 2}, {"id": 3}]
+        response = api_dataset.save.__wrapped__(api_dataset, chunked_data)
+        assert isinstance(response, requests.Response)
+
+        # Verify the final response was stored
+        assert json_file.exists()
+        with open(json_file) as f:
+            stored_data = json.load(f)
+        assert stored_data == response_data
+
+    def test_response_dataset_with_dataset_class(self, requests_mock):
+        """
+        When response_dataset is provided as a dataset class (advanced usage),
+        The API response should be stored according to the dataset behavior.
+        """
+        response_data = {"advanced": "usage"}
+
+        def json_callback(request: requests.Request, context: Any) -> dict:
+            return response_data
+
+        api_dataset = APIDataset(
+            url=TEST_URL,
+            method="POST",
+            response_dataset=MemoryDataset,  # dataset class, not string or dict
+        )
+
+        requests_mock.register_uri(
+            "POST",
+            TEST_URL,
+            json=json_callback,
+        )
+
+        # Save data
+        response = api_dataset.save.__wrapped__(api_dataset, {"input": "data"})
+        assert isinstance(response, requests.Response)
+
+        # Verify stored response
+        stored_response = api_dataset.get_last_response()
+        assert isinstance(stored_response, requests.Response)
+        assert stored_response.json() == response_data

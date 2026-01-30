@@ -3,6 +3,7 @@
 ## Bug fixes and other changes
 
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+- `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.
 
 ## Community contributions
 

@@ -216,7 +216,7 @@ langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddi
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset-autogen = ["langfuse>=2.0.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]
-langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset,langfuse-langfusetracedataset-autogen]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
 opik-opikpromptdataset = ["opik>=1.8.0"]
 opik-opiktracedataset = ["opik>=1.8.0"]
 opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]

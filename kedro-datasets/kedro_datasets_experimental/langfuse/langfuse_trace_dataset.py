@@ -224,32 +224,41 @@ class LangfuseTraceDataset(AbstractDataset):
         return client_params
 
     def _build_autogen_span_processor(self) -> Any:
-        """Build and return a LangfuseSpanProcessor for AutoGen integration.
+        """Build and return a BatchSpanProcessor for AutoGen integration with Langfuse.
 
-        Creates a span processor that integrates with AutoGen's OpenTelemetry-based
-        runtime logging system. The processor uses environment variables set during
-        initialization for authentication with Langfuse.
+        Creates a span processor that sends OpenTelemetry traces to Langfuse's OTLP
+        endpoint. The processor uses credentials set during initialisation for
+        authentication with Langfuse.
 
         Returns:
-            LangfuseSpanProcessor configured for AutoGen tracing.
+            BatchSpanProcessor configured to export traces to Langfuse.
 
         Raises:
-            DatasetError: If required dependencies are not installed.
-
-        Note:
-            Requires the langfuse package with OpenTelemetry support.
-            The span processor can be used with AutoGen's runtime_logging module
-            or directly with OpenTelemetry's TracerProvider.
+            DatasetError: If required OpenTelemetry dependencies are not installed.
         """
         try:
-            from langfuse.opentelemetry import LangfuseSpanProcessor  # noqa: PLC0415
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
         except ImportError as exc:
             raise DatasetError(
-                "AutoGen mode requires langfuse with OpenTelemetry support. "
-                "Install with: pip install 'langfuse[opentelemetry]'"
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
             ) from exc
 
-        return LangfuseSpanProcessor(**self._trace_kwargs)
+        import base64  # noqa: PLC0415
+
+        auth = base64.b64encode(
+            f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
+        ).decode()
+
+        host = self._credentials.get("host", "https://cloud.langfuse.com")
+
+        exporter = OTLPSpanExporter(
+            endpoint=f"{host}/api/public/otel/v1/traces",
+            headers={"Authorization": f"Basic {auth}"}
+        )
+
+        return BatchSpanProcessor(exporter)
 
     def load(self) -> Any:
         """Load appropriate tracing client based on configured mode.

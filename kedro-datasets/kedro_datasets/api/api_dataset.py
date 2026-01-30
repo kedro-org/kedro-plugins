@@ -4,13 +4,17 @@ It uses the python requests library: https://requests.readthedocs.io/en/latest/
 from __future__ import annotations
 
 import json as json_  # make pylint happy
+import math
 from copy import deepcopy
 from typing import Any
 
 import requests
-from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError, parse_dataset_definition
 from requests import Session, sessions
 from requests.auth import AuthBase
+
+from kedro_datasets.json import JSONDataset
+from kedro_datasets.text import TextDataset
 
 
 class APIDataset(AbstractDataset[None, requests.Response]):
@@ -62,10 +66,44 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ... )
         >>> dataset.save(example_table)
 
+        ``APIDataset`` can automatically persist the output of ``POST`` and ``PUT``
+        requests via the ``response_dataset`` parameter. This is useful for auditing,
+        debugging, or reusing API responses downstream in a pipeline.
+
+        When ``response_dataset`` is configured, the behavior is:
+
+        - For ``JSONDataset``: stores ``response.json()`` (parsed JSON payload)
+        - For ``TextDataset``: stores ``response.text`` (raw response body)
+        - For other datasets (e.g. ``PickleDataset``, ``MemoryDataset``): stores the
+          full ``requests.Response`` object
+
+        You can later retrieve the persisted response by calling
+        ``dataset.get_last_response()`` on the dataset instance.
+
+        ```yaml
+        api_with_response_storage:
+          type: api.APIDataset
+          url: https://dummyjson.com/products/add
+          method: POST
+          response_dataset:
+            type: json.JSONDataset
+            filepath: data/api_response.json
+        ```
+
+        Or using the Python API:
+
+        >>> dataset = APIDataset(
+        ...     url="https://dummyjson.com/products/add",
+        ...     method="POST",
+        ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},
+        ... )
+        >>> response = dataset.save({"key": "value"})
+        >>> # The response data is automatically saved to response.json
+
     On initialisation, we can specify all the necessary parameters in the save args
     dictionary. The default HTTP(S) method is POST but PUT is also supported. Two
     important parameters to keep in mind are timeout and chunk_size. `timeout` defines
-    how long  our program waits for a response after a request. `chunk_size`, is only
+    how long our program waits for a response after a request. `chunk_size`, is only
     used if the input of save method is a list. It will divide the request into chunks
     of size `chunk_size`. For example, here we will send two requests each containing
     one row of our example DataFrame.
@@ -94,6 +132,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         save_args: dict[str, Any] | None = None,
         credentials: tuple[str, str] | list[str] | AuthBase | None = None,
         metadata: dict[str, Any] | None = None,
+        response_dataset: str | type[AbstractDataset] | dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
@@ -111,6 +150,21 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 list. An ``AuthBase`` instance can be provided for more complex cases.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
+            response_dataset: Optional dataset to automatically store API responses.
+                The API response is stored based on the dataset type:
+
+                - `JSONDataset`: Stores `response.json()` (parsed JSON data)
+                - `TextDataset`: Stores `response.text` (response body as string)
+                - Other datasets (e.g., `PickleDataset`, `MemoryDataset`): Stores the
+                  full `requests.Response` object
+
+                Can be specified as:
+
+                - A string type identifier: `"json.JSONDataset"`
+                - A dict with `"type"` key: `{"type": "json.JSONDataset", "filepath": "..."}`
+                - A dataset class (advanced usage)
+
+                If `None` (default), responses are not automatically stored.
 
         Raises:
             ValueError: if both ``auth`` and ``credentials`` are specified or used
@@ -118,11 +172,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         """
         super().__init__()
 
-        # GET method means load
         if method == "GET":
             self._params = load_args or {}
 
-        # PUT, POST means save
         elif method in ["PUT", "POST"]:
             self._params = deepcopy(self.DEFAULT_SAVE_ARGS)
             if save_args is not None:
@@ -153,6 +205,22 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         self.metadata = metadata
 
+        # Initialize response dataset if provided
+        self._response_dataset_type: type[AbstractDataset[Any, Any]] | None = None
+        self._response_dataset_config: dict[str, Any] | None = None
+        self._response_dataset_instance: AbstractDataset[Any, Any] | None = None
+
+        if response_dataset is not None:
+            dataset_config = (
+                response_dataset
+                if isinstance(response_dataset, dict)
+                else {"type": response_dataset}
+            )
+            (
+                self._response_dataset_type,
+                self._response_dataset_config,
+            ) = parse_dataset_definition(dataset_config)
+
     @staticmethod
     def _convert_type(value: Any):
         """
@@ -164,11 +232,31 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             return tuple(value)
         return value
 
+    @property
+    def _response_dataset(self) -> AbstractDataset | None:
+        """Lazily create and cache the response dataset instance."""
+        if self._response_dataset_type is None:
+            return None
+
+        if self._response_dataset_instance is None:
+            # Type guard: _response_dataset_config is not None when _response_dataset_type is not None
+            assert self._response_dataset_config is not None
+            self._response_dataset_instance = self._response_dataset_type(
+                **self._response_dataset_config
+            )
+
+        return self._response_dataset_instance
+
     def _describe(self) -> dict[str, Any]:
         # prevent auth from logging
         request_args_cp = self._request_args.copy()
         request_args_cp.pop("auth", None)
-        return request_args_cp
+
+        result = dict(request_args_cp)
+        if self._response_dataset is not None:
+            result["response_dataset"] = self._response_dataset._describe()
+
+        return result
 
     def _execute_request(self, session: Session) -> requests.Response:
         try:
@@ -181,19 +269,31 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return response
 
-    def load(self) -> requests.Response:
-        if self._request_args["method"] == "GET":
-            with sessions.Session() as session:
-                return self._execute_request(session)
+    def get_last_response(self) -> Any:
+        if self._response_dataset is None:
+            raise DatasetError(
+                "No response_dataset configured; cannot retrieve persisted response."
+            )
 
-        raise DatasetError("Only GET method is supported for load")
+        return self._response_dataset.load()  # type: ignore[return-value]
+
+    def load(self) -> Any:
+        if self._request_args["method"] != "GET":
+            raise DatasetError(
+                "Only GET method is supported for load()."
+                "Use save() to send data or get_last_response() to retrieve "
+                "a persisted response."
+            )
+
+        with sessions.Session() as session:
+            return self._execute_request(session)
 
     def _execute_save_with_chunks(
         self,
         json_data: list[dict[str, Any]],
     ) -> requests.Response:
         chunk_size = self._chunk_size
-        n_chunks = len(json_data) // chunk_size + 1
+        n_chunks = math.ceil(len(json_data) / chunk_size)
 
         for i in range(n_chunks):
             send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
@@ -219,13 +319,31 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     def save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
-                return self._execute_save_with_chunks(json_data=data)
+                response: requests.Response = self._execute_save_with_chunks(
+                    json_data=data
+                )
+            else:
+                response: requests.Response = self._execute_save_request(json_data=data)
 
-            return self._execute_save_request(json_data=data)
+            if self._response_dataset is not None:
+                if isinstance(self._response_dataset, JSONDataset):
+                    extracted_data = response.json()
+                elif isinstance(self._response_dataset, TextDataset):
+                    extracted_data = response.text
+                else:
+                    extracted_data = response
+
+                self._response_dataset.save(extracted_data)
+
+            return response
 
         raise DatasetError("Use PUT or POST methods for save")
 
     def _exists(self) -> bool:
+        if self._request_args["method"] != "GET":
+            return False
+
         with sessions.Session() as session:
             response = self._execute_request(session)
+
         return response.ok

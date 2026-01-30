@@ -10,9 +10,6 @@ logger = logging.getLogger(__name__)
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
-# Default Opik Cloud OTEL endpoint
-DEFAULT_OPIK_OTEL_ENDPOINT = "https://www.comet.com/opik/api/v1/private/otel"
-
 
 class OpikTraceDataset(AbstractDataset):
     """Kedro dataset for managing Opik tracing clients and callbacks.
@@ -23,95 +20,113 @@ class OpikTraceDataset(AbstractDataset):
 
     **Modes:**
 
-    - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
-    - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
-    - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
-    - `autogen`: Returns an `AutogenTracer` for AutoGen agent tracing via OpenTelemetry.
+    - ``sdk``: Returns a simple namespace-like client exposing the ``track`` decorator for manual tracing.
+    - ``openai``: Returns an OpenAI client automatically wrapped for Opik tracing.
+    - ``langchain``: Returns an ``OpikTracer`` callback handler for LangChain integration.
+    - ``autogen``: Returns a ``BatchSpanProcessor`` for AutoGen integration via OTLP.
 
     **Examples**
 
     Using catalog YAML configuration:
-    ```yaml
-    opik_trace:
-      type: kedro_datasets_experimental.opik.OpikTraceDataset
-      credentials: opik_credentials
-      mode: openai
-    ```
+
+    .. code-block:: yaml
+
+        opik_trace:
+          type: kedro_datasets_experimental.opik.OpikTraceDataset
+          credentials: opik_credentials
+          mode: openai
 
     Using Python API:
-    ```python
-    from kedro_datasets_experimental.opik import OpikTraceDataset
 
-    # Example: OpenAI mode (traced completions)
-    dataset = OpikTraceDataset(
-        credentials={
-            "api_key": "opik_api_key",  # pragma: allowlist secret
-            "workspace": "my-workspace",
-            "project_name": "kedro-demo",
-            "openai": {
-                "openai_api_key": "sk-...",  # pragma: allowlist secret
-                "openai_api_base": "https://api.openai.com/v1",
+    .. code-block:: python
+
+        from kedro_datasets_experimental.opik import OpikTraceDataset
+
+        # Example: OpenAI mode (traced completions)
+        dataset = OpikTraceDataset(
+            credentials={
+                "api_key": "opik_api_key",  # pragma: allowlist secret
+                "workspace": "my-workspace",
+                "project_name": "kedro-demo",
+                "openai": {
+                    "openai_api_key": "sk-...",  # pragma: allowlist secret
+                    "openai_api_base": "https://api.openai.com/v1",
+                },
             },
-        },
-        mode="openai",
-    )
-    client = dataset.load()
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Summarize Kedro in one sentence."},
-        ],
-    )
+            mode="openai",
+        )
+        client = dataset.load()
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "Summarize Kedro in one sentence."},
+            ],
+        )
 
-    # Example: SDK mode (manual tracing via decorator)
-    dataset = OpikTraceDataset(
-        credentials={
-            "api_key": "opik_api_key",  # pragma: allowlist secret
-            "workspace": "my-workspace",
-            "project_name": "kedro-sdk-demo",
-        },
-        mode="sdk",
-    )
-    client = dataset.load()
-
-
-    @client.track(name="demo_workflow")
-    def multiply(x: int, y: int) -> int:
-        return x * y
+        # Example: SDK mode (manual tracing via decorator)
+        dataset = OpikTraceDataset(
+            credentials={
+                "api_key": "opik_api_key",  # pragma: allowlist secret
+                "workspace": "my-workspace",
+                "project_name": "kedro-sdk-demo",
+            },
+            mode="sdk",
+        )
+        client = dataset.load()
 
 
-    print(multiply(3, 4))
+        @client.track(name="demo_workflow")
+        def multiply(x: int, y: int) -> int:
+            return x * y
 
-    # Example: LangChain mode
-    dataset = OpikTraceDataset(
-        credentials={
-            "api_key": "opik_api_key",  # pragma: allowlist secret
-            "workspace": "my-workspace",
-        },
-        mode="langchain",
-    )
-    tracer = dataset.load()
-    # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
 
-    # Example: AutoGen mode
-    dataset = OpikTraceDataset(
-        credentials={
-            "api_key": "opik_api_key",  # pragma: allowlist secret
-            "workspace": "my-workspace",
-            "project_name": "autogen-demo",
-        },
-        mode="autogen",
-    )
-    tracer = dataset.load()
-    # tracer.setup() configures OpenTelemetry for AutoGen
-    # Then use AutoGen agents normally - traces are sent to Opik
-    ```
+        print(multiply(3, 4))
+
+        # Example: LangChain mode
+        dataset = OpikTraceDataset(
+            credentials={
+                "api_key": "opik_api_key",  # pragma: allowlist secret
+                "workspace": "my-workspace",
+            },
+            mode="langchain",
+        )
+        tracer = dataset.load()
+        # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
+
+        # Example: AutoGen mode (agent tracing via OpenTelemetry)
+        dataset = OpikTraceDataset(
+            credentials={
+                "api_key": "opik_api_key",  # pragma: allowlist secret
+                "workspace": "my-workspace",
+                "project_name": "autogen-demo",
+            },
+            mode="autogen",
+        )
+        span_processor = dataset.load()
+
+        # Set up OpenTelemetry with the Opik span processor
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry import trace
+
+        provider = TracerProvider()
+        provider.add_span_processor(span_processor)
+        trace.set_tracer_provider(provider)
+
+        # Option 1: Automatic tracing (LLM calls traced automatically)
+        agent.invoke(context)  # Traces sent to Opik
+
+        # Option 2: Add custom parent span with business context (recommended)
+        tracer = trace.get_tracer(__name__)
+        with tracer.start_as_current_span("my_workflow") as span:
+            span.set_attribute("user_id", "123")
+            span.set_attribute("intent", "claim_new")
+            agent.invoke(context)  # Child spans nested under "my_workflow"
 
     **Notes**
 
     - Opik configuration is global within the Python process.
-      Using multiple `OpikTraceDataset` instances with different projects in the same session
+      Using multiple ``OpikTraceDataset`` instances with different projects in the same session
       may cause all traces to log to the first configured project.
     - To switch projects, restart the Python process or reload the Opik module.
     """
@@ -128,7 +143,9 @@ class OpikTraceDataset(AbstractDataset):
         self._cached_client = None
 
         self._validate_opik_credentials()
-        self._configure_opik()
+        # Skip Opik SDK configuration for autogen mode (uses OTLP directly)
+        if self._mode != "autogen":
+            self._configure_opik()
 
     def _validate_opik_credentials(self) -> None:
         """Validate Opik credentials before configuring the environment."""
@@ -195,6 +212,50 @@ class OpikTraceDataset(AbstractDataset):
 
         return params
 
+    def _build_autogen_span_processor(self) -> Any:
+        """Build and return a BatchSpanProcessor for AutoGen integration with Opik.
+
+        Creates a span processor that sends OpenTelemetry traces to Opik's OTLP
+        endpoint. The processor uses credentials set during initialisation for
+        authentication with Opik.
+
+        Returns:
+            BatchSpanProcessor configured to export traces to Opik.
+
+        Raises:
+            DatasetError: If required OpenTelemetry dependencies are not installed.
+        """
+        try:
+            from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
+        except ImportError as exc:
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            ) from exc
+
+        # Build headers for Opik authentication
+        headers = {
+            "Authorization": self._credentials["api_key"],
+            "Comet-Workspace": self._credentials["workspace"],
+        }
+
+        # Add project name if specified
+        project_name = self._credentials.get("project_name")
+        if project_name:
+            headers["projectName"] = project_name
+
+        # Use Opik's OTLP endpoint (or custom url_override)
+        base_url = self._credentials.get("url_override", "https://www.comet.com")
+        endpoint = f"{base_url}/opik/api/v1/private/otel/v1/traces"
+
+        exporter = OTLPSpanExporter(
+            endpoint=endpoint,
+            headers=headers
+        )
+
+        return BatchSpanProcessor(exporter)
+
     def _describe(self) -> dict[str, Any]:
         """Describe dataset configuration with credentials redacted."""
         creds = self._credentials.copy()
@@ -207,7 +268,18 @@ class OpikTraceDataset(AbstractDataset):
         }
 
     def load(self) -> Any:
-        """Load the appropriate tracing client based on the configured mode."""
+        """Load the appropriate tracing client based on the configured mode.
+
+        Returns:
+            Tracing client object based on mode:
+            - sdk mode: SDKClient wrapper exposing the track decorator
+            - openai mode: Wrapped OpenAI client with automatic tracing
+            - langchain mode: OpikTracer callback handler
+            - autogen mode: BatchSpanProcessor for OpenTelemetry integration
+
+        Raises:
+            DatasetError: If mode-specific dependencies are missing or credentials are invalid.
+        """
         if self._cached_client is not None:
             return self._cached_client
 
@@ -218,7 +290,7 @@ class OpikTraceDataset(AbstractDataset):
         elif self._mode == "langchain":
             self._cached_client = self._load_langchain_tracer()
         elif self._mode == "autogen":
-            self._cached_client = self._load_autogen_tracer()
+            self._cached_client = self._build_autogen_span_processor()
         else:
             raise DatasetError(f"Unsupported mode '{self._mode}' for OpikTraceDataset")
 
@@ -272,149 +344,6 @@ class OpikTraceDataset(AbstractDataset):
             raise DatasetError("Opik LangChain integration not available.") from e
 
         return OpikTracer(**self._trace_kwargs)
-
-    def _load_autogen_tracer(self) -> Any:
-        """Return an AutogenTracer for AutoGen agent tracing via OpenTelemetry.
-
-        Creates a tracer object that configures OpenTelemetry to send traces to Opik.
-        AutoGen uses OpenTelemetry for its tracing, so we set up an OTLP exporter
-        that sends spans to Opik's OTEL endpoint.
-
-        Returns:
-            AutogenTracer: A tracer object with a setup() method to configure OpenTelemetry.
-
-        Raises:
-            DatasetError: If required OpenTelemetry dependencies are not installed.
-
-        Example:
-            dataset = OpikTraceDataset(credentials=creds, mode="autogen")
-            tracer = dataset.load()
-            tracer.setup()  # Configures OpenTelemetry
-
-            # Now use AutoGen agents - traces are automatically sent to Opik
-            from autogen_agentchat.agents import AssistantAgent
-            agent = AssistantAgent(name="assistant", model_client=model_client)
-        """
-        try:
-            from opentelemetry import trace  # noqa: PLC0415
-            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
-            from opentelemetry.sdk.resources import Resource  # noqa: PLC0415
-            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
-            from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
-        except ImportError as e:
-            raise DatasetError(
-                "AutoGen mode requires OpenTelemetry packages. "
-                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp"
-            ) from e
-
-        # Build OTEL configuration from credentials
-        api_key = self._credentials["api_key"]
-        workspace = self._credentials["workspace"]
-        project_name = self._credentials.get("project_name", "Default Project")
-        url_override = self._credentials.get("url_override")
-
-        # Determine endpoint
-        if url_override:
-            # For self-hosted, append OTEL path
-            endpoint = f"{url_override.rstrip('/')}/api/v1/private/otel"
-        else:
-            endpoint = DEFAULT_OPIK_OTEL_ENDPOINT
-
-        # Build headers
-        headers = f"Authorization={api_key},Comet-Workspace={workspace},projectName={project_name}"
-
-        # Get service name from trace_kwargs or use default
-        service_name = self._trace_kwargs.get("service_name", "autogen-kedro")
-        service_version = self._trace_kwargs.get("service_version", "1.0.0")
-        environment = self._trace_kwargs.get("environment", "development")
-
-        class AutogenTracer:
-            """Tracer for AutoGen that configures OpenTelemetry to send traces to Opik."""
-
-            def __init__(
-                self,
-                otel_endpoint: str,
-                otel_headers: str,
-                svc_name: str,
-                svc_version: str,
-                env: str,
-            ):
-                self._endpoint = otel_endpoint
-                self._headers = otel_headers
-                self._service_name = svc_name
-                self._service_version = svc_version
-                self._environment = env
-                self._provider = None
-
-            def setup(self) -> "TracerProvider":
-                """Configure OpenTelemetry with OTLP exporter for Opik.
-
-                Sets up the TracerProvider with BatchSpanProcessor and OTLPSpanExporter.
-                Call this method before running AutoGen agents.
-
-                Returns:
-                    TracerProvider: The configured tracer provider.
-
-                Example:
-                    tracer = dataset.load()
-                    provider = tracer.setup()
-
-                    # Optionally instrument OpenAI calls
-                    from opentelemetry.instrumentation.openai import OpenAIInstrumentor
-                    OpenAIInstrumentor().instrument()
-
-                    # Now run AutoGen agents
-                """
-                # Set environment variables for OTEL
-                os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = self._endpoint
-                os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = self._headers
-
-                # Create resource with service metadata
-                resource = Resource.create({
-                    "service.name": self._service_name,
-                    "service.version": self._service_version,
-                    "deployment.environment": self._environment,
-                })
-
-                # Create TracerProvider with resource
-                self._provider = TracerProvider(resource=resource)
-
-                # Create BatchSpanProcessor with OTLPSpanExporter
-                processor = BatchSpanProcessor(OTLPSpanExporter())
-                self._provider.add_span_processor(processor)
-
-                # Set as global tracer provider
-                trace.set_tracer_provider(self._provider)
-
-                return self._provider
-
-            def get_tracer(self, name: str = __name__) -> Any:
-                """Get a tracer instance for creating spans.
-
-                Args:
-                    name: The name for the tracer, typically __name__.
-
-                Returns:
-                    A tracer instance for creating spans.
-                """
-                if self._provider is None:
-                    self.setup()
-                return trace.get_tracer(name)
-
-            @property
-            def provider(self) -> "TracerProvider":
-                """Get the TracerProvider, setting up if needed."""
-                if self._provider is None:
-                    self.setup()
-                return self._provider
-
-        return AutogenTracer(
-            otel_endpoint=endpoint,
-            otel_headers=headers,
-            svc_name=service_name,
-            svc_version=service_version,
-            env=environment,
-        )
 
     def save(self, data: Any) -> None:
         """Saving traces manually is not supported; OpikTraceDataset is read-only."""

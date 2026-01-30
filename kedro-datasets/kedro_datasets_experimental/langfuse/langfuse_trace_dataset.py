@@ -300,6 +300,16 @@ class LangfuseTraceDataset(AbstractDataset):
                 provider.add_span_processor(span_processor)
                 trace.set_tracer_provider(provider)
 
+                # Option 1: Automatic tracing (LLM calls traced automatically)
+                agent.invoke(context)  # Traces sent to Langfuse
+
+                # Option 2: Add custom parent span with extra context:
+                tracer = trace.get_tracer(__name__)
+                with tracer.start_as_current_span("my_workflow") as span:
+                span.set_attribute("user_id", "123")
+                span.set_attribute("intent", "claim_new")
+                agent.invoke(context)  # Child spans nested under "my_workflow"
+
                 # Now AutoGen agents will be automatically traced
                 from autogen import AssistantAgent, UserProxyAgent
                 assistant = AssistantAgent("assistant", llm_config={"model": "gpt-4"})

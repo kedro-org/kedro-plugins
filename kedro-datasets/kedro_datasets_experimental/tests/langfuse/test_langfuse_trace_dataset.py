@@ -168,10 +168,15 @@ class TestLangfuseTraceDataset:
         mock_openai_class.assert_called_once_with(api_key="sk-test") # pragma: allowlist secret
         assert result == mock_openai_instance
 
-    def test_openai_mode_missing_credentials(self):
+    def test_openai_mode_missing_credentials(self, mocker):
         """Test OpenAI mode raises error when OpenAI credentials missing."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        mock_openai_module = MagicMock()
+        mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
+
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
             mode="openai"
         )
 
@@ -189,17 +194,28 @@ class TestLangfuseTraceDataset:
         assert description == {"mode": "langchain", "credentials": "***"}
 
     def test_autogen_mode(self, mocker):
-        """Test AutoGen mode returns LangfuseSpanProcessor."""
+        """Test AutoGen mode returns BatchSpanProcessor with OTLPSpanExporter."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        # Create mock OpenTelemetry module
-        mock_otel_module = MagicMock()
-        mock_span_processor_class = MagicMock()
-        mock_span_processor_instance = MagicMock()
-        mock_span_processor_class.return_value = mock_span_processor_instance
-        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+        # Create mock OpenTelemetry modules
+        mock_batch_span_processor = MagicMock()
+        mock_batch_span_processor_instance = MagicMock()
+        mock_batch_span_processor.return_value = mock_batch_span_processor_instance
 
-        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+        mock_otlp_exporter = MagicMock()
+        mock_otlp_exporter_instance = MagicMock()
+        mock_otlp_exporter.return_value = mock_otlp_exporter_instance
+
+        mock_otel_export_module = MagicMock()
+        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
+
+        mock_otlp_module = MagicMock()
+        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
+
+        mocker.patch.dict("sys.modules", {
+            "opentelemetry.sdk.trace.export": mock_otel_export_module,
+            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
+        })
 
         dataset = LangfuseTraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
@@ -207,45 +223,72 @@ class TestLangfuseTraceDataset:
         )
 
         result = dataset.load()
-        mock_span_processor_class.assert_called_once_with()
-        assert result == mock_span_processor_instance
 
-    def test_autogen_mode_with_trace_kwargs(self, mocker):
-        """Test AutoGen mode passes trace_kwargs to LangfuseSpanProcessor."""
+        # Verify OTLPSpanExporter was called with correct endpoint and auth header
+        mock_otlp_exporter.assert_called_once()
+        call_kwargs = mock_otlp_exporter.call_args[1]
+        assert "endpoint" in call_kwargs
+        assert call_kwargs["endpoint"] == "https://cloud.langfuse.com/api/public/otel/v1/traces"
+        assert "headers" in call_kwargs
+        assert "Authorization" in call_kwargs["headers"]
+        assert call_kwargs["headers"]["Authorization"].startswith("Basic ")
+
+        # Verify BatchSpanProcessor was created with the exporter
+        mock_batch_span_processor.assert_called_once_with(mock_otlp_exporter_instance)
+        assert result == mock_batch_span_processor_instance
+
+    def test_autogen_mode_with_custom_host(self, mocker):
+        """Test AutoGen mode uses custom host for OTLP endpoint."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        # Create mock OpenTelemetry module
-        mock_otel_module = MagicMock()
-        mock_span_processor_class = MagicMock()
-        mock_span_processor_instance = MagicMock()
-        mock_span_processor_class.return_value = mock_span_processor_instance
-        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+        mock_batch_span_processor = MagicMock()
+        mock_otlp_exporter = MagicMock()
 
-        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+        mock_otel_export_module = MagicMock()
+        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
+
+        mock_otlp_module = MagicMock()
+        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
+
+        mocker.patch.dict("sys.modules", {
+            "opentelemetry.sdk.trace.export": mock_otel_export_module,
+            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
+        })
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
-            mode="autogen",
-            sample_rate=0.5,
-            debug=True
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test",  # pragma: allowlist secret
+                "host": "https://custom.langfuse.com"
+            },
+            mode="autogen"
         )
 
-        result = dataset.load()
-        mock_span_processor_class.assert_called_once_with(sample_rate=0.5, debug=True)
-        assert result == mock_span_processor_instance
+        dataset.load()
+
+        call_kwargs = mock_otlp_exporter.call_args[1]
+        assert call_kwargs["endpoint"] == "https://custom.langfuse.com/api/public/otel/v1/traces"
 
     def test_autogen_mode_caching(self, mocker):
         """Test that AutoGen mode caches the span processor."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        # Create mock OpenTelemetry module
-        mock_otel_module = MagicMock()
-        mock_span_processor_class = MagicMock()
-        mock_span_processor_instance = MagicMock()
-        mock_span_processor_class.return_value = mock_span_processor_instance
-        mock_otel_module.LangfuseSpanProcessor = mock_span_processor_class
+        mock_batch_span_processor = MagicMock()
+        mock_batch_span_processor_instance = MagicMock()
+        mock_batch_span_processor.return_value = mock_batch_span_processor_instance
 
-        mocker.patch.dict("sys.modules", {"langfuse.opentelemetry": mock_otel_module})
+        mock_otlp_exporter = MagicMock()
+
+        mock_otel_export_module = MagicMock()
+        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
+
+        mock_otlp_module = MagicMock()
+        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
+
+        mocker.patch.dict("sys.modules", {
+            "opentelemetry.sdk.trace.export": mock_otel_export_module,
+            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
+        })
 
         dataset = LangfuseTraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
@@ -257,7 +300,7 @@ class TestLangfuseTraceDataset:
         result2 = dataset.load()
 
         # Should only create span processor once due to caching
-        mock_span_processor_class.assert_called_once()
+        mock_batch_span_processor.assert_called_once()
         assert result1 is result2  # Same instance
 
     def test_autogen_mode_sets_environment_variables(self, mocker):
@@ -276,6 +319,24 @@ class TestLangfuseTraceDataset:
         assert os.environ["LANGFUSE_PUBLIC_KEY"] == "pk_test_autogen"
         assert os.environ["LANGFUSE_SECRET_KEY"] == "sk_test_autogen"  # pragma: allowlist secret
         assert os.environ["LANGFUSE_HOST"] == "https://custom.langfuse.com"
+
+    def test_autogen_mode_import_error(self, mocker):
+        """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Make the import fail
+        mocker.patch.dict("sys.modules", {
+            "opentelemetry.sdk.trace.export": None,
+            "opentelemetry.exporter.otlp.proto.http.trace_exporter": None,
+        })
+
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
+            mode="autogen"
+        )
+
+        with pytest.raises(DatasetError, match="AutoGen mode requires OpenTelemetry"):
+            dataset.load()
 
     def test_describe_method_autogen_mode(self):
         """Test _describe returns correct format for autogen mode."""

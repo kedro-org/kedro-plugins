@@ -281,6 +281,7 @@ class TestLangfusePromptDatasetSave:
 class TestLangfusePromptDatasetLoad:
     """Test LangfusePromptDataset load functionality."""
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_load_sdk_mode(self, langfuse_dataset, mock_langfuse, mock_langfuse_prompt):
         """Test successful load in SDK mode."""
         langfuse_dataset._mode = "sdk"
@@ -327,6 +328,7 @@ class TestLangfusePromptDatasetLoad:
         call_args = mock_langfuse.get_prompt.call_args[1]
         assert call_args["label"] == "production"
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_load_langchain_mode(self, langfuse_dataset, mock_langfuse, mock_langfuse_prompt):
         """Test successful load in LangChain mode."""
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
@@ -346,6 +348,7 @@ class TestLangfusePromptDatasetLoad:
                 mock_langfuse_prompt.get_langchain_prompt()
             )
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_load_invalid_mode(self, langfuse_dataset, mock_langfuse, mock_langfuse_prompt):
         """Test load with invalid mode raises DatasetError."""
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
@@ -452,6 +455,7 @@ class TestLangfusePromptDatasetFileFormats:
 class TestLangfusePromptDatasetUtilityMethods:
     """Test utility methods and functions."""
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_describe(self, langfuse_dataset):
         """Test _describe method returns correct information."""
         desc = langfuse_dataset._describe()
@@ -477,6 +481,7 @@ class TestLangfusePromptDatasetUtilityMethods:
         file_dataset = dataset.file_dataset
         assert file_dataset.__class__.__name__ == expected_class
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_file_dataset_caching(self, langfuse_dataset):
         """Test that file_dataset is cached."""
         file_dataset1 = langfuse_dataset.file_dataset
@@ -507,6 +512,7 @@ class TestLangfusePromptDatasetUtilityMethods:
         expected = "You are helpful\nHello"
         assert _get_content(message_content) == expected
 
+    @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_preview_existing_file(self, langfuse_dataset):
         """Test preview returns JSON string for existing file."""
         preview = langfuse_dataset.preview()

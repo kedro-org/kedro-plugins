@@ -23,7 +23,7 @@ class OpikTraceDataset(AbstractDataset):
     - ``sdk``: Returns a simple namespace-like client exposing the ``track`` decorator for manual tracing.
     - ``openai``: Returns an OpenAI client automatically wrapped for Opik tracing.
     - ``langchain``: Returns an ``OpikTracer`` callback handler for LangChain integration.
-    - ``autogen``: Returns a ``BatchSpanProcessor`` for AutoGen integration via OTLP.
+    - ``autogen``: Returns a configured ``Tracer`` for AutoGen integration via OTLP.
 
     **Examples**
 
@@ -103,25 +103,16 @@ class OpikTraceDataset(AbstractDataset):
             },
             mode="autogen",
         )
-        span_processor = dataset.load()
-
-        # Set up OpenTelemetry with the Opik span processor
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry import trace
-
-        provider = TracerProvider()
-        provider.add_span_processor(span_processor)
-        trace.set_tracer_provider(provider)
+        tracer = dataset.load()  # Returns configured Tracer, ready to use
 
         # Option 1: Automatic tracing (LLM calls traced automatically)
         agent.invoke(context)  # Traces sent to Opik
 
-        # Option 2: Add custom parent span with business context (recommended)
-        tracer = trace.get_tracer(__name__)
-        with tracer.start_as_current_span("my_workflow") as span:
-            span.set_attribute("user_id", "123")
+        # Option 2: Add custom spans with business context (recommended)
+        with tracer.start_as_current_span("response_generation") as span:
             span.set_attribute("intent", "claim_new")
-            agent.invoke(context)  # Child spans nested under "my_workflow"
+            span.set_attribute("user_id", "123")
+            agent.invoke(context)  # Child spans nested under "response_generation"
 
     **Notes**
 
@@ -212,20 +203,21 @@ class OpikTraceDataset(AbstractDataset):
 
         return params
 
-    def _build_autogen_span_processor(self) -> Any:
-        """Build and return a BatchSpanProcessor for AutoGen integration with Opik.
+    def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Opik.
 
-        Creates a span processor that sends OpenTelemetry traces to Opik's OTLP
-        endpoint. The processor uses credentials set during initialisation for
-        authentication with Opik.
+        Sets up OpenTelemetry TracerProvider with OTLP exporter to Opik,
+        configures it as the global provider, and returns a ready-to-use Tracer.
 
         Returns:
-            BatchSpanProcessor configured to export traces to Opik.
+            Tracer configured to export traces to Opik.
 
         Raises:
             DatasetError: If required OpenTelemetry dependencies are not installed.
         """
         try:
+            from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
             from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
         except ImportError as exc:
@@ -254,7 +246,11 @@ class OpikTraceDataset(AbstractDataset):
             headers=headers
         )
 
-        return BatchSpanProcessor(exporter)
+        provider = TracerProvider()
+        provider.add_span_processor(BatchSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+
+        return trace.get_tracer("opik.autogen")
 
     def _describe(self) -> dict[str, Any]:
         """Describe dataset configuration with credentials redacted."""
@@ -275,7 +271,7 @@ class OpikTraceDataset(AbstractDataset):
             - sdk mode: SDKClient wrapper exposing the track decorator
             - openai mode: Wrapped OpenAI client with automatic tracing
             - langchain mode: OpikTracer callback handler
-            - autogen mode: BatchSpanProcessor for OpenTelemetry integration
+            - autogen mode: Configured Tracer for OpenTelemetry integration
 
         Raises:
             DatasetError: If mode-specific dependencies are missing or credentials are invalid.
@@ -290,7 +286,7 @@ class OpikTraceDataset(AbstractDataset):
         elif self._mode == "langchain":
             self._cached_client = self._load_langchain_tracer()
         elif self._mode == "autogen":
-            self._cached_client = self._build_autogen_span_processor()
+            self._cached_client = self._build_autogen_tracer()
         else:
             raise DatasetError(f"Unsupported mode '{self._mode}' for OpikTraceDataset")
 

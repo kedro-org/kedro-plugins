@@ -18,7 +18,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
     - **langchain:** Returns a `CallbackHandler` for LangChain integration.
     - **openai:** Returns a wrapped OpenAI client with automatic tracing.
-    - **autogen:** Returns a `LangfuseSpanProcessor` for AutoGen integration.
+    - **autogen:** Returns a configured `Tracer` for AutoGen integration via OTLP.
     - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
@@ -223,20 +223,21 @@ class LangfuseTraceDataset(AbstractDataset):
 
         return client_params
 
-    def _build_autogen_span_processor(self) -> Any:
-        """Build and return a BatchSpanProcessor for AutoGen integration with Langfuse.
+    def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Langfuse.
 
-        Creates a span processor that sends OpenTelemetry traces to Langfuse's OTLP
-        endpoint. The processor uses credentials set during initialisation for
-        authentication with Langfuse.
+        Sets up OpenTelemetry TracerProvider with OTLP exporter to Langfuse,
+        configures it as the global provider, and returns a ready-to-use Tracer.
 
         Returns:
-            BatchSpanProcessor configured to export traces to Langfuse.
+            Tracer configured to export traces to Langfuse.
 
         Raises:
             DatasetError: If required OpenTelemetry dependencies are not installed.
         """
         try:
+            from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
             from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
         except ImportError as exc:
@@ -258,7 +259,11 @@ class LangfuseTraceDataset(AbstractDataset):
             headers={"Authorization": f"Basic {auth}"}
         )
 
-        return BatchSpanProcessor(exporter)
+        provider = TracerProvider()
+        provider.add_span_processor(BatchSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+
+        return trace.get_tracer("langfuse.autogen")
 
     def load(self) -> Any:
         """Load appropriate tracing client based on configured mode.
@@ -271,7 +276,7 @@ class LangfuseTraceDataset(AbstractDataset):
             Tracing client object based on mode:
             - langchain mode: CallbackHandler for LangChain integration
             - openai mode: Wrapped OpenAI client with automatic tracing
-            - autogen mode: LangfuseSpanProcessor for AutoGen integration
+            - autogen mode: Configured Tracer for OpenTelemetry integration
             - sdk mode: Raw Langfuse client for manual tracing
 
         Raises:
@@ -290,31 +295,15 @@ class LangfuseTraceDataset(AbstractDataset):
 
             # AutoGen mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="autogen")
-                span_processor = dataset.load()
-
-                # Set up OpenTelemetry with the Langfuse span processor
-                from opentelemetry.sdk.trace import TracerProvider
-                from opentelemetry import trace
-
-                provider = TracerProvider()
-                provider.add_span_processor(span_processor)
-                trace.set_tracer_provider(provider)
+                tracer = dataset.load()  # Returns configured Tracer
 
                 # Option 1: Automatic tracing (LLM calls traced automatically)
                 agent.invoke(context)  # Traces sent to Langfuse
 
-                # Option 2: Add custom parent span with extra context:
-                tracer = trace.get_tracer(__name__)
-                with tracer.start_as_current_span("my_workflow") as span:
-                span.set_attribute("user_id", "123")
-                span.set_attribute("intent", "claim_new")
-                agent.invoke(context)  # Child spans nested under "my_workflow"
-
-                # Now AutoGen agents will be automatically traced
-                from autogen import AssistantAgent, UserProxyAgent
-                assistant = AssistantAgent("assistant", llm_config={"model": "gpt-4"})
-                user_proxy = UserProxyAgent("user", human_input_mode="NEVER")
-                user_proxy.initiate_chat(assistant, message="Hello!")  # Traced to Langfuse
+                # Option 2: Add custom spans with context
+                with tracer.start_as_current_span("response_generation") as span:
+                    span.set_attribute("intent", "claim_new")
+                    agent.invoke(context)  # Child spans nested under parent
 
             # SDK mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
@@ -334,7 +323,7 @@ class LangfuseTraceDataset(AbstractDataset):
             client_params = self._build_openai_client_params()
             self._cached_client = OpenAI(**client_params)
         elif self._mode == "autogen":
-            self._cached_client = self._build_autogen_span_processor()
+            self._cached_client = self._build_autogen_tracer()
         else:
             try:
                 from langfuse import get_client  # noqa: PLC0415

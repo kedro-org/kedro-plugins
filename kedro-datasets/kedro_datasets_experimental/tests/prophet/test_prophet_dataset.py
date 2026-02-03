@@ -75,7 +75,7 @@ class TestProphetModelDataset:
 
     def test_load_missing_file(self, prophet_model_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from dataset ProphetModelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets_experimental.prophet.prophet_dataset.ProphetModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             prophet_model_dataset.load()
 
@@ -138,7 +138,7 @@ class TestProphetModelDatasetVersioned:
 
     def test_no_versions(self, versioned_prophet_model_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ProphetModelDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets_experimental.prophet.prophet_dataset.ProphetModelDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_prophet_model_dataset.load()
 
@@ -153,7 +153,7 @@ class TestProphetModelDatasetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_prophet_model_dataset.save(dummy_model)
         pattern = (
-            r"Save path \'.+\' for ProphetModelDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets_experimental.prophet.prophet_dataset.ProphetModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -173,7 +173,7 @@ class TestProphetModelDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"ProphetModelDataset\(.+\)"
+            r"kedro_datasets_experimental.prophet.prophet_dataset.ProphetModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_prophet_model_dataset.save(dummy_model)

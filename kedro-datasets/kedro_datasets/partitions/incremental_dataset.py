@@ -13,7 +13,6 @@ from collections.abc import Callable
 from copy import deepcopy
 from typing import Any
 
-from cachetools import cachedmethod
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
@@ -178,30 +177,34 @@ class IncrementalDataset(PartitionedDataset):
 
         return {**default_config, **checkpoint_config}
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
-        checkpoint = self._read_checkpoint()
-        checkpoint_path = self._filesystem._strip_protocol(
-            self._checkpoint_config[self._filepath_arg]
-        )
-        dataset_is_versioned = VERSION_KEY in self._dataset_config
+        with self._cache_lock:
+            if self._cached_partitions is not None:
+                return self._cached_partitions
 
-        def _is_valid_partition(partition) -> bool:
-            if not partition.endswith(self._filename_suffix):
-                return False
-            if partition == checkpoint_path:
-                return False
-            if checkpoint is None:
-                # nothing was processed yet
-                return True
-            partition_id = self._path_to_partition(partition)
-            return self._comparison_func(partition_id, checkpoint)
+            checkpoint = self._read_checkpoint()
+            checkpoint_path = self._filesystem._strip_protocol(
+                self._checkpoint_config[self._filepath_arg]
+            )
+            dataset_is_versioned = VERSION_KEY in self._dataset_config
 
-        return sorted(
-            _grandparent(path) if dataset_is_versioned else path
-            for path in self._filesystem.find(self._normalized_path, **self._load_args)
-            if _is_valid_partition(path)
-        )
+            def _is_valid_partition(partition) -> bool:
+                if not partition.endswith(self._filename_suffix):
+                    return False
+                if partition == checkpoint_path:
+                    return False
+                if checkpoint is None:
+                    # nothing was processed yet
+                    return True
+                partition_id = self._path_to_partition(partition)
+                return self._comparison_func(partition_id, checkpoint)
+
+            self._cached_partitions = sorted(
+                _grandparent(path) if dataset_is_versioned else path
+                for path in self._filesystem.find(self._normalized_path, **self._load_args)
+                if _is_valid_partition(path)
+            )
+            return self._cached_partitions
 
     @property
     def _checkpoint(self) -> AbstractDataset:

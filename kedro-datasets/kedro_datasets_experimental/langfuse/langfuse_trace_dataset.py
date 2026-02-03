@@ -89,8 +89,9 @@ class LangfuseTraceDataset(AbstractDataset):
         Args:
             credentials: Dictionary with Langfuse credentials. Required keys:
                 {public_key, secret_key}. Optional keys: {host} (defaults to
-                Langfuse cloud if not provided). For OpenAI mode, may also include
-                openai section with {openai_api_key, openai_api_base}.
+                Langfuse cloud if not provided). For autogen mode, {host} is
+                required to construct the OTLP endpoint. For OpenAI mode, may
+                also include openai section with {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
@@ -124,6 +125,7 @@ class LangfuseTraceDataset(AbstractDataset):
                 dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "host": "https://cloud.langfuse.com",
             ...     },
             ...     mode="autogen"
             ... )
@@ -252,7 +254,12 @@ class LangfuseTraceDataset(AbstractDataset):
             f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
         ).decode()
 
-        host = self._credentials.get("host", "https://cloud.langfuse.com")
+        host = self._credentials.get("host")
+        if not host:
+            raise DatasetError(
+                "AutoGen mode requires 'host' in credentials (e.g. 'https://cloud.langfuse.com'). "
+                "This is needed to construct the OTLP endpoint for trace export."
+            )
 
         exporter = OTLPSpanExporter(
             endpoint=f"{host}/api/public/otel/v1/traces",

@@ -152,8 +152,8 @@ class TestPartitionedDatasetLocal:
 
         first_load = pds.load()
         assert (
-            pds._partition_cache.currsize == 1
-        )  # _list_partitions caches its result in _partition_cache
+            pds._cached_partitions is not None
+        )  # _list_partitions caches its result in _cached_partitions
         mocked_fs_invalidate.assert_called_once_with(
             pds._normalized_path
         )  # Assert it was called by load()
@@ -163,8 +163,8 @@ class TestPartitionedDatasetLocal:
         data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         new_partition = "new/data.csv"
         pds.save({new_partition: data})
-        # save() calls _invalidate_caches which clears the Cachetools
-        assert pds._partition_cache.currsize == 0
+        # save() calls _invalidate_caches which clears the cache
+        assert pds._cached_partitions is None
         mocked_fs_invalidate.assert_any_call(pds._normalized_path)
         mocked_fs_invalidate.reset_mock()  # Reset before the next load
 
@@ -173,7 +173,7 @@ class TestPartitionedDatasetLocal:
         assert new_partition not in first_load
         assert new_partition in second_load
         assert (
-            pds._partition_cache.currsize == 1
+            pds._cached_partitions is not None
         )  # Cache repopulated by the second load
         mocked_fs_invalidate.assert_called_once_with(pds._normalized_path)
 
@@ -197,14 +197,14 @@ class TestPartitionedDatasetLocal:
         ds_b = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
         ds_b.load()
 
-        assert ds_a._partition_cache.currsize == 1
-        assert ds_b._partition_cache.currsize == 1
+        assert ds_a._cached_partitions is not None
+        assert ds_b._cached_partitions is not None
 
         # invalidate cache of the dataset A
         ds_a.release()
-        assert ds_a._partition_cache.currsize == 0
+        assert ds_a._cached_partitions is None
         # cache of the dataset B is unaffected
-        assert ds_b._partition_cache.currsize == 1
+        assert ds_b._cached_partitions is not None
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataset", "pandas.ParquetDataset"])
     def test_exists(self, local_csvs, dataset):
@@ -221,7 +221,7 @@ class TestPartitionedDatasetLocal:
         pds = PartitionedDataset(path=str(local_csvs), dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
-        assert pds._partition_cache.currsize == 1
+        assert pds._cached_partitions is not None
 
         (local_csvs / partition_to_remove).unlink()
 
@@ -229,11 +229,11 @@ class TestPartitionedDatasetLocal:
         load_after_file_delete = pds.load()
         # So, it should NOT contain the removed partition.
         assert partition_to_remove not in load_after_file_delete.keys()
-        assert pds._partition_cache.currsize == 1
+        assert pds._cached_partitions is not None
 
         pds.release()
-        # Cachetools should be empty now.
-        assert pds._partition_cache.currsize == 0
+        # Cache should be empty now.
+        assert pds._cached_partitions is None
 
         # Re-scan and find the same state as load_after_file_delete.
         load_after_release_call = pds.load()
@@ -670,7 +670,7 @@ class TestPartitionedDatasetS3:
         pds = PartitionedDataset(path=mocked_csvs_in_s3, dataset=dataset)
         initial_load = pds.load()
         assert partition_to_remove in initial_load
-        assert pds._partition_cache.currsize == 1
+        assert pds._cached_partitions is not None
 
         s3 = s3fs.S3FileSystem()
         s3.rm("/".join([mocked_csvs_in_s3, partition_to_remove]))
@@ -679,11 +679,11 @@ class TestPartitionedDatasetS3:
         load_after_file_delete = pds.load()
         # So, it should NOT contain the removed partition.
         assert partition_to_remove not in load_after_file_delete.keys()
-        assert pds._partition_cache.currsize == 1
+        assert pds._cached_partitions is not None
 
         pds.release()
-        # Cachetools should be empty now.
-        assert pds._partition_cache.currsize == 0
+        # Cache should be empty now.
+        assert pds._cached_partitions is None
 
         # Re-scan and find the same state as load_after_file_delete.
         load_after_release_call = pds.load()

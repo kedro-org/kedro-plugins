@@ -264,7 +264,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             dataset_is_versioned = VERSION_KEY in self._dataset_config
             self._cached_partitions = [
                 _grandparent(path) if dataset_is_versioned else path
-                for path in self._filesystem.find(self._normalized_path, **self._load_args)
+                for path in self._filesystem.find(
+                    self._normalized_path, **self._load_args
+                )
                 if path.endswith(self._filename_suffix)
             ]
             return self._cached_partitions

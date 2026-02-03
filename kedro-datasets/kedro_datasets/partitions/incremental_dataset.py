@@ -201,7 +201,9 @@ class IncrementalDataset(PartitionedDataset):
 
             self._cached_partitions = sorted(
                 _grandparent(path) if dataset_is_versioned else path
-                for path in self._filesystem.find(self._normalized_path, **self._load_args)
+                for path in self._filesystem.find(
+                    self._normalized_path, **self._load_args
+                )
                 if _is_valid_partition(path)
             )
             return self._cached_partitions

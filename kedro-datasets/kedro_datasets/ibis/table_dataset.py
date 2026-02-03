@@ -240,5 +240,6 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
     def _exists(self) -> bool:
         return (
-            self._table_name is not None and self._table_name in self.connection.tables
+            self._table_name is not None
+            and self._table_name in self.connection.list_tables(database=self._database)
         )

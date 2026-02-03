@@ -215,6 +215,14 @@ class TestPartitionedDatasetLocal:
         empty_folder.mkdir(parents=True)
         assert not PartitionedDataset(path=str(empty_folder), dataset=dataset).exists()
 
+    def test_exists_uses_cached_partitions(self, local_csvs):
+        """Test that exists() uses cached partitions from a previous load"""
+        pds = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")
+        pds.load()
+        assert pds._cached_partitions is not None
+        assert pds.exists()
+        assert pds._cached_partitions is not None
+
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     def test_release(self, dataset, local_csvs):
         partition_to_remove = "p2.csv"

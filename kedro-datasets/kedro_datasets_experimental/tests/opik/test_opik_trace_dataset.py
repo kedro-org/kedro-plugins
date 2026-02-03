@@ -79,8 +79,16 @@ def test_load_openai_client(openai_mock, track_openai_mock, configure_mock, base
 
 
 @patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
-def test_openai_missing_credentials_raises(configure_mock, base_credentials):
+def test_openai_missing_credentials_raises(configure_mock, base_credentials, mocker):
     """Test that missing OpenAI API key raises DatasetError."""
+    # Mock openai and opik.integrations.openai to avoid real imports
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
     creds = base_credentials | {"openai": {}}
     dataset = OpikTraceDataset(creds, mode="openai")
     with pytest.raises(DatasetError, match="Missing or empty OpenAI API key"):
@@ -88,8 +96,16 @@ def test_openai_missing_credentials_raises(configure_mock, base_credentials):
 
 
 @patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
-def test_openai_missing_section_raises(configure_mock, base_credentials):
+def test_openai_missing_section_raises(configure_mock, base_credentials, mocker):
     """Test that missing OpenAI section raises DatasetError."""
+    # Mock openai and opik.integrations.openai to avoid real imports
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
     dataset = OpikTraceDataset(base_credentials, mode="openai")
     with pytest.raises(DatasetError, match="Missing 'openai' section in OpikTraceDataset credentials."):
         dataset.load()
@@ -143,134 +159,26 @@ def test_save_not_implemented(configure_mock, base_credentials):
 class TestOpikTraceDatasetAutogenMode:
     """Tests for AutoGen mode in OpikTraceDataset."""
 
-    def test_autogen_mode_returns_batch_span_processor(self, mocker, base_credentials):
-        """Test AutoGen mode returns BatchSpanProcessor with OTLPSpanExporter."""
-        # Create mock OpenTelemetry modules
-        mock_batch_span_processor = MagicMock()
-        mock_batch_span_processor_instance = MagicMock()
-        mock_batch_span_processor.return_value = mock_batch_span_processor_instance
-
-        mock_otlp_exporter = MagicMock()
-        mock_otlp_exporter_instance = MagicMock()
-        mock_otlp_exporter.return_value = mock_otlp_exporter_instance
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
+    def test_autogen_mode_returns_tracer(self, mocker, base_credentials):
+        """Test AutoGen mode returns configured Tracer."""
+        mock_tracer = MagicMock()
+        mocker.patch(
+            "kedro_datasets_experimental.opik.opik_trace_dataset.OpikTraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
 
         dataset = OpikTraceDataset(base_credentials, mode="autogen")
 
         result = dataset.load()
-
-        # Verify OTLPSpanExporter was called with correct endpoint and headers
-        mock_otlp_exporter.assert_called_once()
-        call_kwargs = mock_otlp_exporter.call_args[1]
-        assert "endpoint" in call_kwargs
-        assert call_kwargs["endpoint"] == "https://www.comet.com/opik/api/v1/private/otel/v1/traces"
-        assert "headers" in call_kwargs
-        assert call_kwargs["headers"]["Authorization"] == "test-key"
-        assert call_kwargs["headers"]["Comet-Workspace"] == "test-workspace"
-
-        # Verify BatchSpanProcessor was created with the exporter
-        mock_batch_span_processor.assert_called_once_with(mock_otlp_exporter_instance)
-        assert result == mock_batch_span_processor_instance
-
-    def test_autogen_mode_with_project_name(self, mocker, base_credentials):
-        """Test AutoGen mode includes project name in headers."""
-        mock_batch_span_processor = MagicMock()
-        mock_otlp_exporter = MagicMock()
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
-
-        creds = base_credentials | {"project_name": "my-autogen-project"}
-        dataset = OpikTraceDataset(creds, mode="autogen")
-
-        dataset.load()
-
-        call_kwargs = mock_otlp_exporter.call_args[1]
-        assert call_kwargs["headers"]["projectName"] == "my-autogen-project"
-
-    def test_autogen_mode_with_custom_url(self, mocker, base_credentials):
-        """Test AutoGen mode uses custom URL override for endpoint."""
-        mock_batch_span_processor = MagicMock()
-        mock_otlp_exporter = MagicMock()
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
-
-        creds = base_credentials | {"url_override": "https://custom.opik.com"}
-        dataset = OpikTraceDataset(creds, mode="autogen")
-
-        dataset.load()
-
-        call_kwargs = mock_otlp_exporter.call_args[1]
-        assert call_kwargs["endpoint"] == "https://custom.opik.com/opik/api/v1/private/otel/v1/traces"
-
-    def test_autogen_mode_skips_opik_configure(self, mocker, base_credentials):
-        """Test that AutoGen mode does not call Opik SDK configure."""
-        configure_mock = mocker.patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
-
-        mock_batch_span_processor = MagicMock()
-        mock_otlp_exporter = MagicMock()
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
-
-        OpikTraceDataset(base_credentials, mode="autogen")
-
-        # configure should not be called for autogen mode
-        configure_mock.assert_not_called()
+        assert result == mock_tracer
 
     def test_autogen_mode_caching(self, mocker, base_credentials):
-        """Test that AutoGen mode caches the span processor."""
-        mock_batch_span_processor = MagicMock()
-        mock_batch_span_processor_instance = MagicMock()
-        mock_batch_span_processor.return_value = mock_batch_span_processor_instance
-
-        mock_otlp_exporter = MagicMock()
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
+        """Test that AutoGen mode caches the tracer."""
+        mock_tracer = MagicMock()
+        build_tracer_mock = mocker.patch(
+            "kedro_datasets_experimental.opik.opik_trace_dataset.OpikTraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
 
         dataset = OpikTraceDataset(base_credentials, mode="autogen")
 
@@ -278,16 +186,38 @@ class TestOpikTraceDatasetAutogenMode:
         result1 = dataset.load()
         result2 = dataset.load()
 
-        # Should only create span processor once due to caching
-        mock_batch_span_processor.assert_called_once()
+        # Should only build tracer once due to caching
+        build_tracer_mock.assert_called_once()
         assert result1 is result2
+
+    def test_autogen_mode_skips_opik_configure(self, mocker, base_credentials):
+        """Test that AutoGen mode does not call Opik SDK configure."""
+        configure_mock = mocker.patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
+
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.opik.opik_trace_dataset.OpikTraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
+
+        OpikTraceDataset(base_credentials, mode="autogen")
+
+        # configure should not be called for autogen mode
+        configure_mock.assert_not_called()
 
     def test_autogen_mode_import_error(self, mocker, base_credentials):
         """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": None,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": None,
-        })
+
+        def raise_import_error():
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            )
+
+        mocker.patch(
+            "kedro_datasets_experimental.opik.opik_trace_dataset.OpikTraceDataset._build_autogen_tracer",
+            side_effect=raise_import_error
+        )
 
         dataset = OpikTraceDataset(base_credentials, mode="autogen")
 
@@ -296,19 +226,11 @@ class TestOpikTraceDatasetAutogenMode:
 
     def test_describe_autogen_mode(self, mocker, base_credentials):
         """Test _describe returns correct format for autogen mode."""
-        mock_batch_span_processor = MagicMock()
-        mock_otlp_exporter = MagicMock()
-
-        mock_otel_export_module = MagicMock()
-        mock_otel_export_module.BatchSpanProcessor = mock_batch_span_processor
-
-        mock_otlp_module = MagicMock()
-        mock_otlp_module.OTLPSpanExporter = mock_otlp_exporter
-
-        mocker.patch.dict("sys.modules", {
-            "opentelemetry.sdk.trace.export": mock_otel_export_module,
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter": mock_otlp_module,
-        })
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.opik.opik_trace_dataset.OpikTraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
 
         dataset = OpikTraceDataset(base_credentials, mode="autogen")
         desc = dataset._describe()

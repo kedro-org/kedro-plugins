@@ -246,9 +246,16 @@ class OpikTraceDataset(AbstractDataset):
             headers=headers
         )
 
-        provider = TracerProvider()
-        provider.add_span_processor(BatchSpanProcessor(exporter))
-        trace.set_tracer_provider(provider)
+        processor = BatchSpanProcessor(exporter)
+
+        # Use existing provider if already set, otherwise create a new one.
+        existing_provider = trace.get_tracer_provider()
+        if hasattr(existing_provider, "add_span_processor"):
+            existing_provider.add_span_processor(processor)
+        else:
+            provider = TracerProvider()
+            provider.add_span_processor(processor)
+            trace.set_tracer_provider(provider)
 
         return trace.get_tracer("opik.autogen")
 

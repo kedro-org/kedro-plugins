@@ -100,6 +100,7 @@ class OpikTraceDataset(AbstractDataset):
                 "api_key": "opik_api_key",  # pragma: allowlist secret
                 "workspace": "my-workspace",
                 "project_name": "autogen-demo",
+                "url_override": "https://www.comet.com",
             },
             mode="autogen",
         )
@@ -237,8 +238,13 @@ class OpikTraceDataset(AbstractDataset):
         if project_name:
             headers["projectName"] = project_name
 
-        # Use Opik's OTLP endpoint (or custom url_override)
-        base_url = self._credentials.get("url_override", "https://www.comet.com")
+        # Use Opik's OTLP endpoint (url_override is required for autogen mode)
+        base_url = self._credentials.get("url_override")
+        if not base_url:
+            raise DatasetError(
+                "AutoGen mode requires 'url_override' in credentials (e.g. 'https://www.comet.com'). "
+                "This is needed to construct the OTLP endpoint for trace export."
+            )
         endpoint = f"{base_url}/opik/api/v1/private/otel/v1/traces"
 
         exporter = OTLPSpanExporter(

@@ -149,6 +149,13 @@ class OpikTraceDataset(AbstractDataset):
             if key in self._credentials and not str(self._credentials[key]).strip():
                 raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
 
+        # AutoGen mode requires 'url_override' to construct the OTLP endpoint
+        if self._mode == "autogen" and not self._credentials.get("url_override"):
+            raise DatasetError(
+                "AutoGen mode requires 'url_override' in credentials (e.g. 'https://www.comet.com'). "
+                "This is needed to construct the OTLP endpoint for trace export."
+            )
+
     def _configure_opik(self) -> None:
         """Initialize Opik global configuration with awareness of project switching.
 
@@ -238,13 +245,8 @@ class OpikTraceDataset(AbstractDataset):
         if project_name:
             headers["projectName"] = project_name
 
-        # Use Opik's OTLP endpoint (url_override is required for autogen mode)
-        base_url = self._credentials.get("url_override")
-        if not base_url:
-            raise DatasetError(
-                "AutoGen mode requires 'url_override' in credentials (e.g. 'https://www.comet.com'). "
-                "This is needed to construct the OTLP endpoint for trace export."
-            )
+        # Use Opik's OTLP endpoint (url_override validated in _validate_opik_credentials)
+        base_url = self._credentials["url_override"]
         endpoint = f"{base_url}/opik/api/v1/private/otel/v1/traces"
 
         exporter = OTLPSpanExporter(

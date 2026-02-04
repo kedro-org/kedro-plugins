@@ -92,7 +92,7 @@ class OpikTraceDataset(AbstractDataset):
     tracer = dataset.load()
     # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
 
-    # Example: AutoGen mode (agent tracing via OpenTelemetry)
+    # Example: AutoGen mode Opik cloud
     dataset = OpikTraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
@@ -112,6 +112,19 @@ class OpikTraceDataset(AbstractDataset):
         span.set_attribute("intent", "claim_new")
         span.set_attribute("user_id", "123")
         agent.invoke(context)  # Child spans nested under "response_generation"
+
+    # Example: AutoGen mode self-hosted
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "url_override": "http://localhost:5173",
+            "endpoint": "http://localhost:5173/opik/api/v1/private/otel/v1/traces",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()
     ```
 
     **Notes**

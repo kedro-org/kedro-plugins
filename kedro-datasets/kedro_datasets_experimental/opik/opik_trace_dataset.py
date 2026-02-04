@@ -20,105 +20,103 @@ class OpikTraceDataset(AbstractDataset):
 
     **Modes:**
 
-    - ``sdk``: Returns a simple namespace-like client exposing the ``track`` decorator for manual tracing.
-    - ``openai``: Returns an OpenAI client automatically wrapped for Opik tracing.
-    - ``langchain``: Returns an ``OpikTracer`` callback handler for LangChain integration.
-    - ``autogen``: Returns a configured ``Tracer`` for AutoGen integration via OTLP.
+    - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
+    - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
+    - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
+    - `autogen`: Returns a configured ``Tracer`` for AutoGen integration via OTLP.
 
     **Examples**
 
     Using catalog YAML configuration:
-
-    .. code-block:: yaml
-
-        opik_trace:
-          type: kedro_datasets_experimental.opik.OpikTraceDataset
-          credentials: opik_credentials
-          mode: openai
+    ```yaml
+    opik_trace:
+      type: kedro_datasets_experimental.opik.OpikTraceDataset
+      credentials: opik_credentials
+      mode: openai
+    ```
 
     Using Python API:
+    ```python
+    from kedro_datasets_experimental.opik import OpikTraceDataset
 
-    .. code-block:: python
-
-        from kedro_datasets_experimental.opik import OpikTraceDataset
-
-        # Example: OpenAI mode (traced completions)
-        dataset = OpikTraceDataset(
-            credentials={
-                "api_key": "opik_api_key",  # pragma: allowlist secret
-                "workspace": "my-workspace",
-                "project_name": "kedro-demo",
-                "openai": {
-                    "openai_api_key": "sk-...",  # pragma: allowlist secret
-                    "openai_api_base": "https://api.openai.com/v1",
-                },
+    # Example: OpenAI mode (traced completions)
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "kedro-demo",
+            "openai": {
+                "openai_api_key": "sk-...",  # pragma: allowlist secret
+                "openai_api_base": "https://api.openai.com/v1",
             },
-            mode="openai",
-        )
-        client = dataset.load()
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Summarize Kedro in one sentence."},
-            ],
-        )
+        },
+        mode="openai",
+    )
+    client = dataset.load()
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Summarize Kedro in one sentence."},
+        ],
+    )
 
-        # Example: SDK mode (manual tracing via decorator)
-        dataset = OpikTraceDataset(
-            credentials={
-                "api_key": "opik_api_key",  # pragma: allowlist secret
-                "workspace": "my-workspace",
-                "project_name": "kedro-sdk-demo",
-            },
-            mode="sdk",
-        )
-        client = dataset.load()
-
-
-        @client.track(name="demo_workflow")
-        def multiply(x: int, y: int) -> int:
-            return x * y
+    # Example: SDK mode (manual tracing via decorator)
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "kedro-sdk-demo",
+        },
+        mode="sdk",
+    )
+    client = dataset.load()
 
 
-        print(multiply(3, 4))
+    @client.track(name="demo_workflow")
+    def multiply(x: int, y: int) -> int:
+        return x * y
 
-        # Example: LangChain mode
-        dataset = OpikTraceDataset(
-            credentials={
-                "api_key": "opik_api_key",  # pragma: allowlist secret
-                "workspace": "my-workspace",
-            },
-            mode="langchain",
-        )
-        tracer = dataset.load()
-        # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
 
-        # Example: AutoGen mode (agent tracing via OpenTelemetry)
-        dataset = OpikTraceDataset(
-            credentials={
-                "api_key": "opik_api_key",  # pragma: allowlist secret
-                "workspace": "my-workspace",
-                "project_name": "autogen-demo",
-                "url_override": "https://www.comet.com",
-            },
-            mode="autogen",
-        )
-        tracer = dataset.load()  # Returns configured Tracer, ready to use
+    print(multiply(3, 4))
 
-        # Option 1: Automatic tracing (LLM calls traced automatically)
-        agent.invoke(context)  # Traces sent to Opik
+    # Example: LangChain mode
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+        },
+        mode="langchain",
+    )
+    tracer = dataset.load()
+    # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
 
-        # Option 2: Add custom spans with business context (recommended)
-        with tracer.start_as_current_span("response_generation") as span:
-            span.set_attribute("intent", "claim_new")
-            span.set_attribute("user_id", "123")
-            agent.invoke(context)  # Child spans nested under "response_generation"
+    # Example: AutoGen mode (agent tracing via OpenTelemetry)
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "url_override": "https://www.comet.com",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()  # Returns configured Tracer, ready to use
+
+    # Option 1: Automatic tracing (LLM calls traced automatically)
+    agent.invoke(context)  # Traces sent to Opik
+
+    # Option 2: Add custom spans with business context (recommended)
+    with tracer.start_as_current_span("response_generation") as span:
+        span.set_attribute("intent", "claim_new")
+        span.set_attribute("user_id", "123")
+        agent.invoke(context)  # Child spans nested under "response_generation"
+    ```
 
     **Notes**
 
     - Opik configuration is global within the Python process.
-      Using multiple ``OpikTraceDataset`` instances with different projects in the same session
+      Using multiple `OpikTraceDataset` instances with different projects in the same session
       may cause all traces to log to the first configured project.
     - To switch projects, restart the Python process or reload the Opik module.
     """
@@ -135,7 +133,7 @@ class OpikTraceDataset(AbstractDataset):
         self._cached_client = None
 
         self._validate_opik_credentials()
-        # Skip Opik SDK configuration for autogen mode (uses OTLP directly)
+        # Use OTLP directly
         if self._mode != "autogen":
             self._configure_opik()
 
@@ -283,18 +281,7 @@ class OpikTraceDataset(AbstractDataset):
         }
 
     def load(self) -> Any:
-        """Load the appropriate tracing client based on the configured mode.
-
-        Returns:
-            Tracing client object based on mode:
-            - sdk mode: SDKClient wrapper exposing the track decorator
-            - openai mode: Wrapped OpenAI client with automatic tracing
-            - langchain mode: OpikTracer callback handler
-            - autogen mode: Configured Tracer for OpenTelemetry integration
-
-        Raises:
-            DatasetError: If mode-specific dependencies are missing or credentials are invalid.
-        """
+        """Load the appropriate tracing client based on the configured mode."""
         if self._cached_client is not None:
             return self._cached_client
 

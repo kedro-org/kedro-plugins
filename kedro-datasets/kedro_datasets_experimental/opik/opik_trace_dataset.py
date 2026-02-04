@@ -225,9 +225,13 @@ class OpikTraceDataset(AbstractDataset):
         """
         try:
             from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # noqa: PLC0415
+                OTLPSpanExporter,
+            )
             from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
-            from opentelemetry.sdk.trace.export import BatchSpanProcessor  # noqa: PLC0415
-            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # noqa: PLC0415
+            from opentelemetry.sdk.trace.export import (  # noqa: PLC0415
+                BatchSpanProcessor,
+            )
         except ImportError as exc:
             raise DatasetError(
                 "AutoGen mode requires OpenTelemetry. "

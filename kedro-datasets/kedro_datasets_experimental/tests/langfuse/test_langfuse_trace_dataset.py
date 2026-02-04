@@ -8,6 +8,8 @@ from kedro.io import DatasetError
 
 from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
 
+LANGFUSE_AUTOGEN_ENDPOINT = "https://cloud.langfuse.com/api/public/otel/v1/traces"
+
 
 class TestLangfuseTraceDataset:
     def test_missing_credentials(self):
@@ -193,6 +195,8 @@ class TestLangfuseTraceDataset:
         description = dataset._describe()
         assert description == {"mode": "langchain", "credentials": "***"}
 
+    # --- AutoGen mode tests ---
+
     def test_autogen_mode(self, mocker):
         """Test AutoGen mode returns configured Tracer."""
         mocker.patch.dict("os.environ", {}, clear=True)
@@ -207,7 +211,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
-                "host": "https://cloud.langfuse.com",
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )
@@ -229,7 +233,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
-                "host": "https://cloud.langfuse.com",
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )
@@ -256,22 +260,42 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test_autogen",
                 "secret_key": "sk_test_autogen",  # pragma: allowlist secret
-                "host": "https://custom.langfuse.com"
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )
 
         assert os.environ["LANGFUSE_PUBLIC_KEY"] == "pk_test_autogen"
         assert os.environ["LANGFUSE_SECRET_KEY"] == "sk_test_autogen"  # pragma: allowlist secret
-        assert os.environ["LANGFUSE_HOST"] == "https://custom.langfuse.com"
 
-    def test_autogen_mode_missing_host(self):
-        """Test that autogen mode raises error when host is missing."""
-        with pytest.raises(DatasetError, match="AutoGen mode requires 'host'"):
+    def test_autogen_mode_missing_endpoint(self):
+        """Test that autogen mode raises error when endpoint is missing."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
             LangfuseTraceDataset(
                 credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
                 mode="autogen"
             )
+
+    def test_autogen_mode_empty_endpoint(self):
+        """Test that autogen mode raises error when endpoint is empty."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            LangfuseTraceDataset(
+                credentials={
+                    "public_key": "pk_test",
+                    "secret_key": "sk_test", # pragma: allowlist secret
+                    "endpoint": "",
+                },
+                mode="autogen"
+            )
+
+    def test_autogen_mode_endpoint_not_required_for_other_modes(self):
+        """Test that endpoint is not required for non-autogen modes."""
+        # Endpoint is only required for autogen mode
+        dataset = LangfuseTraceDataset(
+            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
+            mode="sdk"
+        )
+        assert dataset._mode == "sdk"
 
     def test_autogen_mode_import_error(self, mocker):
         """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
@@ -293,7 +317,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
-                "host": "https://cloud.langfuse.com",
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )
@@ -315,7 +339,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
-                "host": "https://cloud.langfuse.com",
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )

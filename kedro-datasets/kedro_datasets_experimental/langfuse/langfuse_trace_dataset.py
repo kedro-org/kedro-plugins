@@ -4,6 +4,7 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 
@@ -61,16 +62,16 @@ class LangfuseTraceDataset(AbstractDataset):
         client = dataset.load()
         response = client.chat.completions.create(...)  # Automatically traced
 
-        # AutoGen mode for agent tracing (host is required)
+        # AutoGen mode for agent tracing (endpoint is required)
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
-                "host": "https://cloud.langfuse.com",
+                "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
             },
             mode="autogen",
         )
-        span_processor = dataset.load()
+        tracer = dataset.load()
         # Use with AutoGen's runtime logging
         ```
     """
@@ -90,9 +91,11 @@ class LangfuseTraceDataset(AbstractDataset):
         Args:
             credentials: Dictionary with Langfuse credentials. Required keys:
                 {public_key, secret_key}. Optional keys: {host} (defaults to
-                Langfuse cloud if not provided). For autogen mode, {host} is
-                required to construct the OTLP endpoint. For OpenAI mode, may
-                also include openai section with {openai_api_key, openai_api_base}.
+                Langfuse cloud if not provided). For autogen mode, {endpoint} is
+                required — the full OTLP endpoint URL (e.g.
+                `https://cloud.langfuse.com/api/public/otel/v1/traces`).
+                For OpenAI mode, may also include openai section with
+                {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
@@ -122,11 +125,11 @@ class LangfuseTraceDataset(AbstractDataset):
             ...     mode="openai"
             ... )
 
-            # AutoGen mode for agent tracing (host is required)
+            # AutoGen mode for agent tracing (endpoint is required)
                 dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
-            ...         "host": "https://cloud.langfuse.com",
+            ...         "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
             ...     },
             ...     mode="autogen"
             ... )
@@ -173,12 +176,15 @@ class LangfuseTraceDataset(AbstractDataset):
                 if not self._credentials[key] or not str(self._credentials[key]).strip():
                     raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
 
-        # AutoGen mode requires 'host' to construct the OTLP endpoint
-        if self._mode == "autogen" and not self._credentials.get("host"):
-            raise DatasetError(
-                "AutoGen mode requires 'host' in credentials (e.g. 'https://cloud.langfuse.com'). "
-                "This is needed to construct the OTLP endpoint for trace export."
-            )
+        # AutoGen mode has additional required credentials
+        if self._mode == "autogen":
+            for key in REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN:
+                if not self._credentials.get(key):
+                    raise DatasetError(
+                        f"AutoGen mode requires '{key}' in credentials "
+                        f"(e.g. 'https://cloud.langfuse.com/api/public/otel/v1/traces'). "
+                        f"Provide the full OTLP endpoint URL for trace export."
+                    )
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
@@ -266,10 +272,11 @@ class LangfuseTraceDataset(AbstractDataset):
             f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
         ).decode()
 
-        host = self._credentials["host"]
+        # Endpoint is provided by user and validated in _validate_langfuse_credentials
+        endpoint = self._credentials["endpoint"]
 
         exporter = OTLPSpanExporter(
-            endpoint=f"{host}/api/public/otel/v1/traces",
+            endpoint=endpoint,
             headers={"Authorization": f"Basic {auth}"}
         )
 

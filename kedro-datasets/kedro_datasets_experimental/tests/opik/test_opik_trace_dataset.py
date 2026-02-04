@@ -13,6 +13,11 @@ def base_credentials():
     return {"api_key": "test-key", "workspace": "test-workspace"}  # pragma: allowlist secret
 
 
+@pytest.fixture
+def autogen_credentials(base_credentials):
+    return base_credentials | {"url_override": "https://www.comet.com"}
+
+
 @patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
 def test_init_with_valid_credentials(configure_mock, base_credentials):
     """Test that dataset initializes correctly with valid credentials and calls configure."""
@@ -159,7 +164,7 @@ def test_save_not_implemented(configure_mock, base_credentials):
 class TestOpikTraceDatasetAutogenMode:
     """Tests for AutoGen mode in OpikTraceDataset."""
 
-    def test_autogen_mode_returns_tracer(self, mocker, base_credentials):
+    def test_autogen_mode_returns_tracer(self, mocker, autogen_credentials):
         """Test AutoGen mode returns configured Tracer."""
         mock_tracer = MagicMock()
         mocker.patch(
@@ -167,12 +172,12 @@ class TestOpikTraceDatasetAutogenMode:
             return_value=mock_tracer
         )
 
-        dataset = OpikTraceDataset(base_credentials, mode="autogen")
+        dataset = OpikTraceDataset(autogen_credentials, mode="autogen")
 
         result = dataset.load()
         assert result == mock_tracer
 
-    def test_autogen_mode_caching(self, mocker, base_credentials):
+    def test_autogen_mode_caching(self, mocker, autogen_credentials):
         """Test that AutoGen mode caches the tracer."""
         mock_tracer = MagicMock()
         build_tracer_mock = mocker.patch(
@@ -180,7 +185,7 @@ class TestOpikTraceDatasetAutogenMode:
             return_value=mock_tracer
         )
 
-        dataset = OpikTraceDataset(base_credentials, mode="autogen")
+        dataset = OpikTraceDataset(autogen_credentials, mode="autogen")
 
         # Call load twice
         result1 = dataset.load()
@@ -190,7 +195,7 @@ class TestOpikTraceDatasetAutogenMode:
         build_tracer_mock.assert_called_once()
         assert result1 is result2
 
-    def test_autogen_mode_skips_opik_configure(self, mocker, base_credentials):
+    def test_autogen_mode_skips_opik_configure(self, mocker, autogen_credentials):
         """Test that AutoGen mode does not call Opik SDK configure."""
         configure_mock = mocker.patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
 
@@ -200,12 +205,17 @@ class TestOpikTraceDatasetAutogenMode:
             return_value=MagicMock()
         )
 
-        OpikTraceDataset(base_credentials, mode="autogen")
+        OpikTraceDataset(autogen_credentials, mode="autogen")
 
         # configure should not be called for autogen mode
         configure_mock.assert_not_called()
 
-    def test_autogen_mode_import_error(self, mocker, base_credentials):
+    def test_autogen_mode_missing_url_override(self, base_credentials):
+        """Test that autogen mode raises error when url_override is missing."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'url_override'"):
+            OpikTraceDataset(base_credentials, mode="autogen")
+
+    def test_autogen_mode_import_error(self, mocker, autogen_credentials):
         """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
 
         def raise_import_error():
@@ -219,12 +229,12 @@ class TestOpikTraceDatasetAutogenMode:
             side_effect=raise_import_error
         )
 
-        dataset = OpikTraceDataset(base_credentials, mode="autogen")
+        dataset = OpikTraceDataset(autogen_credentials, mode="autogen")
 
         with pytest.raises(DatasetError, match="AutoGen mode requires OpenTelemetry"):
             dataset.load()
 
-    def test_describe_autogen_mode(self, mocker, base_credentials):
+    def test_describe_autogen_mode(self, mocker, autogen_credentials):
         """Test _describe returns correct format for autogen mode."""
         # Mock the tracer builder to avoid actual OpenTelemetry imports
         mocker.patch(
@@ -232,7 +242,7 @@ class TestOpikTraceDatasetAutogenMode:
             return_value=MagicMock()
         )
 
-        dataset = OpikTraceDataset(base_credentials, mode="autogen")
+        dataset = OpikTraceDataset(autogen_credentials, mode="autogen")
         desc = dataset._describe()
         assert desc["mode"] == "autogen"
         assert all(v == "***" for v in desc["credentials"].values())

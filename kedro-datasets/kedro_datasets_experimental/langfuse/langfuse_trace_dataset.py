@@ -62,12 +62,24 @@ class LangfuseTraceDataset(AbstractDataset):
         client = dataset.load()
         response = client.chat.completions.create(...)  # Automatically traced
 
-        # AutoGen mode for agent tracing (endpoint is required)
+        # AutoGen mode Langfuse cloud
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
                 "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+            },
+            mode="autogen",
+        )
+        tracer = dataset.load()
+
+        # AutoGen mode self-hosted
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_...",
+                "secret_key": "sk_...",  # pragma: allowlist secret
+                "host": "http://localhost:3000",
+                "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
             },
             mode="autogen",
         )
@@ -94,6 +106,8 @@ class LangfuseTraceDataset(AbstractDataset):
                 Langfuse cloud if not provided). For autogen mode, {endpoint} is
                 required — the full OTLP endpoint URL (e.g.
                 `https://cloud.langfuse.com/api/public/otel/v1/traces`).
+                For self-hosted Langfuse, provide `host` alongside `endpoint`
+                so that environment variables are configured correctly for all modes.
                 For OpenAI mode, may also include openai section with
                 {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
@@ -125,11 +139,21 @@ class LangfuseTraceDataset(AbstractDataset):
             ...     mode="openai"
             ... )
 
-            # AutoGen mode for agent tracing (endpoint is required)
+            # AutoGen mode cloud
                 dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+            ...     },
+            ...     mode="autogen"
+            ... )
+
+            # AutoGen mode self-hosted
+                dataset = LangfuseTraceDataset(
+            ...     credentials={
+            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "host": "http://localhost:3000",
+            ...         "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
             ...     },
             ...     mode="autogen"
             ... )

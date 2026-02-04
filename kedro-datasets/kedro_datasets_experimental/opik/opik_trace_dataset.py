@@ -8,6 +8,7 @@ from opik import configure, track
 logger = logging.getLogger(__name__)
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
+REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
 
@@ -97,7 +98,7 @@ class OpikTraceDataset(AbstractDataset):
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
             "project_name": "autogen-demo",
-            "url_override": "https://www.comet.com",
+            "endpoint": "https://www.comet.com/opik/api/v1/private/otel/v1/traces",
         },
         mode="autogen",
     )
@@ -147,12 +148,15 @@ class OpikTraceDataset(AbstractDataset):
             if key in self._credentials and not str(self._credentials[key]).strip():
                 raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
 
-        # AutoGen mode requires 'url_override' to construct the OTLP endpoint
-        if self._mode == "autogen" and not self._credentials.get("url_override"):
-            raise DatasetError(
-                "AutoGen mode requires 'url_override' in credentials (e.g. 'https://www.comet.com'). "
-                "This is needed to construct the OTLP endpoint for trace export."
-            )
+        # AutoGen mode has additional required credentials
+        if self._mode == "autogen":
+            for key in REQUIRED_OPIK_CREDENTIALS_AUTOGEN:
+                if not self._credentials.get(key):
+                    raise DatasetError(
+                        f"AutoGen mode requires '{key}' in credentials "
+                        f"(e.g. 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'). "
+                        f"Provide the full OTLP endpoint URL for trace export."
+                    )
 
     def _configure_opik(self) -> None:
         """Initialize Opik global configuration with awareness of project switching.
@@ -247,9 +251,8 @@ class OpikTraceDataset(AbstractDataset):
         if project_name:
             headers["projectName"] = project_name
 
-        # Use Opik's OTLP endpoint (url_override validated in _validate_opik_credentials)
-        base_url = self._credentials["url_override"]
-        endpoint = f"{base_url}/opik/api/v1/private/otel/v1/traces"
+        # Endpoint is provided by user and validated in _validate_opik_credentials
+        endpoint = self._credentials["endpoint"]
 
         exporter = OTLPSpanExporter(
             endpoint=endpoint,

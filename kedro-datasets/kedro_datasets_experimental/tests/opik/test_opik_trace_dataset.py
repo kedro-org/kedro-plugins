@@ -7,6 +7,8 @@ from kedro.io import DatasetError
 
 from kedro_datasets_experimental.opik.opik_trace_dataset import OpikTraceDataset
 
+OPIK_AUTOGEN_ENDPOINT = "https://www.comet.com/opik/api/v1/private/otel/v1/traces"
+
 
 @pytest.fixture
 def base_credentials():
@@ -15,7 +17,7 @@ def base_credentials():
 
 @pytest.fixture
 def autogen_credentials(base_credentials):
-    return base_credentials | {"url_override": "https://www.comet.com"}
+    return base_credentials | {"endpoint": OPIK_AUTOGEN_ENDPOINT}
 
 
 @patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
@@ -210,10 +212,24 @@ class TestOpikTraceDatasetAutogenMode:
         # configure should not be called for autogen mode
         configure_mock.assert_not_called()
 
-    def test_autogen_mode_missing_url_override(self, base_credentials):
-        """Test that autogen mode raises error when url_override is missing."""
-        with pytest.raises(DatasetError, match="AutoGen mode requires 'url_override'"):
+    def test_autogen_mode_missing_endpoint(self, base_credentials):
+        """Test that autogen mode raises error when endpoint is missing."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
             OpikTraceDataset(base_credentials, mode="autogen")
+
+    def test_autogen_mode_empty_endpoint(self, base_credentials):
+        """Test that autogen mode raises error when endpoint is empty."""
+        creds = base_credentials | {"endpoint": ""}
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            OpikTraceDataset(creds, mode="autogen")
+
+    def test_autogen_mode_endpoint_not_required_for_other_modes(self, mocker, base_credentials):
+        """Test that endpoint is not required for non-autogen modes."""
+        mocker.patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
+
+        # Endpoint is only required for autogen mode
+        dataset = OpikTraceDataset(base_credentials, mode="sdk")
+        assert dataset._mode == "sdk"
 
     def test_autogen_mode_import_error(self, mocker, autogen_credentials):
         """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""

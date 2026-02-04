@@ -121,7 +121,7 @@ class LangfuseTraceDataset(AbstractDataset):
             ...     mode="openai"
             ... )
 
-            # AutoGen mode for agent tracing
+            # AutoGen mode for agent tracing (host is required)
                 dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
@@ -171,6 +171,13 @@ class LangfuseTraceDataset(AbstractDataset):
                 # If host is provided, it cannot be empty
                 if not self._credentials[key] or not str(self._credentials[key]).strip():
                     raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
+
+        # AutoGen mode requires 'host' to construct the OTLP endpoint
+        if self._mode == "autogen" and not self._credentials.get("host"):
+            raise DatasetError(
+                "AutoGen mode requires 'host' in credentials (e.g. 'https://cloud.langfuse.com'). "
+                "This is needed to construct the OTLP endpoint for trace export."
+            )
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
@@ -254,12 +261,7 @@ class LangfuseTraceDataset(AbstractDataset):
             f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
         ).decode()
 
-        host = self._credentials.get("host")
-        if not host:
-            raise DatasetError(
-                "AutoGen mode requires 'host' in credentials (e.g. 'https://cloud.langfuse.com'). "
-                "This is needed to construct the OTLP endpoint for trace export."
-            )
+        host = self._credentials["host"]
 
         exporter = OTLPSpanExporter(
             endpoint=f"{host}/api/public/otel/v1/traces",

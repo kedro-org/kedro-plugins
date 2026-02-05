@@ -273,7 +273,7 @@ class TestStudyDatasetVersioned:
 
     def test_no_versions(self, versioned_study_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for StudyDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_study_dataset.load()
 
@@ -288,7 +288,7 @@ class TestStudyDatasetVersioned:
         corresponding study for a given save version already exists."""
         versioned_study_dataset.save(dummy_study)
         pattern = (
-            r"Study name \'.+\' for StudyDataset\(.+\) must "
+            r"Study name \'.+\' for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -307,7 +307,7 @@ class TestStudyDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for StudyDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_study_dataset.save(dummy_study)

@@ -1,12 +1,28 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+- `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.
+
+## Community contributions
+
+# Release 9.1.1
+
+## Bug fixes and other changes
+
+- Bump lxml version for xmldataset requirements if Python version is 3.13 and above.
+
+# Release 9.1.0
 
 ## Major features and improvements
 
+- Added support for Python 3.13.
 - Added the following new datasets:
 
-| Type                  | Description                                                                                                    | Location                |
-|-----------------------|----------------------------------------------------------------------------------------------------------------|-------------------------|
-| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic Pandas-to-Spark conversion | `kedro_datasets.spark` |
+| Type                   | Description                                                                                               | Location               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic pandas-to-Spark conversion. | `kedro_datasets.spark` |
 
 - Added the following new **experimental** datasets:
 
@@ -19,7 +35,9 @@
 | `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun`    |
 
 ## Bug fixes and other changes
+
 - Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
+- Fix `plotly.JSONDataset` encoding errors by defaulting thesave encoding to UTF-8.
 
 ## Community contributions
 
@@ -36,30 +54,30 @@
 - Added credentials support to `ibis.TableDataset`.
 - Added the following new datasets:
 
-| Type                  | Description                                                                             | Location                 |
-|-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
-| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
+| Type                  | Description                                                                              | Location                 |
+| --------------------- | ---------------------------------------------------------------------------------------- | ------------------------ |
+| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx`. | `kedro_datasets.openxml` |
 
 - Graduated the following **experimental** datasets to core:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `langchain.ChatOpenAIDataset`    | Kedro dataset for loading a ChatOpenAI LangChain model. | `kedro_datasets.langchain`  |
-| `langchain.OpenAIEmbeddingsDataset` | Kedro dataset for loading an OpenAIEmbeddings model. | `kedro_datasets.langchain` |
-| `langchain.ChatAnthropicDataset`  | A dataset for loading a ChatAnthropic LangChain model.   | `kedro_datasets.langchain`     |
-| `langchain.ChatCohereDataset`   | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain`  |
+| Type                                | Description                                            | Location                   |
+| ----------------------------------- | ------------------------------------------------------ |--------------------------- |
+| `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI LangChain model.    | `kedro_datasets.langchain` |
+| `langchain.OpenAIEmbeddingsDataset` | A dataset for loading an OpenAIEmbeddings model.       | `kedro_datasets.langchain` |
+| `langchain.ChatAnthropicDataset`    | A dataset for loading a ChatAnthropic LangChain model. | `kedro_datasets.langchain` |
+| `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain` |
 
 - Added the following new **experimental** datasets:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `langfuse.LangfuseTraceDataset`    | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
-| `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                     | `kedro_datasets_experimental.langchain` |
-| `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
-| `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
-| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
-| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts      | `kedro_datasets_experimental.opik`      |
-| `opik.OpikTraceDataset`            | Kedro dataset to provide Opik tracing clients and callbacks     | `kedro_datasets_experimental.opik`      |
+| Type                               | Description                                                                    | Location                                |
+| ---------------------------------- | -----------------------------------------------------------------------------  | --------------------------------------- |
+| `langfuse.LangfuseTraceDataset`    | A dataset to provide Langfuse tracing clients and callbacks.                   | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset` | A dataset for loading LangChain prompts.                                       | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`                 | A dataset to read PDF files and extract text using pypdf.                      | `kedro_datasets_experimental.pypdf`     |
+| `langfuse.LangfusePromptDataset`   | A dataset for managing Langfuse prompts.                                       | `kedro_datasets_experimental.langfuse`  |
+| `chromadb.ChromaDBDataset`         | A dataset for loading and saving data to ChromaDB vector database collections. | `kedro_datasets_experimental.chromadb`  |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts.                    | `kedro_datasets_experimental.opik`      |
+| `opik.OpikTraceDataset`            | A dataset to provide Opik tracing clients and callbacks.                       | `kedro_datasets_experimental.opik`      |
 
 
 ## Bug fixes and other changes
@@ -101,9 +119,9 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Make `kedro-datasets` compatible with Kedro 1.0.0.
 - Added the following new datasets:
 
-| Type                  | Description                                                                       | Location                 |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
+| Type                  | Description                                                                        | Location                 |
+| --------------------- | ---------------------------------------------------------------------------------- | ------------------------ |
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx`. | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 

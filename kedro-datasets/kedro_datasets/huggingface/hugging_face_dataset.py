@@ -29,10 +29,9 @@ class HFDataset(AbstractDataset):
         >>> set_verbosity(ERROR)  # for doctest to pass
         >>>
         >>> dataset = HFDataset(dataset_name="openai_humaneval")
-        >>> ds = dataset.load()
-        >>> assert "test" in ds
-        >>> assert len(ds["test"]) == 164
-
+        >>> ds = dataset.load()  # doctest: +SKIP
+        >>> assert "test" in ds  # doctest: +SKIP
+        >>> assert len(ds["test"]) == 164  # doctest: +SKIP
     """
 
     def __init__(

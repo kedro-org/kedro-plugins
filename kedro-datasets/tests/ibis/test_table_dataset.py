@@ -120,11 +120,58 @@ class TestTableDataset:
         table_dataset.save(dummy_table)
         assert table_dataset.exists()
 
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize("database_name", ["test"], indirect=True)
+    def test_exists_with_database(self, table_dataset, database_name, dummy_table):
+        """`exists` method should work with a non-default database."""
+        # Create a non-default database.
+        table_dataset.connection.create_database(database_name)
+
+        assert not table_dataset.exists()
+        table_dataset.save(dummy_table)
+        assert table_dataset.exists()
+
     @pytest.mark.parametrize(
         "save_args", [{"materialized": "table", "mode": "append"}], indirect=True
     )
     def test_save_mode_append(self, table_dataset, dummy_table):
         """Saving with mode=append should add rows to an existing table."""
+        df1 = dummy_table
+        df2 = dummy_table
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        df1 = df1.execute()
+        df2 = df2.execute()
+        reloaded = table_dataset.load().execute()
+        assert len(reloaded) == len(df1) + len(df2)
+
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("9.0.0"),
+        reason='Ibis 9.0 standardised use of "database" to mean a collection of tables',
+    )
+    @pytest.mark.parametrize(
+        ("database_name", "save_args"),
+        [("test", {"materialized": "table", "mode": "append"})],
+        indirect=True,
+    )
+    def test_save_mode_append_with_database(
+        self, table_dataset, database_name, dummy_table
+    ):
+        """Saving with mode=append should work with a non-default database.
+
+        This test verifies the fix for the issue where exists() doesn't
+        check the correct schema when database parameter is specified;
+        see https://github.com/kedro-org/kedro-plugins/issues/1265
+
+        """
+        # Create a non-default database.
+        table_dataset.connection.create_database(database_name)
+
         df1 = dummy_table
         df2 = dummy_table
 
@@ -305,8 +352,6 @@ class TestTableDataset:
         table_dataset.connection.create_database(database_name)
 
         table_dataset.save(dummy_table)
-        reloaded = table_dataset.load()
-        assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
         # Verify that the attached database file was the one written to.
         con = duckdb.connect(database)

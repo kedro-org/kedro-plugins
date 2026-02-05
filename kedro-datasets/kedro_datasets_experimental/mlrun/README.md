@@ -288,4 +288,3 @@ FileNotFoundError: Model artifact not found
 - [MLRun execution API (MLClientCtx)](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html) — `log_artifact`, `log_model`, `log_result`, `get_artifact`
 - [Kedro Documentation](https://docs.kedro.org/)
 - [MLRun GitHub](https://github.com/mlrun/mlrun)
-

@@ -10,7 +10,41 @@ from .context_manager import MLRunContextManager
 
 
 class MLRunAbstractDataset(AbstractDataset):
-    """Base class for MLRun datasets that provides access to shared context."""
+    """Base class for MLRun datasets; use for generic artifacts (any serializable data).
+
+    Uses MLRun's
+    `log_artifact <https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_artifact>`_
+    and
+    `get_artifact <https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.get_artifact>`_.
+    ``load_args`` and ``save_args`` accept any arguments supported by the corresponding
+    MLRun API for your MLRun version; see the MLRun docs.
+
+    Examples:
+        Using the
+        `YAML API <https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/>`_:
+
+        .. code-block:: yaml
+
+            generic_artifact:
+              type: kedro_datasets_experimental.mlrun.MLRunAbstractDataset
+              key: my_artifact
+
+        Using the
+        `Python API <https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/>`_:
+
+        .. code-block:: python
+
+            from kedro_datasets_experimental.mlrun import MLRunAbstractDataset
+
+            dataset = MLRunAbstractDataset(key="config_data")
+            dataset.save({"param1": "value1", "param2": 42})
+            loaded = dataset.load()
+
+    Args:
+        key: Artifact key for MLRun (defaults to catalog dataset name).
+        load_args: Passed to MLRun when loading; see MLRun docs for your version.
+        save_args: Passed to log_artifact; see MLRun docs for your version.
+    """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}

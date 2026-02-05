@@ -264,56 +264,18 @@ class LangfuseTraceDataset(AbstractDataset):
         return client_params
 
     def _build_autogen_tracer(self) -> Any:
-        """Build and return a configured Tracer for AutoGen integration with Langfuse.
-
-        Sets up OpenTelemetry TracerProvider with OTLP exporter to Langfuse,
-        configures it as the global provider, and returns a ready-to-use Tracer.
-
-        Returns:
-            Tracer configured to export traces to Langfuse.
-
-        Raises:
-            DatasetError: If required OpenTelemetry dependencies are not installed.
-        """
         try:
+            from langfuse import Langfuse  # noqa: PLC0415
+            import openlit  # noqa: PLC0415
             from opentelemetry import trace  # noqa: PLC0415
-            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # noqa: PLC0415
-                OTLPSpanExporter,
-            )
-            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
-            from opentelemetry.sdk.trace.export import (  # noqa: PLC0415
-                BatchSpanProcessor,
-            )
         except ImportError as exc:
             raise DatasetError(
-                "AutoGen mode requires OpenTelemetry. "
-                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+                "AutoGen mode with OpenLit requires: pip install langfuse openlit"
             ) from exc
 
-        import base64  # noqa: PLC0415
-
-        auth = base64.b64encode(
-            f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
-        ).decode()
-
-        # Endpoint is provided by user and validated in _validate_langfuse_credentials
-        endpoint = self._credentials["endpoint"]
-
-        exporter = OTLPSpanExporter(
-            endpoint=endpoint,
-            headers={"Authorization": f"Basic {auth}"}
-        )
-
-        processor = BatchSpanProcessor(exporter)
-
-        # Use existing provider if already set, otherwise create a new one.
-        existing_provider = trace.get_tracer_provider()
-        if hasattr(existing_provider, "add_span_processor"):
-            existing_provider.add_span_processor(processor)
-        else:
-            provider = TracerProvider()
-            provider.add_span_processor(processor)
-            trace.set_tracer_provider(provider)
+        # Langfuse SDK reads LANGFUSE_* env vars already set in __init__
+        langfuse = Langfuse()
+        openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
 
         return trace.get_tracer("langfuse.autogen")
 

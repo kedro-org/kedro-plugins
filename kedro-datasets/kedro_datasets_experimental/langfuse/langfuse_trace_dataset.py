@@ -4,7 +4,6 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
-REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 
@@ -19,7 +18,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
     - **langchain:** Returns a `CallbackHandler` for LangChain integration.
     - **openai:** Returns a wrapped OpenAI client with automatic tracing.
-    - **autogen:** Returns a configured `Tracer` for AutoGen integration via OTLP.
+    - **autogen:** Returns a configured `Tracer` for AutoGen integration via OpenLit.
     - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
@@ -67,7 +66,6 @@ class LangfuseTraceDataset(AbstractDataset):
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
-                "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
             },
             mode="autogen",
         )
@@ -79,12 +77,10 @@ class LangfuseTraceDataset(AbstractDataset):
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
                 "host": "http://localhost:3000",
-                "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
             },
             mode="autogen",
         )
         tracer = dataset.load()
-        # Use with AutoGen's runtime logging
         ```
     """
 
@@ -103,13 +99,10 @@ class LangfuseTraceDataset(AbstractDataset):
         Args:
             credentials: Dictionary with Langfuse credentials. Required keys:
                 {public_key, secret_key}. Optional keys: {host} (defaults to
-                Langfuse cloud if not provided). For autogen mode, {endpoint} is
-                required — the full OTLP endpoint URL (e.g.
-                `https://cloud.langfuse.com/api/public/otel/v1/traces`).
-                For self-hosted Langfuse, provide `host` alongside `endpoint`
-                so that environment variables are configured correctly for all modes.
-                For OpenAI mode, may also include openai section with
-                {openai_api_key, openai_api_base}.
+                Langfuse cloud if not provided). For self-hosted Langfuse,
+                provide `host` so that environment variables are configured
+                correctly for all modes. For OpenAI mode, may also include
+                openai section with {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
@@ -143,7 +136,6 @@ class LangfuseTraceDataset(AbstractDataset):
                 dataset = LangfuseTraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
-            ...         "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
             ...     },
             ...     mode="autogen"
             ... )
@@ -153,7 +145,6 @@ class LangfuseTraceDataset(AbstractDataset):
             ...     credentials={
             ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "host": "http://localhost:3000",
-            ...         "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
             ...     },
             ...     mode="autogen"
             ... )
@@ -199,16 +190,6 @@ class LangfuseTraceDataset(AbstractDataset):
                 # If host is provided, it cannot be empty
                 if not self._credentials[key] or not str(self._credentials[key]).strip():
                     raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
-
-        # AutoGen mode has additional required credentials
-        if self._mode == "autogen":
-            for key in REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN:
-                if not self._credentials.get(key):
-                    raise DatasetError(
-                        f"AutoGen mode requires '{key}' in credentials "
-                        f"(e.g. 'https://cloud.langfuse.com/api/public/otel/v1/traces'). "
-                        f"Provide the full OTLP endpoint URL for trace export."
-                    )
 
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
@@ -264,18 +245,27 @@ class LangfuseTraceDataset(AbstractDataset):
         return client_params
 
     def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Langfuse.
+
+        Returns:
+            Tracer configured to export traces to Langfuse via OpenLit.
+
+        Raises:
+            DatasetError: If required dependencies (langfuse, openlit) are not installed.
+        """
         try:
             from langfuse import Langfuse  # noqa: PLC0415
             import openlit  # noqa: PLC0415
             from opentelemetry import trace  # noqa: PLC0415
         except ImportError as exc:
             raise DatasetError(
-                "AutoGen mode with OpenLit requires: pip install langfuse openlit"
+                "AutoGen mode requires Langfuse and OpenLit. "
+                "Install with: pip install langfuse openlit"
             ) from exc
 
         # Langfuse SDK reads LANGFUSE_* env vars already set in __init__
         langfuse = Langfuse()
-        openlit.init(tracer=langfuse._otel_tracer, disable_batch=True)
+        openlit.init(tracer=langfuse._otel_tracer, disable_batch=True, disable_metrics=True, disabled_instrumentors=["httpx"])
 
         return trace.get_tracer("langfuse.autogen")
 
@@ -290,7 +280,7 @@ class LangfuseTraceDataset(AbstractDataset):
             Tracing client object based on mode:
             - langchain mode: CallbackHandler for LangChain integration
             - openai mode: Wrapped OpenAI client with automatic tracing
-            - autogen mode: Configured Tracer for OpenTelemetry integration
+            - autogen mode: Configured Tracer for OpenTelemetry integration via OpenLit
             - sdk mode: Raw Langfuse client for manual tracing
 
         Raises:

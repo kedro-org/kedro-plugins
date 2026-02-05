@@ -294,10 +294,14 @@ class TestLangfuseTraceDataset:
         """Test autogen mode raises DatasetError when dependencies missing."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        # Make langfuse importable but openlit not
-        mock_langfuse_module = MagicMock()
-        mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
-        mocker.patch("builtins.__import__", side_effect=ImportError("No module named 'openlit'"))
+        original_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "openlit":
+                raise ImportError("No module named 'openlit'")
+            return original_import(name, *args, **kwargs)
+
+        mocker.patch("builtins.__import__", side_effect=mock_import)
 
         dataset = LangfuseTraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret

@@ -254,8 +254,8 @@ class LangfuseTraceDataset(AbstractDataset):
             DatasetError: If required dependencies (langfuse, openlit) are not installed.
         """
         try:
-            from langfuse import Langfuse  # noqa: PLC0415
             import openlit  # noqa: PLC0415
+            from langfuse import Langfuse  # noqa: PLC0415
             from opentelemetry import trace  # noqa: PLC0415
         except ImportError as exc:
             raise DatasetError(

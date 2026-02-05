@@ -168,8 +168,14 @@ class TestLangfuseTraceDataset:
         mock_openai_class.assert_called_once_with(api_key="sk-test") # pragma: allowlist secret
         assert result == mock_openai_instance
 
-    def test_openai_mode_missing_credentials(self):
+    def test_openai_mode_missing_credentials(self, mocker):
         """Test OpenAI mode raises error when OpenAI credentials missing."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Mock langfuse.openai
+        mock_openai_module = MagicMock()
+        mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
+
         dataset = LangfuseTraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
             mode="openai"
@@ -223,7 +229,9 @@ class TestLangfuseTraceDataset:
         mock_langfuse_class.assert_called_once()
         mock_openlit.init.assert_called_once_with(
             tracer=mock_langfuse_instance._otel_tracer,
-            disable_batch=True
+            disable_batch=True,
+            disable_metrics=True,
+            disabled_instrumentors=["httpx"],
         )
         mock_trace_module.get_tracer.assert_called_once_with("langfuse.autogen")
         assert result == mock_tracer

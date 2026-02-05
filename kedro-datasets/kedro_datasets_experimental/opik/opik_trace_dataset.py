@@ -24,7 +24,7 @@ class OpikTraceDataset(AbstractDataset):
     - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
     - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
     - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
-    - `autogen`: Returns a configured ``Tracer`` for AutoGen integration via OTLP.
+    - `autogen`: Returns a configured `Tracer` for AutoGen integration via OTLP (OpenTelemetry Protocol).
 
     **Examples**
 

@@ -215,7 +215,7 @@ langchain-langchainpromptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-langchainpromptdataset]"]
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
-langfuse-langfusetracedataset-autogen = ["langfuse>=2.0.0", "openlit"]
+langfuse-langfusetracedataset-autogen = ["langfuse>=2.0.0", "openlit>=1.30,<1.36.8"]  # Pinned openlit for kedro-academy autogen tests
 langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=1.0.0", "langchain>=0.2.0, <1.0"]
 opik-opikpromptdataset = ["opik>=1.8.0"]
 opik-opiktracedataset = ["opik>=1.8.0"]

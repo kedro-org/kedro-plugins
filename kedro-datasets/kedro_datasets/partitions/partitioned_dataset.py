@@ -4,11 +4,9 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
-import operator
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
-from threading import RLock
 from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
@@ -205,7 +203,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._cached_partitions: list[str] | None = None
-        self._cache_lock = RLock()
         self._save_lazily = save_lazily
         self.metadata = metadata
 
@@ -257,19 +254,16 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return self._path
 
     def _list_partitions(self) -> list[str]:
-        with self._cache_lock:
-            if self._cached_partitions is not None:
-                return self._cached_partitions
-
-            dataset_is_versioned = VERSION_KEY in self._dataset_config
-            self._cached_partitions = [
-                _grandparent(path) if dataset_is_versioned else path
-                for path in self._filesystem.find(
-                    self._normalized_path, **self._load_args
-                )
-                if path.endswith(self._filename_suffix)
-            ]
+        if self._cached_partitions is not None:
             return self._cached_partitions
+
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
+        self._cached_partitions = [
+            _grandparent(path) if dataset_is_versioned else path
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
+            if path.endswith(self._filename_suffix)
+        ]
+        return self._cached_partitions
 
     def _join_protocol(self, path: str) -> str:
         protocol_prefix = f"{self._protocol}://"
@@ -356,8 +350,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return self._pretty_repr(object_description_repr)
 
     def _invalidate_caches(self) -> None:
-        with self._cache_lock:
-            self._cached_partitions = None
+        self._cached_partitions = None
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:

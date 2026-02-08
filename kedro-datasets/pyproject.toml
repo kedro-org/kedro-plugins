@@ -26,6 +26,7 @@ polars-base = ["polars>=0.18.0"]
 plotly-base = ["plotly>=4.8.0, <6.0"]
 delta-base = ["delta-spark>=1.0, <5.0"]
 networkx-base = ["networkx~=3.4"]
+setuptools - ["setuptools>=61.2"]
 
 # Spark dependencies
 spark-core = []  # No dependencies

@@ -33,6 +33,3 @@ if (window.ReadTheDocsEventData !== undefined) {
 document.addEventListener("readthedocs-addons-data-ready", function (event) {
     handleReadTheDocsData(event.detail.data());
 });
-
-// Fallback: if RTD Addons are unavailable, default to noindex
-ensureNoIndexMeta();

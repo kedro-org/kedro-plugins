@@ -316,7 +316,6 @@ test = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=2021.04",
-    "setuptools",
     "snowflake-snowpark-python>=1.23; python_version < '3.12'",
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",

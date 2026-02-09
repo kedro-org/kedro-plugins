@@ -8,6 +8,7 @@ from opik import configure, track
 logger = logging.getLogger(__name__)
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
+REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
 
@@ -23,6 +24,7 @@ class OpikTraceDataset(AbstractDataset):
     - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
     - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
     - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
+    - `autogen`: Returns a configured `Tracer` for AutoGen integration via OTLP (OpenTelemetry Protocol).
 
     **Examples**
 
@@ -89,6 +91,40 @@ class OpikTraceDataset(AbstractDataset):
     )
     tracer = dataset.load()
     # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
+
+    # Example: AutoGen mode Opik cloud
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "endpoint": "https://www.comet.com/opik/api/v1/private/otel/v1/traces",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()  # Returns configured Tracer, ready to use
+
+    # Option 1: Automatic tracing (LLM calls traced automatically)
+    agent.invoke(context)  # Traces sent to Opik
+
+    # Option 2: Add custom spans with business context (recommended)
+    with tracer.start_as_current_span("response_generation") as span:
+        span.set_attribute("intent", "claim_new")
+        span.set_attribute("user_id", "123")
+        agent.invoke(context)  # Child spans nested under "response_generation"
+
+    # Example: AutoGen mode self-hosted
+    dataset = OpikTraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "url_override": "http://localhost:5173",
+            "endpoint": "http://localhost:5173/opik/api/v1/private/otel/v1/traces",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()
     ```
 
     **Notes**
@@ -102,7 +138,7 @@ class OpikTraceDataset(AbstractDataset):
     def __init__(
         self,
         credentials: dict[str, Any],
-        mode: Literal["sdk", "openai", "langchain"] = "sdk",
+        mode: Literal["sdk", "openai", "langchain", "autogen"] = "sdk",
         **trace_kwargs: Any,
     ):
         self._credentials = credentials
@@ -111,7 +147,9 @@ class OpikTraceDataset(AbstractDataset):
         self._cached_client = None
 
         self._validate_opik_credentials()
-        self._configure_opik()
+        # Use OTLP directly
+        if self._mode != "autogen":
+            self._configure_opik()
 
     def _validate_opik_credentials(self) -> None:
         """Validate Opik credentials before configuring the environment."""
@@ -122,6 +160,16 @@ class OpikTraceDataset(AbstractDataset):
         for key in OPTIONAL_OPIK_CREDENTIALS:
             if key in self._credentials and not str(self._credentials[key]).strip():
                 raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
+
+        # AutoGen mode has additional required credentials
+        if self._mode == "autogen":
+            for key in REQUIRED_OPIK_CREDENTIALS_AUTOGEN:
+                if not self._credentials.get(key):
+                    raise DatasetError(
+                        f"AutoGen mode requires '{key}' in credentials "
+                        f"(e.g. 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'). "
+                        f"Provide the full OTLP endpoint URL for trace export."
+                    )
 
     def _configure_opik(self) -> None:
         """Initialize Opik global configuration with awareness of project switching.
@@ -178,6 +226,65 @@ class OpikTraceDataset(AbstractDataset):
 
         return params
 
+    def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Opik.
+
+        Sets up OpenTelemetry TracerProvider with OTLP exporter to Opik,
+        configures it as the global provider, and returns a ready-to-use Tracer.
+
+        Returns:
+            Tracer configured to export traces to Opik.
+
+        Raises:
+            DatasetError: If required OpenTelemetry dependencies are not installed.
+        """
+        try:
+            from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # noqa: PLC0415
+                OTLPSpanExporter,
+            )
+            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
+            from opentelemetry.sdk.trace.export import (  # noqa: PLC0415
+                BatchSpanProcessor,
+            )
+        except ImportError as exc:
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            ) from exc
+
+        # Build headers for Opik authentication
+        headers = {
+            "Authorization": self._credentials["api_key"],
+            "Comet-Workspace": self._credentials["workspace"],
+        }
+
+        # Add project name if specified
+        project_name = self._credentials.get("project_name")
+        if project_name:
+            headers["projectName"] = project_name
+
+        # Endpoint is provided by user and validated in _validate_opik_credentials
+        endpoint = self._credentials["endpoint"]
+
+        exporter = OTLPSpanExporter(
+            endpoint=endpoint,
+            headers=headers
+        )
+
+        processor = BatchSpanProcessor(exporter)
+
+        # Use existing provider if already set, otherwise create a new one.
+        existing_provider = trace.get_tracer_provider()
+        if hasattr(existing_provider, "add_span_processor"):
+            existing_provider.add_span_processor(processor)
+        else:
+            provider = TracerProvider()
+            provider.add_span_processor(processor)
+            trace.set_tracer_provider(provider)
+
+        return trace.get_tracer("opik.autogen")
+
     def _describe(self) -> dict[str, Any]:
         """Describe dataset configuration with credentials redacted."""
         creds = self._credentials.copy()
@@ -200,6 +307,8 @@ class OpikTraceDataset(AbstractDataset):
             self._cached_client = self._load_openai_client()
         elif self._mode == "langchain":
             self._cached_client = self._load_langchain_tracer()
+        elif self._mode == "autogen":
+            self._cached_client = self._build_autogen_tracer()
         else:
             raise DatasetError(f"Unsupported mode '{self._mode}' for OpikTraceDataset")
 

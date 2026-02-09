@@ -160,7 +160,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         Note that if a `pa.Schema` object is passed directly in the `schema` argument, no
         processing will be done. Additionally, the behavior when passing a `pa.Schema`
         object is assumed to be consistent with how Dask sees it. That is, it should fully
-        define the  schema for all fields.
+        define the  schema for all fields. Add this here just to trigger CI.
         """
         schema = self._save_args.get("schema")
 

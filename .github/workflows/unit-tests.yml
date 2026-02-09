@@ -30,7 +30,6 @@ jobs:
           activate-environment: true
       - name: Install dependencies
         run: |
-          uv pip install setuptools
           uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
           make plugin=${{ inputs.plugin }} install-test-requirements
           uv pip freeze

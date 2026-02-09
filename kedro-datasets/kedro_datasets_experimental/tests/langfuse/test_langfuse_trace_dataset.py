@@ -8,6 +8,8 @@ from kedro.io import DatasetError
 
 from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
 
+LANGFUSE_AUTOGEN_ENDPOINT = "https://cloud.langfuse.com/api/public/otel/v1/traces"
+
 
 class TestLangfuseTraceDataset:
     def test_missing_credentials(self):
@@ -172,7 +174,6 @@ class TestLangfuseTraceDataset:
         """Test OpenAI mode raises error when OpenAI credentials missing."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        # Mock langfuse.openai
         mock_openai_module = MagicMock()
         mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
 
@@ -194,127 +195,152 @@ class TestLangfuseTraceDataset:
         description = dataset._describe()
         assert description == {"mode": "langchain", "credentials": "***"}
 
+    # --- AutoGen mode tests ---
+
     def test_autogen_mode(self, mocker):
-        """Test autogen mode returns a Tracer via OpenLit."""
+        """Test AutoGen mode returns configured Tracer."""
         mocker.patch.dict("os.environ", {}, clear=True)
-
-        mock_langfuse_class = MagicMock()
-        mock_langfuse_instance = MagicMock()
-        mock_langfuse_instance._otel_tracer = MagicMock()
-        mock_langfuse_class.return_value = mock_langfuse_instance
-
-        mock_langfuse_module = MagicMock()
-        mock_langfuse_module.Langfuse = mock_langfuse_class
-
-        mock_openlit = MagicMock()
 
         mock_tracer = MagicMock()
-        mock_trace_module = MagicMock()
-        mock_trace_module.get_tracer.return_value = mock_tracer
-
-        mocker.patch.dict("sys.modules", {
-            "langfuse": mock_langfuse_module,
-            "openlit": mock_openlit,
-            "opentelemetry": MagicMock(trace=mock_trace_module),
-            "opentelemetry.trace": mock_trace_module,
-        })
+        mocker.patch(
+            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
-            mode="autogen"
-        )
-
-        result = dataset.load()
-
-        mock_langfuse_class.assert_called_once()
-        mock_openlit.init.assert_called_once_with(
-            tracer=mock_langfuse_instance._otel_tracer,
-            disable_batch=True,
-            disable_metrics=True,
-            disabled_instrumentors=["httpx"],
-        )
-        mock_trace_module.get_tracer.assert_called_once_with("langfuse.autogen")
-        assert result == mock_tracer
-
-    def test_autogen_mode_caching(self, mocker):
-        """Test autogen mode caches the tracer after first load."""
-        mocker.patch.dict("os.environ", {}, clear=True)
-
-        mock_langfuse_class = MagicMock()
-        mock_langfuse_instance = MagicMock()
-        mock_langfuse_instance._otel_tracer = MagicMock()
-        mock_langfuse_class.return_value = mock_langfuse_instance
-
-        mock_langfuse_module = MagicMock()
-        mock_langfuse_module.Langfuse = mock_langfuse_class
-
-        mock_openlit = MagicMock()
-
-        mock_tracer = MagicMock()
-        mock_trace_module = MagicMock()
-        mock_trace_module.get_tracer.return_value = mock_tracer
-
-        mocker.patch.dict("sys.modules", {
-            "langfuse": mock_langfuse_module,
-            "openlit": mock_openlit,
-            "opentelemetry": MagicMock(trace=mock_trace_module),
-            "opentelemetry.trace": mock_trace_module,
-        })
-
-        dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
-            mode="autogen"
-        )
-
-        result1 = dataset.load()
-        result2 = dataset.load()
-
-        mock_langfuse_class.assert_called_once()
-        mock_openlit.init.assert_called_once()
-        assert result1 is result2
-
-    def test_autogen_mode_sets_environment_variables(self, mocker):
-        """Test autogen mode still sets Langfuse env vars during init."""
-        mocker.patch.dict("os.environ", {}, clear=True)
-
-        LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_test",
-                "secret_key": "sk_test", # pragma: allowlist secret
-                "host": "http://localhost:3000",
+                "secret_key": "sk_test",  # pragma: allowlist secret
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
             },
             mode="autogen"
         )
 
-        assert os.environ["LANGFUSE_PUBLIC_KEY"] == "pk_test"
-        assert os.environ["LANGFUSE_SECRET_KEY"] == "sk_test" # pragma: allowlist secret
-        assert os.environ["LANGFUSE_HOST"] == "http://localhost:3000"
+        result = dataset.load()
+        assert result == mock_tracer
 
-    def test_autogen_mode_import_error(self, mocker):
-        """Test autogen mode raises DatasetError when dependencies missing."""
+    def test_autogen_mode_caching(self, mocker):
+        """Test that AutoGen mode caches the tracer."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        original_import = __builtins__["__import__"]
-
-        def mock_import(name, *args, **kwargs):
-            if name == "openlit":
-                raise ImportError("No module named 'openlit'")
-            return original_import(name, *args, **kwargs)
-
-        mocker.patch("builtins.__import__", side_effect=mock_import)
+        mock_tracer = MagicMock()
+        build_tracer_mock = mocker.patch(
+            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
 
         dataset = LangfuseTraceDataset(
-            credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test",  # pragma: allowlist secret
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
+            },
             mode="autogen"
         )
 
-        with pytest.raises(DatasetError, match="AutoGen mode requires Langfuse and OpenLit"):
-            dataset.load()
+        # Call load twice
+        result1 = dataset.load()
+        result2 = dataset.load()
 
-    def test_describe_method_autogen_mode(self):
-        """Test _describe returns correct format for autogen mode."""
+        # Should only build tracer once due to caching
+        build_tracer_mock.assert_called_once()
+        assert result1 is result2
+
+    def test_autogen_mode_sets_environment_variables(self, mocker):
+        """Test that AutoGen mode correctly sets Langfuse environment variables."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
+
+        LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test_autogen",
+                "secret_key": "sk_test_autogen",  # pragma: allowlist secret
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
+            },
+            mode="autogen"
+        )
+
+        assert os.environ["LANGFUSE_PUBLIC_KEY"] == "pk_test_autogen"
+        assert os.environ["LANGFUSE_SECRET_KEY"] == "sk_test_autogen"  # pragma: allowlist secret
+
+    def test_autogen_mode_missing_endpoint(self):
+        """Test that autogen mode raises error when endpoint is missing."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            LangfuseTraceDataset(
+                credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
+                mode="autogen"
+            )
+
+    def test_autogen_mode_empty_endpoint(self):
+        """Test that autogen mode raises error when endpoint is empty."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            LangfuseTraceDataset(
+                credentials={
+                    "public_key": "pk_test",
+                    "secret_key": "sk_test", # pragma: allowlist secret
+                    "endpoint": "",
+                },
+                mode="autogen"
+            )
+
+    def test_autogen_mode_endpoint_not_required_for_other_modes(self):
+        """Test that endpoint is not required for non-autogen modes."""
+        # Endpoint is only required for autogen mode
         dataset = LangfuseTraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
+            mode="sdk"
+        )
+        assert dataset._mode == "sdk"
+
+    def test_autogen_mode_import_error(self, mocker):
+        """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Make the import fail by patching the method to raise ImportError
+        def raise_import_error():
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            )
+
+        mocker.patch(
+            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            side_effect=raise_import_error
+        )
+
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test", # pragma: allowlist secret
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
+            },
+            mode="autogen"
+        )
+
+        with pytest.raises(DatasetError, match="AutoGen mode requires OpenTelemetry"):
+            dataset.load()
+
+    def test_describe_method_autogen_mode(self, mocker):
+        """Test _describe returns correct format for autogen mode."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
+
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test", # pragma: allowlist secret
+                "endpoint": LANGFUSE_AUTOGEN_ENDPOINT,
+            },
             mode="autogen"
         )
 

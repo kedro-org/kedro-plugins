@@ -334,7 +334,6 @@ test = [
     "transformers[torch]",
 ]
 
-
 # Lint requirements
 lint = [
     "bandit>=1.6.2, <2.0",

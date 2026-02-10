@@ -103,15 +103,11 @@ class LangfuseTraceDataset(AbstractDataset):
         during initialization for use by all tracing modes.
 
         Args:
-            credentials: Dictionary with Langfuse credentials. Required keys:
-                {public_key, secret_key}. Optional keys: {host} (defaults to
-                Langfuse cloud if not provided). For autogen mode, {endpoint} is
-                required — the full OTLP endpoint URL (e.g.
-                `https://cloud.langfuse.com/api/public/otel/v1/traces`).
-                For self-hosted Langfuse, provide `host` alongside `endpoint`
-                so that environment variables are configured correctly for all modes.
-                For OpenAI mode, may also include openai section with
-                {openai_api_key, openai_api_base}.
+            credentials: Dictionary with Langfuse credentials. Required: {public_key, secret_key}.
+                Optional: {host} (defaults to Langfuse cloud if not provided).
+                For autogen mode, {endpoint} is required — the full OTLP endpoint URL
+                (e.g. https://cloud.langfuse.com/api/public/otel/v1/traces).
+                For OpenAI mode, include openai section with {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
@@ -119,41 +115,45 @@ class LangfuseTraceDataset(AbstractDataset):
             DatasetError: If required Langfuse credentials are missing or empty.
 
         Examples:
-            # Basic SDK mode (using default Langfuse cloud)
-                dataset = LangfuseTraceDataset(
+            >>> # Basic SDK mode (using default Langfuse cloud)
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
             ... )
 
-            # With custom host
-                dataset = LangfuseTraceDataset(
+            >>> # With custom host
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "host": "https://custom.langfuse.com"
             ...     }
             ... )
 
-            # OpenAI mode with API key
-                dataset = LangfuseTraceDataset(
+            >>> # OpenAI mode with API key
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
-            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."} # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."}  # pragma: allowlist secret
             ...     },
             ...     mode="openai"
             ... )
 
-            # AutoGen mode cloud
-                dataset = LangfuseTraceDataset(
+            >>> # AutoGen mode cloud
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
             ...     },
             ...     mode="autogen"
             ... )
 
-            # AutoGen mode self-hosted
-                dataset = LangfuseTraceDataset(
+            >>> # AutoGen mode self-hosted
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "host": "http://localhost:3000",
             ...         "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
             ...     },
@@ -162,8 +162,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
         Note:
             Sets LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, and LANGFUSE_HOST
-            environment variables from the provided credentials. Also sets
-            OPENAI_API_KEY if provided for OpenAI mode compatibility.
+            environment variables from the provided credentials.
         """
         self._credentials = credentials
         self._mode = mode

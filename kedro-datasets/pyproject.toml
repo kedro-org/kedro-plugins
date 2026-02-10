@@ -66,7 +66,7 @@ biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
 dask-csvdataset = ["dask[dataframe]>=2021.10"]
-dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <2.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
@@ -322,11 +322,10 @@ test = [
     "packaging",
     "pyOpenSSL>=22.1.0",  # Workaround for incorrect pin in the snowflake-connector-python package; see https://github.com/snowflakedb/snowflake-connector-python/issues/2109
     "SQLAlchemy>=1.2",
-    "sqlglot<28.7.0", # temporary pin
     "tables>=3.6",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
-    "triad>=0.6.7, <1.0",
+    "triad>=0.6.7, <2.0",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface

@@ -69,7 +69,7 @@ class MLRunResult(MLRunAbstractDataset):
             for k, v in flat.items():
                 self._ctx_manager.context.log_result(k, v)
         else:
-            self._ctx_manager.context.log_result(self._key, data)
+            self._ctx_manager.context.log_result(self.key, data)
 
     def load(self) -> Any:
-        return self._ctx_manager.context.results.get(self._key)
+        return self._ctx_manager.context.results.get(self.key)

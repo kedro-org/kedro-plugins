@@ -54,23 +54,33 @@ class MLRunAbstractDataset(AbstractDataset):
                  load_args: dict[str, Any] | None = None,
                  save_args: dict[str, Any] | None = None, ) -> None:
         self._ctx_manager = MLRunContextManager()
-        self._key = key or getattr(self, '_name', 'unnamed')
+        # None when not given; resolved by key property at save/load time
+        self._key = key
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
-        self._save_args["db_key"] = self._key
-        self._load_args["key"] = self._key
 
+    @property
+    def key(self) -> str:
+        return (
+            self._key
+            if self._key is not None
+            else getattr(self, "_name", "unnamed")
+        )
 
     def load(self) -> mlrun.artifacts.Artifact | None:
-        return self._ctx_manager.context.get_artifact(**self._load_args)
+        return self._ctx_manager.context.get_artifact(
+            **{**self._load_args, "key": self.key}
+        )
 
     def save(self, data: Any) -> None:
-        artifact = mlrun.artifacts.Artifact(key=self._key, body=data)
-        self._ctx_manager.context.log_artifact(item=artifact, **self._save_args)
+        artifact = mlrun.artifacts.Artifact(key=self.key, body=data)
+        self._ctx_manager.context.log_artifact(
+            item=artifact, **{**self._save_args, "db_key": self.key}
+        )
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "key": self._key,
+            "key": self.key,
             "load_args": self._load_args,
             "save_args": self._save_args,
             "mlrun_project_name": self._ctx_manager.project.name,

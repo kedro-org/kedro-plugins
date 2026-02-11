@@ -72,14 +72,14 @@ class MLRunModel(MLRunAbstractDataset):
             joblib.dump(data, model_path)
 
             self._ctx_manager.context.log_model(
-                key=self._key,
+                key=self.key,
                 model_file=model_path,
                 framework=self._framework,
                 **self._save_args
             )
 
     def load(self) -> Any:
-        artifact = self._ctx_manager.project.get_artifact(self._key)
+        artifact = self._ctx_manager.project.get_artifact(self.key)
         target_path = artifact.get_target_path()
         model_file = artifact.model_file
         local_path = get_dataitem(target_path + model_file).local()

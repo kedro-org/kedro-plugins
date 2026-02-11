@@ -47,8 +47,8 @@ class OpikTraceDataset(AbstractDataset):
             "workspace": "my-workspace",
             "project_name": "kedro-demo",
             "openai": {
-                "openai_api_key": "sk-...",  # pragma: allowlist secret
-                "openai_api_base": "https://api.openai.com/v1",
+                "api_key": "sk-...",  # pragma: allowlist secret
+                "base_url": "https://api.openai.com/v1",
             },
         },
         mode="openai",
@@ -214,13 +214,13 @@ class OpikTraceDataset(AbstractDataset):
 
         openai_creds = self._credentials["openai"]
 
-        api_key = str(openai_creds.get("openai_api_key", "")).strip()
+        api_key = str(openai_creds.get("api_key", "")).strip()
         if not api_key:
             raise DatasetError("Missing or empty OpenAI API key")
 
         params = {"api_key": api_key}
 
-        base_url = openai_creds.get("openai_api_base")
+        base_url = openai_creds.get("base_url")
         if base_url and str(base_url).strip():
             params["base_url"] = str(base_url).strip()
 

@@ -76,7 +76,7 @@ def test_load_sdk_client_returns_wrapper(track_mock, configure_mock, base_creden
 def test_load_openai_client(openai_mock, track_openai_mock, configure_mock, base_credentials):
     """Test that loading OpenAI client returns a tracked OpenAI client."""
     creds = base_credentials | {
-        "openai": {"openai_api_key": "sk-test"},  # pragma: allowlist secret
+        "openai": {"api_key": "sk-test"},  # pragma: allowlist secret
         "project_name": "proj-a",
     }
     dataset = OpikTraceDataset(creds, mode="openai")

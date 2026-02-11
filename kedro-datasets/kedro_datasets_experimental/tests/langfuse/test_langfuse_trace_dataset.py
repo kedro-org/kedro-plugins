@@ -161,7 +161,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-test"}  # pragma: allowlist secret
+                "openai": {"api_key": "sk-test"}  # pragma: allowlist secret
             },
             mode="openai"
         )

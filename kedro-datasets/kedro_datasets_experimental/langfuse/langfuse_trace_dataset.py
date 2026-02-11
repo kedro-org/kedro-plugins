@@ -44,7 +44,7 @@ class LangfuseTraceDataset(AbstractDataset):
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
+                "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
             },
             mode="openai",
         )
@@ -55,7 +55,7 @@ class LangfuseTraceDataset(AbstractDataset):
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
                 "host": "https://custom.langfuse.com",
-                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
+                "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
             },
             mode="openai",
         )
@@ -107,7 +107,7 @@ class LangfuseTraceDataset(AbstractDataset):
                 Optional: {host} (defaults to Langfuse cloud if not provided).
                 For autogen mode, {endpoint} is required — the full OTLP endpoint URL
                 (e.g. https://cloud.langfuse.com/api/public/otel/v1/traces).
-                For OpenAI mode, include openai section with {openai_api_key, openai_api_base}.
+                For OpenAI mode, include openai section with {api_key, base_url}.
             mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
@@ -134,7 +134,7 @@ class LangfuseTraceDataset(AbstractDataset):
             ...     credentials={
             ...         "public_key": "pk_...",
             ...         "secret_key": "sk_...",  # pragma: allowlist secret
-            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."}  # pragma: allowlist secret
+            ...         "openai": {"api_key": "sk-...", "base_url": "..."}  # pragma: allowlist secret
             ...     },
             ...     mode="openai"
             ... )
@@ -248,19 +248,19 @@ class LangfuseTraceDataset(AbstractDataset):
         openai_creds = self._credentials["openai"]
 
         # Check for required API key
-        if "openai_api_key" not in openai_creds:
-            raise DatasetError("Missing required OpenAI credential: 'openai_api_key'")
+        if "api_key" not in openai_creds:
+            raise DatasetError("Missing required OpenAI credential: 'api_key'")
 
         # Validate that API key is not empty
-        if not openai_creds["openai_api_key"] or not openai_creds["openai_api_key"].strip():
+        if not openai_creds["api_key"] or not openai_creds["api_key"].strip():
             raise DatasetError("OpenAI API key cannot be empty")
 
         # Build validated client parameters
-        client_params = {"api_key": openai_creds["openai_api_key"]}
+        client_params = {"api_key": openai_creds["api_key"]}
 
         # Add base_url if provided (optional)
-        if "openai_api_base" in openai_creds and openai_creds["openai_api_base"]:
-            client_params["base_url"] = openai_creds["openai_api_base"]
+        if "base_url" in openai_creds and openai_creds["base_url"]:
+            client_params["base_url"] = openai_creds["base_url"]
 
         return client_params
 

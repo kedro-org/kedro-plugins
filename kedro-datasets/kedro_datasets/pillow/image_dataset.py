@@ -1,6 +1,7 @@
 """``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -36,8 +37,8 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         >>> dataset = ImageDataset(
         ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
         ... )
-        >>> image = dataset.load()
-        >>> image.show()
+        >>> image = dataset.load()  # doctest: +SKIP
+        >>> image.show()  # doctest: +SKIP
 
     """
 

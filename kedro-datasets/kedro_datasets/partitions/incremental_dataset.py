@@ -13,7 +13,6 @@ from collections.abc import Callable
 from copy import deepcopy
 from typing import Any
 
-from cachetools import cachedmethod
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
@@ -178,8 +177,10 @@ class IncrementalDataset(PartitionedDataset):
 
         return {**default_config, **checkpoint_config}
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
+        if self._cached_partitions is not None:
+            return self._cached_partitions
+
         checkpoint = self._read_checkpoint()
         checkpoint_path = self._filesystem._strip_protocol(
             self._checkpoint_config[self._filepath_arg]
@@ -197,11 +198,12 @@ class IncrementalDataset(PartitionedDataset):
             partition_id = self._path_to_partition(partition)
             return self._comparison_func(partition_id, checkpoint)
 
-        return sorted(
+        self._cached_partitions = sorted(
             _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if _is_valid_partition(path)
         )
+        return self._cached_partitions
 
     @property
     def _checkpoint(self) -> AbstractDataset:

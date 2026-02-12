@@ -204,8 +204,12 @@ class OpikTraceDataset(AbstractDataset):
             force=True,
         )
 
-    def _build_openai_client_params(self) -> dict[str, str]:
-        """Validate and construct OpenAI client parameters from credentials."""
+    def _validate_openai_client_params(self) -> None:
+        """Validate OpenAI credentials in the 'openai' section.
+
+        Raises:
+            DatasetError: If OpenAI credentials are missing or invalid.
+        """
         if "openai" not in self._credentials:
             raise DatasetError(
                 "Missing 'openai' section in OpikTraceDataset credentials. "
@@ -218,13 +222,9 @@ class OpikTraceDataset(AbstractDataset):
         if not api_key:
             raise DatasetError("Missing or empty OpenAI API key")
 
-        params = {"api_key": api_key}
-
-        base_url = openai_creds.get("base_url")
-        if base_url and str(base_url).strip():
-            params["base_url"] = str(base_url).strip()
-
-        return params
+        # Validate base_url is not empty if provided
+        if "base_url" in openai_creds and not str(openai_creds["base_url"]).strip():
+            raise DatasetError("OpenAI credential 'base_url' cannot be empty if provided")
 
     def _build_autogen_tracer(self) -> Any:
         """Build and return a configured Tracer for AutoGen integration with Opik.
@@ -340,8 +340,8 @@ class OpikTraceDataset(AbstractDataset):
                 "pip install openai opik"
             ) from e
 
-        params = self._build_openai_client_params()
-        client = openai.OpenAI(**params)
+        self._validate_openai_client_params()
+        client = openai.OpenAI(**self._credentials["openai"])
 
         project_name = self._trace_kwargs.get("project_name")
         env_project = os.getenv("OPIK_PROJECT_NAME")

@@ -219,27 +219,11 @@ class LangfuseTraceDataset(AbstractDataset):
         """
         return {"mode": self._mode, "credentials": "***"}
 
-    def _build_openai_client_params(self) -> dict[str, str]:
-        """Validate and build OpenAI client parameters from credentials.
-
-        Validates the presence and content of required OpenAI credentials,
-        then constructs parameters dictionary for OpenAI client initialization.
-
-        Returns:
-            Dictionary with validated OpenAI client parameters. Always includes
-            'api_key', optionally includes 'base_url' if provided.
+    def _validate_openai_client_params(self) -> None:
+        """Validate OpenAI credentials in the 'openai' section.
 
         Raises:
             DatasetError: If OpenAI credentials are missing or invalid.
-
-        Examples:
-            # With API key only
-                params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-..."}  # pragma: allowlist secret
-
-            # With API key and custom base URL
-                params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}  # pragma: allowlist secret
         """
         # Check if openai section exists
         if "openai" not in self._credentials:
@@ -255,14 +239,9 @@ class LangfuseTraceDataset(AbstractDataset):
         if not openai_creds["api_key"] or not openai_creds["api_key"].strip():
             raise DatasetError("OpenAI API key cannot be empty")
 
-        # Build validated client parameters
-        client_params = {"api_key": openai_creds["api_key"]}
-
-        # Add base_url if provided (optional)
-        if "base_url" in openai_creds and openai_creds["base_url"]:
-            client_params["base_url"] = openai_creds["base_url"]
-
-        return client_params
+        # Validate base_url is not empty if provided
+        if "base_url" in openai_creds and not str(openai_creds["base_url"]).strip():
+            raise DatasetError("OpenAI credential 'base_url' cannot be empty if provided")
 
     def _build_autogen_tracer(self) -> Any:
         """Build and return a configured Tracer for AutoGen integration with Langfuse.
@@ -373,8 +352,8 @@ class LangfuseTraceDataset(AbstractDataset):
             self._cached_client = CallbackHandler(**self._trace_kwargs)
         elif self._mode == "openai":
             from langfuse.openai import OpenAI  # noqa: PLC0415
-            client_params = self._build_openai_client_params()
-            self._cached_client = OpenAI(**client_params)
+            self._validate_openai_client_params()
+            self._cached_client = OpenAI(**self._credentials["openai"])
         elif self._mode == "autogen":
             self._cached_client = self._build_autogen_tracer()
         else:

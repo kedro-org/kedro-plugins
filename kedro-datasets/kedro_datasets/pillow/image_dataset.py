@@ -26,19 +26,18 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-        >>> import sys
-        >>>
-        >>> import pytest
+        >>> from PIL import Image
+        >>> import tempfile
         >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> if sys.platform.startswith("win"):
-        ...     pytest.skip("this doctest hangs on Windows CI runner")
-        ...
-        >>> dataset = ImageDataset(
-        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
-        ... )
-        >>> image = dataset.load()  # doctest: +SKIP
-        >>> image.show()  # doctest: +SKIP
+        >>> tmp = tempfile.NamedTemporaryFile(suffix=".jpg")
+        >>> img = Image.new("RGB", (10, 10), color="red")
+        >>> img.save(tmp.name)
+        >>>
+        >>> dataset = ImageDataset(filepath=tmp.name)
+        >>> image = dataset.load()
+        >>> image.size
+        (10, 10)
 
     """
 

@@ -30,13 +30,14 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
         >>> import tempfile
         >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> tmp = tempfile.NamedTemporaryFile(suffix=".jpg")
+        >>> tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
         >>> img = Image.new("RGB", (10, 10), color="red")
         >>> img.save(tmp.name)
+        >>> tmp.close()
         >>>
         >>> dataset = ImageDataset(filepath=tmp.name)
-        >>> image = dataset.load()
-        >>> image.size
+        >>> loaded_img = dataset.load()
+        >>> loaded_img.size
         (10, 10)
 
     """

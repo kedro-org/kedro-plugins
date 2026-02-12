@@ -37,7 +37,9 @@ class MLRunResult(MLRunAbstractDataset):
 
     Args:
         key: Result key for MLRun (defaults to catalog dataset name).
-        flatten: If True, flatten nested dicts to dot-notation keys.
+        flatten: If True, flatten nested dicts to dot-notation keys. When True,
+            each key is stored as a separate MLRun result; load per key
+            (e.g. from context.results for each key).
         load_args: Passed to MLRun when loading; see MLRun docs for your version.
         save_args: Passed to log_result; see MLRun docs for your version.
     """
@@ -65,6 +67,8 @@ class MLRunResult(MLRunAbstractDataset):
 
     def save(self, data: Any) -> None:
         if self._flatten and isinstance(data, dict):
+            # Each flattened key is logged as its own MLRun result (no single key holds
+            # the full dict). When loading, read each key from context.results.
             flat = self._flatten_dict(data)
             for k, v in flat.items():
                 self._ctx_manager.context.log_result(k, v)
@@ -72,4 +76,5 @@ class MLRunResult(MLRunAbstractDataset):
             self._ctx_manager.context.log_result(self.key, data)
 
     def load(self) -> Any:
+        # When flatten=True, results were saved per key; use context.results per key.
         return self._ctx_manager.context.results.get(self.key)

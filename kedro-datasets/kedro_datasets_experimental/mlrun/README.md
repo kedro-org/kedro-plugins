@@ -152,12 +152,12 @@ dataset.save({"accuracy": 0.95, "loss": 0.05})
 loaded = dataset.load()
 ```
 
-| Parameter   | Type | Default | Description                                                                                                                       |
-|-------------|------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `key`       | str  | None    | Result key for MLRun; defaults to catalog dataset name.                                                                           |
-| `flatten`   | bool | `False` | If `True`, flatten nested dicts to dot-notation keys.                                                                             |
-| `load_args` | dict | None    | For loading; see MLRun docs for your version.                                                                                     |
-| `save_args` | dict | None    | Passed to [`log_result`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_result). |
+| Parameter   | Type | Default | Description                                                                                                                                                                        |
+|-------------|------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `key`       | str  | None    | Result key for MLRun; defaults to catalog dataset name.                                                                                                                            |
+| `flatten`   | bool | `False` | If `True`, flatten nested dicts to dot-notation keys. When `flatten=True`, each key is stored as a separate MLRun result; load per key (e.g. from `context.results` for each key). |
+| `load_args` | dict | None    | For loading; see MLRun docs for your version.                                                                                                                                      |
+| `save_args` | dict | None    | Passed to [`log_result`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_result).                                                  |
 
 ### MLRunAbstractDataset
 

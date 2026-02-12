@@ -252,24 +252,25 @@ class TestStudyDatasetVersioned:
     def test_release_instance_cache(self, dummy_study, database_name):
         """Test that cache invalidation does not affect other instances"""
         ds_a = StudyDataset(study_name="test", backend="sqlite", database=database_name, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_study)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = StudyDataset(study_name="test", backend="sqlite", database=database_name, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_study_dataset):
         """Check the error if no versions are available for load."""

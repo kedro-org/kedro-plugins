@@ -66,7 +66,7 @@ biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
 dask-csvdataset = ["dask[dataframe]>=2021.10"]
-dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <2.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
@@ -215,10 +215,12 @@ langchain-langchainpromptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-langchainpromptdataset]"]
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
-langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+langfuse-langfusetracedataset-autogen = ["langfuse>=2.0.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset,langfuse-langfusetracedataset-autogen]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
 opik-opikpromptdataset = ["opik>=1.8.0"]
 opik-opiktracedataset = ["opik>=1.8.0"]
-opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
+opik-opiktracedataset-autogen = ["opik>=1.8.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]
+opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset, opik-opiktracedataset-autogen]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -321,11 +323,10 @@ test = [
     "packaging",
     "pyOpenSSL>=22.1.0",  # Workaround for incorrect pin in the snowflake-connector-python package; see https://github.com/snowflakedb/snowflake-connector-python/issues/2109
     "SQLAlchemy>=1.2",
-    "sqlglot<28.7.0", # temporary pin
     "tables>=3.6",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
-    "triad>=0.6.7, <1.0",
+    "triad>=0.6.7, <2.0",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface

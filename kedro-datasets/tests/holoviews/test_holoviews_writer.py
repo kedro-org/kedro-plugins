@@ -83,10 +83,13 @@ class TestHoloviewsWriter:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.png"
         dataset = HoloviewsWriter(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
 
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "fmt": "svg"}], indirect=True)
     def test_save_extra_params(self, hv_writer, save_args):

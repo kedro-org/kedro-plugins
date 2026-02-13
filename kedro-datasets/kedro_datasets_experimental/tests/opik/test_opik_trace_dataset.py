@@ -86,6 +86,35 @@ def test_load_openai_client(openai_mock, track_openai_mock, configure_mock, base
 
 
 @patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
+@patch("opik.integrations.openai.track_openai")
+@patch("openai.OpenAI")
+def test_load_openai_client_with_base_url(openai_mock, track_openai_mock, configure_mock, base_credentials):
+    """Test that loading OpenAI client passes base_url when provided."""
+    creds = base_credentials | {
+        "openai": {"api_key": "sk-test", "base_url": "https://custom.openai.com/v1"},  # pragma: allowlist secret
+    }
+    dataset = OpikTraceDataset(creds, mode="openai")
+    dataset.load()
+    openai_mock.assert_called_once_with(api_key="sk-test", base_url="https://custom.openai.com/v1")  # pragma: allowlist secret
+
+
+@patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
+def test_openai_empty_base_url_raises(configure_mock, base_credentials, mocker):
+    """Test that empty base_url raises DatasetError."""
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
+    creds = base_credentials | {"openai": {"api_key": "sk-test", "base_url": "  "}}  # pragma: allowlist secret
+    dataset = OpikTraceDataset(creds, mode="openai")
+    with pytest.raises(DatasetError, match="'base_url' cannot be empty if provided"):
+        dataset.load()
+
+
+@patch("kedro_datasets_experimental.opik.opik_trace_dataset.configure")
 def test_openai_missing_credentials_raises(configure_mock, base_credentials, mocker):
     """Test that missing OpenAI API key raises DatasetError."""
     # Mock openai and opik.integrations.openai to avoid real imports

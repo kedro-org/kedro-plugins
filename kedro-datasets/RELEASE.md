@@ -6,6 +6,7 @@
 - Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
 - `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.
 - Added `autogen` mode to `OpikTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
+- Experimental datasets `OpikTraceDataset` and `LangfuseTraceDataset` now receive `openai` credentials as `base_url` and `api_key`, instead of `openai_api_base` and `openai_api_key`.
 
 ## Community contributions
 

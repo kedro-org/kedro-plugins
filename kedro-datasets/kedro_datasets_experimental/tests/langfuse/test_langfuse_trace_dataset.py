@@ -161,7 +161,7 @@ class TestLangfuseTraceDataset:
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-test"}  # pragma: allowlist secret
+                "openai": {"api_key": "sk-test"}  # pragma: allowlist secret
             },
             mode="openai"
         )
@@ -169,6 +169,47 @@ class TestLangfuseTraceDataset:
         result = dataset.load()
         mock_openai_class.assert_called_once_with(api_key="sk-test") # pragma: allowlist secret
         assert result == mock_openai_instance
+
+    def test_openai_mode_with_base_url(self, mocker):
+        """Test OpenAI mode passes base_url to client when provided."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        mock_openai_module = MagicMock()
+        mock_openai_class = MagicMock()
+        mock_openai_module.OpenAI = mock_openai_class
+
+        mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
+
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test",  # pragma: allowlist secret
+                "openai": {"api_key": "sk-test", "base_url": "https://custom.openai.com/v1"}  # pragma: allowlist secret
+            },
+            mode="openai"
+        )
+
+        dataset.load()
+        mock_openai_class.assert_called_once_with(api_key="sk-test", base_url="https://custom.openai.com/v1")  # pragma: allowlist secret
+
+    def test_openai_mode_empty_base_url_raises(self, mocker):
+        """Test OpenAI mode raises error when base_url is empty."""
+        mocker.patch.dict("os.environ", {}, clear=True)
+
+        mock_openai_module = MagicMock()
+        mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
+
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_test",
+                "secret_key": "sk_test",  # pragma: allowlist secret
+                "openai": {"api_key": "sk-test", "base_url": "  "}  # pragma: allowlist secret
+            },
+            mode="openai"
+        )
+
+        with pytest.raises(DatasetError, match="'base_url' cannot be empty if provided"):
+            dataset.load()
 
     def test_openai_mode_missing_credentials(self, mocker):
         """Test OpenAI mode raises error when OpenAI credentials missing."""

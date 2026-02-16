@@ -1,4 +1,11 @@
 # Upcoming Release
+
+## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.2.0
+
 ## Major features and improvements
 
 - Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
@@ -6,8 +13,8 @@
 - Added `autogen` mode to `OpikTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
 - Added the following new **experimental** datasets:
 
-| Type                       | Description                                                                    | Location                               |
-| -------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
+| Type                          | Description                                                                      | Location                               |
+|-------------------------------|----------------------------------------------------------------------------------| -------------------------------------- |
 | `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun`    |
 | `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun`    |
 | `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun`    |
@@ -19,6 +26,8 @@
 - Experimental datasets `OpikTraceDataset` and `LangfuseTraceDataset` now receive `openai` credentials as `base_url` and `api_key`, instead of `openai_api_base` and `openai_api_key`.
 
 ## Community contributions
+
+[Katerina Molchanova](https://github.com/rokatyy)
 
 # Release 9.1.1
 

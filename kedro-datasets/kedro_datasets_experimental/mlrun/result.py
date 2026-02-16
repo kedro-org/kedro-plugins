@@ -8,40 +8,43 @@ class MLRunResult(MLRunAbstractDataset):
     """Dataset for saving/loading scalar results (metrics) via MLRun.
 
     Uses MLRun's
-    `log_result <https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_result>`_;
-    results are read from context.results.
-    ``load_args`` and ``save_args`` accept any arguments supported by the corresponding
-    MLRun API for your MLRun version; see the MLRun docs.
+    [`log_result`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_result).
+    Results are read from `context.results`.
+
+    `load_args` and `save_args` accept any arguments supported by the corresponding
+    MLRun API for your MLRun version; see the MLRun documentation.
 
     Examples:
         Using the
-        `YAML API <https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/>`_:
+        [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-        .. code-block:: yaml
-
-            training_metrics:
-              type: kedro_datasets_experimental.mlrun.MLRunResult
-              key: metrics
-              flatten: true
+        ```yaml
+        training_metrics:
+          type: kedro_datasets_experimental.mlrun.MLRunResult
+          key: metrics
+          flatten: true
+        ```
 
         Using the
-        `Python API <https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/>`_:
+        [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-        .. code-block:: python
+        ```python
+        from kedro_datasets_experimental.mlrun import MLRunResult
 
-            from kedro_datasets_experimental.mlrun import MLRunResult
-
-            dataset = MLRunResult(key="metrics", flatten=True)
-            dataset.save({"accuracy": 0.95, "loss": 0.05})
-            loaded = dataset.load()
+        dataset = MLRunResult(key="metrics", flatten=True)
+        dataset.save({"accuracy": 0.95, "loss": 0.05})
+        loaded = dataset.load()
+        ```
 
     Args:
         key: Result key for MLRun (defaults to catalog dataset name).
-        flatten: If True, flatten nested dicts to dot-notation keys. When True,
-            each key is stored as a separate MLRun result; load per key
-            (e.g. from context.results for each key).
+        flatten: If `True`, flatten nested dictionaries to dot-notation keys.
+
+            When enabled:
+            - Each key is stored as a separate MLRun result.
+            - Loading must be performed per key (e.g. from `context.results`).
         load_args: Passed to MLRun when loading; see MLRun docs for your version.
-        save_args: Passed to log_result; see MLRun docs for your version.
+        save_args: Passed to `log_result`; see MLRun docs for your version.
     """
 
     def __init__(

@@ -51,10 +51,12 @@ class MLRunAbstractDataset(AbstractDataset):
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
-    def __init__(self,
-                 key: str | None = None,
-                 load_args: dict[str, Any] | None = None,
-                 save_args: dict[str, Any] | None = None, ) -> None:
+    def __init__(
+        self,
+        key: str | None = None,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+    ) -> None:
         self._ctx_manager = MLRunContextManager()
         # None when not given; resolved by key property at save/load time
         self._key = key

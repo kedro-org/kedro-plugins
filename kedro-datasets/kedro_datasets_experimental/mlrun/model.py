@@ -13,45 +13,47 @@ class MLRunModel(MLRunAbstractDataset):
     """Dataset for saving/loading models via MLRun.
 
     Uses MLRun's
-    `log_model <https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_model>`_
+    [`log_model`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_model)
     and
-    `get_artifact <https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.get_artifact>`_.
-    ``load_args`` and ``save_args`` accept any arguments supported by the corresponding
-    MLRun API for your MLRun version; see the MLRun docs.
+    [`get_artifact`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.get_artifact).
 
-    Examples:
-        Using the
-        `YAML API <https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/>`_:
+    `load_args` and `save_args` accept any arguments supported by the corresponding
+    MLRun API for your MLRun version; see the MLRun documentation.
 
-        .. code-block:: yaml
+    ## Examples
 
-            trained_model:
-              type: kedro_datasets_experimental.mlrun.MLRunModel
-              key: my_sklearn_model
-              framework: sklearn
-              model_format: pkl
+    Using the
+    [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-        Using the
-        `Python API <https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/>`_:
+    ```yaml
+    trained_model:
+      type: kedro_datasets_experimental.mlrun.MLRunModel
+      key: my_sklearn_model
+      framework: sklearn
+      model_format: pkl
+    ```
 
-        .. code-block:: python
+    Using the
+    [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-            from kedro_datasets_experimental.mlrun import MLRunModel
+    ```python
+    from kedro_datasets_experimental.mlrun import MLRunModel
 
-            dataset = MLRunModel(
-                key="my_sklearn_model",
-                framework="sklearn",
-                model_format="pkl",
-            )
-            dataset.save(trained_model)
-            loaded_model = dataset.load()
+    dataset = MLRunModel(
+        key="my_sklearn_model",
+        framework="sklearn",
+        model_format="pkl",
+    )
+    dataset.save(trained_model)
+    loaded_model = dataset.load()
+    ```
 
     Args:
         key: Artifact key for MLRun (defaults to catalog dataset name).
-        framework: ML framework name (e.g. "sklearn", "xgboost", "lightgbm").
-        model_format: File format/extension for saving the model (e.g. "pkl").
+        framework: ML framework name (e.g. `"sklearn"`, `"xgboost"`, `"lightgbm"`).
+        model_format: File format/extension for saving the model (e.g. `"pkl"`).
         load_args: Passed to MLRun when loading; see MLRun docs for your version.
-        save_args: Passed to log_model; see MLRun docs for your version.
+        save_args: Passed to `log_model`; see MLRun docs for your version.
     """
 
     def __init__( # noqa: PLR0913

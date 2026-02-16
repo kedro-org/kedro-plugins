@@ -32,6 +32,10 @@
 | Type                       | Description                                                                    | Location                               |
 | -------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
 | `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections. | `kedro_datasets_experimental.chromadb` |
+| `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun`    |
 
 ## Bug fixes and other changes
 

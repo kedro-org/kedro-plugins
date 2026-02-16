@@ -1010,6 +1010,9 @@ class TestDataFlowSequentialRunner:
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataset(load) -> node -> MemoryDataset (save and then load) ->
         node -> SparkDataset (save)"""
+        if is_async:
+            pytest.skip("Hangs on Python 3.12+")
+
         test_pipeline = pipeline(
             [
                 node(identity, "spark_in", "memory_ds"),

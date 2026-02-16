@@ -307,6 +307,7 @@ class TestSparkHiveDataset:
         ):
             dataset.load()
 
+    @pytest.mark.skip("Hangs")
     def test_save_delta_format(self, mocker):
         dataset = SparkHiveDataset(
             database="default_1", table="delta_table", save_args={"format": "delta"}

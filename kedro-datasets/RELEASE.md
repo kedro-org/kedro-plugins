@@ -1,11 +1,21 @@
 # Upcoming Release
 ## Major features and improvements
-## Bug fixes and other changes
 
-- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
 - `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.
 - Added `autogen` mode to `OpikTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
+- Added the following new **experimental** datasets:
+
+| Type                       | Description                                                                    | Location                               |
+| -------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
+| `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun`    |
+
+## Bug fixes and other changes
+
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Experimental datasets `OpikTraceDataset` and `LangfuseTraceDataset` now receive `openai` credentials as `base_url` and `api_key`, instead of `openai_api_base` and `openai_api_key`.
 
 ## Community contributions

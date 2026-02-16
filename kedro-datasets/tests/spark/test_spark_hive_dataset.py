@@ -20,8 +20,6 @@ TESTSPARKDIR = "test_spark_dir"
 spark_major = int(pyspark.__version__.split(".")[0])
 if spark_major >= 4:
     pytestmark = pytest.mark.skip(reason="Hive catalog not available in Spark 4.x")
-else:
-    pytestmark = pytest.mark.skip(reason="Tests hang")
 
 
 @pytest.fixture(scope="module")

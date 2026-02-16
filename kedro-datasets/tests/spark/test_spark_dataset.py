@@ -989,8 +989,7 @@ def data_catalog(tmp_path):
     )
 
 
-# @pytest.mark.parametrize("is_async", [False, True])
-@pytest.mark.skip("Something is hanging")
+@pytest.mark.parametrize("is_async", [False, True])
 class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataset(load) -> node -> Spark (save)."""

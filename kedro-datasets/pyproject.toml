@@ -35,7 +35,7 @@ spark-emr = []  # Uses EMR runtime Spark
 
 # Filesystem specific packages for Spark
 spark-s3 = ["s3fs>=2021.4"]
-spark-gcs = ["gcsfs>=2023.1, <2023.7"]
+spark-gcs = ["gcsfs>=2023.1"]
 spark-azure = ["adlfs>=2023.1"]
 spark-hdfs = ["pyarrow>=7.0"]  # PyArrow includes HDFS support
 
@@ -276,7 +276,7 @@ test = [
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
-    "gcsfs>=2023.1, <2023.7",
+    "gcsfs>=2023.1",
     "geopandas>=0.8.0, <2.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
@@ -406,7 +406,7 @@ experimental_test = [
     "u8darts[all]",
     "pypdf>=3.0.0",
     "moto==5.0.0",
-    "gcsfs>=2023.1, <2023.7",
+    "gcsfs>=2023.1",
     "s3fs>=2021.04",
     "reportlab>=3.6.0",
     "chromadb>=1.0.0",

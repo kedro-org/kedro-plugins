@@ -1,6 +1,9 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+- Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
+
 ## Bug fixes and other changes
 ## Community contributions
 

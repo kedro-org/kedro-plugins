@@ -1,6 +1,9 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+- Kedro-Datasets is now compatible with pandas 3.0.
+
 ## Bug fixes and other changes
 ## Community contributions
 

@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
+
 ## Bug fixes and other changes
 
 - Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).

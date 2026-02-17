@@ -63,7 +63,7 @@ fix-markdownlint:
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
 dataset-tests: dataset-doctests
-	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks --ignore-glob 'tests/[n-zN-Z]*/*.py]'
+	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks --ignore tests/redis --ignore tests/snowflake --ignore tests/spark
 	cd kedro-datasets && pytest -s -vvv tests/databricks --no-cov
 	cd kedro-datasets && pytest -s -vvv tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
 

@@ -100,6 +100,8 @@ def patch_aiobotocore():
 
         return patched_convert_to_response_dict
 
+    # Save the original function to restore later
+    original_convert_to_response_dict = aiobotocore.endpoint.convert_to_response_dict
     aiobotocore.endpoint.convert_to_response_dict = factory(
         aiobotocore.endpoint.convert_to_response_dict
     )
@@ -108,9 +110,19 @@ def patch_aiobotocore():
     # the synchronous base-class methods. Moto returns synchronous responses,
     # and the async overrides raise errors (e.g. KeyError: 'response') when
     # s3fs tries to use them with mocked S3 writes.
+    # Save original attributes to restore them during teardown
+    saved_attrs = {}
     for attr in ("_make_chunk", "read"):
         if hasattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr):
+            saved_attrs[attr] = getattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr)
             delattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr)
+    
+    yield
+    
+    # Restore original state during teardown
+    aiobotocore.endpoint.convert_to_response_dict = original_convert_to_response_dict
+    for attr, value in saved_attrs.items():
+        setattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr, value)
 
 
 @fixture(params=[None])

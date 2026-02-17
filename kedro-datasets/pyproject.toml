@@ -431,8 +431,19 @@ version = {attr = "kedro_datasets.__version__"}
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-# temporarily ignore kedro_datasets/__init__.py in coverage report
-omit = ["tests/*", "kedro_datasets/holoviews/*", "kedro_datasets/tensorflow/*", "kedro_datasets/databricks/*", "kedro_datasets/snowflake/*", "kedro_datasets/spark/spark_hive_dataset.py", "kedro_datasets/__init__.py", "kedro_datasets/conftest.py", "*/__init__.py", "kedro_datasets/spark/*"]
+omit = [
+    "*/__init__.py",
+    "kedro_datasets/__init__.py",  # temporarily ignore kedro_datasets/__init__.py in coverage report
+    "kedro_datasets/conftest.py",
+    "kedro_datasets/dask/*",  # TODO(deepyaman): Remove once Dask supports pandas 3.x.
+    "kedro_datasets/databricks/*",
+    "kedro_datasets/holoviews/*",
+    "kedro_datasets/snowflake/*",
+    "kedro_datasets/spark/spark_hive_dataset.py",
+    "kedro_datasets/tensorflow/*",
+    "kedro_datasets/spark/*",
+    "tests/*",
+]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]

@@ -62,19 +62,19 @@ fix-markdownlint:
 	markdownlint-cli2 --config kedro-datasets/.markdownlint.yaml --fix "kedro-datasets/docs/**/*.md"
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
+# --ignore tests/api \
+# --ignore tests/biosequence \
+# --ignore tests/dask \
+# --ignore tests/databricks \
+# --ignore tests/email \
+# --ignore tests/geopandas \
+# --ignore tests/holoviews \
+# --ignore tests/huggingface \
 # --ignore tests/pandas \
 # --ignore tests/partitions \
 
 dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks \
-	  --ignore tests/api \
-	  --ignore tests/biosequence \
-	  --ignore tests/dask \
-	  --ignore tests/databricks \
-	  --ignore tests/email \
-	  --ignore tests/geopandas \
-	  --ignore tests/holoviews \
-	  --ignore tests/huggingface \
 	  --ignore tests/ibis \
 	  --ignore tests/json \
 	  --ignore tests/langchain \

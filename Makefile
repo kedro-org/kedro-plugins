@@ -68,16 +68,16 @@ fix-markdownlint:
 # --ignore tests/email \
 # --ignore tests/geopandas \
 # --ignore tests/holoviews \
+# --ignore tests/huggingface \
+# --ignore tests/ibis \
+# --ignore tests/json \
+# --ignore tests/langchain \
 # --ignore tests/pandas \
 # --ignore tests/partitions \
 
 dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks \
 	  --ignore tests/dask \
-	  --ignore tests/huggingface \
-	  --ignore tests/ibis \
-	  --ignore tests/json \
-	  --ignore tests/langchain \
 	  --ignore tests/matlab \
 	  --ignore tests/matplotlib \
 	  --ignore tests/networkx \

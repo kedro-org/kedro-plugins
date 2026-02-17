@@ -4,7 +4,7 @@
 
 ## Bug fixes and other changes
 
-- Relaxed all `gcsfs` upper-bound pins (were `<2023.7`).
+- Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).
 
 ## Community contributions
 

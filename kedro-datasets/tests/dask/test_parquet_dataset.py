@@ -11,6 +11,8 @@ from s3fs import S3FileSystem
 
 from kedro_datasets.dask import ParquetDataset
 
+from . import pytestmark
+
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}

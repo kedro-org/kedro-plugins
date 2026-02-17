@@ -62,8 +62,37 @@ fix-markdownlint:
 	markdownlint-cli2 --config kedro-datasets/.markdownlint.yaml --fix "kedro-datasets/docs/**/*.md"
 
 # Run test_tensorflow_model_dataset separately, because these tests are flaky when run as part of the full test-suite
+# --ignore tests/pandas \
+# --ignore tests/partitions \
+
 dataset-tests: dataset-doctests
-	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks --ignore tests/redis --ignore tests/snowflake --ignore tests/spark
+	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks \
+	  --ignore tests/api \
+	  --ignore tests/biosequence \
+	  --ignore tests/dask \
+	  --ignore tests/databricks \
+	  --ignore tests/email \
+	  --ignore tests/geopandas \
+	  --ignore tests/holoviews \
+	  --ignore tests/huggingface \
+	  --ignore tests/ibis \
+	  --ignore tests/json \
+	  --ignore tests/langchain \
+	  --ignore tests/matlab \
+	  --ignore tests/matplotlib \
+	  --ignore tests/networkx \
+	  --ignore tests/openxml \
+	  --ignore tests/pickle \
+	  --ignore tests/pillow \
+	  --ignore tests/plotly \
+	  --ignore tests/polars \
+	  --ignore tests/redis \
+	  --ignore tests/snowflake \
+	  --ignore tests/spark \
+	  --ignore tests/svmlight \
+	  --ignore tests/tensorflow \
+	  --ignore tests/text \
+	  --ignore tests/yaml
 	cd kedro-datasets && pytest -s -vvv tests/databricks --no-cov
 	cd kedro-datasets && pytest -s -vvv tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
 

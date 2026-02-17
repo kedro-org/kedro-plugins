@@ -102,7 +102,6 @@ def patch_aiobotocore():
 
     # Save the original function to restore later
     original_convert_to_response_dict = aiobotocore.endpoint.convert_to_response_dict
-    
     aiobotocore.endpoint.convert_to_response_dict = factory(
         aiobotocore.endpoint.convert_to_response_dict
     )

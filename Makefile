@@ -74,6 +74,13 @@ fix-markdownlint:
 # --ignore tests/langchain \
 # --ignore tests/pandas \
 # --ignore tests/partitions \
+# --ignore tests/redis \
+# --ignore tests/snowflake \
+# --ignore tests/spark \
+# --ignore tests/svmlight \
+# --ignore tests/tensorflow \
+# --ignore tests/text \
+# --ignore tests/yaml
 
 dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest -s -vvv tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile --ignore tests/tensorflow --ignore tests/databricks \
@@ -85,14 +92,7 @@ dataset-tests: dataset-doctests
 	  --ignore tests/pickle \
 	  --ignore tests/pillow \
 	  --ignore tests/plotly \
-	  --ignore tests/polars \
-	  --ignore tests/redis \
-	  --ignore tests/snowflake \
-	  --ignore tests/spark \
-	  --ignore tests/svmlight \
-	  --ignore tests/tensorflow \
-	  --ignore tests/text \
-	  --ignore tests/yaml
+	  --ignore tests/polars
 	cd kedro-datasets && pytest -s -vvv tests/databricks --no-cov
 	cd kedro-datasets && pytest -s -vvv tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
 

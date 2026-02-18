@@ -340,7 +340,7 @@ def check_jupyter_nb_proc_on_port(
         command: Jupyter command message to check
         port: Port to check
     """
-    url = f"http://localhost:{int(port)}"
+    url = f"http://localhost:{int(port)}?token=test-token-abc123"
     wait_for(
         func=_check_service_up,
         expected_result=None,

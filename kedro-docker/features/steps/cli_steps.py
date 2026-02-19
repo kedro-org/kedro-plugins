@@ -94,7 +94,6 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
     """
     data = download_url(url)
-
     try:
         assert context.result.poll() is None
         assert string in data
@@ -340,14 +339,14 @@ def check_jupyter_nb_proc_on_port(
         command: Jupyter command message to check
         port: Port to check
     """
-    url = f"http://localhost:{int(port)}?token=test-token-abc123"
+    url = f"http://localhost:{int(port)}/api?token=test-token-abc123"
     wait_for(
         func=_check_service_up,
         expected_result=None,
         print_error=False,
         context=context,
         url=url,
-        string=f"Jupyter {command}",
+        string="version",
         timeout_=15,
     )
 

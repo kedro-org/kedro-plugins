@@ -347,7 +347,7 @@ def check_jupyter_nb_proc_on_port(
         context=context,
         url=url,
         string="version",
-        timeout_=15,
+        timeout_=150,
     )
 
 

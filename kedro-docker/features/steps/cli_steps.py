@@ -327,9 +327,9 @@ def check_docker_ipython_msg(context, msg):
     )
 
 
-@then("Jupyter {command} should run on port {port}")
+@then("Jupyter {command} should run on port {port} given token {token}")
 def check_jupyter_nb_proc_on_port(
-    context: behave.runner.Context, command: str, port: int
+    context: behave.runner.Context, command: str, port: int, token: str
 ):
     """
     Check that jupyter notebook service is running on specified port
@@ -339,7 +339,7 @@ def check_jupyter_nb_proc_on_port(
         command: Jupyter command message to check
         port: Port to check
     """
-    url = f"http://localhost:{int(port)}/api?token=test-token-abc123"
+    url = f"http://localhost:{int(port)}/api?token={token}"
     wait_for(
         func=_check_service_up,
         expected_result=None,

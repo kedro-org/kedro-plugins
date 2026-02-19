@@ -51,23 +51,23 @@ Feature: Docker commands in new projects
 
   Scenario: Execute docker jupyter notebook target
     Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker jupyter notebook"
-    Then Jupyter Server should run on port 8888
+    When I execute the kedro command "docker jupyter notebook --IdentityProvider.token=test-token-abc123"
+    Then Jupyter Server should run on port 8888 given token test-token-abc123
 
   Scenario: Execute docker jupyter notebook target on custom port
     Given I have executed the kedro command "docker build"
-    When I execute the kedro command "docker jupyter notebook --port 8899"
-    Then Jupyter Server should run on port 8899
+    When I execute the kedro command "docker jupyter notebook --IdentityProvider.token=test-token-abc123 --port 8899"
+    Then Jupyter Server should run on port 8899 given token test-token-abc123
 
   Scenario: Execute docker jupyter lab target
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker jupyter lab --IdentityProvider.token=test-token-abc123"
-    Then Jupyter Server should run on port 8888
+    Then Jupyter Server should run on port 8888 given token test-token-abc123
 
   Scenario: Execute docker jupyter lab target on custom port
     Given I have executed the kedro command "docker build"
     When I execute the kedro command "docker jupyter lab --IdentityProvider.token=test-token-abc123 --port 8899"
-    Then Jupyter Server should run on port 8899
+    Then Jupyter Server should run on port 8899 given token test-token-abc123
 
   Scenario: Jupyter port already used
     Given I have executed the kedro command "docker build"

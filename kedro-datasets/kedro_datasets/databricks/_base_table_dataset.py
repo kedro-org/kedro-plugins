@@ -537,15 +537,16 @@ class BaseTableDataset(AbstractVersionedDataset):
         Args:
             update_data (DataFrame): The Spark dataframe to upsert.
         """
+        full_table = self._table.full_table_location()
         if self._exists():
-            base_data = get_spark().table(self._table.full_table_location())
+            base_data = get_spark().table(full_table)
             base_columns = base_data.columns
             update_columns = update_data.columns
 
             if set(update_columns) != set(base_columns):
                 raise DatasetError(
                     f"Upsert requires tables to have identical columns. "
-                    f"Delta table {self._table.full_table_location()} "
+                    f"Delta table {full_table} "
                     f"has columns: {base_columns}, whereas "
                     f"dataframe has columns {update_columns}"
                 )
@@ -560,7 +561,6 @@ class BaseTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            full_table = self._table.full_table_location()
             upsert_sql = f"""MERGE INTO {full_table} base USING update ON {where_expr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""  # nosec B608
             get_spark().sql(upsert_sql)

@@ -554,7 +554,7 @@ class BaseTableDataset(AbstractVersionedDataset):
                 where_expr = (
                     f"base.{self._table.primary_key}=update.{self._table.primary_key}"
                 )
-            else:
+            elif isinstance(self._table.primary_key, list):
                 where_expr = " AND ".join(
                     f"base.{col}=update.{col}" for col in self._table.primary_key
                 )

@@ -2,6 +2,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 
+- Fixed `databricks.ManagedTableDataset` upsert write mode failing with `[CONFIG_NOT_AVAILABLE]` on Databricks Spark Connect runtimes by replacing `spark.conf.set` variable substitution with direct f-string interpolation in the MERGE SQL statement.
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
 - `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.

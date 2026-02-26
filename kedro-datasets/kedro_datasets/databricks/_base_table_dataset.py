@@ -550,21 +550,19 @@ class BaseTableDataset(AbstractVersionedDataset):
                     f"dataframe has columns {update_columns}"
                 )
 
-            where_expr = ""
             if isinstance(self._table.primary_key, str):
                 where_expr = (
                     f"base.{self._table.primary_key}=update.{self._table.primary_key}"
                 )
-            elif isinstance(self._table.primary_key, list):
+            else:
                 where_expr = " AND ".join(
                     f"base.{col}=update.{col}" for col in self._table.primary_key
                 )
 
             update_data.createOrReplaceTempView("update")
-            get_spark().conf.set("fullTableAddress", self._table.full_table_location())
-            get_spark().conf.set("whereExpr", where_expr)
-            upsert_sql = """MERGE INTO ${fullTableAddress} base USING update ON ${whereExpr}
-                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""
+            full_table = self._table.full_table_location()
+            upsert_sql = f"""MERGE INTO {full_table} base USING update ON {where_expr}
+                WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""  # nosec B608
             get_spark().sql(upsert_sql)
         else:
             self._save_append(update_data)

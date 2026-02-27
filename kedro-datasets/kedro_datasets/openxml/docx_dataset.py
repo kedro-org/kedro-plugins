@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses python-docx from Document to handle t
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -54,7 +55,7 @@ class DocxDataset(AbstractVersionedDataset[dict, dict]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

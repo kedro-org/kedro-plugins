@@ -182,6 +182,12 @@ class TestCSVDataset:
         assert dataset._cached_load_version is None
         assert dataset._cached_save_version is None
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = CSVDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
 class TestCSVDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

@@ -61,7 +61,7 @@ class GenericDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "file",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

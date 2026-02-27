@@ -274,7 +274,7 @@ test = [
     "dask[complete]>=2021.10",
     "deltalake>=0.10.0",
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
-    "delta-spark>=4.0, <4.1; python_version >= '3.12'",
+    "delta-spark>=4.0; python_version >= '3.12'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
@@ -380,7 +380,7 @@ experimental = [
 
 experimental_test = [
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
-    "delta-spark>=4.0, <4.1; python_version >= '3.12'",
+    "delta-spark>=4.0; python_version >= '3.12'",
     "langchain-openai",
     "langchain-cohere",
     "langchain-anthropic",

@@ -5,7 +5,6 @@ filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 from __future__ import annotations
 
 import json
-import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -55,7 +54,7 @@ class YAMLDataset(AbstractVersionedDataset[dict, dict]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | os.PathLike,
+        filepath: str,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,

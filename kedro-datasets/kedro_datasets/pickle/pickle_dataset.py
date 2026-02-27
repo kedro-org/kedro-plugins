@@ -6,7 +6,6 @@ supports all allowed options for loading and saving pickle files.
 from __future__ import annotations
 
 import importlib
-import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -75,7 +74,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | os.PathLike,
+        filepath: str,
         backend: str = "pickle",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

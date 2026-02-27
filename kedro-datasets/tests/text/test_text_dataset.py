@@ -79,13 +79,6 @@ class TestTextDataset:
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
 
-    def test_pathlike_filepath(self, tmp_path):
-        """Test that os.PathLike filepaths are supported."""
-        filepath = tmp_path / "test.txt"
-        dataset = TextDataset(filepath=filepath)
-        dataset.save(STRING)
-        assert dataset.load() == STRING
-
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.txt"

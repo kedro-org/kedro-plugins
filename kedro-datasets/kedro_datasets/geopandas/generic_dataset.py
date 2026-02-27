@@ -9,6 +9,7 @@ import copy
 from pathlib import PurePosixPath
 from typing import Any
 
+import os
 import fsspec
 import geopandas as gpd
 from kedro.io.core import (

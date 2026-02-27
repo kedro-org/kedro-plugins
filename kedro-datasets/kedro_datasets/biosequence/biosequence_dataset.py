@@ -8,6 +8,7 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
+import os
 from Bio import SeqIO
 from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_path
 
@@ -50,7 +51,7 @@ class BioSequenceDataset(AbstractDataset[list, list]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,

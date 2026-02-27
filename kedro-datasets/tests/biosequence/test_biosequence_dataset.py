@@ -17,7 +17,7 @@ SAVE_ARGS = {"format": "fasta"}
 
 @pytest.fixture
 def filepath_biosequence(tmp_path):
-    return str(tmp_path / "test.fasta")
+    return tmp_path / "test.fasta"
 
 
 @pytest.fixture

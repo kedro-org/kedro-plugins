@@ -13,6 +13,7 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
+import os
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
@@ -62,7 +63,7 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,

@@ -10,6 +10,7 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
+import os
 import geopandas as gpd
 from kedro.io.core import (
     AbstractVersionedDataset,
@@ -61,7 +62,7 @@ class GenericDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "file",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS).
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -51,7 +52,7 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

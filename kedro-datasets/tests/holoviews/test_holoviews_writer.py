@@ -91,6 +91,13 @@ class TestHoloviewsWriter:
         assert dataset._cached_load_version is None
         assert dataset._cached_save_version is None
 
+    def test_pathlike_filepath(self, tmp_path, dummy_hv_object):
+        """Test that os.PathLike objects work as filepath."""
+        filepath = tmp_path / "test.png"
+        dataset = HoloviewsWriter(filepath=filepath)
+        dataset.save(dummy_hv_object)
+        assert dataset.exists()
+
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "fmt": "svg"}], indirect=True)
     def test_save_extra_params(self, hv_writer, save_args):
         """Test overriding the default save arguments."""

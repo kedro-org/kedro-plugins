@@ -5,6 +5,7 @@ filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -78,7 +79,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -90,7 +91,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol
+            filepath: Filepath as a string or path-like object in POSIX format to a CSV file prefixed with a protocol
                 `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem)
                 will be used.

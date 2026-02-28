@@ -199,6 +199,13 @@ class TestEagerExcelDataset:
             inspect.signature(excel_dataset.preview).return_annotation == "TablePreview"
         )
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.parquet"
+        dataset = EagerPolarsDataset(filepath=filepath, file_format="parquet")
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
 
 class TestEagerParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore):

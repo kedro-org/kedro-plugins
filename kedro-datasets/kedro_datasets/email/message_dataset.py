@@ -4,6 +4,7 @@ using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
@@ -13,7 +14,6 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-import os
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,

@@ -3,12 +3,12 @@ file.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-import os
 from Bio import SeqIO
 from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_path
 

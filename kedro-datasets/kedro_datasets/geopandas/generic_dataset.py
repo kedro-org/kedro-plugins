@@ -11,7 +11,6 @@ from pathlib import PurePosixPath
 from typing import Any
 
 import fsspec
-import os
 import geopandas as gpd
 from kedro.io.core import (
     AbstractVersionedDataset,

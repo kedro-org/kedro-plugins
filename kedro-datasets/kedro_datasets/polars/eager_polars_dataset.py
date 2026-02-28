@@ -5,6 +5,7 @@ type of read/write target.
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -62,7 +63,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -76,7 +77,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         identified by string matching on a best effort basis.
 
         Args:
-            filepath: Filepath in POSIX format to a file prefixed with a protocol like
+            filepath: Filepath as a string or path-like object in POSIX format to a file prefixed with a protocol like
                 `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem)
                 will be used.

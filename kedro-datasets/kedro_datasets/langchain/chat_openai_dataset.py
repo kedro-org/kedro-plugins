@@ -1,4 +1,5 @@
 """Defines an interface to common OpenAI models."""
+
 from typing import Any, NoReturn
 
 from kedro.io import AbstractDataset, DatasetError

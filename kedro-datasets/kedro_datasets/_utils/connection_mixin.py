@@ -11,8 +11,7 @@ class ConnectionMixin(ABC):
     _connections: ClassVar[dict[Hashable, Any]] = {}
 
     @abstractmethod
-    def _connect(self) -> Any:
-        ...  # pragma: no cover
+    def _connect(self) -> Any: ...  # pragma: no cover
 
     @property
     def _connection(self) -> Any:

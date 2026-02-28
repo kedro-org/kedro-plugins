@@ -1,4 +1,5 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+
 from __future__ import annotations
 
 import copy

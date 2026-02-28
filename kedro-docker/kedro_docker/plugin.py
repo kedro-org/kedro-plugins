@@ -1,4 +1,4 @@
-""" Kedro plugin for packaging a project with Docker """
+"""Kedro plugin for packaging a project with Docker"""
 
 import shlex
 import subprocess

@@ -6,10 +6,10 @@ allowed geopandas (pandas) options for loading and saving geosjon files.
 from __future__ import annotations
 
 import copy
+import os
 from pathlib import PurePosixPath
 from typing import Any
 
-import os
 import fsspec
 import geopandas as gpd
 from kedro.io.core import (

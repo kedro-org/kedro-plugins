@@ -189,6 +189,7 @@ class TestCSVDataset:
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
 
+
 class TestCSVDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance

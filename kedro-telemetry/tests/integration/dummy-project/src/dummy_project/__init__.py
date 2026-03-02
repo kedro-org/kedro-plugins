@@ -1,4 +1,3 @@
-"""dummy_project
-"""
+"""dummy_project"""
 
 __version__ = "0.1"

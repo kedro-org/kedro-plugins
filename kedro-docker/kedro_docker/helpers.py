@@ -1,4 +1,4 @@
-""" Utilities for use with click docker commands """
+"""Utilities for use with click docker commands"""
 
 from __future__ import annotations
 

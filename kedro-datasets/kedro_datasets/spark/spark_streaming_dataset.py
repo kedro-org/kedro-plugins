@@ -1,4 +1,5 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
+
 from __future__ import annotations
 
 from pathlib import PurePosixPath

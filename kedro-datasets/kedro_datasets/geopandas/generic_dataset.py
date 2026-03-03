@@ -6,6 +6,7 @@ allowed geopandas (pandas) options for loading and saving geosjon files.
 from __future__ import annotations
 
 import copy
+import os
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -61,7 +62,7 @@ class GenericDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "file",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

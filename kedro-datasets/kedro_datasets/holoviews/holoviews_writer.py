@@ -3,6 +3,7 @@ filesystem (e.g. local, S3, GCS)."""
 from __future__ import annotations
 
 import io
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn, TypeVar
@@ -43,7 +44,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         fs_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -57,6 +58,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested key `open_args_save`.

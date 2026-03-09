@@ -3,13 +3,13 @@ dataframe"""
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
 
 import dask.dataframe as dd
 import fsspec
 import triad
-import os
 from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 

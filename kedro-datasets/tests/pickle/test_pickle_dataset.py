@@ -121,6 +121,13 @@ class TestPickleDataset:
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.pkl"
+        dataset = PickleDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.pkl"

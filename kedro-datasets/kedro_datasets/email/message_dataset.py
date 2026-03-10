@@ -4,6 +4,7 @@ using an underlying filesystem (e.g.: local, S3, GCS). It uses the
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from email.generator import Generator
 from email.message import Message
@@ -62,7 +63,7 @@ class EmailMessageDataset(AbstractVersionedDataset[Message, Message]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,

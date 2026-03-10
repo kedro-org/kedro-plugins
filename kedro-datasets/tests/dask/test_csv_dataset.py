@@ -126,6 +126,13 @@ class TestCSVDataset:
         s3_dataset.save(dummy_dd_dataframe)
         assert s3_dataset.exists()
 
+    def test_exists_glob_raises_file_not_found(self, s3_dataset, mocker):
+        """Test that _exists returns False when glob raises FileNotFoundError.
+        Newer versions of s3fs raise FileNotFoundError when globbing an empty bucket."""
+        fs_mock = mocker.patch("fsspec.filesystem")
+        fs_mock.return_value.glob.side_effect = FileNotFoundError
+        assert not s3_dataset.exists()
+
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""
         file_path = str(tmp_path / "some" / "dir" / FILE_NAME)

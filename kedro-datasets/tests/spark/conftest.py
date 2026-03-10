@@ -14,15 +14,7 @@ from pyspark.sql import SparkSession
 def _setup_spark_session():
     return configure_spark_with_delta_pip(
         SparkSession.builder.appName("MyApp")
-        .master("local[1]")
-        .config("spark.driver.memory", "1536m")
-        .config("spark.driver.maxResultSize", "512m")
-        .config("spark.sql.shuffle.partitions", "4")
-        .config("spark.ui.enabled", "false")
-        .config(
-            "spark.driver.extraJavaOptions",
-            "-XX:MaxMetaspaceSize=256m -XX:ReservedCodeCacheSize=64m",
-        )
+        .master("local[*]")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",

@@ -252,28 +252,29 @@ class TestStudyDatasetVersioned:
     def test_release_instance_cache(self, dummy_study, database_name):
         """Test that cache invalidation does not affect other instances"""
         ds_a = StudyDataset(study_name="test", backend="sqlite", database=database_name, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_study)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = StudyDataset(study_name="test", backend="sqlite", database=database_name, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_study_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for StudyDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_study_dataset.load()
 
@@ -288,7 +289,7 @@ class TestStudyDatasetVersioned:
         corresponding study for a given save version already exists."""
         versioned_study_dataset.save(dummy_study)
         pattern = (
-            r"Study name \'.+\' for StudyDataset\(.+\) must "
+            r"Study name \'.+\' for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -307,7 +308,7 @@ class TestStudyDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for StudyDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets_experimental.optuna.study_dataset.StudyDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_study_dataset.save(dummy_study)

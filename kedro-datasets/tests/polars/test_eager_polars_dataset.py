@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -144,10 +145,66 @@ class TestEagerExcelDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = EagerPolarsDataset(filepath=filepath, file_format="excel")
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, excel_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        excel_dataset.save(dummy_dataframe)
+        previewed = excel_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(excel_dataset.preview).return_annotation == "TablePreview"
+        )
+
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.parquet"
+        dataset = EagerPolarsDataset(filepath=filepath, file_format="parquet")
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
 
 class TestEagerParquetDatasetVersioned:
@@ -239,6 +296,53 @@ class TestEagerParquetDatasetVersioned:
         )
         assert ds_new.resolve_load_version() == second_load_version
 
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_parquet_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_parquet_dataset.save(dummy_dataframe)
+        previewed = versioned_parquet_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_parquet_dataset.preview).return_annotation
+            == "TablePreview"
+        )
+
 
 class TestEagerIPCDatasetVersioned:
     def test_save_and_load(self, versioned_ipc_dataset, dummy_dataframe):
@@ -322,6 +426,53 @@ class TestEagerIPCDatasetVersioned:
             version=Version(None, None),
         )
         assert ds_new.resolve_load_version() == second_load_version
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_ipc_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_ipc_dataset.save(dummy_dataframe)
+        previewed = versioned_ipc_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_ipc_dataset.preview).return_annotation
+            == "TablePreview"
+        )
 
 
 class TestEagerCSVDatasetVersioned:
@@ -417,28 +568,29 @@ class TestEagerCSVDatasetVersioned:
             file_format="csv",
             version=Version(None, None),
         )
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = EagerPolarsDataset(
             filepath=filepath_csv.as_posix(),
             file_format="csv",
             version=Version(None, None),
         )
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
@@ -500,6 +652,53 @@ class TestEagerCSVDatasetVersioned:
         Path(csv_dataset._filepath.as_posix()).unlink()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, versioned_csv_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        versioned_csv_dataset.save(dummy_dataframe)
+        previewed = versioned_csv_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(versioned_csv_dataset.preview).return_annotation
+            == "TablePreview"
+        )
 
 
 class TestBadEagerPolarsDataset:

@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses polars to handle the CSV file.
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -18,6 +19,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+from kedro_datasets._typing import TablePreview
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +78,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -87,7 +90,7 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol
+            filepath: Filepath as a string or path-like object in POSIX format to a CSV file prefixed with a protocol
                 `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem)
                 will be used.
@@ -205,3 +208,19 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        data = dataset_copy.load().limit(nrows if type(nrows) is int else 5)
+        data_dict = data.to_pandas().to_dict(orient="split")
+        return TablePreview(data_dict)

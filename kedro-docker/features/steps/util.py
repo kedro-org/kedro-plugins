@@ -126,7 +126,7 @@ def init_docker_client(**kwargs) -> docker.client.DockerClient:
     # otherwise docker on CircleCI fails with an error:
     # docker.errors.APIError: 400 Client Error: Bad Request ("client version
     # 1.35 is too new. Maximum supported API version is 1.34")
-    kwargs.setdefault("version", "1.34")
+    kwargs.setdefault("version", "1.44")
     return docker.from_env(**kwargs)
 
 

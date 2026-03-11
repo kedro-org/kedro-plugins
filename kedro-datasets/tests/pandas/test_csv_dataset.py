@@ -227,10 +227,13 @@ class TestCSVDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = CSVDataset(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
 
 
 class TestCSVDatasetVersioned:
@@ -311,24 +314,25 @@ class TestCSVDatasetVersioned:
     def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
         """Test that cache invalidation does not affect other instances"""
         ds_a = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""

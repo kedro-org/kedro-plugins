@@ -4,6 +4,7 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 
@@ -18,6 +19,9 @@ class LangfuseTraceDataset(AbstractDataset):
 
     - **langchain:** Returns a `CallbackHandler` for LangChain integration.
     - **openai:** Returns a wrapped OpenAI client with automatic tracing.
+    - **autogen:** Returns a configured `Tracer` for AutoGen integration via OTLP.
+      Note: Langfuse's graph visualisation is in beta and may not render
+      complex multi-agent workflows correctly.
     - **sdk:** Returns a raw Langfuse client for manual tracing.
 
     Examples:
@@ -40,7 +44,7 @@ class LangfuseTraceDataset(AbstractDataset):
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
-                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
+                "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
             },
             mode="openai",
         )
@@ -51,7 +55,7 @@ class LangfuseTraceDataset(AbstractDataset):
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
                 "host": "https://custom.langfuse.com",
-                "openai": {"openai_api_key": "sk-..."},  # pragma: allowlist secret
+                "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
             },
             mode="openai",
         )
@@ -59,13 +63,37 @@ class LangfuseTraceDataset(AbstractDataset):
         # Load tracing client
         client = dataset.load()
         response = client.chat.completions.create(...)  # Automatically traced
+
+        # AutoGen mode Langfuse cloud
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_...",
+                "secret_key": "sk_...",  # pragma: allowlist secret
+                "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+            },
+            mode="autogen",
+        )
+        tracer = dataset.load()
+
+        # AutoGen mode self-hosted
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_...",
+                "secret_key": "sk_...",  # pragma: allowlist secret
+                "host": "http://localhost:3000",
+                "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
+            },
+            mode="autogen",
+        )
+        tracer = dataset.load()
+        # Use with AutoGen's runtime logging
         ```
     """
 
     def __init__(
         self,
         credentials: dict[str, Any],
-        mode: Literal["langchain", "openai", "sdk"] = "sdk",
+        mode: Literal["langchain", "openai", "autogen", "sdk"] = "sdk",
         **trace_kwargs: Any
     ):
         """Initialize LangfuseTraceDataset and configure environment variables.
@@ -75,43 +103,66 @@ class LangfuseTraceDataset(AbstractDataset):
         during initialization for use by all tracing modes.
 
         Args:
-            credentials: Dictionary with Langfuse credentials. Required keys:
-                {public_key, secret_key}. Optional keys: {host} (defaults to
-                Langfuse cloud if not provided). For OpenAI mode, may also include
-                openai section with {openai_api_key, openai_api_base}.
-            mode: Tracing mode - "langchain", "openai", or "sdk" (default).
+            credentials: Dictionary with Langfuse credentials. Required: {public_key, secret_key}.
+                Optional: {host} (defaults to Langfuse cloud if not provided).
+                For autogen mode, {endpoint} is required — the full OTLP endpoint URL
+                (e.g. https://cloud.langfuse.com/api/public/otel/v1/traces).
+                For OpenAI mode, include openai section with {api_key, base_url}.
+            mode: Tracing mode - "langchain", "openai", "autogen", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
 
         Raises:
             DatasetError: If required Langfuse credentials are missing or empty.
 
         Examples:
-            # Basic SDK mode (using default Langfuse cloud)
-                dataset = LangfuseTraceDataset(
+            >>> # Basic SDK mode (using default Langfuse cloud)
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
             ... )
 
-            # With custom host
-                dataset = LangfuseTraceDataset(
+            >>> # With custom host
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
             ...         "host": "https://custom.langfuse.com"
             ...     }
             ... )
 
-            # OpenAI mode with API key
-                dataset = LangfuseTraceDataset(
+            >>> # OpenAI mode with API key
+            >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...",  # pragma: allowlist secret
-            ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."} # pragma: allowlist secret
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "openai": {"api_key": "sk-...", "base_url": "..."}  # pragma: allowlist secret
             ...     },
             ...     mode="openai"
             ... )
 
+            >>> # AutoGen mode cloud
+            >>> dataset = LangfuseTraceDataset(
+            ...     credentials={
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+            ...     },
+            ...     mode="autogen"
+            ... )
+
+            >>> # AutoGen mode self-hosted
+            >>> dataset = LangfuseTraceDataset(
+            ...     credentials={
+            ...         "public_key": "pk_...",
+            ...         "secret_key": "sk_...",  # pragma: allowlist secret
+            ...         "host": "http://localhost:3000",
+            ...         "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
+            ...     },
+            ...     mode="autogen"
+            ... )
+
         Note:
             Sets LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, and LANGFUSE_HOST
-            environment variables from the provided credentials. Also sets
-            OPENAI_API_KEY if provided for OpenAI mode compatibility.
+            environment variables from the provided credentials.
         """
         self._credentials = credentials
         self._mode = mode
@@ -150,6 +201,16 @@ class LangfuseTraceDataset(AbstractDataset):
                 if not self._credentials[key] or not str(self._credentials[key]).strip():
                     raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
 
+        # AutoGen mode has additional required credentials
+        if self._mode == "autogen":
+            for key in REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN:
+                if not self._credentials.get(key):
+                    raise DatasetError(
+                        f"AutoGen mode requires '{key}' in credentials "
+                        f"(e.g. 'https://cloud.langfuse.com/api/public/otel/v1/traces'). "
+                        f"Provide the full OTLP endpoint URL for trace export."
+                    )
+
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
 
@@ -158,27 +219,11 @@ class LangfuseTraceDataset(AbstractDataset):
         """
         return {"mode": self._mode, "credentials": "***"}
 
-    def _build_openai_client_params(self) -> dict[str, str]:
-        """Validate and build OpenAI client parameters from credentials.
-
-        Validates the presence and content of required OpenAI credentials,
-        then constructs parameters dictionary for OpenAI client initialization.
-
-        Returns:
-            Dictionary with validated OpenAI client parameters. Always includes
-            'api_key', optionally includes 'base_url' if provided.
+    def _validate_openai_client_params(self) -> None:
+        """Validate OpenAI credentials in the 'openai' section.
 
         Raises:
             DatasetError: If OpenAI credentials are missing or invalid.
-
-        Examples:
-            # With API key only
-                params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-..."}  # pragma: allowlist secret
-
-            # With API key and custom base URL
-                params = self._build_openai_client_params()
-                # Returns: {"api_key": "sk-...", "base_url": "https://api.custom.com"}  # pragma: allowlist secret
         """
         # Check if openai section exists
         if "openai" not in self._credentials:
@@ -187,21 +232,70 @@ class LangfuseTraceDataset(AbstractDataset):
         openai_creds = self._credentials["openai"]
 
         # Check for required API key
-        if "openai_api_key" not in openai_creds:
-            raise DatasetError("Missing required OpenAI credential: 'openai_api_key'")
+        if "api_key" not in openai_creds:
+            raise DatasetError("Missing required OpenAI credential: 'api_key'")
 
         # Validate that API key is not empty
-        if not openai_creds["openai_api_key"] or not openai_creds["openai_api_key"].strip():
+        if not openai_creds["api_key"] or not openai_creds["api_key"].strip():
             raise DatasetError("OpenAI API key cannot be empty")
 
-        # Build validated client parameters
-        client_params = {"api_key": openai_creds["openai_api_key"]}
+        # Validate base_url is not empty if provided
+        if "base_url" in openai_creds and not str(openai_creds["base_url"]).strip():
+            raise DatasetError("OpenAI credential 'base_url' cannot be empty if provided")
 
-        # Add base_url if provided (optional)
-        if "openai_api_base" in openai_creds and openai_creds["openai_api_base"]:
-            client_params["base_url"] = openai_creds["openai_api_base"]
+    def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Langfuse.
 
-        return client_params
+        Sets up OpenTelemetry TracerProvider with OTLP exporter to Langfuse,
+        configures it as the global provider, and returns a ready-to-use Tracer.
+
+        Returns:
+            Tracer configured to export traces to Langfuse.
+
+        Raises:
+            DatasetError: If required OpenTelemetry dependencies are not installed.
+        """
+        try:
+            from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # noqa: PLC0415
+                OTLPSpanExporter,
+            )
+            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
+            from opentelemetry.sdk.trace.export import (  # noqa: PLC0415
+                BatchSpanProcessor,
+            )
+        except ImportError as exc:
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            ) from exc
+
+        import base64  # noqa: PLC0415
+
+        auth = base64.b64encode(
+            f"{self._credentials['public_key']}:{self._credentials['secret_key']}".encode()
+        ).decode()
+
+        # Endpoint is provided by user and validated in _validate_langfuse_credentials
+        endpoint = self._credentials["endpoint"]
+
+        exporter = OTLPSpanExporter(
+            endpoint=endpoint,
+            headers={"Authorization": f"Basic {auth}"}
+        )
+
+        processor = BatchSpanProcessor(exporter)
+
+        # Use existing provider if already set, otherwise create a new one.
+        existing_provider = trace.get_tracer_provider()
+        if hasattr(existing_provider, "add_span_processor"):
+            existing_provider.add_span_processor(processor)
+        else:
+            provider = TracerProvider()
+            provider.add_span_processor(processor)
+            trace.set_tracer_provider(provider)
+
+        return trace.get_tracer("langfuse.autogen")
 
     def load(self) -> Any:
         """Load appropriate tracing client based on configured mode.
@@ -214,10 +308,11 @@ class LangfuseTraceDataset(AbstractDataset):
             Tracing client object based on mode:
             - langchain mode: CallbackHandler for LangChain integration
             - openai mode: Wrapped OpenAI client with automatic tracing
+            - autogen mode: Configured Tracer for OpenTelemetry integration
             - sdk mode: Raw Langfuse client for manual tracing
 
         Raises:
-            DatasetError: If OpenAI mode is used but OpenAI credentials are missing or invalid.
+            DatasetError: If mode-specific dependencies are missing or credentials are invalid.
 
         Examples:
             # LangChain mode
@@ -230,6 +325,18 @@ class LangfuseTraceDataset(AbstractDataset):
                 client = dataset.load()
                 response = client.chat.completions.create(model="gpt-4", messages=[...])
 
+            # AutoGen mode
+                dataset = LangfuseTraceDataset(credentials=creds, mode="autogen")
+                tracer = dataset.load()  # Returns configured Tracer
+
+                # Option 1: Automatic tracing (LLM calls traced automatically)
+                agent.invoke(context)  # Traces sent to Langfuse
+
+                # Option 2: Add custom spans with context
+                with tracer.start_as_current_span("response_generation") as span:
+                    span.set_attribute("intent", "claim_new")
+                    agent.invoke(context)  # Child spans nested under parent
+
             # SDK mode
                 dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
                 langfuse = dataset.load()
@@ -241,19 +348,21 @@ class LangfuseTraceDataset(AbstractDataset):
 
         # Create and cache the appropriate client
         if self._mode == "langchain":
-            from langfuse.langchain import CallbackHandler  # noqa PLC0415
-            self._cached_client = CallbackHandler()
+            from langfuse.langchain import CallbackHandler  # noqa: PLC0415
+            self._cached_client = CallbackHandler(**self._trace_kwargs)
         elif self._mode == "openai":
-            from langfuse.openai import OpenAI  # noqa PLC0415
-            client_params = self._build_openai_client_params()
-            self._cached_client = OpenAI(**client_params)
+            from langfuse.openai import OpenAI  # noqa: PLC0415
+            self._validate_openai_client_params()
+            self._cached_client = OpenAI(**self._credentials["openai"])
+        elif self._mode == "autogen":
+            self._cached_client = self._build_autogen_tracer()
         else:
             try:
-                from langfuse import get_client  # noqa PLC0415
+                from langfuse import get_client  # noqa: PLC0415
                 self._cached_client = get_client()
             except ImportError:
-                from langfuse import Langfuse  # noqa PLC0415
-                self._cached_client = Langfuse()
+                from langfuse import Langfuse  # noqa: PLC0415
+                self._cached_client = Langfuse(**self._trace_kwargs)
 
         return self._cached_client
 

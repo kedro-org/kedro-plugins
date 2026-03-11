@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 from pathlib import Path, PurePosixPath
@@ -173,10 +174,20 @@ class TestCSVDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = CSVDataset(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = CSVDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
 
 class TestCSVDatasetVersioned:
@@ -257,24 +268,25 @@ class TestCSVDatasetVersioned:
     def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
         """Test that cache invalidation does not affect other instances"""
         ds_a = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
@@ -344,6 +356,52 @@ class TestCSVDatasetVersioned:
         Path(csv_dataset._filepath.as_posix()).unlink()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
+
+    @pytest.mark.parametrize(
+        "nrows,expected",
+        [
+            (
+                0,
+                {
+                    "index": [],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [],
+                },
+            ),
+            (
+                1,
+                {
+                    "index": [0],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5]],
+                },
+            ),
+            (
+                None,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+            (
+                10,
+                {
+                    "index": [0, 1],
+                    "columns": ["col1", "col2", "col3"],
+                    "data": [[1, 4, 5], [2, 5, 6]],
+                },
+            ),
+        ],
+    )
+    def test_preview(self, csv_dataset, dummy_dataframe, nrows, expected):
+        """Test preview returns the correct data structure."""
+        csv_dataset.save(dummy_dataframe)
+        previewed = csv_dataset.preview(nrows=nrows)
+        assert previewed == expected
+        assert (
+            inspect.signature(csv_dataset.preview).return_annotation == "TablePreview"
+        )
 
 
 class TestCSVDatasetS3:

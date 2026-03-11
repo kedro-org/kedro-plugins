@@ -1,6 +1,7 @@
 """``ImageDataset`` loads/saves image data as `numpy` from an underlying
 filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -25,19 +26,19 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-        >>> import sys
-        >>>
-        >>> import pytest
+        >>> from PIL import Image
+        >>> import tempfile
         >>> from kedro_datasets.pillow import ImageDataset
         >>>
-        >>> if sys.platform.startswith("win"):
-        ...     pytest.skip("this doctest hangs on Windows CI runner")
-        ...
-        >>> dataset = ImageDataset(
-        ...     filepath="https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg"
-        ... )
-        >>> image = dataset.load()
-        >>> image.show()
+        >>> tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+        >>> img = Image.new("RGB", (10, 10), color="red")
+        >>> img.save(tmp.name)
+        >>> tmp.close()
+        >>>
+        >>> dataset = ImageDataset(filepath=tmp.name)
+        >>> loaded_img = dataset.load()
+        >>> loaded_img.size
+        (10, 10)
 
     """
 

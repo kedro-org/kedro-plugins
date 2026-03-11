@@ -35,7 +35,7 @@ spark-emr = []  # Uses EMR runtime Spark
 
 # Filesystem specific packages for Spark
 spark-s3 = ["s3fs>=2021.4"]
-spark-gcs = ["gcsfs>=2023.1, <2023.7"]
+spark-gcs = ["gcsfs>=2023.1"]
 spark-azure = ["adlfs>=2023.1"]
 spark-hdfs = ["pyarrow>=7.0"]  # PyArrow includes HDFS support
 
@@ -66,7 +66,7 @@ biosequence-biosequencedataset = ["biopython~=1.73"]
 biosequence = ["kedro-datasets[biosequence-biosequencedataset]"]
 
 dask-csvdataset = ["dask[dataframe]>=2021.10"]
-dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <1.0"]
+dask-parquetdataset = ["dask[complete]>=2021.10", "triad>=0.6.7, <2.0"]
 dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
@@ -93,6 +93,7 @@ ibis-duckdb = ["ibis-framework[duckdb]"]
 ibis-exasol = ["ibis-framework[exasol]"]
 ibis-flink = ["ibis-framework", "apache-flink"]
 ibis-impala = ["ibis-framework[impala]"]
+ibis-materialize = ["ibis-framework[materialize]"]
 ibis-mssql = ["ibis-framework[mssql]"]
 ibis-mysql = ["ibis-framework[mysql]"]
 ibis-oracle = ["ibis-framework[oracle]"]
@@ -101,6 +102,7 @@ ibis-polars = ["ibis-framework[polars]"]
 ibis-postgres = ["ibis-framework[postgres]"]
 ibis-pyspark = ["ibis-framework[pyspark]"]
 ibis-risingwave = ["ibis-framework[risingwave]"]
+ibis-singlestoredb = ["ibis-framework[singlestoredb]"]
 ibis-snowflake = ["ibis-framework[snowflake]"]
 ibis-sqlite = ["ibis-framework[sqlite]"]
 ibis-trino = ["ibis-framework[trino]"]
@@ -215,10 +217,13 @@ langchain-langchainpromptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-langchainpromptdataset]"]
 langfuse-langfusepromptdataset = ["langfuse>=2.0.0"]
 langfuse-langfusetracedataset = ["langfuse>=2.0.0"]
-langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+langfuse-langfusetracedataset-autogen = ["langfuse>=2.0.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]
+langfuse = ["kedro-datasets[langfuse-langfusepromptdataset,langfuse-langfusetracedataset,langfuse-langfusetracedataset-autogen]", "openai>=2.3.0", "langchain>=0.2.0, <1.0"]
+mlrun = ["mlrun>=1.10.0"]
 opik-opikpromptdataset = ["opik>=1.8.0"]
 opik-opiktracedataset = ["opik>=1.8.0"]
-opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset]", "openai>=2.3.0", "langchain>=0.2.0"]
+opik-opiktracedataset-autogen = ["opik>=1.8.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]
+opik = ["kedro-datasets[opik-opikpromptdataset, opik-opiktracedataset, opik-opiktracedataset-autogen]", "openai>=2.3.0", "langchain>=0.2.0"]
 
 netcdf-netcdfdataset = ["h5netcdf>=1.2.0","netcdf4>=1.6.4","xarray>=2023.1.0"]
 netcdf = ["kedro-datasets[netcdf-netcdfdataset]"]
@@ -237,7 +242,7 @@ rioxarray = ["kedro-datasets[rioxarray-geotiffdataset]"]
 safetensors-safetensorsdataset = ["safetensors", "numpy"]
 safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
 
-video-videodataset = ["opencv-python~=4.5.5.64"]
+video-videodataset = ["opencv-python~=4.12.0.88"]
 video = ["kedro-datasets[video-videodataset]"]
 
 # Docs requirements
@@ -269,11 +274,11 @@ test = [
     "dask[complete]>=2021.10",
     "deltalake>=0.10.0",
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
-    "delta-spark>=4.0; python_version >= '3.12'",
+    "delta-spark>=4.0, <4.1; python_version >= '3.12'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "fiona >=1.8, <2.0",
-    "gcsfs>=2023.1, <2023.7",
+    "gcsfs>=2023.1",
     "geopandas>=0.8.0, <2.0",
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
@@ -324,7 +329,7 @@ test = [
     "tables>=3.6",
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
-    "triad>=0.6.7, <1.0",
+    "triad>=0.6.7, <2.0",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",
     # huggingface
@@ -365,12 +370,48 @@ experimental = [
     "xarray>=2023.1.0",
     "rioxarray",
     "torch",
-    "opencv-python~=4.5.5.64",
+    "opencv-python~=4.12.0.88",
     "prophet>=1.1.5",
     "opik",
     "optuna",
     "u8darts[all]",
     "pypdf>=3.0.0",
+]
+
+experimental_test = [
+    "delta-spark>=1.0, <3.0; python_version <= '3.11'",
+    "delta-spark>=4.0, <4.1; python_version >= '3.12'",
+    "langchain-openai",
+    "langchain-cohere",
+    "langchain-anthropic",
+    "langchain-community",
+    "langfuse",
+    "openai>=2.3.0",
+    "langchain>=0.2.0",
+    "h5netcdf>=1.2.0",
+    "netcdf4>=1.6.4, <1.7.4",
+    "xarray>=2023.1.0",
+    "rioxarray",
+    "torch",
+    "opencv-python~=4.12.0.88",
+    "prophet>=1.1.5",
+    "opik",
+    "optuna",
+    "pyspark>=3.0, <4.0; python_version < '3.11'",
+    "pyspark>=3.4, <4.0; python_version == '3.11'",
+    "pyspark>=4.0; python_version >= '3.12'",
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest-xdist[psutil]~=2.2.1",
+    "pytest~=7.2",
+    "u8darts[all]",
+    "pypdf>=3.0.0",
+    "moto==5.0.0",
+    "gcsfs>=2023.1",
+    "s3fs>=2021.04",
+    "reportlab>=3.6.0",
+    "chromadb>=1.0.0",
+    "dask[complete]>=2021.10",
 ]
 
 # All requirements

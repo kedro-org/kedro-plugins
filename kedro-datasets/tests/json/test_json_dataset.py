@@ -92,6 +92,13 @@ class TestJSONDataset:
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.json"
+        dataset = JSONDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        assert dataset.load() == dummy_data
+
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.json"

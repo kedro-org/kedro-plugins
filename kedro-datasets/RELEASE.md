@@ -1,35 +1,79 @@
 # Upcoming Release
+
 ## Major features and improvements
+
+- Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
+
 ## Bug fixes and other changes
+
+- Fixed `databricks.ManagedTableDataset` upsert write mode failing with `[CONFIG_NOT_AVAILABLE]` on Databricks Spark Connect runtimes by replacing `spark.conf.set` variable substitution with direct f-string interpolation in the MERGE SQL statement.
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+- Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).
+
 ## Community contributions
 
-# Release 9.1.1
-## Bug fixes and other changes
-- Bump lxml version for xmldataset requirements if Python version is 3.13 and above.
+# Release 9.2.0
 
+## Major features and improvements
+
+- Added `autogen` mode to `LangfuseTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
+- `api.APIDataset` now stores the response received from a `PUT` or `POST` request via the `response_dataset` parameter.
+- Added `autogen` mode to `OpikTraceDataset` for tracing AutoGen agent conversations with OpenTelemetry integration.
+- Added the following new **experimental** datasets:
+
+| Type                          | Description                                                                      | Location                            |
+| ----------------------------- | -------------------------------------------------------------------------------- | ----------------------------------- |
+| `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun` |
+| `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun` |
+| `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun` |
+| `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun` |
+
+## Bug fixes and other changes
+
+- Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
+- Experimental datasets `OpikTraceDataset` and `LangfuseTraceDataset` now receive `openai` credentials as `base_url` and `api_key`, instead of `openai_api_base` and `openai_api_key`.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+[Katerina Molchanova](https://github.com/rokatyy)
+
+# Release 9.1.1
+
+## Bug fixes and other changes
+
+- Bump lxml version for xmldataset requirements if Python version is 3.13 and above.
 
 # Release 9.1.0
 
 ## Major features and improvements
-- Added support for Python 3.13.
 
+- Added support for Python 3.13.
 - Added the following new datasets:
 
-| Type                  | Description                                                                                                    | Location                |
-|-----------------------|----------------------------------------------------------------------------------------------------------------|-------------------------|
-| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic Pandas-to-Spark conversion | `kedro_datasets.spark` |
+| Type                   | Description                                                                                               | Location               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `spark.SparkDatasetV2` | A Spark dataset with Spark Connect, Databricks Connect support, and automatic pandas-to-Spark conversion. | `kedro_datasets.spark` |
 
 - Added the following new **experimental** datasets:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
+| Type                          | Description                                                                      | Location                               |
+| ----------------------------- | -------------------------------------------------------------------------------- | -------------------------------------- |
+| `chromadb.ChromaDBDataset`    | A dataset for loading and saving data to ChromaDB vector database collections.   | `kedro_datasets_experimental.chromadb` |
+| `mlrun.MLRunAbstractDataset`  | A base dataset for MLRun integration, can be used directly for generic artifacts | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunModel`            | A dataset for saving and loading ML models via MLRun with framework metadata     | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunDataframeDataset` | A dataset for saving and loading pandas DataFrames as MLRun artifacts            | `kedro_datasets_experimental.mlrun`    |
+| `mlrun.MLRunResult`           | A dataset for logging scalar results and metrics to MLRun                        | `kedro_datasets_experimental.mlrun`    |
 
 ## Bug fixes and other changes
+
 - Updated `pandas.DeltaTableDataset` to be compatible with `deltalake` version 1.x.
 - Fix `plotly.JSONDataset` encoding errors by defaulting thesave encoding to UTF-8.
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Armand Masseau](https://github.com/armandmasseaugit)
 - [SRIKAR-8-77](https://github.com/SRIKAR-8-77)
@@ -44,39 +88,40 @@
 - Added credentials support to `ibis.TableDataset`.
 - Added the following new datasets:
 
-| Type                  | Description                                                                             | Location                 |
-|-----------------------|-----------------------------------------------------------------------------------------|--------------------------|
-| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx` | `kedro_datasets.openxml` |
+| Type                  | Description                                                                              | Location                 |
+| --------------------- | ---------------------------------------------------------------------------------------- | ------------------------ |
+| `openxml.PptxDataset` | A dataset for loading and saving .pptx files (Microsoft PowerPoint) using `python-pptx`. | `kedro_datasets.openxml` |
 
 - Graduated the following **experimental** datasets to core:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `langchain.ChatOpenAIDataset`    | Kedro dataset for loading a ChatOpenAI LangChain model. | `kedro_datasets.langchain`  |
-| `langchain.OpenAIEmbeddingsDataset` | Kedro dataset for loading an OpenAIEmbeddings model. | `kedro_datasets.langchain` |
-| `langchain.ChatAnthropicDataset`  | A dataset for loading a ChatAnthropic LangChain model.   | `kedro_datasets.langchain`     |
-| `langchain.ChatCohereDataset`   | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain`  |
+| Type                                | Description                                            | Location                   |
+| ----------------------------------- | ------------------------------------------------------ | -------------------------- |
+| `langchain.ChatOpenAIDataset`       | A dataset for loading a ChatOpenAI LangChain model.    | `kedro_datasets.langchain` |
+| `langchain.OpenAIEmbeddingsDataset` | A dataset for loading an OpenAIEmbeddings model.       | `kedro_datasets.langchain` |
+| `langchain.ChatAnthropicDataset`    | A dataset for loading a ChatAnthropic LangChain model. | `kedro_datasets.langchain` |
+| `langchain.ChatCohereDataset`       | A dataset for loading a ChatCohere LangChain model.    | `kedro_datasets.langchain` |
 
 - Added the following new **experimental** datasets:
 
-| Type                               | Description                                                     | Location                                |
-|------------------------------------|-----------------------------------------------------------------|-----------------------------------------|
-| `langfuse.LangfuseTraceDataset`    | Kedro dataset to provide Langfuse tracing clients and callbacks | `kedro_datasets_experimental.langfuse`  |
-| `langchain.LangChainPromptDataset` | Kedro dataset for loading LangChain prompts                     | `kedro_datasets_experimental.langchain` |
-| `pypdf.PDFDataset`                 | Kedro dataset to read PDF files and extract text using pypdf    | `kedro_datasets_experimental.pypdf`     |
-| `langfuse.LangfusePromptDataset`   | Kedro dataset for managing Langfuse prompts                     | `kedro_datasets_experimental.langfuse`  |
-| `chromadb.ChromaDBDataset` | A dataset for loading and saving data to ChromaDB vector database collections | `kedro_datasets_experimental.chromadb` |
-| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts      | `kedro_datasets_experimental.opik`      |
-| `opik.OpikTraceDataset`            | Kedro dataset to provide Opik tracing clients and callbacks     | `kedro_datasets_experimental.opik`      |
-
+| Type                               | Description                                                                    | Location                                |
+| ---------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
+| `langfuse.LangfuseTraceDataset`    | A dataset to provide Langfuse tracing clients and callbacks.                   | `kedro_datasets_experimental.langfuse`  |
+| `langchain.LangChainPromptDataset` | A dataset for loading LangChain prompts.                                       | `kedro_datasets_experimental.langchain` |
+| `pypdf.PDFDataset`                 | A dataset to read PDF files and extract text using pypdf.                      | `kedro_datasets_experimental.pypdf`     |
+| `langfuse.LangfusePromptDataset`   | A dataset for managing Langfuse prompts.                                       | `kedro_datasets_experimental.langfuse`  |
+| `chromadb.ChromaDBDataset`         | A dataset for loading and saving data to ChromaDB vector database collections. | `kedro_datasets_experimental.chromadb`  |
+| `opik.OpikPromptDataset`           | A dataset to provide Opik integration for handling prompts.                    | `kedro_datasets_experimental.opik`      |
+| `opik.OpikTraceDataset`            | A dataset to provide Opik tracing clients and callbacks.                       | `kedro_datasets_experimental.opik`      |
 
 ## Bug fixes and other changes
+
 - Add HTMLPreview type.
 - Fixed `StudyDataset` to properly propagate a RDB password through the dataset's `credentials`.
 
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
+
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [gitgud5000](https://github.com/gitgud5000)
 
@@ -86,9 +131,9 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added the following new experimental datasets:
 
-| Type                           | Description                                                   | Location                             |
-| ------------------------------ | ------------------------------------------------------------- | ------------------------------------ |
-| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars | `kedro_datasets_experimental.polars` |
+| Type                           | Description                                                    | Location                             |
+| ------------------------------ | -------------------------------------------------------------- | ------------------------------------ |
+| `polars.PolarsDatabaseDataset` | A dataset to load and save data to a SQL backend using Polars. | `kedro_datasets_experimental.polars` |
 
 ## Bug fixes and other changes
 
@@ -97,6 +142,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Updated the json schema for Kedro 1.0.0.
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 - [gitgud5000](https://github.com/gitgud5000)
@@ -109,9 +156,9 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Make `kedro-datasets` compatible with Kedro 1.0.0.
 - Added the following new datasets:
 
-| Type                  | Description                                                                       | Location                 |
-| --------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx` | `kedro_datasets.openxml` |
+| Type                  | Description                                                                        | Location                 |
+| --------------------- | ---------------------------------------------------------------------------------- | ------------------------ |
+| `openxml.DocxDataset` | A dataset for loading and saving .docx files (Microsoft Word) using `python-docx`. | `kedro_datasets.openxml` |
 
 ## Bug fixes and other changes
 
@@ -459,7 +506,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 2.0.0.
 
-# Release 1.7.0:
+# Release 1.7.0
 
 ## Major features and improvements
 
@@ -480,13 +527,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Walber Moreira](https://github.com/wmoreiraa)
 
-# Release 1.6.0:
+# Release 1.6.0
 
 ## Major features and improvements
 
 - Added support for Python 3.11.
 
-# Release 1.5.3:
+# Release 1.5.3
 
 ## Bug fixes and other changes
 
@@ -498,13 +545,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Community contributions
 
-# Release 1.5.2:
+# Release 1.5.2
 
 ## Bug fixes and other changes
 
 - Fixed problematic `kedro-datasets` optional dependencies.
 
-# Release 1.5.1:
+# Release 1.5.1
 
 ## Bug fixes and other changes
 
@@ -544,13 +591,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Fixed documentations of `GeoJSONDataSet` and `SparkStreamingDataSet`.
 - Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
-# Release 1.4.1:
+# Release 1.4.1
 
 ## Bug fixes and other changes
 
 - Fixed missing `pickle.PickleDataSet` extras in `setup.py`.
 
-# Release 1.4.0:
+# Release 1.4.0
 
 ## Major features and improvements
 
@@ -564,7 +611,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Fixed problematic docstrings of `APIDataSet`.
 
-# Release 1.3.0:
+# Release 1.3.0
 
 ## Major features and improvements
 
@@ -595,7 +642,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [McDonnellJoseph](https://github.com/McDonnellJoseph)
 - [Danny Farah](https://github.com/dannyrfar)
 
-# Release 1.2.0:
+# Release 1.2.0
 
 ## Major features and improvements
 
@@ -606,13 +653,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Fixed a docstring in the Pandas `SQLQueryDataSet` as part of the Sphinx revamp on Kedro.
 
-# Release 1.1.1:
+# Release 1.1.1
 
 ## Bug fixes and other changes
 
 - Fixed problematic docstrings causing Read the Docs builds on Kedro to fail.
 
-# Release 1.1.0:
+# Release 1.1.0
 
 ## Major features and improvements
 
@@ -628,7 +675,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Add `mssql` backend to the `SQLQueryDataSet` DataSet using `pyodbc` library.
 - Added a warning when the user tries to use `SparkDataSet` on Databricks without specifying a file path with the `/dbfs/` prefix.
 
-# Release 1.0.2:
+# Release 1.0.2
 
 ## Bug fixes and other changes
 
@@ -636,13 +683,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Relaxed PyArrow range in line with pandas.
 - Fixed outdated links to the dill package documentation.
 
-# Release 1.0.1:
+# Release 1.0.1
 
 ## Bug fixes and other changes
 
 - Fixed docstring formatting in `VideoDataSet` that was causing the documentation builds to fail.
 
-# Release 1.0.0:
+# Release 1.0.0
 
 First official release of Kedro-Datasets.
 
@@ -654,7 +701,7 @@ The datasets have always been part of the core Kedro Framework project inside `k
 
 - Changed `pandas.ParquetDataSet` to load data using pandas instead of parquet.
 
-# Release 0.1.0:
+# Release 0.1.0
 
 The initial release of Kedro-Datasets.
 

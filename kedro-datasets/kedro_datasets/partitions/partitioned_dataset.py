@@ -4,7 +4,6 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
-import operator
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -13,7 +12,6 @@ from urllib.parse import urlparse
 from warnings import warn
 
 import fsspec
-from cachetools import Cache, cachedmethod
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
@@ -204,7 +202,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
-        self._partition_cache: Cache = Cache(maxsize=1)
+        self._cached_partitions: list[str] | None = None
         self._save_lazily = save_lazily
         self.metadata = metadata
 
@@ -255,14 +253,17 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
+        if self._cached_partitions is not None:
+            return self._cached_partitions
+
         dataset_is_versioned = VERSION_KEY in self._dataset_config
-        return [
+        self._cached_partitions = [
             _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]
+        return self._cached_partitions
 
     def _join_protocol(self, path: str) -> str:
         protocol_prefix = f"{self._protocol}://"
@@ -349,7 +350,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return self._pretty_repr(object_description_repr)
 
     def _invalidate_caches(self) -> None:
-        self._partition_cache.clear()
+        self._cached_partitions = None
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:

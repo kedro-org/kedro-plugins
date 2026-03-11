@@ -77,10 +77,19 @@ class MockHttpClientResponse(aiohttp.client_reqrep.ClientResponse):
     def raw_headers(self) -> aiohttp.typedefs.RawHeaders:
         return self._headers.items()
 
+    def close(self) -> None:
+        # No-op: the mock doesn't hold real connections or event loops,
+        # but newer aiohttp (3.13+) calls close() which accesses _loop.
+        pass
+
+    def release(self) -> None:
+        pass
+
 
 @fixture(scope="session", autouse=True)
 def patch_aiobotocore():
     import aiobotocore.endpoint  # noqa: PLC0415
+    import aiobotocore.httpchecksum  # noqa: PLC0415
 
     def factory(original: Callable) -> Callable:
         def patched_convert_to_response_dict(
@@ -94,6 +103,14 @@ def patch_aiobotocore():
     aiobotocore.endpoint.convert_to_response_dict = factory(
         aiobotocore.endpoint.convert_to_response_dict
     )
+
+    # Remove async overrides from AioAwsChunkedWrapper so it falls back to
+    # the synchronous base-class methods. Moto returns synchronous responses,
+    # and the async overrides raise errors (e.g. KeyError: 'response') when
+    # s3fs tries to use them with mocked S3 writes.
+    for attr in ("_make_chunk", "read"):
+        if hasattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr):
+            delattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr)
 
 
 @fixture(params=[None])

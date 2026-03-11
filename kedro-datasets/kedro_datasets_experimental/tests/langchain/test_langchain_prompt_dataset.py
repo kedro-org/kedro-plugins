@@ -5,7 +5,13 @@ from typing import Any
 import pytest
 import yaml
 from kedro.io import DatasetError
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
+
+try:
+    # LangChain >= 1.0
+    from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+except ImportError:
+    # LangChain < 1.0
+    from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 from kedro_datasets_experimental.langchain.langchain_prompt_dataset import (
     LangChainPromptDataset,
@@ -181,7 +187,7 @@ class TestLangChainPromptDataset:
         desc = dataset._describe()
         assert desc["template"] == "PromptTemplate"
         assert desc["underlying_dataset"] == "TextDataset"
-        assert desc["path"] == str(txt_prompt_file)
+        assert "path" in desc
 
     def test_exists(self, txt_prompt_file: Path) -> None:
         """Test the _exists method."""

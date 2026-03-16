@@ -275,10 +275,11 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def _partition_to_path(self, path: str):
-        dir_path = self._path.rstrip(self._sep)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.lstrip(self._sep)
 
-        # Construct the full path
         full_path = self._sep.join([dir_path, path])
 
         # Normalize the path to resolve any '..' or '.' components
@@ -297,9 +298,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"which is outside the dataset directory '{dir_path}'."
             )
 
-        # Use the normalized path and add suffix
-        full_path = normalized_full_path + self._filename_suffix
-        return full_path
+        return normalized_full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:
         dir_path = self._filesystem._strip_protocol(self._normalized_path)

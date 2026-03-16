@@ -282,7 +282,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         full_path = self._sep.join([dir_path, path])
 
-        # Normalize the path to resolve any '..' or '.' components
+        # Normalize the path to resolve any '..' or '.' components for security check
         # This works for both local and remote (S3, GCS, etc.) POSIX-style paths
         normalized_full_path = posixpath.normpath(full_path)
         normalized_base_path = posixpath.normpath(dir_path)
@@ -298,7 +298,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"which is outside the dataset directory '{dir_path}'."
             )
 
-        return normalized_full_path + self._filename_suffix
+        return full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:
         dir_path = self._filesystem._strip_protocol(self._normalized_path)

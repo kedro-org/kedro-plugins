@@ -444,6 +444,23 @@ class TestPartitionedDatasetLocal:
             pds.load()
 
     @pytest.mark.parametrize(
+        "unsafe_partition_id",
+        [
+            "..",
+            "../secrets",
+            "../../../secrets",
+            "foo/../../secrets",
+        ],
+    )
+    def test_partition_path_traversal_attack(self, tmpdir, unsafe_partition_id):
+        """Test that partition IDs with path traversal patterns are rejected."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            pds.save({unsafe_partition_id: original_data})
+
+    @pytest.mark.parametrize(
         "pds_config,filepath_arg",
         [
             (

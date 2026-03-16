@@ -4,6 +4,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
+import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -276,7 +277,28 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     def _partition_to_path(self, path: str):
         dir_path = self._path.rstrip(self._sep)
         path = path.lstrip(self._sep)
-        full_path = self._sep.join([dir_path, path]) + self._filename_suffix
+
+        # Construct the full path
+        full_path = self._sep.join([dir_path, path])
+
+        # Normalize the path to resolve any '..' or '.' components
+        # This works for both local and remote (S3, GCS, etc.) POSIX-style paths
+        normalized_full_path = posixpath.normpath(full_path)
+        normalized_base_path = posixpath.normpath(dir_path)
+
+        # Ensure the normalized path is within the base directory
+        # Check that normalized path starts with base path followed by separator or is exactly base path
+        if not (
+            normalized_full_path == normalized_base_path
+            or normalized_full_path.startswith(normalized_base_path + self._sep)
+        ):
+            raise DatasetError(
+                f"Partition ID '{path}' resolves to '{normalized_full_path}' "
+                f"which is outside the dataset directory '{dir_path}'."
+            )
+
+        # Use the normalized path and add suffix
+        full_path = normalized_full_path + self._filename_suffix
         return full_path
 
     def _path_to_partition(self, path: str) -> str:

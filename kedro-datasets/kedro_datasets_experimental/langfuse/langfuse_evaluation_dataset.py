@@ -4,18 +4,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from kedro_datasets._typing import JSONPreview
 from kedro.io import AbstractDataset, DatasetError
-from langfuse import Langfuse
-from langfuse.api import Error as LangfuseApiError
-from langfuse.api import NotFoundError as LangfuseNotFoundError
-
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
     from langfuse._client.datasets import DatasetClient
+
+from langfuse import Langfuse
+from langfuse.api import Error as LangfuseApiError
+from langfuse.api import NotFoundError as LangfuseNotFoundError
+
+from kedro_datasets._typing import JSONPreview
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
@@ -87,7 +89,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         ```yaml
         # Local sync policy - local file seeds and syncs to remote
         evaluation_dataset:
-          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
           dataset_name: intent-detection-eval
           filepath: data/evaluation/intent_items.json
           sync_policy: local
@@ -97,14 +99,14 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
         # Remote sync policy - Langfuse is the source of truth
         production_eval:
-          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
           dataset_name: intent-detection-eval
           sync_policy: remote
           credentials: langfuse_credentials
 
         # Pinned to a historical snapshot for reproducibility
         eval_snapshot:
-          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
           dataset_name: intent-detection-eval
           sync_policy: remote
           version: "2026-01-15T00:00:00Z"
@@ -114,7 +116,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         Using Python API:
 
         ```python
-        from kedro_agentic_workflows.datasets import LangfuseEvaluationDataset
+        from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
 
         dataset = LangfuseEvaluationDataset(
             dataset_name="intent-detection-eval",
@@ -272,10 +274,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             raise DatasetError("filepath must be provided for file dataset operations.")
         if self._file_dataset is None:
             if self._filepath.suffix.lower() in (".yaml", ".yml"):
-                from kedro_datasets.yaml import YAMLDataset
+                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
                 self._file_dataset = YAMLDataset(filepath=str(self._filepath))
             else:
-                from kedro_datasets.json import JSONDataset
+                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
                 self._file_dataset = JSONDataset(filepath=str(self._filepath))
         return self._file_dataset
 

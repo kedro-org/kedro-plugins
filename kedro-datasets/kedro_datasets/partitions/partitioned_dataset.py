@@ -286,15 +286,15 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         """
         # Normalize only for validation - handle Windows backslashes
         # fsspec uses forward slashes internally, so we normalize to forward slashes
-        path_for_check = path.replace("\\", "/").lstrip("/")
-        full_path_for_check = self._sep.join([dir_path, path_for_check])
+        path_to_check = path.replace("\\", "/").lstrip("/")
+        full_path_to_check = self._sep.join([dir_path, path_to_check])
 
         # Normalize the path to resolve any '..' or '.' components for the security check.
         # posixpath is used intentionally here as fsspec normalizes all paths to
         # forward-slash separated strings regardless of OS (including Windows), so
         # this is safe for both local and remote (S3, GCS, etc.) filesystems as long
         # as paths have gone through fsspec's normalization before reaching this point.
-        normalized_full_path = posixpath.normpath(full_path_for_check)
+        normalized_full_path = posixpath.normpath(full_path_to_check)
         normalized_base_path = posixpath.normpath(dir_path)
 
         # Ensure the normalized path is within the base directory
@@ -321,10 +321,16 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:
-        dir_path = self._filesystem._strip_protocol(self._normalized_path)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.split(dir_path, 1).pop().lstrip(self._sep)
         if self._filename_suffix and path.endswith(self._filename_suffix):
             path = path[: -len(self._filename_suffix)]
+
+        # Validate the partition ID to ensure it doesn't escape the base directory
+        self._validate_partition_path(path, dir_path)
+
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:

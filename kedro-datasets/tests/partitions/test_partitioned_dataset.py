@@ -456,13 +456,39 @@ class TestPartitionedDatasetLocal:
             "foo\\..\\..\\secrets",
         ],
     )
-    def test_partition_path_traversal_attack(self, tmpdir, unsafe_partition_id):
-        """Test that partition IDs with path traversal patterns are rejected."""
+    def test_save_partition_unsafe_paths(self, tmpdir, unsafe_partition_id):
+        """Test that partition IDs with path traversal patterns are rejected during save."""
         pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
 
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             pds.save({unsafe_partition_id: original_data})
+
+    @pytest.mark.parametrize(
+        "unsafe_partition_id",
+        [
+            "..",
+            "../secrets",
+            "../../../secrets",
+            "foo/../../secrets",
+            # Windows paths with backslashes
+            "..\\secrets",
+            "..\\..\\secrets",
+            "foo\\..\\..\\secrets",
+        ],
+    )
+    def test_load_partition_unsafe_paths(self, tmpdir, mocker, unsafe_partition_id):
+        """Test that partition IDs with path traversal patterns are rejected during load."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+
+        # Mock the filesystem.find() to return a malicious path
+        dir_path = str(tmpdir)
+        malicious_full_path = f"{dir_path}/{unsafe_partition_id}"
+        mocked_find = mocker.patch.object(pds._filesystem, "find")
+        mocked_find.return_value = [malicious_full_path]
+
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            pds.load()
 
     @pytest.mark.parametrize(
         "safe_partition_id",
@@ -477,7 +503,7 @@ class TestPartitionedDatasetLocal:
             ".hidden",
         ],
     )
-    def test_partition_safe_paths_allowed(self, tmpdir, safe_partition_id):
+    def test_partition_safe_paths(self, tmpdir, safe_partition_id):
         """Test that legitimate partition IDs are accepted and can be saved/loaded."""
         pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})

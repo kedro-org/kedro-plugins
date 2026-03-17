@@ -141,7 +141,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         ```
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         dataset_name: str,
         credentials: dict[str, str],

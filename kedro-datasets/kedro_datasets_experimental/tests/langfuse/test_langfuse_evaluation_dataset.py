@@ -1,9 +1,13 @@
 import json
+from datetime import timezone
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 import yaml
 from kedro.io import DatasetError
+from langfuse.api import Error as LangfuseApiError
+from langfuse.api import NotFoundError as LangfuseNotFoundError
 
 from kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset import (
     LangfuseEvaluationDataset,
@@ -275,8 +279,6 @@ class TestLoadLocal:
         self, mock_credentials, mock_langfuse
     ):
         """Remote not found → creates dataset, then returns it."""
-        from langfuse.api import NotFoundError as LangfuseNotFoundError
-
         not_found_body = Mock()
         not_found_body.message = "Not found"
         created = Mock()
@@ -304,8 +306,6 @@ class TestLoadLocal:
         self, tmp_path, mock_credentials, mock_langfuse
     ):
         """No local file, no remote → creates remote, returns empty dataset."""
-        from langfuse.api import NotFoundError as LangfuseNotFoundError
-
         not_found_body = Mock()
         not_found_body.message = "Not found"
         empty_ds = Mock()
@@ -482,8 +482,6 @@ class TestSave:
         new_items = [{"id": "q3", "input": {"text": "refund please"}}]
         ds.save(new_items)
 
-        from pathlib import Path
-
         saved_data = json.loads(Path(filepath_json).read_text())
         ids = [item["id"] for item in saved_data]
         assert "q1" in ids
@@ -495,8 +493,6 @@ class TestSave:
     ):
         """Remote policy save does not touch local file."""
         mock_langfuse.get_dataset.return_value = empty_remote_dataset
-
-        from pathlib import Path
 
         original = Path(filepath_json).read_text()
 
@@ -619,8 +615,6 @@ class TestExists:
         assert ds._exists() is True
 
     def test_exists_false(self, mock_credentials, mock_langfuse):
-        from langfuse.api import NotFoundError as LangfuseNotFoundError
-
         not_found_body = Mock()
         not_found_body.message = "Not found"
         mock_langfuse.get_dataset.side_effect = LangfuseNotFoundError(
@@ -633,8 +627,6 @@ class TestExists:
         assert ds._exists() is False
 
     def test_exists_api_error_raises(self, mock_credentials, mock_langfuse):
-        from langfuse.api import Error as LangfuseApiError
-
         mock_langfuse.get_dataset.side_effect = LangfuseApiError(body="Server error")
         ds = LangfuseEvaluationDataset(
             dataset_name="test-eval",
@@ -762,8 +754,6 @@ class TestHelpers:
         assert result.year == 2026
 
     def test_parse_version_naive_gets_utc(self):
-        from datetime import timezone
-
         result = LangfuseEvaluationDataset._parse_version("2026-01-15T00:00:00")
         assert result.tzinfo == timezone.utc
 

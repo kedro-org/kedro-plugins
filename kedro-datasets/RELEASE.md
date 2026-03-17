@@ -3,6 +3,11 @@
 ## Major features and improvements
 
 - Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `langfuse.LangfuseEvaluationDataset` | A dataset for managing Langfuse evaluation datasets. | `kedro_datasets_experimental.langfuse` |
 
 ## Bug fixes and other changes
 

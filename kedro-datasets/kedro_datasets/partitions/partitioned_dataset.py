@@ -282,8 +282,11 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         full_path = self._sep.join([dir_path, path])
 
-        # Normalize the path to resolve any '..' or '.' components for security check
-        # This works for both local and remote (S3, GCS, etc.) POSIX-style paths
+        # Normalize the path to resolve any '..' or '.' components for the security check.
+        # posixpath is used intentionally here as fsspec normalizes all paths to
+        # forward-slash separated strings regardless of OS (including Windows), so
+        # this is safe for both local and remote (S3, GCS, etc.) filesystems as long
+        # as paths have gone through fsspec's normalization before reaching this point.
         normalized_full_path = posixpath.normpath(full_path)
         normalized_base_path = posixpath.normpath(dir_path)
 

@@ -449,7 +449,7 @@ class TestPartitionedDatasetLocal:
             "..",
             "../secrets",
             "../../../secrets",
-            "foo/../../secrets",
+            "foo/../../secrets"
         ],
     )
     def test_partition_path_traversal_attack(self, tmpdir, unsafe_partition_id):
@@ -459,6 +459,33 @@ class TestPartitionedDatasetLocal:
 
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             pds.save({unsafe_partition_id: original_data})
+
+    @pytest.mark.parametrize(
+        "safe_partition_id",
+        [
+            "data1",
+            "partition_a",
+            "year=2024/month=01/data",
+            "v1.0.0",
+            "file.backup",
+            "...data",
+            "foo/bar/baz",
+            ".hidden",
+        ],
+    )
+    def test_partition_safe_paths_allowed(self, tmpdir, safe_partition_id):
+        """Test that legitimate partition IDs are accepted and can be saved/loaded."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        # Should not raise any errors
+        pds.save({safe_partition_id: original_data})
+
+        # Verify the data can be loaded back
+        loaded = pds.load()
+        assert safe_partition_id in loaded
+        loaded_data = loaded[safe_partition_id]()
+        assert_frame_equal(loaded_data, original_data)
 
     @pytest.mark.parametrize(
         "pds_config,filepath_arg",

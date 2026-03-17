@@ -274,20 +274,27 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return f"{protocol_prefix}{path}"
         return path
 
-    def _partition_to_path(self, path: str):
-        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
-            self._sep
-        )
-        path = path.lstrip(self._sep)
+    def _validate_partition_path(self, path: str, dir_path: str) -> None:
+        """Validate that the partition path is within the base directory.
 
-        full_path = self._sep.join([dir_path, path])
+        Args:
+            path: The partition path to validate
+            dir_path: The base directory path
+
+        Raises:
+            DatasetError: If the path resolves outside the base directory
+        """
+        # Normalize only for validation - handle Windows backslashes
+        # fsspec uses forward slashes internally, so we normalize to forward slashes
+        path_for_check = path.replace("\\", "/").lstrip("/")
+        full_path_for_check = self._sep.join([dir_path, path_for_check])
 
         # Normalize the path to resolve any '..' or '.' components for the security check.
         # posixpath is used intentionally here as fsspec normalizes all paths to
         # forward-slash separated strings regardless of OS (including Windows), so
         # this is safe for both local and remote (S3, GCS, etc.) filesystems as long
         # as paths have gone through fsspec's normalization before reaching this point.
-        normalized_full_path = posixpath.normpath(full_path)
+        normalized_full_path = posixpath.normpath(full_path_for_check)
         normalized_base_path = posixpath.normpath(dir_path)
 
         # Ensure the normalized path is within the base directory
@@ -301,6 +308,16 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"which is outside the dataset directory '{dir_path}'."
             )
 
+    def _partition_to_path(self, path: str):
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
+        path = path.lstrip(self._sep)
+
+        # Validate the path is within the base directory
+        self._validate_partition_path(path, dir_path)
+
+        full_path = self._sep.join([dir_path, path])
         return full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:

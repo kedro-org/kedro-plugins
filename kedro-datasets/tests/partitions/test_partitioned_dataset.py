@@ -449,7 +449,11 @@ class TestPartitionedDatasetLocal:
             "..",
             "../secrets",
             "../../../secrets",
-            "foo/../../secrets"
+            "foo/../../secrets",
+            # Windows paths with backslashes
+            "..\\secrets",
+            "..\\..\\secrets",
+            "foo\\..\\..\\secrets",
         ],
     )
     def test_partition_path_traversal_attack(self, tmpdir, unsafe_partition_id):

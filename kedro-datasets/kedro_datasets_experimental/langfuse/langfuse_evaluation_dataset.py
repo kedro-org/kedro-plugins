@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 
 if TYPE_CHECKING:
+    from langfuse._client.datasets import DatasetClient
+
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
-    from langfuse._client.datasets import DatasetClient
 
 from langfuse import Langfuse
 from langfuse.api import Error as LangfuseApiError

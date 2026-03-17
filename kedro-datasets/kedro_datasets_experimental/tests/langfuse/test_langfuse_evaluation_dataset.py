@@ -13,7 +13,6 @@ from kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset import (
     LangfuseEvaluationDataset,
 )
 
-
 MODULE = "kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset"
 
 

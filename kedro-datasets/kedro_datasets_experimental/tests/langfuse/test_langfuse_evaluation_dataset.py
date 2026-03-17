@@ -702,7 +702,7 @@ class TestHelpers:
         dataset = Mock()
         dataset.items = []
         items = [{"id": "a", "input": "x"}, {"id": "b", "input": "y"}]
-        result = LangfuseEvaluationDataset._filter_new_items(None, items, dataset)
+        result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
         assert len(result) == 2
 
     def test_filter_new_items_all_existing(self):
@@ -711,7 +711,7 @@ class TestHelpers:
         dataset = Mock()
         dataset.items = [remote_item]
         items = [{"id": "a", "input": "x"}]
-        result = LangfuseEvaluationDataset._filter_new_items(None, items, dataset)
+        result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
         assert result == []
 
     def test_filter_new_items_without_id_always_included(self):
@@ -719,7 +719,7 @@ class TestHelpers:
         dataset.items = []
         items = [{"input": "no-id"}]
         with patch(f"{MODULE}.logger"):
-            result = LangfuseEvaluationDataset._filter_new_items(None, items, dataset)
+            result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
         assert len(result) == 1
 
     def test_merge_items_no_overlap(self):

@@ -367,8 +367,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 status=item.get("status"),
             )
 
+    @staticmethod
     def _filter_new_items(
-        self,
         items: list[dict[str, Any]],
         dataset: "DatasetClient",
     ) -> list[dict[str, Any]]:

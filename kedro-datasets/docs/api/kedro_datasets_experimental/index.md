@@ -11,6 +11,7 @@ Name | Description
 [langchain.LangChainPromptDataset](langchain.LangChainPromptDataset.md) | ``LangChainPromptDataset`` loads a `langchain` prompt template.
 [langfuse.LangfusePromptDataset](langfuse.LangfusePromptDataset.md) | ``LangfusePromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.
 [langfuse.LangfuseTraceDataset](langfuse.LangfuseTraceDataset.md) | ``LangfuseTraceDataset`` provides Langfuse tracing clients for LLM observability and monitoring.
+[langfuse.LangfuseEvaluationDataset](langfuse.LangfuseEvaluationDataset.md) | ``LangfuseEvaluationDataset`` manages Langfuse evaluation datasets for LLM experiment workflows, supporting local file syncing and remote dataset versioning.
 [mlrun.MLRunAbstractDataset](mlrun.MLRunAbstractDataset.md) | ``MLRunAbstractDataset`` base class for MLRun datasets, can be used directly for generic artifacts.
 [mlrun.MLRunModel](mlrun.MLRunModel.md) | ``MLRunModel`` saves and loads ML models via MLRun with framework metadata and configurable file format.
 [mlrun.MLRunDataframeDataset](mlrun.MLRunDataframeDataset.md) | ``MLRunDataframeDataset`` saves and loads pandas DataFrames as MLRun artifacts.

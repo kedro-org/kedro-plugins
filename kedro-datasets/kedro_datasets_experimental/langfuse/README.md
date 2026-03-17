@@ -461,9 +461,295 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 
 ---
 
+## LangfuseEvaluationDataset
+
+A Kedro dataset for managing [Langfuse evaluation datasets](https://langfuse.com/docs/evaluation/experiments/datasets). It connects to a remote Langfuse dataset, optionally backed by a local JSON/YAML file, and returns a `DatasetClient` on `load()` — ready for iterating items or running experiments via `dataset.run_experiment()`.
+
+### Quick Start
+
+```python
+from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+
+dataset = LangfuseEvaluationDataset(
+    dataset_name="intent-detection-eval",
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+    filepath="data/evaluation/intent_items.json",
+)
+
+# Returns a Langfuse DatasetClient
+eval_ds = dataset.load()
+
+for item in eval_ds.items:
+    print(item.input, item.expected_output)
+```
+
+### Installation
+
+```bash
+pip install "kedro-datasets[langfuse-langfuseevaluationdataset]"
+```
+
+Or install all Langfuse datasets at once:
+
+```bash
+pip install "kedro-datasets[langfuse]"
+```
+
+#### Requirements:
+- Python 3.10+
+- Kedro
+- Langfuse SDK ≥ 3.14.0
+
+### Evaluation Item Format
+
+The local file and `save()` data must be a list of dicts. Each item accepts the same keys as [`Langfuse.create_dataset_item()`](https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data):
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `input` | **Yes** | The evaluation input payload |
+| `id` | No | Stable identifier used for deduplication on sync and upload |
+| `expected_output` | No | Ground-truth value for scoring |
+| `metadata` | No | Arbitrary metadata dict attached to the item |
+| `source_trace_id` | No | Langfuse trace ID to link the item to |
+| `source_observation_id` | No | Observation ID within the source trace |
+| `status` | No | `"ACTIVE"` (default) or `"ARCHIVED"` |
+
+##### JSON Example
+
+```json
+[
+  {
+    "id": "q1",
+    "input": {"text": "cancel my order"},
+    "expected_output": "cancel_order",
+    "metadata": {"source": "production"}
+  },
+  {
+    "id": "q2",
+    "input": {"text": "where is my package?"},
+    "expected_output": "track_order"
+  }
+]
+```
+
+##### YAML Example
+
+```yaml
+- id: q1
+  input:
+    text: cancel my order
+  expected_output: cancel_order
+  metadata:
+    source: production
+- id: q2
+  input:
+    text: where is my package?
+  expected_output: track_order
+```
+
+> **Note:** Items without an `id` cannot be deduplicated and will be re-uploaded on every `load()` or `save()` call. Always assign unique `id` values for predictable sync behaviour.
+
+### Sync Policies
+
+| Policy | Local File | Remote (Langfuse) | Use Case |
+|--------|------------|-------------------|----------|
+| **`local`** (default) | ✅ Source of truth | ⬆️ New items synced from local | Development, rapid iteration |
+| **`remote`** | ❌ No interaction | ✅ Source of truth | Production, shared datasets |
+
+##### Choosing the Right Policy
+
+- **Development**: Use `local` — iterate on items in your IDE, they sync to remote on `load()`
+- **Production / shared datasets**: Use `remote` — manage items via the Langfuse UI or API
+
+### Configuration Examples
+
+#### Catalog Configuration (YAML)
+
+##### Local Sync Policy — Development
+
+```yaml
+evaluation_dataset:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: intent-detection-eval
+  filepath: data/evaluation/intent_items.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    project: intent-detection
+```
+
+##### Remote Sync Policy — Production
+
+```yaml
+production_eval:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: intent-detection-eval
+  sync_policy: remote
+  credentials: langfuse_credentials
+```
+
+##### Remote + Version — Reproducible Snapshot
+
+```yaml
+eval_snapshot:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: intent-detection-eval
+  sync_policy: remote
+  version: "2026-01-15T00:00:00Z"
+  credentials: langfuse_credentials
+```
+
+#### Python API Examples
+
+##### Basic Usage
+
+```python
+from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+
+dataset = LangfuseEvaluationDataset(
+    dataset_name="intent-detection-eval",
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+    filepath="data/evaluation/intent_items.json",
+)
+
+eval_ds = dataset.load()
+```
+
+##### Saving New Items
+
+```python
+dataset.save(
+    [
+        {
+            "id": "q3",
+            "input": {"text": "I need a refund"},
+            "expected_output": "refund_request",
+        },
+    ]
+)
+```
+
+##### Versioned Remote Load
+
+```python
+dataset = LangfuseEvaluationDataset(
+    dataset_name="intent-detection-eval",
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+    sync_policy="remote",
+    version="2026-01-15T00:00:00Z",
+)
+
+snapshot = dataset.load()
+```
+
+### Running Experiments
+
+The `DatasetClient` returned by `load()` integrates directly with Langfuse's experiment runner. Langfuse manages the experiment lifecycle — tracing, scoring, and result aggregation.
+
+```python
+from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+
+dataset = LangfuseEvaluationDataset(
+    dataset_name="intent-detection-eval",
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+)
+
+eval_ds = dataset.load()
+
+
+def run_intent_classification(item):
+    # Your model inference logic
+    return classify(item.input["text"])
+
+
+eval_ds.run_experiment(
+    name="intent-model-v2",
+    run_fn=run_intent_classification,
+)
+```
+
+> **Lifecycle delegation:** The dataset only handles creation, sync, and retrieval of evaluation items. Experiment execution, tracing, and scoring are delegated entirely to Langfuse's `DatasetClient` API.
+
+### Troubleshooting
+
+#### Missing Credentials
+
+```
+DatasetError: Missing required Langfuse credential: 'public_key'
+```
+
+##### Solution: Add all required credentials to your configuration:
+```python
+credentials = {
+    "public_key": "pk_...",
+    "secret_key": "sk_...",  # pragma: allowlist secret
+}
+```
+
+---
+
+#### Unsupported File Extension
+
+```
+DatasetError: Unsupported file extension '.txt'
+```
+
+##### Solution: Use supported formats: `.json`, `.yaml`, or `.yml`
+
+---
+
+#### Version with Local Sync Policy
+
+```
+DatasetError: The 'version' parameter can only be used with sync_policy='remote'.
+```
+
+##### Solution: Switch to `sync_policy="remote"` when using the `version` parameter.
+
+---
+
+#### Missing Input Key
+
+```
+DatasetError: Dataset item at index 0 is missing required 'input' key.
+```
+
+##### Solution: Ensure every item in the list contains an `input` key:
+```python
+[{"id": "q1", "input": {"text": "cancel order"}, "expected_output": "cancel"}]
+```
+
+---
+
+#### API Errors
+
+```
+DatasetError: Langfuse API error while fetching dataset '...': 401 Unauthorized
+```
+
+##### Solution:
+- Verify `public_key` and `secret_key` are correct
+- Check if keys have proper permissions
+- Ensure `host` URL is correct for self-hosted instances
+
+---
+
 #### Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)
 
 #### Related Resources
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)
-- **Langfuse**: [Langfuse prompt management](https://langfuse.com/docs/prompt-management)
+- **Langfuse Evaluation**: [Dataset experiments](https://langfuse.com/docs/evaluation/experiments/datasets)
+- **Langfuse Prompts**: [Prompt management](https://langfuse.com/docs/prompt-management)

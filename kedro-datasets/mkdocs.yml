@@ -174,9 +174,9 @@ plugins:
         Experimental LLM and AI:
           - api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md: ChromaDB vector database integration
           - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
+          - api/kedro_datasets_experimental/langfuse.LangfuseEvaluationDataset.md: Langfuse evaluation dataset integration
           - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
           - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
-          - api/kedro_datasets_experimental/langfuse.LangfuseEvaluationDataset.md: Langfuse evaluation dataset integration
           - api/kedro_datasets_experimental/opik.OpikPromptDataset.md: Opik prompt integration
           - api/kedro_datasets_experimental/opik.OpikTraceDataset.md: Opik tracing integration
 
@@ -344,9 +344,9 @@ nav:
         - Langchain:
           - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
         - Langfuse:
+          - langfuse.LangfuseEvaluationDataset: api/kedro_datasets_experimental/langfuse.LangfuseEvaluationDataset.md
           - langfuse.LangfusePromptDataset: api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md
           - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
-          - langfuse.LangfuseEvaluationDataset: api/kedro_datasets_experimental/langfuse.LangfuseEvaluationDataset.md
         - MLRun:
           - mlrun.MLRunAbstractDataset: api/kedro_datasets_experimental/mlrun.MLRunAbstractDataset.md
           - mlrun.MLRunDataframeDataset: api/kedro_datasets_experimental/mlrun.MLRunDataframeDataset.md

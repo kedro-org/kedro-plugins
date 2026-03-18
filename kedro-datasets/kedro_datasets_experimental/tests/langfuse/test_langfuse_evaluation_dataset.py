@@ -248,10 +248,10 @@ class TestLoadLocal:
         assert result is mock_remote_dataset
         mock_langfuse.create_dataset.assert_not_called()
 
-    def test_load_existing_remote_local_file_syncs_new_items(
+    def test_load_existing_remote_local_file_upserts_all_items(
         self, filepath_json, mock_credentials, mock_langfuse
     ):
-        """Remote exists but misses local items → uploads missing ones."""
+        """Remote exists → all local items are upserted (create or update)."""
         remote = Mock()
         remote_item = Mock()
         remote_item.id = "q1"
@@ -269,9 +269,13 @@ class TestLoadLocal:
         )
         result = ds.load()
 
-        mock_langfuse.create_dataset_item.assert_called_once()
-        call_kwargs = mock_langfuse.create_dataset_item.call_args[1]
-        assert call_kwargs["id"] == "q2"
+        assert mock_langfuse.create_dataset_item.call_count == 2
+        uploaded_ids = [
+            call[1]["id"]
+            for call in mock_langfuse.create_dataset_item.call_args_list
+        ]
+        assert "q1" in uploaded_ids
+        assert "q2" in uploaded_ids
         assert result is refreshed
 
     def test_load_nonexistent_remote_creates_it(
@@ -328,7 +332,7 @@ class TestLoadLocal:
     def test_load_idempotent_reload(
         self, filepath_json, mock_credentials, mock_langfuse, mock_remote_dataset
     ):
-        """Second load does not re-upload already-synced items."""
+        """Each load upserts all local items to remote."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
         ds = LangfuseEvaluationDataset(
@@ -338,10 +342,10 @@ class TestLoadLocal:
             sync_policy="local",
         )
         ds.load()
-        mock_langfuse.create_dataset_item.assert_not_called()
+        assert mock_langfuse.create_dataset_item.call_count == 2
 
         ds.load()
-        mock_langfuse.create_dataset_item.assert_not_called()
+        assert mock_langfuse.create_dataset_item.call_count == 4
 
 
 class TestLoadRemote:
@@ -433,7 +437,7 @@ class TestSave:
         assert call_kwargs["id"] == "q1"
         assert call_kwargs["input"] == {"text": "hello"}
 
-    def test_save_skips_existing_ids(
+    def test_save_upserts_existing_ids(
         self, mock_credentials, mock_langfuse, mock_remote_dataset
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
@@ -446,7 +450,29 @@ class TestSave:
         items = [{"id": "q1", "input": {"text": "cancel my order"}}]
         ds.save(items)
 
-        mock_langfuse.create_dataset_item.assert_not_called()
+        mock_langfuse.create_dataset_item.assert_called_once()
+        call_kwargs = mock_langfuse.create_dataset_item.call_args[1]
+        assert call_kwargs["id"] == "q1"
+        assert call_kwargs["input"] == {"text": "cancel my order"}
+
+    def test_save_updates_existing_item_content(
+        self, mock_credentials, mock_langfuse, mock_remote_dataset
+    ):
+        """Saving an item with an existing id but different input upserts it."""
+        mock_langfuse.get_dataset.return_value = mock_remote_dataset
+
+        ds = LangfuseEvaluationDataset(
+            dataset_name="test-eval",
+            credentials=mock_credentials,
+            sync_policy="remote",
+        )
+        items = [{"id": "q1", "input": {"text": "updated input"}}]
+        ds.save(items)
+
+        mock_langfuse.create_dataset_item.assert_called_once()
+        call_kwargs = mock_langfuse.create_dataset_item.call_args[1]
+        assert call_kwargs["id"] == "q1"
+        assert call_kwargs["input"] == {"text": "updated input"}
 
     def test_save_items_without_id_always_uploaded(
         self, mock_credentials, mock_langfuse, mock_remote_dataset
@@ -689,30 +715,6 @@ class TestHelpers:
                 [{"input": "ok"}, {"expected_output": "bad"}]
             )
 
-    def test_filter_new_items_all_new(self):
-        dataset = Mock()
-        dataset.items = []
-        items = [{"id": "a", "input": "x"}, {"id": "b", "input": "y"}]
-        result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
-        assert len(result) == 2
-
-    def test_filter_new_items_all_existing(self):
-        remote_item = Mock()
-        remote_item.id = "a"
-        dataset = Mock()
-        dataset.items = [remote_item]
-        items = [{"id": "a", "input": "x"}]
-        result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
-        assert result == []
-
-    def test_filter_new_items_without_id_always_included(self):
-        dataset = Mock()
-        dataset.items = []
-        items = [{"input": "no-id"}]
-        with patch(f"{MODULE}.logger"):
-            result = LangfuseEvaluationDataset._filter_new_items(items, dataset)
-        assert len(result) == 1
-
     def test_merge_items_no_overlap(self):
         existing = [{"id": "a", "input": "x"}]
         new = [{"id": "b", "input": "y"}]
@@ -720,12 +722,12 @@ class TestHelpers:
         assert len(merged) == 2
         assert [m["id"] for m in merged] == ["a", "b"]
 
-    def test_merge_items_duplicate_dropped(self):
+    def test_merge_items_new_takes_precedence(self):
         existing = [{"id": "a", "input": "x"}]
         new = [{"id": "a", "input": "updated"}]
         merged = LangfuseEvaluationDataset._merge_items(existing, new)
         assert len(merged) == 1
-        assert merged[0]["input"] == "x"
+        assert merged[0]["input"] == "updated"
 
     def test_merge_items_without_id_appended(self):
         existing = [{"id": "a", "input": "x"}]

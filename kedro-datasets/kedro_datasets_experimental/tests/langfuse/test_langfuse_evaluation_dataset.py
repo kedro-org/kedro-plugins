@@ -610,7 +610,7 @@ class TestDescribe:
         desc = ds._describe()
 
         assert desc["dataset_name"] == "test-eval"
-        assert filepath_json in desc["filepath"]
+        assert Path(desc["filepath"]) == Path(filepath_json)
         assert desc["sync_policy"] == "local"
         assert desc["version"] is None
         assert desc["metadata"] == {"project": "test"}

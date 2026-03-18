@@ -48,7 +48,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
     The local file and ``save()`` data must be a list of dicts. Each item
     accepts the same keys as
-    `Langfuse.create_dataset_item() <https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data>`_:
+    [Langfuse.create_dataset_item()](https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data):
 
     - ``input`` (**required**) — the evaluation input payload.
     - ``id`` — stable identifier used for deduplication on sync and upload.
@@ -177,7 +177,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 ``sync_policy="remote"``. When omitted, the latest dataset
                 state is returned. Requires ``langfuse>=3.14.0`` (dataset
                 versioning was introduced in the
-                `Feb 2026 release <https://langfuse.com/changelog/2026-02-11-versioned-dataset-experiments>`_).
+                [Feb 2026 release](https://langfuse.com/changelog/2026-02-11-versioned-dataset-experiments)).
 
         Raises:
             DatasetError: If credentials are missing or empty, sync_policy is

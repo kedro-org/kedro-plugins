@@ -510,7 +510,7 @@ The local file and `save()` data must be a list of dicts. Each item accepts the 
 | Key | Required | Description |
 |-----|----------|-------------|
 | `input` | **Yes** | The evaluation input payload |
-| `id` | No | Stable identifier used for deduplication on sync and upload |
+| `id` | No | Stable identifier used for upsert on sync and upload |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 | `source_trace_id` | No | Langfuse trace ID to link the item to |
@@ -550,19 +550,40 @@ The local file and `save()` data must be a list of dicts. Each item accepts the 
   expected_output: track_order
 ```
 
-> **Note:** Items without an `id` cannot be deduplicated and will be re-uploaded on every `load()` or `save()` call. Always assign unique `id` values for predictable sync behaviour.
+> **Note:** Items without an `id` are always re-uploaded on every `load()` or `save()` call. Always assign unique `id` values for predictable upsert behaviour.
 
 ### Sync Policies
 
 | Policy | Local File | Remote (Langfuse) | Use Case |
 |--------|------------|-------------------|----------|
-| **`local`** (default) | ✅ Source of truth | ⬆️ New items synced from local | Development, rapid iteration |
+| **`local`** (default) | ✅ Source of truth | ⬆️ All items upserted from local | Development, rapid iteration |
 | **`remote`** | ❌ No interaction | ✅ Source of truth | Production, shared datasets |
 
 ##### Choosing the Right Policy
 
 - **Development**: Use `local` — iterate on items in your IDE, they sync to remote on `load()`
 - **Production / shared datasets**: Use `remote` — manage items via the Langfuse UI or API
+
+### Load & Save Behaviour
+
+Both methods use **upsert** semantics: every item is sent to `Langfuse.create_dataset_item()`, which creates a new item or updates the existing item matched by `id`. Items without an `id` always create new entries.
+
+#### `load()`
+
+| Scenario | Steps |
+|----------|-------|
+| **`local`** policy | 1. Creates remote dataset if it doesn't exist<br>2. Reads items from the local file<br>3. **Upserts all** local items to remote<br>4. Returns the refreshed `DatasetClient` |
+| **`remote`** policy | 1. Creates remote dataset if it doesn't exist<br>2. Returns `DatasetClient` as-is — no local file interaction |
+| **`remote`** + `version` | 1. Returns a historical snapshot of the dataset at the given ISO 8601 timestamp — no local file interaction |
+
+#### `save(data)`
+
+| Scenario | Steps |
+|----------|-------|
+| **`local`** policy | 1. Creates remote dataset if it doesn't exist<br>2. **Upserts all** items in `data` to remote<br>3. Merges `data` into the local file (new items take precedence over existing entries with the same `id`) |
+| **`remote`** policy | 1. Creates remote dataset if it doesn't exist<br>2. **Upserts all** items in `data` to remote — no local file interaction |
+
+> **Upsert in practice:** If you `save([{"id": "q1", "input": {"text": "updated question"}}])` and `q1` already exists on remote, its `input` is overwritten. If `q1` doesn't exist, it is created.
 
 ### Configuration Examples
 
@@ -621,7 +642,7 @@ dataset = LangfuseEvaluationDataset(
 eval_ds = dataset.load()
 ```
 
-##### Saving New Items
+##### Upserting Items
 
 ```python
 dataset.save(

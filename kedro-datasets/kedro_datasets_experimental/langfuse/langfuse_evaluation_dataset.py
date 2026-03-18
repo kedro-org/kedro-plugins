@@ -38,9 +38,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
     - **On load:** Creates the remote dataset if it does not exist,
       synchronises based on ``sync_policy``, and returns a ``DatasetClient``.
-    - **On save:** Always uploads new items to the remote dataset
-      (deduplicating by ``id``). In ``local`` mode, also merges them into
-      the local file. In ``remote`` mode, only the remote upload occurs.
+    - **On save:** Upserts all items to the remote dataset — items with an
+      existing ``id`` are updated in place, new items are created.
+      In ``local`` mode, items are also merged into the local file (new
+      items take precedence). In ``remote`` mode, only the remote upsert
+      occurs.
 
     **Item format:**
 
@@ -73,16 +75,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     **Sync policies:**
 
     - **local** (default): The local file is the source of truth. On
-      ``load()``, any local items missing from the remote (compared by ``id``)
-      are uploaded. Existing remote items are never modified or deleted.
-      Items without an ``id`` field cannot be deduplicated and will be
-      re-uploaded on every load.
+      ``load()``, all local items are upserted to remote (creating new
+      items or updating existing ones matched by ``id``). Items without
+      an ``id`` field cannot be deduplicated and will create new entries
+      on every load.
     - **remote**: The remote Langfuse dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
-      interaction. ``save()`` uploads new items to remote (deduplicating
-      by ``id``) but does not write to any local file. An optional
-      ``version`` (ISO 8601 timestamp) can pin ``load()`` to a historical
-      snapshot (requires ``langfuse>=3.14.0``).
+      interaction. ``save()`` upserts all items to remote but does not
+      write to any local file. An optional ``version`` (ISO 8601
+      timestamp) can pin ``load()`` to a historical snapshot (requires
+      ``langfuse>=3.14.0``).
 
     Examples:
         Using catalog YAML configuration:
@@ -163,11 +165,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 When ``None``, no local file interaction occurs.
             sync_policy: Controls the source of truth for reads and whether
                 a local file is involved:
-                ``"local"`` (default) — local file seeds the remote dataset
-                on ``load()``; ``save()`` uploads to remote and merges into
-                the local file.
+                ``"local"`` (default) — all local items are upserted to
+                remote on ``load()``; ``save()`` upserts to remote and
+                merges into the local file (new data takes precedence).
                 ``"remote"`` — ``load()`` fetches remote as-is; ``save()``
-                uploads to remote without local file interaction.
+                upserts to remote without local file interaction.
             metadata: Optional metadata dict passed to Langfuse when creating
                 the remote dataset for the first time.
             version: ISO 8601 timestamp to pin ``load()`` to a historical
@@ -259,7 +261,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             return None
         try:
             # Python 3.10 doesn't support 'Z' suffix in fromisoformat
-            normalized = version.replace("Z", "+00:00") if version.endswith("Z") else version
+            normalized = version[:-1] + "+00:00" if version.endswith("Z") else version
             dt = datetime.fromisoformat(normalized)
         except (ValueError, TypeError) as exc:
             raise DatasetError(
@@ -329,18 +331,28 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     ) -> list[dict[str, Any]]:
         """Merge new items into existing list, deduplicating by 'id'.
 
-        Items without an 'id' key are always appended.
-        For items with an 'id', existing items take precedence (new duplicates
-        are dropped).
+        Items without an ``id`` key are always appended.
+        For items with an ``id``, **new items take precedence** — existing
+        entries with the same ``id`` are replaced.
         """
+        new_by_id: dict[str, dict[str, Any]] = {}
+        for item in new:
+            item_id = item.get("id")
+            if item_id is not None:
+                new_by_id[item_id] = item
+
         seen_ids: set[str] = set()
         merged: list[dict[str, Any]] = []
 
         for item in existing:
             item_id = item.get("id")
-            if item_id is not None:
+            if item_id is not None and item_id in new_by_id:
+                merged.append(new_by_id[item_id])
                 seen_ids.add(item_id)
-            merged.append(item)
+            else:
+                merged.append(item)
+                if item_id is not None:
+                    seen_ids.add(item_id)
 
         for item in new:
             item_id = item.get("id")
@@ -370,42 +382,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 status=item.get("status"),
             )
 
-    @staticmethod
-    def _filter_new_items(
-        items: list[dict[str, Any]],
-        dataset: "DatasetClient",
-    ) -> list[dict[str, Any]]:
-        """Return items not already present on remote, compared by 'id'.
-
-        Items without an 'id' key are always included (cannot be deduplicated).
-        """
-        items_with_id = [item for item in items if "id" in item]
-        items_without_id = [item for item in items if "id" not in item]
-
-        if items_without_id:
-            logger.warning(
-                "Found %d item(s) without an 'id' field. "
-                "Items without 'id' cannot be deduplicated and will be "
-                "uploaded every time. Consider adding unique 'id' fields.",
-                len(items_without_id),
-            )
-
-        remote_ids = {item.id for item in dataset.items}
-        missing_items = [
-            item for item in items_with_id
-            if item["id"] not in remote_ids
-        ]
-
-        return missing_items + items_without_id
-
     def _sync_local_to_remote(self, dataset: "DatasetClient") -> "DatasetClient":
-        """Sync local items to remote, uploading only items missing from remote.
+        """Upsert all local items to remote (create new, update existing).
 
-        Compares local items against remote items by 'id'. Items present in the
-        local file but absent from the remote dataset are uploaded. Existing
-        remote items are never modified or deleted.
+        Every item from the local file is sent to
+        ``Langfuse.create_dataset_item()``, which performs an upsert: items
+        with an ``id`` that already exists on remote are updated in place;
+        new items are created. Items without an ``id`` always create new
+        entries and cannot be deduplicated.
 
-        Returns the (possibly refreshed) DatasetClient.
+        Returns the refreshed ``DatasetClient``.
         """
         if not self._filepath or not self._filepath.exists():
             return dataset
@@ -413,26 +399,34 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         local_items = self.file_dataset.load()
         self._validate_items(local_items)
 
-        new_items = self._filter_new_items(local_items, dataset)
-        if not new_items:
+        if not local_items:
             return dataset
 
+        items_without_id = [item for item in local_items if "id" not in item]
+        if items_without_id:
+            logger.warning(
+                "Found %d item(s) without an 'id' field. "
+                "Items without 'id' cannot be deduplicated and will create "
+                "new entries on every sync. Consider adding unique 'id' fields.",
+                len(items_without_id),
+            )
+
         logger.info(
-            "Syncing %d new item(s) from '%s' to remote dataset '%s'.",
-            len(new_items),
+            "Upserting %d item(s) from '%s' to remote dataset '%s'.",
+            len(local_items),
             self._filepath,
             self._dataset_name,
         )
-        self._upload_items(new_items)
+        self._upload_items(local_items)
         return self._client.get_dataset(name=self._dataset_name)
 
     def load(self) -> "DatasetClient":
         """Load the evaluation dataset from Langfuse.
 
         Creates the remote dataset if it does not exist. In ``local`` mode,
-        items from the local file that are missing on remote (compared by
-        ``id``) are uploaded first. In ``remote`` mode with ``version`` set,
-        returns items as they existed at that point in time.
+        all local items are upserted to remote (creating new items or
+        updating existing ones matched by ``id``). In ``remote`` mode with
+        ``version`` set, returns items as they existed at that point in time.
 
         Returns:
             DatasetClient: Langfuse dataset client that can be used to
@@ -469,11 +463,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     def save(self, data: list[dict[str, Any]]) -> None:
         """Save evaluation items to the remote dataset.
 
-        Uploads items to Langfuse, skipping any that already exist on
-        remote (matched by ``id``). In ``local`` mode, items are also
-        merged into the local file with the same id-based deduplication.
-        In ``remote`` mode, only the remote upload occurs — no local
-        file is written.
+        Upserts all items to Langfuse via ``create_dataset_item()`` — items
+        with an existing ``id`` are updated in place, new items are created.
+        In ``local`` mode, items are also merged into the local file (new
+        items take precedence over existing entries with the same ``id``).
+        In ``remote`` mode, only the remote upload occurs.
 
         Args:
             data: List of evaluation item dicts. Each item must contain
@@ -484,21 +478,24 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             DatasetError: If any item is missing the required ``input`` key
                 or the Langfuse API returns an error.
         """
-        dataset = self._get_or_create_remote_dataset()
+        self._get_or_create_remote_dataset()
         self._validate_items(data)
-        new_items = self._filter_new_items(data, dataset)
-        if new_items:
-            logger.info(
-                "Uploading %d new item(s) to remote dataset '%s'.",
-                len(new_items),
-                self._dataset_name,
+
+        items_without_id = [item for item in data if "id" not in item]
+        if items_without_id:
+            logger.warning(
+                "Found %d item(s) without an 'id' field. "
+                "Items without 'id' cannot be deduplicated and will create "
+                "new entries on every save. Consider adding unique 'id' fields.",
+                len(items_without_id),
             )
-            self._upload_items(new_items)
-        else:
-            logger.info(
-                "No new items to upload to remote dataset '%s'.",
-                self._dataset_name,
-            )
+
+        logger.info(
+            "Upserting %d item(s) to remote dataset '%s'.",
+            len(data),
+            self._dataset_name,
+        )
+        self._upload_items(data)
 
         if self._sync_policy == "local" and self._filepath:
             existing = []

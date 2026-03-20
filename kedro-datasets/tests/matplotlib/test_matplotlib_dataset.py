@@ -265,6 +265,38 @@ class TestMatplotlibDataset:
             inspect.signature(plot_dataset.preview).return_annotation == "ImagePreview"
         )
 
+    @pytest.mark.parametrize(
+        "unsafe_plot_name",
+        [
+            "../escape.png",
+            "../../etc/passwd",
+            "../secrets/key.png",
+            "foo/../../outside.png",
+            "foo\\..\\..\\secrets",
+        ],
+    )
+    def test_save_dict_unsafe_plot_names(self, tmp_path, unsafe_plot_name):
+        """Test that plot names with path traversal components are rejected."""
+        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        plot = plt.figure()
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            dataset.save({unsafe_plot_name: plot})
+
+    @pytest.mark.parametrize(
+        "safe_plot_name,expected_path",
+        [
+            ("red.png", "plots/red.png"),
+            ("subdir/blue.png", "plots/subdir/blue.png"),
+            ("a/b/c.png", "plots/a/b/c.png"),
+            ("a/../b/c.png", "plots/b/c.png"),
+        ],
+    )
+    def test_save_dict_safe_plot_names(self, tmp_path, safe_plot_name, expected_path):
+        """Test that safe plot names (including intra-directory traversal) save successfully."""
+        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        dataset.save({safe_plot_name: plt.figure()})
+        assert (tmp_path / expected_path).exists()
+
 
 class TestMatplotlibDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

@@ -538,7 +538,7 @@ class TestPartitionedDatasetLocal:
 
         with pytest.raises(
             DatasetError,
-            match=r"Partition ID '.*' resolves to '.*' which is outside the dataset directory '.*'\.",
+            match=r"Path '.*' resolves to '.*' which is outside the dataset directory '.*'\.",
         ):
             pds.save({"../secrets": original_data})
 

@@ -4,7 +4,6 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
-import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -20,6 +19,8 @@ from kedro.io.core import (
     DatasetError,
     parse_dataset_definition,
 )
+
+from kedro_datasets._utils import validate_sub_path
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -274,40 +275,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return f"{protocol_prefix}{path}"
         return path
 
-    def _validate_partition_path(self, path: str, dir_path: str) -> None:
-        """Validate that the partition path is within the base directory.
-
-        Args:
-            path: The partition path to validate
-            dir_path: The base directory path
-
-        Raises:
-            DatasetError: If the path resolves outside the base directory
-        """
-        # Normalize only for validation - handle Windows backslashes
-        # fsspec uses forward slashes internally, so we normalize to forward slashes
-        path_to_check = path.replace("\\", "/").lstrip("/")
-        full_path_to_check = self._sep.join([dir_path, path_to_check])
-
-        # Normalize the path to resolve any '..' or '.' components for the security check.
-        # posixpath is used intentionally here as fsspec normalizes all paths to
-        # forward-slash separated strings regardless of OS (including Windows), so
-        # this is safe for both local and remote (S3, GCS, etc.) filesystems as long
-        # as paths have gone through fsspec's normalization before reaching this point.
-        normalized_full_path = posixpath.normpath(full_path_to_check)
-        normalized_base_path = posixpath.normpath(dir_path)
-
-        # Ensure the normalized path is within the base directory
-        # Check that normalized path starts with base path followed by separator or is exactly base path
-        if not (
-            normalized_full_path == normalized_base_path
-            or normalized_full_path.startswith(normalized_base_path + self._sep)
-        ):
-            raise DatasetError(
-                f"Partition ID '{path}' resolves to '{normalized_full_path}' "
-                f"which is outside the dataset directory '{dir_path}'."
-            )
-
     def _partition_to_path(self, path: str):
         dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
             self._sep
@@ -315,7 +282,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         path = path.lstrip(self._sep)
 
         # Validate the path is within the base directory
-        self._validate_partition_path(path, dir_path)
+        validate_sub_path(path, dir_path)
 
         full_path = self._sep.join([dir_path, path])
         return full_path + self._filename_suffix
@@ -329,7 +296,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             path = path[: -len(self._filename_suffix)]
 
         # Validate the partition ID to ensure it doesn't escape the base directory
-        self._validate_partition_path(path, dir_path)
+        validate_sub_path(path, dir_path)
 
         return path
 

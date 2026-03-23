@@ -9,6 +9,8 @@ from s3fs import S3FileSystem
 
 from kedro_datasets.dask import CSVDataset
 
+from . import pytestmark
+
 FILE_NAME = "*.csv"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}

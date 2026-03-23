@@ -443,7 +443,6 @@ omit = [
     "kedro_datasets/snowflake/*",
     "kedro_datasets/spark/spark_hive_dataset.py",
     "kedro_datasets/tensorflow/*",
-    "kedro_datasets/spark/*",
     "tests/*",
 ]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]

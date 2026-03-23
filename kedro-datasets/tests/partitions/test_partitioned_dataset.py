@@ -444,6 +444,126 @@ class TestPartitionedDatasetLocal:
             pds.load()
 
     @pytest.mark.parametrize(
+        "safe_partition_id",
+        [
+            "data1",
+            "partition_a",
+            "year=2024/month=01/data",
+            "v1.0.0",
+            "file.backup",
+            "...data",
+            "foo/bar/baz",
+            ".hidden",
+        ],
+    )
+    def test_load_partition_safe_paths(self, tmpdir, safe_partition_id):
+        """Test legitimate partition IDs can be loaded without error."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        pds.save({safe_partition_id: original_data})
+
+        loaded = pds.load()
+        assert safe_partition_id in loaded
+        assert_frame_equal(loaded[safe_partition_id](), original_data)
+
+    @pytest.mark.parametrize(
+        "unsafe_partition_id",
+        [
+            "..",
+            "../secrets",
+            "../../../secrets",
+            "foo/../../secrets",
+            # Windows paths with backslashes
+            "..\\secrets",
+            "..\\..\\secrets",
+            "foo\\..\\..\\secrets",
+        ],
+    )
+    def test_load_partition_unsafe_paths(self, tmpdir, mocker, unsafe_partition_id):
+        """Test path traversal partition IDs are rejected during load."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        dir_path = pds._filesystem._strip_protocol(pds._normalized_path).rstrip(
+            pds._sep
+        )
+        malicious_full_path = f"{dir_path}/{unsafe_partition_id}/data.csv"
+        mocker.patch.object(pds, "_list_partitions", return_value=[malicious_full_path])
+
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            pds.load()
+
+    @pytest.mark.parametrize(
+        "safe_partition_id",
+        [
+            "data1",
+            "partition_a",
+            "year=2024/month=01/data",
+            "v1.0.0",
+            "file.backup",
+            "...data",
+            "foo/bar/baz",
+            ".hidden",
+        ],
+    )
+    def test_save_partition_safe_paths(self, tmpdir, safe_partition_id):
+        """Test legitimate partition IDs can be saved without error."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        pds.save({safe_partition_id: original_data})
+
+    @pytest.mark.parametrize(
+        "unsafe_partition_id",
+        [
+            "..",
+            "../secrets",
+            "../../../secrets",
+            "foo/../../secrets",
+            # Windows paths with backslashes
+            "..\\secrets",
+            "..\\..\\secrets",
+            "foo\\..\\..\\secrets",
+        ],
+    )
+    def test_save_partition_unsafe_paths(self, tmpdir, unsafe_partition_id):
+        """Test path traversal partition IDs are rejected during save."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            pds.save({unsafe_partition_id: original_data})
+
+    def test_unsafe_partition_error_message(self, tmpdir):
+        """Test DatasetError message includes the resolved path and base directory."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        with pytest.raises(
+            DatasetError,
+            match=r"Path '.*' resolves to '.*' which is outside the dataset directory '.*'\.",
+        ):
+            pds.save({"../secrets": original_data})
+
+    @pytest.mark.parametrize(
+        "partition_id,expected_key",
+        [
+            # Intra-directory traversal — stays within base so validation passes,
+            # but the OS resolves '..' / '.' on write so the loaded key is normalised.
+            ("a/../b", "b"),  # written to base/b.csv
+            ("sub/./data", "sub/data"),  # written to base/sub/data.csv
+            ("a/b/../c/d", "a/c/d"),  # written to base/a/c/d.csv
+        ],
+    )
+    def test_safe_partition_expected_key(self, tmpdir, partition_id, expected_key):
+        """Test intra-directory traversal paths pass validation but load under
+        the OS-normalised key, not the original partition_id."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        pds.save({partition_id: original_data})
+
+        loaded = pds.load()
+        assert expected_key in loaded
+        assert_frame_equal(loaded[expected_key](), original_data)
+
+    @pytest.mark.parametrize(
         "pds_config,filepath_arg",
         [
             (

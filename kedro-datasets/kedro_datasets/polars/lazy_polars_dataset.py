@@ -79,7 +79,7 @@ class LazyPolarsDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -92,7 +92,7 @@ class LazyPolarsDataset(
         data file on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a file prefixed with a protocol like
+            filepath: Filepath as a string or path-like object in POSIX format to a file prefixed with a protocol like
                 `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem)
                 will be used.

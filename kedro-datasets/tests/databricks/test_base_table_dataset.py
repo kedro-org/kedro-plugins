@@ -391,6 +391,32 @@ class TestBaseTableDataset:
 
         mock_add_pk.assert_called_once_with([unity_ds._table.primary_key])
 
+    def test_save_upsert_does_not_use_spark_conf(
+        self,
+        sample_spark_df: DataFrame,
+        upsert_spark_df: DataFrame,
+        spark_session,
+        mocker,
+    ):
+        # spark.conf.set() is blocked by Databricks Spark Connect's assertConfigAllowed(),
+        # so the upsert must use f-string interpolation instead of ${...} substitution.
+        unity_ds = BaseTableDataset(
+            database="test",
+            table="test_save_upsert_no_spark_conf",
+            write_mode="upsert",
+            primary_key="name",
+        )
+        mocker.patch(
+            "kedro_datasets.databricks._base_table_dataset.BaseTable._add_primary_key_constraint",
+            return_value=None,
+        )
+        unity_ds.save(sample_spark_df)
+
+        mock_conf_set = mocker.patch.object(spark_session.conf, "set")
+        unity_ds.save(upsert_spark_df)
+
+        mock_conf_set.assert_not_called()
+
     def test_load_spark(self, sample_spark_df: DataFrame):
         unity_ds = BaseTableDataset(
             database="test", table="test_load_spark", write_mode="overwrite"

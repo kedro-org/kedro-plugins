@@ -224,6 +224,13 @@ class TestLazyCSVDataset:
         assert dataset._cached_load_version is None
         assert dataset._cached_save_version is None
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = LazyPolarsDataset(filepath=filepath, file_format="csv")
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load().collect(), dummy_dataframe)
+
 
 class TestLazyParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore, dummy_dataframe, filepath_pq):

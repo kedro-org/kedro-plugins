@@ -382,23 +382,26 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 status=item.get("status"),
             )
 
-    def _sync_local_to_remote(self, dataset: "DatasetClient") -> "DatasetClient":
-        """Upsert all local items to remote (create new, update existing).
+    def _load_local_items(self) -> list[dict[str, Any]]:
+        """Load items from the local file, returning an empty list if unavailable."""
+        if not self._filepath or not self._filepath.exists():
+            return []
+        return self.file_dataset.load()
 
-        Every item from the local file is sent to
-        ``Langfuse.create_dataset_item()``, which performs an upsert: items
-        with an ``id`` that already exists on remote are updated in place;
-        new items are created. Items without an ``id`` always create new
-        entries and cannot be deduplicated.
+    def _sync_local_to_remote(
+        self,
+        dataset: "DatasetClient",
+        local_items: list[dict[str, Any]],
+    ) -> "DatasetClient":
+        """Upsert local items to remote (create new, update existing).
+
+        Every item is sent to ``Langfuse.create_dataset_item()``, which
+        performs an upsert: items with an ``id`` that already exists on
+        remote are updated in place; new items are created. Items without
+        an ``id`` always create new entries and cannot be deduplicated.
 
         Returns the refreshed ``DatasetClient``.
         """
-        if not self._filepath or not self._filepath.exists():
-            return dataset
-
-        local_items = self.file_dataset.load()
-        self._validate_items(local_items)
-
         if not local_items:
             return dataset
 
@@ -436,6 +439,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             DatasetError: If the Langfuse API is unreachable or returns
                 an unexpected error.
         """
+        local_items: list[dict[str, Any]] = []
+        if self._sync_policy == "local":
+            local_items = self._load_local_items()
+            self._validate_items(local_items)
+
         dataset = self._get_or_create_remote_dataset()
 
         if self._version is not None:
@@ -449,7 +457,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             )
 
         if self._sync_policy == "local":
-            dataset = self._sync_local_to_remote(dataset)
+            dataset = self._sync_local_to_remote(dataset, local_items)
 
         logger.info(
             "Loaded dataset '%s' with %d item(s) (sync_policy='%s').",

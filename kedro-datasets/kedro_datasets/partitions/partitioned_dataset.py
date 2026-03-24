@@ -20,6 +20,8 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 
+from kedro_datasets._utils import validate_sub_path
+
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
     "%(keys)s were explicitly defined in the %(target)s config."
@@ -274,16 +276,28 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def _partition_to_path(self, path: str):
-        dir_path = self._path.rstrip(self._sep)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.lstrip(self._sep)
-        full_path = self._sep.join([dir_path, path]) + self._filename_suffix
-        return full_path
+
+        # Validate the path is within the base directory
+        validate_sub_path(path, dir_path)
+
+        full_path = self._sep.join([dir_path, path])
+        return full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:
-        dir_path = self._filesystem._strip_protocol(self._normalized_path)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.split(dir_path, 1).pop().lstrip(self._sep)
         if self._filename_suffix and path.endswith(self._filename_suffix):
             path = path[: -len(self._filename_suffix)]
+
+        # Validate the partition ID to ensure it doesn't escape the base directory
+        validate_sub_path(path, dir_path)
+
         return path
 
     def load(self) -> dict[str, Callable[[], Any]]:

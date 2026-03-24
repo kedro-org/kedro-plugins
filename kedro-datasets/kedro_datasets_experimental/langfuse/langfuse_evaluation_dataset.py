@@ -478,8 +478,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             DatasetError: If any item is missing the required ``input`` key
                 or the Langfuse API returns an error.
         """
-        self._get_or_create_remote_dataset()
         self._validate_items(data)
+        self._get_or_create_remote_dataset()
 
         items_without_id = [item for item in data if "id" not in item]
         if items_without_id:

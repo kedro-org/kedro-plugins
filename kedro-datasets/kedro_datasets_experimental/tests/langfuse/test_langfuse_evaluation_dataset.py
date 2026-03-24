@@ -329,6 +329,25 @@ class TestLoadLocal:
         result = ds.load()
         assert len(result.items) == 0
 
+    def test_load_validates_before_remote_creation(
+        self, tmp_path, mock_credentials, mock_langfuse
+    ):
+        """Validation of local items fails before the remote dataset is created."""
+        filepath = tmp_path / "bad_items.json"
+        filepath.write_text(json.dumps([{"bad": "no input key"}]))
+
+        ds = LangfuseEvaluationDataset(
+            dataset_name="test-eval",
+            credentials=mock_credentials,
+            filepath=filepath.as_posix(),
+            sync_policy="local",
+        )
+        with pytest.raises(DatasetError, match="missing required 'input' key"):
+            ds.load()
+
+        mock_langfuse.get_dataset.assert_not_called()
+        mock_langfuse.create_dataset.assert_not_called()
+
     def test_load_idempotent_reload(
         self, filepath_json, mock_credentials, mock_langfuse, mock_remote_dataset
     ):
@@ -556,6 +575,21 @@ class TestSave:
         )
         with pytest.raises(DatasetError, match="missing required 'input' key"):
             ds.save([{"id": "q1", "expected_output": "test"}])
+
+    def test_save_validates_before_remote_creation(
+        self, mock_credentials, mock_langfuse
+    ):
+        """Validation fails before the remote dataset is created."""
+        ds = LangfuseEvaluationDataset(
+            dataset_name="test-eval",
+            credentials=mock_credentials,
+            sync_policy="remote",
+        )
+        with pytest.raises(DatasetError, match="missing required 'input' key"):
+            ds.save([{"bad": "no input key"}])
+
+        mock_langfuse.get_dataset.assert_not_called()
+        mock_langfuse.create_dataset.assert_not_called()
 
 
 class TestPreview:

@@ -1,5 +1,6 @@
 import duckdb
 import ibis
+import ibis.selectors as s
 import pandas as pd
 import pytest
 from kedro.io import DatasetError
@@ -148,7 +149,8 @@ class TestTableDataset:
         df1 = df1.execute()
         df2 = df2.execute()
         reloaded = table_dataset.load().execute()
-        assert len(reloaded) == len(df1) + len(df2)
+        expected = pd.concat([df1, df2], ignore_index=True)
+        assert_frame_equal(reloaded, expected)
 
     @pytest.mark.skipif(
         Version(ibis.__version__) < Version("9.0.0"),
@@ -181,7 +183,54 @@ class TestTableDataset:
         df1 = df1.execute()
         df2 = df2.execute()
         reloaded = table_dataset.load().execute()
-        assert len(reloaded) == len(df1) + len(df2)
+        expected = pd.concat([df1, df2], ignore_index=True)
+        assert_frame_equal(reloaded, expected)
+
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("12.0.0"),
+        reason="upsert() was introduced in Ibis 12.0",
+    )
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"materialized": "table", "mode": "upsert", "on": "col1"}],
+        indirect=True,
+    )
+    def test_save_mode_upsert(self, table_dataset, dummy_table):
+        """Saving with mode=upsert should add or update rows in a table."""
+        df1 = dummy_table
+        df2 = dummy_table.mutate(s.across(s.all(), lambda x: x * 2))
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        df1 = df1.execute()
+        df2 = df2.execute()
+        reloaded = table_dataset.load().execute()
+        expected = (
+            pd.concat([df1, df2])
+            .drop_duplicates(subset=["col1"], keep="last")
+            .reset_index(drop=True)
+        )
+        assert_frame_equal(reloaded, expected)
+
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("12.0.0"),
+        reason="upsert() was introduced in Ibis 12.0",
+    )
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "upsert"}], indirect=True
+    )
+    def test_save_mode_upsert_requires_on(self, table_dataset, dummy_table):
+        """Saving with mode=upsert should fail if 'on' is missing."""
+        df1 = dummy_table
+        df2 = dummy_table
+
+        table_dataset.save(df1)  # Falls back to `Backend.create_table`.
+        with pytest.raises(
+            DatasetError,
+            match=r"SQLBackend.upsert\(\) missing 1 required positional argument: 'on'",
+        ):
+            table_dataset.save(df2)
 
     @pytest.mark.parametrize(
         "save_args",
@@ -257,11 +306,24 @@ class TestTableDataset:
         indirect=True,
     )
     def test_append_mode_no_insert_raises(self, table_dataset, dummy_table):
-        """Test that saving with mode=append on a backend without 'insert' raises DatasetError (polars backend)."""
+        """Test that saving with mode=append on a backend without 'insert' raises DatasetError."""
         # Save once to create the table
         table_dataset.save(dummy_table)
         # Try to append again, should raise DatasetError
         with pytest.raises(DatasetError, match="does not support inserts"):
+            table_dataset.save(dummy_table)
+
+    @pytest.mark.parametrize(
+        ("connection_config", "save_args"),
+        [({"backend": "polars"}, {"materialized": "table", "mode": "upsert"})],
+        indirect=True,
+    )
+    def test_upsert_mode_no_upsert_raises(self, table_dataset, dummy_table):
+        """Test that saving with mode=upsert on a backend without 'upsert' raises DatasetError."""
+        # Save once to create the table
+        table_dataset.save(dummy_table)
+        # Try to upsert again, should raise DatasetError
+        with pytest.raises(DatasetError, match="does not support upserts"):
             table_dataset.save(dummy_table)
 
     @pytest.mark.parametrize(

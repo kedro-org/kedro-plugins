@@ -30,6 +30,7 @@ class SaveMode(StrEnum):
     ERROR = auto()
     ERRORIFEXISTS = auto()
     IGNORE = auto()
+    UPSERT = auto()
 
 
 class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
@@ -48,6 +49,17 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
           save_args:
             materialized: table
             mode: append
+
+        boats:
+          type: ibis.TableDataset
+          table_name: boats
+          connection:
+            backend: duckdb
+            database: company.db
+          save_args:
+            materialized: table
+            mode: upsert
+            on: id # The 'on' argument is only accepted for upserts.
 
         motorbikes:
           type: ibis.TableDataset
@@ -142,6 +154,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 - _"append"_: Append contents of the new data to the existing table (does not overwrite).
                 - _"error"_ or _"errorifexists"_: Throw an exception if the table already exists.
                 - _"ignore"_: Silently ignore the operation if the table already exists.
+                - _"upsert"_: Update existing rows and insert new rows.
             metadata: Any arbitrary metadata. This is ignored by Kedro,
                 but may be consumed by users or external plugins.
         """
@@ -207,14 +220,26 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
     def save(self, data: ir.Table) -> None:
         writer = getattr(self.connection, f"create_{self._materialized}")
-        if self._mode == "append":
+        if self._mode in {"append", "upsert"}:
             if not self._exists():
-                writer(self._table_name, data, overwrite=False, **self._save_args)
-            elif hasattr(self.connection, "insert"):
-                self.connection.insert(self._table_name, data, **self._save_args)
+                save_args = self._save_args
+                if self._mode == "upsert" and "on" in save_args:
+                    # The 'on' argument is only accepted for upserts, so
+                    # we remove it if we're falling back to creating the
+                    # database object.
+                    save_args = {k: v for k, v in save_args.items() if k != "on"}
+
+                writer(self._table_name, data, overwrite=False, **save_args)
+            elif hasattr(
+                self.connection,
+                method_name := "insert" if self._mode == "append" else "upsert",
+            ):
+                method = getattr(self.connection, method_name)
+                method(self._table_name, data, **self._save_args)
             else:
                 raise DatasetError(
-                    f"The {self.connection.name} backend for Ibis does not support inserts."
+                    f"The {self.connection.name} backend for Ibis does "
+                    f"not support {method_name}s."
                 )
         elif self._mode == "overwrite":
             writer(self._table_name, data, overwrite=True, **self._save_args)

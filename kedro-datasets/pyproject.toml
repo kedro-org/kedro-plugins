@@ -180,8 +180,8 @@ plotly-plotlydataset = ["kedro-datasets[pandas-base,plotly-base]"]
 plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydataset]"]
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
-polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake >= 0.6.2"]
-polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake >= 0.6.2"]
+polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake>=0.6.2"]
+polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake>=0.6.2"]
 polars = [
     """kedro-datasets[polars-csvdataset,\
     polars-eagerpolarsdataset,\
@@ -276,8 +276,9 @@ test = [
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
     "delta-spark>=4.0, <4.1; python_version >= '3.12'",
     "dill~=0.3.1",
+    "duckdb>=1.4.0",
     "filelock>=3.4.0, <4.0",
-    "fiona >=1.8, <2.0",
+    "fiona>=1.8, <2.0",
     "gcsfs>=2023.1",
     "geopandas>=0.8.0, <2.0",
     "hdfs>=2.5.8, <3.0",

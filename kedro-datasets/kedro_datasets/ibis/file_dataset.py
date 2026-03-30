@@ -89,15 +89,15 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
 
         ``FileDataset`` connects to the Ibis backend object constructed
         from the connection configuration. The `backend` key provided in
-        the config can be any of the `supported backends <https://ibis-\
-        project.org/install>`_. The remaining dictionary entries will be
-        passed as arguments to the underlying ``connect()`` method (e.g.
-        `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
-        #ibis.duckdb.connect>`_).
+        the config can be any of the
+        [supported backends](https://ibis-project.org/install). The
+        remaining dictionary entries will be passed as arguments to the
+        underlying ``connect()`` method (e.g.
+        [ibis.duckdb.connect()](https://ibis-project.org/backends/duckdb#ibis.duckdb.connect)).
 
         The read method corresponding to the given ``file_format`` (e.g.
-        `read_csv() <https://ibis-project.org/backends/\
-        duckdb#ibis.backends.duckdb.Backend.read_csv>`_) is used to load
+        [read_csv()](https://ibis-project.org/backends/duckdb#ibis.backends.duckdb.Backend.read_csv))
+        is used to load
         the file with the backend. Note that only the data is loaded; no
         link to the underlying file exists past ``FileDataset.load()``.
 

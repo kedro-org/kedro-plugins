@@ -105,11 +105,11 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
 
         ``TableDataset`` connects to the Ibis backend object constructed
         from the connection configuration. The `backend` key provided in
-        the config can be any of the `supported backends <https://ibis-\
-        project.org/install>`_. The remaining dictionary entries will be
-        passed as arguments to the underlying ``connect()`` method (e.g.
-        `ibis.duckdb.connect() <https://ibis-project.org/backends/duckdb\
-        #ibis.duckdb.connect>`_).
+        the config can be any of the
+        [supported backends](https://ibis-project.org/install). The
+        remaining dictionary entries will be passed as arguments to the
+        underlying ``connect()`` method (e.g.
+        [ibis.duckdb.connect()](https://ibis-project.org/backends/duckdb#ibis.duckdb.connect)).
 
         The dataset establishes a connection to the relevant table for the execution
         backend. Therefore, Ibis doesn't fetch data on load; all compute

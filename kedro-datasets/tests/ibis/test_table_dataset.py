@@ -211,7 +211,10 @@ class TestTableDataset:
             .drop_duplicates(subset=["col1"], keep="last")
             .reset_index(drop=True)
         )
-        assert_frame_equal(reloaded, expected)
+        assert_frame_equal(
+            reloaded.sort_values("col1").reset_index(drop=True),
+            expected.sort_values("col1").reset_index(drop=True),
+        )
 
     @pytest.mark.skipif(
         Version(ibis.__version__) < Version("12.0.0"),

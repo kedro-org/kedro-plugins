@@ -50,6 +50,17 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
             materialized: table
             mode: append
 
+        boats:
+          type: ibis.TableDataset
+          table_name: boats
+          connection:
+            backend: duckdb
+            database: company.db
+          save_args:
+            materialized: table
+            mode: upsert
+            on: id # The 'on' argument is only accepted for upserts.
+
         motorbikes:
           type: ibis.TableDataset
           table_name: motorbikes

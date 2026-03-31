@@ -505,7 +505,7 @@ pip install "kedro-datasets[langfuse]"
 
 ### Evaluation Item Format
 
-The local file and `save()` data must be a list of dicts. Each item accepts the same keys as [`Langfuse.create_dataset_item()`](https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data):
+Evaluation items, whether stored in the local `filepath` file or passed as the `data` argument to `save()`, must be a list of dicts. Each item accepts the same keys as [`Langfuse.create_dataset_item()`](https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data):
 
 | Key | Required | Description |
 |-----|----------|-------------|

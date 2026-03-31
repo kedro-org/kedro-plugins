@@ -24,8 +24,108 @@ HTTP_NOT_FOUND = 404
 
 
 class OpikEvaluationDataset(AbstractDataset):
-    """Kedro dataset for Opik evaluation datasets supporting local->remote sync (local mode)
-    and remote-only behavior (remote mode).
+    """Kedro dataset for Opik evaluation datasets.
+
+    Connects to an Opik evaluation dataset and returns an ``opik.Dataset``
+    on ``load()``, which can be passed to ``opik.evaluation.evaluate()`` to
+    run experiments. Supports an optional local JSON/YAML file as the
+    authoring surface for evaluation items.
+
+    **On load / save behaviour:**
+
+    - **On load:** Creates the remote dataset if it does not exist,
+      synchronises based on ``sync_policy``, and returns an ``opik.Dataset``.
+    - **On save:** Upserts all items to the remote dataset. In ``local`` mode,
+      items are also merged into the local file (new items take precedence).
+      In ``remote`` mode, only the remote upload occurs.
+
+    **Item format:**
+
+    The local file and ``save()`` data must be a list of dicts. Each item
+    accepts the following keys:
+
+    - ``input`` (**required**) — the evaluation input payload.
+    - ``id`` — stable identifier used for local deduplication. Note: Opik
+      requires item IDs to be valid UUIDs. Human-readable IDs (e.g.
+      ``"intent_001"``) are stripped before upload — Opik auto-generates
+      UUIDs. Items without an ``id`` cannot be deduplicated across syncs and
+      will create new remote entries on every load.
+    - ``expected_output`` — ground-truth value for scoring.
+    - ``metadata`` — arbitrary metadata dict attached to the item.
+
+    ```json
+    [
+      {
+        "id": "q1",
+        "input": {"text": "cancel my order"},
+        "expected_output": "cancel_order",
+        "metadata": {"source": "production"}
+      }
+    ]
+    ```
+
+    **Sync policies:**
+
+    - **local** (default): The local file is the source of truth. On
+      ``load()``, all local items are upserted to remote (creating new items
+      or updating existing ones by content hash). ``save()`` upserts to
+      remote and merges into the local file (new data takes precedence).
+    - **remote**: The remote Opik dataset is the sole source of truth.
+      ``load()`` fetches the remote dataset as-is with no local file
+      interaction. ``save()`` upserts all items to remote without writing
+      to any local file.
+
+    Examples:
+        Using catalog YAML configuration:
+
+        ```yaml
+        # Local sync policy — local file seeds and syncs to remote
+        evaluation_dataset:
+          type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+          dataset_name: intent-detection-eval
+          filepath: data/evaluation/intent_items.json
+          sync_policy: local
+          credentials: opik_credentials
+          metadata:
+            project: intent-detection
+
+        # Remote sync policy — Opik is the source of truth
+        production_eval:
+          type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+          dataset_name: intent-detection-eval
+          sync_policy: remote
+          credentials: opik_credentials
+        ```
+
+        Using Python API:
+
+        ```python
+        from kedro_datasets_experimental.opik import OpikEvaluationDataset
+
+        dataset = OpikEvaluationDataset(
+            dataset_name="intent-detection-eval",
+            credentials={"api_key": "..."},  # pragma: allowlist secret
+            filepath="data/evaluation/intent_items.json",
+        )
+
+        # Load returns an opik.Dataset for running experiments
+        from opik.evaluation import evaluate
+
+        eval_dataset = dataset.load()
+        evaluate(
+            dataset=eval_dataset,
+            task=my_task,
+            scoring_functions=[my_scorer],
+            experiment_name="my-experiment",
+        )
+
+        # Save new evaluation items
+        dataset.save(
+            [
+                {"id": "q1", "input": {"text": "cancel order"}, "expected_output": "cancel"},
+            ]
+        )
+        ```
     """
 
     def __init__(
@@ -36,6 +136,28 @@ class OpikEvaluationDataset(AbstractDataset):
         sync_policy: Literal["local", "remote"] = "local",
         metadata: dict[str, Any] | None = None,
     ):
+        """Initialise ``OpikEvaluationDataset``.
+
+        Args:
+            dataset_name: Name of the evaluation dataset in Opik.
+            credentials: Opik authentication credentials.
+                Required: ``api_key``.
+                Optional: ``workspace``, ``host``, ``project_name``.
+            filepath: Path to a local JSON/YAML file for authoring evaluation
+                items. Supports ``.json``, ``.yaml``, and ``.yml`` extensions.
+                When ``None``, no local file interaction occurs.
+            sync_policy: Controls the source of truth for reads and whether
+                a local file is involved:
+                ``"local"`` (default) — all local items are upserted to
+                remote on ``load()``; ``save()`` upserts to remote and
+                merges into the local file (new data takes precedence).
+                ``"remote"`` — ``load()`` fetches remote as-is; ``save()``
+                upserts to remote without local file interaction.
+            metadata: Optional metadata dict stored locally and returned by
+                ``_describe()``. Note: Opik's ``create_dataset()`` does not
+                accept a metadata argument, so this value is not propagated
+                to the remote dataset.
+        """
         self._validate_init_params(credentials, filepath, sync_policy)
 
         self._dataset_name = dataset_name

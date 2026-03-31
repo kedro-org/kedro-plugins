@@ -4,6 +4,13 @@
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Langfuse](https://img.shields.io/badge/langfuse-integration-orange)](https://langfuse.com/)
 
+## Datasets
+
+| Dataset | Description |
+|---------|-------------|
+| [LangfusePromptDataset](#langfusepromptdataset) | Prompt management with Langfuse versioning, sync policies, and LangChain integration. |
+| [LangfuseEvaluationDataset](#langfuseevaluationdataset) | Evaluation dataset management with local/remote sync and upsert semantics. |
+
 ## LangfusePromptDataset
 A Kedro dataset for seamless AI prompt management with Langfuse versioning, synchronization, and team collaboration. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 

@@ -6,7 +6,9 @@ import yaml
 from kedro.io import DatasetError
 from opik.rest_api.core.api_error import ApiError
 
-from kedro_datasets_experimental.opik.opik_evaluation_dataset import OpikEvaluationDataset
+from kedro_datasets_experimental.opik.opik_evaluation_dataset import (
+    OpikEvaluationDataset,
+)
 
 
 def make_api_error(status_code: int) -> ApiError:

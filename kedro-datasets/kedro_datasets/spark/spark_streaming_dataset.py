@@ -74,8 +74,6 @@ class SparkStreamingDataset(AbstractDataset):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._file_format = file_format
-        self._save_args = save_args
-        self._load_args = load_args
         self.metadata = metadata
 
         fs_prefix, filepath = split_filepath(filepath)

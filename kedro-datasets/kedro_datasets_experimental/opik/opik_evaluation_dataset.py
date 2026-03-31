@@ -4,10 +4,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
-from kedro_datasets._typing import JSONPreview
 from opik import Opik
 from opik.api_objects.dataset.dataset import Dataset
 from opik.rest_api.core.api_error import ApiError
+
+from kedro_datasets._typing import JSONPreview
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
@@ -19,6 +20,7 @@ SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 REQUIRED_OPIK_CREDENTIALS = {"api_key"}
 OPTIONAL_OPIK_CREDENTIALS = {"workspace", "host", "project_name"}
 VALID_SYNC_POLICIES = {"local", "remote"}
+HTTP_NOT_FOUND = 404
 
 
 class OpikEvaluationDataset(AbstractDataset):
@@ -121,7 +123,7 @@ class OpikEvaluationDataset(AbstractDataset):
         try:
             return self._client.get_dataset(name=self._dataset_name)
         except ApiError as e:
-            if e.status_code != 404:
+            if e.status_code != HTTP_NOT_FOUND:
                 raise DatasetError(
                     f"Opik API error while fetching dataset '{self._dataset_name}': {e}"
                 ) from e
@@ -301,7 +303,7 @@ class OpikEvaluationDataset(AbstractDataset):
             self._client.get_dataset(name=self._dataset_name)
             return True
         except ApiError as e:
-            if e.status_code == 404:
+            if e.status_code == HTTP_NOT_FOUND:
                 return False
             raise DatasetError(
                 f"Opik API error while checking dataset '{self._dataset_name}': {e}"

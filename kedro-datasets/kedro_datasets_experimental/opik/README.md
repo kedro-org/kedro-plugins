@@ -31,7 +31,7 @@ prompt = dataset.load()
 #### SDK Mode Only
 For basic Opik integration without LangChain dependencies:
 ```bash
-pip install "kedro-datasets[opik-opikpromptdataset]"
+pip install "kedro-datasets[opik-promptdataset]"
 ```
 
 #### Full Installation
@@ -224,11 +224,7 @@ dataset = OpikPromptDataset(
         "project_name": "customer-support",
     },
     save_args={
-        "metadata": {
-            "environment": "production",
-            "team": "ml-ops",
-            "version": "2.0.0"
-        }
+        "metadata": {"environment": "production", "team": "ml-ops", "version": "2.0.0"}
     },
 )
 ```
@@ -261,7 +257,7 @@ template = support_dataset.load()
 response = template.format(
     customer_name="Alice",
     issue="billing inquiry",
-    context="Previous interaction: password reset"
+    context="Previous interaction: password reset",
 )
 ```
 

@@ -40,7 +40,7 @@ prompt = dataset.load()
 #### SDK Mode Only
 For basic Langfuse integration without LangChain dependencies:
 ```bash
-pip install "kedro-datasets[langfuse-langfusepromptdataset]"
+pip install "kedro-datasets[langfuse-promptdataset]"
 ```
 
 #### Full Installation
@@ -496,7 +496,7 @@ for item in eval_ds.items:
 ### Installation
 
 ```bash
-pip install "kedro-datasets[langfuse-langfuseevaluationdataset]"
+pip install "kedro-datasets[langfuse-evaluationdataset]"
 ```
 
 Or install all Langfuse datasets at once:

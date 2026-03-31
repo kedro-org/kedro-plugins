@@ -21,6 +21,7 @@ from kedro.io.core import (
 from matplotlib.figure import Figure
 
 from kedro_datasets._typing import ImagePreview
+from kedro_datasets._utils import validate_sub_path
 
 
 class MatplotlibDataset(
@@ -194,6 +195,7 @@ class MatplotlibDataset(
                 self._save_to_fs(full_key_path=full_key_path, plot=plot)
         elif isinstance(data, dict):
             for plot_name, plot in data.items():
+                validate_sub_path(plot_name, str(save_path))
                 full_key_path = get_filepath_str(save_path / plot_name, self._protocol)
                 self._save_to_fs(full_key_path=full_key_path, plot=plot)
         else:

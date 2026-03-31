@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 import pyspark
 import pytest
 from kedro.io.core import DatasetError
+from packaging.version import parse
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
@@ -17,9 +18,10 @@ TESTSPARKDIR = "test_spark_dir"
 
 # Hive support was removed from Spark 4.x in favour of Catalog V2 / DataSourceV2.
 # These tests are skipped because enableHiveSupport() no longer works in Spark ≥ 4.x.
-spark_major = int(pyspark.__version__.split(".")[0])
-if spark_major >= 4:
-    pytestmark = pytest.mark.skip(reason="Hive catalog not available in Spark 4.x")
+pytestmark = pytest.mark.skipif(
+    parse(pyspark.__version__) >= parse("4"),
+    reason="Hive catalog not available in Spark 4.x",
+)
 
 
 @pytest.fixture(scope="module")

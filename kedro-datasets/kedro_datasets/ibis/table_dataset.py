@@ -143,7 +143,7 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 user, password, token, account). If provided, these values
                 override the base `connection` configuration.
             load_args: Additional arguments passed to the Ibis backend's
-                `read_{file_format}` method.
+                `table` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `create_{materialized}` method. By default, ``ir.Table``
                 objects are materialized as views. To save a table using

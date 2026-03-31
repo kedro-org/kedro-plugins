@@ -6,22 +6,13 @@ import yaml
 from kedro.io import DatasetError
 from opik.rest_api.core.api_error import ApiError
 
-from kedro_datasets_experimental.opik.opik_evaluation_dataset import (
-    OpikEvaluationDataset,
-)
+from kedro_datasets_experimental.opik.opik_evaluation_dataset import OpikEvaluationDataset
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 def make_api_error(status_code: int) -> ApiError:
     """Return an ApiError with the given status code."""
     return ApiError(status_code=status_code, headers={}, body={})
 
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
 
 @pytest.fixture
 def mock_opik():
@@ -114,10 +105,6 @@ def dataset_remote(mock_credentials, mock_opik, mock_remote_dataset):
     )
 
 
-# ---------------------------------------------------------------------------
-# Init
-# ---------------------------------------------------------------------------
-
 class TestOpikEvaluationDatasetInit:
     """Test OpikEvaluationDataset initialisation."""
 
@@ -202,10 +189,6 @@ class TestOpikEvaluationDatasetInit:
                 )
 
 
-# ---------------------------------------------------------------------------
-# file_dataset property
-# ---------------------------------------------------------------------------
-
 class TestFiledatasetProperty:
     """Test the file_dataset lazy property."""
 
@@ -232,10 +215,6 @@ class TestFiledatasetProperty:
         with pytest.raises(DatasetError, match="filepath must be provided"):
             _ = dataset_remote.file_dataset
 
-
-# ---------------------------------------------------------------------------
-# _get_or_create_remote_dataset
-# ---------------------------------------------------------------------------
 
 class TestGetOrCreateRemoteDataset:
     """Test the _get_or_create_remote_dataset helper."""
@@ -271,10 +250,6 @@ class TestGetOrCreateRemoteDataset:
             dataset_local._get_or_create_remote_dataset()
 
 
-# ---------------------------------------------------------------------------
-# _validate_items
-# ---------------------------------------------------------------------------
-
 class TestValidateItems:
     """Test the _validate_items static method."""
 
@@ -292,10 +267,6 @@ class TestValidateItems:
         with pytest.raises(DatasetError, match="index 1.*missing required 'input'"):
             OpikEvaluationDataset._validate_items(items)
 
-
-# ---------------------------------------------------------------------------
-# _upload_items
-# ---------------------------------------------------------------------------
 
 class TestUploadItems:
     """Test the _upload_items method."""
@@ -327,10 +298,6 @@ class TestUploadItems:
         dataset_local._upload_items(mock_remote_dataset, eval_items)
         mock_remote_dataset.insert.assert_called_once()
 
-
-# ---------------------------------------------------------------------------
-# _sync_local_to_remote
-# ---------------------------------------------------------------------------
 
 class TestSyncLocalToRemote:
     """Test the _sync_local_to_remote helper."""
@@ -403,10 +370,6 @@ class TestSyncLocalToRemote:
             assert any("without an 'id' field" in msg for msg in warning_messages)
 
 
-# ---------------------------------------------------------------------------
-# _merge_items
-# ---------------------------------------------------------------------------
-
 class TestMergeItems:
     """Test the _merge_items static method."""
 
@@ -462,10 +425,6 @@ class TestMergeItems:
         assert len(result) == 2
 
 
-# ---------------------------------------------------------------------------
-# load()
-# ---------------------------------------------------------------------------
-
 class TestLoad:
     """Test the load() method."""
 
@@ -506,10 +465,6 @@ class TestLoad:
         with pytest.raises(DatasetError, match="Opik API error while fetching dataset"):
             dataset_local.load()
 
-
-# ---------------------------------------------------------------------------
-# save()
-# ---------------------------------------------------------------------------
 
 class TestSave:
     """Test the save() method."""
@@ -583,10 +538,6 @@ class TestSave:
         mock_remote_dataset.insert.assert_not_called()
 
 
-# ---------------------------------------------------------------------------
-# _exists()
-# ---------------------------------------------------------------------------
-
 class TestExists:
     """Test the _exists() method."""
 
@@ -606,10 +557,6 @@ class TestExists:
         with pytest.raises(DatasetError, match="Opik API error while checking dataset"):
             dataset_local._exists()
 
-
-# ---------------------------------------------------------------------------
-# _describe()
-# ---------------------------------------------------------------------------
 
 class TestDescribe:
     """Test the _describe() method."""
@@ -636,10 +583,6 @@ class TestDescribe:
         )
         assert ds._describe()["metadata"] == {"project": "evaluation"}
 
-
-# ---------------------------------------------------------------------------
-# preview()
-# ---------------------------------------------------------------------------
 
 class TestPreview:
     """Test the preview() method."""

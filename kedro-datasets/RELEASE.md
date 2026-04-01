@@ -5,9 +5,15 @@
 - Kedro-Datasets is now compatible with pandas 3.0.
 - Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
 - Added "upsert" save mode to `ibis.TableDataset` (available on backends that support `MERGE INTO` since Ibis 12.0).
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `langfuse.LangfuseEvaluationDataset` | A dataset for managing Langfuse evaluation datasets. | `kedro_datasets_experimental.langfuse` |
 
 ## Bug fixes and other changes
 
+- Added `LangfuseTraceDataset` documentation to the Langfuse README and restructured the page with a table of contents.
 - Fixed `databricks.ManagedTableDataset` upsert write mode failing with `[CONFIG_NOT_AVAILABLE]` on Databricks Spark Connect runtimes by replacing `spark.conf.set` variable substitution with direct f-string interpolation in the MERGE SQL statement.
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).

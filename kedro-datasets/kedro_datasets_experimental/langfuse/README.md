@@ -9,6 +9,7 @@
 | Dataset | Description |
 |---------|-------------|
 | [LangfusePromptDataset](#langfusepromptdataset) | Prompt management with Langfuse versioning, sync policies, and LangChain integration. |
+| [LangfuseTraceDataset](#langfusetracedataset) | Tracing clients and callbacks for LangChain, OpenAI, AutoGen, and direct SDK usage. |
 | [LangfuseEvaluationDataset](#langfuseevaluationdataset) | Evaluation dataset management with local/remote sync and upsert semantics. |
 
 ## LangfusePromptDataset
@@ -468,6 +469,313 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 
 ---
 
+## LangfuseTraceDataset
+
+A Kedro dataset for managing [Langfuse tracing](https://langfuse.com/docs/tracing) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Langfuse SDK usage. Environment variables are automatically configured during initialization.
+
+### Quick Start
+
+```python
+from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
+
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+        "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+    },
+    mode="openai",
+)
+
+client = dataset.load()
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+# The call is automatically traced in Langfuse
+```
+
+### Installation
+
+```bash
+pip install "kedro-datasets[langfuse-langfusetracedataset]"
+```
+
+For AutoGen mode, install with OpenTelemetry dependencies:
+
+```bash
+pip install "kedro-datasets[langfuse-langfusetracedataset-autogen]"
+```
+
+Or install all Langfuse datasets at once:
+
+```bash
+pip install "kedro-datasets[langfuse]"
+```
+
+#### Requirements:
+- Python 3.10+
+- Kedro
+- Langfuse SDK
+- OpenAI (for `mode="openai"`)
+- LangChain (for `mode="langchain"`)
+- OpenTelemetry (for `mode="autogen"`)
+
+### Modes
+
+| Mode | Returns | Use Case |
+|------|---------|----------|
+| **`sdk`** (default) | Raw `Langfuse` client | Manual tracing with full control |
+| **`langchain`** | `CallbackHandler` | Drop-in tracing for LangChain chains and agents |
+| **`openai`** | Wrapped `OpenAI` client | Automatic tracing of OpenAI API calls |
+| **`autogen`** | `Tracer` (OpenTelemetry) | Tracing AutoGen agent conversations via OTLP |
+
+#### SDK Mode (default)
+
+Returns a raw Langfuse client for manual trace creation:
+
+```python
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+    mode="sdk",
+)
+
+langfuse = dataset.load()
+trace = langfuse.trace(name="my-trace")
+span = trace.span(name="retrieval")
+# ... your logic ...
+span.end()
+```
+
+#### LangChain Mode
+
+Returns a `CallbackHandler` to pass into LangChain chains or agents:
+
+```python
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+    },
+    mode="langchain",
+)
+
+callback = dataset.load()
+chain.invoke(input, config={"callbacks": [callback]})
+```
+
+#### OpenAI Mode
+
+Returns an OpenAI client wrapper that traces all API calls automatically:
+
+```python
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+        "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+    },
+    mode="openai",
+)
+
+client = dataset.load()
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Summarise this document."}],
+)
+```
+
+#### AutoGen Mode
+
+Returns a configured OpenTelemetry `Tracer` for AutoGen agent conversations. Requires an OTLP endpoint in credentials:
+
+```python
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+        "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+    },
+    mode="autogen",
+)
+
+tracer = dataset.load()
+
+# Add custom spans
+with tracer.start_as_current_span("response_generation") as span:
+    span.set_attribute("intent", "claim_new")
+    agent.invoke(context)
+```
+
+For self-hosted Langfuse, provide both `host` and `endpoint`:
+
+```python
+dataset = LangfuseTraceDataset(
+    credentials={
+        "public_key": "pk_...",
+        "secret_key": "sk_...",  # pragma: allowlist secret
+        "host": "http://localhost:3000",
+        "endpoint": "http://localhost:3000/api/public/otel/v1/traces",
+    },
+    mode="autogen",
+)
+```
+
+> **Note:** Langfuse's graph visualisation for AutoGen is in beta and may not render complex multi-agent workflows correctly.
+
+### Configuration Examples
+
+#### Catalog Configuration (YAML)
+
+##### OpenAI Mode
+
+```yaml
+langfuse_trace:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: openai
+```
+
+##### LangChain Mode
+
+```yaml
+langfuse_trace:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: langchain
+```
+
+##### AutoGen Mode
+
+```yaml
+langfuse_trace:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: autogen
+```
+
+#### Credentials Management
+
+```yaml
+# conf/local/credentials.yml
+langfuse_credentials:
+  public_key: "pk_your_public_key"
+  secret_key: "sk_your_secret_key"  # pragma: allowlist secret
+  host: "https://cloud.langfuse.com"  # optional, defaults to Langfuse cloud
+  openai:  # required for mode: openai
+    api_key: "sk-..."  # pragma: allowlist secret
+    base_url: "https://api.openai.com/v1"  # optional
+  endpoint: "https://cloud.langfuse.com/api/public/otel/v1/traces"  # required for mode: autogen
+```
+
+### Integration Examples
+
+#### Kedro Pipeline Integration
+
+```python
+# nodes.py
+def generate_response(tracing_client, user_input: str):
+    response = tracing_client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": user_input}],
+    )
+    return response.choices[0].message.content
+
+
+# pipeline.py
+from kedro.pipeline import Pipeline, Node
+
+
+def create_pipeline():
+    return Pipeline(
+        [
+            Node(
+                func=generate_response,
+                inputs=["langfuse_trace", "user_input"],
+                outputs="llm_response",
+            )
+        ]
+    )
+```
+
+### Troubleshooting
+
+#### Missing Credentials
+
+```
+DatasetError: Missing required Langfuse credential: 'public_key'
+```
+
+##### Solution: Add all required credentials to your configuration:
+```python
+credentials = {
+    "public_key": "pk_...",
+    "secret_key": "sk_...",  # pragma: allowlist secret
+}
+```
+
+---
+
+#### Missing OpenAI Credentials
+
+```
+DatasetError: OpenAI mode requires 'openai' section in credentials
+```
+
+##### Solution: Add the `openai` section with an `api_key`:
+```python
+credentials = {
+    "public_key": "pk_...",
+    "secret_key": "sk_...",  # pragma: allowlist secret
+    "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+}
+```
+
+---
+
+#### Missing AutoGen Endpoint
+
+```
+DatasetError: AutoGen mode requires 'endpoint' in credentials
+```
+
+##### Solution: Provide the full OTLP endpoint URL:
+```python
+credentials = {
+    "public_key": "pk_...",
+    "secret_key": "sk_...",  # pragma: allowlist secret
+    "endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+}
+```
+
+---
+
+#### Missing OpenTelemetry Dependencies
+
+```
+DatasetError: AutoGen mode requires OpenTelemetry.
+```
+
+##### Solution:
+```bash
+pip install "kedro-datasets[langfuse-langfusetracedataset-autogen]"
+```
+
+---
+
+#### Save Not Supported
+
+```
+NotImplementedError: LangfuseTraceDataset is read-only
+```
+
+##### Solution: `LangfuseTraceDataset` is a read-only dataset that provides tracing clients. Traces are logged automatically through the returned client, not via `save()`.
+
+---
+
 ## LangfuseEvaluationDataset
 
 A Kedro dataset for managing [Langfuse evaluation datasets](https://langfuse.com/docs/evaluation/experiments/datasets). It connects to a remote Langfuse dataset, optionally backed by a local JSON/YAML file, and returns a `DatasetClient` on `load()` — ready for iterating items or running experiments via `dataset.run_experiment()`.
@@ -774,10 +1082,11 @@ DatasetError: Langfuse API error while fetching dataset '...': 401 Unauthorized
 
 ---
 
-#### Issues
+## Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)
 
-#### Related Resources
+## Related Resources
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)
+- **Langfuse Tracing**: [Tracing overview](https://langfuse.com/docs/tracing)
 - **Langfuse Evaluation**: [Dataset experiments](https://langfuse.com/docs/evaluation/experiments/datasets)
 - **Langfuse Prompts**: [Prompt management](https://langfuse.com/docs/prompt-management)

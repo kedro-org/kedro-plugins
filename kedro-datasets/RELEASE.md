@@ -13,6 +13,7 @@
 
 ## Bug fixes and other changes
 
+- Added `LangfuseTraceDataset` documentation to the Langfuse README and restructured the page with a table of contents.
 - Fixed `databricks.ManagedTableDataset` upsert write mode failing with `[CONFIG_NOT_AVAILABLE]` on Databricks Spark Connect runtimes by replacing `spark.conf.set` variable substitution with direct f-string interpolation in the MERGE SQL statement.
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).

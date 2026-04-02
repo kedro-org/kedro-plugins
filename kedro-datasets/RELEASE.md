@@ -10,6 +10,7 @@
 | Type                                 | Description                                          | Location                               |
 | ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
 | `langfuse.LangfuseEvaluationDataset` | A dataset for managing Langfuse evaluation datasets. | `kedro_datasets_experimental.langfuse` |
+| `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
 

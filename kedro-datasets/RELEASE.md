@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+- Fixed `optuna.StudyDataset` documentation page by converting docstring from reStructuredText to Markdown and adding missing doc page header.
 ## Community contributions
 
 # Release 9.3.0

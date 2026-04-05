@@ -140,8 +140,9 @@ plugins:
 
         Machine Learning and AI:
           - api/kedro_datasets/tensorflow.TensorFlowModelDataset.md: TensorFlow model storage
-          - api/kedro_datasets/huggingface.HFDataset.md: HuggingFace datasets integration
-          - api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md: HuggingFace transformer pipelines
+          - api/kedro_datasets/huggingface.HFDataset.md: Hugging Face remote datasets integration
+          - api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md: Hugging Face transformer pipelines
+          - api/kedro_datasets/huggingface.LocalHFDataset.md: Hugging Face local datasets integration
 
         Visualization and Plotting:
           - api/kedro_datasets/matplotlib.MatplotlibDataset.md: Matplotlib figure storage
@@ -266,6 +267,7 @@ nav:
         - Huggingface:
           - huggingface.HFDataset: api/kedro_datasets/huggingface.HFDataset.md
           - huggingface.HFTransformerPipelineDataset: api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md
+          - huggingface.LocalHFDataset: api/kedro_datasets/huggingface.LocalHFDataset.md
         - Ibis:
           - ibis.FileDataset: api/kedro_datasets/ibis.FileDataset.md
           - ibis.TableDataset: api/kedro_datasets/ibis.TableDataset.md

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, TypeAlias
 
 import fsspec
 from datasets import (
@@ -24,7 +24,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-DatasetLike = Dataset | DatasetDict | IterableDataset | IterableDatasetDict
+DatasetLike: TypeAlias = Dataset | DatasetDict | IterableDataset | IterableDatasetDict
 
 
 class HFDataset(AbstractDataset[None, DatasetLike]):

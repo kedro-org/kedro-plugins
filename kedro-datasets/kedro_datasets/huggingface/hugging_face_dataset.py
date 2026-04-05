@@ -106,7 +106,7 @@ class LocalHFDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         ```
 
         By default, data will be loaded and saved from
-        (Arrow)[https://huggingface.co/docs/datasets/about_arrow] format.
+        [Arrow](https://huggingface.co/docs/datasets/about_arrow) format.
 
         Using the
         [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/)
@@ -122,14 +122,8 @@ class LocalHFDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         This saves each individual ``datasets.Dataset`` into separate files
         in the directory in JSON format.
 
-        The ``file_format`` accepts the following arguments:
-
-            - ``arrow``
-            - ``parquet``
-            - ``json``
-            - ``csv``
-            - ``lance``
-            - ``hdf5``
+        The ``file_format`` accepts `arrow`, `parquet`, `json`, `csv`, `lance`,
+        and `hdf5` as arguments.
 
         For more on saving and loading from a filesystem with the Datasets
         library, see

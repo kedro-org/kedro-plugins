@@ -44,6 +44,17 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Major features and improvements
 
+- Added `huggingface.LocalHFDataset` to handle saving and loading from Hugging Face datasets on a filesystem.
+
+## Bug fixes and other changes
+## Community contributions
+
+[iwhalen](https://github.com/iwhalen)
+
+# Release 9.3.0
+
+## Major features and improvements
+
 - Kedro-Datasets is now compatible with pandas 3.0.
 - Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
 - Added "upsert" save mode to `ibis.TableDataset` (available on backends that support `MERGE INTO` since Ibis 12.0).

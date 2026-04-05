@@ -19,6 +19,7 @@
               "holoviews.HoloviewsWriter",
               "huggingface.HFDataset",
               "huggingface.HFTransformerPipelineDataset",
+              "huggingface.LocalHFDataset",
               "ibis.FileDataset",
               "ibis.TableDataset",
               "json.JSONDataset",
@@ -447,6 +448,38 @@
                 "pipeline_kwargs": {
                   "type": "object",
                   "description": "Additional kwargs to be passed into the pipeline"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "huggingface.LocalHFDataset"
+                }
+              }
+            },
+            "then": {
+              "required": ["path"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to a directory or file for persisting Hugging Face datasets. Supports local and remote filesystems (e.g. s3://)."
+                },
+                "file_format": {
+                  "type": "string",
+                  "enum": ["arrow", "parquet", "json", "csv", "lance", "hdf5"],
+                  "default": "arrow",
+                  "description": "The file format to use for saving and loading. Defaults to 'arrow'."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the load method."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the save method."
                 }
               }
             }

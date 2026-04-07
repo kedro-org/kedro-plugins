@@ -6,6 +6,10 @@
 
 ## Community contributions
 
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Guillaume Tauzin](https://github.com/gtauzin)
+
 # Release 9.3.0
 
 ## Major features and improvements

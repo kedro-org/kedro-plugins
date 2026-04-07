@@ -335,6 +335,7 @@ class OpikEvaluationDataset(AbstractDataset):
             self._dataset_name,
         )
         self._upload_items(dataset, local_items)
+        self._client.flush()
 
         return self._client.get_dataset(name=self._dataset_name)
 
@@ -425,6 +426,7 @@ class OpikEvaluationDataset(AbstractDataset):
 
         dataset = self._get_or_create_remote_dataset()
         self._upload_items(dataset, data)
+        self._client.flush()
 
         if self._sync_policy == "local" and self._filepath:
             existing: list[dict] = []

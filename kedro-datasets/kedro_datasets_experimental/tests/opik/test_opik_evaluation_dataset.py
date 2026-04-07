@@ -367,6 +367,15 @@ class TestSyncLocalToRemote:
 
         assert result is refreshed
 
+    def test_flushes_client_after_upload(self, dataset_local, mock_opik, mock_remote_dataset):
+        """Calls client.flush() after insert to ensure items are committed before evaluate()."""
+        mock_opik.get_dataset.return_value = mock_remote_dataset
+
+        with patch.object(dataset_local, "_upload_items"):
+            dataset_local._sync_local_to_remote(mock_remote_dataset)
+
+        mock_opik.flush.assert_called_once()
+
     def test_warns_about_items_without_id(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, eval_items_no_id):
         """Logs a warning when items have no 'id' field."""
         filepath = tmp_path / "eval.json"
@@ -490,6 +499,12 @@ class TestSave:
         mock_opik.get_dataset.return_value = mock_remote_dataset
         dataset_local.save(eval_items)
         mock_remote_dataset.insert.assert_called_once()
+
+    def test_save_flushes_client_after_upload(self, dataset_local, mock_opik, mock_remote_dataset, eval_items):
+        """Calls client.flush() after insert to ensure items are committed before evaluate()."""
+        mock_opik.get_dataset.return_value = mock_remote_dataset
+        dataset_local.save(eval_items)
+        mock_opik.flush.assert_called_once()
 
     def test_save_local_mode_merges_into_file(self, dataset_local, mock_opik, mock_remote_dataset, eval_items):
         """Local mode merges new items into the local file."""

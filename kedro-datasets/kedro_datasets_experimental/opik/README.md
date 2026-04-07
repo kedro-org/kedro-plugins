@@ -502,8 +502,10 @@ The local file and `save()` data must be a list of dicts:
 
 | Policy | Local File | Remote (Opik) | Use Case |
 |--------|------------|---------------|----------|
-| **`local`** (default) | Source of truth | Upserted from local on every `load()` | Authoring, development |
+| **`local`** (default) | Source of truth | Upserted from local on every `load()` | Authoring, development, initial seeding |
 | **`remote`** | Not touched | Source of truth | Production, read-only experiments |
+
+> **Note on `remote` mode and empty datasets:** `sync_policy="remote"` never pushes items from the local file to Opik. If the remote dataset does not exist yet, `load()` creates it empty and returns it with no items — experiments run against it will have nothing to evaluate. Before using remote mode, ensure the dataset has been populated by either running with `sync_policy="local"` at least once, or creating and populating the dataset directly via the Opik UI.
 
 ### Configuration Examples
 
@@ -611,6 +613,18 @@ DatasetError: Dataset item at index 0 is missing required 'input' key.
 ```
 
 **Solution:** Every item in the local file and passed to `save()` must contain an `input` key.
+
+---
+
+#### Remote dataset is empty / experiment has no items
+
+**Symptom:** `sync_policy="remote"` run completes without error but the Opik dataset has no items and the experiment results are empty.
+
+**Cause:** `remote` mode never reads from the local file. If the dataset did not exist, it was created empty. If it existed but had no items, it is returned as-is.
+
+**Solution:** Populate the remote dataset first using one of:
+- Run the pipeline once with `sync_policy="local"` to seed from your local file, then switch back to `"remote"`.
+- Create and populate the dataset directly via the [Opik UI](https://www.comet.com/docs/opik/).
 
 ---
 

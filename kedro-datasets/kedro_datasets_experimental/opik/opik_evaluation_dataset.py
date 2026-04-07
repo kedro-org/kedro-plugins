@@ -73,7 +73,10 @@ class OpikEvaluationDataset(AbstractDataset):
     - **remote**: The remote Opik dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
       interaction. ``save()`` upserts all items to remote without writing
-      to any local file.
+      to any local file. If the remote dataset does not exist yet, it is
+      created empty — **no items are pushed from the local file**. To seed
+      a new remote dataset, run with ``sync_policy="local"`` at least once,
+      or create and populate the dataset directly via the Opik UI.
 
     Examples:
         Using catalog YAML configuration:

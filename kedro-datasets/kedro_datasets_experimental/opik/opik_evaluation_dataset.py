@@ -240,7 +240,8 @@ class OpikEvaluationDataset(AbstractDataset):
         Returns the latest ``Dataset`` object.
 
         Raises:
-            DatasetError: If the Opik API returns an unexpected error.
+            DatasetError: If the Opik API returns an unexpected error or is
+                unreachable.
         """
         try:
             return self._client.get_dataset(name=self._dataset_name)
@@ -249,6 +250,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 raise DatasetError(
                     f"Opik API error while fetching dataset '{self._dataset_name}': {e}"
                 ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to connect to Opik while fetching dataset "
+                f"'{self._dataset_name}': {e}"
+            ) from e
 
         try:
             logger.info(
@@ -262,6 +268,11 @@ class OpikEvaluationDataset(AbstractDataset):
         except ApiError as e:
             raise DatasetError(
                 f"Opik API error while creating dataset '{self._dataset_name}': {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to connect to Opik while creating dataset "
+                f"'{self._dataset_name}': {e}"
             ) from e
 
     @staticmethod
@@ -376,7 +387,8 @@ class OpikEvaluationDataset(AbstractDataset):
             Dataset: The Opik dataset ready for use in experiments.
 
         Raises:
-            DatasetError: If the Opik API returns an unexpected error.
+            DatasetError: If the Opik API returns an unexpected error or the
+                server is unreachable.
         """
         dataset = self._get_or_create_remote_dataset()
 

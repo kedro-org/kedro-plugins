@@ -251,6 +251,20 @@ class TestGetOrCreateRemoteDataset:
         with pytest.raises(DatasetError, match="Opik API error while creating dataset"):
             dataset_local._get_or_create_remote_dataset()
 
+    def test_connection_error_on_get_raises_dataset_error(self, dataset_local, mock_opik):
+        """Non-ApiError on get_dataset (e.g. connection refused) is wrapped in DatasetError."""
+        mock_opik.get_dataset.side_effect = ConnectionRefusedError("Connection refused")
+        with pytest.raises(DatasetError, match="Failed to connect to Opik"):
+            dataset_local._get_or_create_remote_dataset()
+
+    def test_connection_error_on_create_raises_dataset_error(self, dataset_local, mock_opik):
+        """Non-ApiError on create_dataset (e.g. connection refused) is wrapped in DatasetError."""
+        mock_opik.get_dataset.side_effect = make_api_error(404)
+        mock_opik.create_dataset.side_effect = ConnectionRefusedError("Connection refused")
+        with pytest.raises(DatasetError, match="Failed to connect to Opik"):
+            dataset_local._get_or_create_remote_dataset()
+
+
 
 class TestValidateItems:
     """Test the _validate_items static method."""

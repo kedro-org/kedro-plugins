@@ -2,7 +2,7 @@
 filesystem (e.g.: local, S3, GCS).
 """
 from __future__ import annotations
-
+import os
 import json
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -59,7 +59,7 @@ class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidge
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,

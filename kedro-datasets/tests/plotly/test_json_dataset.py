@@ -15,7 +15,7 @@ from kedro_datasets.plotly import JSONDataset
 
 @pytest.fixture
 def filepath_json(tmp_path):
-    return (tmp_path / "test.json").as_posix()
+    return tmp_path / "test.json"
 
 
 @pytest.fixture

@@ -37,7 +37,7 @@ class OpikEvaluationDataset(AbstractDataset):
       synchronises based on ``sync_policy``, and returns an ``opik.Dataset``.
     - **On save:** Upserts all items to the remote dataset. In ``local`` mode,
       items are also merged into the local file (new items take precedence).
-      In ``remote`` mode, only the remote upload occurs.
+      In ``remote`` mode, only the remote upsert occurs.
 
     **Item format:**
 

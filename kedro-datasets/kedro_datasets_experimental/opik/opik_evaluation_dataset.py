@@ -311,6 +311,10 @@ class OpikEvaluationDataset(AbstractDataset):
         regardless of whether an ``id`` is present.
 
         Callers are responsible for validating items before calling this method.
+
+        Raises:
+            DatasetError: If the Opik API returns an error or the server is
+                unreachable during insert.
         """
         items_to_insert = []
         for item in items:
@@ -324,7 +328,17 @@ class OpikEvaluationDataset(AbstractDataset):
                     items_to_insert.append(item)
                 except ValueError:
                     items_to_insert.append({k: v for k, v in item.items() if k != "id"})
-        dataset.insert(items_to_insert)
+        try:
+            dataset.insert(items_to_insert)
+        except ApiError as e:
+            raise DatasetError(
+                f"Opik API error while inserting items into dataset "
+                f"'{self._dataset_name}': {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to insert items into Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
     def _sync_local_to_remote(self, dataset: Dataset) -> Dataset:
         """Insert all local items into the remote dataset.
@@ -380,7 +394,12 @@ class OpikEvaluationDataset(AbstractDataset):
             self._dataset_name,
         )
         self._upload_items(dataset, local_items)
-        self._client.flush()
+        try:
+            self._client.flush()
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to flush items to Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
         return self._client.get_dataset(name=self._dataset_name)
 
@@ -472,7 +491,12 @@ class OpikEvaluationDataset(AbstractDataset):
 
         dataset = self._get_or_create_remote_dataset()
         self._upload_items(dataset, data)
-        self._client.flush()
+        try:
+            self._client.flush()
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to flush items to Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
         if self._sync_policy == "local" and self._filepath:
             existing: list[dict] = []

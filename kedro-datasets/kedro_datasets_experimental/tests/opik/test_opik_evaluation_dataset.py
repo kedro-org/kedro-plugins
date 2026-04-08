@@ -375,6 +375,20 @@ class TestUploadItems:
         dataset_local._upload_items(mock_remote_dataset, eval_items)
         mock_remote_dataset.insert.assert_called_once()
 
+    def test_insert_api_error_raises_dataset_error(self, dataset_local, mock_remote_dataset, eval_items):
+        """ApiError from dataset.insert() is wrapped in DatasetError."""
+        mock_remote_dataset.insert.side_effect = make_api_error(500)
+
+        with pytest.raises(DatasetError, match="Opik API error while inserting items"):
+            dataset_local._upload_items(mock_remote_dataset, eval_items)
+
+    def test_insert_connection_error_raises_dataset_error(self, dataset_local, mock_remote_dataset, eval_items):
+        """Connection-level errors from dataset.insert() are wrapped in DatasetError."""
+        mock_remote_dataset.insert.side_effect = ConnectionRefusedError("Connection refused")
+
+        with pytest.raises(DatasetError, match="Failed to insert items into Opik dataset"):
+            dataset_local._upload_items(mock_remote_dataset, eval_items)
+
 
 class TestSyncLocalToRemote:
     """Test the _sync_local_to_remote helper."""
@@ -436,6 +450,15 @@ class TestSyncLocalToRemote:
             dataset_local._sync_local_to_remote(mock_remote_dataset)
 
         mock_opik.flush.assert_called_once()
+
+    def test_flush_error_raises_dataset_error(self, dataset_local, mock_opik, mock_remote_dataset):
+        """Errors from client.flush() during sync are wrapped in DatasetError."""
+        mock_opik.flush.side_effect = Exception("flush failed")
+        mock_opik.get_dataset.return_value = mock_remote_dataset
+
+        with patch.object(dataset_local, "_upload_items"):
+            with pytest.raises(DatasetError, match="Failed to flush items"):
+                dataset_local._sync_local_to_remote(mock_remote_dataset)
 
     def test_warns_about_items_without_id(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, eval_items_no_id):
         """Logs a warning when items have no 'id' field."""
@@ -588,6 +611,14 @@ class TestSave:
         mock_opik.get_dataset.return_value = mock_remote_dataset
         dataset_local.save(eval_items)
         mock_opik.flush.assert_called_once()
+
+    def test_save_flush_error_raises_dataset_error(self, dataset_local, mock_opik, mock_remote_dataset, eval_items):
+        """Errors from client.flush() during save are wrapped in DatasetError."""
+        mock_opik.get_dataset.return_value = mock_remote_dataset
+        mock_opik.flush.side_effect = Exception("flush failed")
+
+        with pytest.raises(DatasetError, match="Failed to flush items"):
+            dataset_local.save(eval_items)
 
     def test_save_local_mode_merges_into_file(self, dataset_local, mock_opik, mock_remote_dataset, eval_items):
         """Local mode merges new items into the local file."""

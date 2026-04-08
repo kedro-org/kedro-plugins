@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -47,11 +48,12 @@ class OpikEvaluationDataset(AbstractDataset):
     accepts the following keys:
 
     - ``input`` (**required**) — the evaluation input payload.
-    - ``id`` — stable identifier used for local deduplication. Note: Opik
-      requires item IDs to be valid UUIDs. Human-readable IDs (e.g.
-      ``"intent_001"``) are stripped before upload — Opik auto-generates
-      UUIDs. Items without an ``id`` cannot be deduplicated across syncs and
-      will create new remote entries on every load.
+    - ``id`` — stable identifier used for local deduplication. If ``id`` is
+      a valid UUID it is forwarded to Opik, giving the remote row a stable
+      identity. Human-readable IDs (e.g. ``"intent_001"``) are stripped
+      before upload so the API is not fed invalid values — Opik
+      auto-generates a UUID in those cases. Items without an ``id`` are
+      uploaded without one and Opik assigns a UUID automatically.
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
 
@@ -299,20 +301,33 @@ class OpikEvaluationDataset(AbstractDataset):
     def _upload_items(self, dataset: Dataset, items: list[dict[str, Any]]) -> None:
         """Insert items into the remote Opik dataset.
 
-        Opik requires item IDs to be valid UUIDs. Human-readable IDs from local
-        files (e.g. ``"intent_001"``) are stripped so the SDK auto-generates UUIDs.
-        Deduplication is content-hash-based and is unaffected by the ID field.
+        If an item's ``id`` is a valid UUID it is forwarded as-is, giving the
+        remote row a stable identity. Human-readable IDs (e.g. ``"intent_001"``)
+        are stripped before upload so the API is not fed invalid values — Opik
+        auto-generates a UUID in those cases. Items with no ``id`` are uploaded
+        without one and Opik assigns a UUID automatically.
+
+        Deduplication is content-hash-based. Unchanged items are no-ops
+        regardless of whether an ``id`` is present.
 
         Callers are responsible for validating items before calling this method.
         """
-        items_to_insert = [
-            {k: v for k, v in item.items() if k != "id"}
-            for item in items
-        ]
+        items_to_insert = []
+        for item in items:
+            if "id" not in item:
+                items_to_insert.append(item)
+            elif not item["id"]:
+                items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+            else:
+                try:
+                    uuid.UUID(str(item["id"]))
+                    items_to_insert.append(item)
+                except ValueError:
+                    items_to_insert.append({k: v for k, v in item.items() if k != "id"})
         dataset.insert(items_to_insert)
 
     def _sync_local_to_remote(self, dataset: Dataset) -> Dataset:
-        """insert items from local - remote identity depends on whether UUID id is sent”
+        """Insert all local items into the remote dataset.
 
         Reads the local file and inserts all items into the remote dataset.
         The Opik SDK deduplicates by content hash, so re-inserting unchanged
@@ -327,17 +342,39 @@ class OpikEvaluationDataset(AbstractDataset):
         if not local_items:
             return dataset
 
-        items_without_id = [item for item in local_items if "id" not in item]
-        if items_without_id:
+        items_without_stable_id = [
+            item for item in local_items
+            if "id" not in item or not item.get("id")
+        ]
+        if items_without_stable_id:
             logger.warning(
-                "Found %d item(s) without an 'id' field in '%s'. "
-                "These cannot be tracked across syncs.",
-                len(items_without_id),
+                "Found %d item(s) with a missing, None, or empty 'id' field in '%s'. "
+                "These cannot be tracked across syncs and will create new remote "
+                "rows on every load.",
+                len(items_without_stable_id),
                 self._filepath,
             )
 
+        items_with_non_uuid_id = []
+        for item in local_items:
+            if item.get("id"):  # present and non-empty/non-None
+                try:
+                    uuid.UUID(str(item["id"]))
+                except ValueError:
+                    items_with_non_uuid_id.append(item)
+        if items_with_non_uuid_id:
+            logger.warning(
+                "Found %d item(s) with non-UUID 'id' values in '%s' "
+                "(e.g. '%s'). These IDs will be stripped before upload — "
+                "Opik will auto-generate UUIDs and remote rows will not "
+                "have stable identities.",
+                len(items_with_non_uuid_id),
+                self._filepath,
+                items_with_non_uuid_id[0]["id"],
+            )
+
         logger.info(
-            "Upserting %d item(s) from '%s' to remote dataset '%s'.",
+            "Syncing %d item(s) from '%s' to remote dataset '%s'.",
             len(local_items),
             self._filepath,
             self._dataset_name,

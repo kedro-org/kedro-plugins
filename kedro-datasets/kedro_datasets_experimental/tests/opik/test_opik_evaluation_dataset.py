@@ -1,3 +1,4 @@
+import datetime
 import json
 from unittest.mock import Mock, call, patch
 
@@ -793,7 +794,6 @@ class TestPreview:
         self, tmp_path, mock_credentials, mock_opik
     ):
         """Non-JSON-serialisable local data returns a graceful error message instead of raising."""
-        import datetime
 
         filepath = tmp_path / "eval.json"
         filepath.write_text(json.dumps([{"input": "x"}]))

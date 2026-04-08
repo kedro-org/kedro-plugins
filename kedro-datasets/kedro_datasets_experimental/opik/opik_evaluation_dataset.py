@@ -22,6 +22,7 @@ REQUIRED_OPIK_CREDENTIALS = {"api_key"}
 OPTIONAL_OPIK_CREDENTIALS = {"workspace", "host", "project_name"}
 VALID_SYNC_POLICIES = {"local", "remote"}
 HTTP_NOT_FOUND = 404
+REQUIRED_UUID_VERSION = 7
 
 
 class OpikEvaluationDataset(AbstractDataset):
@@ -327,7 +328,7 @@ class OpikEvaluationDataset(AbstractDataset):
             else:
                 try:
                     parsed = uuid.UUID(str(item["id"]))
-                    if parsed.version == 7:
+                    if parsed.version == REQUIRED_UUID_VERSION:
                         items_to_insert.append(item)  # valid UUID v7 — preserve id
                     else:
                         items_to_insert.append({k: v for k, v in item.items() if k != "id"})
@@ -379,7 +380,7 @@ class OpikEvaluationDataset(AbstractDataset):
             if item.get("id"):  # present and non-empty/non-None
                 try:
                     parsed = uuid.UUID(str(item["id"]))
-                    if parsed.version != 7:
+                    if parsed.version != REQUIRED_UUID_VERSION:
                         items_with_non_uuid_v7_id.append(item)
                 except ValueError:
                     items_with_non_uuid_v7_id.append(item)

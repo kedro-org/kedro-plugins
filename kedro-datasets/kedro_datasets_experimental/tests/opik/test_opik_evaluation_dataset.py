@@ -54,15 +54,15 @@ def eval_items():
 
 @pytest.fixture
 def eval_items_uuid():
-    """Sample evaluation dataset items with valid UUID IDs."""
+    """Sample evaluation dataset items with valid UUID v7 IDs."""
     return [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "id": "018e2f1a-dead-7abc-8def-000000000001",
             "input": {"question": "What is AI?"},
             "expected_output": {"answer": "Artificial Intelligence"},
         },
         {
-            "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+            "id": "018e2f1a-dead-7abc-8def-000000000002",
             "input": {"question": "What is ML?"},
             "expected_output": {"answer": "Machine Learning"},
         },
@@ -71,10 +71,10 @@ def eval_items_uuid():
 
 @pytest.fixture
 def eval_items_mixed():
-    """Items with a mix of valid UUID and human-readable IDs."""
+    """Items with a mix of UUID v7 and human-readable IDs."""
     return [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "id": "018e2f1a-dead-7abc-8def-000000000001",
             "input": {"question": "What is AI?"},
             "expected_output": {"answer": "Artificial Intelligence"},
         },
@@ -322,12 +322,17 @@ class TestValidateItems:
 class TestUploadItems:
     """Test the _upload_items method."""
 
-    def test_non_uuid_ids_are_stripped(self, dataset_local, mock_remote_dataset, eval_items):
-        """Human-readable (non-UUID) IDs are stripped; Opik receives items without 'id'."""
-        dataset_local._upload_items(mock_remote_dataset, eval_items)
+    @pytest.mark.parametrize("bad_id,label", [
+        ("item_001", "human-readable"),
+        ("550e8400-e29b-41d4-a716-446655440000", "UUID v4"),
+    ])
+    def test_non_uuid_v7_id_is_stripped(self, dataset_local, mock_remote_dataset, bad_id, label):
+        """Non-UUID-v7 IDs (human-readable or other UUID versions) are stripped before upload."""
+        items = [{"id": bad_id, "input": {"question": "What is AI?"}}]
+        dataset_local._upload_items(mock_remote_dataset, items)
 
         inserted = mock_remote_dataset.insert.call_args[0][0]
-        assert all("id" not in item for item in inserted)
+        assert "id" not in inserted[0]
 
     def test_non_id_fields_are_preserved(self, dataset_local, mock_remote_dataset, eval_items):
         """input and expected_output fields are passed through unchanged."""
@@ -355,17 +360,17 @@ class TestUploadItems:
         assert inserted[0]["id"] == eval_items_mixed[0]["id"]  # UUID preserved
         assert "id" not in inserted[1]  # non-UUID stripped
 
-    def test_uuid_id_preserved_when_content_changes(self, dataset_local, mock_remote_dataset):
-        """The same UUID id is forwarded on both uploads even when item content changes."""
-        uuid_id = "550e8400-e29b-41d4-a716-446655440000"
-        first_version = [{"id": uuid_id, "input": {"question": "What is AI?"}}]
-        second_version = [{"id": uuid_id, "input": {"question": "What is Artificial Intelligence?"}}]
+    def test_uuid_v7_id_preserved_when_content_changes(self, dataset_local, mock_remote_dataset):
+        """A UUID v7 id is forwarded on both uploads even when item content changes."""
+        uuid_v7_id = "018e2f1a-dead-7abc-8def-000000000001"
+        first_version = [{"id": uuid_v7_id, "input": {"question": "What is AI?"}}]
+        second_version = [{"id": uuid_v7_id, "input": {"question": "What is Artificial Intelligence?"}}]
 
         dataset_local._upload_items(mock_remote_dataset, first_version)
-        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_id
+        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_v7_id
 
         dataset_local._upload_items(mock_remote_dataset, second_version)
-        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_id
+        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_v7_id
 
     def test_items_without_id_are_passed_unchanged(self, dataset_local, mock_remote_dataset, eval_items_no_id):
         """Items that have no 'id' key are inserted as-is."""
@@ -383,23 +388,14 @@ class TestUploadItems:
         inserted = mock_remote_dataset.insert.call_args[0][0]
         assert "id" not in inserted[0]
 
-    def test_dataset_insert_is_called_once(self, dataset_local, mock_remote_dataset, eval_items):
-        """dataset.insert() is called exactly once."""
-        dataset_local._upload_items(mock_remote_dataset, eval_items)
-        mock_remote_dataset.insert.assert_called_once()
-
-    def test_insert_api_error_raises_dataset_error(self, dataset_local, mock_remote_dataset, eval_items):
-        """ApiError from dataset.insert() is wrapped in DatasetError."""
-        mock_remote_dataset.insert.side_effect = make_api_error(500)
-
-        with pytest.raises(DatasetError, match="Opik API error while inserting items"):
-            dataset_local._upload_items(mock_remote_dataset, eval_items)
-
-    def test_insert_connection_error_raises_dataset_error(self, dataset_local, mock_remote_dataset, eval_items):
-        """Connection-level errors from dataset.insert() are wrapped in DatasetError."""
-        mock_remote_dataset.insert.side_effect = ConnectionRefusedError("Connection refused")
-
-        with pytest.raises(DatasetError, match="Failed to insert items into Opik dataset"):
+    @pytest.mark.parametrize("error,match", [
+        (make_api_error(500), "Opik API error while inserting items"),
+        (ConnectionRefusedError("Connection refused"), "Failed to insert items into Opik dataset"),
+    ])
+    def test_insert_error_raises_dataset_error(self, dataset_local, mock_remote_dataset, eval_items, error, match):
+        """SDK errors from dataset.insert() are wrapped in DatasetError."""
+        mock_remote_dataset.insert.side_effect = error
+        with pytest.raises(DatasetError, match=match):
             dataset_local._upload_items(mock_remote_dataset, eval_items)
 
 
@@ -491,30 +487,15 @@ class TestSyncLocalToRemote:
             with pytest.raises(DatasetError, match="Failed to refresh dataset"):
                 dataset_local._sync_local_to_remote(mock_remote_dataset)
 
-    def test_warns_about_items_without_id(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, eval_items_no_id):
-        """Logs a warning when items have no 'id' field."""
-        filepath = tmp_path / "eval.json"
-        filepath.write_text(json.dumps(eval_items_no_id))
-        mock_opik.get_dataset.return_value = mock_remote_dataset
-
-        ds = OpikEvaluationDataset(
-            dataset_name="ds",
-            credentials=mock_credentials,
-            filepath=str(filepath),
-        )
-
-        with patch("kedro_datasets_experimental.opik.opik_evaluation_dataset.logger") as mock_logger:
-            with patch.object(ds, "_upload_items"):
-                ds._sync_local_to_remote(mock_remote_dataset)
-            warning_messages = [c[0][0] for c in mock_logger.warning.call_args_list]
-            assert any("missing, None, or empty" in msg for msg in warning_messages)
-
-    @pytest.mark.parametrize("bad_id", [None, ""])
-    def test_warns_about_items_with_none_or_empty_id(
-        self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, bad_id
+    @pytest.mark.parametrize("items", [
+        [{"input": {"question": "What is AI?"}}],
+        [{"id": None, "input": {"question": "What is AI?"}}],
+        [{"id": "", "input": {"question": "What is AI?"}}],
+    ])
+    def test_warns_when_id_missing_or_empty(
+        self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, items
     ):
-        """Logs a warning when items have id=None or id=''."""
-        items = [{"id": bad_id, "input": {"question": "What is AI?"}}]
+        """Logs a warning when items have no id, id=None, or id=''."""
         filepath = tmp_path / "eval.json"
         filepath.write_text(json.dumps(items))
         mock_opik.get_dataset.return_value = mock_remote_dataset

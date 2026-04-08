@@ -49,11 +49,12 @@ class OpikEvaluationDataset(AbstractDataset):
 
     - ``input`` (**required**) — the evaluation input payload.
     - ``id`` — stable identifier used for local deduplication. If ``id`` is
-      a valid UUID it is forwarded to Opik, giving the remote row a stable
-      identity. Human-readable IDs (e.g. ``"intent_001"``) are stripped
-      before upload so the API is not fed invalid values — Opik
-      auto-generates a UUID in those cases. Items without an ``id`` are
-      uploaded without one and Opik assigns a UUID automatically.
+      a valid **UUID v7** it is forwarded to Opik, giving the remote row a
+      stable identity. Opik requires UUID v7 for item IDs; all other values
+      (human-readable strings, UUIDs of other versions, ``None``, or empty
+      string) are stripped before upload — Opik auto-generates a UUID v7 in
+      those cases. Items without an ``id`` are uploaded without one and Opik
+      assigns a UUID v7 automatically.
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
 
@@ -301,11 +302,12 @@ class OpikEvaluationDataset(AbstractDataset):
     def _upload_items(self, dataset: Dataset, items: list[dict[str, Any]]) -> None:
         """Insert items into the remote Opik dataset.
 
-        If an item's ``id`` is a valid UUID it is forwarded as-is, giving the
-        remote row a stable identity. Human-readable IDs (e.g. ``"intent_001"``)
-        are stripped before upload so the API is not fed invalid values — Opik
-        auto-generates a UUID in those cases. Items with no ``id`` are uploaded
-        without one and Opik assigns a UUID automatically.
+        If an item's ``id`` is a valid **UUID v7** it is forwarded as-is,
+        giving the remote row a stable identity. Opik requires UUID v7 for
+        item IDs; all other values (human-readable strings, UUIDs of other
+        versions, ``None``, or empty string) are stripped before upload —
+        Opik auto-generates a UUID v7 in those cases. Items with no ``id``
+        are uploaded without one and Opik assigns a UUID v7 automatically.
 
         Deduplication is content-hash-based. Unchanged items are no-ops
         regardless of whether an ``id`` is present.
@@ -324,8 +326,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 items_to_insert.append({k: v for k, v in item.items() if k != "id"})
             else:
                 try:
-                    uuid.UUID(str(item["id"]))
-                    items_to_insert.append(item)
+                    parsed = uuid.UUID(str(item["id"]))
+                    if parsed.version == 7:
+                        items_to_insert.append(item)  # valid UUID v7 — preserve id
+                    else:
+                        items_to_insert.append({k: v for k, v in item.items() if k != "id"})
                 except ValueError:
                     items_to_insert.append({k: v for k, v in item.items() if k != "id"})
         try:
@@ -369,22 +374,24 @@ class OpikEvaluationDataset(AbstractDataset):
                 self._filepath,
             )
 
-        items_with_non_uuid_id = []
+        items_with_non_uuid_v7_id = []
         for item in local_items:
             if item.get("id"):  # present and non-empty/non-None
                 try:
-                    uuid.UUID(str(item["id"]))
+                    parsed = uuid.UUID(str(item["id"]))
+                    if parsed.version != 7:
+                        items_with_non_uuid_v7_id.append(item)
                 except ValueError:
-                    items_with_non_uuid_id.append(item)
-        if items_with_non_uuid_id:
+                    items_with_non_uuid_v7_id.append(item)
+        if items_with_non_uuid_v7_id:
             logger.warning(
-                "Found %d item(s) with non-UUID 'id' values in '%s' "
-                "(e.g. '%s'). These IDs will be stripped before upload — "
-                "Opik will auto-generate UUIDs and remote rows will not "
-                "have stable identities.",
-                len(items_with_non_uuid_id),
+                "Found %d item(s) with non-UUID-v7 'id' values in '%s' "
+                "(e.g. '%s'). Opik requires UUID v7 for item IDs — these "
+                "will be stripped before upload and Opik will auto-generate "
+                "UUID v7 values. Remote rows will not have stable identities.",
+                len(items_with_non_uuid_v7_id),
                 self._filepath,
-                items_with_non_uuid_id[0]["id"],
+                items_with_non_uuid_v7_id[0]["id"],
             )
 
         logger.info(

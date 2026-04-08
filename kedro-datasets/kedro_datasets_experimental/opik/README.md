@@ -494,7 +494,7 @@ The local file and `save()` data must be a list of dicts:
 | Field | Required | Notes |
 |-------|----------|-------|
 | `input` | Yes | The evaluation input payload |
-| `id` | No | Used for local deduplication. If `id` is a valid UUID it is forwarded to Opik, giving the remote row a stable identity. Human-readable IDs (e.g. `"q1"`) and `None`/empty values are stripped before upload — Opik auto-generates a UUID in those cases. Items without a stable UUID `id` create new remote rows on every sync. |
+| `id` | No | Used for local deduplication. If `id` is a valid **UUID v7** it is forwarded to Opik, giving the remote row a stable identity. Opik requires UUID v7 for item IDs — all other values (human-readable strings, UUIDs of other versions, `None`, or empty string) are stripped before upload and Opik auto-generates a UUID v7. Items without a stable UUID v7 `id` create new remote rows on every sync. |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 
@@ -743,7 +743,7 @@ def my_task(dataset_item: dict) -> dict:
 
 - **`metadata` is local-only**: Opik's `create_dataset()` does not accept a `metadata` argument. The `metadata` param is stored and returned by `_describe()` but is not propagated to the remote dataset (unlike Langfuse, which passes it through).
 - **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `LangfuseEvaluationDataset` has no Opik equivalent.
-- **UUID `id` values are stable remotely; human-readable ones are not**: If a local item's `id` is a valid UUID, it is forwarded to Opik and the remote row keeps that identity. Human-readable IDs (e.g. `"q1"`) and `None`/empty values are stripped — Opik auto-generates a UUID in those cases, so those rows will not have a stable remote identity across syncs.
+- **UUID v7 `id` values are stable remotely; all others are not**: If a local item's `id` is a valid UUID v7, it is forwarded to Opik and the remote row keeps that identity. Opik requires UUID v7 for item IDs — human-readable strings, UUIDs of other versions (e.g. v4), `None`, and empty values are all stripped before upload. Opik auto-generates a UUID v7 in those cases, so those rows will not have a stable remote identity across syncs.
 
 ### Support
 

@@ -35,9 +35,11 @@ class OpikEvaluationDataset(AbstractDataset):
 
     - **On load:** Creates the remote dataset if it does not exist,
       synchronises based on ``sync_policy``, and returns an ``opik.Dataset``.
-    - **On save:** Upserts all items to the remote dataset. In ``local`` mode,
-      items are also merged into the local file (new items take precedence).
-      In ``remote`` mode, only the remote upsert occurs.
+    - **On save:** Inserts all items to the remote dataset. Unchanged items
+      are deduplicated by the Opik SDK (content hash); changed items create
+      new remote rows. In ``local`` mode, items are also merged into the
+      local file (new items take precedence). In ``remote`` mode, only the
+      remote insert occurs.
 
     **Item format:**
 
@@ -67,12 +69,15 @@ class OpikEvaluationDataset(AbstractDataset):
     **Sync policies:**
 
     - **local** (default): The local file is the source of truth. On
-      ``load()``, all local items are upserted to remote (creating new items
-      or updating existing ones by content hash). ``save()`` upserts to
+      ``load()``, all local items are re-inserted to remote on every sync.
+      The Opik SDK deduplicates by content hash — items whose content has
+      not changed since the last sync are ignored. If a local item's content
+      changes (even when its ``id`` is kept the same), a new remote row is
+      added; the previous version is **not** replaced. ``save()`` inserts to
       remote and merges into the local file (new data takes precedence).
     - **remote**: The remote Opik dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
-      interaction. ``save()`` upserts all items to remote without writing
+      interaction. ``save()`` inserts all items to remote without writing
       to any local file. If the remote dataset does not exist yet, it is
       created empty — **no items are pushed from the local file**. To seed
       a new remote dataset, run with ``sync_policy="local"`` at least once,
@@ -151,11 +156,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 When ``None``, no local file interaction occurs.
             sync_policy: Controls the source of truth for reads and whether
                 a local file is involved:
-                ``"local"`` (default) — all local items are upserted to
-                remote on ``load()``; ``save()`` upserts to remote and
+                ``"local"`` (default) — all local items are re-inserted to
+                remote on ``load()``; ``save()`` inserts to remote and
                 merges into the local file (new data takes precedence).
                 ``"remote"`` — ``load()`` fetches remote as-is; ``save()``
-                upserts to remote without local file interaction.
+                inserts to remote without local file interaction.
             metadata: Optional metadata dict stored locally and returned by
                 ``_describe()``. Note: Opik's ``create_dataset()`` does not
                 accept a metadata argument, so this value is not propagated
@@ -307,7 +312,7 @@ class OpikEvaluationDataset(AbstractDataset):
         dataset.insert(items_to_insert)
 
     def _sync_local_to_remote(self, dataset: Dataset) -> Dataset:
-        """Upsert all local items to the remote dataset.
+        """insert items from local - remote identity depends on whether UUID id is sent”
 
         Reads the local file and inserts all items into the remote dataset.
         The Opik SDK deduplicates by content hash, so re-inserting unchanged
@@ -384,8 +389,9 @@ class OpikEvaluationDataset(AbstractDataset):
         """Load the Opik dataset, syncing local items to remote if sync_policy is ``local``.
 
         Creates the remote dataset if it does not exist. In ``local`` mode, all
-        local items are upserted to remote on every load — content-identical items
-        are deduplicated by the Opik SDK and will not create duplicates.
+        local items are re-inserted to remote on every load. The Opik SDK
+        deduplicates by content hash — unchanged items are no-ops; changed items
+        (even with the same local ``id``) create new remote rows.
 
         Returns:
             Dataset: The Opik dataset ready for use in experiments.

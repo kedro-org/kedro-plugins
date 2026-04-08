@@ -494,7 +494,7 @@ The local file and `save()` data must be a list of dicts:
 | Field | Required | Notes |
 |-------|----------|-------|
 | `input` | Yes | The evaluation input payload |
-| `id` | No | Used for local deduplication. Human-readable IDs (e.g. `"q1"`) are stripped before remote upload. Opik requires valid UUIDs and auto-generates them. Items without `id` create new remote entries on every load. |
+| `id` | No | Used for local deduplication. If `id` is a valid UUID it is forwarded to Opik, giving the remote row a stable identity. Human-readable IDs (e.g. `"q1"`) and `None`/empty values are stripped before upload — Opik auto-generates a UUID in those cases. Items without a stable UUID `id` create new remote rows on every sync. |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 
@@ -502,7 +502,7 @@ The local file and `save()` data must be a list of dicts:
 
 | Policy | Local File | Remote (Opik) | Use Case |
 |--------|------------|---------------|----------|
-| **`local`** (default) | Source of truth | Upserted from local on every `load()` | Authoring, development, initial seeding |
+| **`local`** (default) | Source of truth | Re-inserted from local on every `load()`. Unchanged items are deduplicated by content hash; changed items create new remote rows. | Authoring, development, initial seeding |
 | **`remote`** | Not touched | Source of truth | Production, read-only experiments |
 
 > **Note on `remote` mode and empty datasets:** `sync_policy="remote"` never pushes items from the local file to Opik. If the remote dataset does not exist yet, `load()` creates it empty and returns it with no items — experiments run against it will have nothing to evaluate. Before using remote mode, ensure the dataset has been populated by either running with `sync_policy="local"` at least once, or creating and populating the dataset directly via the Opik UI.
@@ -737,13 +737,13 @@ def my_task(dataset_item: dict) -> dict:
 - `dataset_name`, `filepath`, `sync_policy`, `metadata` constructor params
 - Local file format (item schema is identical)
 - Context nodes that don't interact with the evaluation dataset
-- Sync semantics: `local` upserts on every load; `remote` fetches as-is
+- Sync semantics: `local` re-inserts from local file on every load (content-hash dedup); `remote` fetches as-is
 
 ### Known limitations
 
 - **`metadata` is local-only**: Opik's `create_dataset()` does not accept a `metadata` argument. The `metadata` param is stored and returned by `_describe()` but is not propagated to the remote dataset (unlike Langfuse, which passes it through).
 - **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `LangfuseEvaluationDataset` has no Opik equivalent.
-- **Item IDs are not stable remotely**: Human-readable IDs from local files are stripped before upload (Opik requires valid UUIDs). Remote item IDs are auto-generated and will differ from local IDs.
+- **UUID `id` values are stable remotely; human-readable ones are not**: If a local item's `id` is a valid UUID, it is forwarded to Opik and the remote row keeps that identity. Human-readable IDs (e.g. `"q1"`) and `None`/empty values are stripped — Opik auto-generates a UUID in those cases, so those rows will not have a stable remote identity across syncs.
 
 ### Support
 

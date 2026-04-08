@@ -401,7 +401,16 @@ class OpikEvaluationDataset(AbstractDataset):
                 f"Failed to flush items to Opik dataset '{self._dataset_name}': {e}"
             ) from e
 
-        return self._client.get_dataset(name=self._dataset_name)
+        try:
+            return self._client.get_dataset(name=self._dataset_name)
+        except ApiError as e:
+            raise DatasetError(
+                f"Opik API error while refreshing dataset '{self._dataset_name}' after sync: {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to refresh dataset '{self._dataset_name}' after sync: {e}"
+            ) from e
 
     @staticmethod
     def _merge_items(
@@ -514,6 +523,11 @@ class OpikEvaluationDataset(AbstractDataset):
             raise DatasetError(
                 f"Opik API error while checking dataset '{self._dataset_name}': {e}"
             ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to connect to Opik while checking dataset "
+                f"'{self._dataset_name}': {e}"
+            ) from e
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -541,4 +555,7 @@ class OpikEvaluationDataset(AbstractDataset):
         if isinstance(local_data, str):
             local_data = {"content": local_data}
 
-        return JSONPreview(json.dumps(local_data))
+        try:
+            return JSONPreview(json.dumps(local_data))
+        except (TypeError, ValueError) as e:
+            return JSONPreview(f"Could not serialise local data to JSON: {e}")

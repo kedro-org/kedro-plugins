@@ -354,6 +354,18 @@ class TestUploadItems:
         assert inserted[0]["id"] == eval_items_mixed[0]["id"]  # UUID preserved
         assert "id" not in inserted[1]  # non-UUID stripped
 
+    def test_uuid_id_preserved_when_content_changes(self, dataset_local, mock_remote_dataset):
+        """The same UUID id is forwarded on both uploads even when item content changes."""
+        uuid_id = "550e8400-e29b-41d4-a716-446655440000"
+        first_version = [{"id": uuid_id, "input": {"question": "What is AI?"}}]
+        second_version = [{"id": uuid_id, "input": {"question": "What is Artificial Intelligence?"}}]
+
+        dataset_local._upload_items(mock_remote_dataset, first_version)
+        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_id
+
+        dataset_local._upload_items(mock_remote_dataset, second_version)
+        assert mock_remote_dataset.insert.call_args[0][0][0]["id"] == uuid_id
+
     def test_items_without_id_are_passed_unchanged(self, dataset_local, mock_remote_dataset, eval_items_no_id):
         """Items that have no 'id' key are inserted as-is."""
         dataset_local._upload_items(mock_remote_dataset, eval_items_no_id)
@@ -458,6 +470,24 @@ class TestSyncLocalToRemote:
 
         with patch.object(dataset_local, "_upload_items"):
             with pytest.raises(DatasetError, match="Failed to flush items"):
+                dataset_local._sync_local_to_remote(mock_remote_dataset)
+
+    def test_refresh_api_error_raises_dataset_error(self, dataset_local, mock_opik, mock_remote_dataset):
+        """ApiError from get_dataset() after sync is wrapped in DatasetError."""
+        mock_opik.flush.return_value = None
+        mock_opik.get_dataset.side_effect = make_api_error(500)
+
+        with patch.object(dataset_local, "_upload_items"):
+            with pytest.raises(DatasetError, match="Opik API error while refreshing dataset"):
+                dataset_local._sync_local_to_remote(mock_remote_dataset)
+
+    def test_refresh_connection_error_raises_dataset_error(self, dataset_local, mock_opik, mock_remote_dataset):
+        """Connection error from get_dataset() after sync is wrapped in DatasetError."""
+        mock_opik.flush.return_value = None
+        mock_opik.get_dataset.side_effect = ConnectionRefusedError("Connection refused")
+
+        with patch.object(dataset_local, "_upload_items"):
+            with pytest.raises(DatasetError, match="Failed to refresh dataset"):
                 dataset_local._sync_local_to_remote(mock_remote_dataset)
 
     def test_warns_about_items_without_id(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset, eval_items_no_id):
@@ -702,6 +732,12 @@ class TestExists:
         with pytest.raises(DatasetError, match="Opik API error while checking dataset"):
             dataset_local._exists()
 
+    def test_connection_error_raises_dataset_error(self, dataset_local, mock_opik):
+        """Connection-level errors are wrapped in DatasetError."""
+        mock_opik.get_dataset.side_effect = ConnectionRefusedError("Connection refused")
+        with pytest.raises(DatasetError, match="Failed to connect to Opik while checking dataset"):
+            dataset_local._exists()
+
 
 class TestDescribe:
     """Test the _describe() method."""
@@ -752,3 +788,23 @@ class TestPreview:
     def test_preview_no_filepath(self, dataset_remote):
         """Returns a descriptive message when no filepath is configured."""
         assert "No filepath configured" in str(dataset_remote.preview())
+
+    def test_preview_non_serialisable_data_returns_message(
+        self, tmp_path, mock_credentials, mock_opik
+    ):
+        """Non-JSON-serialisable local data returns a graceful error message instead of raising."""
+        import datetime
+
+        filepath = tmp_path / "eval.json"
+        filepath.write_text(json.dumps([{"input": "x"}]))
+
+        ds = OpikEvaluationDataset(
+            dataset_name="ds",
+            credentials=mock_credentials,
+            filepath=str(filepath),
+        )
+
+        with patch.object(ds.file_dataset, "load", return_value=[{"input": datetime.date(2024, 1, 1)}]):
+            result = str(ds.preview())
+
+        assert "Could not serialise" in result

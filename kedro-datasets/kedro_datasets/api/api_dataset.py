@@ -52,7 +52,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...         }
         ...     },
         ... )
-        >>> data = dataset.load()
+        >>> data = dataset.load()  # doctest: +SKIP
 
         ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
         methods:
@@ -64,7 +64,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...     url="https://dummyjson.com/products/add",
         ...     save_args={"chunk_size": 1},
         ... )
-        >>> dataset.save(example_table)
+        >>> dataset.save(example_table)  # doctest: +SKIP
 
         ``APIDataset`` can automatically persist the output of ``POST`` and ``PUT``
         requests via the ``response_dataset`` parameter. This is useful for auditing,
@@ -97,7 +97,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         ...     method="POST",
         ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},
         ... )
-        >>> response = dataset.save({"key": "value"})
+        >>> response = dataset.save({"key": "value"})  # doctest: +SKIP
         >>> # The response data is automatically saved to response.json
 
     On initialisation, we can specify all the necessary parameters in the save args

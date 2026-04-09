@@ -1,7 +1,16 @@
 # Upcoming Release
+
 ## Major features and improvements
+
 ## Bug fixes and other changes
+
+- Fixed the rendering of the `optuna.StudyDataset` documentation.
+
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 9.3.0
 
@@ -31,13 +40,13 @@
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Priyanka](https://github.com/priya-gitTest)
-[Akumawavez](https://github.com/akumawavez)
-[Joris](https://github.com/jorisvane)
-[Bas-commits](https://github.com/Bas-commits)
-[oomenn](https://github.com/oomenn)
-[Celina](https://github.com/celinaczy)
-[Juanchodpg2](https://github.com/juanchodpg2)
+- [Priyanka](https://github.com/priya-gitTest)
+- [Akumawavez](https://github.com/akumawavez)
+- [Joris](https://github.com/jorisvane)
+- [Bas-commits](https://github.com/Bas-commits)
+- [oomenn](https://github.com/oomenn)
+- [Celina](https://github.com/celinaczy)
+- [Juanchodpg2](https://github.com/juanchodpg2)
 
 # Release 9.2.0
 
@@ -64,7 +73,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Katerina Molchanova](https://github.com/rokatyy)
+- [Katerina Molchanova](https://github.com/rokatyy)
 
 # Release 9.1.1
 

@@ -44,15 +44,15 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>>
         >>>
         >>> dataset = APIDataset(
-        ...     url="https://api.spaceflightnewsapi.net/v4/articles",
-        ...     load_args={
-        ...         "params": {
-        ...             "news_site": "NASA",
-        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # Artemis I
+        ...     url="https://api.spaceflightnewsapi.net/v4/articles",  # doctest: +SKIP
+        ...     load_args={  # doctest: +SKIP
+        ...         "params": {  # doctest: +SKIP
+        ...             "news_site": "NASA",  # doctest: +SKIP
+        ...             "launch": "65896761-b6ca-4df3-9699-e077a360c52a",  # doctest: +SKIP
         ...         }
         ...     },
         ... )
-        >>> data = dataset.load()
+        >>> data = dataset.load()  # doctest: +SKIP
 
         ``APIDataset`` can also be used to save output on a remote server using HTTP(S)
         methods:
@@ -60,9 +60,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         >>> example_table = '{"col1":["val1", "val2"], "col2":["val3", "val4"]}'
         >>>
         >>> dataset = APIDataset(
-        ...     method="POST",
-        ...     url="https://dummyjson.com/products/add",
-        ...     save_args={"chunk_size": 1},
+        ...     method="POST",  # doctest: +SKIP
+        ...     url="https://dummyjson.com/products/add",  # doctest: +SKIP
+        ...     save_args={"chunk_size": 1},  # doctest: +SKIP
         ... )
         >>> dataset.save(example_table)
 
@@ -93,9 +93,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         Or using the Python API:
 
         >>> dataset = APIDataset(
-        ...     url="https://dummyjson.com/products/add",
-        ...     method="POST",
-        ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},
+        ...     url="https://dummyjson.com/products/add",  # doctest: +SKIP
+        ...     method="POST",  # doctest: +SKIP
+        ...     response_dataset={"type": "json.JSONDataset", "filepath": "response.json"},  # doctest: +SKIP
         ... )
         >>> response = dataset.save({"key": "value"})
         >>> # The response data is automatically saved to response.json

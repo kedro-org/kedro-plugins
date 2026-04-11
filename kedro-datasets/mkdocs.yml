@@ -140,9 +140,14 @@ plugins:
 
         Machine Learning and AI:
           - api/kedro_datasets/tensorflow.TensorFlowModelDataset.md: TensorFlow model storage
+          - api/kedro_datasets/huggingface.ArrowDataset.md: Hugging Face local datasets in Arrow format
+          - api/kedro_datasets/huggingface.CSVDataset.md: Hugging Face local datasets in CSV format
+          - api/kedro_datasets/huggingface.HDF5Dataset.md: Hugging Face local datasets in HDF5 format
           - api/kedro_datasets/huggingface.HFDataset.md: Hugging Face remote datasets integration
           - api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md: Hugging Face transformer pipelines
-          - api/kedro_datasets/huggingface.LocalHFDataset.md: Hugging Face local datasets integration
+          - api/kedro_datasets/huggingface.JSONDataset.md: Hugging Face local datasets in JSON format
+          - api/kedro_datasets/huggingface.LanceDataset.md: Hugging Face local datasets in Lance format
+          - api/kedro_datasets/huggingface.ParquetDataset.md: Hugging Face local datasets in Parquet format
 
         Visualization and Plotting:
           - api/kedro_datasets/matplotlib.MatplotlibDataset.md: Matplotlib figure storage
@@ -265,9 +270,14 @@ nav:
         - Holoviews:
           - holoviews.HoloviewsWriter: api/kedro_datasets/holoviews.HoloviewsWriter.md
         - Huggingface:
+          - huggingface.ArrowDataset: api/kedro_datasets/huggingface.ArrowDataset.md
+          - huggingface.CSVDataset: api/kedro_datasets/huggingface.CSVDataset.md
+          - huggingface.HDF5Dataset: api/kedro_datasets/huggingface.HDF5Dataset.md
           - huggingface.HFDataset: api/kedro_datasets/huggingface.HFDataset.md
           - huggingface.HFTransformerPipelineDataset: api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md
-          - huggingface.LocalHFDataset: api/kedro_datasets/huggingface.LocalHFDataset.md
+          - huggingface.JSONDataset: api/kedro_datasets/huggingface.JSONDataset.md
+          - huggingface.LanceDataset: api/kedro_datasets/huggingface.LanceDataset.md
+          - huggingface.ParquetDataset: api/kedro_datasets/huggingface.ParquetDataset.md
         - Ibis:
           - ibis.FileDataset: api/kedro_datasets/ibis.FileDataset.md
           - ibis.TableDataset: api/kedro_datasets/ibis.TableDataset.md

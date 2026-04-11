@@ -37,7 +37,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Major features and improvements
 
-- Replaced `huggingface.LocalHFDataset` with per-format classes: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`, `LanceDataset`, `HDF5Dataset`.
+- Add Hugging Face datasets: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`, `LanceDataset`, `HDF5Dataset`.
 
 ## Bug fixes and other changes
 ## Community contributions

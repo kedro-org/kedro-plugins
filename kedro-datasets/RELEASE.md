@@ -37,12 +37,14 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Major features and improvements
 
-- Added `huggingface.LocalHFDataset` to handle saving and loading from Hugging Face datasets on a filesystem.
+- Replaced `huggingface.LocalHFDataset` with per-format classes: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`, `LanceDataset`, `HDF5Dataset`.
 
 ## Bug fixes and other changes
 ## Community contributions
 
-[iwhalen](https://github.com/iwhalen)
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [iwhalen](https://github.com/iwhalen)
 
 # Release 9.3.0
 

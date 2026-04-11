@@ -17,9 +17,14 @@
               "email.EmailMessageDataset",
               "geopandas.GenericDataset",
               "holoviews.HoloviewsWriter",
+              "huggingface.ArrowDataset",
+              "huggingface.CSVDataset",
+              "huggingface.HDF5Dataset",
               "huggingface.HFDataset",
               "huggingface.HFTransformerPipelineDataset",
-              "huggingface.LocalHFDataset",
+              "huggingface.JSONDataset",
+              "huggingface.LanceDataset",
+              "huggingface.ParquetDataset",
               "ibis.FileDataset",
               "ibis.TableDataset",
               "json.JSONDataset",
@@ -456,7 +461,14 @@
             "if": {
               "properties": {
                 "type": {
-                  "const": "huggingface.LocalHFDataset"
+                  "enum": [
+                    "huggingface.ArrowDataset",
+                    "huggingface.ParquetDataset",
+                    "huggingface.JSONDataset",
+                    "huggingface.CSVDataset",
+                    "huggingface.LanceDataset",
+                    "huggingface.HDF5Dataset"
+                  ]
                 }
               }
             },
@@ -466,12 +478,6 @@
                 "path": {
                   "type": "string",
                   "description": "Path to a directory or file for persisting Hugging Face datasets. Supports local and remote filesystems (e.g. s3://)."
-                },
-                "file_format": {
-                  "type": "string",
-                  "enum": ["arrow", "parquet", "json", "csv", "lance", "hdf5"],
-                  "default": "arrow",
-                  "description": "The file format to use for saving and loading. Defaults to 'arrow'."
                 },
                 "load_args": {
                   "type": "object",

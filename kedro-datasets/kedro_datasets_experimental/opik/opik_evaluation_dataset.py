@@ -304,6 +304,10 @@ class OpikEvaluationDataset(AbstractDataset):
             ) from e
 
     @staticmethod
+    def _strip_id(item: dict[str, Any]) -> dict[str, Any]:
+        return {k: v for k, v in item.items() if k != "id"}
+
+    @staticmethod
     def _validate_items(items: list[dict[str, Any]]) -> None:
         """Validate that all items contain the required ``input`` key.
 
@@ -341,16 +345,16 @@ class OpikEvaluationDataset(AbstractDataset):
             if "id" not in item:
                 items_to_insert.append(item)
             elif not item["id"]:
-                items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+                items_to_insert.append(self._strip_id(item))
             else:
                 try:
                     parsed = uuid.UUID(str(item["id"]))
                     if parsed.version == REQUIRED_UUID_VERSION:
                         items_to_insert.append(item)  # valid UUID v7 — preserve id
                     else:
-                        items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+                        items_to_insert.append(self._strip_id(item))
                 except ValueError:
-                    items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+                    items_to_insert.append(self._strip_id(item))
         try:
             dataset.insert(items_to_insert)
         except ApiError as e:

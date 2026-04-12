@@ -1,6 +1,6 @@
 import datetime
 import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import pytest
 import yaml
@@ -342,7 +342,7 @@ class TestUploadItems:
         assert inserted[0]["input"] == eval_items[0]["input"]
         assert inserted[0]["expected_output"] == eval_items[0]["expected_output"]
 
-    def test_valid_uuid_ids_are_preserved(self, dataset_local, mock_remote_dataset, eval_items_uuid):
+    def test_valid_uuidv7_ids_are_preserved(self, dataset_local, mock_remote_dataset, eval_items_uuid):
         """Valid UUID IDs are forwarded to Opik unchanged."""
         dataset_local._upload_items(mock_remote_dataset, eval_items_uuid)
 

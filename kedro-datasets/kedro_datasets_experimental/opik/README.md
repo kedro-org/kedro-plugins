@@ -490,11 +490,12 @@ The local file and `save()` data must be a list of dicts:
   }
 ]
 ```
+("q1" is used for local deduplication only, as it is not a UUID v7 and will be stripped on upload)
 
 | Field | Required | Notes |
 |-------|----------|-------|
 | `input` | Yes | The evaluation input payload |
-| `id` | No | Used for local deduplication. If `id` is a valid **UUID v7** it is forwarded to Opik, giving the remote row a stable identity. Opik requires UUID v7 for item IDs — all other values (human-readable strings, UUIDs of other versions, `None`, or empty string) are stripped before upload and Opik auto-generates a UUID v7. Items without a stable UUID v7 `id` create new remote rows on every sync. |
+| `id` | No | Used for local deduplication. Upload behaviour depends on the value: **valid UUID v7** — forwarded to Opik; Opik's API upserts by item ID, so the first sync creates the remote row and subsequent syncs update it in-place (changed content replaces the row; unchanged content is a no-op). **All other values** (human-readable strings, other UUID versions, `None`, empty string, or absent) — stripped before upload; Opik auto-generates a new UUID v7 every sync, so a new remote row is created on every sync regardless of content. |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 
@@ -502,7 +503,7 @@ The local file and `save()` data must be a list of dicts:
 
 | Policy | Local File | Remote (Opik) | Use Case |
 |--------|------------|---------------|----------|
-| **`local`** (default) | Source of truth | Re-inserted from local on every `load()`. Unchanged items are deduplicated by content hash; changed items create new remote rows. | Authoring, development, initial seeding |
+| **`local`** (default) | Source of truth | All local items are re-inserted on every `load()` via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place; items without a UUID v7 `id` receive a new auto-generated UUID on every sync and create a new remote row each time. | Authoring, development, initial seeding |
 | **`remote`** | Not touched | Source of truth | Production, read-only experiments |
 
 > **Note on `remote` mode and empty datasets:** `sync_policy="remote"` never pushes items from the local file to Opik. If the remote dataset does not exist yet, `load()` creates it empty and returns it with no items — experiments run against it will have nothing to evaluate. Before using remote mode, ensure the dataset has been populated by either running with `sync_policy="local"` at least once, or creating and populating the dataset directly via the Opik UI.
@@ -632,6 +633,8 @@ DatasetError: Dataset item at index 0 is missing required 'input' key.
 
 `OpikEvaluationDataset` and `LangfuseEvaluationDataset` share the same constructor signature and local file format. Migrating is a catalog swap plus evaluation pipeline node changes.
 
+> **Item identity behaves differently between platforms.** Langfuse forwards any string `id` to the API for upsert. Opik only forwards `id` values that are valid UUID v7 — all others are stripped and Opik auto-generates a new UUID v7 on every sync, creating a new remote row each time. If your local items use human-readable or non-UUID v7 `id` values, those items will accumulate new remote rows on every sync after migrating. To preserve stable remote identity, update your item `id` fields to valid UUID v7 values before switching to Opik.
+
 ### Step 1 - Update the catalog entry
 
 | | Langfuse | Opik |
@@ -737,13 +740,13 @@ def my_task(dataset_item: dict) -> dict:
 - `dataset_name`, `filepath`, `sync_policy`, `metadata` constructor params
 - Local file format (item schema is identical)
 - Context nodes that don't interact with the evaluation dataset
-- Sync semantics: `local` re-inserts from local file on every load (content-hash dedup); `remote` fetches as-is
+- Sync semantics: `local` re-inserts from local file on every load (upsert-by-ID: UUID v7 items update in-place, non-UUID items create new rows each sync); `remote` fetches as-is
 
 ### Known limitations
 
 - **`metadata` is local-only**: Opik's `create_dataset()` does not accept a `metadata` argument. The `metadata` param is stored and returned by `_describe()` but is not propagated to the remote dataset (unlike Langfuse, which passes it through).
 - **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `LangfuseEvaluationDataset` has no Opik equivalent.
-- **UUID v7 `id` values are stable remotely; all others are not**: If a local item's `id` is a valid UUID v7, it is forwarded to Opik and the remote row keeps that identity. Opik requires UUID v7 for item IDs — human-readable strings, UUIDs of other versions (e.g. v4), `None`, and empty values are all stripped before upload. Opik auto-generates a UUID v7 in those cases, so those rows will not have a stable remote identity across syncs.
+- **UUID v7 `id` values are forwarded; Opik upserts by item ID**: If a local item's `id` is a valid UUID v7, it is passed to Opik's `create_or_update` API, which upserts by item ID — the first sync creates the remote row; subsequent syncs update that same row in-place (content changes replace the row; unchanged content is a no-op). Items without a valid UUID v7 `id` have it stripped before upload; Opik auto-generates a new UUID v7 each sync, so those items create a new remote row on every sync, even when the content is unchanged.
 
 ### Support
 

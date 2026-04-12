@@ -37,11 +37,12 @@ class OpikEvaluationDataset(AbstractDataset):
 
     - **On load:** Creates the remote dataset if it does not exist,
       synchronises based on ``sync_policy``, and returns an ``opik.Dataset``.
-    - **On save:** Inserts all items to the remote dataset. Unchanged items
-      are deduplicated by the Opik SDK (content hash); changed items create
-      new remote rows. In ``local`` mode, items are also merged into the
-      local file (new items take precedence). In ``remote`` mode, only the
-      remote insert occurs.
+    - **On save:** Inserts all items to the remote dataset via Opik's
+      upsert-by-ID API. Items with a UUID v7 ``id`` update the existing
+      remote row in-place; items without a UUID v7 ``id`` create a new
+      remote row on every call. In ``local`` mode, items are also merged
+      into the local file (new items take precedence). In ``remote`` mode,
+      only the remote insert occurs.
 
     **Item format:**
 
@@ -49,13 +50,18 @@ class OpikEvaluationDataset(AbstractDataset):
     accepts the following keys:
 
     - ``input`` (**required**) — the evaluation input payload.
-    - ``id`` — stable identifier used for local deduplication. If ``id`` is
-      a valid **UUID v7** it is forwarded to Opik, giving the remote row a
-      stable identity. Opik requires UUID v7 for item IDs; all other values
-      (human-readable strings, UUIDs of other versions, ``None``, or empty
-      string) are stripped before upload — Opik auto-generates a UUID v7 in
-      those cases. Items without an ``id`` are uploaded without one and Opik
-      assigns a UUID v7 automatically.
+    - ``id`` — identifier used for local deduplication. The upload
+      behaviour depends on whether ``id`` is a valid UUID v7:
+
+      - **Valid UUID v7**: forwarded to Opik. Opik's API upserts by item
+        ID — the first sync creates the remote row; subsequent syncs
+        update that same row in-place if the content has changed.
+        The remote row keeps the same UUID across all syncs.
+      - **All other values** (human-readable strings, UUIDs of other
+        versions, ``None``, empty string, or no ``id`` key): stripped
+        before upload. Opik auto-generates a new UUID v7 on every sync,
+        so a **new remote row is created on every sync** regardless of
+        whether the content has changed.
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
 
@@ -69,16 +75,24 @@ class OpikEvaluationDataset(AbstractDataset):
       }
     ]
     ```
+    ("q1" is used for local deduplication only, as it is not a UUID v7 and will be stripped on upload)
 
     **Sync policies:**
 
     - **local** (default): The local file is the source of truth. On
       ``load()``, all local items are re-inserted to remote on every sync.
-      The Opik SDK deduplicates by content hash — items whose content has
-      not changed since the last sync are ignored. If a local item's content
-      changes (even when its ``id`` is kept the same), a new remote row is
-      added; the previous version is **not** replaced. ``save()`` inserts to
-      remote and merges into the local file (new data takes precedence).
+      Opik's API upserts by item ID, so the outcome depends on whether
+      each item carries a UUID v7 ``id``:
+
+      - Items with a UUID v7 ``id`` are updated in-place on the remote —
+        content changes replace the existing row; unchanged items are
+        a no-op.
+      - Items without a UUID v7 ``id`` (non-UUID values are stripped)
+        receive a new auto-generated UUID v7 on every sync, creating a
+        **new remote row each time**, even if the content is unchanged.
+
+      ``save()`` inserts to remote and merges into the local file (new
+      data takes precedence).
     - **remote**: The remote Opik dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
       interaction. ``save()`` inserts all items to remote without writing
@@ -137,6 +151,8 @@ class OpikEvaluationDataset(AbstractDataset):
                 {"id": "q1", "input": {"text": "cancel order"}, "expected_output": "cancel"},
             ]
         )
+
+        # Same as in the other example, "q1" is not a UUID v7 and will be stripped on upload
         ```
     """
 
@@ -303,15 +319,16 @@ class OpikEvaluationDataset(AbstractDataset):
     def _upload_items(self, dataset: Dataset, items: list[dict[str, Any]]) -> None:
         """Insert items into the remote Opik dataset.
 
-        If an item's ``id`` is a valid **UUID v7** it is forwarded as-is,
-        giving the remote row a stable identity. Opik requires UUID v7 for
-        item IDs; all other values (human-readable strings, UUIDs of other
-        versions, ``None``, or empty string) are stripped before upload —
-        Opik auto-generates a UUID v7 in those cases. Items with no ``id``
-        are uploaded without one and Opik assigns a UUID v7 automatically.
+        Upload behaviour depends on whether an item carries a UUID v7 ``id``:
 
-        Deduplication is content-hash-based. Unchanged items are no-ops
-        regardless of whether an ``id`` is present.
+        - **Valid UUID v7**: forwarded to Opik. Opik's REST API calls
+          ``create_or_update`` by item ID — the first call creates the
+          remote row; subsequent calls update that same row in-place if
+          the content has changed.
+        - **All other values** (human-readable strings, UUIDs of other
+          versions, ``None``, empty string, or no ``id`` key): stripped
+          before upload. Opik auto-generates a new UUID v7, so a **new
+          remote row is created on every call**, even for unchanged content.
 
         Callers are responsible for validating items before calling this method.
 
@@ -462,9 +479,11 @@ class OpikEvaluationDataset(AbstractDataset):
         """Load the Opik dataset, syncing local items to remote if sync_policy is ``local``.
 
         Creates the remote dataset if it does not exist. In ``local`` mode, all
-        local items are re-inserted to remote on every load. The Opik SDK
-        deduplicates by content hash — unchanged items are no-ops; changed items
-        (even with the same local ``id``) create new remote rows.
+        local items are re-inserted to remote on every load via Opik's
+        ``create_or_update`` API (upsert by item ID). Items with a UUID v7
+        ``id`` update the existing remote row in-place; items without a UUID v7
+        ``id`` receive a new auto-generated UUID v7 and create a new remote row
+        on every load.
 
         Returns:
             Dataset: The Opik dataset ready for use in experiments.

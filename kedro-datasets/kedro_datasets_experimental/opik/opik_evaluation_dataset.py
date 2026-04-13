@@ -342,6 +342,11 @@ class OpikEvaluationDataset(AbstractDataset):
           remote row is updated in-place, while no new row is created.
         - **All other values** (human-readable strings, UUIDs of other
           versions, ``None``, empty string, or no ``id`` key): stripped
+          before upload. Opik auto-generates a new UUID v7. Unchanged
+          content is deduplicated by content hash (no-op), but changed
+          content creates a **new remote row** while the previous one
+          remains.
+          versions, ``None``, empty string, or no ``id`` key): stripped
           before upload. Opik auto-generates a new UUID v7, so a **new
           remote row is created on every call**. Whenever content changes,
           a new remote row will be created while the previous one remains.

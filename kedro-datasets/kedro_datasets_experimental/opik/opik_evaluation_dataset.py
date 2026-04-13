@@ -506,6 +506,9 @@ class OpikEvaluationDataset(AbstractDataset):
         ``create_or_update`` API (upsert by item ID). On items with a valid UUID v7
         ``id``, update the existing remote row in-place, and no new row is created.
         On items where the ``id`` is not a valid UUID v7 (including missing, ``None``, or empty),
+        the ``id`` is stripped before upload and Opik auto-generates a new UUID v7.
+        Unchanged content is deduplicated (no-op), but changed content creates a
+        new remote row while the previous one remains.
         the ``id`` is stripped before upload and Opik auto-generates a new UUID v7,
         so a new remote row is created on every load.
 

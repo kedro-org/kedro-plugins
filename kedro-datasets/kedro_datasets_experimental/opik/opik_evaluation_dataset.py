@@ -95,6 +95,9 @@ class OpikEvaluationDataset(AbstractDataset):
         content changes replace the existing row; unchanged items are
         a no-op.
       - Items without a UUID v7 ``id`` (non-UUID values are stripped)
+        are deduplicated by content hash — unchanged content is a no-op,
+        but changed content creates a **new remote row** (the previous
+        row remains), leading to row accumulation over time.
         receive a new auto-generated UUID v7 on every sync, creating a
         **new remote row each time**, even if the content is unchanged.
 

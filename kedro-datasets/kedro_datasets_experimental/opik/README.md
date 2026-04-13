@@ -495,7 +495,7 @@ The local file and `save()` data must be a list of dicts:
 | Field | Required | Notes |
 |-------|----------|-------|
 | `input` | Yes | The evaluation input payload |
-| `id` | No | Used for local deduplication. Upload behaviour depends on the value: **valid UUID v7** — forwarded to Opik; Opik's API upserts by item ID, so the first sync creates the remote row and subsequent syncs update it in-place (when the content is changed, the already existing row is updated). **All other values** (human-readable strings, other UUID versions, `None`, empty string, or absent) — stripped before upload; Opik auto-generates a new UUID v7 every sync, so a new remote row is created on every sync regardless of content, while the already existing row remains in place. |
+| `id` | No | Used for local deduplication. Upload behaviour depends on the value: **valid UUID v7** — forwarded to Opik; Opik's API upserts by item ID, so the first sync creates the remote row and subsequent syncs update it in-place (when the content is changed, the already existing row is updated). **All other values** (human-readable strings, other UUID versions, `None`, empty string, or absent) — stripped before upload; Opik auto-generates a new UUID v7 every sync. Unchanged content is deduplicated by content hash (no-op), but changed content creates a new remote row while the previous one remains, leading to row accumulation over time. |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 

@@ -59,7 +59,12 @@ class OpikEvaluationDataset(AbstractDataset):
         The remote row keeps the same UUID across all syncs. Whenever
         content changes, the existing remote row is updated in-place,
         while no new row is created.
-      - **All other values** (human-readable strings, UUIDs of other
+     - **All other values** (human-readable strings, UUIDs of other
+        versions, ``None``, empty string, or no ``id`` key): stripped
+        before upload. Opik auto-generates a new UUID v7. Unchanged
+        content is deduplicated by content hash (no-op), but changed
+        content creates a **new remote row** while the previous one
+        remains, leading to row accumulation over time.
         versions, ``None``, empty string, or no ``id`` key): stripped
         before upload. Opik auto-generates a new UUID v7 on every sync,
         so a **new remote row is created on every sync**. Whenever content

@@ -495,7 +495,7 @@ The local file and `save()` data must be a list of dicts:
 | Field | Required | Notes |
 |-------|----------|-------|
 | `input` | Yes | The evaluation input payload |
-| `id` | No | Used for local deduplication. Upload behaviour depends on the value: **valid UUID v7** — forwarded to Opik; Opik's API upserts by item ID, so the first sync creates the remote row and subsequent syncs update it in-place (changed content replaces the row; unchanged content is a no-op). **All other values** (human-readable strings, other UUID versions, `None`, empty string, or absent) — stripped before upload; Opik auto-generates a new UUID v7 every sync, so a new remote row is created on every sync regardless of content. |
+| `id` | No | Used for local deduplication. Upload behaviour depends on the value: **valid UUID v7** — forwarded to Opik; Opik's API upserts by item ID, so the first sync creates the remote row and subsequent syncs update it in-place (when the content is changed, the already existing row is updated). **All other values** (human-readable strings, other UUID versions, `None`, empty string, or absent) — stripped before upload; Opik auto-generates a new UUID v7 every sync, so a new remote row is created on every sync regardless of content, while the already existing row remains in place. |
 | `expected_output` | No | Ground-truth value for scoring |
 | `metadata` | No | Arbitrary metadata dict attached to the item |
 
@@ -503,7 +503,7 @@ The local file and `save()` data must be a list of dicts:
 
 | Policy | Local File | Remote (Opik) | Use Case |
 |--------|------------|---------------|----------|
-| **`local`** (default) | Source of truth | All local items are re-inserted on every `load()` via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place; items without a UUID v7 `id` receive a new auto-generated UUID on every sync and create a new remote row each time. | Authoring, development, initial seeding |
+| **`local`** (default) | Source of truth | All local items are re-inserted on every `load()` via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place, without creating a new row; items without a UUID v7 `id` receive a new auto-generated UUID on every sync and create a new remote row each time, while the previous row still remains. | Authoring, development, initial seeding |
 | **`remote`** | Not touched | Source of truth | Production, read-only experiments |
 
 > **Note on `remote` mode and empty datasets:** `sync_policy="remote"` never pushes items from the local file to Opik. If the remote dataset does not exist yet, `load()` creates it empty and returns it with no items — experiments run against it will have nothing to evaluate. Before using remote mode, ensure the dataset has been populated by either running with `sync_policy="local"` at least once, or creating and populating the dataset directly via the Opik UI.

@@ -503,7 +503,7 @@ The local file and `save()` data must be a list of dicts:
 
 | Policy | Local File | Remote (Opik) | Use Case |
 |--------|------------|---------------|----------|
-| **`local`** (default) | Source of truth | All local items are re-inserted on every `load()` via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place, without creating a new row; items without a UUID v7 `id` receive a new auto-generated UUID on every sync and create a new remote row each time, while the previous row still remains. | Authoring, development, initial seeding |
+| **`local`** (default) | Source of truth | All local items are re-inserted on every `load()` via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place, without creating a new row; items without a UUID v7 `id` are deduplicated by content hash — unchanged content is a no-op, but changed content creates a new remote row (the previous row remains), leading to row accumulation over time. | Authoring, development, initial seeding |
 | **`remote`** | Not touched | Source of truth | Production, read-only experiments |
 
 > **Note on `remote` mode and empty datasets:** `sync_policy="remote"` never pushes items from the local file to Opik. If the remote dataset does not exist yet, `load()` creates it empty and returns it with no items — experiments run against it will have nothing to evaluate. Before using remote mode, ensure the dataset has been populated by either running with `sync_policy="local"` at least once, or creating and populating the dataset directly via the Opik UI.

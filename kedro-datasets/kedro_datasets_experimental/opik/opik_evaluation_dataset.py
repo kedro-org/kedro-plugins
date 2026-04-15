@@ -65,10 +65,7 @@ class OpikEvaluationDataset(AbstractDataset):
         content is deduplicated by content hash (no-op), but changed
         content creates a **new remote row** while the previous one
         remains, leading to row accumulation over time.
-        versions, ``None``, empty string, or no ``id`` key): stripped
-        before upload. Opik auto-generates a new UUID v7 on every sync,
-        so a **new remote row is created on every sync**. Whenever content
-        changes, a new remote row will be created while the previous one remains.
+
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
 

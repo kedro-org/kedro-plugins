@@ -95,8 +95,6 @@ class OpikEvaluationDataset(AbstractDataset):
         are deduplicated by content hash — unchanged content is a no-op,
         but changed content creates a **new remote row** (the previous
         row remains), leading to row accumulation over time.
-        receive a new auto-generated UUID v7 on every sync, creating a
-        **new remote row each time**, even if the content is unchanged.
 
       ``save()`` inserts to remote and merges into the local file (new
       data takes precedence).

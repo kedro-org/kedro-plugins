@@ -53,18 +53,18 @@ class OpikEvaluationDataset(AbstractDataset):
     - ``id`` — identifier used for local deduplication. The upload
       behaviour depends on whether ``id`` is a valid UUID v7:
 
-      - **Valid UUID v7**: forwarded to Opik. Opik's API upserts by item
-        ID — the first sync creates the remote row; subsequent syncs
-        update that same row in-place if the content has changed.
-        The remote row keeps the same UUID across all syncs. Whenever
-        content changes, the existing remote row is updated in-place,
-        while no new row is created.
-     - **All other values** (human-readable strings, UUIDs of other
-        versions, ``None``, empty string, or no ``id`` key): stripped
-        before upload. Opik auto-generates a new UUID v7. Unchanged
-        content is deduplicated by content hash (no-op), but changed
-        content creates a **new remote row** while the previous one
-        remains, leading to row accumulation over time.
+        - **Valid UUID v7**: forwarded to Opik. Opik's API upserts by item
+          ID — the first sync creates the remote row; subsequent syncs
+          update that same row in-place if the content has changed.
+          The remote row keeps the same UUID across all syncs. Whenever
+          content changes, the existing remote row is updated in-place,
+          while no new row is created.
+        - **All other values** (human-readable strings, UUIDs of other
+          versions, ``None``, empty string, or no ``id`` key): stripped
+          before upload. Opik auto-generates a new UUID v7. Unchanged
+          content is deduplicated by content hash (no-op), but changed
+          content creates a **new remote row** while the previous one
+          remains, leading to row accumulation over time.
 
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
@@ -88,13 +88,13 @@ class OpikEvaluationDataset(AbstractDataset):
       Opik's API upserts by item ID, so the outcome depends on whether
       each item carries a UUID v7 ``id``:
 
-      - Items with a UUID v7 ``id`` are updated in-place on the remote —
-        content changes replace the existing row; unchanged items are
-        a no-op.
-      - Items without a UUID v7 ``id`` (non-UUID values are stripped)
-        are deduplicated by content hash — unchanged content is a no-op,
-        but changed content creates a **new remote row** (the previous
-        row remains), leading to row accumulation over time.
+        - Items with a UUID v7 ``id`` are updated in-place on the remote —
+          content changes replace the existing row; unchanged items are
+          a no-op.
+        - Items without a UUID v7 ``id`` (non-UUID values are stripped)
+          are deduplicated by content hash — unchanged content is a no-op,
+          but changed content creates a **new remote row** (the previous
+          row remains), leading to row accumulation over time.
 
       ``save()`` inserts to remote and merges into the local file (new
       data takes precedence).

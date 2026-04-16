@@ -94,17 +94,17 @@ class OpikEvaluationDataset(AbstractDataset):
         - Items without a UUID v7 ``id`` (non-UUID values are stripped)
           are deduplicated by content hash — unchanged content is a no-op,
           but changed content creates a **new remote row** (the previous
-          row remains), leading to row accumulation over time.
+          row remains), leading to row accumulation over time. 
+          ``save()`` inserts to remote and merges into the local file (new
+          data takes precedence).
 
-      ``save()`` inserts to remote and merges into the local file (new
-      data takes precedence).
     - **remote**: The remote Opik dataset is the sole source of truth.
-      ``load()`` fetches the remote dataset as-is with no local file
-      interaction. ``save()`` inserts all items to remote without writing
-      to any local file. If the remote dataset does not exist yet, it is
-      created empty — **no items are pushed from the local file**. To seed
-      a new remote dataset, run with ``sync_policy="local"`` at least once,
-      or create and populate the dataset directly via the Opik UI.
+        ``load()`` fetches the remote dataset as-is with no local file
+        interaction. ``save()`` inserts all items to remote without writing
+        to any local file. If the remote dataset does not exist yet, it is
+        created empty — **no items are pushed from the local file**. To seed
+        a new remote dataset, run with ``sync_policy="local"`` at least once,
+        or create and populate the dataset directly via the Opik UI.
 
     Examples:
         Using catalog YAML configuration:

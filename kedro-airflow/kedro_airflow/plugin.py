@@ -163,7 +163,8 @@ def create(  # noqa: PLR0913, PLR0912
         raise click.BadParameter(
             "The `--all` and `--pipeline` option are mutually exclusive."
         )
-    with KedroSession.create(project_path=metadata.project_path, env=env) as session:
+    session = KedroSession.create(project_path=metadata.project_path, env=env)
+    with session:
         context = session.load_context()
         config_airflow = _load_config(context)
 

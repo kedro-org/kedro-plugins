@@ -1,5 +1,12 @@
 # Upcoming Release
 ## Major features and improvements
+
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
 ## Bug fixes and other changes
 ## Community contributions
 

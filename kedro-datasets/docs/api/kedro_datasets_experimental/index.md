@@ -17,6 +17,7 @@ Name | Description
 [mlrun.MLRunDataframeDataset](mlrun.MLRunDataframeDataset.md) | ``MLRunDataframeDataset`` saves and loads pandas DataFrames as MLRun artifacts.
 [mlrun.MLRunResult](mlrun.MLRunResult.md) | ``MLRunResult`` logs scalar results and metrics to MLRun with optional nested dict flattening.
 [netcdf.NetCDFDataset](netcdf.NetCDFDataset.md) | ``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
+[opik.OpikEvaluationDataset](opik.OpikEvaluationDataset.md) | ``OpikEvaluationDataset`` manages Opik evaluation datasets for LLM experiment workflows.
 [opik.OpikPromptDataset](opik.OpikPromptDataset.md) | ``OpikPromptDataset`` manages prompts with Opik versioning support, returning either raw SDK objects or LangChain templates.
 [opik.OpikTraceDataset](opik.OpikTraceDataset.md) | ``OpikTraceDataset`` provides Opik tracing clients for observability and monitoring.
 [optuna.StudyDataset](optuna.StudyDataset.md) | ``StudyDataset`` loads/saves an Optuna study, enabling distributed hyperparameter tuning.

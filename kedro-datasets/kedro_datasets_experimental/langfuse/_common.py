@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 from kedro.io import DatasetError
 
@@ -76,7 +76,7 @@ def validate_file_extension(filepath: str | Path) -> None:
         )
 
 
-def create_file_dataset(filepath: str | Path) -> Union["JSONDataset", "YAMLDataset"]:
+def create_file_dataset(filepath: str | Path) -> JSONDataset | YAMLDataset:
     """Create the appropriate Kedro file dataset for *filepath*.
 
     Args:
@@ -97,7 +97,7 @@ def create_file_dataset(filepath: str | Path) -> Union["JSONDataset", "YAMLDatas
 
 def build_preview(
     filepath: Path | None,
-    file_dataset: Union["JSONDataset", "YAMLDataset", None] = None,
+    file_dataset: JSONDataset | YAMLDataset | None = None,
 ) -> JSONPreview:
     """Build a JSON-compatible preview of local file data for Kedro-Viz.
 

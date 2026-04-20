@@ -237,7 +237,7 @@ class LangfusePromptDataset(AbstractDataset):
         self._file_dataset = None
         self._cached_build_args = None
 
-    def _validate_init_params(  # noqa: PLR0913
+    def _validate_init_params(  # noqa: PLR0912, PLR0913
         self,
         filepath: str,
         credentials: dict[str, Any],

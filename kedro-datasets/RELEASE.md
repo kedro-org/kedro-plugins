@@ -8,6 +8,9 @@
 | `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
+
+- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`LangfusePromptDataset`, `LangfuseEvaluationDataset`, `LangfuseTraceDataset`) into a common `langfuse._common` module.
+
 ## Community contributions
 
 # Release 9.3.0

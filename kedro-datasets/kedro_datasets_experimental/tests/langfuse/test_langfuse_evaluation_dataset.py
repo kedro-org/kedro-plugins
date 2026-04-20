@@ -15,8 +15,8 @@ from kedro_datasets_experimental.langfuse._common import (
     validate_sync_policy,
 )
 from kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset import (
-    LangfuseEvaluationDataset,
     VALID_SYNC_POLICIES,
+    LangfuseEvaluationDataset,
 )
 
 MODULE = "kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset"

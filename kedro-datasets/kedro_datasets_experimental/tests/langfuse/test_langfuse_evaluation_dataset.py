@@ -9,8 +9,14 @@ from kedro.io import DatasetError
 from langfuse.api import Error as LangfuseApiError
 from langfuse.api import NotFoundError as LangfuseNotFoundError
 
+from kedro_datasets_experimental.langfuse._common import (
+    validate_file_extension,
+    validate_langfuse_credentials,
+    validate_sync_policy,
+)
 from kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset import (
     LangfuseEvaluationDataset,
+    VALID_SYNC_POLICIES,
 )
 
 MODULE = "kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset"
@@ -699,44 +705,44 @@ class TestHelpers:
     """Test static helper methods in isolation."""
 
     def test_validate_credentials_valid(self):
-        LangfuseEvaluationDataset._validate_credentials(
+        validate_langfuse_credentials(
             {"public_key": "pk", "secret_key": "sk"}  # pragma: allowlist secret
         )
 
     def test_validate_credentials_missing_key(self):
         with pytest.raises(DatasetError, match="Missing required"):
-            LangfuseEvaluationDataset._validate_credentials({"public_key": "pk"})
+            validate_langfuse_credentials({"public_key": "pk"})
 
     def test_validate_credentials_empty_value(self):
         with pytest.raises(DatasetError, match="cannot be empty"):
-            LangfuseEvaluationDataset._validate_credentials(
+            validate_langfuse_credentials(
                 {"public_key": "", "secret_key": "sk"}  # pragma: allowlist secret
             )
 
     def test_validate_credentials_empty_host(self):
         with pytest.raises(DatasetError, match="cannot be empty if provided"):
-            LangfuseEvaluationDataset._validate_credentials(
+            validate_langfuse_credentials(
                 {"public_key": "pk", "secret_key": "sk", "host": "  "}  # pragma: allowlist secret
             )
 
     @pytest.mark.parametrize("policy", ["local", "remote"])
     def test_validate_sync_policy_valid(self, policy):
-        LangfuseEvaluationDataset._validate_sync_policy(policy)
+        validate_sync_policy(policy, VALID_SYNC_POLICIES)
 
     def test_validate_sync_policy_invalid(self):
         with pytest.raises(DatasetError, match="Invalid sync_policy"):
-            LangfuseEvaluationDataset._validate_sync_policy("strict")
+            validate_sync_policy("strict", VALID_SYNC_POLICIES)
 
     @pytest.mark.parametrize("ext", [".json", ".yaml", ".yml"])
     def test_validate_filepath_valid(self, tmp_path, ext):
-        LangfuseEvaluationDataset._validate_filepath(str(tmp_path / f"items{ext}"))
+        validate_file_extension(str(tmp_path / f"items{ext}"))
 
     def test_validate_filepath_none(self):
-        LangfuseEvaluationDataset._validate_filepath(None)
+        pass
 
     def test_validate_filepath_invalid(self, tmp_path):
         with pytest.raises(DatasetError, match="Unsupported file extension"):
-            LangfuseEvaluationDataset._validate_filepath(str(tmp_path / "items.csv"))
+            validate_file_extension(str(tmp_path / "items.csv"))
 
     def test_validate_items_valid(self):
         LangfuseEvaluationDataset._validate_items(

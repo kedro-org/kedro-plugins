@@ -8,8 +8,9 @@
 | `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
+- Added `os.PathLike` support for `plotly` datasets.
 ## Community contributions
-
+- [Datascienceio](https://github.com/datascienceio)
 # Release 9.3.0
 
 ## Major features and improvements

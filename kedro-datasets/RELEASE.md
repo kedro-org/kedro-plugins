@@ -8,8 +8,9 @@
 | `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
+- Updated filepath type for the Plotly related information in Kedro-datasets. Directly evaluate Path rather than string , hence posix-related term was deleted
 ## Community contributions
-
+- [Datascienceio](github.com/datascienceio)
 # Release 9.3.0
 
 ## Major features and improvements

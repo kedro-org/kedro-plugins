@@ -181,11 +181,11 @@ class TestOpikPromptDatasetInit:
             )
 
     def test_init_unsupported_file_extension(self, tmp_path, mock_opik):
-        """Test initialisation with unsupported file extension raises NotImplementedError."""
+        """Test initialisation with unsupported file extension raises DatasetError."""
         unsupported_file = tmp_path / "prompt.txt"
         unsupported_file.write_text("test prompt")
 
-        with pytest.raises(NotImplementedError, match="Unsupported file extension '.txt'"):
+        with pytest.raises(DatasetError, match="Unsupported file extension '.txt'"):
             OpikPromptDataset(
                 filepath=str(unsupported_file),
                 prompt_name="test-prompt",
@@ -592,7 +592,7 @@ class TestOpikPromptDatasetUtilityMethods:
         )
 
         preview = dataset.preview()
-        assert "Local prompt file does not exist" in str(preview)
+        assert "Local file does not exist" in str(preview)
 
     def test_ensure_dataset_exists_creates_new(self, filepath_json_chat, mock_credentials, mock_opik):
         """Test that _ensure_dataset_exists creates dataset if it doesn't exist."""

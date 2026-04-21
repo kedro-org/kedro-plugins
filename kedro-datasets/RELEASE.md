@@ -8,9 +8,15 @@
 | `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
+
 - Refactored shared validation and utility logic from the three Opik experimental datasets (`OpikPromptDataset`, `OpikEvaluationDataset`, `OpikTraceDataset`) into a common `opik._common` module.
+- Added `os.PathLike` support for `plotly` datasets.
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Datascienceio](https://github.com/datascienceio)
 
 # Release 9.3.0
 

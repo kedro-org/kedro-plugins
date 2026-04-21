@@ -11,13 +11,20 @@ from opik.rest_api.core.api_error import ApiError
 
 from kedro_datasets._typing import JSONPreview
 
+from ._common import (
+    build_preview,
+    create_file_dataset,
+    validate_credentials,
+    validate_file_extension,
+    validate_sync_policy,
+)
+
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 REQUIRED_OPIK_CREDENTIALS = {"api_key"}
 OPTIONAL_OPIK_CREDENTIALS = {"workspace", "host", "project_name"}
 VALID_SYNC_POLICIES = {"local", "remote"}
@@ -210,47 +217,10 @@ class OpikEvaluationDataset(AbstractDataset):
         filepath: str | None,
         sync_policy: str,
     ) -> None:
-        OpikEvaluationDataset._validate_credentials(credentials)
-        OpikEvaluationDataset._validate_sync_policy(sync_policy)
-        OpikEvaluationDataset._validate_filepath(filepath)
-
-    @staticmethod
-    def _validate_credentials(credentials: dict[str, str]) -> None:
-        for key in REQUIRED_OPIK_CREDENTIALS:
-            if key not in credentials:
-                raise DatasetError(
-                    f"Missing required Opik credential: '{key}'."
-                )
-            if not credentials[key] or not str(credentials[key]).strip():
-                raise DatasetError(
-                    f"Opik credential '{key}' cannot be empty."
-                )
-        for key in OPTIONAL_OPIK_CREDENTIALS:
-            if key in credentials and (
-                not credentials[key] or not str(credentials[key]).strip()
-            ):
-                raise DatasetError(
-                    f"Opik credential '{key}' cannot be empty if provided."
-                )
-
-    @staticmethod
-    def _validate_sync_policy(sync_policy: str) -> None:
-        if sync_policy not in VALID_SYNC_POLICIES:
-            raise DatasetError(
-                f"Invalid sync_policy '{sync_policy}'. "
-                f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
-            )
-
-    @staticmethod
-    def _validate_filepath(filepath: str | None) -> None:
-        if filepath is None:
-            return
-        suffix = Path(filepath).suffix.lower()
-        if suffix not in SUPPORTED_FILE_EXTENSIONS:
-            raise DatasetError(
-                f"Unsupported file extension '{suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}."
-            )
+        validate_credentials(credentials, REQUIRED_OPIK_CREDENTIALS, OPTIONAL_OPIK_CREDENTIALS)
+        validate_sync_policy(sync_policy, VALID_SYNC_POLICIES)
+        if filepath is not None:
+            validate_file_extension(filepath)
 
     @property
     def file_dataset(self) -> "JSONDataset | YAMLDataset":
@@ -258,13 +228,7 @@ class OpikEvaluationDataset(AbstractDataset):
         if not self._filepath:
             raise DatasetError("filepath must be provided for file dataset operations.")
         if self._file_dataset is None:
-            suffix = self._filepath.suffix.lower()
-            if suffix in (".yaml", ".yml"):
-                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
-                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
-            else:
-                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
-                self._file_dataset = JSONDataset(filepath=str(self._filepath))
+            self._file_dataset = create_file_dataset(self._filepath)
         return self._file_dataset
 
     def _get_or_create_remote_dataset(self) -> Dataset:
@@ -587,18 +551,4 @@ class OpikEvaluationDataset(AbstractDataset):
             JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string.
                 Returns a descriptive message if filepath is not configured or does not exist.
         """
-        if not self._filepath:
-            return JSONPreview("No filepath configured.")
-
-        if not self._filepath.exists():
-            return JSONPreview("Local evaluation dataset does not exist.")
-
-        local_data = self.file_dataset.load()
-
-        if isinstance(local_data, str):
-            local_data = {"content": local_data}
-
-        try:
-            return JSONPreview(json.dumps(local_data))
-        except (TypeError, ValueError) as e:
-            return JSONPreview(f"Could not serialise local data to JSON: {e}")
+        return build_preview(self._filepath, self.file_dataset if self._filepath else None)

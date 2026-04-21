@@ -3,8 +3,8 @@ filesystem (e.g.: local, S3, GCS).
 """
 from __future__ import annotations
 
-import os
 import json
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any

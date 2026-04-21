@@ -14,7 +14,7 @@ from kedro_datasets.plotly import HTMLDataset
 
 @pytest.fixture
 def filepath_html(tmp_path):
-    return (tmp_path / "test.html").as_posix()
+    return tmp_path / "test.html"
 
 
 @pytest.fixture

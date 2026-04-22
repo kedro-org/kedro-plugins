@@ -96,23 +96,21 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         return self._load_dataset(load_path)
 
     def save(self, data: DatasetLike) -> None:
-        if not isinstance(
-            data,
-            Dataset | DatasetDict | IterableDataset | IterableDatasetDict,
-        ):
+        if isinstance(data, IterableDataset | IterableDatasetDict):
+            msg = (
+                f"{type(self).__name__} got iterable dataset. "
+                "Before saving an iterable dataset "
+                "you must materialize it into a `Dataset` or `DatasetDict`."
+            )
+            raise RuntimeError(msg)
+
+        if not isinstance(data, Dataset | DatasetDict):
             msg = (
                 f"{type(self).__name__} only supports `datasets.Dataset`, "
                 "`datasets.DatasetDict`, "
-                "`datasets.IterableDataset`, and "
-                "`datasets.IterableDatasetDict` instances. "
                 f"Got {type(data)}"
             )
             raise DatasetError(msg)
-
-        if isinstance(data, IterableDatasetDict):
-            data = DatasetDict({k: Dataset.from_list(list(v)) for k, v in data.items()})
-        elif isinstance(data, IterableDataset):
-            data = Dataset.from_list(list(data))
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
@@ -124,37 +122,12 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         self._invalidate_cache()
 
     def _load_dataset(self, load_path: str) -> DatasetLike:
-        if self._fs.isdir(load_path):
-            ext = self.EXTENSION
-            data_files = {
-                PurePosixPath(p).stem: p for p in self._fs.glob(f"{load_path}/*{ext}")
-            }
-            # Note: nosec is fine here since we're always loading from a filesystem.
-            #   Bandit throws an exception because it wants a revision number,
-            #   which is only relevatn when loading from the Hub.
-            return load_dataset(
-                self.BUILDER, data_files=data_files, **self._load_args
-            )  # nosec
-
-        result = load_dataset(  # nosec
+        return load_dataset(  # nosec
             self.BUILDER,
             data_files=load_path,
             storage_options=self._storage_options,
             **self._load_args,
         )
-
-        # load_dataset wraps a single file in a DatasetDict with one
-        # split (typically "train"). When the caller didn't ask for a
-        # specific split, unwrap it so a single file round-trips as a
-        # Dataset, not a DatasetDict.
-        if (
-            "split" not in self._load_args
-            and isinstance(result, DatasetDict)
-            and len(result) == 1
-        ):
-            return next(iter(result.values()))
-
-        return result
 
     def _save_dataset(self, data: Dataset, save_path: str) -> None:
         saver = f"to_{self.BUILDER}"
@@ -165,6 +138,10 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         )
 
     def _save_dataset_dict(self, data: DatasetDict, save_path: str) -> None:
+        """Hugging Face only provides ``DatasetDict.save_to_disk`` for Arrow format.
+
+        As a result, we have to call ``to_<format>`` per split.
+        """
         self._fs.mkdirs(save_path, exist_ok=True)
         ext = self.EXTENSION
         saver = f"to_{self.BUILDER}"

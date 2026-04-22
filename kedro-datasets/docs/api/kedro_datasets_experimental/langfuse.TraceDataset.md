@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+::: kedro_datasets_experimental.langfuse.TraceDataset
     options:
         members: true
         show_source: true

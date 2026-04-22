@@ -1,4 +1,4 @@
-::: kedro_datasets_experimental.langchain.LangChainPromptDataset
+::: kedro_datasets_experimental.langchain.PromptDataset
     options:
         members: true
         show_source: true

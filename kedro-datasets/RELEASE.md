@@ -5,7 +5,17 @@
 
 | Type                                 | Description                                          | Location                               |
 | ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
-| `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+| `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
+## Breaking changes to experimental datasets
+- Shortened `pyproject.toml` extra names and renamed dataset classes for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped from class names and file names:
+  - `langfuse.LangfusePromptDataset` → `langfuse.PromptDataset`
+  - `langfuse.LangfuseTraceDataset` → `langfuse.TraceDataset`
+  - `langfuse.LangfuseEvaluationDataset` → `langfuse.EvaluationDataset`
+  - `opik.OpikPromptDataset` → `opik.PromptDataset`
+  - `opik.OpikTraceDataset` → `opik.TraceDataset`
+  - `langchain.LangChainPromptDataset` → `langchain.PromptDataset`
+- Shortened `pyproject.toml` extras: e.g. `opik-opiktracedataset` → `opik-tracedataset`, `langfuse-langfusetracedataset` → `langfuse-tracedataset`, `langchain-langchainpromptdataset` → `langchain-promptdataset`.
 
 ## Bug fixes and other changes
 - Added `os.PathLike` support for `plotly` datasets.

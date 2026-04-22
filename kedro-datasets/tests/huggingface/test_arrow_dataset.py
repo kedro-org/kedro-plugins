@@ -61,27 +61,18 @@ class TestArrowDataset:
         assert arrow_dataset.exists()
 
     def test_save_and_load_iterable_dataset(self, arrow_dataset, iterable_dataset):
-        """Test saving an IterableDataset materializes and round-trips."""
-        arrow_dataset.save(iterable_dataset)
-        reloaded = arrow_dataset.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == {
-            "col1": [1, 2, 3],
-            "col2": ["a", "b", "c"],
-        }
+        """Test that saving an IterableDataset raises an error with a helpful message."""
+        pattern = r"got iterable dataset"
+        with pytest.raises(DatasetError, match=pattern):
+            arrow_dataset.save(iterable_dataset)
 
     def test_save_and_load_iterable_dataset_dict(
         self, arrow_dataset, iterable_dataset_dict
     ):
-        """Test saving an IterableDatasetDict materializes and round-trips."""
-        arrow_dataset.save(iterable_dataset_dict)
-        reloaded = arrow_dataset.load()
-        assert isinstance(reloaded, DatasetDict)
-        assert set(reloaded.keys()) == {"train", "test"}
-        assert reloaded["train"].to_dict() == {
-            "col1": [1, 2],
-            "col2": ["a", "b"],
-        }
+        """Test that saving an IterableDatasetDict raises an error with a helpful message."""
+        pattern = r"got iterable dataset"
+        with pytest.raises(DatasetError, match=pattern):
+            arrow_dataset.save(iterable_dataset_dict)
 
     @pytest.mark.parametrize("save_args", [{"num_shards": 2}], indirect=True)
     def test_save_extra_params(self, arrow_dataset, save_args):
@@ -103,7 +94,9 @@ class TestArrowDataset:
 
     def test_save_invalid_type(self, arrow_dataset):
         """Check the error when saving an unsupported type."""
-        pattern = r"ArrowDataset only supports .datasets.Dataset., .datasets.DatasetDict., .datasets.IterableDataset., and .datasets.IterableDatasetDict. instances."
+        pattern = (
+            r"ArrowDataset only supports .datasets.Dataset., .datasets.DatasetDict."
+        )
         with pytest.raises(DatasetError, match=pattern):
             arrow_dataset.save({"not": "a dataset"})
 
@@ -180,23 +173,18 @@ class TestArrowDatasetVersioned:
     def test_save_and_load_iterable_dataset(
         self, versioned_arrow_dataset, iterable_dataset
     ):
-        """Test versioned save with IterableDataset."""
-        versioned_arrow_dataset.save(iterable_dataset)
-        reloaded = versioned_arrow_dataset.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == {
-            "col1": [1, 2, 3],
-            "col2": ["a", "b", "c"],
-        }
+        """Test that versioned save of IterableDataset raises an error with a helpful message."""
+        pattern = r"got iterable dataset"
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_arrow_dataset.save(iterable_dataset)
 
     def test_save_and_load_iterable_dataset_dict(
         self, versioned_arrow_dataset, iterable_dataset_dict
     ):
-        """Test versioned save with IterableDatasetDict."""
-        versioned_arrow_dataset.save(iterable_dataset_dict)
-        reloaded = versioned_arrow_dataset.load()
-        assert isinstance(reloaded, DatasetDict)
-        assert set(reloaded.keys()) == {"train", "test"}
+        """Test that versioned save of IterableDatasetDict raises an error with a helpful message."""
+        pattern = r"got iterable dataset"
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_arrow_dataset.save(iterable_dataset_dict)
 
     def test_no_versions(self, versioned_arrow_dataset):
         """Check the error if no versions are available for load."""
@@ -251,6 +239,8 @@ class TestArrowDatasetVersioned:
 
     def test_save_invalid_type_versioned(self, versioned_arrow_dataset):
         """Check the error when saving an unsupported type through versioned dataset."""
-        pattern = r"ArrowDataset only supports .datasets.Dataset., .datasets.DatasetDict., .datasets.IterableDataset., and .datasets.IterableDatasetDict. instances."
+        pattern = (
+            r"ArrowDataset only supports .datasets.Dataset., .datasets.DatasetDict."
+        )
         with pytest.raises(DatasetError, match=pattern):
             versioned_arrow_dataset.save("not a dataset")

@@ -177,6 +177,7 @@ plugins:
           - api/kedro_datasets_experimental/langfuse.LangfuseEvaluationDataset.md: Langfuse evaluation dataset integration
           - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
           - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
+          - api/kedro_datasets_experimental/opik.OpikEvaluationDataset.md: Opik evaluation integration
           - api/kedro_datasets_experimental/opik.OpikPromptDataset.md: Opik prompt integration
           - api/kedro_datasets_experimental/opik.OpikTraceDataset.md: Opik tracing integration
 
@@ -355,6 +356,7 @@ nav:
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - Opik:
+          - opik.OpikEvaluationDataset: api/kedro_datasets_experimental/opik.OpikEvaluationDataset.md
           - opik.OpikPromptDataset: api/kedro_datasets_experimental/opik.OpikPromptDataset.md
           - opik.OpikTraceDataset: api/kedro_datasets_experimental/opik.OpikTraceDataset.md
         - Optuna:

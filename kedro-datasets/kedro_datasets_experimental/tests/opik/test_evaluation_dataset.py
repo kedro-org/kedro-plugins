@@ -7,8 +7,8 @@ import yaml
 from kedro.io import DatasetError
 from opik.rest_api.core.api_error import ApiError
 
-from kedro_datasets_experimental.opik.opik_evaluation_dataset import (
-    OpikEvaluationDataset,
+from kedro_datasets_experimental.opik.evaluation_dataset import (
+    EvaluationDataset,
 )
 
 
@@ -20,7 +20,7 @@ def make_api_error(status_code: int) -> ApiError:
 @pytest.fixture
 def mock_opik():
     """Mock Opik client instance."""
-    with patch("kedro_datasets_experimental.opik.opik_evaluation_dataset.Opik") as mock_class:
+    with patch("kedro_datasets_experimental.opik.evaluation_dataset.Opik") as mock_class:
         instance = Mock()
         mock_class.return_value = instance
         yield instance
@@ -121,9 +121,9 @@ def mock_remote_dataset():
 
 @pytest.fixture
 def dataset_local(filepath_json, mock_credentials, mock_opik, mock_remote_dataset):
-    """OpikEvaluationDataset with local sync policy."""
+    """EvaluationDataset with local sync policy."""
     mock_opik.get_dataset.return_value = mock_remote_dataset
-    return OpikEvaluationDataset(
+    return EvaluationDataset(
         dataset_name="test-dataset",
         credentials=mock_credentials,
         filepath=filepath_json,
@@ -133,21 +133,21 @@ def dataset_local(filepath_json, mock_credentials, mock_opik, mock_remote_datase
 
 @pytest.fixture
 def dataset_remote(mock_credentials, mock_opik, mock_remote_dataset):
-    """OpikEvaluationDataset with remote sync policy and no filepath."""
+    """EvaluationDataset with remote sync policy and no filepath."""
     mock_opik.get_dataset.return_value = mock_remote_dataset
-    return OpikEvaluationDataset(
+    return EvaluationDataset(
         dataset_name="test-dataset",
         credentials=mock_credentials,
         sync_policy="remote",
     )
 
 
-class TestOpikEvaluationDatasetInit:
-    """Test OpikEvaluationDataset initialisation."""
+class TestEvaluationDatasetInit:
+    """Test EvaluationDataset initialisation."""
 
     def test_init_minimal_params(self, mock_credentials, mock_opik):
         """Minimal required params store expected defaults."""
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="my-dataset",
             credentials=mock_credentials,
         )
@@ -159,7 +159,7 @@ class TestOpikEvaluationDatasetInit:
     def test_init_all_params(self, filepath_json, mock_credentials, mock_opik):
         """All params are stored correctly."""
         meta = {"project": "test"}
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="my-dataset",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -173,7 +173,7 @@ class TestOpikEvaluationDatasetInit:
     def test_init_missing_api_key(self, mock_opik):
         """Missing api_key raises DatasetError."""
         with pytest.raises(DatasetError, match="Missing required Opik credential: 'api_key'"):
-            OpikEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="ds",
                 credentials={"workspace": "w"},
             )
@@ -182,7 +182,7 @@ class TestOpikEvaluationDatasetInit:
     def test_init_empty_api_key(self, mock_opik, empty_value):
         """Empty api_key raises DatasetError."""
         with pytest.raises(DatasetError, match="Opik credential 'api_key' cannot be empty"):
-            OpikEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="ds",
                 credentials={"api_key": empty_value},
             )
@@ -190,7 +190,7 @@ class TestOpikEvaluationDatasetInit:
     def test_init_empty_optional_credential(self, mock_opik):
         """Empty optional credential (workspace) raises DatasetError."""
         with pytest.raises(DatasetError, match="Opik credential 'workspace' cannot be empty if provided"):
-            OpikEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="ds",
                 credentials={"api_key": "key", "workspace": ""},  # pragma: allowlist secret
             )
@@ -198,7 +198,7 @@ class TestOpikEvaluationDatasetInit:
     def test_init_invalid_sync_policy(self, mock_credentials, mock_opik):
         """Invalid sync_policy raises DatasetError."""
         with pytest.raises(DatasetError, match="Invalid sync_policy 'invalid'"):
-            OpikEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="ds",
                 credentials=mock_credentials,
                 sync_policy="invalid",
@@ -209,7 +209,7 @@ class TestOpikEvaluationDatasetInit:
         bad_file = tmp_path / "data.txt"
         bad_file.write_text("content")
         with pytest.raises(DatasetError, match="Unsupported file extension '.txt'"):
-            OpikEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="ds",
                 credentials=mock_credentials,
                 filepath=str(bad_file),
@@ -217,10 +217,10 @@ class TestOpikEvaluationDatasetInit:
 
     def test_init_client_failure_raises_dataset_error(self, mock_credentials):
         """Opik client construction failure is wrapped in DatasetError."""
-        with patch("kedro_datasets_experimental.opik.opik_evaluation_dataset.Opik") as mock_class:
+        with patch("kedro_datasets_experimental.opik.evaluation_dataset.Opik") as mock_class:
             mock_class.side_effect = Exception("Connection refused")
             with pytest.raises(DatasetError, match="Failed to initialise Opik client"):
-                OpikEvaluationDataset(
+                EvaluationDataset(
                     dataset_name="ds",
                     credentials=mock_credentials,
                 )
@@ -236,7 +236,7 @@ class TestFiledatasetProperty:
     def test_yaml_returns_yaml_dataset(self, filepath_yaml, mock_credentials, mock_opik, mock_remote_dataset):
         """YAML filepath resolves to YAMLDataset."""
         mock_opik.get_dataset.return_value = mock_remote_dataset
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=filepath_yaml,
@@ -306,17 +306,17 @@ class TestValidateItems:
 
     def test_valid_items_pass(self, eval_items):
         """Items with 'input' keys pass validation without error."""
-        OpikEvaluationDataset._validate_items(eval_items)  # no exception
+        EvaluationDataset._validate_items(eval_items)  # no exception
 
     def test_empty_list_passes(self):
         """Empty item list is valid."""
-        OpikEvaluationDataset._validate_items([])
+        EvaluationDataset._validate_items([])
 
     def test_missing_input_raises_dataset_error(self):
         """Item missing 'input' raises DatasetError with index."""
         items = [{"input": {"q": "ok"}}, {"expected_output": "missing input"}]
         with pytest.raises(DatasetError, match="index 1.*missing required 'input'"):
-            OpikEvaluationDataset._validate_items(items)
+            EvaluationDataset._validate_items(items)
 
 
 class TestUploadItems:
@@ -410,7 +410,7 @@ class TestSyncLocalToRemote:
     def test_returns_dataset_unchanged_when_file_missing(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset):
         """No-op when local file does not exist."""
         mock_opik.get_dataset.return_value = mock_remote_dataset
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(tmp_path / "nonexistent.json"),
@@ -424,7 +424,7 @@ class TestSyncLocalToRemote:
         empty_file.write_text("[]")
         mock_opik.get_dataset.return_value = mock_remote_dataset
 
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(empty_file),
@@ -500,13 +500,13 @@ class TestSyncLocalToRemote:
         filepath.write_text(json.dumps(items))
         mock_opik.get_dataset.return_value = mock_remote_dataset
 
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(filepath),
         )
 
-        with patch("kedro_datasets_experimental.opik.opik_evaluation_dataset.logger") as mock_logger:
+        with patch("kedro_datasets_experimental.opik.evaluation_dataset.logger") as mock_logger:
             with patch.object(ds, "_upload_items"):
                 ds._sync_local_to_remote(mock_remote_dataset)
             warning_messages = [c[0][0] for c in mock_logger.warning.call_args_list]
@@ -520,7 +520,7 @@ class TestMergeItems:
         """New item with existing ID replaces the old entry in place."""
         existing = [{"id": "a", "input": {"v": 1}}, {"id": "b", "input": {"v": 2}}]
         new = [{"id": "a", "input": {"v": 99}}]
-        result = OpikEvaluationDataset._merge_items(existing, new)
+        result = EvaluationDataset._merge_items(existing, new)
         assert result[0]["input"]["v"] == 99
         assert len(result) == 2
 
@@ -528,7 +528,7 @@ class TestMergeItems:
         """New item without ID is always appended, never deduped."""
         existing = [{"id": "a", "input": {"v": 1}}]
         new = [{"input": {"v": 2}}]
-        result = OpikEvaluationDataset._merge_items(existing, new)
+        result = EvaluationDataset._merge_items(existing, new)
         assert len(result) == 2
         assert result[1]["input"]["v"] == 2
 
@@ -536,27 +536,27 @@ class TestMergeItems:
         """New item with a novel ID is appended after existing items."""
         existing = [{"id": "a", "input": {"v": 1}}]
         new = [{"id": "b", "input": {"v": 2}}]
-        result = OpikEvaluationDataset._merge_items(existing, new)
+        result = EvaluationDataset._merge_items(existing, new)
         assert len(result) == 2
         assert result[1]["id"] == "b"
 
     def test_empty_existing_returns_new(self):
         """Merging into empty list returns a copy of new items."""
         new = [{"id": "a", "input": {"v": 1}}]
-        result = OpikEvaluationDataset._merge_items([], new)
+        result = EvaluationDataset._merge_items([], new)
         assert result == new
 
     def test_empty_new_returns_existing(self):
         """Merging empty new list returns existing unchanged."""
         existing = [{"id": "a", "input": {"v": 1}}]
-        result = OpikEvaluationDataset._merge_items(existing, [])
+        result = EvaluationDataset._merge_items(existing, [])
         assert result == existing
 
     def test_order_preserved_with_replacement(self):
         """Replacement keeps the item at its original position."""
         existing = [{"id": "a", "input": {"v": 1}}, {"id": "b", "input": {"v": 2}}]
         new = [{"id": "b", "input": {"v": 99}}]
-        result = OpikEvaluationDataset._merge_items(existing, new)
+        result = EvaluationDataset._merge_items(existing, new)
         assert result[0]["id"] == "a"
         assert result[1]["input"]["v"] == 99
 
@@ -564,7 +564,7 @@ class TestMergeItems:
         """Two new items without ID are both appended (no dedup possible)."""
         existing = []
         new = [{"input": {"v": 1}}, {"input": {"v": 1}}]
-        result = OpikEvaluationDataset._merge_items(existing, new)
+        result = EvaluationDataset._merge_items(existing, new)
         assert len(result) == 2
 
 
@@ -657,7 +657,7 @@ class TestSave:
         missing = tmp_path / "new.json"
         mock_opik.get_dataset.return_value = mock_remote_dataset
 
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(missing),
@@ -681,7 +681,7 @@ class TestSave:
     def test_save_remote_mode_logs_warning(self, dataset_remote, mock_opik, mock_remote_dataset, eval_items):
         """Remote mode logs a warning that the local file won't be updated."""
         mock_opik.get_dataset.return_value = mock_remote_dataset
-        with patch("kedro_datasets_experimental.opik.opik_evaluation_dataset.logger") as mock_logger:
+        with patch("kedro_datasets_experimental.opik.evaluation_dataset.logger") as mock_logger:
             dataset_remote.save(eval_items)
             warning_messages = [c[0][0] for c in mock_logger.warning.call_args_list]
             assert any("uploads to remote only" in msg for msg in warning_messages)
@@ -739,7 +739,7 @@ class TestDescribe:
     def test_describe_metadata_included(self, mock_credentials, mock_opik, mock_remote_dataset):
         """metadata dict is returned in _describe."""
         mock_opik.get_dataset.return_value = mock_remote_dataset
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             metadata={"project": "evaluation"},
@@ -760,7 +760,7 @@ class TestPreview:
     def test_preview_nonexistent_file(self, tmp_path, mock_credentials, mock_opik, mock_remote_dataset):
         """Returns a descriptive message when the local file does not exist."""
         mock_opik.get_dataset.return_value = mock_remote_dataset
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(tmp_path / "missing.json"),
@@ -779,7 +779,7 @@ class TestPreview:
         filepath = tmp_path / "eval.json"
         filepath.write_text(json.dumps([{"input": "x"}]))
 
-        ds = OpikEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="ds",
             credentials=mock_credentials,
             filepath=str(filepath),

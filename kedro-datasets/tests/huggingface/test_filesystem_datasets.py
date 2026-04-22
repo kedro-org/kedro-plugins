@@ -102,25 +102,14 @@ class TestFilesystemDataset:
             assert reloaded[split].to_dict() == dataset_dict[split].to_dict()
 
     def test_save_and_load_iterable_dataset(self, fs_dataset, iterable_dataset):
-        fs_dataset.save(iterable_dataset)
-        reloaded = fs_dataset.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == {
-            "col1": [1, 2, 3],
-            "col2": ["a", "b", "c"],
-        }
+        with pytest.raises(DatasetError, match=r"got iterable dataset"):
+            fs_dataset.save(iterable_dataset)
 
     def test_save_and_load_iterable_dataset_dict(
         self, fs_dataset_dir, iterable_dataset_dict
     ):
-        fs_dataset_dir.save(iterable_dataset_dict)
-        reloaded = fs_dataset_dir.load()
-        assert isinstance(reloaded, DatasetDict)
-        assert set(reloaded.keys()) == {"train", "test"}
-        assert reloaded["train"].to_dict() == {
-            "col1": [1, 2],
-            "col2": ["a", "b"],
-        }
+        with pytest.raises(DatasetError, match=r"got iterable dataset"):
+            fs_dataset_dir.save(iterable_dataset_dict)
 
     def test_exists(self, fs_dataset, dataset):
         assert not fs_dataset.exists()

@@ -8,20 +8,20 @@
 
 | Dataset | Description |
 |---------|-------------|
-| [LangfusePromptDataset](#langfusepromptdataset) | Prompt management with Langfuse versioning, sync policies, and LangChain integration. |
-| [LangfuseTraceDataset](#langfusetracedataset) | Tracing clients and callbacks for LangChain, OpenAI, AutoGen, and direct SDK usage. |
-| [LangfuseEvaluationDataset](#langfuseevaluationdataset) | Evaluation dataset management with local/remote sync and upsert semantics. |
+| [PromptDataset](#langfusepromptdataset) | Prompt management with Langfuse versioning, sync policies, and LangChain integration. |
+| [TraceDataset](#langfusetracedataset) | Tracing clients and callbacks for LangChain, OpenAI, AutoGen, and direct SDK usage. |
+| [EvaluationDataset](#langfuseevaluationdataset) | Evaluation dataset management with local/remote sync and upsert semantics. |
 
-## LangfusePromptDataset
+## PromptDataset
 A Kedro dataset for seamless AI prompt management with Langfuse versioning, synchronization, and team collaboration. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 
 ### Quick Start
 
 ```python
-from kedro_datasets_experimental.langfuse import LangfusePromptDataset
+from kedro_datasets_experimental.langfuse import PromptDataset
 
 # Load and use a prompt
-dataset = LangfusePromptDataset(
+dataset = PromptDataset(
     filepath="prompts/intent.json",
     prompt_name="intent-classifier",
     credentials={
@@ -130,7 +130,7 @@ Conversational format with role-based messages:
 Returns raw Langfuse prompt objects for maximum flexibility:
 
 ```python
-dataset = LangfusePromptDataset(
+dataset = PromptDataset(
     filepath="prompts/intent.json",
     prompt_name="intent-classifier",
     credentials={
@@ -159,7 +159,7 @@ compiled_prompt = intent_ds.compile(user_query="Hello world!")
 Returns ready-to-use `ChatPromptTemplate` objects:
 
 ```python
-dataset = LangfusePromptDataset(mode="langchain", ...)
+dataset = PromptDataset(mode="langchain", ...)
 
 # ChatPromptTemplate object
 template = dataset.load()
@@ -176,7 +176,7 @@ formatted = template.format(user_query="Hello world")
 
 ```yaml
 intent_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.PromptDataset
   filepath: data/prompts/intent.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -190,7 +190,7 @@ intent_prompt:
 ##### Remote Sync Policy - Production
 ```yaml
 production_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.PromptDataset
   filepath: data/prompts/production.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -205,7 +205,7 @@ production_prompt:
 
 ```yaml
 validation_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.PromptDataset
   filepath: data/prompts/validation.yaml
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -220,10 +220,10 @@ validation_prompt:
 
 ##### Basic Usage
 ```python
-from kedro_datasets_experimental.langfuse import LangfusePromptDataset
+from kedro_datasets_experimental.langfuse import PromptDataset
 
 # Minimal configuration
-dataset = LangfusePromptDataset(
+dataset = PromptDataset(
     filepath="prompts/intent.json",
     prompt_name="intent-classifier",
     credentials={
@@ -236,7 +236,7 @@ dataset = LangfusePromptDataset(
 ##### Advanced Configuration
 ```python
 # Full configuration with custom host
-dataset = LangfusePromptDataset(
+dataset = PromptDataset(
     filepath="prompts/support.yaml",
     prompt_name="customer-support",
     prompt_type="chat",
@@ -270,7 +270,7 @@ langfuse_credentials:
 
 ```python
 # Multi-intent classification system
-intent_dataset = LangfusePromptDataset(
+intent_dataset = PromptDataset(
     filepath="prompts/intent.json",
     prompt_name="intent-classifier",
     prompt_type="chat",
@@ -287,7 +287,7 @@ You can read more about this use case on [kedro-academy](https://github.com/kedr
 ##### Response Generation
 ```python
 # Dynamic response generation
-response_dataset = LangfusePromptDataset(
+response_dataset = PromptDataset(
     filepath="prompts/response.yaml",
     prompt_name="response-generator",
     prompt_type="chat",
@@ -304,7 +304,7 @@ response = template.format(
 ##### RAG Applications
 ```python
 # Retrieval-Augmented Generation
-rag_dataset = LangfusePromptDataset(
+rag_dataset = PromptDataset(
     filepath="prompts/rag.json",
     prompt_name="rag-synthesizer",
     prompt_type="chat",
@@ -332,17 +332,15 @@ final_prompt = template.format(
 dataset.save(prompt_content)  # Auto-creates new version
 
 # Apply labels for organization
-dataset = LangfusePromptDataset(
-    save_args={"labels": ["v2.1.0", "production", "stable"]}
-)
+dataset = PromptDataset(save_args={"labels": ["v2.1.0", "production", "stable"]})
 ```
 
 ##### Version-Specific Loading
 ```python
 # Load specific versions
-historical_dataset = LangfusePromptDataset(load_args={"version": 3})  # Load version 3
+historical_dataset = PromptDataset(load_args={"version": 3})  # Load version 3
 
-labeled_dataset = LangfusePromptDataset(
+labeled_dataset = PromptDataset(
     load_args={"label": "production"}  # Load production label
 )
 ```
@@ -469,16 +467,16 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 
 ---
 
-## LangfuseTraceDataset
+## TraceDataset
 
 A Kedro dataset for managing [Langfuse tracing](https://langfuse.com/docs/tracing) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Langfuse SDK usage. Environment variables are automatically configured during initialization.
 
 ### Quick Start
 
 ```python
-from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
+from kedro_datasets_experimental.langfuse import TraceDataset
 
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -498,13 +496,13 @@ response = client.chat.completions.create(
 ### Installation
 
 ```bash
-pip install "kedro-datasets[langfuse-langfusetracedataset]"
+pip install "kedro-datasets[langfuse-tracedataset]"
 ```
 
 For AutoGen mode, install with OpenTelemetry dependencies:
 
 ```bash
-pip install "kedro-datasets[langfuse-langfusetracedataset-autogen]"
+pip install "kedro-datasets[langfuse-tracedataset-autogen]"
 ```
 
 Or install all Langfuse datasets at once:
@@ -535,7 +533,7 @@ pip install "kedro-datasets[langfuse]"
 Returns a raw Langfuse client for manual trace creation:
 
 ```python
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -555,7 +553,7 @@ span.end()
 Returns a `CallbackHandler` to pass into LangChain chains or agents:
 
 ```python
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -572,7 +570,7 @@ chain.invoke(input, config={"callbacks": [callback]})
 Returns an OpenAI client wrapper that traces all API calls automatically:
 
 ```python
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -593,7 +591,7 @@ response = client.chat.completions.create(
 Returns a configured OpenTelemetry `Tracer` for AutoGen agent conversations. Requires an OTLP endpoint in credentials:
 
 ```python
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -613,7 +611,7 @@ with tracer.start_as_current_span("response_generation") as span:
 For self-hosted Langfuse, provide both `host` and `endpoint`:
 
 ```python
-dataset = LangfuseTraceDataset(
+dataset = TraceDataset(
     credentials={
         "public_key": "pk_...",
         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -634,7 +632,7 @@ dataset = LangfuseTraceDataset(
 
 ```yaml
 langfuse_trace:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  type: kedro_datasets_experimental.langfuse.TraceDataset
   credentials: langfuse_credentials
   mode: openai
 ```
@@ -643,7 +641,7 @@ langfuse_trace:
 
 ```yaml
 langfuse_trace:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  type: kedro_datasets_experimental.langfuse.TraceDataset
   credentials: langfuse_credentials
   mode: langchain
 ```
@@ -652,7 +650,7 @@ langfuse_trace:
 
 ```yaml
 langfuse_trace:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  type: kedro_datasets_experimental.langfuse.TraceDataset
   credentials: langfuse_credentials
   mode: autogen
 ```
@@ -761,7 +759,7 @@ DatasetError: AutoGen mode requires OpenTelemetry.
 
 ##### Solution:
 ```bash
-pip install "kedro-datasets[langfuse-langfusetracedataset-autogen]"
+pip install "kedro-datasets[langfuse-tracedataset-autogen]"
 ```
 
 ---
@@ -769,23 +767,23 @@ pip install "kedro-datasets[langfuse-langfusetracedataset-autogen]"
 #### Save Not Supported
 
 ```
-NotImplementedError: LangfuseTraceDataset is read-only
+NotImplementedError: TraceDataset is read-only
 ```
 
-##### Solution: `LangfuseTraceDataset` is a read-only dataset that provides tracing clients. Traces are logged automatically through the returned client, not via `save()`.
+##### Solution: `TraceDataset` is a read-only dataset that provides tracing clients. Traces are logged automatically through the returned client, not via `save()`.
 
 ---
 
-## LangfuseEvaluationDataset
+## EvaluationDataset
 
 A Kedro dataset for managing [Langfuse evaluation datasets](https://langfuse.com/docs/evaluation/experiments/datasets). It connects to a remote Langfuse dataset, optionally backed by a local JSON/YAML file, and returns a `DatasetClient` on `load()` — ready for iterating items or running experiments via `dataset.run_experiment()`.
 
 ### Quick Start
 
 ```python
-from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+from kedro_datasets_experimental.langfuse import EvaluationDataset
 
-dataset = LangfuseEvaluationDataset(
+dataset = EvaluationDataset(
     dataset_name="intent-detection-eval",
     credentials={
         "public_key": "pk_...",
@@ -908,7 +906,7 @@ Both methods use **upsert** semantics: every item is sent to `Langfuse.create_da
 
 ```yaml
 evaluation_dataset:
-  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: intent-detection-eval
   filepath: data/evaluation/intent_items.json
   sync_policy: local
@@ -921,7 +919,7 @@ evaluation_dataset:
 
 ```yaml
 production_eval:
-  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: intent-detection-eval
   sync_policy: remote
   credentials: langfuse_credentials
@@ -931,7 +929,7 @@ production_eval:
 
 ```yaml
 eval_snapshot:
-  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: intent-detection-eval
   sync_policy: remote
   version: "2026-01-15T00:00:00Z"
@@ -943,9 +941,9 @@ eval_snapshot:
 ##### Basic Usage
 
 ```python
-from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+from kedro_datasets_experimental.langfuse import EvaluationDataset
 
-dataset = LangfuseEvaluationDataset(
+dataset = EvaluationDataset(
     dataset_name="intent-detection-eval",
     credentials={
         "public_key": "pk_...",
@@ -974,7 +972,7 @@ dataset.save(
 ##### Versioned Remote Load
 
 ```python
-dataset = LangfuseEvaluationDataset(
+dataset = EvaluationDataset(
     dataset_name="intent-detection-eval",
     credentials={
         "public_key": "pk_...",
@@ -992,9 +990,9 @@ snapshot = dataset.load()
 The `DatasetClient` returned by `load()` integrates directly with Langfuse's experiment runner. Langfuse manages the experiment lifecycle — tracing, scoring, and result aggregation.
 
 ```python
-from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+from kedro_datasets_experimental.langfuse import EvaluationDataset
 
-dataset = LangfuseEvaluationDataset(
+dataset = EvaluationDataset(
     dataset_name="intent-detection-eval",
     credentials={
         "public_key": "pk_...",

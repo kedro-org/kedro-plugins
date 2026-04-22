@@ -5,8 +5,8 @@ import pytest
 import yaml
 from kedro.io import DatasetError
 
-from kedro_datasets_experimental.langfuse.langfuse_prompt_dataset import (
-    LangfusePromptDataset,
+from kedro_datasets_experimental.langfuse.prompt_dataset import (
+    PromptDataset,
     _get_content,
     _hash,
 )
@@ -15,7 +15,7 @@ from kedro_datasets_experimental.langfuse.langfuse_prompt_dataset import (
 @pytest.fixture
 def mock_langfuse():
     """Mock Langfuse client for testing."""
-    with patch("kedro_datasets_experimental.langfuse.langfuse_prompt_dataset.Langfuse") as mock:
+    with patch("kedro_datasets_experimental.langfuse.prompt_dataset.Langfuse") as mock:
         langfuse_instance = Mock()
         mock.return_value = langfuse_instance
         yield langfuse_instance
@@ -109,8 +109,8 @@ def mock_langfuse_prompt():
 
 @pytest.fixture
 def langfuse_dataset(filepath_json_chat, mock_credentials, mock_langfuse):
-    """Basic LangfusePromptDataset for testing."""
-    return LangfusePromptDataset(
+    """Basic PromptDataset for testing."""
+    return PromptDataset(
         filepath=filepath_json_chat,
         prompt_name="test-prompt",
         credentials=mock_credentials,
@@ -118,12 +118,12 @@ def langfuse_dataset(filepath_json_chat, mock_credentials, mock_langfuse):
     )
 
 
-class TestLangfusePromptDatasetInit:
-    """Test LangfusePromptDataset initialization."""
+class TestPromptDatasetInit:
+    """Test PromptDataset initialization."""
 
     def test_init_minimal_params(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test initialization with minimal required parameters."""
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials
@@ -138,7 +138,7 @@ class TestLangfusePromptDatasetInit:
         load_args = {"version": 1}
         save_args = {"labels": ["test"]}
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -166,7 +166,7 @@ class TestLangfusePromptDatasetInit:
     def test_init_missing_required_credentials(self, filepath_json_chat, missing_key, credentials_dict, mock_langfuse):
         """Test initialization with missing required credentials raises DatasetError."""
         with pytest.raises(DatasetError, match=f"Missing required Langfuse credential: '{missing_key}'"):
-            LangfusePromptDataset(
+            PromptDataset(
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
                 credentials=credentials_dict
@@ -181,7 +181,7 @@ class TestLangfusePromptDatasetInit:
         invalid_credentials = {"public_key": invalid_value, "secret_key": "sk_test_67890"} # pragma: allowlist secret
 
         with pytest.raises(DatasetError, match="Langfuse credential 'public_key' cannot be empty"):
-            LangfusePromptDataset(
+            PromptDataset(
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
                 credentials=invalid_credentials
@@ -196,7 +196,7 @@ class TestLangfusePromptDatasetInit:
         }
 
         with pytest.raises(DatasetError, match="Langfuse credential 'host' cannot be empty if provided"):
-            LangfusePromptDataset(
+            PromptDataset(
                 filepath=filepath_json_chat,
                 prompt_name="test-prompt",
                 credentials=invalid_credentials
@@ -208,19 +208,19 @@ class TestLangfusePromptDatasetInit:
         unsupported_file.write_text("test prompt")
 
         with pytest.raises(NotImplementedError, match="Unsupported file extension '.txt'"):
-            LangfusePromptDataset(
+            PromptDataset(
                 filepath=str(unsupported_file),
                 prompt_name="test-prompt",
                 credentials=mock_credentials
             )
 
 
-class TestLangfusePromptDatasetSave:
-    """Test LangfusePromptDataset save functionality."""
+class TestPromptDatasetSave:
+    """Test PromptDataset save functionality."""
 
     def test_save_text_prompt(self, filepath_json_text, mock_credentials, mock_langfuse):
         """Test saving a text prompt."""
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_text,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -238,7 +238,7 @@ class TestLangfusePromptDatasetSave:
 
     def test_save_chat_prompt(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test saving a chat prompt."""
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -260,7 +260,7 @@ class TestLangfusePromptDatasetSave:
     def test_save_with_labels(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test saving a prompt with labels."""
         save_args = {"labels": ["production", "v2.0"]}
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -278,8 +278,8 @@ class TestLangfusePromptDatasetSave:
         )
 
 
-class TestLangfusePromptDatasetLoad:
-    """Test LangfusePromptDataset load functionality."""
+class TestPromptDatasetLoad:
+    """Test PromptDataset load functionality."""
 
     @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
     def test_load_sdk_mode(self, langfuse_dataset, mock_langfuse, mock_langfuse_prompt):
@@ -298,7 +298,7 @@ class TestLangfusePromptDatasetLoad:
         """Test load with specific version."""
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -315,7 +315,7 @@ class TestLangfusePromptDatasetLoad:
         """Test load with specific label."""
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -358,14 +358,14 @@ class TestLangfusePromptDatasetLoad:
             langfuse_dataset.load()
 
 
-class TestLangfusePromptDatasetSyncPolicies:
+class TestPromptDatasetSyncPolicies:
     """Test different sync policies."""
 
     def test_sync_local_no_remote(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test local sync policy when no remote prompt exists."""
         mock_langfuse.get_prompt.side_effect = Exception("Prompt not found")
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -382,7 +382,7 @@ class TestLangfusePromptDatasetSyncPolicies:
         """Test remote sync policy when no remote prompt exists raises DatasetError."""
         mock_langfuse.get_prompt.side_effect = Exception("Prompt not found")
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -398,7 +398,7 @@ class TestLangfusePromptDatasetSyncPolicies:
         non_existent_file = (tmp_path / "nonexistent.json").as_posix()
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=non_existent_file,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -413,7 +413,7 @@ class TestLangfusePromptDatasetSyncPolicies:
         """Test that load_args produce warning in local sync policy."""
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath_json_chat,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -422,14 +422,14 @@ class TestLangfusePromptDatasetSyncPolicies:
             load_args={"version": 1}
         )
 
-        with patch("kedro_datasets_experimental.langfuse.langfuse_prompt_dataset.logger") as mock_logger:
+        with patch("kedro_datasets_experimental.langfuse.prompt_dataset.logger") as mock_logger:
             # Access _get_build_args to trigger the warning
             _ = dataset._get_build_args
             mock_logger.warning.assert_called()
             warning_message = mock_logger.warning.call_args[0][0]
             assert "Ignoring load_args" in warning_message
 
-class TestLangfusePromptDatasetFileFormats:
+class TestPromptDatasetFileFormats:
     """Test different file format support."""
 
     @pytest.mark.parametrize(
@@ -441,7 +441,7 @@ class TestLangfusePromptDatasetFileFormats:
         filepath = request.getfixturevalue(filepath_fixture)
         mock_langfuse.get_prompt.return_value = mock_langfuse_prompt
 
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath,
             prompt_name="test-prompt",
             credentials=mock_credentials,
@@ -452,7 +452,7 @@ class TestLangfusePromptDatasetFileFormats:
         assert result == mock_langfuse_prompt
 
 
-class TestLangfusePromptDatasetUtilityMethods:
+class TestPromptDatasetUtilityMethods:
     """Test utility methods and functions."""
 
     @pytest.mark.skip(reason="Skipping for now, langfuse not compatible with langchain>=1.0 yet")
@@ -472,7 +472,7 @@ class TestLangfusePromptDatasetUtilityMethods:
     def test_file_dataset_property(self, request, mock_credentials, mock_langfuse, filepath_fixture, expected_class):
         """Test file_dataset property returns correct dataset type."""
         filepath = request.getfixturevalue(filepath_fixture)
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=filepath,
             prompt_name="test-prompt",
             credentials=mock_credentials
@@ -523,7 +523,7 @@ class TestLangfusePromptDatasetUtilityMethods:
     def test_preview_nonexistent_file(self, tmp_path, mock_credentials, mock_langfuse):
         """Test preview returns error message for nonexistent file."""
         nonexistent_file = (tmp_path / "nonexistent.json").as_posix()
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath=nonexistent_file,
             prompt_name="test-prompt",
             credentials=mock_credentials

@@ -48,7 +48,7 @@ def _get_content(data: str | list) -> str:
     return "\n".join(msg["content"] for msg in data)
 
 
-class LangfusePromptDataset(AbstractDataset):
+class PromptDataset(AbstractDataset):
     """Kedro dataset for managing prompts with Langfuse versioning and synchronization.
 
     This dataset provides seamless integration between local prompt files (JSON/YAML)
@@ -75,7 +75,7 @@ class LangfusePromptDataset(AbstractDataset):
         ```yaml
         # Local sync policy - local files are source of truth
         intent_prompt:
-          type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+          type: kedro_datasets_experimental.langfuse.PromptDataset
           filepath: data/prompts/intent.json
           prompt_name: "intent-classifier"
           prompt_type: "chat"
@@ -89,7 +89,7 @@ class LangfusePromptDataset(AbstractDataset):
 
         # Remote sync policy - Langfuse versions are source of truth
         production_prompt:
-          type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+          type: kedro_datasets_experimental.langfuse.PromptDataset
           filepath: data/prompts/production.json
           prompt_name: "intent-classifier"
           sync_policy: remote
@@ -100,10 +100,10 @@ class LangfusePromptDataset(AbstractDataset):
         Using Python API:
 
         ```python
-        from kedro_datasets_experimental.langfuse import LangfusePromptDataset
+        from kedro_datasets_experimental.langfuse import PromptDataset
 
         # Basic usage (using default Langfuse cloud)
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
             prompt_type="chat",
@@ -114,7 +114,7 @@ class LangfusePromptDataset(AbstractDataset):
         )
 
         # With custom host
-        dataset = LangfusePromptDataset(
+        dataset = PromptDataset(
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
             prompt_type="chat",
@@ -150,7 +150,7 @@ class LangfusePromptDataset(AbstractDataset):
         save_args: dict[str, Any] | None = None,
     ) -> None:
         """
-        Initialize LangfusePromptDataset for managing prompts with Langfuse versioning.
+        Initialize PromptDataset for managing prompts with Langfuse versioning.
 
         Args:
             filepath: Local file path for storing prompt. Supports .json, .yaml, .yml extensions.
@@ -176,14 +176,14 @@ class LangfusePromptDataset(AbstractDataset):
 
         Examples:
             >>> # Local sync policy (default) - local files are source of truth
-            >>> dataset = LangfusePromptDataset(
+            >>> dataset = PromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
             ... )
 
             >>> # Remote sync policy - load specific version from Langfuse
-            >>> dataset = LangfusePromptDataset(
+            >>> dataset = PromptDataset(
             ...     filepath="prompts/intent.yaml",
             ...     prompt_name="intent-classifier",
             ...     credentials=creds,
@@ -192,7 +192,7 @@ class LangfusePromptDataset(AbstractDataset):
             ... )
 
             >>> # Remote sync policy - load specific label from Langfuse
-            >>> dataset = LangfusePromptDataset(
+            >>> dataset = PromptDataset(
             ...     filepath="prompts/production.json",
             ...     prompt_name="intent-classifier",
             ...     credentials=creds,
@@ -201,14 +201,14 @@ class LangfusePromptDataset(AbstractDataset):
             ... )
 
             >>> # With custom host
-            >>> dataset = LangfusePromptDataset(
+            >>> dataset = PromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "https://custom.langfuse.com"}  # pragma: allowlist secret
             ... )
 
             >>> # Auto-label new versions when saving (works with any sync policy)
-            >>> dataset = LangfusePromptDataset(
+            >>> dataset = PromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
             ...     credentials=creds,

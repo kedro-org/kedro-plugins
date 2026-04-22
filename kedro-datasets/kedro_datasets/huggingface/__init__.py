@@ -32,16 +32,6 @@ except (ImportError, RuntimeError):
     CSVDataset: Any
 
 try:
-    from .lance_dataset import LanceDataset
-except (ImportError, RuntimeError):
-    LanceDataset: Any
-
-try:
-    from .hdf5_dataset import HDF5Dataset
-except (ImportError, RuntimeError):
-    HDF5Dataset: Any
-
-try:
     from .transformer_pipeline_dataset import HFTransformerPipelineDataset
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
@@ -56,8 +46,6 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "parquet_dataset": ["ParquetDataset"],
         "json_dataset": ["JSONDataset"],
         "csv_dataset": ["CSVDataset"],
-        "lance_dataset": ["LanceDataset"],
-        "hdf5_dataset": ["HDF5Dataset"],
         "transformer_pipeline_dataset": ["HFTransformerPipelineDataset"],
     },
 )

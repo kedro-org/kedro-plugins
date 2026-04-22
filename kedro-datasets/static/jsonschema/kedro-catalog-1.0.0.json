@@ -19,11 +19,9 @@
               "holoviews.HoloviewsWriter",
               "huggingface.ArrowDataset",
               "huggingface.CSVDataset",
-              "huggingface.HDF5Dataset",
               "huggingface.HFDataset",
               "huggingface.HFTransformerPipelineDataset",
               "huggingface.JSONDataset",
-              "huggingface.LanceDataset",
               "huggingface.ParquetDataset",
               "ibis.FileDataset",
               "ibis.TableDataset",
@@ -465,9 +463,7 @@
                     "huggingface.ArrowDataset",
                     "huggingface.ParquetDataset",
                     "huggingface.JSONDataset",
-                    "huggingface.CSVDataset",
-                    "huggingface.LanceDataset",
-                    "huggingface.HDF5Dataset"
+                    "huggingface.CSVDataset"
                   ]
                 }
               }

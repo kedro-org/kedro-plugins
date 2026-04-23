@@ -18,15 +18,17 @@ from opik import Opik, Prompt
 
 from kedro_datasets._typing import JSONPreview
 
-# Supported file extensions for prompt storage
-SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
+from ._common import (
+    build_preview,
+    create_file_dataset,
+    validate_file_extension,
+    validate_sync_policy,
+)
 
-# Valid parameter values
 VALID_PROMPT_TYPES = {"chat", "text"}
 VALID_SYNC_POLICIES = {"local", "remote", "strict"}
 VALID_MODES = {"langchain", "sdk"}
 
-# Logger for this module
 logger = logging.getLogger(__name__)
 
 
@@ -155,7 +157,6 @@ class PromptDataset(AbstractDataset):
 
         Raises:
             DatasetError: If required parameters are missing or invalid.
-            NotImplementedError: If filepath has unsupported extension.
             ImportError: If langchain is required but not installed.
         """
         # Validate parameters
@@ -196,34 +197,22 @@ class PromptDataset(AbstractDataset):
 
         Raises:
             DatasetError: If parameters are invalid.
-            NotImplementedError: If filepath has unsupported extension.
             ImportError: If required packages are missing.
         """
-        # Validate file extension
-        file_path = Path(filepath)
-        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
-            raise NotImplementedError(
-                f"Unsupported file extension '{file_path.suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-            )
+        validate_file_extension(filepath)
 
-        # Validate enum parameters
         if prompt_type and prompt_type not in VALID_PROMPT_TYPES:
             raise DatasetError(
                 f"Invalid prompt_type '{prompt_type}'. Must be one of: {', '.join(sorted(VALID_PROMPT_TYPES))}"
             )
 
-        if sync_policy and sync_policy not in VALID_SYNC_POLICIES:
-            raise DatasetError(
-                f"Invalid sync_policy '{sync_policy}'. Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}"
-            )
+        validate_sync_policy(sync_policy, VALID_SYNC_POLICIES)
 
         if mode and mode not in VALID_MODES:
             raise DatasetError(
                 f"Invalid mode '{mode}'. Must be one of: {', '.join(sorted(VALID_MODES))}"
             )
 
-        # Validate mode-specific requirements
         if mode == "langchain":
             try:
                 from langchain_core.prompts import ChatPromptTemplate  # noqa: PLC0415
@@ -253,22 +242,9 @@ class PromptDataset(AbstractDataset):
 
         Returns:
             JSONDataset for .json files, YAMLDataset for .yaml/.yml files.
-
-        Raises:
-            NotImplementedError: If file extension is not supported.
         """
         if self._file_dataset is None:
-            if self._filepath.suffix.lower() in [".yaml", ".yml"]:
-                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
-                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
-            elif self._filepath.suffix.lower() == ".json":
-                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
-                self._file_dataset = JSONDataset(filepath=str(self._filepath))
-            else:
-                raise NotImplementedError(
-                    f"Unsupported file extension '{self._filepath.suffix}'. "
-                    f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-                )
+            self._file_dataset = create_file_dataset(self._filepath)
         return self._file_dataset
 
     def _describe(self) -> dict[str, Any]:
@@ -599,13 +575,4 @@ class PromptDataset(AbstractDataset):
         Returns:
             JSONPreview: A Kedro-Viz-compatible preview of the prompt.
         """
-        if self._filepath.exists():
-            local_data = self.file_dataset.load()
-
-            # Wrap string content in JSON object for Kedro-Viz compatibility
-            if isinstance(local_data, str):
-                local_data = {"content": local_data}
-
-            return JSONPreview(json.dumps(local_data))
-
-        return JSONPreview("Local prompt file does not exist.")
+        return build_preview(self._filepath, self.file_dataset)

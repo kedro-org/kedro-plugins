@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,12 +16,16 @@ from langfuse.api import Error as LangfuseApiError
 from langfuse.api import NotFoundError as LangfuseNotFoundError
 
 from kedro_datasets._typing import JSONPreview
+from kedro_datasets_experimental.langfuse._common import (
+    build_preview,
+    create_file_dataset,
+    validate_file_extension,
+    validate_langfuse_credentials,
+    validate_sync_policy,
+)
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
-REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
-OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 VALID_SYNC_POLICIES = {"local", "remote"}
 
 
@@ -207,52 +210,15 @@ class EvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
         sync_policy: str,
         version: str | None,
     ) -> None:
-        EvaluationDataset._validate_credentials(credentials)
-        EvaluationDataset._validate_sync_policy(sync_policy)
-        EvaluationDataset._validate_filepath(filepath)
+        validate_langfuse_credentials(credentials)
+        validate_sync_policy(sync_policy, VALID_SYNC_POLICIES)
+        if filepath is not None:
+            validate_file_extension(filepath)
         if version is not None and sync_policy != "remote":
             raise DatasetError(
                 "The 'version' parameter can only be used with "
                 "sync_policy='remote'. A versioned load returns a historical "
                 "snapshot which is incompatible with local-to-remote sync."
-            )
-
-    @staticmethod
-    def _validate_credentials(credentials: dict[str, str]) -> None:
-        for key in REQUIRED_LANGFUSE_CREDENTIALS:
-            if key not in credentials:
-                raise DatasetError(
-                    f"Missing required Langfuse credential: '{key}'."
-                )
-            if not credentials[key] or not str(credentials[key]).strip():
-                raise DatasetError(
-                    f"Langfuse credential '{key}' cannot be empty."
-                )
-        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
-            if key in credentials and (
-                not credentials[key] or not str(credentials[key]).strip()
-            ):
-                raise DatasetError(
-                    f"Langfuse credential '{key}' cannot be empty if provided."
-                )
-
-    @staticmethod
-    def _validate_sync_policy(sync_policy: str) -> None:
-        if sync_policy not in VALID_SYNC_POLICIES:
-            raise DatasetError(
-                f"Invalid sync_policy '{sync_policy}'. "
-                f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
-            )
-
-    @staticmethod
-    def _validate_filepath(filepath: str | None) -> None:
-        if filepath is None:
-            return
-        suffix = Path(filepath).suffix.lower()
-        if suffix not in SUPPORTED_FILE_EXTENSIONS:
-            raise DatasetError(
-                f"Unsupported file extension '{suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}."
             )
 
     @staticmethod
@@ -279,12 +245,7 @@ class EvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
         if not self._filepath:
             raise DatasetError("filepath must be provided for file dataset operations.")
         if self._file_dataset is None:
-            if self._filepath.suffix.lower() in (".yaml", ".yml"):
-                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
-                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
-            else:
-                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
-                self._file_dataset = JSONDataset(filepath=str(self._filepath))
+            self._file_dataset = create_file_dataset(self._filepath)
         return self._file_dataset
 
     def _get_or_create_remote_dataset(self) -> "DatasetClient":
@@ -541,15 +502,7 @@ class EvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
                 descriptive message if ``filepath`` is not configured or
                 the file does not exist.
         """
-        if not self._filepath:
-            return JSONPreview("No filepath configured.")
-
-        if not self._filepath.exists():
-            return JSONPreview("Local file does not exist.")
-
-        local_data = self.file_dataset.load()
-
-        if isinstance(local_data, str):
-            local_data = {"content": local_data}
-
-        return JSONPreview(json.dumps(local_data))
+        return build_preview(
+            self._filepath,
+            self.file_dataset if self._filepath else None,
+        )

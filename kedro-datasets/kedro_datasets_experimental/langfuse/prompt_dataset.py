@@ -15,13 +15,13 @@ if TYPE_CHECKING:
 from langfuse import Langfuse
 
 from kedro_datasets._typing import JSONPreview
-
-# Supported file extensions for prompt storage
-SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
-
-# Required credentials for Langfuse authentication
-REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
-OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
+from kedro_datasets_experimental.langfuse._common import (
+    build_preview,
+    create_file_dataset,
+    validate_file_extension,
+    validate_langfuse_credentials,
+    validate_sync_policy,
+)
 
 # Valid parameter values
 VALID_PROMPT_TYPES = {"chat", "text"}
@@ -216,8 +216,8 @@ class PromptDataset(AbstractDataset):
             ... )
 
         Raises:
-            DatasetError: If credentials are missing required keys.
-            NotImplementedError: If filepath has unsupported extension.
+            DatasetError: If credentials are missing required keys or
+                filepath has an unsupported extension.
         """
         # Validate all parameters before assignment
         self._validate_init_params(filepath, credentials, prompt_type, sync_policy, mode, load_args, save_args)
@@ -237,64 +237,57 @@ class PromptDataset(AbstractDataset):
         self._file_dataset = None
         self._cached_build_args = None
 
-    def _validate_credentials(self, credentials: dict[str, Any]) -> None:
-        """Validate Langfuse credentials.
+    def _validate_init_params(  # noqa: PLR0912, PLR0913
+        self,
+        filepath: str,
+        credentials: dict[str, Any],
+        prompt_type: str,
+        sync_policy: str,
+        mode: str,
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
+    ) -> None:
+        """Validate initialization parameters.
 
         Args:
+            filepath: File path to validate for supported extensions.
             credentials: Credentials dictionary to validate.
-
-        Raises:
-            DatasetError: If required credentials are missing or empty.
-        """
-        # Validate required keys
-        for key in REQUIRED_LANGFUSE_CREDENTIALS:
-            if key not in credentials:
-                raise DatasetError(f"Missing required Langfuse credential: '{key}'")
-            if not credentials[key] or not str(credentials[key]).strip():
-                raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
-
-        # Validate optional keys
-        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
-            if key in credentials:
-                if not credentials[key] or not str(credentials[key]).strip():
-                    raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
-
-    def _validate_enum_params(self, prompt_type: str, sync_policy: str, mode: str) -> None:
-        """Validate enum parameters.
-
-        Args:
             prompt_type: Prompt type to validate.
             sync_policy: Sync policy to validate.
             mode: Mode to validate.
+            load_args: Load arguments to validate.
+            save_args: Save arguments to validate.
 
         Raises:
-            DatasetError: If parameter values are invalid.
+            DatasetError: If parameters are invalid or filepath has an
+                unsupported extension.
+            ImportError: If langchain package is required but not available.
         """
+        validate_file_extension(filepath)
+        validate_langfuse_credentials(credentials)
+
         if prompt_type and prompt_type not in VALID_PROMPT_TYPES:
             raise DatasetError(
                 f"Invalid prompt_type '{prompt_type}'. Must be one of: {', '.join(sorted(VALID_PROMPT_TYPES))}"
             )
 
-        if sync_policy and sync_policy not in VALID_SYNC_POLICIES:
-            raise DatasetError(
-                f"Invalid sync_policy '{sync_policy}'. Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}"
-            )
+        if sync_policy:
+            validate_sync_policy(sync_policy, VALID_SYNC_POLICIES)
 
         if mode and mode not in VALID_MODES:
             raise DatasetError(
                 f"Invalid mode '{mode}'. Must be one of: {', '.join(sorted(VALID_MODES))}"
             )
 
-    def _validate_args(self, load_args: dict[str, Any] | None, save_args: dict[str, Any] | None) -> None:
-        """Validate load_args and save_args.
+        if mode == "langchain":
+            try:
+                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
+            except ImportError as exc:
+                raise ImportError(
+                    "The 'langchain' package is required when using mode='langchain'. "
+                    "Install it with: pip install 'kedro-datasets[langfuse]'"
+                ) from exc
 
-        Args:
-            load_args: Load arguments to validate.
-            save_args: Save arguments to validate.
-
-        Raises:
-            DatasetError: If argument types are invalid.
-        """
         if load_args is not None:
             if "version" in load_args and load_args["version"] is not None:
                 if not isinstance(load_args["version"], int):
@@ -319,55 +312,6 @@ class PromptDataset(AbstractDataset):
                             f"save_args['labels'][{i}] must be a string, got {type(label).__name__}: {label}"
                         )
 
-    def _validate_init_params(  # noqa: PLR0913
-        self,
-        filepath: str,
-        credentials: dict[str, Any],
-        prompt_type: str,
-        sync_policy: str,
-        mode: str,
-        load_args: dict[str, Any] | None = None,
-        save_args: dict[str, Any] | None = None,
-    ) -> None:
-        """Validate initialization parameters.
-
-        Args:
-            filepath: File path to validate for supported extensions.
-            credentials: Credentials dictionary to validate.
-            prompt_type: Prompt type to validate.
-            sync_policy: Sync policy to validate.
-            mode: Mode to validate.
-            load_args: Load arguments to validate.
-            save_args: Save arguments to validate.
-
-        Raises:
-            DatasetError: If parameters are invalid.
-            NotImplementedError: If filepath has unsupported extension.
-            ImportError: If langchain package is required but not available.
-        """
-        # Validate file extension
-        file_path = Path(filepath)
-        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
-            raise NotImplementedError(
-                f"Unsupported file extension '{file_path.suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-            )
-
-        # Validate mode-specific requirements
-        if mode == "langchain":
-            try:
-                from langchain.prompts import ChatPromptTemplate  # noqa: PLC0415
-            except ImportError as exc:
-                raise ImportError(
-                    "The 'langchain' package is required when using mode='langchain'. "
-                    "Install it with: pip install 'kedro-datasets[langfuse]'"
-                ) from exc
-
-        # Delegate to specialized validation methods
-        self._validate_credentials(credentials)
-        self._validate_enum_params(prompt_type, sync_policy, mode)
-        self._validate_args(load_args, save_args)
-
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
 
@@ -390,22 +334,9 @@ class PromptDataset(AbstractDataset):
 
         Returns:
             JSONDataset for .json files, YAMLDataset for .yaml/.yml files.
-
-        Raises:
-            NotImplementedError: If file extension is not supported.
         """
         if self._file_dataset is None:
-            if self._filepath.suffix.lower() in [".yaml", ".yml"]:
-                from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
-                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
-            elif self._filepath.suffix.lower() == ".json":
-                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
-                self._file_dataset = JSONDataset(filepath=str(self._filepath))
-            else:
-                raise NotImplementedError(
-                    f"Unsupported file extension '{self._filepath.suffix}'. "
-                    f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-                )
+            self._file_dataset = create_file_dataset(self._filepath)
         return self._file_dataset
 
     def save(self, data: str | list) -> None:
@@ -693,25 +624,10 @@ class PromptDataset(AbstractDataset):
             raise DatasetError(f"Unsupported mode: {self._mode}. Must be 'sdk' or 'langchain'.")
 
     def preview(self) -> JSONPreview:
-        """
-        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
-
-        Automatically wraps string content in a JSON object to ensure compatibility
-        with Kedro-Viz's JSON preview requirements. This prevents "src property must
-        be a valid json object" errors when the local file contains plain text.
+        """Generate a JSON-compatible preview of the local prompt data for Kedro-Viz.
 
         Returns:
-            JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string.
-                String content is wrapped in {"content": <string>} format for proper
-                JSON object structure. Returns error message if local file doesn't exist.
+            JSONPreview: Serialised JSON string for Kedro-Viz. Returns a
+                descriptive message if the local file does not exist.
         """
-        if self._filepath.exists():
-            local_data = self.file_dataset.load()
-
-            # If local_data is just a string, wrap it in a JSON object
-            if isinstance(local_data, str):
-                local_data = {"content": local_data}
-
-            return JSONPreview(json.dumps(local_data))
-
-        return JSONPreview("Local prompt does not exist.")
+        return build_preview(self._filepath, self.file_dataset)

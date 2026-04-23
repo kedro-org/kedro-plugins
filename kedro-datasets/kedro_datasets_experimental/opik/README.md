@@ -379,7 +379,7 @@ credentials = {
 
 #### Unsupported File Extension
 ```
-NotImplementedError: Unsupported file extension '.txt'
+DatasetError: Unsupported file extension '.txt'
 ```
 
 ##### Solution: Use supported formats: `.json`, `.yaml`, or `.yml`

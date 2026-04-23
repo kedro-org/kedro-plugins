@@ -5,6 +5,8 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 from opik import configure, track
 
+from ._common import validate_credentials
+
 logger = logging.getLogger(__name__)
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
@@ -153,15 +155,8 @@ class TraceDataset(AbstractDataset):
 
     def _validate_opik_credentials(self) -> None:
         """Validate Opik credentials before configuring the environment."""
-        for key in REQUIRED_OPIK_CREDENTIALS:
-            if key not in self._credentials or not str(self._credentials[key]).strip():
-                raise DatasetError(f"Missing required Opik credential: '{key}'")
+        validate_credentials(self._credentials, REQUIRED_OPIK_CREDENTIALS, OPTIONAL_OPIK_CREDENTIALS)
 
-        for key in OPTIONAL_OPIK_CREDENTIALS:
-            if key in self._credentials and not str(self._credentials[key]).strip():
-                raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
-
-        # AutoGen mode has additional required credentials
         if self._mode == "autogen":
             for key in REQUIRED_OPIK_CREDENTIALS_AUTOGEN:
                 if not self._credentials.get(key):

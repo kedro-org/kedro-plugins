@@ -465,7 +465,7 @@ addopts = [
 ]
 filterwarnings = [
     # TODO: remove once Kedro releases Python 3.14 support
-    "ignore::kedro.KedroPythonVersionWarning",
+    "ignore:Kedro is not yet fully compatible",
 ]
 
 [tool.ruff]

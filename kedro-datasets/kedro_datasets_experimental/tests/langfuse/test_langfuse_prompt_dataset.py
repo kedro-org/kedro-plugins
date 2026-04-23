@@ -203,11 +203,11 @@ class TestLangfusePromptDatasetInit:
             )
 
     def test_init_unsupported_file_extension(self, tmp_path, mock_credentials, mock_langfuse):
-        """Test initialization with unsupported file extension raises NotImplementedError."""
+        """Test initialization with unsupported file extension raises DatasetError."""
         unsupported_file = tmp_path / "prompt.txt"
         unsupported_file.write_text("test prompt")
 
-        with pytest.raises(NotImplementedError, match="Unsupported file extension '.txt'"):
+        with pytest.raises(DatasetError, match="Unsupported file extension '.txt'"):
             LangfusePromptDataset(
                 filepath=str(unsupported_file),
                 prompt_name="test-prompt",
@@ -530,4 +530,4 @@ class TestLangfusePromptDatasetUtilityMethods:
         )
 
         preview = dataset.preview()
-        assert "Local prompt does not exist" in str(preview)
+        assert "Local file does not exist" in str(preview)

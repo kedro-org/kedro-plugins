@@ -3,9 +3,11 @@ from typing import Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
 
-REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+from kedro_datasets_experimental.langfuse._common import (
+    validate_langfuse_credentials,
+)
+
 REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN = {"endpoint"}
-OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 
 class LangfuseTraceDataset(AbstractDataset):
@@ -185,21 +187,7 @@ class LangfuseTraceDataset(AbstractDataset):
         Raises:
             DatasetError: If Langfuse credentials are missing or invalid.
         """
-        # Validate required keys
-        for key in REQUIRED_LANGFUSE_CREDENTIALS:
-            if key not in self._credentials:
-                raise DatasetError(f"Missing required Langfuse credential: '{key}'")
-
-            # Validate that credential is not empty
-            if not self._credentials[key] or not str(self._credentials[key]).strip():
-                raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
-
-        # Validate optional keys if present
-        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
-            if key in self._credentials:
-                # If host is provided, it cannot be empty
-                if not self._credentials[key] or not str(self._credentials[key]).strip():
-                    raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
+        validate_langfuse_credentials(self._credentials)
 
         # AutoGen mode has additional required credentials
         if self._mode == "autogen":

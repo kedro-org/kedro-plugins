@@ -444,6 +444,7 @@ omit = [
     "kedro_datasets/conftest.py",
     "kedro_datasets/dask/*",  # TODO(deepyaman): Remove once Dask supports pandas 3.x.
     "kedro_datasets/databricks/*",
+    "kedro_datasets/geopandas/*",  # TODO: remove once fiona supports Python 3.14
     "kedro_datasets/holoviews/*",
     "kedro_datasets/snowflake/*",
     "kedro_datasets/spark/spark_hive_dataset.py",

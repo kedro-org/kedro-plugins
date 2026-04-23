@@ -224,11 +224,7 @@ dataset = OpikPromptDataset(
         "project_name": "customer-support",
     },
     save_args={
-        "metadata": {
-            "environment": "production",
-            "team": "ml-ops",
-            "version": "2.0.0"
-        }
+        "metadata": {"environment": "production", "team": "ml-ops", "version": "2.0.0"}
     },
 )
 ```
@@ -261,7 +257,7 @@ template = support_dataset.load()
 response = template.format(
     customer_name="Alice",
     issue="billing inquiry",
-    context="Previous interaction: password reset"
+    context="Previous interaction: password reset",
 )
 ```
 
@@ -383,7 +379,7 @@ credentials = {
 
 #### Unsupported File Extension
 ```
-NotImplementedError: Unsupported file extension '.txt'
+DatasetError: Unsupported file extension '.txt'
 ```
 
 ##### Solution: Use supported formats: `.json`, `.yaml`, or `.yml`
@@ -710,7 +706,9 @@ from opik.evaluation.metrics import base_metric, score_result
 
 
 class MyScorer(base_metric.BaseMetric):
-    def score(self, dataset_item: dict, task_outputs: dict, **kwargs) -> score_result.ScoreResult:
+    def score(
+        self, dataset_item: dict, task_outputs: dict, **kwargs
+    ) -> score_result.ScoreResult:
         expected = dataset_item.get("expected_output", "")
         actual = task_outputs.get("output", "")
         value = float(actual == expected)

@@ -39,7 +39,13 @@ jobs:
       - name: Run unit tests for Linux / kedro-datasets
         if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: make dataset-tests
+        env:
+          # TODO: remove once Kedro releases Python 3.14 support
+          PYTHONWARNINGS: ${{ inputs.python-version == '3.14' && 'ignore:Kedro is not yet fully compatible' || '' }}
       - name: Run unit tests for Windows / kedro-datasets / no spark parallel
         if: inputs.os == 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           make test-no-spark
+        env:
+          # TODO: remove once Kedro releases Python 3.14 support
+          PYTHONWARNINGS: ${{ inputs.python-version == '3.14' && 'ignore:Kedro is not yet fully compatible' || '' }}

@@ -5,6 +5,8 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset, DatasetError
 from opik import configure, track
 
+from ._common import validate_credentials
+
 logger = logging.getLogger(__name__)
 
 REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
@@ -12,7 +14,7 @@ REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
 
-class OpikTraceDataset(AbstractDataset):
+class TraceDataset(AbstractDataset):
     """Kedro dataset for managing Opik tracing clients and callbacks.
 
     This dataset provides Opik tracing integrations for various AI frameworks or direct SDK usage.
@@ -31,17 +33,17 @@ class OpikTraceDataset(AbstractDataset):
     Using catalog YAML configuration:
     ```yaml
     opik_trace:
-      type: kedro_datasets_experimental.opik.OpikTraceDataset
+      type: kedro_datasets_experimental.opik.TraceDataset
       credentials: opik_credentials
       mode: openai
     ```
 
     Using Python API:
     ```python
-    from kedro_datasets_experimental.opik import OpikTraceDataset
+    from kedro_datasets_experimental.opik import TraceDataset
 
     # Example: OpenAI mode (traced completions)
-    dataset = OpikTraceDataset(
+    dataset = TraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
@@ -63,7 +65,7 @@ class OpikTraceDataset(AbstractDataset):
     )
 
     # Example: SDK mode (manual tracing via decorator)
-    dataset = OpikTraceDataset(
+    dataset = TraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
@@ -82,7 +84,7 @@ class OpikTraceDataset(AbstractDataset):
     print(multiply(3, 4))
 
     # Example: LangChain mode
-    dataset = OpikTraceDataset(
+    dataset = TraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
@@ -93,7 +95,7 @@ class OpikTraceDataset(AbstractDataset):
     # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
 
     # Example: AutoGen mode Opik cloud
-    dataset = OpikTraceDataset(
+    dataset = TraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
@@ -114,7 +116,7 @@ class OpikTraceDataset(AbstractDataset):
         agent.invoke(context)  # Child spans nested under "response_generation"
 
     # Example: AutoGen mode self-hosted
-    dataset = OpikTraceDataset(
+    dataset = TraceDataset(
         credentials={
             "api_key": "opik_api_key",  # pragma: allowlist secret
             "workspace": "my-workspace",
@@ -130,7 +132,7 @@ class OpikTraceDataset(AbstractDataset):
     **Notes**
 
     - Opik configuration is global within the Python process.
-      Using multiple `OpikTraceDataset` instances with different projects in the same session
+      Using multiple `TraceDataset` instances with different projects in the same session
       may cause all traces to log to the first configured project.
     - To switch projects, restart the Python process or reload the Opik module.
     """
@@ -153,15 +155,8 @@ class OpikTraceDataset(AbstractDataset):
 
     def _validate_opik_credentials(self) -> None:
         """Validate Opik credentials before configuring the environment."""
-        for key in REQUIRED_OPIK_CREDENTIALS:
-            if key not in self._credentials or not str(self._credentials[key]).strip():
-                raise DatasetError(f"Missing required Opik credential: '{key}'")
+        validate_credentials(self._credentials, REQUIRED_OPIK_CREDENTIALS, OPTIONAL_OPIK_CREDENTIALS)
 
-        for key in OPTIONAL_OPIK_CREDENTIALS:
-            if key in self._credentials and not str(self._credentials[key]).strip():
-                raise DatasetError(f"Optional Opik credential '{key}' cannot be empty if provided")
-
-        # AutoGen mode has additional required credentials
         if self._mode == "autogen":
             for key in REQUIRED_OPIK_CREDENTIALS_AUTOGEN:
                 if not self._credentials.get(key):
@@ -212,7 +207,7 @@ class OpikTraceDataset(AbstractDataset):
         """
         if "openai" not in self._credentials:
             raise DatasetError(
-                "Missing 'openai' section in OpikTraceDataset credentials. "
+                "Missing 'openai' section in TraceDataset credentials. "
                 "For OpenAI mode, include an 'openai' block inside your credentials."
             )
 
@@ -310,7 +305,7 @@ class OpikTraceDataset(AbstractDataset):
         elif self._mode == "autogen":
             self._cached_client = self._build_autogen_tracer()
         else:
-            raise DatasetError(f"Unsupported mode '{self._mode}' for OpikTraceDataset")
+            raise DatasetError(f"Unsupported mode '{self._mode}' for TraceDataset")
 
         return self._cached_client
 
@@ -364,5 +359,5 @@ class OpikTraceDataset(AbstractDataset):
         return OpikTracer(**self._trace_kwargs)
 
     def save(self, data: Any) -> None:
-        """Saving traces manually is not supported; OpikTraceDataset is read-only."""
-        raise NotImplementedError("OpikTraceDataset is read-only.")
+        """Saving traces manually is not supported; TraceDataset is read-only."""
+        raise NotImplementedError("TraceDataset is read-only.")

@@ -1,4 +1,4 @@
-"""Unit tests for LangfuseTraceDataset."""
+"""Unit tests for TraceDataset."""
 
 import os
 from unittest.mock import MagicMock
@@ -6,21 +6,21 @@ from unittest.mock import MagicMock
 import pytest
 from kedro.io import DatasetError
 
-from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
+from kedro_datasets_experimental.langfuse import TraceDataset
 
 LANGFUSE_AUTOGEN_ENDPOINT = "https://cloud.langfuse.com/api/public/otel/v1/traces"
 
 
-class TestLangfuseTraceDataset:
+class TestTraceDataset:
     def test_missing_credentials(self):
         """Test that dataset raises error when credentials are missing."""
         with pytest.raises(DatasetError, match="Missing required Langfuse credential"):
-            LangfuseTraceDataset(credentials={})
+            TraceDataset(credentials={})
 
     def test_empty_credentials(self):
         """Test that dataset raises error when credentials are empty."""
         with pytest.raises(DatasetError, match="cannot be empty"):
-            LangfuseTraceDataset(credentials={"public_key": "", "secret_key": "sk"})  # pragma: allowlist secret
+            TraceDataset(credentials={"public_key": "", "secret_key": "sk"})  # pragma: allowlist secret
 
     def test_langchain_mode(self, mocker):
         """Test langchain mode returns CallbackHandler."""
@@ -34,7 +34,7 @@ class TestLangfuseTraceDataset:
         # Mock the langfuse.langchain module
         mocker.patch.dict("sys.modules", {"langfuse.langchain": mock_langchain})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
             mode="langchain"
         )
@@ -47,7 +47,7 @@ class TestLangfuseTraceDataset:
         """Test that host is set in environment when provided."""
         mocker.patch.dict("os.environ", {}, clear=True)
 
-        LangfuseTraceDataset(
+        TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
@@ -72,7 +72,7 @@ class TestLangfuseTraceDataset:
 
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
@@ -97,7 +97,7 @@ class TestLangfuseTraceDataset:
 
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
@@ -121,7 +121,7 @@ class TestLangfuseTraceDataset:
 
         mocker.patch.dict("sys.modules", {"langfuse": mock_langfuse_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
@@ -136,12 +136,12 @@ class TestLangfuseTraceDataset:
 
     def test_save_not_implemented(self):
         """Test save raises DatasetError (wrapping NotImplementedError)."""
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"} # pragma: allowlist secret
         )
 
         # Kedro wraps NotImplementedError in DatasetError
-        with pytest.raises(DatasetError, match="LangfuseTraceDataset is read-only"):
+        with pytest.raises(DatasetError, match="TraceDataset is read-only"):
             dataset.save("some_data")
 
     def test_openai_mode(self, mocker):
@@ -157,7 +157,7 @@ class TestLangfuseTraceDataset:
 
         mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
@@ -180,7 +180,7 @@ class TestLangfuseTraceDataset:
 
         mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
@@ -199,7 +199,7 @@ class TestLangfuseTraceDataset:
         mock_openai_module = MagicMock()
         mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
@@ -218,7 +218,7 @@ class TestLangfuseTraceDataset:
         mock_openai_module = MagicMock()
         mocker.patch.dict("sys.modules", {"langfuse.openai": mock_openai_module})
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"},  # pragma: allowlist secret
             mode="openai"
         )
@@ -228,7 +228,7 @@ class TestLangfuseTraceDataset:
 
     def test_describe_method(self):
         """Test _describe returns correct format."""
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="langchain"
         )
@@ -244,11 +244,11 @@ class TestLangfuseTraceDataset:
 
         mock_tracer = MagicMock()
         mocker.patch(
-            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            "kedro_datasets_experimental.langfuse.trace_dataset.TraceDataset._build_autogen_tracer",
             return_value=mock_tracer
         )
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
@@ -266,11 +266,11 @@ class TestLangfuseTraceDataset:
 
         mock_tracer = MagicMock()
         build_tracer_mock = mocker.patch(
-            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            "kedro_datasets_experimental.langfuse.trace_dataset.TraceDataset._build_autogen_tracer",
             return_value=mock_tracer
         )
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test",  # pragma: allowlist secret
@@ -293,11 +293,11 @@ class TestLangfuseTraceDataset:
 
         # Mock the tracer builder to avoid actual OpenTelemetry imports
         mocker.patch(
-            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            "kedro_datasets_experimental.langfuse.trace_dataset.TraceDataset._build_autogen_tracer",
             return_value=MagicMock()
         )
 
-        LangfuseTraceDataset(
+        TraceDataset(
             credentials={
                 "public_key": "pk_test_autogen",
                 "secret_key": "sk_test_autogen",  # pragma: allowlist secret
@@ -312,7 +312,7 @@ class TestLangfuseTraceDataset:
     def test_autogen_mode_missing_endpoint(self):
         """Test that autogen mode raises error when endpoint is missing."""
         with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
-            LangfuseTraceDataset(
+            TraceDataset(
                 credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
                 mode="autogen"
             )
@@ -320,7 +320,7 @@ class TestLangfuseTraceDataset:
     def test_autogen_mode_empty_endpoint(self):
         """Test that autogen mode raises error when endpoint is empty."""
         with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
-            LangfuseTraceDataset(
+            TraceDataset(
                 credentials={
                     "public_key": "pk_test",
                     "secret_key": "sk_test", # pragma: allowlist secret
@@ -332,7 +332,7 @@ class TestLangfuseTraceDataset:
     def test_autogen_mode_endpoint_not_required_for_other_modes(self):
         """Test that endpoint is not required for non-autogen modes."""
         # Endpoint is only required for autogen mode
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={"public_key": "pk_test", "secret_key": "sk_test"}, # pragma: allowlist secret
             mode="sdk"
         )
@@ -350,11 +350,11 @@ class TestLangfuseTraceDataset:
             )
 
         mocker.patch(
-            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            "kedro_datasets_experimental.langfuse.trace_dataset.TraceDataset._build_autogen_tracer",
             side_effect=raise_import_error
         )
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret
@@ -372,11 +372,11 @@ class TestLangfuseTraceDataset:
 
         # Mock the tracer builder to avoid actual OpenTelemetry imports
         mocker.patch(
-            "kedro_datasets_experimental.langfuse.langfuse_trace_dataset.LangfuseTraceDataset._build_autogen_tracer",
+            "kedro_datasets_experimental.langfuse.trace_dataset.TraceDataset._build_autogen_tracer",
             return_value=MagicMock()
         )
 
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_test",
                 "secret_key": "sk_test", # pragma: allowlist secret

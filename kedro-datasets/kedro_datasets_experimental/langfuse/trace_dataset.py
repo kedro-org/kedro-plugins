@@ -3,12 +3,14 @@ from typing import Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
 
-REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+from kedro_datasets_experimental.langfuse._common import (
+    validate_langfuse_credentials,
+)
+
 REQUIRED_LANGFUSE_CREDENTIALS_AUTOGEN = {"endpoint"}
-OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 
-class LangfuseTraceDataset(AbstractDataset):
+class TraceDataset(AbstractDataset):
     """Kedro dataset for managing Langfuse tracing clients and callbacks.
 
     This dataset provides appropriate tracing objects based on mode configuration,
@@ -29,7 +31,7 @@ class LangfuseTraceDataset(AbstractDataset):
 
         ```yaml
         langfuse_trace:
-          type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+          type: kedro_datasets_experimental.langfuse.TraceDataset
           credentials: langfuse_credentials
           mode: openai
         ```
@@ -37,10 +39,10 @@ class LangfuseTraceDataset(AbstractDataset):
         Using Python API:
 
         ```python
-        from kedro_datasets_experimental.langfuse import LangfuseTraceDataset
+        from kedro_datasets_experimental.langfuse import TraceDataset
 
         # Basic usage (using default Langfuse cloud)
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -50,7 +52,7 @@ class LangfuseTraceDataset(AbstractDataset):
         )
 
         # With custom host
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -65,7 +67,7 @@ class LangfuseTraceDataset(AbstractDataset):
         response = client.chat.completions.create(...)  # Automatically traced
 
         # AutoGen mode Langfuse cloud
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -76,7 +78,7 @@ class LangfuseTraceDataset(AbstractDataset):
         tracer = dataset.load()
 
         # AutoGen mode self-hosted
-        dataset = LangfuseTraceDataset(
+        dataset = TraceDataset(
             credentials={
                 "public_key": "pk_...",
                 "secret_key": "sk_...",  # pragma: allowlist secret
@@ -96,7 +98,7 @@ class LangfuseTraceDataset(AbstractDataset):
         mode: Literal["langchain", "openai", "autogen", "sdk"] = "sdk",
         **trace_kwargs: Any
     ):
-        """Initialize LangfuseTraceDataset and configure environment variables.
+        """Initialize TraceDataset and configure environment variables.
 
         Validates credentials and sets up appropriate environment variables for
         Langfuse tracing integration. Environment variables are set immediately
@@ -116,12 +118,12 @@ class LangfuseTraceDataset(AbstractDataset):
 
         Examples:
             >>> # Basic SDK mode (using default Langfuse cloud)
-            >>> dataset = LangfuseTraceDataset(
+            >>> dataset = TraceDataset(
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}  # pragma: allowlist secret
             ... )
 
             >>> # With custom host
-            >>> dataset = LangfuseTraceDataset(
+            >>> dataset = TraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...",
             ...         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -130,7 +132,7 @@ class LangfuseTraceDataset(AbstractDataset):
             ... )
 
             >>> # OpenAI mode with API key
-            >>> dataset = LangfuseTraceDataset(
+            >>> dataset = TraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...",
             ...         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -140,7 +142,7 @@ class LangfuseTraceDataset(AbstractDataset):
             ... )
 
             >>> # AutoGen mode cloud
-            >>> dataset = LangfuseTraceDataset(
+            >>> dataset = TraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...",
             ...         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -150,7 +152,7 @@ class LangfuseTraceDataset(AbstractDataset):
             ... )
 
             >>> # AutoGen mode self-hosted
-            >>> dataset = LangfuseTraceDataset(
+            >>> dataset = TraceDataset(
             ...     credentials={
             ...         "public_key": "pk_...",
             ...         "secret_key": "sk_...",  # pragma: allowlist secret
@@ -185,21 +187,7 @@ class LangfuseTraceDataset(AbstractDataset):
         Raises:
             DatasetError: If Langfuse credentials are missing or invalid.
         """
-        # Validate required keys
-        for key in REQUIRED_LANGFUSE_CREDENTIALS:
-            if key not in self._credentials:
-                raise DatasetError(f"Missing required Langfuse credential: '{key}'")
-
-            # Validate that credential is not empty
-            if not self._credentials[key] or not str(self._credentials[key]).strip():
-                raise DatasetError(f"Langfuse credential '{key}' cannot be empty")
-
-        # Validate optional keys if present
-        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
-            if key in self._credentials:
-                # If host is provided, it cannot be empty
-                if not self._credentials[key] or not str(self._credentials[key]).strip():
-                    raise DatasetError(f"Langfuse credential '{key}' cannot be empty if provided")
+        validate_langfuse_credentials(self._credentials)
 
         # AutoGen mode has additional required credentials
         if self._mode == "autogen":
@@ -316,17 +304,17 @@ class LangfuseTraceDataset(AbstractDataset):
 
         Examples:
             # LangChain mode
-                dataset = LangfuseTraceDataset(credentials=creds, mode="langchain")
+                dataset = TraceDataset(credentials=creds, mode="langchain")
                 callback = dataset.load()
                 chain.invoke(input, config={"callbacks": [callback]})
 
             # OpenAI mode
-                dataset = LangfuseTraceDataset(credentials=creds, mode="openai")
+                dataset = TraceDataset(credentials=creds, mode="openai")
                 client = dataset.load()
                 response = client.chat.completions.create(model="gpt-4", messages=[...])
 
             # AutoGen mode
-                dataset = LangfuseTraceDataset(credentials=creds, mode="autogen")
+                dataset = TraceDataset(credentials=creds, mode="autogen")
                 tracer = dataset.load()  # Returns configured Tracer
 
                 # Option 1: Automatic tracing (LLM calls traced automatically)
@@ -338,7 +326,7 @@ class LangfuseTraceDataset(AbstractDataset):
                     agent.invoke(context)  # Child spans nested under parent
 
             # SDK mode
-                dataset = LangfuseTraceDataset(credentials=creds, mode="sdk")
+                dataset = TraceDataset(credentials=creds, mode="sdk")
                 langfuse = dataset.load()
                 trace = langfuse.trace(name="my-trace")
         """
@@ -376,8 +364,8 @@ class LangfuseTraceDataset(AbstractDataset):
             NotImplementedError: Always raised as tracing datasets are read-only.
 
         Note:
-            LangfuseTraceDataset is designed for providing tracing clients,
+            TraceDataset is designed for providing tracing clients,
             not for data storage. Use the returned tracing clients to automatically
             log traces, spans, and generations to Langfuse.
         """
-        raise NotImplementedError("LangfuseTraceDataset is read-only - it provides tracing clients, not data storage")
+        raise NotImplementedError("TraceDataset is read-only - it provides tracing clients, not data storage")

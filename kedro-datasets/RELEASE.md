@@ -5,10 +5,33 @@
 
 | Type                                 | Description                                          | Location                               |
 | ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
-| `opik.OpikEvaluationDataset`         | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+| `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
+## Breaking changes to experimental datasets
+- Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
+  - Classes:
+    - `langfuse.LangfusePromptDataset` → `langfuse.PromptDataset`
+    - `langfuse.LangfuseTraceDataset` → `langfuse.TraceDataset`
+    - `langfuse.LangfuseEvaluationDataset` → `langfuse.EvaluationDataset`
+    - `opik.OpikPromptDataset` → `opik.PromptDataset`
+    - `opik.OpikTraceDataset` → `opik.TraceDataset`
+    - `langchain.LangChainPromptDataset` → `langchain.PromptDataset`
+  - Extras:
+    - `langfuse-langfusepromptdataset` → `langfuse-promptdataset`
+    - `opik-opiktracedataset` → `opik-tracedataset`
+    - `langchain-langchainpromptdataset` → `langchain-promptdataset`
+    - etc.
 
 ## Bug fixes and other changes
+
+- Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
+- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
+- Added `os.PathLike` support for `plotly` datasets.
+
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Datascienceio](https://github.com/datascienceio)
 
 # Release 9.3.0
 

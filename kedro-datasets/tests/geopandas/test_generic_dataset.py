@@ -1,7 +1,14 @@
+import sys
 from pathlib import Path, PurePosixPath
 
 import geopandas as gpd
 import pytest
+
+if sys.version_info >= (3, 14):
+    pytest.skip(
+        "fiona (a dependency of geopandas) does not support Python 3.14",
+        allow_module_level=True,
+    )
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem

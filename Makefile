@@ -68,8 +68,14 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
 	cd kedro-datasets && pytest tests/databricks --no-cov
 
+PYTHON_GTE_314 := $(shell python3 -c "import sys; print(1 if sys.version_info >= (3, 14) else 0)" 2>/dev/null || echo 0)
+ifeq ($(PYTHON_GTE_314),1)
+extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
+extra_pytest_args=--ignore kedro_datasets/tensorflow
+else
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=
+endif
 dataset-doctest%:
 	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
 	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \

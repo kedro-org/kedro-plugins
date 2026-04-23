@@ -15,6 +15,12 @@ if sys.platform == "win32":
         allow_module_level=True,
     )
 
+if sys.version_info >= (3, 14):
+    pytest.skip(
+        "TensorFlow does not support Python 3.14",
+        allow_module_level=True,
+    )
+
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
 # fixtures to avoid them being evaluated immediately when a new test process is spawned.

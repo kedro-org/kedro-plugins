@@ -463,6 +463,10 @@ addopts = [
     "-W",
     "ignore"
 ]
+filterwarnings = [
+    # TODO: remove once Kedro releases Python 3.14 support
+    "ignore::kedro.KedroPythonVersionWarning",
+]
 
 [tool.ruff]
 line-length = 88

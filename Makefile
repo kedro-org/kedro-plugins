@@ -70,8 +70,8 @@ dataset-tests: dataset-doctests
 
 PYTHON_GTE_314 := $(shell python3 -c "import sys; print(1 if sys.version_info >= (3, 14) else 0)" 2>/dev/null || echo 0)
 ifeq ($(PYTHON_GTE_314),1)
-extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow
-extra_pytest_args=--ignore kedro_datasets/tensorflow
+extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow --ignore kedro_datasets/geopandas
+extra_pytest_args=--ignore kedro_datasets/tensorflow --ignore kedro_datasets/geopandas
 else
 extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
 extra_pytest_args=

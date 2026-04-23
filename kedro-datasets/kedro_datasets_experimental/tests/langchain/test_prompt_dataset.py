@@ -13,8 +13,8 @@ except ImportError:
     # LangChain < 1.0
     from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-from kedro_datasets_experimental.langchain.langchain_prompt_dataset import (
-    LangChainPromptDataset,
+from kedro_datasets_experimental.langchain.prompt_dataset import (
+    PromptDataset,
 )
 
 
@@ -84,10 +84,10 @@ def chat_yaml_prompt_file(tmp_path: Path) -> Path:
     return prompt_file
 
 
-class TestLangChainPromptDataset:
+class TestPromptDataset:
     def test_init_with_txt_file(self, txt_prompt_file: Path) -> None:
         """Test dataset initialization with a .txt file."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "text.TextDataset"}
             )
@@ -96,7 +96,7 @@ class TestLangChainPromptDataset:
 
     def test_init_with_json_file(self, json_prompt_file: Path) -> None:
         """Test dataset initialization with a .json file."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(json_prompt_file),
             dataset={"type": "json.JSONDataset"}
             )
@@ -106,7 +106,7 @@ class TestLangChainPromptDataset:
     def test_init_with_invalid_template(self, txt_prompt_file: Path) -> None:
         """Test initialization with invalid template type."""
         with pytest.raises(DatasetError, match="Invalid template"):
-            LangChainPromptDataset(
+            PromptDataset(
                 filepath=str(txt_prompt_file),
                 dataset={"type": "text.TextDataset"},
                 template="InvalidTemplate"
@@ -114,7 +114,7 @@ class TestLangChainPromptDataset:
 
     def test_load_text_prompt(self, txt_prompt_file: Path) -> None:
         """Test loading a simple text prompt."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "kedro_datasets.text.TextDataset"}
             )
@@ -124,7 +124,7 @@ class TestLangChainPromptDataset:
 
     def test_load_json_prompt(self, json_prompt_file: Path) -> None:
         """Test loading a JSON prompt configuration."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(json_prompt_file),
             dataset={"type": "kedro_datasets.json.JSONDataset"})
         prompt = dataset.load()
@@ -133,7 +133,7 @@ class TestLangChainPromptDataset:
 
     def test_load_chat_prompt(self, chat_prompt_file: Path) -> None:
         """Test loading a chat prompt configuration."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(chat_prompt_file),
             dataset={"type": "json.JSONDataset"},
             template="ChatPromptTemplate"
@@ -147,7 +147,7 @@ class TestLangChainPromptDataset:
 
     def test_load_yaml_prompt(self, yaml_prompt_file: Path) -> None:
         """Test loading a YAML prompt configuration."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(yaml_prompt_file),
             dataset={"type": "kedro_datasets.yaml.YAMLDataset"}
             )
@@ -157,7 +157,7 @@ class TestLangChainPromptDataset:
 
     def test_load_yaml_chat_prompt(self, chat_yaml_prompt_file: Path) -> None:
         """Test loading a YAML chat prompt configuration."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(chat_yaml_prompt_file),
             dataset={"type": "yaml.YAMLDataset"},
             template="ChatPromptTemplate"
@@ -172,7 +172,7 @@ class TestLangChainPromptDataset:
 
     def test_save_not_supported(self, txt_prompt_file: Path) -> None:
         """Test that save operation raises an error."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "text.TextDataset"}
             )
@@ -181,7 +181,7 @@ class TestLangChainPromptDataset:
 
     def test_describe(self, txt_prompt_file: Path) -> None:
         """Test the _describe method returns correct information."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "text.TextDataset"})
         desc = dataset._describe()
@@ -191,7 +191,7 @@ class TestLangChainPromptDataset:
 
     def test_exists(self, txt_prompt_file: Path) -> None:
         """Test the _exists method."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "text.TextDataset"}
             )
@@ -200,7 +200,7 @@ class TestLangChainPromptDataset:
     def test_credentials_propagation(self, json_prompt_file: Path) -> None:
         """Test that credentials are properly propagated to the underlying dataset."""
         credentials = {"key": "value"}
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(json_prompt_file),
             dataset={"type": "json.JSONDataset"},
             credentials=credentials,
@@ -216,7 +216,7 @@ class TestLangChainPromptDataset:
         """Test that plain string data raises DatasetError for ChatPromptTemplate."""
         prompt_file = tmp_path / "plain_string.json"
         prompt_file.write_text('"Just a plain string, not a chat prompt."')
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(prompt_file),
             dataset={"type": "text.TextDataset"},
             template="ChatPromptTemplate"
@@ -228,13 +228,13 @@ class TestLangChainPromptDataset:
         """Test that using an invalid dataset type raises DatasetError."""
         invalid_dataset = {"type": "pandas.CSVDataset"}
         with pytest.raises(DatasetError, match="Unsupported dataset type 'pandas.CSVDataset'"):
-            LangChainPromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
+            PromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
 
     def test_none_dataset_type_raises_error(self, txt_prompt_file: Path) -> None:
         """Test that passing no dataset type raises DatasetError."""
         invalid_dataset = None
         with pytest.raises(DatasetError, match="Underlying dataset type cannot be empty"):
-            LangChainPromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
+            PromptDataset(filepath=str(txt_prompt_file), dataset=invalid_dataset)
 
     @pytest.mark.parametrize(
         "bad_data,error_pattern",
@@ -251,7 +251,7 @@ class TestLangChainPromptDataset:
         """Test validation of chat prompt data."""
         prompt_file = tmp_path / "bad_chat.json"
         prompt_file.write_text(str(bad_data))
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(prompt_file),
             dataset={"type": "json.JSONDataset"},
             template="ChatPromptTemplate"
@@ -274,7 +274,7 @@ class TestLangChainPromptDataset:
         prompt_file = tmp_path / "bad_chat.yaml"
         prompt_file.write_text(yaml.dump(bad_data))
 
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(prompt_file),
             dataset={"type": "yaml.YAMLDataset"},
             template="ChatPromptTemplate"
@@ -285,7 +285,7 @@ class TestLangChainPromptDataset:
 
     def test_preview_txt_prompt(self, txt_prompt_file: str):
         """Preview a plain text prompt returns raw string."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(txt_prompt_file),
             dataset={"type": "text.TextDataset"}
             )
@@ -294,7 +294,7 @@ class TestLangChainPromptDataset:
 
     def test_preview_json_prompt(self, json_prompt_file: str):
         """Preview a JSON prompt returns serialized dict."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(json_prompt_file),
             dataset={"type": "json.JSONDataset"}
             )
@@ -305,7 +305,7 @@ class TestLangChainPromptDataset:
 
     def test_preview_yaml_prompt(self, yaml_prompt_file: str):
         """Preview a YAML prompt returns serialized dict."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(yaml_prompt_file),
             dataset={"type": "yaml.YAMLDataset"}
             )
@@ -316,7 +316,7 @@ class TestLangChainPromptDataset:
 
     def test_preview_chat_json_prompt(self, chat_prompt_file: str):
         """Preview a JSON chat prompt returns serialized messages list."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(chat_prompt_file),
             dataset={"type": "json.JSONDataset"},
             template="ChatPromptTemplate")
@@ -328,7 +328,7 @@ class TestLangChainPromptDataset:
 
     def test_preview_chat_yaml_prompt(self, chat_yaml_prompt_file: str):
         """Preview a YAML chat prompt returns serialized messages list."""
-        dataset = LangChainPromptDataset(
+        dataset = PromptDataset(
             filepath=str(chat_yaml_prompt_file),
             dataset={"type": "yaml.YAMLDataset"},
             template="ChatPromptTemplate")

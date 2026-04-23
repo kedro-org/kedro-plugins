@@ -31,7 +31,7 @@ HTTP_NOT_FOUND = 404
 REQUIRED_UUID_VERSION = 7
 
 
-class OpikEvaluationDataset(AbstractDataset):
+class EvaluationDataset(AbstractDataset):
     """Kedro dataset for Opik evaluation datasets.
 
     Connects to an Opik evaluation dataset and returns an ``opik.Dataset``
@@ -118,7 +118,7 @@ class OpikEvaluationDataset(AbstractDataset):
         ```yaml
         # Local sync policy — local file seeds and syncs to remote
         evaluation_dataset:
-          type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+          type: kedro_datasets_experimental.opik.EvaluationDataset
           dataset_name: intent-detection-eval
           filepath: data/evaluation/intent_items.json
           sync_policy: local
@@ -128,7 +128,7 @@ class OpikEvaluationDataset(AbstractDataset):
 
         # Remote sync policy — Opik is the source of truth
         production_eval:
-          type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+          type: kedro_datasets_experimental.opik.EvaluationDataset
           dataset_name: intent-detection-eval
           sync_policy: remote
           credentials: opik_credentials
@@ -137,9 +137,9 @@ class OpikEvaluationDataset(AbstractDataset):
         Using Python API:
 
         ```python
-        from kedro_datasets_experimental.opik import OpikEvaluationDataset
+        from kedro_datasets_experimental.opik import EvaluationDataset
 
-        dataset = OpikEvaluationDataset(
+        dataset = EvaluationDataset(
             dataset_name="intent-detection-eval",
             credentials={"api_key": "..."},  # pragma: allowlist secret
             filepath="data/evaluation/intent_items.json",
@@ -175,7 +175,7 @@ class OpikEvaluationDataset(AbstractDataset):
         sync_policy: Literal["local", "remote"] = "local",
         metadata: dict[str, Any] | None = None,
     ):
-        """Initialise ``OpikEvaluationDataset``.
+        """Initialise ``EvaluationDataset``.
 
         Args:
             dataset_name: Name of the evaluation dataset in Opik.

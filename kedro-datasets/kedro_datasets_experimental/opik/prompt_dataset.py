@@ -49,7 +49,7 @@ def _get_content(data: str | list) -> str:
     return "\n".join(msg["content"] for msg in data)
 
 
-class OpikPromptDataset(AbstractDataset):
+class PromptDataset(AbstractDataset):
     """Kedro dataset for managing prompts with Opik versioning and synchronisation.
 
     This dataset provides seamless integration between local prompt files (JSON/YAML)
@@ -76,7 +76,7 @@ class OpikPromptDataset(AbstractDataset):
         ```yaml
         # Local sync policy - local files are source of truth
         customer_prompt:
-          type: kedro_datasets_experimental.opik.OpikPromptDataset
+          type: kedro_datasets_experimental.opik.PromptDataset
           filepath: data/prompts/customer.json
           prompt_name: customer_support_v1
           prompt_type: chat
@@ -86,7 +86,7 @@ class OpikPromptDataset(AbstractDataset):
 
         # Remote sync policy - Opik versions are source of truth
         production_prompt:
-          type: kedro_datasets_experimental.opik.OpikPromptDataset
+          type: kedro_datasets_experimental.opik.PromptDataset
           filepath: data/prompts/production.yaml
           prompt_name: customer_support_v1
           sync_policy: remote
@@ -96,10 +96,10 @@ class OpikPromptDataset(AbstractDataset):
         Using Python API:
 
         ```python
-        from kedro_datasets_experimental.opik import OpikPromptDataset
+        from kedro_datasets_experimental.opik import PromptDataset
 
         # Create dataset for chat prompt
-        dataset = OpikPromptDataset(
+        dataset = PromptDataset(
             filepath="data/prompts/customer_support.json",
             prompt_name="customer_support_v1",
             prompt_type="chat",
@@ -134,7 +134,7 @@ class OpikPromptDataset(AbstractDataset):
         save_args: dict[str, Any] | None = None,
         **opik_kwargs: Any
     ):
-        """Initialise OpikPromptDataset with local and remote configuration.
+        """Initialise PromptDataset with local and remote configuration.
 
         Args:
             filepath: Local file path for storing prompt. Supports .json, .yaml, .yml extensions.

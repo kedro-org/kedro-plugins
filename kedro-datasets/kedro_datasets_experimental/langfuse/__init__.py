@@ -5,21 +5,21 @@ from typing import Any
 import lazy_loader as lazy
 
 try:
-    from .langfuse_evaluation_dataset import LangfuseEvaluationDataset
-    from .langfuse_prompt_dataset import LangfusePromptDataset
-    from .langfuse_trace_dataset import LangfuseTraceDataset
+    from .evaluation_dataset import EvaluationDataset
+    from .prompt_dataset import PromptDataset
+    from .trace_dataset import TraceDataset
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
     # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-    LangfuseEvaluationDataset: Any
-    LangfusePromptDataset: Any
-    LangfuseTraceDataset: Any
+    EvaluationDataset: Any
+    PromptDataset: Any
+    TraceDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
-        "langfuse_evaluation_dataset": ["LangfuseEvaluationDataset"],
-        "langfuse_prompt_dataset": ["LangfusePromptDataset"],
-        "langfuse_trace_dataset": ["LangfuseTraceDataset"],
+        "evaluation_dataset": ["EvaluationDataset"],
+        "prompt_dataset": ["PromptDataset"],
+        "trace_dataset": ["TraceDataset"],
     },
 )

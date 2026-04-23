@@ -4,16 +4,16 @@
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Opik](https://img.shields.io/badge/opik-integration-purple)](https://www.comet.com/site/products/opik/)
 
-## OpikPromptDataset
+## PromptDataset
 A Kedro dataset for seamless AI prompt management with Opik versioning, synchronisation, and experiment tracking. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 
 ### Quick Start
 
 ```python
-from kedro_datasets_experimental.opik import OpikPromptDataset
+from kedro_datasets_experimental.opik import PromptDataset
 
 # Load and use a prompt
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     filepath="prompts/customer_support.json",
     prompt_name="customer_support_v1",
     credentials={
@@ -31,7 +31,7 @@ prompt = dataset.load()
 #### SDK Mode Only
 For basic Opik integration without LangChain dependencies:
 ```bash
-pip install "kedro-datasets[opik-opikpromptdataset]"
+pip install "kedro-datasets[opik-promptdataset]"
 ```
 
 #### Full Installation
@@ -116,7 +116,7 @@ Conversational format with role-based messages:
 Returns raw Opik Prompt objects for maximum flexibility:
 
 ```python
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     filepath="prompts/customer.json",
     prompt_name="customer_support_v1",
     credentials={
@@ -138,7 +138,7 @@ metadata = prompt_obj.metadata
 ##### LangChain Mode
 Returns ready-to-use `ChatPromptTemplate` objects:
 ```python
-dataset = OpikPromptDataset(mode="langchain", ...)
+dataset = PromptDataset(mode="langchain", ...)
 
 # ChatPromptTemplate object
 template = dataset.load()
@@ -155,7 +155,7 @@ formatted = template.format(question="What is Kedro?")
 
 ```yaml
 dev_prompt:
-  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  type: kedro_datasets_experimental.opik.PromptDataset
   filepath: data/prompts/customer_support.json
   prompt_name: customer_support_v1
   prompt_type: chat
@@ -171,7 +171,7 @@ dev_prompt:
 ##### Remote Sync Policy - Production
 ```yaml
 production_prompt:
-  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  type: kedro_datasets_experimental.opik.PromptDataset
   filepath: data/prompts/production.json
   prompt_name: customer_support_v1
   prompt_type: chat
@@ -183,7 +183,7 @@ production_prompt:
 ##### Strict Sync Policy - CI/CD
 ```yaml
 validation_prompt:
-  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  type: kedro_datasets_experimental.opik.PromptDataset
   filepath: data/prompts/validation.yaml
   prompt_name: customer_support_v1
   prompt_type: chat
@@ -196,10 +196,10 @@ validation_prompt:
 
 ##### Basic Usage
 ```python
-from kedro_datasets_experimental.opik import OpikPromptDataset
+from kedro_datasets_experimental.opik import PromptDataset
 
 # Minimal configuration
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     filepath="prompts/support.json",
     prompt_name="support_assistant",
     credentials={
@@ -212,7 +212,7 @@ dataset = OpikPromptDataset(
 ##### Advanced Configuration
 ```python
 # Full configuration with metadata
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     filepath="prompts/assistant.yaml",
     prompt_name="assistant_v2",
     prompt_type="chat",
@@ -246,7 +246,7 @@ opik_credentials:
 ##### Customer Support Assistant
 ```python
 # Dynamic customer support responses
-support_dataset = OpikPromptDataset(
+support_dataset = PromptDataset(
     filepath="prompts/support.json",
     prompt_name="support_assistant_v2",
     prompt_type="chat",
@@ -264,7 +264,7 @@ response = template.format(
 ##### Code Generation
 ```python
 # Code generation prompts
-code_dataset = OpikPromptDataset(
+code_dataset = PromptDataset(
     filepath="prompts/code_gen.yaml",
     prompt_name="python_generator",
     prompt_type="text",
@@ -281,7 +281,7 @@ code_prompt = prompt_obj.prompt.format(
 ##### RAG Applications
 ```python
 # Retrieval-Augmented Generation
-rag_dataset = OpikPromptDataset(
+rag_dataset = PromptDataset(
     filepath="prompts/rag.json",
     prompt_name="rag_synthesizer",
     prompt_type="chat",
@@ -302,7 +302,7 @@ final_prompt = template.format(
 #### Metadata Management
 ```python
 # Track prompt versions with metadata
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     save_args={
         "metadata": {
             "version": "2.1.0",
@@ -323,7 +323,7 @@ Opik automatically tracks prompt versions as part of your ML experiments:
 ```python
 # Prompts are versioned and tracked in Opik datasets
 # Access via Opik UI to compare prompt performance across experiments
-dataset = OpikPromptDataset(
+dataset = PromptDataset(
     filepath="prompts/experiment.json",
     prompt_name="experiment_prompt_v3",
     credentials=opik_credentials,
@@ -433,17 +433,17 @@ DatasetError: Remote sync policy specified but no remote prompt exists in Opik
 
 ---
 
-## OpikEvaluationDataset
+## EvaluationDataset
 
 A Kedro dataset for managing LLM evaluation datasets with Opik. Supports a local JSON/YAML file as the authoring surface and keeps it in sync with a remote Opik dataset, or delegates entirely to the remote dataset in production.
 
 ### Quick Start
 
 ```python
-from kedro_datasets_experimental.opik import OpikEvaluationDataset
+from kedro_datasets_experimental.opik import EvaluationDataset
 from opik.evaluation import evaluate
 
-dataset = OpikEvaluationDataset(
+dataset = EvaluationDataset(
     dataset_name="intent-detection-eval",
     credentials={"api_key": "opik_..."},  # pragma: allowlist secret
     filepath="data/evaluation/intent_items.json",
@@ -462,7 +462,7 @@ evaluate(
 ### Installation
 
 ```bash
-pip install "kedro-datasets[opik-opikevaluationdataset]"
+pip install "kedro-datasets[opik-evaluationdataset]"
 ```
 
 #### Requirements
@@ -512,7 +512,7 @@ The local file and `save()` data must be a list of dicts:
 
 ```yaml
 evaluation_dataset:
-  type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+  type: kedro_datasets_experimental.opik.EvaluationDataset
   dataset_name: intent-detection-eval
   filepath: data/evaluation/intent_items.json
   sync_policy: local
@@ -525,7 +525,7 @@ evaluation_dataset:
 
 ```yaml
 production_eval:
-  type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+  type: kedro_datasets_experimental.opik.EvaluationDataset
   dataset_name: intent-detection-eval
   sync_policy: remote
   credentials: opik_credentials
@@ -625,9 +625,9 @@ DatasetError: Dataset item at index 0 is missing required 'input' key.
 
 ---
 
-## Migrating from LangfuseEvaluationDataset to OpikEvaluationDataset
+## Migrating from langfuse.EvaluationDataset to opik.EvaluationDataset
 
-`OpikEvaluationDataset` and `LangfuseEvaluationDataset` share the same constructor signature and local file format. Migrating is a catalog swap plus evaluation pipeline node changes.
+`opik.EvaluationDataset` and `langfuse.EvaluationDataset` share the same constructor signature and local file format. Migrating is a catalog swap plus evaluation pipeline node changes.
 
 > **Item identity behaves differently between platforms.** Langfuse forwards any string `id` to the API for upsert. Opik only forwards `id` values that are valid UUID v7 — all others are stripped and Opik auto-generates a new UUID v7 on every sync, creating a new remote row each time. If your local items use human-readable or non-UUID v7 `id` values, those items will accumulate new remote rows on every sync after migrating. To preserve stable remote identity, update your item `id` fields to valid UUID v7 values before switching to Opik.
 
@@ -635,7 +635,7 @@ DatasetError: Dataset item at index 0 is missing required 'input' key.
 
 | | Langfuse | Opik |
 |---|---|---|
-| `type` | `kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset` | `kedro_datasets_experimental.opik.OpikEvaluationDataset` |
+| `type` | `kedro_datasets_experimental.langfuse.EvaluationDataset` | `kedro_datasets_experimental.opik.EvaluationDataset` |
 | `credentials` key | `public_key` + `secret_key` | `api_key` |
 | Optional credential keys | `host` | `workspace`, `host`, `project_name` |
 | `version` param | ✅ Supported (ISO 8601 snapshot pinning) | ❌ Not available |
@@ -645,7 +645,7 @@ DatasetError: Dataset item at index 0 is missing required 'input' key.
 
 ```yaml
 evaluation_dataset:
-  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: intent-detection-eval
   filepath: data/evaluation/intent_items.json
   sync_policy: local
@@ -661,7 +661,7 @@ langfuse_credentials:
 
 ```yaml
 evaluation_dataset:
-  type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+  type: kedro_datasets_experimental.opik.EvaluationDataset
   dataset_name: intent-detection-eval
   filepath: data/evaluation/intent_items.json
   sync_policy: local
@@ -743,7 +743,7 @@ def my_task(dataset_item: dict) -> dict:
 ### Known limitations
 
 - **`metadata` is local-only**: Opik's `create_dataset()` does not accept a `metadata` argument. The `metadata` param is stored and returned by `_describe()` but is not propagated to the remote dataset (unlike Langfuse, which passes it through).
-- **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `LangfuseEvaluationDataset` has no Opik equivalent.
+- **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `langfuse.EvaluationDataset` has no Opik equivalent.
 - **UUID v7 `id` values are forwarded; Opik upserts by item ID**: If a local item's `id` is a valid UUID v7, it is passed to Opik's `create_or_update` API, which upserts by item ID — the first sync creates the remote row; subsequent syncs update that same row in-place (content changes replace the row; unchanged content is a no-op). Items without a valid UUID v7 `id` have it stripped before upload; Opik auto-generates a new UUID v7 each sync, so those items create a new remote row on every sync, even when the content is unchanged.
 
 ### Support

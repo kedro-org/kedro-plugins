@@ -14,12 +14,12 @@ from kedro_datasets_experimental.langfuse._common import (
     validate_langfuse_credentials,
     validate_sync_policy,
 )
-from kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset import (
+from kedro_datasets_experimental.langfuse.evaluation_dataset import (
     VALID_SYNC_POLICIES,
-    LangfuseEvaluationDataset,
+    EvaluationDataset,
 )
 
-MODULE = "kedro_datasets_experimental.langfuse.langfuse_evaluation_dataset"
+MODULE = "kedro_datasets_experimental.langfuse.evaluation_dataset"
 
 
 @pytest.fixture
@@ -102,8 +102,8 @@ def empty_remote_dataset():
 
 @pytest.fixture
 def eval_dataset(filepath_json, mock_credentials, mock_langfuse):
-    """Basic LangfuseEvaluationDataset for testing (local sync)."""
-    return LangfuseEvaluationDataset(
+    """Basic EvaluationDataset for testing (local sync)."""
+    return EvaluationDataset(
         dataset_name="test-eval",
         credentials=mock_credentials,
         filepath=filepath_json,
@@ -112,10 +112,10 @@ def eval_dataset(filepath_json, mock_credentials, mock_langfuse):
 
 
 class TestInit:
-    """Test LangfuseEvaluationDataset initialization."""
+    """Test EvaluationDataset initialization."""
 
     def test_init_minimal_params(self, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -126,7 +126,7 @@ class TestInit:
         assert ds._version is None
 
     def test_init_all_params(self, filepath_json, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -153,7 +153,7 @@ class TestInit:
         with pytest.raises(
             DatasetError, match=f"Missing required Langfuse credential: '{missing_key}'"
         ):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=credentials_dict,
             )
@@ -167,7 +167,7 @@ class TestInit:
         with pytest.raises(
             DatasetError, match="Langfuse credential 'public_key' cannot be empty"
         ):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=creds,
             )
@@ -181,14 +181,14 @@ class TestInit:
         with pytest.raises(
             DatasetError, match="Langfuse credential 'host' cannot be empty if provided"
         ):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=creds,
             )
 
     def test_init_invalid_sync_policy(self, mock_credentials, mock_langfuse):
         with pytest.raises(DatasetError, match="Invalid sync_policy 'bad'"):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=mock_credentials,
                 sync_policy="bad",
@@ -198,7 +198,7 @@ class TestInit:
         bad_file = tmp_path / "items.txt"
         bad_file.write_text("test")
         with pytest.raises(DatasetError, match="Unsupported file extension '.txt'"):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=mock_credentials,
                 filepath=str(bad_file),
@@ -209,7 +209,7 @@ class TestInit:
             DatasetError,
             match="'version' parameter can only be used with sync_policy='remote'",
         ):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=mock_credentials,
                 sync_policy="local",
@@ -217,7 +217,7 @@ class TestInit:
             )
 
     def test_init_version_with_remote_accepted(self, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -227,7 +227,7 @@ class TestInit:
 
     def test_init_invalid_version_format(self, mock_credentials, mock_langfuse):
         with pytest.raises(DatasetError, match="Invalid version 'not-a-date'"):
-            LangfuseEvaluationDataset(
+            EvaluationDataset(
                 dataset_name="test-eval",
                 credentials=mock_credentials,
                 sync_policy="remote",
@@ -244,7 +244,7 @@ class TestLoadLocal:
         """Remote exists, no local file → returns remote as-is."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="local",
@@ -267,7 +267,7 @@ class TestLoadLocal:
         refreshed.items = [remote_item, Mock()]
         mock_langfuse.get_dataset.side_effect = [remote, refreshed]
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -299,7 +299,7 @@ class TestLoadLocal:
             created,
         ]
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="local",
@@ -326,7 +326,7 @@ class TestLoadLocal:
             empty_ds,
         ]
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=(tmp_path / "nonexistent.json").as_posix(),
@@ -342,7 +342,7 @@ class TestLoadLocal:
         filepath = tmp_path / "bad_items.json"
         filepath.write_text(json.dumps([{"bad": "no input key"}]))
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath.as_posix(),
@@ -360,7 +360,7 @@ class TestLoadLocal:
         """Each load upserts all local items to remote."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -381,7 +381,7 @@ class TestLoadRemote:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -396,7 +396,7 @@ class TestLoadRemote:
         """Remote policy never reads or writes the local file."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -413,7 +413,7 @@ class TestLoadRemote:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -428,7 +428,7 @@ class TestLoadRemote:
         """Versioned load passes the parsed datetime to get_dataset."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -449,7 +449,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = empty_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -467,7 +467,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -486,7 +486,7 @@ class TestSave:
         """Saving an item with an existing id but different input upserts it."""
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -504,7 +504,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -523,7 +523,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = empty_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -546,7 +546,7 @@ class TestSave:
 
         original = Path(filepath_json).read_text()
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -561,7 +561,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -574,7 +574,7 @@ class TestSave:
     ):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
 
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -586,7 +586,7 @@ class TestSave:
         self, mock_credentials, mock_langfuse
     ):
         """Validation fails before the remote dataset is created."""
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             sync_policy="remote",
@@ -604,7 +604,7 @@ class TestPreview:
     def test_preview_returns_json_preview_with_data(
         self, filepath_json, mock_credentials, mock_langfuse
     ):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -617,7 +617,7 @@ class TestPreview:
         assert parsed[0]["id"] == "q1"
 
     def test_preview_no_filepath(self, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -625,7 +625,7 @@ class TestPreview:
         assert "No filepath configured" in str(preview)
 
     def test_preview_missing_file(self, tmp_path, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=(tmp_path / "missing.json").as_posix(),
@@ -640,7 +640,7 @@ class TestDescribe:
     def test_describe_returns_expected_keys(
         self, filepath_json, mock_credentials, mock_langfuse
     ):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -658,7 +658,7 @@ class TestDescribe:
     def test_describe_no_credentials_in_output(
         self, mock_credentials, mock_langfuse
     ):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -673,7 +673,7 @@ class TestExists:
 
     def test_exists_true(self, mock_credentials, mock_langfuse, mock_remote_dataset):
         mock_langfuse.get_dataset.return_value = mock_remote_dataset
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -685,7 +685,7 @@ class TestExists:
         mock_langfuse.get_dataset.side_effect = LangfuseNotFoundError(
             body=not_found_body
         )
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -693,7 +693,7 @@ class TestExists:
 
     def test_exists_api_error_raises(self, mock_credentials, mock_langfuse):
         mock_langfuse.get_dataset.side_effect = LangfuseApiError(body="Server error")
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )
@@ -745,62 +745,62 @@ class TestHelpers:
             validate_file_extension(str(tmp_path / "items.csv"))
 
     def test_validate_items_valid(self):
-        LangfuseEvaluationDataset._validate_items(
+        EvaluationDataset._validate_items(
             [{"input": "a"}, {"input": "b"}]
         )
 
     def test_validate_items_missing_input(self):
         with pytest.raises(DatasetError, match="index 1 is missing required 'input'"):
-            LangfuseEvaluationDataset._validate_items(
+            EvaluationDataset._validate_items(
                 [{"input": "ok"}, {"expected_output": "bad"}]
             )
 
     def test_merge_items_no_overlap(self):
         existing = [{"id": "a", "input": "x"}]
         new = [{"id": "b", "input": "y"}]
-        merged = LangfuseEvaluationDataset._merge_items(existing, new)
+        merged = EvaluationDataset._merge_items(existing, new)
         assert len(merged) == 2
         assert [m["id"] for m in merged] == ["a", "b"]
 
     def test_merge_items_new_takes_precedence(self):
         existing = [{"id": "a", "input": "x"}]
         new = [{"id": "a", "input": "updated"}]
-        merged = LangfuseEvaluationDataset._merge_items(existing, new)
+        merged = EvaluationDataset._merge_items(existing, new)
         assert len(merged) == 1
         assert merged[0]["input"] == "updated"
 
     def test_merge_items_without_id_appended(self):
         existing = [{"id": "a", "input": "x"}]
         new = [{"input": "no-id"}]
-        merged = LangfuseEvaluationDataset._merge_items(existing, new)
+        merged = EvaluationDataset._merge_items(existing, new)
         assert len(merged) == 2
 
     def test_merge_items_empty_existing(self):
-        merged = LangfuseEvaluationDataset._merge_items(
+        merged = EvaluationDataset._merge_items(
             [], [{"id": "a", "input": "x"}]
         )
         assert len(merged) == 1
 
     def test_merge_items_empty_new(self):
         existing = [{"id": "a", "input": "x"}]
-        merged = LangfuseEvaluationDataset._merge_items(existing, [])
+        merged = EvaluationDataset._merge_items(existing, [])
         assert merged == existing
 
     def test_parse_version_none(self):
-        assert LangfuseEvaluationDataset._parse_version(None) is None
+        assert EvaluationDataset._parse_version(None) is None
 
     def test_parse_version_valid(self):
-        result = LangfuseEvaluationDataset._parse_version("2026-01-15T00:00:00Z")
+        result = EvaluationDataset._parse_version("2026-01-15T00:00:00Z")
         assert result is not None
         assert result.year == 2026
 
     def test_parse_version_naive_gets_utc(self):
-        result = LangfuseEvaluationDataset._parse_version("2026-01-15T00:00:00")
+        result = EvaluationDataset._parse_version("2026-01-15T00:00:00")
         assert result.tzinfo == timezone.utc
 
     def test_parse_version_invalid(self):
         with pytest.raises(DatasetError, match="Invalid version"):
-            LangfuseEvaluationDataset._parse_version("bad")
+            EvaluationDataset._parse_version("bad")
 
     @pytest.mark.parametrize(
         "filepath_fixture,expected_class",
@@ -813,7 +813,7 @@ class TestHelpers:
         self, request, mock_credentials, mock_langfuse, filepath_fixture, expected_class
     ):
         filepath = request.getfixturevalue(filepath_fixture)
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath,
@@ -821,7 +821,7 @@ class TestHelpers:
         assert ds.file_dataset.__class__.__name__ == expected_class
 
     def test_file_dataset_caching(self, filepath_json, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
             filepath=filepath_json,
@@ -831,7 +831,7 @@ class TestHelpers:
         assert fd1 is fd2
 
     def test_file_dataset_no_filepath_raises(self, mock_credentials, mock_langfuse):
-        ds = LangfuseEvaluationDataset(
+        ds = EvaluationDataset(
             dataset_name="test-eval",
             credentials=mock_credentials,
         )

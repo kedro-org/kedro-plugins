@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 VALID_SYNC_POLICIES = {"local", "remote"}
 
 
-class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
+class EvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
     """Kedro dataset for Langfuse evaluation datasets.
 
     Connects to a Langfuse evaluation dataset and returns a ``DatasetClient``
@@ -96,7 +96,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         ```yaml
         # Local sync policy - local file seeds and syncs to remote
         evaluation_dataset:
-          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.EvaluationDataset
           dataset_name: intent-detection-eval
           filepath: data/evaluation/intent_items.json
           sync_policy: local
@@ -106,14 +106,14 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
         # Remote sync policy - Langfuse is the source of truth
         production_eval:
-          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.EvaluationDataset
           dataset_name: intent-detection-eval
           sync_policy: remote
           credentials: langfuse_credentials
 
         # Pinned to a historical snapshot for reproducibility
         eval_snapshot:
-          type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+          type: kedro_datasets_experimental.langfuse.EvaluationDataset
           dataset_name: intent-detection-eval
           sync_policy: remote
           version: "2026-01-15T00:00:00Z"
@@ -123,9 +123,9 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         Using Python API:
 
         ```python
-        from kedro_datasets_experimental.langfuse import LangfuseEvaluationDataset
+        from kedro_datasets_experimental.langfuse import EvaluationDataset
 
-        dataset = LangfuseEvaluationDataset(
+        dataset = EvaluationDataset(
             dataset_name="intent-detection-eval",
             credentials={
                 "public_key": "pk_...",
@@ -157,7 +157,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         metadata: dict[str, Any] | None = None,
         version: str | None = None,
     ):
-        """Initialise ``LangfuseEvaluationDataset``.
+        """Initialise ``EvaluationDataset``.
 
         Args:
             dataset_name: Name of the evaluation dataset in Langfuse.

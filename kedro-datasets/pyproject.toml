@@ -149,7 +149,7 @@ pandas-sqltabledataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0"
 pandas-sqlquerydataset = ["kedro-datasets[pandas-base]", "SQLAlchemy>=1.4, <3.0", "pyodbc>=4.0"]
 pandas-xmldataset = [
     "kedro-datasets[pandas-base]",
-    "lxml~=5.2; python_version >= '3.13'",
+    "lxml>=6.1; python_version >= '3.13'",
     "lxml~=4.6; python_version < '3.13'"
 ]
 pandas = [
@@ -295,7 +295,8 @@ test = [
     "langchain-cohere>=0.1.5",
     "langchain-anthropic>=0.1.13",
     "langchain-community>=0.2.0",
-    "lxml~=5.0",
+    "lxml~=5.0; python_version < '3.14'",
+    "lxml>=6.1; python_version >= '3.14'",
     "matplotlib>=3.5, <4.0",
     "memory_profiler>=0.50.0, <1.0",
     "moto==5.0.0",

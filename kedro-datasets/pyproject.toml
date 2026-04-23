@@ -331,8 +331,8 @@ test = [
     "pyOpenSSL>=22.1.0",  # Workaround for incorrect pin in the snowflake-connector-python package; see https://github.com/snowflakedb/snowflake-connector-python/issues/2109
     "SQLAlchemy>=1.2",
     "tables>=3.6",
-    "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
-    "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+    "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version < '3.14'",
+    "tensorflow~=2.0; (platform_system != 'Darwin' or platform_machine != 'arm64') and python_version < '3.14'",
     "triad>=0.6.7, <2.0",
     "xarray>=2023.1.0",
     "xlsxwriter~=1.0",

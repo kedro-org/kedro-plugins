@@ -17,8 +17,12 @@
               "email.EmailMessageDataset",
               "geopandas.GenericDataset",
               "holoviews.HoloviewsWriter",
+              "huggingface.ArrowDataset",
+              "huggingface.CSVDataset",
               "huggingface.HFDataset",
               "huggingface.HFTransformerPipelineDataset",
+              "huggingface.JSONDataset",
+              "huggingface.ParquetDataset",
               "ibis.FileDataset",
               "ibis.TableDataset",
               "json.JSONDataset",
@@ -447,6 +451,37 @@
                 "pipeline_kwargs": {
                   "type": "object",
                   "description": "Additional kwargs to be passed into the pipeline"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "enum": [
+                    "huggingface.ArrowDataset",
+                    "huggingface.ParquetDataset",
+                    "huggingface.JSONDataset",
+                    "huggingface.CSVDataset"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": ["path"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to a directory or file for persisting Hugging Face datasets. Supports local and remote filesystems (e.g. s3://)."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the load method."
+                },
+                "save_args": {
+                  "type": "object",
+                  "description": "Additional arguments passed to the save method."
                 }
               }
             }

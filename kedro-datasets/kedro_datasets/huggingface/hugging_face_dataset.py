@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypeAlias
 
-from datasets import load_dataset
+from datasets import (
+    Dataset,
+    DatasetDict,
+    IterableDataset,
+    IterableDatasetDict,
+    load_dataset,
+)
 from huggingface_hub import HfApi
 from kedro.io import AbstractDataset
 
+DatasetLike: TypeAlias = Dataset | DatasetDict | IterableDataset | IterableDatasetDict
 
-class HFDataset(AbstractDataset):
+
+class HFDataset(AbstractDataset[None, DatasetLike]):
     """``HFDataset`` loads Hugging Face datasets
     using the `datasets <https://pypi.org/project/datasets>`_ library.
 
@@ -45,7 +53,7 @@ class HFDataset(AbstractDataset):
         self._dataset_kwargs = dataset_kwargs or {}
         self.metadata = metadata
 
-    def load(self):
+    def load(self) -> DatasetLike:
         # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
         return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 

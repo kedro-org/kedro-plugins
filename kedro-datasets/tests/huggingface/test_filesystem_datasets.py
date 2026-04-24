@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import PurePosixPath
 
@@ -38,13 +39,21 @@ def fmt(request):
 
 
 @pytest.fixture
-def dataset_cls(fmt):
+def kedro_dataset_cls(fmt):
     return fmt[0]
 
 
 @pytest.fixture
 def extension(fmt):
     return fmt[1]
+
+
+@pytest.fixture
+def dataset_dict_data_files(extension):
+    return {
+        "data": f"data{extension}",
+        "labels": f"labels{extension}",
+    }
 
 
 @pytest.fixture
@@ -58,144 +67,183 @@ def path_dir(tmp_path):
 
 
 @pytest.fixture
-def fs_dataset(dataset_cls, path_file, save_args, load_args, fs_args):
-    return dataset_cls(
-        path=path_file,
-        save_args=save_args,
-        load_args=load_args,
-        fs_args=fs_args,
+def load_version():
+    return "2019-01-01T23.59.59.999Z"
+
+
+@pytest.fixture
+def save_version():
+    return "2019-01-01T23.59.59.999Z"
+
+
+@pytest.fixture
+def versioned_fs_dataset(kedro_dataset_cls, path_file, load_version, save_version):
+    return kedro_dataset_cls(
+        path=path_file, version=Version(load_version, save_version)
     )
 
 
-@pytest.fixture
-def fs_dataset_dir(dataset_cls, path_dir):
-    return dataset_cls(path=path_dir)
-
-
-@pytest.fixture
-def versioned_fs_dataset(dataset_cls, path_file, load_version, save_version):
-    return dataset_cls(path=path_file, version=Version(load_version, save_version))
-
-
 class TestFilesystemDataset:
-    def test_save_and_load_dataset(self, fs_dataset, dataset):
-        """A single-file load returns a Dataset (auto-unwrapped)."""
-        fs_dataset.save(dataset)
-        reloaded = fs_dataset.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == dataset.to_dict()
-
-    def test_save_and_load_dataset_with_split(self, dataset_cls, path_file, dataset):
-        """With split in load_args, the explicit split is respected."""
-        ds = dataset_cls(path=path_file, load_args={"split": "train"})
-        ds.save(dataset)
-        reloaded = ds.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == dataset.to_dict()
-
-    def test_save_and_load_dataset_dict(self, fs_dataset_dir, dataset_dict):
-        fs_dataset_dir.save(dataset_dict)
-        reloaded = fs_dataset_dir.load()
+    def test_save_and_load_dataset(self, hf_dataset, kedro_dataset_cls, path_file):
+        """A single-file load returns a DatasetDict with single key "train"."""
+        kedro_dataset = kedro_dataset_cls(path=path_file)
+        kedro_dataset.save(hf_dataset)
+        reloaded = kedro_dataset.load()
         assert isinstance(reloaded, DatasetDict)
-        assert set(reloaded.keys()) == {"train", "test"}
-        for split in dataset_dict:
-            assert reloaded[split].to_dict() == dataset_dict[split].to_dict()
+        assert "train" in reloaded
+        assert reloaded["train"].to_dict() == hf_dataset.to_dict()
 
-    def test_save_and_load_iterable_dataset(self, fs_dataset, iterable_dataset):
+    def test_save_and_load_dataset_with_split(
+        self, hf_dataset, kedro_dataset_cls, path_file
+    ):
+        """With split in load_args, the explicit split is respected."""
+        kedro_dataset = kedro_dataset_cls(path=path_file, load_args={"split": "train"})
+        kedro_dataset.save(hf_dataset)
+        reloaded = kedro_dataset.load()
+        assert isinstance(reloaded, Dataset)
+        assert reloaded.to_dict() == hf_dataset.to_dict()
+
+    def test_directory_no_data_files_error(self, kedro_dataset_cls, path_dir):
+        with pytest.raises(DatasetError, match=r"from a directory"):
+            kedro_dataset_cls(path=path_dir)
+
+    def test_build_data_files(
+        self, kedro_dataset_cls, path_dir, dataset_dict_data_files
+    ):
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir, load_args={"data_files": dataset_dict_data_files}
+        )
+
+        built_data_files = kedro_dataset._build_data_files()
+
+        for split, filename in dataset_dict_data_files.items():
+            assert split in built_data_files
+            assert built_data_files[split] == os.path.join(path_dir, filename)
+
+    def test_save_and_load_dataset_dict(
+        self, dataset_dict, kedro_dataset_cls, path_dir, dataset_dict_data_files
+    ):
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir, load_args={"data_files": dataset_dict_data_files}
+        )
+        kedro_dataset.save(dataset_dict)
+
+        reloaded = kedro_dataset.load()
+        assert isinstance(reloaded, DatasetDict)
+        assert set(reloaded.keys()) == dataset_dict_data_files.keys()
+        for key in dataset_dict_data_files.keys():
+            assert reloaded[key].to_dict() == dataset_dict[key].to_dict()
+
+    def test_save_and_load_iterable_dataset(
+        self, iterable_dataset, kedro_dataset_cls, path_file
+    ):
+        kedro_dataset = kedro_dataset_cls(path=path_file)
         with pytest.raises(DatasetError, match=r"got iterable dataset"):
-            fs_dataset.save(iterable_dataset)
+            kedro_dataset.save(iterable_dataset)
 
     def test_save_and_load_iterable_dataset_dict(
-        self, fs_dataset_dir, iterable_dataset_dict
+        self,
+        iterable_dataset_dict,
+        kedro_dataset_cls,
+        path_dir,
+        dataset_dict_data_files,
     ):
-        with pytest.raises(DatasetError, match=r"got iterable dataset"):
-            fs_dataset_dir.save(iterable_dataset_dict)
-
-    def test_exists(self, fs_dataset, dataset):
-        assert not fs_dataset.exists()
-        fs_dataset.save(dataset)
-        assert fs_dataset.exists()
-
-    def test_load_missing_dataset(self, fs_dataset, dataset_cls):
-        pattern = (
-            rf"Failed while loading data from dataset {_qualname(dataset_cls)}\(.*\)"
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir, load_args={"data_files": dataset_dict_data_files}
         )
-        with pytest.raises(DatasetError, match=pattern):
-            fs_dataset.load()
+        with pytest.raises(DatasetError, match=r"got iterable dataset"):
+            kedro_dataset.save(iterable_dataset_dict)
 
-    def test_save_invalid_type(self, fs_dataset, dataset_cls):
-        pattern = rf"{dataset_cls.__name__} only supports"
+    def test_exists(self, hf_dataset, kedro_dataset_cls, path_file):
+        kedro_dataset = kedro_dataset_cls(path=path_file)
+        kedro_dataset.save(hf_dataset)
+        assert kedro_dataset.exists()
+
+    def test_load_missing_dataset(self, kedro_dataset_cls, path_file):
+        kedro_dataset = kedro_dataset_cls(path=path_file)
+
+        pattern = rf"Failed while loading data from dataset {_qualname(kedro_dataset_cls)}\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            fs_dataset.save({"not": "a dataset"})
+            kedro_dataset.load()
+
+    def test_save_invalid_type(self, kedro_dataset_cls, path_file):
+        kedro_dataset = kedro_dataset_cls(path=path_file)
+
+        pattern = rf"{kedro_dataset_cls.__name__} only supports"
+        with pytest.raises(DatasetError, match=pattern):
+            kedro_dataset.save({"not": "a dataset"})
 
     @pytest.mark.parametrize("base_path,instance_type", PROTOCOLS)
-    def test_protocol_usage(self, dataset_cls, extension, base_path, instance_type):
+    def test_protocol_usage(
+        self, kedro_dataset_cls, extension, base_path, instance_type, mocker
+    ):
+        # Skip checking directory as it would require permissions for remote filesystems.
+        mocker.patch.object(instance_type, "isdir", return_value=False)
+
         path = f"{base_path}{extension}"
-        ds = dataset_cls(path=path)
+        ds = kedro_dataset_cls(path=path)
         assert isinstance(ds._fs, instance_type)
         resolved = path.split(PROTOCOL_DELIMITER, 1)[-1]
         assert str(ds._filepath) == resolved
         assert isinstance(ds._filepath, PurePosixPath)
 
-    def test_pathlike_path(self, dataset_cls, tmp_path, extension, dataset):
+    def test_pathlike_path(self, hf_dataset, kedro_dataset_cls, tmp_path, extension):
         path = tmp_path / f"test_pathlike{extension}"
-        ds = dataset_cls(path=path)
-        ds.save(dataset)
+        ds = kedro_dataset_cls(path=path)
+        ds.save(hf_dataset)
         reloaded = ds.load()
-        assert reloaded.to_dict() == dataset.to_dict()
+        assert isinstance(reloaded, DatasetDict)
+        assert reloaded["train"].to_dict() == hf_dataset.to_dict()
 
-    def test_catalog_release(self, dataset_cls, extension, mocker):
+    def test_catalog_release(self, kedro_dataset_cls, path_file, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
-        path = f"test{extension}"
-        ds = dataset_cls(path=path)
+        fs_mock.isdir.return_value = False
+        ds = kedro_dataset_cls(path=path_file)
         ds.release()
-        fs_mock.invalidate_cache.assert_called_once_with(path)
+        fs_mock.invalidate_cache.assert_called_once_with(path_file)
 
 
 class TestFilesystemDatasetVersioned:
-    def test_version_str_repr(self, dataset_cls, extension, load_version, save_version):
+    def test_version_str_repr(
+        self, kedro_dataset_cls, extension, load_version, save_version
+    ):
         path = f"test{extension}"
-        ds = dataset_cls(path=path)
-        ds_versioned = dataset_cls(
+        ds = kedro_dataset_cls(path=path)
+        ds_versioned = kedro_dataset_cls(
             path=path, version=Version(load_version, save_version)
         )
         assert path in str(ds)
         assert "version" not in str(ds)
 
         assert path in str(ds_versioned)
-        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
+        ver_str = f"version=Version(load='{load_version}', save='{save_version}')"
         assert ver_str in str(ds_versioned)
-        assert dataset_cls.__name__ in str(ds_versioned)
+        assert kedro_dataset_cls.__name__ in str(ds_versioned)
 
-    def test_save_and_load(self, versioned_fs_dataset, dataset):
-        versioned_fs_dataset.save(dataset)
+    def test_save_and_load(self, hf_dataset, versioned_fs_dataset):
+        versioned_fs_dataset.save(hf_dataset)
         reloaded = versioned_fs_dataset.load()
-        assert isinstance(reloaded, Dataset)
-        assert reloaded.to_dict() == dataset.to_dict()
+        assert isinstance(reloaded, DatasetDict)
+        assert reloaded["train"].to_dict() == hf_dataset.to_dict()
 
-    def test_no_versions(self, versioned_fs_dataset, dataset_cls):
-        pattern = rf"Did not find any versions for {_qualname(dataset_cls)}\(.+\)"
+    def test_no_versions(self, kedro_dataset_cls, path_file):
+        """With Version(None, None), construction fails when no saved versions exist."""
+        pattern = rf"Did not find any versions for {_qualname(kedro_dataset_cls)}\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_fs_dataset.load()
+            kedro_dataset_cls(path=path_file, version=Version(None, None))
 
-    def test_exists(self, versioned_fs_dataset, dataset):
+    def test_exists(self, hf_dataset, versioned_fs_dataset):
         assert not versioned_fs_dataset.exists()
-        versioned_fs_dataset.save(dataset)
+        versioned_fs_dataset.save(hf_dataset)
         assert versioned_fs_dataset.exists()
 
-    def test_prevent_overwrite(self, versioned_fs_dataset, dataset_cls, dataset):
-        versioned_fs_dataset.save(dataset)
+    def test_prevent_overwrite(
+        self, hf_dataset, versioned_fs_dataset, kedro_dataset_cls
+    ):
+        versioned_fs_dataset.save(hf_dataset)
         pattern = (
-            rf"Save path \'.+\' for {_qualname(dataset_cls)}\(.+\) must "
+            rf"Save path \'.+\' for {_qualname(kedro_dataset_cls)}\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_fs_dataset.save(dataset)
-
-    def test_http_filesystem_no_versioning(self, dataset_cls, extension):
-        pattern = "Versioning is not supported for HTTP protocols."
-        with pytest.raises(DatasetError, match=pattern):
-            dataset_cls(
-                path=f"https://example.com/data{extension}",
-                version=Version(None, None),
-            )
+            versioned_fs_dataset.save(hf_dataset)

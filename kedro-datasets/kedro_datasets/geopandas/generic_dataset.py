@@ -36,7 +36,7 @@ class GenericDataset(
     The underlying functionality is supported by geopandas, so it supports all
     allowed geopandas (pandas) options for loading and saving files.
 
-    As of April 2025, fiona (a dependency of geopandas) does not support Python 3.14.
+    fiona (a dependency of geopandas) does not currently support Python 3.14.
 
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):

@@ -91,6 +91,26 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
             glob_function=self._fs.glob,
         )
 
+        # For non-Arrow datasets, we have to validate that, if we were given
+        # a directory, the user also provided ``data_files`` in the load_args.
+        filepath_str = get_filepath_str(self._get_load_path(), self._protocol)
+        self._path_is_dir = not PurePosixPath(filepath_str).suffix or self._fs.isdir(
+            filepath_str
+        )
+
+        self._validate_load_paths()
+
+    def _validate_load_paths(self):
+        """If we're loading from a directory, we have to assume this is a DatasetDict.
+        Non-Arrow datasets cannot do a ``datasets.load_from_disk`` without ``data_files``
+        specified in the arguments.
+        """
+        if self._path_is_dir and "data_files" not in self._load_args:
+            raise DatasetError(
+                f"{type(self).__name__} cannot load from a directory "
+                "without specifying ``data_files`` in ``load_args``."
+            )
+
     def load(self) -> DatasetLike:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return self._load_dataset(load_path)
@@ -121,12 +141,30 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
         self._invalidate_cache()
 
+    def _build_data_files(self) -> str | dict[str, str]:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        # If this is a directory, we're expecting to load a DatasetDict.
+        if self._path_is_dir:
+            data_files = self._load_args["data_files"]
+            return {
+                split: os.path.join(load_path, filename)
+                for split, filename in data_files.items()
+            }
+
+        # Otherwise, just return the path to the Dataset to be loaded.
+        return load_path
+
     def _load_dataset(self, load_path: str) -> DatasetLike:
+        data_files: str | dict[str, str] = self._build_data_files()
+
+        load_args = deepcopy(self._load_args)
+        load_args.pop("data_files", None)
+
         return load_dataset(  # nosec
             self.BUILDER,
-            data_files=load_path,
+            data_files=data_files,
             storage_options=self._storage_options,
-            **self._load_args,
+            **load_args,
         )
 
     def _save_dataset(self, data: Dataset, save_path: str) -> None:
@@ -144,14 +182,9 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         """
         self._fs.mkdirs(save_path, exist_ok=True)
         ext = self.EXTENSION
-        saver = f"to_{self.BUILDER}"
         for split, split_ds in data.items():
             split_path = f"{save_path}/{split}{ext}"
-            getattr(split_ds, saver)(
-                split_path,
-                storage_options=self._storage_options,
-                **self._save_args,
-            )
+            self._save_dataset(split_ds, split_path)
 
     def _describe(self) -> dict[str, Any]:
         return {

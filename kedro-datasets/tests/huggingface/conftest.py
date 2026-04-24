@@ -10,7 +10,7 @@ from datasets import Dataset, DatasetDict, IterableDatasetDict
 
 
 @pytest.fixture
-def dataset():
+def hf_dataset():
     return Dataset.from_dict({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
 
 
@@ -18,8 +18,8 @@ def dataset():
 def dataset_dict():
     return DatasetDict(
         {
-            "train": Dataset.from_dict({"col1": [1, 2], "col2": ["a", "b"]}),
-            "test": Dataset.from_dict({"col1": [3], "col2": ["c"]}),
+            "data": Dataset.from_dict({"col1": [1, 2], "col2": ["a", "b"]}),
+            "labels": Dataset.from_dict({"col1": [3], "col2": ["c"]}),
         }
     )
 
@@ -35,10 +35,10 @@ def iterable_dataset():
 def iterable_dataset_dict():
     return IterableDatasetDict(
         {
-            "train": Dataset.from_dict(
+            "data": Dataset.from_dict(
                 {"col1": [1, 2], "col2": ["a", "b"]}
             ).to_iterable_dataset(),
-            "test": Dataset.from_dict(
+            "labels": Dataset.from_dict(
                 {"col1": [3], "col2": ["c"]}
             ).to_iterable_dataset(),
         }

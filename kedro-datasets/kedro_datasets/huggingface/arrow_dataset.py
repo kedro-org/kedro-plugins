@@ -50,6 +50,10 @@ class ArrowDataset(FilesystemDataset):
     BUILDER: ClassVar[str] = "arrow"
     EXTENSION: ClassVar[str] = ".arrow"
 
+    def _validate_load_paths(self):
+        """Override to do nothing. Path validation handled by ``load_from_disk``."""
+        pass
+
     def _load_dataset(self, load_path: str) -> DatasetLike:
         return load_from_disk(
             load_path,

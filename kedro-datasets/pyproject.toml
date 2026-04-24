@@ -315,7 +315,7 @@ test = [
     "pyspark>=3.0, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0, <4.1; python_version >= '3.12'",  # Temporary pin till delta-spark is compatible
-    "pytest-cov~=3.0",
+    "pytest-cov>=7.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
@@ -406,7 +406,7 @@ experimental_test = [
     "pyspark>=3.0, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0; python_version >= '3.12'",
-    "pytest-cov~=3.0",
+    "pytest-cov>=7.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",

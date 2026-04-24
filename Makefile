@@ -68,8 +68,11 @@ dataset-tests: dataset-doctests
 	cd kedro-datasets && pytest tests/tensorflow/test_tensorflow_model_dataset.py --no-cov
 	cd kedro-datasets && pytest tests/databricks --no-cov
 
-extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark
-extra_pytest_args=
+# tensorflow and geopandas are excluded from doctests because their dependencies
+# (TensorFlow and fiona respectively) do not support Python 3.14. Both modules
+# are covered by their own dedicated test targets and are excluded from coverage.
+extra_pytest_args-no-spark=--ignore kedro_datasets/databricks --ignore kedro_datasets/spark --ignore kedro_datasets/tensorflow --ignore kedro_datasets/geopandas
+extra_pytest_args=--ignore kedro_datasets/tensorflow --ignore kedro_datasets/geopandas
 dataset-doctest%:
 	if [ "${*}" != 's-no-spark' ] && [ "${*}" != 's' ]; then \
 	  echo "make: *** No rule to make target \`${@}\`.  Stop."; \

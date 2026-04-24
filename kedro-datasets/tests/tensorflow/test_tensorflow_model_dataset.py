@@ -15,6 +15,11 @@ if sys.platform == "win32":
         allow_module_level=True,
     )
 
+_skip_on_314 = pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="TensorFlow does not support Python 3.14",
+)
+
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
 # fixtures to avoid them being evaluated immediately when a new test process is spawned.
@@ -138,6 +143,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
+@_skip_on_314
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
@@ -275,6 +281,7 @@ class TestTensorFlowModelDataset:
         assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
+@_skip_on_314
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
 

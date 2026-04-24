@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 
+- Kedro-Datasets is now compatible with Python 3.14.
 - Added the following new **experimental** datasets:
 
 | Type                                 | Description                                          | Location                               |

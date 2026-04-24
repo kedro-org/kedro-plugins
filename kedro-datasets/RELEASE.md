@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 
+- Add Hugging Face datasets: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`.
 - Added the following new **experimental** datasets:
 
 | Type                                 | Description                                          | Location                               |
@@ -32,18 +33,6 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
-
-# Release 9.3.0
-
-## Major features and improvements
-
-- Add Hugging Face datasets: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`.
-
-## Bug fixes and other changes
-## Community contributions
-
-Many thanks to the following Kedroids for contributing PRs to this release:
-
 - [iwhalen](https://github.com/iwhalen)
 
 # Release 9.3.0

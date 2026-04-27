@@ -96,11 +96,29 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
+    Provide at least one of ``sql``, ``filepath``, or ``table_name``. When only
+    ``table_name`` is given, the dataset loads the whole table via ``SELECT *``.
+    Schema-qualified tables are addressed via the ``sql`` form (e.g.
+    ``"SELECT * FROM dwschema.shuttles"``); there is no separate ``schema``
+    argument.
+
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
+
+    Load-and-save against a single table:
+
+    ```yaml
+    shuttles_table:
+        type: polars.PolarsDatabaseDataset
+        table_name: shuttles
+        credentials: db_credentials
+    ```
+
+    Load via a custom (here schema-qualified) SQL query:
+
     ```yaml
     shuttle_id_dataset:
         type: polars.PolarsDatabaseDataset
-        sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        sql: "SELECT shuttle, shuttle_id FROM spaceflights.shuttles;"
         credentials: db_credentials
     ```
 
@@ -152,14 +170,14 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         """Creates a new ``PolarsDatabaseDataset``."""
         if sql and filepath:
             raise DatasetError(
-                "'sql' and 'filepath' arguments cannot both be provided."
+                "'sql' and 'filepath' arguments cannot both be provided. "
                 "Please only provide one."
             )
 
-        if not table_name or (sql or filepath):
+        if not (sql or filepath or table_name):
             raise DatasetError(
-                "Either 'table_name' or one of 'sql' or 'filepath' arguments cannot both be empty."
-                "Please provide a sql query or path to a sql query file."
+                "Provide at least one of 'sql', 'filepath', or 'table_name'. "
+                "When only 'table_name' is given, the dataset will load the whole table."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
@@ -170,7 +188,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         default_load_args: dict[str, Any] = {}
         default_save_args: dict[str, Any] = {
-            "if_exists": "replace"
+            "if_table_exists": "replace"
         }
 
         self._load_args = (
@@ -188,11 +206,10 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         self.metadata = metadata
 
-        # load sql query from file
         if sql:
             self._load_args["sql"] = sql
             self._filepath = None
-        else:
+        elif filepath:
             # filesystem for loading sql file
             _fs_args = copy.deepcopy(fs_args) or {}
             _fs_credentials = _fs_args.pop("credentials", {})
@@ -201,6 +218,9 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
+        else:
+            # table_name-only mode: load() will build "SELECT * FROM <table_name>".
+            self._filepath = None
         self._connection_str = credentials["con"]
         self._connection_args = {
             k: credentials[k] for k in credentials.keys() if k != "con"
@@ -253,12 +273,14 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 query = fs_file.read()
-        else:
+        elif "sql" in load_args:
             query = load_args.pop("sql")
+        else:
+            query = f"SELECT * FROM {self.table_name}"
 
         return pl.read_database(
             query=query,
-            connection=self._connection_str,
+            connection=self.engine,
             **load_args
         )
 

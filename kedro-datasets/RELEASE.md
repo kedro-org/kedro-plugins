@@ -27,11 +27,13 @@
 - Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
+- Made `polars.PolarsDatabaseDataset` usable end-to-end: corrected the inverted argument validation in `__init__` that made the dataset uninstantiable for any valid configuration; renamed the default `save_args` key from `if_exists` to `if_table_exists` for compatibility with current `polars.DataFrame.write_database`; and switched `load()` to pass the cached SQLAlchemy `engine` (instead of a URI string) to `pl.read_database`. Also added support for table-name-only catalog entries (loads via `SELECT * FROM <table_name>` when no `sql` or `filepath` is provided).
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
+- [Anton Nikishin](https://github.com/nikanton)
 
 # Release 9.3.0
 

@@ -8,17 +8,18 @@ Name | Description
 -----|------------
 [chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads and saves data to ChromaDB vector database collections.
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
-[langchain.LangChainPromptDataset](langchain.LangChainPromptDataset.md) | ``LangChainPromptDataset`` loads a `langchain` prompt template.
-[langfuse.LangfuseEvaluationDataset](langfuse.LangfuseEvaluationDataset.md) | ``LangfuseEvaluationDataset`` manages Langfuse evaluation datasets for LLM experiment workflows, supporting local file syncing and remote dataset versioning.
-[langfuse.LangfusePromptDataset](langfuse.LangfusePromptDataset.md) | ``LangfusePromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.
-[langfuse.LangfuseTraceDataset](langfuse.LangfuseTraceDataset.md) | ``LangfuseTraceDataset`` provides Langfuse tracing clients for LLM observability and monitoring.
+[langchain.PromptDataset](langchain.PromptDataset.md) | ``PromptDataset`` loads a `langchain` prompt template.
+[langfuse.EvaluationDataset](langfuse.EvaluationDataset.md) | ``EvaluationDataset`` manages Langfuse evaluation datasets for LLM experiment workflows, supporting local file syncing and remote dataset versioning.
+[langfuse.PromptDataset](langfuse.PromptDataset.md) | ``PromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.
+[langfuse.TraceDataset](langfuse.TraceDataset.md) | ``TraceDataset`` provides Langfuse tracing clients for LLM observability and monitoring.
 [mlrun.MLRunAbstractDataset](mlrun.MLRunAbstractDataset.md) | ``MLRunAbstractDataset`` base class for MLRun datasets, can be used directly for generic artifacts.
 [mlrun.MLRunModel](mlrun.MLRunModel.md) | ``MLRunModel`` saves and loads ML models via MLRun with framework metadata and configurable file format.
 [mlrun.MLRunDataframeDataset](mlrun.MLRunDataframeDataset.md) | ``MLRunDataframeDataset`` saves and loads pandas DataFrames as MLRun artifacts.
 [mlrun.MLRunResult](mlrun.MLRunResult.md) | ``MLRunResult`` logs scalar results and metrics to MLRun with optional nested dict flattening.
 [netcdf.NetCDFDataset](netcdf.NetCDFDataset.md) | ``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
-[opik.OpikPromptDataset](opik.OpikPromptDataset.md) | ``OpikPromptDataset`` manages prompts with Opik versioning support, returning either raw SDK objects or LangChain templates.
-[opik.OpikTraceDataset](opik.OpikTraceDataset.md) | ``OpikTraceDataset`` provides Opik tracing clients for observability and monitoring.
+[opik.EvaluationDataset](opik.EvaluationDataset.md) | ``EvaluationDataset`` manages Opik evaluation datasets for LLM experiment workflows.
+[opik.PromptDataset](opik.PromptDataset.md) | ``PromptDataset`` manages prompts with Opik versioning support, returning either raw SDK objects or LangChain templates.
+[opik.TraceDataset](opik.TraceDataset.md) | ``TraceDataset`` provides Opik tracing clients for observability and monitoring.
 [optuna.StudyDataset](optuna.StudyDataset.md) | ``StudyDataset`` loads/saves an Optuna study, enabling distributed hyperparameter tuning.
 [pypdf.PDFDataset](pypdf.PDFDataset.md) | ``PDFDataset`` loads data from PDF files using pypdf to extract text from pages. Read-only dataset.
 [polars.PolarsDatabaseDataset](polars.PolarsDatabaseDataset.md) | ``PolarsDatabaseDataset`` implementation to access databases as Polars DataFrames. It supports reading from a SQL query and writing to a database table.

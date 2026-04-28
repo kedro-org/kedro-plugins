@@ -18,7 +18,7 @@ except ImportError:
 from kedro_datasets._typing import JSONPreview
 
 
-class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]): # noqa UP007
+class PromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]): # noqa UP007
     """
     A Kedro dataset for loading LangChain prompt templates from text, JSON, or YAML files.
 
@@ -29,7 +29,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
     my_prompt:
-        type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+        type: kedro_datasets_experimental.langchain.PromptDataset
         filepath: data/prompts/my_prompt.json
         template: PromptTemplate
         dataset:
@@ -47,9 +47,9 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-    from kedro_datasets_experimental.langchain import LangChainPromptDataset
+    from kedro_datasets_experimental.langchain import PromptDataset
 
-    dataset = LangChainPromptDataset(
+    dataset = PromptDataset(
         filepath="data/prompts/my_prompt.json",
         template="PromptTemplate",
         dataset={"type": "json.JSONDataset"},
@@ -294,7 +294,7 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         return ChatPromptTemplate.from_messages(messages)
 
     def save(self, data: Any) -> None:
-        raise DatasetError("Saving is not supported for LangChainPromptDataset")
+        raise DatasetError("Saving is not supported for PromptDataset")
 
     def _describe(self) -> dict[str, Any]:
         clean_config = {

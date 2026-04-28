@@ -2,14 +2,39 @@
 
 ## Major features and improvements
 
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
 ## Bug fixes and other changes
 
-- Fixed the rendering of the `optuna.StudyDataset` documentation.
+## Breaking changes to experimental datasets
+- Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
+  - Classes:
+    - `langfuse.LangfusePromptDataset` → `langfuse.PromptDataset`
+    - `langfuse.LangfuseTraceDataset` → `langfuse.TraceDataset`
+    - `langfuse.LangfuseEvaluationDataset` → `langfuse.EvaluationDataset`
+    - `opik.OpikPromptDataset` → `opik.PromptDataset`
+    - `opik.OpikTraceDataset` → `opik.TraceDataset`
+    - `langchain.LangChainPromptDataset` → `langchain.PromptDataset`
+  - Extras:
+    - `langfuse-langfusepromptdataset` → `langfuse-promptdataset`
+    - `opik-opiktracedataset` → `opik-tracedataset`
+    - `langchain-langchainpromptdataset` → `langchain-promptdataset`
+    - etc.
+
+## Bug fixes and other changes
+
+- Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
+- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
+- Added `os.PathLike` support for `plotly` datasets.
 
 ## Community contributions
-
 Many thanks to the following Kedroids for contributing PRs to this release:
 
+- [Datascienceio](https://github.com/datascienceio)
 - [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 9.3.0

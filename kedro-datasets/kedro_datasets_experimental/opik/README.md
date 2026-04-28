@@ -4,6 +4,14 @@
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Opik](https://img.shields.io/badge/opik-integration-purple)](https://www.comet.com/site/products/opik/)
 
+## Datasets
+
+| Dataset | Description |
+|---------|-------------|
+| [PromptDataset](#promptdataset) | Prompt management with Opik versioning, sync policies, and LangChain integration. |
+| [TraceDataset](#tracedataset) | Tracing clients and callbacks for LangChain, OpenAI, AutoGen, and direct SDK usage. |
+| [EvaluationDataset](#evaluationdataset) | Evaluation dataset management with local/remote sync and upsert semantics. |
+
 ## PromptDataset
 A Kedro dataset for seamless AI prompt management with Opik versioning, synchronisation, and experiment tracking. Supports both LangChain integration and direct SDK usage with flexible sync policies for development and production workflows.
 
@@ -422,14 +430,317 @@ DatasetError: Remote sync policy specified but no remote prompt exists in Opik
 
 ---
 
-### Support
+## TraceDataset
 
-#### Issues
-- **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)
+A Kedro dataset for managing [Opik tracing](https://www.comet.com/docs/opik/tracing/log_traces) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Opik SDK usage. Opik credentials are automatically configured during initialization.
 
-#### Related Resources
-- **Opik Documentation**: [Opik Platform](https://www.comet.com/docs/opik/)
-- **Kedro Documentation**: [Kedro Datasets](https://docs.kedro.org/)
+### Quick Start
+
+```python
+from kedro_datasets_experimental.opik import TraceDataset
+
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+        "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+    },
+    mode="openai",
+)
+
+client = dataset.load()
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+# The call is automatically traced in Opik
+```
+
+### Installation
+
+```bash
+pip install "kedro-datasets[opik-tracedataset]"
+```
+
+For AutoGen mode, install with OpenTelemetry dependencies:
+
+```bash
+pip install "kedro-datasets[opik-tracedataset-autogen]"
+```
+
+Or install all Opik datasets at once:
+
+```bash
+pip install "kedro-datasets[opik]"
+```
+
+#### Requirements:
+- Python 3.10+
+- Kedro
+- Opik SDK
+- OpenAI (for `mode="openai"`)
+- LangChain (for `mode="langchain"`)
+- OpenTelemetry (for `mode="autogen"`)
+
+### Modes
+
+| Mode | Returns | Use Case |
+|------|---------|----------|
+| **`sdk`** (default) | `SDKClient` wrapping the `track` decorator | Manual tracing with `@client.track` |
+| **`langchain`** | `OpikTracer` callback handler | Drop-in tracing for LangChain chains and agents |
+| **`openai`** | Wrapped `OpenAI` client | Automatic tracing of OpenAI API calls |
+| **`autogen`** | `Tracer` (OpenTelemetry) | Tracing AutoGen agent conversations via OTLP |
+
+#### SDK Mode (default)
+
+Returns a simple client exposing the `track` decorator for manual trace creation:
+
+```python
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+        "project_name": "kedro-sdk-demo",
+    },
+    mode="sdk",
+)
+
+client = dataset.load()
+
+
+@client.track(name="my_workflow")
+def run_step(x: int) -> int:
+    return x * 2
+
+
+run_step(21)  # Trace sent to Opik
+```
+
+#### LangChain Mode
+
+Returns an `OpikTracer` to pass into LangChain chains or agents:
+
+```python
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+    },
+    mode="langchain",
+)
+
+tracer = dataset.load()
+chain.invoke(input, config={"callbacks": [tracer]})
+```
+
+#### OpenAI Mode
+
+Returns an OpenAI client wrapper that traces all API calls automatically:
+
+```python
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+        "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+    },
+    mode="openai",
+)
+
+client = dataset.load()
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Summarise this document."}],
+)
+```
+
+#### AutoGen Mode
+
+Returns a configured OpenTelemetry `Tracer` for AutoGen agent conversations. Requires an OTLP endpoint in credentials:
+
+```python
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+        "project_name": "autogen-demo",
+        "endpoint": "https://www.comet.com/opik/api/v1/private/otel/v1/traces",
+    },
+    mode="autogen",
+)
+
+tracer = dataset.load()
+
+# Add custom spans
+with tracer.start_as_current_span("response_generation") as span:
+    span.set_attribute("intent", "claim_new")
+    agent.invoke(context)
+```
+
+For self-hosted Opik, provide both `url_override` and `endpoint`:
+
+```python
+dataset = TraceDataset(
+    credentials={
+        "api_key": "opik_...",  # pragma: allowlist secret
+        "workspace": "my-workspace",
+        "url_override": "http://localhost:5173",
+        "endpoint": "http://localhost:5173/opik/api/v1/private/otel/v1/traces",
+    },
+    mode="autogen",
+)
+```
+
+> **Note:** Opik configuration is global within the Python process. Using multiple `TraceDataset` instances with different `project_name` values in the same session may cause all traces to log to the first configured project. To switch projects, restart the Python process or unset the `OPIK_PROJECT_NAME` environment variable.
+
+### Configuration Examples
+
+#### Catalog Configuration (YAML)
+
+##### OpenAI Mode
+
+```yaml
+opik_trace:
+  type: kedro_datasets_experimental.opik.TraceDataset
+  credentials: opik_credentials
+  mode: openai
+```
+
+##### LangChain Mode
+
+```yaml
+opik_trace:
+  type: kedro_datasets_experimental.opik.TraceDataset
+  credentials: opik_credentials
+  mode: langchain
+```
+
+##### AutoGen Mode
+
+```yaml
+opik_trace:
+  type: kedro_datasets_experimental.opik.TraceDataset
+  credentials: opik_credentials
+  mode: autogen
+```
+
+#### Credentials Management
+
+```yaml
+# conf/local/credentials.yml
+opik_credentials:
+  api_key: "opik_your_api_key"  # pragma: allowlist secret
+  workspace: "your-workspace"
+  project_name: "your-project"  # optional
+  url_override: "https://your-opik-instance.com"  # optional, self-hosted only
+  openai:  # required for mode: openai
+    api_key: "sk-..."  # pragma: allowlist secret
+    base_url: "https://api.openai.com/v1"  # optional
+  endpoint: "https://www.comet.com/opik/api/v1/private/otel/v1/traces"  # required for mode: autogen
+```
+
+### Integration Examples
+
+#### Kedro Pipeline Integration
+
+```python
+# nodes.py
+def generate_response(tracing_client, user_input: str):
+    response = tracing_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": user_input}],
+    )
+    return response.choices[0].message.content
+
+
+# pipeline.py
+from kedro.pipeline import Pipeline, Node
+
+
+def create_pipeline():
+    return Pipeline(
+        [
+            Node(
+                func=generate_response,
+                inputs=["opik_trace", "user_input"],
+                outputs="llm_response",
+            )
+        ]
+    )
+```
+
+### Troubleshooting
+
+#### Missing Credentials
+
+```
+DatasetError: Missing required Opik credential: 'api_key'
+```
+
+##### Solution: Add all required credentials to your configuration:
+```python
+credentials = {
+    "api_key": "opik_...",  # pragma: allowlist secret
+    "workspace": "your-workspace",
+}
+```
+
+---
+
+#### Missing OpenAI Credentials
+
+```
+DatasetError: Missing 'openai' section in TraceDataset credentials.
+```
+
+##### Solution: Add the `openai` section with an `api_key`:
+```python
+credentials = {
+    "api_key": "opik_...",  # pragma: allowlist secret
+    "workspace": "your-workspace",
+    "openai": {"api_key": "sk-..."},  # pragma: allowlist secret
+}
+```
+
+---
+
+#### Missing AutoGen Endpoint
+
+```
+DatasetError: AutoGen mode requires 'endpoint' in credentials
+```
+
+##### Solution: Provide the full OTLP endpoint URL:
+```python
+credentials = {
+    "api_key": "opik_...",  # pragma: allowlist secret
+    "workspace": "your-workspace",
+    "endpoint": "https://www.comet.com/opik/api/v1/private/otel/v1/traces",
+}
+```
+
+---
+
+#### Missing OpenTelemetry Dependencies
+
+```
+DatasetError: AutoGen mode requires OpenTelemetry.
+```
+
+##### Solution:
+```bash
+pip install "kedro-datasets[opik-tracedataset-autogen]"
+```
+
+---
+
+#### Save Not Supported
+
+```
+NotImplementedError: TraceDataset is read-only.
+```
+
+##### Solution: `TraceDataset` is a read-only dataset that provides tracing clients. Traces are logged automatically through the returned client, not via `save()`.
 
 ---
 
@@ -746,11 +1057,14 @@ def my_task(dataset_item: dict) -> dict:
 - **No snapshot versioning**: Opik does not support pinning `load()` to a historical snapshot. The `version` param from `langfuse.EvaluationDataset` has no Opik equivalent.
 - **UUID v7 `id` values are forwarded; Opik upserts by item ID**: If a local item's `id` is a valid UUID v7, it is passed to Opik's `create_or_update` API, which upserts by item ID — the first sync creates the remote row; subsequent syncs update that same row in-place (content changes replace the row; unchanged content is a no-op). Items without a valid UUID v7 `id` have it stripped before upload; Opik auto-generates a new UUID v7 each sync, so those items create a new remote row on every sync, even when the content is unchanged.
 
-### Support
+---
 
-#### Issues
+## Issues
 - **Bug Reports**: [kedro-plugins/issues](https://github.com/kedro-org/kedro-plugins/issues)
 
-#### Related Resources
-- **Opik Documentation**: [Opik Evaluation](https://www.comet.com/docs/opik/evaluation/overview)
+## Related Resources
+- **Opik Documentation**: [Opik Platform](https://www.comet.com/docs/opik/)
+- **Opik Tracing**: [Tracing overview](https://www.comet.com/docs/opik/tracing/log_traces)
+- **Opik Evaluation**: [Evaluation overview](https://www.comet.com/docs/opik/evaluation/overview)
+- **Kedro Documentation**: [Kedro Datasets](https://docs.kedro.org/)
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)

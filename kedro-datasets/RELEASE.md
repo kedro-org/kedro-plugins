@@ -1,18 +1,73 @@
 # Upcoming Release
+## Major features and improvements
+
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
+## Breaking changes to experimental datasets
+- Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
+  - Classes:
+    - `langfuse.LangfusePromptDataset` → `langfuse.PromptDataset`
+    - `langfuse.LangfuseTraceDataset` → `langfuse.TraceDataset`
+    - `langfuse.LangfuseEvaluationDataset` → `langfuse.EvaluationDataset`
+    - `opik.OpikPromptDataset` → `opik.PromptDataset`
+    - `opik.OpikTraceDataset` → `opik.TraceDataset`
+    - `langchain.LangChainPromptDataset` → `langchain.PromptDataset`
+  - Extras:
+    - `langfuse-langfusepromptdataset` → `langfuse-promptdataset`
+    - `opik-opiktracedataset` → `opik-tracedataset`
+    - `langchain-langchainpromptdataset` → `langchain-promptdataset`
+    - etc.
+
+## Bug fixes and other changes
+
+- Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
+- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
+- Added `os.PathLike` support for `plotly` datasets.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Datascienceio](https://github.com/datascienceio)
+
+# Release 9.3.0
 
 ## Major features and improvements
 
 - Kedro-Datasets is now compatible with pandas 3.0.
 - Added `ibis-materialize` and `ibis-singlestoredb` extras for the backends added in Ibis 12.0.
 - Added "upsert" save mode to `ibis.TableDataset` (available on backends that support `MERGE INTO` since Ibis 12.0).
+- Added the following new **experimental** datasets:
+
+| Type                                 | Description                                          | Location                               |
+| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `langfuse.LangfuseEvaluationDataset` | A dataset for managing Langfuse evaluation datasets. | `kedro_datasets_experimental.langfuse` |
 
 ## Bug fixes and other changes
 
+- Added `LangfuseTraceDataset` documentation to the Langfuse README and restructured the page with a table of contents.
 - Fixed `databricks.ManagedTableDataset` upsert write mode failing with `[CONFIG_NOT_AVAILABLE]` on Databricks Spark Connect runtimes by replacing `spark.conf.set` variable substitution with direct f-string interpolation in the MERGE SQL statement.
 - Fixed `ibis.TableDataset` `exists` method to account for `database` (i.e. the collection of tables, or schema).
 - Relaxed all `gcsfs` upper-bound pins (previously capped below `2023.7`).
+- Added `os.PathLike` support for the following dataset groups (`text`, `json`, `yaml`, `pickle`, `geopandas`, `polars`, `openXML`, `holoview`, `biosequence`, `email` and `geopandas`)
+- Pinned delta-spark upper bound to 4.1
+- Ensured partition paths remain within dataset directory
+- Ensured matplotlib paths remain within dataset directory
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+[Priyanka](https://github.com/priya-gitTest)
+[Akumawavez](https://github.com/akumawavez)
+[Joris](https://github.com/jorisvane)
+[Bas-commits](https://github.com/Bas-commits)
+[oomenn](https://github.com/oomenn)
+[Celina](https://github.com/celinaczy)
+[Juanchodpg2](https://github.com/juanchodpg2)
 
 # Release 9.2.0
 

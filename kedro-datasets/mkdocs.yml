@@ -173,11 +173,13 @@ plugins:
 
         Experimental LLM and AI:
           - api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md: ChromaDB vector database integration
-          - api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md: LangChain prompt templates
-          - api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md: Langfuse prompt integration
-          - api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md: Langfuse tracing integration
-          - api/kedro_datasets_experimental/opik.OpikPromptDataset.md: Opik prompt integration
-          - api/kedro_datasets_experimental/opik.OpikTraceDataset.md: Opik tracing integration
+          - api/kedro_datasets_experimental/langchain.PromptDataset.md: LangChain prompt templates
+          - api/kedro_datasets_experimental/langfuse.EvaluationDataset.md: Langfuse evaluation dataset integration
+          - api/kedro_datasets_experimental/langfuse.PromptDataset.md: Langfuse prompt integration
+          - api/kedro_datasets_experimental/langfuse.TraceDataset.md: Langfuse tracing integration
+          - api/kedro_datasets_experimental/opik.EvaluationDataset.md: Opik evaluation integration
+          - api/kedro_datasets_experimental/opik.PromptDataset.md: Opik prompt integration
+          - api/kedro_datasets_experimental/opik.TraceDataset.md: Opik tracing integration
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -341,10 +343,11 @@ nav:
         - Databricks:
           - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - Langchain:
-          - langchain.LangChainPromptDataset: api/kedro_datasets_experimental/langchain.LangChainPromptDataset.md
+          - langchain.PromptDataset: api/kedro_datasets_experimental/langchain.PromptDataset.md
         - Langfuse:
-          - langfuse.LangfusePromptDataset: api/kedro_datasets_experimental/langfuse.LangfusePromptDataset.md
-          - langfuse.LangfuseTraceDataset: api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset.md
+          - langfuse.EvaluationDataset: api/kedro_datasets_experimental/langfuse.EvaluationDataset.md
+          - langfuse.PromptDataset: api/kedro_datasets_experimental/langfuse.PromptDataset.md
+          - langfuse.TraceDataset: api/kedro_datasets_experimental/langfuse.TraceDataset.md
         - MLRun:
           - mlrun.MLRunAbstractDataset: api/kedro_datasets_experimental/mlrun.MLRunAbstractDataset.md
           - mlrun.MLRunDataframeDataset: api/kedro_datasets_experimental/mlrun.MLRunDataframeDataset.md
@@ -353,8 +356,9 @@ nav:
         - NetCDF:
           - netcdf.NetCDFDataset: api/kedro_datasets_experimental/netcdf.NetCDFDataset.md
         - Opik:
-          - opik.OpikPromptDataset: api/kedro_datasets_experimental/opik.OpikPromptDataset.md
-          - opik.OpikTraceDataset: api/kedro_datasets_experimental/opik.OpikTraceDataset.md
+          - opik.EvaluationDataset: api/kedro_datasets_experimental/opik.EvaluationDataset.md
+          - opik.PromptDataset: api/kedro_datasets_experimental/opik.PromptDataset.md
+          - opik.TraceDataset: api/kedro_datasets_experimental/opik.TraceDataset.md
         - Optuna:
           - optuna.StudyDataset: api/kedro_datasets_experimental/optuna.StudyDataset.md
         - PyPDF:

@@ -5,6 +5,7 @@ plotly figure.
 from __future__ import annotations
 
 import json
+import os
 from copy import deepcopy
 from typing import Any
 
@@ -70,7 +71,7 @@ class PlotlyDataset(JSONDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         plotly_args: dict[str, Any],
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

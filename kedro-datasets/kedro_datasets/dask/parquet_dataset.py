@@ -3,6 +3,7 @@ dataframe"""
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
 
@@ -78,7 +79,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,

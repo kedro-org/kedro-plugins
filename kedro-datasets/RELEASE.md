@@ -1,4 +1,5 @@
 # Upcoming Release
+
 ## Major features and improvements
 
 - Added the following new **experimental** datasets:
@@ -6,6 +7,8 @@
 | Type                                 | Description                                          | Location                               |
 | ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
 | `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
+## Bug fixes and other changes
 
 ## Breaking changes to experimental datasets
 - Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
@@ -32,6 +35,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
+- [Guillaume Tauzin](https://github.com/gtauzin)
 
 # Release 9.3.0
 
@@ -61,13 +65,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Priyanka](https://github.com/priya-gitTest)
-[Akumawavez](https://github.com/akumawavez)
-[Joris](https://github.com/jorisvane)
-[Bas-commits](https://github.com/Bas-commits)
-[oomenn](https://github.com/oomenn)
-[Celina](https://github.com/celinaczy)
-[Juanchodpg2](https://github.com/juanchodpg2)
+- [Priyanka](https://github.com/priya-gitTest)
+- [Akumawavez](https://github.com/akumawavez)
+- [Joris](https://github.com/jorisvane)
+- [Bas-commits](https://github.com/Bas-commits)
+- [oomenn](https://github.com/oomenn)
+- [Celina](https://github.com/celinaczy)
+- [Juanchodpg2](https://github.com/juanchodpg2)
 
 # Release 9.2.0
 
@@ -94,7 +98,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Katerina Molchanova](https://github.com/rokatyy)
+- [Katerina Molchanova](https://github.com/rokatyy)
 
 # Release 9.1.1
 

@@ -33,11 +33,14 @@ class CSVDataset(FilesystemDataset):
         [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
         to load a ``datasets.DatasetDict`` from a single file:
 
+        >>> from datasets import Dataset
         >>> from kedro_datasets.huggingface.csv_dataset import (
         ...     CSVDataset,
         ... )
         >>>
+        >>> data = Dataset.from_dict({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
         >>> dataset = CSVDataset(path=tmp_path / "data.csv")
+        >>> dataset.save(data)
         >>> loaded = dataset.load()
         >>> assert "train" in loaded
 
@@ -57,14 +60,17 @@ class CSVDataset(FilesystemDataset):
         [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
         to load a ``datasets.Dataset`` from a single file:
 
+        >>> from datasets import Dataset
         >>> from kedro_datasets.huggingface.csv_dataset import (
         ...     CSVDataset,
         ... )
         >>>
+        >>> data = Dataset.from_dict({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
         >>> dataset = CSVDataset(
         ...     path=tmp_path / "data.csv",
         ...     load_args={"split": "train"},
         ... )
+        >>> dataset.save(data)
         >>> loaded = dataset.load()
         >>> assert type(loaded.shape) is tuple  # No "train" key.
 
@@ -86,10 +92,15 @@ class CSVDataset(FilesystemDataset):
         [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/)
         to load a ``datasets.DatasetDict`` from a directory of files:
 
+        >>> from datasets import Dataset, DatasetDict
         >>> from kedro_datasets.huggingface.csv_dataset import (
         ...     CSVDataset,
         ... )
         >>>
+        >>> dataset_dict = DatasetDict({
+        ...     "labels": Dataset.from_dict({"col1": [1, 2], "col2": ["a", "b"]}),
+        ...     "data": Dataset.from_dict({"col1": [3, 4], "col2": ["c", "d"]}),
+        ... })
         >>> dataset = CSVDataset(
         ...     path=tmp_path,
         ...     load_args={
@@ -99,6 +110,7 @@ class CSVDataset(FilesystemDataset):
         ...         }
         ...     },
         ... )
+        >>> dataset.save(dataset_dict)
         >>> loaded = dataset.load()
     """
 

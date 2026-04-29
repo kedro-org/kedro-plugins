@@ -91,26 +91,6 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
             glob_function=self._fs.glob,
         )
 
-        # For non-Arrow datasets, we have to validate that, if we were given
-        # a directory, the user also provided ``data_files`` in the load_args.
-        filepath_str = get_filepath_str(self._get_load_path(), self._protocol)
-        self._path_is_dir = not PurePosixPath(filepath_str).suffix or self._fs.isdir(
-            filepath_str
-        )
-
-        self._validate_load_paths()
-
-    def _validate_load_paths(self):
-        """If we're loading from a directory, we have to assume this is a DatasetDict.
-        Non-Arrow datasets cannot do a ``datasets.load_from_disk`` without ``data_files``
-        specified in the arguments.
-        """
-        if self._path_is_dir and "data_files" not in self._load_args:
-            raise DatasetError(
-                f"{type(self).__name__} cannot load from a directory "
-                "without specifying ``data_files`` in ``load_args``."
-            )
-
     def load(self) -> DatasetLike:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return self._load_dataset(load_path)
@@ -122,7 +102,7 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
                 "Before saving an iterable dataset "
                 "you must materialize it into a `Dataset` or `DatasetDict`."
             )
-            raise RuntimeError(msg)
+            raise DatasetError(msg)
 
         if not isinstance(data, Dataset | DatasetDict):
             msg = (
@@ -143,8 +123,8 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
     def _build_data_files(self) -> str | dict[str, str]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        # If this is a directory, we're expecting to load a DatasetDict.
-        if self._path_is_dir:
+
+        if "data_files" in self._load_args:
             data_files = self._load_args["data_files"]
             return {
                 split: os.path.join(load_path, filename)

@@ -103,10 +103,6 @@ class TestFilesystemDataset:
         assert isinstance(reloaded, Dataset)
         assert reloaded.to_dict() == hf_dataset.to_dict()
 
-    def test_directory_no_data_files_error(self, kedro_dataset_cls, path_dir):
-        with pytest.raises(DatasetError, match=r"from a directory"):
-            kedro_dataset_cls(path=path_dir)
-
     def test_build_data_files(
         self, kedro_dataset_cls, path_dir, dataset_dict_data_files
     ):
@@ -227,10 +223,11 @@ class TestFilesystemDatasetVersioned:
         assert reloaded["train"].to_dict() == hf_dataset.to_dict()
 
     def test_no_versions(self, kedro_dataset_cls, path_file):
-        """With Version(None, None), construction fails when no saved versions exist."""
+        """With Version(None, None), loading fails when no saved versions exist."""
         pattern = rf"Did not find any versions for {_qualname(kedro_dataset_cls)}\(.+\)"
+        ds = kedro_dataset_cls(path=path_file, version=Version(None, None))
         with pytest.raises(DatasetError, match=pattern):
-            kedro_dataset_cls(path=path_file, version=Version(None, None))
+            ds.load()
 
     def test_exists(self, hf_dataset, versioned_fs_dataset):
         assert not versioned_fs_dataset.exists()

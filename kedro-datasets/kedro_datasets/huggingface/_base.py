@@ -54,7 +54,13 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
             version: Optional versioning configuration
                 (see :class:`~kedro.io.core.Version`).
             load_args: Additional keyword arguments passed to the
-                underlying load function.
+                underlying load function. When loading a ``DatasetDict``
+                from a directory, supply ``data_files`` as a mapping of
+                split name to filename (e.g. ``{"train": "train.csv"}``).
+                The keys must match the split names of the ``DatasetDict``
+                being saved, and the filenames must use the correct
+                extension for the format (e.g. ``.csv`` for
+                ``CSVDataset``).
             save_args: Additional keyword arguments passed to the
                 underlying save function.
             credentials: Credentials for the underlying filesystem
@@ -160,6 +166,17 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
         As a result, we have to call ``to_<format>`` per split.
         """
+        if "data_files" in self._load_args:
+            data_files_keys = set(self._load_args["data_files"].keys())
+            split_names = set(data.keys())
+            if data_files_keys != split_names:
+                msg = (
+                    f"DatasetDict split names {sorted(split_names)} do not match "
+                    f"``load_args['data_files']`` keys {sorted(data_files_keys)}. "
+                    "The data_files keys must match the DatasetDict split names "
+                    "so the saved files can be found on load."
+                )
+                raise DatasetError(msg)
         self._fs.mkdirs(save_path, exist_ok=True)
         ext = self.EXTENSION
         for split, split_ds in data.items():

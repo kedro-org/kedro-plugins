@@ -130,6 +130,23 @@ class TestFilesystemDataset:
         for key in dataset_dict_data_files.keys():
             assert reloaded[key].to_dict() == dataset_dict[key].to_dict()
 
+    def test_save_dataset_dict_mismatched_data_files(
+        self, dataset_dict, kedro_dataset_cls, path_dir, extension
+    ):
+        """Saving a DatasetDict whose split names don't match data_files keys raises DatasetError."""
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir,
+            load_args={
+                # In the test fixture, we expect "data" and "labels". Not "train" and "test".
+                "data_files": {
+                    "train": f"train{extension}",
+                    "test": f"test{extension}",
+                }
+            },
+        )
+        with pytest.raises(DatasetError, match=r"do not match"):
+            kedro_dataset.save(dataset_dict)
+
     def test_save_and_load_iterable_dataset(
         self, iterable_dataset, kedro_dataset_cls, path_file
     ):

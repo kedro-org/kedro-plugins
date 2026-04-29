@@ -9,6 +9,10 @@ class JSONDataset(FilesystemDataset):
     """``JSONDataset`` loads/saves Hugging Face ``Dataset`` and
     ``DatasetDict`` objects to/from JSON files.
 
+    Saving ``IterableDataset`` or ``IterableDatasetDict`` objects is not
+    supported and will raise a ``DatasetError``. Materialize the iterable
+    dataset into a ``Dataset`` or ``DatasetDict`` before saving.
+
     Note that ``datasets`` loads a single file as a ``datasets.DatasetDict``
     with a single key called ``"train"``. You can get around this by specifying
     ``split`` in the ``load_args``. See examples for more info.

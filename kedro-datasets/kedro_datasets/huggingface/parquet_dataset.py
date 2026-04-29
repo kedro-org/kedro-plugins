@@ -10,6 +10,10 @@ class ParquetDataset(FilesystemDataset):
     ``DatasetDict`` objects to/from
     `Parquet <https://parquet.apache.org/>`_ files.
 
+    Saving ``IterableDataset`` or ``IterableDatasetDict`` objects is not
+    supported and will raise a ``DatasetError``. Materialize the iterable
+    dataset into a ``Dataset`` or ``DatasetDict`` before saving.
+
     Note that ``datasets`` loads a single file as a ``datasets.DatasetDict``
     with a single key called ``"train"``. You can get around this by specifying
     ``split`` in the ``load_args``. See examples for more info.

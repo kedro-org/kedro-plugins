@@ -14,8 +14,9 @@ class ArrowDataset(FilesystemDataset):
     `Arrow <https://huggingface.co/docs/datasets/about_arrow>`_ format
     using ``save_to_disk`` / ``load_from_disk``.
 
-    Iterable variants (``IterableDataset``, ``IterableDatasetDict``)
-    are materialised before saving.
+    Saving ``IterableDataset`` or ``IterableDatasetDict`` objects is not
+    supported and will raise a ``DatasetError``. Materialize the iterable
+    dataset into a ``Dataset`` or ``DatasetDict`` before saving.
 
     Examples:
         Using the
@@ -49,10 +50,6 @@ class ArrowDataset(FilesystemDataset):
 
     BUILDER: ClassVar[str] = "arrow"
     EXTENSION: ClassVar[str] = ".arrow"
-
-    def _validate_load_paths(self):
-        """Override to do nothing. Path validation handled by ``load_from_disk``."""
-        pass
 
     def _load_dataset(self, load_path: str) -> DatasetLike:
         return load_from_disk(

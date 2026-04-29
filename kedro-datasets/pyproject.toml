@@ -72,7 +72,7 @@ dask = ["kedro-datasets[dask-parquetdataset, dask-csvdataset]"]
 databricks-managedtabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 databricks = ["kedro-datasets[databricks-managedtabledataset]"]
 
-geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona>=1.8, <2.0"]
+geopandas-genericdataset = ["geopandas>=0.8.0, <2.0", "fiona>=1.8, <2.0; python_version < '3.14'"]
 geopandas = ["kedro-datasets[geopandas-genericdataset]"]
 
 holoviews-holoviewswriter = ["holoviews>=1.13.0"]
@@ -197,7 +197,10 @@ snowflake = ["kedro-datasets[snowflake-snowparktabledataset]"]
 svmlight-svmlightdataset = ["scikit-learn>=1.0.2", "scipy>=1.7.3"]
 svmlight = ["kedro-datasets[svmlight-svmlightdataset]"]
 
-tensorflow-tensorflowmodeldataset = ["tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'", "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'"]
+tensorflow-tensorflowmodeldataset = [
+    "tensorflow~=2.0; (platform_system != 'Darwin' or platform_machine != 'arm64') and python_version < '3.14'",
+    "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version < '3.14'",
+]
 tensorflow = ["kedro-datasets[tensorflow-tensorflowmodeldataset]"]
 
 text-textdataset = []

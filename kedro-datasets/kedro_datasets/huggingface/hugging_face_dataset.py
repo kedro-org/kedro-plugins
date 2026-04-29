@@ -12,7 +12,7 @@ from datasets import (
 from huggingface_hub import HfApi
 from kedro.io import AbstractDataset
 
-DatasetLike: TypeAlias = Dataset | DatasetDict | IterableDataset | IterableDatasetDict
+from ._base import DatasetLike
 
 
 class HFDataset(AbstractDataset[None, DatasetLike]):

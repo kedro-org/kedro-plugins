@@ -75,6 +75,10 @@ addopts = """
     --cov tests
     --no-cov-on-fail
     -ra"""
+filterwarnings = [
+    # TODO: remove once Kedro releases Python 3.14 support
+    "ignore::kedro.KedroPythonVersionWarning",
+]
 
 [tool.coverage.report]
 fail_under = 100

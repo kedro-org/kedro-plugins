@@ -1,14 +1,12 @@
 import sys
+from pathlib import Path, PurePosixPath
 
 import pytest
 
-if sys.version_info >= (3, 14):
-    pytest.skip(
-        "fiona (a dependency of geopandas) does not support Python 3.14",
-        allow_module_level=True,
-    )
-
-from pathlib import Path, PurePosixPath
+_skip_on_314 = pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="fiona (a dependency of geopandas) does not support Python 3.14",
+)
 
 import geopandas as gpd
 from fsspec.implementations.http import HTTPFileSystem
@@ -146,6 +144,7 @@ def versioned_geojson_dataset(filepath_geojson, load_version, save_version):
     )
 
 
+@_skip_on_314
 class TestGenericDataset:
     def test_save_and_load(self, geojson_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one."""
@@ -253,6 +252,7 @@ class TestGenericDataset:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 
+@_skip_on_314
 class TestGenericDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance

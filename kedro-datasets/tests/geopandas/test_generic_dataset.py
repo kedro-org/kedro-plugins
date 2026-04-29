@@ -1,14 +1,8 @@
 import sys
 from pathlib import Path, PurePosixPath
 
-import pytest
-
-_skip_on_314 = pytest.mark.skipif(
-    sys.version_info >= (3, 14),
-    reason="fiona (a dependency of geopandas) does not support Python 3.14",
-)
-
 import geopandas as gpd
+import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -18,6 +12,11 @@ from s3fs import S3FileSystem
 from shapely.geometry import Point
 
 from kedro_datasets.geopandas import GenericDataset
+
+_skip_on_314 = pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="fiona (a dependency of geopandas) does not support Python 3.14",
+)
 
 
 @pytest.fixture(params=[None])

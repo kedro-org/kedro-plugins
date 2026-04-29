@@ -591,7 +591,7 @@ dataset = TraceDataset(
 )
 ```
 
-> **Note:** Opik configuration is global within the Python process. Using multiple `TraceDataset` instances with different `project_name` values in the same session may cause all traces to log to the first configured project. To switch projects, restart the Python process or unset the `OPIK_PROJECT_NAME` environment variable.
+> **Note:** Opik SDK configuration is global within the Python process. For `sdk`, `openai`, and `langchain` modes, using multiple `TraceDataset` instances with different `project_name` values in the same session may cause all traces to log to the first configured project — to switch projects, restart the Python process or unset the `OPIK_PROJECT_NAME` environment variable. `autogen` mode is exempt: it sends `project_name` directly in OTLP request headers rather than relying on the global Opik SDK state, so each instance targets its own project independently.
 
 ### Configuration Examples
 
@@ -674,7 +674,7 @@ def create_pipeline():
 #### Missing Credentials
 
 ```
-DatasetError: Missing required Opik credential: 'api_key'
+DatasetError: Missing required Opik credential: 'api_key'.
 ```
 
 ##### Solution: Add all required credentials to your configuration:
@@ -897,7 +897,7 @@ def create_pipeline():
 #### Missing Credentials
 
 ```
-DatasetError: Missing required Opik credential: 'api_key'
+DatasetError: Missing required Opik credential: 'api_key'.
 ```
 
 **Solution:** Add `api_key` to your credentials file.

@@ -9,11 +9,15 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs import S3FileSystem
 
-if sys.platform == "win32":
-    pytest.skip(
-        "TensorFlow tests have become inexplicably flaky in Windows CI",
-        allow_module_level=True,
-    )
+_skip_on_win32 = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="TensorFlow tests have become inexplicably flaky in Windows CI",
+)
+
+_skip_on_314 = pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="TensorFlow does not support Python 3.14",
+)
 
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
@@ -138,6 +142,8 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
+@_skip_on_win32
+@_skip_on_314
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
@@ -275,6 +281,8 @@ class TestTensorFlowModelDataset:
         assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
+@_skip_on_win32
+@_skip_on_314
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
 

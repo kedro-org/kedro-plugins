@@ -80,6 +80,8 @@ def _setup_context_with_venv(context, venv_dir):
     pip_conf_path = context.venv_dir / "pip.conf"
     pip_conf_path.touch()
     context.env["PIP_CONFIG_FILE"] = str(pip_conf_path)
+    # TODO: remove once Kedro releases Python 3.14 support
+    context.env["PYTHONWARNINGS"] = "ignore::kedro.KedroPythonVersionWarning"
 
     return context
 

@@ -9,6 +9,7 @@
 | `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
 
 ## Bug fixes and other changes
+- Restructured the `README.md` file for Opik experimental datasets and added information on `OpikTraceDataset`.
 
 ## Breaking changes to experimental datasets
 - Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:

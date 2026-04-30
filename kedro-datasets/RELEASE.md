@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Kedro-Datasets is now compatible with Python 3.14, except for `tensorflow.TensorFlowModelDataset` and `geopandas.GenericDataset`.
 - Added the following new **experimental** datasets:
 
 | Type                                 | Description                                          | Location                               |

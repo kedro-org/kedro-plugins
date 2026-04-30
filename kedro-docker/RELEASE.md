@@ -3,7 +3,6 @@
 ## Major features and improvements
 * Added support for Python 3.14
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
-* Base docker image used is now debian-bookworm.
 
 ## Bug fixes and other changes
 * Removed `_VERBOSE` legacy code usage.

@@ -35,7 +35,7 @@ def _grandparent(path: str) -> str:
     path_obj = PurePosixPath(path)
     grandparent = path_obj.parents[1]
     if grandparent.name != path_obj.name:
-        last_three_parts = path_obj.relative_to(*path_obj.parts[:-3])
+        last_three_parts = path_obj.relative_to(path_obj.parents[2])
         raise DatasetError(
             f"`{path}` is not a well-formed versioned path ending with "
             f"`filename/timestamp/filename` (got `{last_three_parts}`)."

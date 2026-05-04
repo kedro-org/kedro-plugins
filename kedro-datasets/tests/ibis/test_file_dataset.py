@@ -70,7 +70,9 @@ class TestFileDataset:
         reloaded = file_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
-    def test_save_and_load_parquet(self, filepath_parquet, connection_config, dummy_table):
+    def test_save_and_load_parquet(
+        self, filepath_parquet, connection_config, dummy_table
+    ):
         """Parquet paths must be str; Ibis calls len() on the path arg and PurePosixPath has no __len__."""
         ds = FileDataset(
             filepath=filepath_parquet,

@@ -2,8 +2,6 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
-## Breaking changes to experimental datasets
-## Bug fixes and other changes
 ## Community contributions
 
 # Release 9.4.0

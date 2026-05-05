@@ -588,7 +588,7 @@ class TestIncrementalDatasetS3:
         assert not pds._checkpoint.exists()
 
 
-class TestIncrementalDatasetCheckpointSecurity:
+class TestIncrementalDatasetCheckpointValidation:
     """Tests for path traversal protection in checkpoint filepath validation."""
 
     @pytest.mark.parametrize(

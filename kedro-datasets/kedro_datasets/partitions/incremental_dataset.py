@@ -205,9 +205,9 @@ class IncrementalDataset(PartitionedDataset):
                 dir_path = self._filesystem._strip_protocol(
                     self._normalized_path
                 ).rstrip(self._sep)
-                fp_stripped = self._filesystem._strip_protocol(
-                    user_filepath
-                ).replace("\\", "/")
+                fp_stripped = self._filesystem._strip_protocol(user_filepath).replace(
+                    "\\", "/"
+                )
                 validate_sub_path(fp_stripped.lstrip("/"), dir_path)
 
         return merged

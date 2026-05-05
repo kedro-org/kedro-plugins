@@ -9,6 +9,7 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from typing import Any
@@ -22,6 +23,8 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.utils import load_obj
+
+from kedro_datasets._utils import validate_sub_path
 
 from .partitioned_dataset import (
     KEY_PROPAGATION_WARNING,
@@ -175,7 +178,32 @@ class IncrementalDataset(PartitionedDataset):
                 {"keys": CREDENTIALS_KEY, "target": "checkpoint"},
             )
 
-        return {**default_config, **checkpoint_config}
+        merged = {**default_config, **checkpoint_config}
+
+        if self._filepath_arg in checkpoint_config:
+            user_filepath = str(checkpoint_config[self._filepath_arg])
+            dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+                self._sep
+            )
+            stripped = self._filesystem._strip_protocol(user_filepath).replace(
+                "\\", "/"
+            )
+            if posixpath.isabs(stripped):
+                normalized = posixpath.normpath(stripped)
+                normalized_base = posixpath.normpath(dir_path)
+                if not (
+                    normalized == normalized_base
+                    or normalized.startswith(normalized_base + "/")
+                ):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{normalized}' which is outside the dataset "
+                        f"directory '{dir_path}'."
+                    )
+            else:
+                validate_sub_path(stripped.lstrip("/"), dir_path)
+
+        return merged
 
     def _list_partitions(self) -> list[str]:
         if self._cached_partitions is not None:

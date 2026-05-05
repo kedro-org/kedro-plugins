@@ -5,10 +5,14 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - ".secrets.baseline"
   pull_request:
     branches:
       - main
       - develop
+    paths-ignore:
+      - ".secrets.baseline"
 
 jobs:
   linkcheck:

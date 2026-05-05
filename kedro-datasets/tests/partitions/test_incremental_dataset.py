@@ -281,7 +281,7 @@ class TestIncrementalDatasetLocal:
     @pytest.mark.parametrize(
         "checkpoint_filepath",
         [
-            "/tmp/evil_checkpoint",
+            "/tmp/bad_checkpoint",
             "/etc/passwd",
         ],
     )
@@ -299,7 +299,7 @@ class TestIncrementalDatasetLocal:
     @pytest.mark.parametrize(
         "checkpoint_filepath",
         [
-            "../../evil_checkpoint",
+            "../../bad_checkpoint",
             "../sibling/checkpoint",
         ],
     )
@@ -636,3 +636,13 @@ class TestIncrementalDatasetS3:
         pds.confirm()
         # confirming with no partitions available must have no effect
         assert not pds._checkpoint.exists()
+
+    def test_checkpoint_filepath_s3_traversal_blocked(self, mocked_csvs_in_s3):
+        """S3 checkpoint filepaths with .. traversal are rejected via validate_sub_path."""
+        traversal_path = f"s3://{BUCKET_NAME}/csvs/../../../bad_checkpoint"
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            IncrementalDataset(
+                path=mocked_csvs_in_s3,
+                dataset=DATASET,
+                checkpoint={"filepath": traversal_path},
+            )

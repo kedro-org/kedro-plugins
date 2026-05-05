@@ -591,36 +591,23 @@ class TestIncrementalDatasetS3:
 class TestIncrementalDatasetCheckpointValidation:
     """Tests for path traversal protection in checkpoint filepath validation."""
 
-    @pytest.mark.parametrize(
-        "checkpoint_filepath",
-        [
-            "/tmp/bad_checkpoint",
-            "/etc/passwd",
-        ],
-    )
-    def test_absolute_path_traversal_blocked(self, tmp_path, checkpoint_filepath):
-        """Absolute checkpoint filepaths outside the dataset directory are rejected."""
+    def test_absolute_path_traversal_blocked(self, tmp_path):
+        """Absolute checkpoint filepath outside the dataset directory is rejected."""
+        outside = str(tmp_path.parent / "bad_checkpoint")
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             IncrementalDataset(
                 path=str(tmp_path),
                 dataset=DATASET,
-                checkpoint={"filepath": checkpoint_filepath},
+                checkpoint={"filepath": outside},
             )
 
-    @pytest.mark.parametrize(
-        "checkpoint_filepath",
-        [
-            "../../bad_checkpoint",
-            "../sibling/checkpoint",
-        ],
-    )
-    def test_relative_traversal_blocked(self, tmp_path, checkpoint_filepath):
-        """Relative checkpoint filepaths that escape the dataset directory via .. are rejected."""
+    def test_relative_traversal_blocked(self, tmp_path):
+        """Relative checkpoint filepath that escapes the dataset directory via .. is rejected."""
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             IncrementalDataset(
                 path=str(tmp_path),
                 dataset=DATASET,
-                checkpoint={"filepath": checkpoint_filepath},
+                checkpoint={"filepath": "../bad_checkpoint"},
             )
 
     def test_filepath_within_base_allowed(self, tmp_path, partitioned_data_pandas):

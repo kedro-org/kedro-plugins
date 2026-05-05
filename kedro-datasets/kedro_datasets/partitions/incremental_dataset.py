@@ -9,6 +9,7 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+import os
 import posixpath
 from collections.abc import Callable
 from copy import deepcopy
@@ -182,26 +183,32 @@ class IncrementalDataset(PartitionedDataset):
 
         if self._filepath_arg in checkpoint_config:
             user_filepath = str(checkpoint_config[self._filepath_arg])
-            dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
-                self._sep
-            )
-            stripped = self._filesystem._strip_protocol(user_filepath).replace(
-                "\\", "/"
-            )
-            if posixpath.isabs(stripped):
-                normalized = posixpath.normpath(stripped)
-                normalized_base = posixpath.normpath(dir_path)
-                if not (
-                    normalized == normalized_base
-                    or normalized.startswith(normalized_base + "/")
-                ):
+            if self._protocol == "file":
+                # Local filesystem: use os.path directly so Windows drive
+                # letters are handled correctly across all fsspec versions.
+                base = os.path.normcase(os.path.normpath(self._normalized_path))
+                if os.path.isabs(user_filepath):
+                    resolved = os.path.normcase(os.path.normpath(user_filepath))
+                else:
+                    resolved = os.path.normcase(
+                        os.path.normpath(os.path.join(base, user_filepath))
+                    )
+                if not (resolved == base or resolved.startswith(base + os.sep)):
                     raise DatasetError(
                         f"Checkpoint filepath '{user_filepath}' resolves to "
-                        f"'{normalized}' which is outside the dataset "
-                        f"directory '{dir_path}'."
+                        f"'{resolved}' which is outside the dataset "
+                        f"directory '{base}'."
                     )
             else:
-                validate_sub_path(stripped.lstrip("/"), dir_path)
+                # Cloud filesystem (S3, GCS, Azure, …): strip protocol and
+                # use validate_sub_path which handles cloud path traversal.
+                dir_path = self._filesystem._strip_protocol(
+                    self._normalized_path
+                ).rstrip(self._sep)
+                fp_stripped = self._filesystem._strip_protocol(
+                    user_filepath
+                ).replace("\\", "/")
+                validate_sub_path(fp_stripped.lstrip("/"), dir_path)
 
         return merged
 

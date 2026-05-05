@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import operator
 import os
-import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from typing import Any

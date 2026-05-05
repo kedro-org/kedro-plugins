@@ -623,11 +623,31 @@ class TestIncrementalDatasetCheckpointValidation:
         assert Path(checkpoint_path).is_file()
 
     def test_s3_traversal_blocked(self, mocked_csvs_in_s3):
-        """S3 checkpoint filepaths with .. traversal are rejected via validate_sub_path."""
+        """S3 checkpoint filepaths with .. traversal are rejected."""
         traversal_path = f"s3://{BUCKET_NAME}/csvs/../../../bad_checkpoint"
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             IncrementalDataset(
                 path=mocked_csvs_in_s3,
                 dataset=DATASET,
                 checkpoint={"filepath": traversal_path},
+            )
+
+    def test_s3_same_bucket_traversal_blocked(self, mocked_csvs_in_s3):
+        """Same-bucket .. traversal that stays within the bucket is rejected."""
+        traversal_path = f"s3://{BUCKET_NAME}/csvs/../outside"
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            IncrementalDataset(
+                path=mocked_csvs_in_s3,
+                dataset=DATASET,
+                checkpoint={"filepath": traversal_path},
+            )
+
+    def test_s3_cross_bucket_blocked(self, mocked_csvs_in_s3):
+        """A checkpoint filepath pointing to a different S3 bucket is rejected."""
+        cross_bucket_path = "s3://other-bucket/evil"
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            IncrementalDataset(
+                path=mocked_csvs_in_s3,
+                dataset=DATASET,
+                checkpoint={"filepath": cross_bucket_path},
             )

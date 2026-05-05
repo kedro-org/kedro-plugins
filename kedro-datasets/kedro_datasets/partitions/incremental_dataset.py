@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import operator
 import os
+import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from typing import Any
@@ -23,8 +24,6 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.utils import load_obj
-
-from kedro_datasets._utils import validate_sub_path
 
 from .partitioned_dataset import (
     KEY_PROPAGATION_WARNING,
@@ -199,15 +198,27 @@ class IncrementalDataset(PartitionedDataset):
                         f"directory '{base}'."
                     )
             else:
-                # Cloud filesystem (S3, GCS, Azure, …): strip protocol and
-                # use validate_sub_path which handles cloud path traversal.
+                # Cloud filesystem (S3, GCS, Azure, …): strip protocol from
+                # both paths, then do a direct normpath prefix check — the same
+                # pattern as the local branch — so same-bucket traversal (../)
+                # and cross-bucket paths are both caught without path joining.
                 dir_path = self._filesystem._strip_protocol(
                     self._normalized_path
                 ).rstrip(self._sep)
-                fp_stripped = self._filesystem._strip_protocol(user_filepath).replace(
-                    "\\", "/"
-                )
-                validate_sub_path(fp_stripped.lstrip("/"), dir_path)
+                fp_stripped = self._filesystem._strip_protocol(
+                    user_filepath
+                ).replace("\\", "/")
+                normalized_dir = posixpath.normpath(dir_path)
+                normalized_fp = posixpath.normpath(fp_stripped)
+                if not (
+                    normalized_fp == normalized_dir
+                    or normalized_fp.startswith(normalized_dir + "/")
+                ):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{normalized_fp}' which is outside the dataset "
+                        f"directory '{normalized_dir}'."
+                    )
 
         return merged
 

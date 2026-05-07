@@ -20,6 +20,6 @@ Feature: Airflow
     And I have run a non-interactive kedro new
     And I have executed the kedro command "airflow create -t ../airflow/dags/"
     And I have installed the kedro project package
-    When I execute the airflow command "tasks run project-dummy split --local"
+    When I execute the airflow command "tasks test project-dummy split"
     Then I should get a successful exit code
     And I should get a message including "Loading data"

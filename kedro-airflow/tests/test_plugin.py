@@ -30,13 +30,13 @@ from kedro_airflow.plugin import commands
         (
             "__default__",
             ["airflow", "create", "--group-by", "memory"],
-            'task_id="node0-node1-node2-node3-node4",',
+            '@task(task_id="node0-node1-node2-node3-node4")',
         ),
         # As the example pipeline is not namespaced, each node is treated as a separate task.
         (
             "__default__",
             ["airflow", "create", "--group-by", "namespace"],
-            'task_id="node0",',
+            '@task(task_id="node0")',
         ),
     ],
 )
@@ -432,15 +432,13 @@ def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method contains namespaces parameter logic
-    assert 'if self.group_type == "namespace":' in dag_content
-    assert "session.run(self.pipeline_name, namespaces=[self.namespace])" in dag_content
+    # Verify TaskFlow @task decorator is used
+    assert "@task(" in dag_content
+    assert "task_id=" in dag_content
 
-    # Verify that group_type parameter is being passed
-    assert "group_type=" in dag_content
-
-    # Verify that namespace parameter is being passed
-    assert "namespace=" in dag_content
+    # With non-namespaced test pipeline, --group-by namespace produces type="nodes" groups,
+    # so each node becomes an individual task using node_names
+    assert "session.run(pipeline_name, node_names=[" in dag_content
 
     dag_file.unlink()
 
@@ -457,11 +455,8 @@ def test_memory_grouping_uses_node_names_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method has node_names
-    assert "session.run(self.pipeline_name, node_names=self.node_name)" in dag_content
-
-    # Verify the conditional logic exists
-    assert "else:" in dag_content
-    assert "if isinstance(self.node_name, str):" in dag_content
+    # Verify memory grouping renders a static node_names list via TaskFlow @task
+    assert "session.run(pipeline_name, node_names=[" in dag_content
+    assert "@task(" in dag_content
 
     dag_file.unlink()

@@ -9,6 +9,8 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+import os
+import posixpath
 from collections.abc import Callable
 from copy import deepcopy
 from typing import Any
@@ -175,7 +177,50 @@ class IncrementalDataset(PartitionedDataset):
                 {"keys": CREDENTIALS_KEY, "target": "checkpoint"},
             )
 
-        return {**default_config, **checkpoint_config}
+        merged = {**default_config, **checkpoint_config}
+
+        if self._filepath_arg in checkpoint_config:
+            user_filepath = str(checkpoint_config[self._filepath_arg])
+            if self._protocol == "file":
+                # Local filesystem: use os.path directly so Windows drive
+                # letters are handled correctly across all fsspec versions.
+                base = os.path.normcase(os.path.normpath(self._normalized_path))
+                if os.path.isabs(user_filepath):
+                    resolved = os.path.normcase(os.path.normpath(user_filepath))
+                else:
+                    resolved = os.path.normcase(
+                        os.path.normpath(os.path.join(base, user_filepath))
+                    )
+                if not (resolved == base or resolved.startswith(base + os.sep)):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{resolved}' which is outside the dataset "
+                        f"directory '{base}'."
+                    )
+            else:
+                # Cloud filesystem (S3, GCS, Azure, …): strip protocol from
+                # both paths, then do a direct normpath prefix check — the same
+                # pattern as the local branch — so same-bucket traversal (../)
+                # and cross-bucket paths are both caught without path joining.
+                dir_path = self._filesystem._strip_protocol(
+                    self._normalized_path
+                ).rstrip(self._sep)
+                fp_stripped = self._filesystem._strip_protocol(user_filepath).replace(
+                    "\\", "/"
+                )
+                normalized_dir = posixpath.normpath(dir_path)
+                normalized_fp = posixpath.normpath(fp_stripped)
+                if not (
+                    normalized_fp == normalized_dir
+                    or normalized_fp.startswith(normalized_dir + "/")
+                ):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{normalized_fp}' which is outside the dataset "
+                        f"directory '{normalized_dir}'."
+                    )
+
+        return merged
 
     def _list_partitions(self) -> list[str]:
         if self._cached_partitions is not None:

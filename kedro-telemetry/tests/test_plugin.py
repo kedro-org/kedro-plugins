@@ -21,6 +21,7 @@ from kedro_telemetry.plugin import (
     KedroTelemetryHook,
     _check_for_telemetry_consent,
     _format_project_statistics_data,
+    _format_tools,
     _is_known_ci_env,
 )
 
@@ -44,7 +45,7 @@ new-proj = "spaceflights.__main__:main"
 package_name = "spaceflights"
 project_name = "spaceflights"
 kedro_init_version = "0.18.14"
-tools = ["Linting", "Testing", "Custom Logging", "Documentation", "Data Structure", "PySpark"]
+tools = "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']"
 example_pipeline = "True"
 
 [project.entry-points."kedro.hooks"]
@@ -793,3 +794,48 @@ class TestKedroTelemetryHook:
         assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
         # Ensure dataset types are counted for the new catalog + doesn't count parameters
         assert result["dataset_types"] == {"kedro.io.memory_dataset.MemoryDataset": 2}
+
+
+class TestFormatTools:
+    """Tests for `_format_tools`, which normalises the ``[tool.kedro] tools``
+    value (which Kedro writes as a TOML string containing ``str(list)``) into
+    a comma-separated string suitable for Heap."""
+
+    @mark.parametrize(
+        "tools_value, expected",
+        [
+            # Real Kedro starter format: TOML string containing str(list)
+            (
+                "['Linting', 'Testing', 'Documentation']",
+                "Linting, Testing, Documentation",
+            ),
+            # Default "no tools selected" written by the starter
+            ("['None']", "None"),
+            # Hand-edited / legacy TOML array form
+            (["Linting", "Testing"], "Linting, Testing"),
+            (("Linting", "Testing"), "Linting, Testing"),
+            # Plain comma-separated string (already in the desired shape)
+            ("Linting, Testing", "Linting, Testing"),
+        ],
+    )
+    def test_supported_inputs(self, tools_value, expected):
+        assert _format_tools(tools_value) == expected
+
+    @mark.parametrize(
+        "tools_value",
+        [
+            "",
+            [],
+            (),
+            "[]",
+            None,
+            123,
+        ],
+    )
+    def test_empty_or_unsupported_inputs_return_none(self, tools_value):
+        assert _format_tools(tools_value) is None
+
+    def test_malformed_string_falls_back_to_string_value(self):
+        # Not valid Python literal, but a non-empty string -> sent verbatim
+        # so we still get _something_ in Heap rather than dropping the field.
+        assert _format_tools("Linting; Testing") == "Linting; Testing"

@@ -1,5 +1,6 @@
 # Upcoming release
 * Added support for Python 3.14.
+* Fixed formatting of the `tools` property sent to Heap so it is a readable comma-separated string (e.g. `"Linting, Testing"`).
 
 # Release 0.7.0
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.

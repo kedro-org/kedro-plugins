@@ -581,7 +581,8 @@ class TestKedroTelemetryHook:
             "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
-            "dataset_types": {"custom": 1, "kedro.io.memory_dataset.MemoryDataset": 3},
+            "dataset_type_count.custom": 1,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
         expected_call = mocker.call(
@@ -645,7 +646,8 @@ class TestKedroTelemetryHook:
             "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
-            "dataset_types": {"custom": 1, "kedro.io.memory_dataset.MemoryDataset": 3},
+            "dataset_type_count.custom": 1,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -715,7 +717,8 @@ class TestKedroTelemetryHook:
             "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
-            "dataset_types": {"kedro.io.memory_dataset.MemoryDataset": 3, "custom": 1},
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
+            "dataset_type_count.custom": 1,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -762,9 +765,9 @@ class TestKedroTelemetryHook:
         assert result["number_of_datasets"] == ds_nodes_pipes_cnt
         assert result["number_of_nodes"] == ds_nodes_pipes_cnt
         assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
-        assert (
-            result["dataset_types"] == {}
-        )  # dataset types are not available for old catalog
+        # dataset types are not available for the old catalog, so no
+        # dataset_type_count.* properties should be emitted at all.
+        assert not any(k.startswith("dataset_type_count.") for k in result)
 
     def test_new_catalog_with_keys_method(self, pipeline_fixture, project_pipelines):
         # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
@@ -793,7 +796,10 @@ class TestKedroTelemetryHook:
         assert result["number_of_nodes"] == ds_nodes_pipes_cnt
         assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
         # Ensure dataset types are counted for the new catalog + doesn't count parameters
-        assert result["dataset_types"] == {"kedro.io.memory_dataset.MemoryDataset": 2}
+        assert (
+            result["dataset_type_count.kedro.io.memory_dataset.MemoryDataset"]
+            == ds_nodes_pipes_cnt
+        )
 
 
 class TestFormatTools:

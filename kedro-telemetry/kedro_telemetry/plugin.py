@@ -333,28 +333,28 @@ def _format_project_statistics_data(
     catalog: DataCatalog,
     default_pipeline: Pipeline,
     project_pipelines: dict,
-):
+) -> dict[str, Any]:
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
-    dataset_types: dict[str | None, int] = {}
+    dataset_type_counts: dict[str, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
         # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
         dataset_names = catalog.keys()
         for ds_name in dataset_names:
-            if not ds_name.startswith(("parameters", "params:")):
-                ds_type = catalog.get_type(ds_name) or ""
-                if (
-                    ds_type.startswith("kedro_datasets.")
-                    or ds_type.startswith("kedro.io.")
-                    or ds_type.startswith("kedro_datasets_experimental.")
-                ):
-                    dataset_types[ds_type] = dataset_types.get(ds_type, 0) + 1
-                else:
-                    dataset_types["custom"] = dataset_types.get("custom", 0) + 1
+            if ds_name.startswith(("parameters", "params:")):
+                continue
+            ds_type = catalog.get_type(ds_name) or ""
+            if ds_type.startswith(
+                ("kedro_datasets.", "kedro.io.", "kedro_datasets_experimental.")
+            ):
+                key = ds_type
+            else:
+                key = "custom"
+            dataset_type_counts[key] = dataset_type_counts.get(key, 0) + 1
     else:
         dataset_names = catalog.list()  # type: ignore
 
-    return {
+    properties: dict[str, Any] = {
         "number_of_datasets": sum(
             1
             for c in dataset_names
@@ -362,8 +362,13 @@ def _format_project_statistics_data(
         ),
         "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
         "number_of_pipelines": len(project_pipelines.keys()),
-        "dataset_types": dataset_types,
     }
+    # Flatten per-type counts into individual scalar properties so they are
+    # accepted by Heap (which only allows string/number property values) and
+    # can be aggregated/grouped in Heap dashboards.
+    for type_name, count in dataset_type_counts.items():
+        properties[f"dataset_type_count.{type_name}"] = count
+    return properties
 
 
 def _get_heap_app_id() -> str:

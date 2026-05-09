@@ -299,10 +299,10 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     def _execute_save_with_chunks(
         self,
         json_data: list[dict[str, Any]],
-    ) -> requests.Response:
+    ) -> requests.Response | None:
         # If send_individually is True, send each item as a separate request
         if self._send_individually:
-            response = None
+            response: requests.Response | None = None
             for record in json_data:
                 response = self._execute_save_request(json_data=record)
             return response
@@ -332,14 +332,17 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def save(self, data: Any) -> requests.Response:  # type: ignore[override]
+    def save(self, data: Any) -> requests.Response | None:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
-                response: requests.Response = self._execute_save_with_chunks(
+                response: requests.Response | None = self._execute_save_with_chunks(
                     json_data=data
                 )
             else:
                 response: requests.Response = self._execute_save_request(json_data=data)
+
+            if response is None:
+                return None
 
             if self._response_dataset is not None:
                 if isinstance(self._response_dataset, JSONDataset):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import logging
@@ -133,13 +134,43 @@ def _add_tool_properties(
         try:
             tool_kedro = pyproject_data["tool"]["kedro"]
             if "tools" in tool_kedro:
-                properties["tools"] = ", ".join(tool_kedro["tools"])
+                tools_property = _format_tools(tool_kedro["tools"])
+                if tools_property is not None:
+                    properties["tools"] = tools_property
             if "example_pipeline" in tool_kedro:
                 properties["example_pipeline"] = tool_kedro["example_pipeline"]
         except KeyError:
             pass
 
     return properties
+
+
+def _format_tools(tools_value: Any) -> str | None:
+    """Normalise the `[tool.kedro] tools` value to a comma-separated string.
+
+    Kedro's project template writes `tools` as a TOML string containing the
+    `str()` of a Python list (e.g. ``tools = "['Linting', 'Testing']"``), so
+    `tomllib` returns a string here, not a list. The previous implementation
+    assumed a list and called ``", ".join(...)`` directly, which iterated over
+    the string character-by-character and produced unusable output in Heap.
+
+    This function accepts either form (the real Kedro string, or a TOML array
+    in case the file was hand-edited) and returns ``None`` when there's no
+    usable value to send.
+    """
+    if isinstance(tools_value, str):
+        try:
+            parsed = ast.literal_eval(tools_value)
+        except (ValueError, SyntaxError):
+            parsed = None
+        if isinstance(parsed, (list, tuple)):
+            tools_value = parsed
+
+    if isinstance(tools_value, (list, tuple)):
+        return ", ".join(str(t) for t in tools_value) or None
+    if isinstance(tools_value, str) and tools_value:
+        return tools_value
+    return None
 
 
 def _generate_new_uuid(full_path: str) -> str:

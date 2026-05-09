@@ -253,7 +253,9 @@ class TestAPIDatasetSendIndividually:
             assert req_data == items[i]
 
     @pytest.mark.parametrize("method", SAVE_METHODS)
-    def test_send_individually_with_response_dataset(self, requests_mock, tmp_path, method):
+    def test_send_individually_with_response_dataset(
+        self, requests_mock, tmp_path, method
+    ):
         """
         When send_individually=True with response_dataset configured,
         Only the final response should be stored.

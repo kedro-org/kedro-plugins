@@ -261,3 +261,8 @@ class TestFilesystemDatasetVersioned:
         )
         with pytest.raises(DatasetError, match=pattern):
             versioned_fs_dataset.save(hf_dataset)
+
+    def test_exists_no_versions(self, kedro_dataset_cls, path_file):
+        """`exists()` returns False (not raises) when no versions are saved yet."""
+        ds = kedro_dataset_cls(path=path_file, version=Version(None, None))
+        assert ds.exists() is False

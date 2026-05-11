@@ -1,14 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import Any
 
-from datasets import (
-    Dataset,
-    DatasetDict,
-    IterableDataset,
-    IterableDatasetDict,
-    load_dataset,
-)
+from datasets import load_dataset
 from huggingface_hub import HfApi
 from kedro.io import AbstractDataset
 

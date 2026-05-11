@@ -239,3 +239,8 @@ class TestArrowDatasetVersioned:
         )
         with pytest.raises(DatasetError, match=pattern):
             versioned_arrow_dataset.save("not a dataset")
+
+    def test_exists_no_versions(self, path_arrow):
+        """`exists()` returns False (not raises) when no versions are saved yet."""
+        ds = ArrowDataset(path=path_arrow, version=Version(None, None))
+        assert ds.exists() is False

@@ -80,7 +80,11 @@ holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
 
 huggingface-hfdataset = ["datasets", "huggingface_hub"]
 huggingface-hftransformerpipelinedataset = ["transformers"]
-huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
+huggingface-arrowdataset = ["datasets"]
+huggingface-csvdataset = ["datasets"]
+huggingface-jsondataset = ["datasets"]
+huggingface-parquetdataset = ["datasets"]
+huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset,huggingface-arrowdataset,huggingface-csvdataset,huggingface-jsondataset,huggingface-parquetdataset]"]
 
 ibis-athena = ["ibis-framework[athena]"]
 ibis-bigquery = ["ibis-framework[bigquery]"]
@@ -210,10 +214,7 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-chromadb-chromadbdataset = [
-    "chromadb>=1.0.0",
-    "opentelemetry-exporter-otlp-proto-grpc>=1.40.0; python_version >= '3.14'",
-]
+chromadb-chromadbdataset = ["chromadb>=1.0.0"]
 chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
 
 darts-torch-model-dataset = ["u8darts-all"]
@@ -276,7 +277,6 @@ test = [
     "adlfs~=2023.1",
     "biopython~=1.73",
     "chromadb>=1.0.0",
-    "opentelemetry-exporter-otlp-proto-grpc>=1.40.0; python_version >= '3.14'",
     "cloudpickle~=2.2.1; python_version < '3.14'",
     "cloudpickle>=3.1.2; python_version >= '3.14'",
     "compress-pickle[lz4]~=2.1.0",

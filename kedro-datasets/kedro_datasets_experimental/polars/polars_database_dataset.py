@@ -329,7 +329,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         elif "sql" in load_args:
             query = load_args.pop("sql")
         else:
-            query = f"SELECT * FROM {self.table_name}"
+            query = f"SELECT * FROM {self.table_name}"  # nosec B608
 
         return pl.read_database(
             query=query,

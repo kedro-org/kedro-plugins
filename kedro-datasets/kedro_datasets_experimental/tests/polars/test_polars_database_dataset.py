@@ -313,6 +313,39 @@ class TestPolarsDatabaseDataset:
         )
         assert "table_name='metrics_repr'" in str(dataset)
 
+    def test_engine_cached_across_instances_with_same_con(self, sqlite_credentials):
+        """Two datasets with the same ``con`` share one cached ``Engine``."""
+        first = PolarsDatabaseDataset(
+            table_name="t1", credentials=sqlite_credentials
+        )
+        second = PolarsDatabaseDataset(
+            table_name="t2", credentials=sqlite_credentials
+        )
+        assert first.engine is second.engine
+
+    def test_extra_credentials_forwarded_to_create_engine(self, mocker):
+        """Non-``con`` credential keys are passed through to ``create_engine``."""
+        mock_create_engine = mocker.patch(
+            "kedro_datasets_experimental.polars.polars_database_dataset.create_engine"
+        )
+        dataset = PolarsDatabaseDataset(
+            table_name="t",
+            credentials={"con": CONNECTION, "pool_size": 7},
+        )
+        _ = dataset.engine
+        mock_create_engine.assert_called_once_with(CONNECTION, pool_size=7)
+
+    def test_engine_distinct_for_different_con(self, sqlite_credentials, tmp_path):
+        """Datasets with different ``con`` strings get distinct ``Engine`` instances."""
+        other_credentials = {"con": f"sqlite:///{tmp_path / 'other.db'}"}
+        first = PolarsDatabaseDataset(
+            table_name="t", credentials=sqlite_credentials
+        )
+        second = PolarsDatabaseDataset(
+            table_name="t", credentials=other_credentials
+        )
+        assert first.engine is not second.engine
+
     def test_str_representation_filepath_excludes_connection_string(self, tmp_path):
         """The string repr never leaks the connection string in filepath mode."""
         query_file = tmp_path / "audit_repr_query.sql"

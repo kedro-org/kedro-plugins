@@ -9,6 +9,7 @@ on:
       - "kedro-datasets/**"
       - "kedro-docker/**"
       - "kedro-telemetry/**"
+      - ".secrets.baseline"
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - "kedro-datasets/**"
       - "kedro-docker/**"
       - "kedro-telemetry/**"
+      - ".secrets.baseline"
 
 permissions:
   contents: read

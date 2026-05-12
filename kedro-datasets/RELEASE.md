@@ -1,11 +1,16 @@
 # Upcoming Release
+
 ## Major features and improvements
 
+- Kedro-Datasets is now compatible with Python 3.14, except for `tensorflow.TensorFlowModelDataset` and `geopandas.GenericDataset`.
 - Added the following new **experimental** datasets:
 
 | Type                                 | Description                                          | Location                               |
 | ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
 | `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+
+## Bug fixes and other changes
+- Restructured the `README.md` file for Opik experimental datasets and added information on `OpikTraceDataset`.
 
 ## Breaking changes to experimental datasets
 - Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
@@ -27,12 +32,14 @@
 - Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
-- Made `polars.PolarsDatabaseDataset` usable end-to-end: corrected the inverted argument validation in `__init__` that made the dataset uninstantiable for any valid configuration; renamed the default `save_args` key from `if_exists` to `if_table_exists` for compatibility with current `polars.DataFrame.write_database`; and switched `load()` to pass the cached SQLAlchemy `engine` (instead of a URI string) to `pl.read_database`. Also added support for table-name-only catalog entries (loads via `SELECT * FROM <table_name>` when no `sql` or `filepath` is provided).
+- Added `checkpoint.filepath` validation for IncrementalDataset.
+- Repaired `polars.PolarsDatabaseDataset` end-to-end (it was effectively broken and previously had no tests): corrected the inverted argument validation in `__init__` that made the dataset uninstantiable for any valid configuration; renamed the default `save_args` key from `if_exists` to `if_table_exists` for compatibility with current `polars.DataFrame.write_database`; switched `load()` to pass the cached SQLAlchemy `engine` (instead of a URI string) to `pl.read_database`; added support for table-name-only catalog entries (loads via `SELECT * FROM <table_name>` when no `sql` or `filepath` is provided); added construction-time validation that raises `DatasetError` for conflicting/missing arguments; removed a dead `adapt_mssql_date_params` method that had been copy-pasted from the pandas SQL dataset and was incompatible with `polars.read_database`; added `polars` and `SQLAlchemy` to the `experimental` and `experimental_test` extras so the dataset is installable; and added a full test suite covering load/save round-trips, source precedence, engine caching, and credentials forwarding.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
+- [Guillaume Tauzin](https://github.com/gtauzin)
 - [Anton Nikishin](https://github.com/nikanton)
 
 # Release 9.3.0
@@ -63,13 +70,13 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Priyanka](https://github.com/priya-gitTest)
-[Akumawavez](https://github.com/akumawavez)
-[Joris](https://github.com/jorisvane)
-[Bas-commits](https://github.com/Bas-commits)
-[oomenn](https://github.com/oomenn)
-[Celina](https://github.com/celinaczy)
-[Juanchodpg2](https://github.com/juanchodpg2)
+- [Priyanka](https://github.com/priya-gitTest)
+- [Akumawavez](https://github.com/akumawavez)
+- [Joris](https://github.com/jorisvane)
+- [Bas-commits](https://github.com/Bas-commits)
+- [oomenn](https://github.com/oomenn)
+- [Celina](https://github.com/celinaczy)
+- [Juanchodpg2](https://github.com/juanchodpg2)
 
 # Release 9.2.0
 
@@ -96,7 +103,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-[Katerina Molchanova](https://github.com/rokatyy)
+- [Katerina Molchanova](https://github.com/rokatyy)
 
 # Release 9.1.1
 

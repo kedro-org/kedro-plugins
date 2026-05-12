@@ -24,11 +24,10 @@ logger = logging.getLogger(__name__)
 class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
     """``StudyDataset`` loads/saves data from/to an optuna Study.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         review_prediction_study:
           type: kedro_datasets_experimental.optuna.StudyDataset
           backend: sqlite
@@ -47,12 +46,9 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
           backend: postgresql
           database: optuna_db
           credentials: dev_optuna_postgresql
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/data/advanced_data_catalog_usage.html):
 
         >>> from kedro_datasets_experimental.optuna import StudyDataset
         >>> from optuna.distributions import FloatDistribution
@@ -71,6 +67,7 @@ class StudyDataset(AbstractVersionedDataset[optuna.Study, optuna.Study]):
         >>> reloaded = dataset.load()
         >>> assert len(reloaded.trials) == 1
         >>> assert reloaded.trials[0].params["x"] == 2.0
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {"sampler": None, "pruner": None}

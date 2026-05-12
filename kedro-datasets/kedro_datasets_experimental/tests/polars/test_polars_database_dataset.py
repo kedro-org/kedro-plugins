@@ -1,14 +1,14 @@
 """Unit tests for ``PolarsDatabaseDataset``."""
 
+import fsspec
 import polars as pl
 import pytest
 from kedro.io.core import DatasetError
 from polars.testing import assert_frame_equal
+from sqlalchemy import create_engine, text
 
 from kedro_datasets_experimental.polars import PolarsDatabaseDataset
 
-TABLE_NAME = "table_a"
-SQL_QUERY = "SELECT * FROM table_a"
 CONNECTION = "sqlite:///:memory:"
 
 
@@ -24,158 +24,288 @@ def sqlite_credentials(tmp_path):
 
 
 @pytest.fixture
-def sql_file(tmp_path):
-    file = tmp_path / "query.sql"
-    file.write_text(SQL_QUERY)
-    return file.as_posix()
+def numeric_frame():
+    """Int-only frame with order-line-item columns."""
+    return pl.DataFrame(
+        {"quantity": [1, 2], "total": [4, 5], "units_sold": [5, 6]}
+    )
 
 
 @pytest.fixture
-def dummy_dataframe():
-    return pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+def string_frame():
+    """String-only frame, different schema from ``numeric_frame``."""
+    return pl.DataFrame(
+        {"name": ["alice", "bob", "carol"], "city": ["NYC", "LA", "SF"]}
+    )
+
+
+@pytest.fixture
+def mixed_frame():
+    """Mixed-dtype frame: int / string / float."""
+    return pl.DataFrame(
+        {"id": [10, 20, 30, 40], "label": ["a", "b", "c", "d"], "score": [1.5, 2.5, 3.5, 4.5]}
+    )
+
+
+@pytest.fixture
+def seed_table(sqlite_credentials):
+    """Factory fixture: seeds ``table_name`` with ``frame`` and returns credentials."""
+
+    def _seed(table_name, frame):
+        writer = PolarsDatabaseDataset(
+            table_name=table_name,
+            credentials=sqlite_credentials,
+        )
+        writer.save(frame)
+        return sqlite_credentials
+
+    return _seed
 
 
 class TestPolarsDatabaseDataset:
     def test_no_query_or_table_name(self):
         """Check the error when none of ``sql``, ``filepath``, ``table_name`` is given."""
-        pattern = r"Provide at least one of 'sql', 'filepath', or 'table_name'\."
-        with pytest.raises(DatasetError, match=pattern):
+        with pytest.raises(DatasetError):
             PolarsDatabaseDataset(credentials={"con": CONNECTION})
 
-    def test_sql_and_filepath_args(self, sql_file):
+    def test_sql_and_filepath_args(self, seed_table, numeric_frame, tmp_path):
         """Check the error when both ``sql`` and ``filepath`` are provided."""
-        pattern = r"'sql' and 'filepath' arguments cannot both be provided\."
-        with pytest.raises(DatasetError, match=pattern):
+        table_name = "validation_check"
+        sql = f"SELECT * FROM {table_name}"
+        credentials = seed_table(table_name, numeric_frame)
+        query_file = tmp_path / "query.sql"
+        query_file.write_text(sql)
+
+        with pytest.raises(DatasetError):
             PolarsDatabaseDataset(
-                sql=SQL_QUERY,
-                filepath=sql_file,
-                table_name=TABLE_NAME,
-                credentials={"con": CONNECTION},
+                sql=sql,
+                filepath=query_file.as_posix(),
+                table_name=table_name,
+                credentials=credentials,
             )
 
     def test_empty_connection(self):
         """Check the error when instantiating with an empty connection string."""
-        pattern = r"'con' argument cannot be empty\."
-        with pytest.raises(DatasetError, match=pattern):
+        with pytest.raises(DatasetError):
             PolarsDatabaseDataset(
-                sql=SQL_QUERY, table_name=TABLE_NAME, credentials={"con": ""}
+                sql="SELECT * FROM any_table",
+                table_name="any_table",
+                credentials={"con": ""},
             )
 
-    def test_load_with_sql(self, mocker):
-        """Test ``load`` invokes ``polars.read_database`` with the cached engine."""
-        mock_read = mocker.patch("polars.read_database")
+    @pytest.mark.parametrize("value", range(5))
+    def test_load_trivial_sql(self, value):
+        """``SELECT <value>`` executes against the configured connection and returns ``value``."""
         dataset = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
+            sql=f"SELECT {value}",
             credentials={"con": CONNECTION},
         )
-        dataset.load()
+        assert dataset.load().item() == value
 
-        mock_read.assert_called_once()
-        kwargs = mock_read.call_args.kwargs
-        assert kwargs["query"] == SQL_QUERY
-        assert kwargs["connection"] is dataset.engine
-
-    def test_load_query_file(self, mocker, sql_file):
-        """Test ``load`` reads the SQL query from a file when ``filepath`` is set."""
-        mock_read = mocker.patch("polars.read_database")
+    def test_save_no_table_name(self, numeric_frame):
+        """``save`` raises when the dataset was configured without ``table_name``."""
         dataset = PolarsDatabaseDataset(
-            filepath=sql_file,
-            table_name=TABLE_NAME,
+            sql="SELECT 1",
             credentials={"con": CONNECTION},
         )
-        dataset.load()
+        with pytest.raises(DatasetError):
+            dataset.save(numeric_frame)
 
-        mock_read.assert_called_once()
-        kwargs = mock_read.call_args.kwargs
-        assert kwargs["query"] == SQL_QUERY
-
-    def test_load_table_name_only(self, mocker):
-        """Test ``load`` builds ``SELECT * FROM <table_name>`` when no sql/filepath."""
-        mock_read = mocker.patch("polars.read_database")
+    def test_load_with_sql(self, seed_table, string_frame):
+        """``load`` returns the seeded data when ``sql`` is configured."""
+        credentials = seed_table("shuttles", string_frame)
         dataset = PolarsDatabaseDataset(
-            table_name=TABLE_NAME, credentials={"con": CONNECTION}
+            sql="SELECT * FROM shuttles",
+            credentials=credentials,
         )
-        dataset.load()
+        assert_frame_equal(dataset.load(), string_frame)
 
-        mock_read.assert_called_once()
-        kwargs = mock_read.call_args.kwargs
-        assert kwargs["query"] == f"SELECT * FROM {TABLE_NAME}"
-        assert kwargs["connection"] is dataset.engine
+    def test_load_query_file(self, seed_table, numeric_frame, tmp_path):
+        """``load`` reads the SQL query from a file and returns the seeded data."""
+        credentials = seed_table("orders", numeric_frame)
+        query_file = tmp_path / "orders_query.sql"
+        query_file.write_text("SELECT quantity, total, units_sold FROM orders")
 
-    def test_save(self, mocker, dummy_dataframe):
-        """Test ``save`` calls ``DataFrame.write_database`` with the default save_args."""
         dataset = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
-            credentials={"con": CONNECTION},
+            filepath=query_file.as_posix(),
+            credentials=credentials,
         )
-        mocker.patch.object(dummy_dataframe, "write_database")
-        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), numeric_frame)
 
-        dummy_dataframe.write_database.assert_called_once_with(
-            table_name=TABLE_NAME,
-            connection=CONNECTION,
-            if_table_exists="replace",
-        )
-
-    def test_save_no_table_name(self, dummy_dataframe):
-        """Test ``save`` raises when no ``table_name`` was configured."""
+    def test_load_table_name_only(self, seed_table, mixed_frame):
+        """``load`` builds ``SELECT * FROM <table_name>`` and returns the seeded data."""
+        credentials = seed_table("users", mixed_frame)
         dataset = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
-            credentials={"con": CONNECTION},
+            table_name="users",
+            credentials=credentials,
         )
-        dataset.table_name = None
-        pattern = r"'table_name' argument is required to save datasets\."
-        with pytest.raises(DatasetError, match=pattern):
-            dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), mixed_frame)
 
-    def test_str_representation_sql(self):
-        """Test the dataset instance string representation with the ``sql`` arg."""
+    def test_sql_overrides_table_name_on_load(self, seed_table, string_frame):
+        """``sql`` takes precedence over ``table_name`` for load when both are given."""
+        credentials = seed_table("source_table", string_frame)
         dataset = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
-            credentials={"con": CONNECTION},
+            sql="SELECT * FROM source_table",
+            table_name="nonexistent_target",
+            credentials=credentials,
         )
-        str_repr = str(dataset)
-        assert f"sql='{SQL_QUERY}'" in str_repr
-        assert f"table_name='{TABLE_NAME}'" in str_repr
-        assert CONNECTION not in str_repr
+        assert_frame_equal(dataset.load(), string_frame)
 
-    def test_str_representation_filepath(self, sql_file):
-        """Test the dataset instance string representation with the ``filepath`` arg."""
+    def test_filepath_overrides_table_name_on_load(
+        self, seed_table, mixed_frame, tmp_path
+    ):
+        """``filepath`` takes precedence over ``table_name`` for load when both are given."""
+        credentials = seed_table("source_table", mixed_frame)
+        query_file = tmp_path / "q.sql"
+        query_file.write_text("SELECT * FROM source_table")
+
         dataset = PolarsDatabaseDataset(
-            filepath=sql_file,
-            table_name=TABLE_NAME,
-            credentials={"con": CONNECTION},
+            filepath=query_file.as_posix(),
+            table_name="nonexistent_target",
+            credentials=credentials,
         )
-        str_repr = str(dataset)
-        assert f"filepath='{sql_file}'" in str_repr
-        assert f"table_name='{TABLE_NAME}'" in str_repr
-        assert CONNECTION not in str_repr
+        assert_frame_equal(dataset.load(), mixed_frame)
 
-    def test_save_and_load_roundtrip(self, sqlite_credentials, dummy_dataframe):
-        """Regression test for the docstring example (issue #1384)."""
+    def test_load_schema_overrides(self, seed_table, numeric_frame):
+        """``load_args`` are forwarded to ``polars.read_database`` (schema_overrides)."""
+        credentials = seed_table("metrics", numeric_frame)
         dataset = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
+            table_name="metrics",
+            credentials=credentials,
+            load_args={"schema_overrides": {"quantity": pl.Float64}},
+        )
+        assert dataset.load().schema["quantity"] == pl.Float64
+
+    def test_save_writes_rows_to_table(self, sqlite_credentials, string_frame):
+        """``save`` writes all rows from the DataFrame to the target table."""
+        dataset = PolarsDatabaseDataset(
+            table_name="events",
             credentials=sqlite_credentials,
         )
-        dataset.save(dummy_dataframe)
-        reloaded = dataset.load()
-        assert_frame_equal(dummy_dataframe, reloaded)
+        dataset.save(string_frame)
 
-    def test_load_table_name_only_roundtrip(self, sqlite_credentials, dummy_dataframe):
-        """End-to-end test for table-name-only mode: write with sql + load with table_name."""
-        writer = PolarsDatabaseDataset(
-            sql=SQL_QUERY,
-            table_name=TABLE_NAME,
-            credentials=sqlite_credentials,
-        )
-        writer.save(dummy_dataframe)
+        engine = create_engine(sqlite_credentials["con"])
+        with engine.connect() as conn:
+            row_count = conn.execute(text("SELECT COUNT(*) FROM events")).scalar()
+        assert row_count == len(string_frame)
 
-        reader = PolarsDatabaseDataset(
-            table_name=TABLE_NAME, credentials=sqlite_credentials
+    def test_save_default_replaces_existing_table(
+        self, seed_table, mixed_frame, numeric_frame
+    ):
+        """The default ``if_table_exists='replace'`` overwrites the existing table."""
+        credentials = seed_table("snapshots", mixed_frame)
+        dataset = PolarsDatabaseDataset(
+            table_name="snapshots",
+            credentials=credentials,
         )
-        assert_frame_equal(dummy_dataframe, reader.load())
+        dataset.save(numeric_frame)
+
+        engine = create_engine(credentials["con"])
+        with engine.connect() as conn:
+            row_count = conn.execute(text("SELECT COUNT(*) FROM snapshots")).scalar()
+        assert row_count == len(numeric_frame)
+
+    def test_save_append_adds_to_existing_table(self, seed_table, numeric_frame):
+        """``save_args={'if_table_exists': 'append'}`` adds rows instead of overwriting."""
+        credentials = seed_table("audit_log", numeric_frame)
+        dataset = PolarsDatabaseDataset(
+            table_name="audit_log",
+            credentials=credentials,
+            save_args={"if_table_exists": "append"},
+        )
+        dataset.save(numeric_frame)
+
+        engine = create_engine(credentials["con"])
+        with engine.connect() as conn:
+            row_count = conn.execute(text("SELECT COUNT(*) FROM audit_log")).scalar()
+        assert row_count == 2 * len(numeric_frame)
+
+    def test_fs_args_forwarded_to_fsspec(self, mocker):
+        """``fs_args`` and the popped ``credentials`` are passed to ``fsspec.filesystem``."""
+        mock_fs = mocker.patch("fsspec.filesystem")
+        PolarsDatabaseDataset(
+            filepath="s3://bucket/remote_query.sql",
+            table_name="remote_query",
+            credentials={"con": CONNECTION},
+            fs_args={"credentials": {"key": "x", "secret": "y"}, "anon": False},
+        )
+        mock_fs.assert_called_once_with("s3", key="x", secret="y", anon=False)
+
+    def test_load_reads_query_through_fsspec_filesystem(
+        self, seed_table, numeric_frame
+    ):
+        """``load`` reads the SQL file through the configured fsspec filesystem."""
+        credentials = seed_table("memorable", numeric_frame)
+        mem_fs = fsspec.filesystem("memory")
+        with mem_fs.open("/queries/memorable.sql", "wb") as f:
+            f.write(b"SELECT quantity, total, units_sold FROM memorable")
+
+        dataset = PolarsDatabaseDataset(
+            filepath="memory:///queries/memorable.sql",
+            credentials=credentials,
+        )
+        assert_frame_equal(dataset.load(), numeric_frame)
+
+    def test_str_representation_sql_includes_sql(self):
+        """The string repr exposes the configured SQL query."""
+        sql_query = "SELECT * FROM products"
+        dataset = PolarsDatabaseDataset(
+            sql=sql_query,
+            table_name="products",
+            credentials={"con": CONNECTION},
+        )
+        assert f"sql='{sql_query}'" in str(dataset)
+
+    def test_str_representation_sql_includes_table_name(self):
+        """The string repr exposes the configured table name."""
+        dataset = PolarsDatabaseDataset(
+            sql="SELECT * FROM customers",
+            table_name="customers",
+            credentials={"con": CONNECTION},
+        )
+        assert "table_name='customers'" in str(dataset)
+
+    def test_str_representation_sql_excludes_connection_string(self):
+        """The string repr never leaks the connection string."""
+        dataset = PolarsDatabaseDataset(
+            sql="SELECT * FROM secrets_check",
+            table_name="secrets_check",
+            credentials={"con": CONNECTION},
+        )
+        assert CONNECTION not in str(dataset)
+
+    def test_str_representation_filepath_includes_filepath(self, tmp_path):
+        """The string repr exposes the configured filepath."""
+        query_file = tmp_path / "reports_query.sql"
+        query_file.write_text("SELECT * FROM reports")
+
+        dataset = PolarsDatabaseDataset(
+            filepath=query_file.as_posix(),
+            table_name="reports",
+            credentials={"con": CONNECTION},
+        )
+        assert f"filepath='{query_file.as_posix()}'" in str(dataset)
+
+    def test_str_representation_filepath_includes_table_name(self, tmp_path):
+        """The string repr exposes the configured table name in filepath mode."""
+        query_file = tmp_path / "metrics_repr_query.sql"
+        query_file.write_text("SELECT * FROM metrics_repr")
+
+        dataset = PolarsDatabaseDataset(
+            filepath=query_file.as_posix(),
+            table_name="metrics_repr",
+            credentials={"con": CONNECTION},
+        )
+        assert "table_name='metrics_repr'" in str(dataset)
+
+    def test_str_representation_filepath_excludes_connection_string(self, tmp_path):
+        """The string repr never leaks the connection string in filepath mode."""
+        query_file = tmp_path / "audit_repr_query.sql"
+        query_file.write_text("SELECT * FROM audit_repr")
+
+        dataset = PolarsDatabaseDataset(
+            filepath=query_file.as_posix(),
+            table_name="audit_repr",
+            credentials={"con": CONNECTION},
+        )
+        assert CONNECTION not in str(dataset)

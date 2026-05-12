@@ -96,11 +96,13 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    Provide at least one of ``sql``, ``filepath``, or ``table_name``. When only
-    ``table_name`` is given, the dataset loads the whole table via ``SELECT *``.
-    Schema-qualified tables are addressed via the ``sql`` form (e.g.
-    ``"SELECT * FROM dwschema.shuttles"``); there is no separate ``schema``
-    argument.
+    Provide at least one of ``sql``, ``filepath``, or ``table_name`` (``sql``
+    and ``filepath`` are mutually exclusive). ``load`` uses ``sql`` or
+    ``filepath`` when given, otherwise ``SELECT * FROM <table_name>``.
+    ``save`` always writes to ``table_name``.
+
+    Schema-qualified tables can be passed directly to ``table_name`` using the
+    ``schema_name.table_name`` form; there is no separate ``schema`` argument.
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
@@ -120,6 +122,22 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         type: polars.PolarsDatabaseDataset
         sql: "SELECT shuttle, shuttle_id FROM spaceflights.shuttles;"
         credentials: db_credentials
+    ```
+
+    Pass extra arguments to the underlying polars methods via ``load_args`` and
+    ``save_args``:
+
+    ```yaml
+    shuttles_table:
+        type: polars.PolarsDatabaseDataset
+        table_name: shuttles
+        credentials: db_credentials
+        load_args:
+            batch_size: 10000
+            schema_overrides:
+                shuttle_id: Int64
+        save_args:
+            if_table_exists: append
     ```
 
     Sample database credentials entry in ``credentials.yml``:
@@ -167,7 +185,45 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new ``PolarsDatabaseDataset``."""
+        """Creates a new ``PolarsDatabaseDataset``.
+
+        Args:
+            sql: SQL query to execute on load. Mutually exclusive with
+                ``filepath``. If neither is given, ``table_name`` must be
+                provided and the dataset will load via ``SELECT * FROM <table_name>``.
+            credentials: A dictionary with a ``SQLAlchemy`` connection string.
+                Users are supposed to provide the connection string ``con``
+                through credentials. To find all supported connection string
+                formats, see here:
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
+                Additional parameters for the sqlalchemy engine can be provided
+                alongside the ``con`` parameter.
+            load_args: Provided to the underlying ``polars.read_database``
+                function along with the connection. To find all supported
+                arguments, see here:
+                https://docs.pola.rs/api/python/stable/reference/api/polars.read_database.html
+            fs_args: Extra arguments passed to ``fsspec`` when ``filepath``
+                points to a SQL file (e.g. credentials for remote storage).
+            filepath: Path to a ``.sql`` file containing the query to execute
+                on load. Mutually exclusive with ``sql``.
+            table_name: Target table for ``save``. When ``sql`` and
+                ``filepath`` are not provided, also used as the load source via
+                ``SELECT * FROM <table_name>``. Schema-qualified tables can be
+                passed as ``schema_name.table_name``.
+            save_args: Provided to the underlying ``polars.DataFrame.write_database``
+                method along with the connection string. To find all supported
+                arguments, see here:
+                https://docs.pola.rs/api/python/stable/reference/api/polars.DataFrame.write_database.html
+                Defaults to ``{"if_table_exists": "replace"}`` — writes overwrite
+                the target table unless overridden (e.g. ``if_table_exists: append``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
+
+        Raises:
+            DatasetError: When both ``sql`` and ``filepath`` are provided, when
+                none of ``sql``/``filepath``/``table_name`` is provided, or
+                when ``con`` is missing from ``credentials``.
+        """
         if sql and filepath:
             raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be provided. "

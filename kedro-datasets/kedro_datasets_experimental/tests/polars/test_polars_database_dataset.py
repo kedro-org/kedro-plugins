@@ -12,6 +12,16 @@ from kedro_datasets_experimental.polars import PolarsDatabaseDataset
 CONNECTION = "sqlite:///:memory:"
 
 
+def _select(table_name: str, columns: str = "*") -> str:
+    """Build a ``SELECT <columns> FROM <table_name>`` query for tests.
+
+    All call sites pass test-controlled identifiers, so the f-string
+    interpolation is safe; the ``nosec`` is scoped to this helper instead
+    of being repeated at every call site.
+    """
+    return f"SELECT {columns} FROM {table_name}"  # nosec B608
+
+
 @pytest.fixture(autouse=True)
 def cleanup_engines():
     yield
@@ -71,7 +81,7 @@ class TestPolarsDatabaseDataset:
     def test_sql_and_filepath_args(self, seed_table, numeric_frame, tmp_path):
         """Check the error when both ``sql`` and ``filepath`` are provided."""
         table_name = "validation_check"
-        sql = f"SELECT * FROM {table_name}"
+        sql = _select(table_name)
         credentials = seed_table(table_name, numeric_frame)
         query_file = tmp_path / "query.sql"
         query_file.write_text(sql)
@@ -116,7 +126,7 @@ class TestPolarsDatabaseDataset:
         table_name = "shuttles"
         credentials = seed_table(table_name, string_frame)
         dataset = PolarsDatabaseDataset(
-            sql=f"SELECT * FROM {table_name}",
+            sql=_select(table_name),
             credentials=credentials,
         )
         assert_frame_equal(dataset.load(), string_frame)
@@ -126,7 +136,7 @@ class TestPolarsDatabaseDataset:
         table_name = "orders"
         credentials = seed_table(table_name, numeric_frame)
         query_file = tmp_path / "orders_query.sql"
-        query_file.write_text(f"SELECT quantity, total, units_sold FROM {table_name}")
+        query_file.write_text(_select(table_name, "quantity, total, units_sold"))
 
         dataset = PolarsDatabaseDataset(
             filepath=query_file.as_posix(),
@@ -149,7 +159,7 @@ class TestPolarsDatabaseDataset:
         table_name = "source_table"
         credentials = seed_table(table_name, string_frame)
         dataset = PolarsDatabaseDataset(
-            sql=f"SELECT * FROM {table_name}",
+            sql=_select(table_name),
             table_name="nonexistent_target",
             credentials=credentials,
         )
@@ -162,7 +172,7 @@ class TestPolarsDatabaseDataset:
         table_name = "source_table"
         credentials = seed_table(table_name, mixed_frame)
         query_file = tmp_path / "q.sql"
-        query_file.write_text(f"SELECT * FROM {table_name}")
+        query_file.write_text(_select(table_name))
 
         dataset = PolarsDatabaseDataset(
             filepath=query_file.as_posix(),
@@ -194,7 +204,7 @@ class TestPolarsDatabaseDataset:
         engine = create_engine(sqlite_credentials["con"])
         with engine.connect() as conn:
             row_count = conn.execute(
-                text(f"SELECT COUNT(*) FROM {table_name}")
+                text(_select(table_name, "COUNT(*)"))
             ).scalar()
         assert row_count == len(string_frame)
 
@@ -229,7 +239,7 @@ class TestPolarsDatabaseDataset:
         engine = create_engine(credentials["con"])
         with engine.connect() as conn:
             row_count = conn.execute(
-                text(f"SELECT COUNT(*) FROM {table_name}")
+                text(_select(table_name, "COUNT(*)"))
             ).scalar()
         assert row_count == 2 * len(numeric_frame)
 
@@ -253,7 +263,7 @@ class TestPolarsDatabaseDataset:
         credentials = seed_table(table_name, numeric_frame)
         mem_fs = fsspec.filesystem("memory")
         with mem_fs.open(query_path, "wb") as f:
-            f.write(f"SELECT quantity, total, units_sold FROM {table_name}".encode())
+            f.write(_select(table_name, "quantity, total, units_sold").encode())
 
         dataset = PolarsDatabaseDataset(
             filepath=f"memory://{query_path}",

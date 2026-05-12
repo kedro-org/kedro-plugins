@@ -113,18 +113,20 @@ class TestPolarsDatabaseDataset:
 
     def test_load_with_sql(self, seed_table, string_frame):
         """``load`` returns the seeded data when ``sql`` is configured."""
-        credentials = seed_table("shuttles", string_frame)
+        table_name = "shuttles"
+        credentials = seed_table(table_name, string_frame)
         dataset = PolarsDatabaseDataset(
-            sql="SELECT * FROM shuttles",
+            sql=f"SELECT * FROM {table_name}",
             credentials=credentials,
         )
         assert_frame_equal(dataset.load(), string_frame)
 
     def test_load_query_file(self, seed_table, numeric_frame, tmp_path):
         """``load`` reads the SQL query from a file and returns the seeded data."""
-        credentials = seed_table("orders", numeric_frame)
+        table_name = "orders"
+        credentials = seed_table(table_name, numeric_frame)
         query_file = tmp_path / "orders_query.sql"
-        query_file.write_text("SELECT quantity, total, units_sold FROM orders")
+        query_file.write_text(f"SELECT quantity, total, units_sold FROM {table_name}")
 
         dataset = PolarsDatabaseDataset(
             filepath=query_file.as_posix(),
@@ -134,18 +136,20 @@ class TestPolarsDatabaseDataset:
 
     def test_load_table_name_only(self, seed_table, mixed_frame):
         """``load`` builds ``SELECT * FROM <table_name>`` and returns the seeded data."""
-        credentials = seed_table("users", mixed_frame)
+        table_name = "users"
+        credentials = seed_table(table_name, mixed_frame)
         dataset = PolarsDatabaseDataset(
-            table_name="users",
+            table_name=table_name,
             credentials=credentials,
         )
         assert_frame_equal(dataset.load(), mixed_frame)
 
     def test_sql_overrides_table_name_on_load(self, seed_table, string_frame):
         """``sql`` takes precedence over ``table_name`` for load when both are given."""
-        credentials = seed_table("source_table", string_frame)
+        table_name = "source_table"
+        credentials = seed_table(table_name, string_frame)
         dataset = PolarsDatabaseDataset(
-            sql="SELECT * FROM source_table",
+            sql=f"SELECT * FROM {table_name}",
             table_name="nonexistent_target",
             credentials=credentials,
         )
@@ -155,9 +159,10 @@ class TestPolarsDatabaseDataset:
         self, seed_table, mixed_frame, tmp_path
     ):
         """``filepath`` takes precedence over ``table_name`` for load when both are given."""
-        credentials = seed_table("source_table", mixed_frame)
+        table_name = "source_table"
+        credentials = seed_table(table_name, mixed_frame)
         query_file = tmp_path / "q.sql"
-        query_file.write_text("SELECT * FROM source_table")
+        query_file.write_text(f"SELECT * FROM {table_name}")
 
         dataset = PolarsDatabaseDataset(
             filepath=query_file.as_posix(),
@@ -168,9 +173,10 @@ class TestPolarsDatabaseDataset:
 
     def test_load_schema_overrides(self, seed_table, numeric_frame):
         """``load_args`` are forwarded to ``polars.read_database`` (schema_overrides)."""
-        credentials = seed_table("metrics", numeric_frame)
+        table_name = "metrics"
+        credentials = seed_table(table_name, numeric_frame)
         dataset = PolarsDatabaseDataset(
-            table_name="metrics",
+            table_name=table_name,
             credentials=credentials,
             load_args={"schema_overrides": {"quantity": pl.Float64}},
         )
@@ -178,38 +184,43 @@ class TestPolarsDatabaseDataset:
 
     def test_save_writes_rows_to_table(self, sqlite_credentials, string_frame):
         """``save`` writes all rows from the DataFrame to the target table."""
+        table_name = "events"
         dataset = PolarsDatabaseDataset(
-            table_name="events",
+            table_name=table_name,
             credentials=sqlite_credentials,
         )
         dataset.save(string_frame)
 
         engine = create_engine(sqlite_credentials["con"])
         with engine.connect() as conn:
-            row_count = conn.execute(text("SELECT COUNT(*) FROM events")).scalar()
+            row_count = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_name}")
+            ).scalar()
         assert row_count == len(string_frame)
 
     def test_save_default_replaces_existing_table(
         self, seed_table, mixed_frame, numeric_frame
     ):
         """The default ``if_table_exists='replace'`` overwrites the existing table."""
-        credentials = seed_table("snapshots", mixed_frame)
+        table_name = "snapshots"
+        credentials = seed_table(table_name, mixed_frame)
         dataset = PolarsDatabaseDataset(
-            table_name="snapshots",
+            table_name=table_name,
             credentials=credentials,
         )
+        # precondition: seeded ``mixed_frame`` is actually in the table
+        assert_frame_equal(dataset.load(), mixed_frame)
+
         dataset.save(numeric_frame)
 
-        engine = create_engine(credentials["con"])
-        with engine.connect() as conn:
-            row_count = conn.execute(text("SELECT COUNT(*) FROM snapshots")).scalar()
-        assert row_count == len(numeric_frame)
+        assert_frame_equal(dataset.load(), numeric_frame)
 
     def test_save_append_adds_to_existing_table(self, seed_table, numeric_frame):
         """``save_args={'if_table_exists': 'append'}`` adds rows instead of overwriting."""
-        credentials = seed_table("audit_log", numeric_frame)
+        table_name = "audit_log"
+        credentials = seed_table(table_name, numeric_frame)
         dataset = PolarsDatabaseDataset(
-            table_name="audit_log",
+            table_name=table_name,
             credentials=credentials,
             save_args={"if_table_exists": "append"},
         )
@@ -217,7 +228,9 @@ class TestPolarsDatabaseDataset:
 
         engine = create_engine(credentials["con"])
         with engine.connect() as conn:
-            row_count = conn.execute(text("SELECT COUNT(*) FROM audit_log")).scalar()
+            row_count = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_name}")
+            ).scalar()
         assert row_count == 2 * len(numeric_frame)
 
     def test_fs_args_forwarded_to_fsspec(self, mocker):
@@ -235,13 +248,15 @@ class TestPolarsDatabaseDataset:
         self, seed_table, numeric_frame
     ):
         """``load`` reads the SQL file through the configured fsspec filesystem."""
-        credentials = seed_table("memorable", numeric_frame)
+        table_name = "memorable"
+        query_path = f"/queries/{table_name}.sql"
+        credentials = seed_table(table_name, numeric_frame)
         mem_fs = fsspec.filesystem("memory")
-        with mem_fs.open("/queries/memorable.sql", "wb") as f:
-            f.write(b"SELECT quantity, total, units_sold FROM memorable")
+        with mem_fs.open(query_path, "wb") as f:
+            f.write(f"SELECT quantity, total, units_sold FROM {table_name}".encode())
 
         dataset = PolarsDatabaseDataset(
-            filepath="memory:///queries/memorable.sql",
+            filepath=f"memory://{query_path}",
             credentials=credentials,
         )
         assert_frame_equal(dataset.load(), numeric_frame)

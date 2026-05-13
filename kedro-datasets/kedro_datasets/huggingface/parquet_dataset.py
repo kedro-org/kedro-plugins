@@ -83,10 +83,9 @@ class ParquetDataset(FilesystemDataset):
         reviews:
           type: huggingface.ParquetDataset
           path: data/01_raw/reviews
-          load_args:
-            data_files:
-              labels: labels.parquet
-              data: data.parquet
+          data_files:
+            labels: labels.parquet
+            data: data.parquet
         ```
 
         Using the
@@ -104,11 +103,9 @@ class ParquetDataset(FilesystemDataset):
         ... })
         >>> dataset = ParquetDataset(
         ...     path=tmp_path,
-        ...     load_args={
-        ...         "data_files": {
-        ...             "labels": "labels.parquet",
-        ...             "data": "data.parquet",
-        ...         }
+        ...     data_files={
+        ...         "labels": "labels.parquet",
+        ...         "data": "data.parquet",
         ...     },
         ... )
         >>> dataset.save(dataset_dict)

@@ -82,10 +82,9 @@ class CSVDataset(FilesystemDataset):
         reviews:
           type: huggingface.CSVDataset
           path: data/01_raw/reviews
-          load_args:
-            data_files:
-              labels: labels.csv
-              data: data.csv
+          data_files:
+            labels: labels.csv
+            data: data.csv
         ```
 
         Using the
@@ -103,11 +102,9 @@ class CSVDataset(FilesystemDataset):
         ... })
         >>> dataset = CSVDataset(
         ...     path=tmp_path,
-        ...     load_args={
-        ...         "data_files": {
-        ...             "labels": "labels.csv",
-        ...             "data": "data.csv",
-        ...         }
+        ...     data_files={
+        ...         "labels": "labels.csv",
+        ...         "data": "data.csv",
         ...     },
         ... )
         >>> dataset.save(dataset_dict)

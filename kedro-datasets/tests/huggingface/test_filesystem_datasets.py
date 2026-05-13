@@ -57,6 +57,14 @@ def dataset_dict_data_files(extension):
 
 
 @pytest.fixture
+def custom_dataset_dict_data_files(extension):
+    return {
+        "data": f"my_data{extension}",
+        "labels": f"my_labels{extension}",
+    }
+
+
+@pytest.fixture
 def path_file(tmp_path, extension):
     return (tmp_path / f"test{extension}").as_posix()
 
@@ -107,7 +115,7 @@ class TestFilesystemDataset:
         self, kedro_dataset_cls, path_dir, dataset_dict_data_files
     ):
         kedro_dataset = kedro_dataset_cls(
-            path=path_dir, load_args={"data_files": dataset_dict_data_files}
+            path=path_dir, data_files=dataset_dict_data_files
         )
 
         built_data_files = kedro_dataset._build_data_files()
@@ -120,7 +128,7 @@ class TestFilesystemDataset:
         self, dataset_dict, kedro_dataset_cls, path_dir, dataset_dict_data_files
     ):
         kedro_dataset = kedro_dataset_cls(
-            path=path_dir, load_args={"data_files": dataset_dict_data_files}
+            path=path_dir, data_files=dataset_dict_data_files
         )
         kedro_dataset.save(dataset_dict)
 
@@ -130,22 +138,87 @@ class TestFilesystemDataset:
         for key in dataset_dict_data_files.keys():
             assert reloaded[key].to_dict() == dataset_dict[key].to_dict()
 
+    def test_save_and_load_dataset_dict_with_custom_data_files(
+        self,
+        dataset_dict,
+        kedro_dataset_cls,
+        path_dir,
+        custom_dataset_dict_data_files,
+    ):
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir, data_files=custom_dataset_dict_data_files
+        )
+        kedro_dataset.save(dataset_dict)
+
+        for filename in custom_dataset_dict_data_files.values():
+            assert os.path.exists(os.path.join(path_dir, filename))
+
+        reloaded = kedro_dataset.load()
+        assert isinstance(reloaded, DatasetDict)
+        assert set(reloaded.keys()) == custom_dataset_dict_data_files.keys()
+        for key in custom_dataset_dict_data_files.keys():
+            assert reloaded[key].to_dict() == dataset_dict[key].to_dict()
+
+    def test_load_and_save_data_files_can_differ(
+        self,
+        dataset_dict,
+        kedro_dataset_cls,
+        path_dir,
+        extension,
+    ):
+        load_data_files = {
+            "data": f"load_data{extension}",
+            "labels": f"load_labels{extension}",
+        }
+        save_data_files = {
+            "data": f"save_data{extension}",
+            "labels": f"save_labels{extension}",
+        }
+        kedro_dataset = kedro_dataset_cls(
+            path=path_dir,
+            load_args={"data_files": load_data_files},
+            save_args={"data_files": save_data_files},
+        )
+
+        built_data_files = kedro_dataset._build_data_files()
+        for split, filename in load_data_files.items():
+            assert built_data_files[split] == os.path.join(path_dir, filename)
+
+        kedro_dataset.save(dataset_dict)
+        for filename in save_data_files.values():
+            assert os.path.exists(os.path.join(path_dir, filename))
+
     def test_save_dataset_dict_mismatched_data_files(
         self, dataset_dict, kedro_dataset_cls, path_dir, extension
     ):
         """Saving a DatasetDict whose split names don't match data_files keys raises DatasetError."""
         kedro_dataset = kedro_dataset_cls(
             path=path_dir,
-            load_args={
-                # In the test fixture, we expect "data" and "labels". Not "train" and "test".
-                "data_files": {
-                    "train": f"train{extension}",
-                    "test": f"test{extension}",
-                }
+            # In the test fixture, we expect "data" and "labels". Not "train" and "test".
+            data_files={
+                "train": f"train{extension}",
+                "test": f"test{extension}",
             },
         )
         with pytest.raises(DatasetError, match=r"do not match"):
             kedro_dataset.save(dataset_dict)
+
+    @pytest.mark.parametrize("args_name", ["load_args", "save_args"])
+    def test_top_level_data_files_conflicts_with_data_files_in_args(
+        self,
+        kedro_dataset_cls,
+        path_dir,
+        dataset_dict_data_files,
+        args_name,
+    ):
+        args = {
+            "path": path_dir,
+            "data_files": dataset_dict_data_files,
+            args_name: {"data_files": dataset_dict_data_files},
+        }
+
+        with pytest.raises(DatasetError, match=r"top-level"):
+            kedro_dataset_cls(**args)
 
     def test_save_and_load_iterable_dataset(
         self, iterable_dataset, kedro_dataset_cls, path_file
@@ -162,7 +235,7 @@ class TestFilesystemDataset:
         dataset_dict_data_files,
     ):
         kedro_dataset = kedro_dataset_cls(
-            path=path_dir, load_args={"data_files": dataset_dict_data_files}
+            path=path_dir, data_files=dataset_dict_data_files
         )
         with pytest.raises(DatasetError, match=r"got iterable dataset"):
             kedro_dataset.save(iterable_dataset_dict)

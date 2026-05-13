@@ -82,10 +82,9 @@ class JSONDataset(FilesystemDataset):
         reviews:
           type: huggingface.JSONDataset
           path: data/01_raw/reviews
-          load_args:
-            data_files:
-              labels: labels.json
-              data: data.json
+          data_files:
+            labels: labels.json
+            data: data.json
         ```
 
         Using the
@@ -103,11 +102,9 @@ class JSONDataset(FilesystemDataset):
         ... })
         >>> dataset = JSONDataset(
         ...     path=tmp_path,
-        ...     load_args={
-        ...         "data_files": {
-        ...             "labels": "labels.json",
-        ...             "data": "data.json",
-        ...         }
+        ...     data_files={
+        ...         "labels": "labels.json",
+        ...         "data": "data.json",
         ...     },
         ... )
         >>> dataset.save(dataset_dict)

@@ -24,7 +24,7 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<3.0",
+    "apache-airflow>=3.2.0,<4.0",
     "behave",
     "coverage>=7.2.0",
     "kedro-datasets",
@@ -33,12 +33,11 @@ test = [
     "pytest-mock",
     "pytest-xdist",
     "wheel",
-    "flask-limiter<3.13",
 ]
 
 lint = [
     "bandit",
-    "black~=22.0",
+    "black~=24.0",
     "detect-secrets~=1.5.0",
     "mypy~=1.0",
     "pre-commit>=2.9.2",

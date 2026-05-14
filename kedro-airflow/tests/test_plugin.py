@@ -4,8 +4,11 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+import jinja2
 import pytest
 import yaml
+from kedro.pipeline import GroupedNodes
+from slugify import slugify
 
 from kedro_airflow.plugin import commands
 
@@ -30,13 +33,13 @@ from kedro_airflow.plugin import commands
         (
             "__default__",
             ["airflow", "create", "--group-by", "memory"],
-            'task_id="node0-node1-node2-node3-node4",',
+            '@task(task_id="node0-node1-node2-node3-node4")',
         ),
         # As the example pipeline is not namespaced, each node is treated as a separate task.
         (
             "__default__",
             ["airflow", "create", "--group-by", "namespace"],
-            'task_id="node0",',
+            '@task(task_id="node0")',
         ),
     ],
 )
@@ -432,15 +435,13 @@ def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method contains namespaces parameter logic
-    assert 'if self.group_type == "namespace":' in dag_content
-    assert "session.run(self.pipeline_name, namespaces=[self.namespace])" in dag_content
+    # Verify TaskFlow @task decorator is used
+    assert "@task(" in dag_content
+    assert "task_id=" in dag_content
 
-    # Verify that group_type parameter is being passed
-    assert "group_type=" in dag_content
-
-    # Verify that namespace parameter is being passed
-    assert "namespace=" in dag_content
+    # With non-namespaced test pipeline, --group-by namespace produces type="nodes" groups,
+    # so each node becomes an individual task using node_names
+    assert "session.run(pipeline_name, node_names=[" in dag_content
 
     dag_file.unlink()
 
@@ -457,11 +458,52 @@ def test_memory_grouping_uses_node_names_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method has node_names
-    assert "session.run(self.pipeline_name, node_names=self.node_name)" in dag_content
-
-    # Verify the conditional logic exists
-    assert "else:" in dag_content
-    assert "if isinstance(self.node_name, str):" in dag_content
+    # Verify memory grouping renders a static node_names list via TaskFlow @task
+    assert "session.run(pipeline_name, node_names=[" in dag_content
+    assert "@task(" in dag_content
 
     dag_file.unlink()
+
+
+def _load_template() -> jinja2.Template:
+    """Load the default DAG template with the same Jinja2 environment as the plugin."""
+    jinja_file = (
+        Path(__file__).parent.parent / "kedro_airflow" / "airflow_dag_template.j2"
+    )
+    loader = jinja2.FileSystemLoader(jinja_file.parent)
+    jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)
+    jinja_env.filters["slugify"] = slugify
+    return jinja_env.get_template(jinja_file.name)
+
+
+def test_namespace_grouping_renders_namespaces_call():
+    """Check that namespace-typed GroupedNodes render session.run with namespaces= parameter."""
+    node_objs = [
+        GroupedNodes(
+            name="data_engineering",
+            type="namespace",
+            nodes=["ingest_data", "clean_data"],
+            dependencies=[],
+        ),
+        GroupedNodes(
+            name="data_science",
+            type="namespace",
+            nodes=["train_model"],
+            dependencies=["data_engineering"],
+        ),
+    ]
+    dag_content = _load_template().render(
+        dag_name="my_project",
+        node_objs=node_objs,
+        env="local",
+        pipeline_name="__default__",
+        package_name="my_project",
+        conf_source="",
+    )
+
+    # Namespace groups use namespaces= not node_names=
+    assert 'session.run(pipeline_name, namespaces=["data_engineering"])' in dag_content
+    assert 'session.run(pipeline_name, namespaces=["data_science"])' in dag_content
+    assert "node_names=" not in dag_content
+    # Dependency wiring is preserved
+    assert 'tasks["data-engineering"] >> tasks["data-science"]' in dag_content

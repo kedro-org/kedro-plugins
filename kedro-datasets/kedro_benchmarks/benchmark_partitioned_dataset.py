@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -38,9 +39,10 @@ class _FakeS3FileSystem:
 
     def glob(self, path: str, **_kwargs) -> list[str]:
         local_pattern = self._root_path / self._strip_protocol(path)
+        pattern_relative = local_pattern.relative_to(self._root_path)
         return [
             f"s3://{file_path.relative_to(self._root_path).as_posix()}"
-            for file_path in self._root_path.glob(str(local_pattern.relative_to(self._root_path)))
+            for file_path in self._root_path.glob(str(pattern_relative))
             if file_path.is_file()
         ]
 
@@ -63,7 +65,9 @@ class CachedPartitionedDataset(PartitionedDataset):
         partitions = {}
 
         for partition_file_path in self._list_partitions():
-            kwargs = self._dataset_config.copy()
+            # Use deepcopy like the current implementation to ensure fair comparison
+            # across partition re-listing behavior, not copy() overhead differences
+            kwargs = deepcopy(self._dataset_config)
             kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
             dataset = self._dataset_type(**kwargs)  # type: ignore[misc]
             partition_id = self._path_to_partition(partition_file_path)

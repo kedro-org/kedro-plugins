@@ -36,8 +36,8 @@ jobs:
       - name: Run unit tests for kedro-airflow, kedro-docker, kedro-telemetry
         if: inputs.plugin != 'kedro-datasets'
         run: make plugin=${{ inputs.plugin }} test
-      - name: Reinstall CPU-only PyTorch to avoid triton/CUDA segfault
-        if: inputs.plugin == 'kedro-datasets'
+      - name: Reinstall CPU-only PyTorch to avoid triton/CUDA segfault on Linux
+        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
         run: |
           uv pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cpu
           uv pip uninstall -y triton || true

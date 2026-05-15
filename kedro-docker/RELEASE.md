@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added support for Python 3.14
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 
 ## Bug fixes and other changes

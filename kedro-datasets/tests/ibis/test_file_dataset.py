@@ -19,6 +19,11 @@ def filepath_csv(tmp_path):
 
 
 @pytest.fixture
+def filepath_parquet(tmp_path):
+    return (tmp_path / "test.parquet").as_posix()
+
+
+@pytest.fixture
 def database(tmp_path):
     return (tmp_path / "file.db").as_posix()
 
@@ -63,6 +68,19 @@ class TestFileDataset:
         """Test saving and reloading the data set."""
         file_dataset.save(dummy_table)
         reloaded = file_dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
+    def test_save_and_load_parquet(
+        self, filepath_parquet, connection_config, dummy_table
+    ):
+        """Parquet paths must be str; Ibis calls len() on the path arg and PurePosixPath has no __len__."""
+        ds = FileDataset(
+            filepath=filepath_parquet,
+            file_format="parquet",
+            connection=connection_config,
+        )
+        ds.save(dummy_table)
+        reloaded = ds.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
     @pytest.mark.parametrize("load_args", [{"filename": True}], indirect=True)

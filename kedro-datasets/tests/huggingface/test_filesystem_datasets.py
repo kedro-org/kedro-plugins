@@ -159,35 +159,6 @@ class TestFilesystemDataset:
         for key in custom_dataset_dict_data_files.keys():
             assert reloaded[key].to_dict() == dataset_dict[key].to_dict()
 
-    def test_load_and_save_data_files_can_differ(
-        self,
-        dataset_dict,
-        kedro_dataset_cls,
-        path_dir,
-        extension,
-    ):
-        load_data_files = {
-            "data": f"load_data{extension}",
-            "labels": f"load_labels{extension}",
-        }
-        save_data_files = {
-            "data": f"save_data{extension}",
-            "labels": f"save_labels{extension}",
-        }
-        kedro_dataset = kedro_dataset_cls(
-            path=path_dir,
-            load_args={"data_files": load_data_files},
-            save_args={"data_files": save_data_files},
-        )
-
-        built_data_files = kedro_dataset._build_data_files()
-        for split, filename in load_data_files.items():
-            assert built_data_files[split] == os.path.join(path_dir, filename)
-
-        kedro_dataset.save(dataset_dict)
-        for filename in save_data_files.values():
-            assert os.path.exists(os.path.join(path_dir, filename))
-
     def test_save_dataset_dict_mismatched_data_files(
         self, dataset_dict, kedro_dataset_cls, path_dir, extension
     ):
@@ -204,20 +175,23 @@ class TestFilesystemDataset:
             kedro_dataset.save(dataset_dict)
 
     @pytest.mark.parametrize("args_name", ["load_args", "save_args"])
-    def test_top_level_data_files_conflicts_with_data_files_in_args(
+    @pytest.mark.parametrize("top_level_data_files", [True, False])
+    def test_data_files_in_args_raises_dataset_error(
         self,
         kedro_dataset_cls,
         path_dir,
         dataset_dict_data_files,
         args_name,
+        top_level_data_files,
     ):
         args = {
             "path": path_dir,
-            "data_files": dataset_dict_data_files,
             args_name: {"data_files": dataset_dict_data_files},
         }
+        if top_level_data_files:
+            args["data_files"] = dataset_dict_data_files
 
-        with pytest.raises(DatasetError, match=r"top-level"):
+        with pytest.raises(DatasetError, match=r"top-level argument"):
             kedro_dataset_cls(**args)
 
     def test_save_and_load_iterable_dataset(

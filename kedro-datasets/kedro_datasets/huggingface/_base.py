@@ -61,13 +61,11 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
                 the filenames must use the correct extension for the
                 format (e.g. ``.csv`` for ``CSVDataset``).
             load_args: Additional keyword arguments passed to the
-                underlying load function. For backwards compatibility,
-                this may include ``data_files`` if the top-level
-                ``data_files`` argument is not used.
+                underlying load function. This cannot include ``data_files``;
+                use the top-level ``data_files`` argument instead.
             save_args: Additional keyword arguments passed to the
-                underlying save function. For backwards compatibility,
-                this may include ``data_files`` if the top-level
-                ``data_files`` argument is not used.
+                underlying save function. This cannot include ``data_files``;
+                use the top-level ``data_files`` argument instead.
             credentials: Credentials for the underlying filesystem
                 (e.g. ``key``/``secret`` for S3). Passed to the
                 ``storage_options`` parameter in the underlying
@@ -91,9 +89,8 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
         self._load_args = deepcopy(load_args or {})
         self._save_args = deepcopy(save_args or {})
-        self._load_data_files, self._save_data_files = self._resolve_data_files(
-            data_files
-        )
+        self._validate_data_files_args()
+        self._data_files = deepcopy(data_files)
         self.metadata = metadata
 
         self._storage_options = {**_credentials, **_fs_args} or None
@@ -138,10 +135,10 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
     def _build_data_files(self) -> str | dict[str, str]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        if self._load_data_files:
+        if self._data_files:
             return {
                 split: os.path.join(load_path, filename)
-                for split, filename in self._load_data_files.items()
+                for split, filename in self._data_files.items()
             }
 
         # Otherwise, just return the path to the Dataset to be loaded.
@@ -170,8 +167,8 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
         As a result, we have to call ``to_<format>`` per split.
         """
-        if self._save_data_files:
-            data_files_keys = set(self._save_data_files.keys())
+        if self._data_files:
+            data_files_keys = set(self._data_files.keys())
             split_names = set(data.keys())
             if data_files_keys != split_names:
                 msg = (
@@ -184,37 +181,17 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         self._fs.mkdirs(save_path, exist_ok=True)
         ext = self.EXTENSION
         for split, split_ds in data.items():
-            filename = (
-                self._save_data_files[split]
-                if self._save_data_files
-                else f"{split}{ext}"
-            )
+            filename = self._data_files[split] if self._data_files else f"{split}{ext}"
             split_path = f"{save_path}/{filename}"
             self._save_dataset(split_ds, split_path)
 
-    def _resolve_data_files(
-        self, data_files: dict[str, str] | None
-    ) -> tuple[dict[str, str] | None, dict[str, str] | None]:
-        if data_files is not None and (
-            "data_files" in self._load_args or "data_files" in self._save_args
-        ):
+    def _validate_data_files_args(self) -> None:
+        if "data_files" in self._load_args or "data_files" in self._save_args:
             msg = (
-                f"{type(self).__name__} got ``data_files`` as a top-level "
-                "argument and in ``load_args`` or ``save_args``. Pass it "
-                "in only one place."
+                f"{type(self).__name__} got ``data_files`` in ``load_args`` "
+                "or ``save_args``. Pass it as a top-level argument instead."
             )
             raise DatasetError(msg)
-
-        load_data_files, save_data_files = None, None
-
-        if data_files is not None:
-            save_data_files = load_data_files = deepcopy(data_files)
-
-        else:
-            load_data_files = deepcopy(self._load_args.pop("data_files", None))
-            save_data_files = deepcopy(self._save_args.pop("data_files", None))
-
-        return load_data_files, save_data_files
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -222,7 +199,7 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
             "file_format": self.BUILDER,
             "protocol": self._protocol,
             "version": self._version,
-            "data_files": self._load_data_files,
+            "data_files": self._data_files,
             "load_args": self._load_args,
             "save_args": self._save_args,
         }

@@ -14,21 +14,29 @@ except (ImportError, RuntimeError):
 try:
     from .arrow_dataset import ArrowDataset
 except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
     ArrowDataset: Any
 
 try:
     from .parquet_dataset import ParquetDataset
 except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
     ParquetDataset: Any
 
 try:
     from .json_dataset import JSONDataset
 except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
     JSONDataset: Any
 
 try:
     from .csv_dataset import CSVDataset
 except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
     CSVDataset: Any
 
 try:

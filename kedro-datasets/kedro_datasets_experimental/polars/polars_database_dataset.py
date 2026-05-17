@@ -1,7 +1,6 @@
 """``PolarsDatabaseDataset`` to load and save data to a SQL backend using Polars."""
 
 import copy
-import datetime as dt
 import re
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -96,12 +95,48 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
+    Provide at least one of ``sql``, ``filepath``, or ``table_name`` (``sql``
+    and ``filepath`` are mutually exclusive). ``load`` uses ``sql`` or
+    ``filepath`` when given, otherwise ``SELECT * FROM <table_name>``.
+    ``save`` always writes to ``table_name``.
+
+    Schema-qualified tables can be passed directly to ``table_name`` using the
+    ``schema_name.table_name`` form; there is no separate ``schema`` argument.
+
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
+
+    Load-and-save against a single table:
+
+    ```yaml
+    shuttles_table:
+        type: polars.PolarsDatabaseDataset
+        table_name: shuttles
+        credentials: db_credentials
+    ```
+
+    Load via a custom (here schema-qualified) SQL query:
+
     ```yaml
     shuttle_id_dataset:
         type: polars.PolarsDatabaseDataset
-        sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        sql: "SELECT shuttle, shuttle_id FROM spaceflights.shuttles;"
         credentials: db_credentials
+    ```
+
+    Pass extra arguments to the underlying polars methods via ``load_args`` and
+    ``save_args``:
+
+    ```yaml
+    shuttles_table:
+        type: polars.PolarsDatabaseDataset
+        table_name: shuttles
+        credentials: db_credentials
+        load_args:
+            batch_size: 10000
+            schema_overrides:
+                shuttle_id: Int64
+        save_args:
+            if_table_exists: append
     ```
 
     Sample database credentials entry in ``credentials.yml``:
@@ -149,17 +184,55 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Creates a new ``PolarsDatabaseDataset``."""
+        """Creates a new ``PolarsDatabaseDataset``.
+
+        Args:
+            sql: SQL query to execute on load. Mutually exclusive with
+                ``filepath``. If neither is given, ``table_name`` must be
+                provided and the dataset will load via ``SELECT * FROM <table_name>``.
+            credentials: A dictionary with a ``SQLAlchemy`` connection string.
+                Users are supposed to provide the connection string ``con``
+                through credentials. To find all supported connection string
+                formats, see here:
+                https://docs.sqlalchemy.org/core/engines.html#database-urls
+                Additional parameters for the sqlalchemy engine can be provided
+                alongside the ``con`` parameter.
+            load_args: Provided to the underlying ``polars.read_database``
+                function along with the connection. To find all supported
+                arguments, see here:
+                https://docs.pola.rs/api/python/stable/reference/api/polars.read_database.html
+            fs_args: Extra arguments passed to ``fsspec`` when ``filepath``
+                points to a SQL file (e.g. credentials for remote storage).
+            filepath: Path to a ``.sql`` file containing the query to execute
+                on load. Mutually exclusive with ``sql``.
+            table_name: Target table for ``save``. When ``sql`` and
+                ``filepath`` are not provided, also used as the load source via
+                ``SELECT * FROM <table_name>``. Schema-qualified tables can be
+                passed as ``schema_name.table_name``.
+            save_args: Provided to the underlying ``polars.DataFrame.write_database``
+                method along with the connection string. To find all supported
+                arguments, see here:
+                https://docs.pola.rs/api/python/stable/reference/api/polars.DataFrame.write_database.html
+                Defaults to ``{"if_table_exists": "replace"}`` — writes overwrite
+                the target table unless overridden (e.g. ``if_table_exists: append``).
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
+
+        Raises:
+            DatasetError: When both ``sql`` and ``filepath`` are provided, when
+                none of ``sql``/``filepath``/``table_name`` is provided, or
+                when ``con`` is missing from ``credentials``.
+        """
         if sql and filepath:
             raise DatasetError(
-                "'sql' and 'filepath' arguments cannot both be provided."
+                "'sql' and 'filepath' arguments cannot both be provided. "
                 "Please only provide one."
             )
 
-        if not table_name or (sql or filepath):
+        if not (sql or filepath or table_name):
             raise DatasetError(
-                "Either 'table_name' or one of 'sql' or 'filepath' arguments cannot both be empty."
-                "Please provide a sql query or path to a sql query file."
+                "Provide at least one of 'sql', 'filepath', or 'table_name'. "
+                "When only 'table_name' is given, the dataset will load the whole table."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
@@ -170,7 +243,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         default_load_args: dict[str, Any] = {}
         default_save_args: dict[str, Any] = {
-            "if_exists": "replace"
+            "if_table_exists": "replace"
         }
 
         self._load_args = (
@@ -188,11 +261,10 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         self.metadata = metadata
 
-        # load sql query from file
         if sql:
             self._load_args["sql"] = sql
             self._filepath = None
-        else:
+        elif filepath:
             # filesystem for loading sql file
             _fs_args = copy.deepcopy(fs_args) or {}
             _fs_credentials = _fs_args.pop("credentials", {})
@@ -201,12 +273,13 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
+        else:
+            # table_name-only mode: load() will build "SELECT * FROM <table_name>".
+            self._filepath = None
         self._connection_str = credentials["con"]
         self._connection_args = {
             k: credentials[k] for k in credentials.keys() if k != "con"
         }
-        if "mssql" in self._connection_str:
-            self.adapt_mssql_date_params()
 
     @classmethod
     def create_connection(
@@ -253,12 +326,14 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 query = fs_file.read()
-        else:
+        elif "sql" in load_args:
             query = load_args.pop("sql")
+        else:
+            query = f"SELECT * FROM {self.table_name}"  # nosec B608
 
         return pl.read_database(
             query=query,
-            connection=self._connection_str,
+            connection=self.engine,
             **load_args
         )
 
@@ -273,26 +348,3 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
             connection=self._connection_str,
             **self._save_args
         )
-
-    # For mssql only
-    def adapt_mssql_date_params(self) -> None:
-        """We need to change the format of datetime parameters.
-        MSSQL expects datetime in the exact format %y-%m-%dT%H:%M:%S.
-        Here, we also accept plain dates.
-        `pyodbc` does not accept named parameters, they must be provided as a list."""
-        params = self._load_args.get("params", [])
-        if not isinstance(params, list):
-            raise DatasetError(
-                "Unrecognized `params` format. It can be only a `list`, "
-                f"got {type(params)!r}"
-            )
-        new_load_args = []
-        for value in params:
-            try:
-                as_date = dt.date.fromisoformat(value)
-                new_val = dt.datetime.combine(as_date, dt.time.min)
-                new_load_args.append(new_val.strftime("%Y-%m-%dT%H:%M:%S"))
-            except (TypeError, ValueError):
-                new_load_args.append(value)
-        if new_load_args:
-            self._load_args["params"] = tuple(new_load_args)

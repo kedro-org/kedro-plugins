@@ -385,6 +385,8 @@ experimental = [
     "optuna",
     "u8darts[all]",
     "pypdf>=3.0.0",
+    "polars>=1.0",
+    "SQLAlchemy>=1.4",
 ]
 
 experimental_test = [
@@ -422,6 +424,8 @@ experimental_test = [
     "chromadb>=1.0.0",
     "litellm<1.80.12; python_version >= '3.14'",  # For compatibility with chromadb's opentelemetry-proto
     "dask[complete]>=2021.10",
+    "polars>=1.0",
+    "SQLAlchemy>=1.4",
 ]
 
 # All requirements

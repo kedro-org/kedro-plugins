@@ -33,12 +33,14 @@
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
+- Repaired `polars.PolarsDatabaseDataset` end-to-end (it was effectively broken and previously had no tests): corrected the inverted argument validation in `__init__` that made the dataset uninstantiable for any valid configuration; renamed the default `save_args` key from `if_exists` to `if_table_exists` for compatibility with current `polars.DataFrame.write_database`; switched `load()` to pass the cached SQLAlchemy `engine` (instead of a URI string) to `pl.read_database`; added support for table-name-only catalog entries (loads via `SELECT * FROM <table_name>` when no `sql` or `filepath` is provided); added construction-time validation that raises `DatasetError` for conflicting/missing arguments; removed a dead `adapt_mssql_date_params` method that had been copy-pasted from the pandas SQL dataset and was incompatible with `polars.read_database`; added `polars` and `SQLAlchemy` to the `experimental` and `experimental_test` extras so the dataset is installable; and added a full test suite covering load/save round-trips, source precedence, engine caching, and credentials forwarding.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [Anton Nikishin](https://github.com/nikanton)
 
 # Release 9.3.0
 

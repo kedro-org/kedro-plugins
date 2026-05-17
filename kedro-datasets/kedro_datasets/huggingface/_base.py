@@ -89,7 +89,14 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
 
         self._load_args = deepcopy(load_args or {})
         self._save_args = deepcopy(save_args or {})
-        self._validate_data_files_args()
+
+        if "data_files" in self._load_args or "data_files" in self._save_args:
+            msg = (
+                f"{type(self).__name__} got ``data_files`` in ``load_args`` "
+                "or ``save_args``. Pass it as a top-level argument instead."
+            )
+            raise DatasetError(msg)
+
         self._data_files = deepcopy(data_files)
         self.metadata = metadata
 
@@ -184,14 +191,6 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
             filename = self._data_files[split] if self._data_files else f"{split}{ext}"
             split_path = f"{save_path}/{filename}"
             self._save_dataset(split_ds, split_path)
-
-    def _validate_data_files_args(self) -> None:
-        if "data_files" in self._load_args or "data_files" in self._save_args:
-            msg = (
-                f"{type(self).__name__} got ``data_files`` in ``load_args`` "
-                "or ``save_args``. Pass it as a top-level argument instead."
-            )
-            raise DatasetError(msg)
 
     def _describe(self) -> dict[str, Any]:
         return {

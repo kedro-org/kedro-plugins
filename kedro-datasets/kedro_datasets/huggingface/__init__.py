@@ -12,6 +12,34 @@ except (ImportError, RuntimeError):
     HFDataset: Any
 
 try:
+    from .arrow_dataset import ArrowDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    ArrowDataset: Any
+
+try:
+    from .parquet_dataset import ParquetDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    ParquetDataset: Any
+
+try:
+    from .json_dataset import JSONDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    JSONDataset: Any
+
+try:
+    from .csv_dataset import CSVDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    CSVDataset: Any
+
+try:
     from .transformer_pipeline_dataset import HFTransformerPipelineDataset
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
@@ -22,6 +50,10 @@ __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "hugging_face_dataset": ["HFDataset"],
+        "arrow_dataset": ["ArrowDataset"],
+        "parquet_dataset": ["ParquetDataset"],
+        "json_dataset": ["JSONDataset"],
+        "csv_dataset": ["CSVDataset"],
         "transformer_pipeline_dataset": ["HFTransformerPipelineDataset"],
     },
 )

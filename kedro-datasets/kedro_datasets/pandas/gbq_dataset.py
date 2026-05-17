@@ -255,8 +255,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
                 SQL query from filepath.
-            filepath: A path to a file with a sql query statement. Can be a string or
-            a PathLike object.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 

@@ -564,3 +564,12 @@ class TestSQLQueryDataset:
         kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
             CONNECTION, **additional_params
         )
+
+    def test_pathlike_filepath(self, mocker, tmp_path):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.sql"
+        filepath.write_text(SQL_QUERY)
+        dataset = SQLQueryDataset(filepath=filepath, credentials={"con": CONNECTION})
+        mocker.patch("pandas.read_sql_query")
+        dataset.load()
+        pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=ANY)

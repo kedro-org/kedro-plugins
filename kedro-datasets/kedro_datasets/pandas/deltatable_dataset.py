@@ -5,6 +5,7 @@ load and save using a pandas dataframe.
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
 
@@ -84,7 +85,7 @@ class DeltaTableDataset(AbstractDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         catalog_type: str | None = None,
         catalog_name: str | None = None,
         database: str | None = None,

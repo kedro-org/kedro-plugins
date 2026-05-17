@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import datetime as dt
+import os
 import re
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -420,7 +421,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         execution_options: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
         encoding: str | None = None,

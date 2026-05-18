@@ -31,7 +31,7 @@ kedro airflow create
 ```
 
 This command will generate an Airflow DAG file located in the `airflow_dags/` directory in your project.
-You can pass a `--pipeline` flag to generate the DAG file for a specific Kedro pipeline and an `--env` flag to generate the DAG file for a specific Kedro environment.
+You can pass a `--pipelines` flag to generate the DAG file for a specific Kedro pipeline and an `--env` flag to generate the DAG file for a specific Kedro environment.
 Passing `--all` will convert all registered Kedro pipelines to Airflow DAGs.
 
 ### Step 2: Copy the DAG file to the Airflow DAGs folder.
@@ -200,31 +200,41 @@ See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-us
 
 ### What changed in the generated DAG
 
-The generated DAG no longer defines a `KedroOperator` class. Instead, each Kedro node group is a `@task`-decorated function:
+The generated DAG no longer defines a `KedroOperator` class. Instead, a shared `_run_kedro_node` helper is defined once and each Kedro node group becomes a `@task`-decorated function that calls it:
 
 ```python
 # Airflow 3.x (new)
 from airflow.sdk import dag, task
 
+def _run_kedro_node(node_names=None, namespaces=None):
+    configure_project(package_name)
+    with KedroSession.create(project_path=project_path, env=env, conf_source=conf_source) as session:
+        if namespaces is not None:
+            session.run(pipeline_name=pipeline_name, namespaces=namespaces)
+        else:
+            session.run(pipeline_name=pipeline_name, node_names=node_names)
+
 @dag(dag_id="my_project", schedule="@once", ...)
 def my_project():
     @task(task_id="split")
     def split():
-        configure_project(package_name)
-        with KedroSession.create(project_path, env=env, conf_source=conf_source) as session:
-            session.run(pipeline_name, node_names=["split"])
+        _run_kedro_node(node_names=["split"])
     ...
 
 my_project()
 ```
 
+### `--pipeline` renamed to `--pipelines`
+
+The CLI flag `--pipeline` (`-p`) has been renamed to `--pipelines`. Update any scripts or CI commands that use `kedro airflow create --pipeline <name>` to use `--pipelines` instead.
+
 ### `schedule_interval` in `airflow.yml`
 
-The `schedule_interval` config key in `airflow.yml` continues to work without any changes — it is mapped to the `schedule` parameter in the generated Python code automatically. No migration of your config files is needed.
+The `schedule_interval` config key in `airflow.yml` continues to work without any changes — it is mapped to the `schedule` parameter in the generated Python code automatically. You can also use `schedule` directly. No migration of your config files is needed.
 
 ### Custom templates
 
-If you maintain a custom Jinja2 template via `--jinja-file` that subclasses or references `KedroOperator`, you will need to rewrite it. The recommended approach is to define `@task`-decorated closures inside a `@dag` function, mirroring the new default template. All template variables passed by `kedro airflow create` (e.g. `node_objs`, `dag_name`, `env`) remain unchanged.
+If you maintain a custom Jinja2 template via `--jinja-file` that subclasses or references `KedroOperator`, you will need to rewrite it. The recommended approach is to define a `_run_kedro_node` helper and `@task`-decorated functions inside a `@dag` function, mirroring the new default template. All template variables passed by `kedro airflow create` (e.g. `node_objs`, `dag_name`, `env`) remain unchanged.
 
 ## Can I contribute?
 

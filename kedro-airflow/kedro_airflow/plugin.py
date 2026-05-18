@@ -26,7 +26,7 @@ from kedro_airflow.grouping import group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
 If not set, the '__default__' pipeline is used. This argument supports
-passing multiple values using `--pipeline [p1] --pipeline [p2]`.
+passing multiple values using `--pipelines [p1] --pipelines [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
 TAGS_ARG_HELP = """Tags to be used for filtering pipeline nodes.
@@ -87,7 +87,6 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
 @airflow_commands.command()
 @click.option(
     "-p",
-    "--pipeline",
     "--pipelines",
     "pipeline_names",
     multiple=True,
@@ -161,7 +160,7 @@ def create(  # noqa: PLR0913, PLR0912
         conf_source = ""
     if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
         raise click.BadParameter(
-            "The `--all` and `--pipeline` option are mutually exclusive."
+            "The `--all` and `--pipelines` option are mutually exclusive."
         )
     session = KedroSession.create(project_path=metadata.project_path, env=env)
     with session:

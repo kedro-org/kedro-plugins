@@ -25,7 +25,7 @@ from kedro_airflow.plugin import commands
         # Test execution with alternate pipeline name
         (
             "ds",
-            ["airflow", "create", "--pipeline", "ds"],
+            ["airflow", "create", "--pipelines", "ds"],
             'tasks["node0"] >> tasks["node1"]',
         ),
         # Test with grouping
@@ -341,7 +341,7 @@ def test_create_airflow_dag_tags_parameter_exists(
 
 def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):
     """Test executing with a non-existing pipeline"""
-    command = ["airflow", "create", "--pipeline", "de"]
+    command = ["airflow", "create", "--pipelines", "de"]
     result = cli_runner.invoke(commands, command, obj=metadata)
     assert result.exit_code == 1
     assert (
@@ -384,7 +384,7 @@ def test_create_airflow_all_and_pipeline(cli_runner, metadata):
 
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
+        "Error: Invalid value: The `--all` and `--pipelines` option are mutually exclusive."
         in result.stderr
     )
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import logging
@@ -133,13 +134,43 @@ def _add_tool_properties(
         try:
             tool_kedro = pyproject_data["tool"]["kedro"]
             if "tools" in tool_kedro:
-                properties["tools"] = ", ".join(tool_kedro["tools"])
+                tools_property = _format_tools(tool_kedro["tools"])
+                if tools_property is not None:
+                    properties["tools"] = tools_property
             if "example_pipeline" in tool_kedro:
                 properties["example_pipeline"] = tool_kedro["example_pipeline"]
         except KeyError:
             pass
 
     return properties
+
+
+def _format_tools(tools_value: Any) -> str | None:
+    """Normalise the `[tool.kedro] tools` value to a comma-separated string.
+
+    Kedro's project template writes `tools` as a TOML string containing the
+    `str()` of a Python list (e.g. ``tools = "['Linting', 'Testing']"``), so
+    `tomllib` returns a string here, not a list. The previous implementation
+    assumed a list and called ``", ".join(...)`` directly, which iterated over
+    the string character-by-character and produced unusable output in Heap.
+
+    This function accepts either form (the real Kedro string, or a TOML array
+    in case the file was hand-edited) and returns ``None`` when there's no
+    usable value to send.
+    """
+    if isinstance(tools_value, str):
+        try:
+            parsed = ast.literal_eval(tools_value)
+        except (ValueError, SyntaxError):
+            parsed = None
+        if isinstance(parsed, (list, tuple)):
+            tools_value = parsed
+
+    if isinstance(tools_value, (list, tuple)):
+        return ", ".join(str(t) for t in tools_value) or None
+    if isinstance(tools_value, str) and tools_value:
+        return tools_value
+    return None
 
 
 def _generate_new_uuid(full_path: str) -> str:
@@ -302,28 +333,28 @@ def _format_project_statistics_data(
     catalog: DataCatalog,
     default_pipeline: Pipeline,
     project_pipelines: dict,
-):
+) -> dict[str, Any]:
     """Add project statistics to send to Heap."""
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
-    dataset_types: dict[str | None, int] = {}
+    dataset_type_counts: dict[str, int] = {}
     if hasattr(catalog, "keys") and callable(catalog.keys):
         # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
         dataset_names = catalog.keys()
         for ds_name in dataset_names:
-            if not ds_name.startswith(("parameters", "params:")):
-                ds_type = catalog.get_type(ds_name) or ""
-                if (
-                    ds_type.startswith("kedro_datasets.")
-                    or ds_type.startswith("kedro.io.")
-                    or ds_type.startswith("kedro_datasets_experimental.")
-                ):
-                    dataset_types[ds_type] = dataset_types.get(ds_type, 0) + 1
-                else:
-                    dataset_types["custom"] = dataset_types.get("custom", 0) + 1
+            if ds_name.startswith(("parameters", "params:")):
+                continue
+            ds_type = catalog.get_type(ds_name) or ""
+            if ds_type.startswith(
+                ("kedro_datasets.", "kedro.io.", "kedro_datasets_experimental.")
+            ):
+                key = ds_type
+            else:
+                key = "custom"
+            dataset_type_counts[key] = dataset_type_counts.get(key, 0) + 1
     else:
         dataset_names = catalog.list()  # type: ignore
 
-    return {
+    properties: dict[str, Any] = {
         "number_of_datasets": sum(
             1
             for c in dataset_names
@@ -331,8 +362,13 @@ def _format_project_statistics_data(
         ),
         "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
         "number_of_pipelines": len(project_pipelines.keys()),
-        "dataset_types": dataset_types,
     }
+    # Flatten per-type counts into individual scalar properties so they are
+    # accepted by Heap (which only allows string/number property values) and
+    # can be aggregated/grouped in Heap dashboards.
+    for type_name, count in dataset_type_counts.items():
+        properties[f"dataset_type_count.{type_name}"] = count
+    return properties
 
 
 def _get_heap_app_id() -> str:

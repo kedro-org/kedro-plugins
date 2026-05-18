@@ -16,11 +16,20 @@ package_name = "{{ package_name }}"
 conf_source = "{{ conf_source }}" or Path.cwd() / "conf"
 
 
+def _run_kedro_node(node_names=None, namespaces=None):
+    configure_project(package_name)
+    with KedroSession.create(project_path=project_path, env=env, conf_source=conf_source) as session:
+        if namespaces is not None:
+            session.run(pipeline_name=pipeline_name, namespaces=namespaces)
+        else:
+            session.run(pipeline_name=pipeline_name, node_names=node_names)
+
+
 @dag(
     dag_id="{{ dag_name | safe | slugify }}",
     start_date=datetime({{ start_date | default([2023, 1, 1]) | join(",")}}),
     max_active_runs={{ max_active_runs | default(3) }},
-    schedule="{{ schedule_interval | default('@once') }}",
+    schedule="{{ schedule | default(schedule_interval | default('@once')) }}",
     catchup={{ catchup | default(False) }},
     default_args=dict(
         owner="{{ owner | default('airflow') }}",
@@ -36,12 +45,10 @@ def {{ dag_name | safe | slugify | replace("-", "_") }}():
 
     @task(task_id="{{ group.name | slugify }}")
     def {{ group.name | slugify | replace("-", "_") }}():
-        configure_project(package_name)
-        with KedroSession.create(project_path, env=env, conf_source=conf_source) as session:
 {%- if group.type == "namespace" %}
-            session.run(pipeline_name, namespaces=["{{ group.name }}"])
+        _run_kedro_node(namespaces=["{{ group.name }}"])
 {%- else %}
-            session.run(pipeline_name, node_names=[{% for node in group.nodes %}"{{ node }}"{% if not loop.last %}, {% endif %}{% endfor %}])
+        _run_kedro_node(node_names=[{% for node in group.nodes %}"{{ node }}"{% if not loop.last %}, {% endif %}{% endfor %}])
 {%- endif %}
 {%- endfor %}
 

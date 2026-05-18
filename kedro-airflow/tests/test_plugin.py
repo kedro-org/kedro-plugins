@@ -441,7 +441,7 @@ def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
 
     # With non-namespaced test pipeline, --group-by namespace produces type="nodes" groups,
     # so each node becomes an individual task using node_names
-    assert "session.run(pipeline_name, node_names=[" in dag_content
+    assert "_run_kedro_node(node_names=[" in dag_content
 
     dag_file.unlink()
 
@@ -459,7 +459,7 @@ def test_memory_grouping_uses_node_names_parameter(cli_runner, metadata):
     dag_content = dag_file.read_text()
 
     # Verify memory grouping renders a static node_names list via TaskFlow @task
-    assert "session.run(pipeline_name, node_names=[" in dag_content
+    assert "_run_kedro_node(node_names=[" in dag_content
     assert "@task(" in dag_content
 
     dag_file.unlink()
@@ -501,9 +501,9 @@ def test_namespace_grouping_renders_namespaces_call():
         conf_source="",
     )
 
-    # Namespace groups use namespaces= not node_names=
-    assert 'session.run(pipeline_name, namespaces=["data_engineering"])' in dag_content
-    assert 'session.run(pipeline_name, namespaces=["data_science"])' in dag_content
-    assert "node_names=" not in dag_content
+    # Namespace groups call _run_kedro_node with namespaces=, not node_names=
+    assert '_run_kedro_node(namespaces=["data_engineering"])' in dag_content
+    assert '_run_kedro_node(namespaces=["data_science"])' in dag_content
+    assert "_run_kedro_node(node_names=[" not in dag_content
     # Dependency wiring is preserved
     assert 'tasks["data-engineering"] >> tasks["data-science"]' in dag_content

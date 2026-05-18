@@ -16,7 +16,7 @@ ATTRS = {
     "target": "to",
     "name": "fake_id",
     "key": "fake_key",
-    "link": "fake_link",
+    "edges": "fake_link",
 }
 
 
@@ -74,7 +74,7 @@ class TestJSONDataset:
             target="to",
             name="fake_id",
             key="fake_key",
-            link="fake_link",
+            edges="fake_link",
         )
 
         patched_load = mocker.patch(
@@ -100,7 +100,7 @@ class TestJSONDataset:
             target="to",
             name="fake_id",
             key="fake_key",
-            link="fake_link",
+            edges="fake_link",
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 

@@ -80,6 +80,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         *,
         table_name: str | None = None,
         connection: dict[str, Any] | None = None,
+        credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -110,6 +111,9 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
             table_name: The name to use for the created table (on load).
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
+            credentials: Credentials or additional configuration used to
+                connect (e.g. user, password, token, account). If given,
+                these values override the base connection configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
@@ -123,7 +127,9 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         """
         self._file_format = file_format
         self._table_name = table_name
-        self._connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        _connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
+        _credentials = deepcopy(credentials) or {}
+        self._connection_config = {**_connection_config, **_credentials}
         self.metadata = metadata
 
         super().__init__(
@@ -154,13 +160,13 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         return self._connection
 
     def load(self) -> ir.Table:
-        load_path = self._get_load_path()
+        load_path = Path(self._get_load_path())
         reader = getattr(self.connection, f"read_{self._file_format}")
         return reader(load_path, table_name=self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
-        save_path = self._get_save_path()
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        save_path = Path(self._get_save_path())
+        save_path.parent.mkdir(parents=True, exist_ok=True)
         writer = getattr(self.connection, f"to_{self._file_format}")
         writer(data, save_path, **self._save_args)
 

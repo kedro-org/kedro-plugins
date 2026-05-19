@@ -13,7 +13,7 @@
     "environment_type": "virtualenv",
     "show_commit_url": "https://github.com/kedro-org/kedro-plugins/commit/",
     "results_dir": ".asv/results",
-    "benchmark_dir": "kedro_benchmarks",
+    "benchmark_dir": "kedro_datasets_benchmarks",
     "html_dir": ".asv/html",
     "matrix": {
         "req": {

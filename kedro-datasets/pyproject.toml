@@ -430,7 +430,6 @@ experimental_test = [
     "dask[complete]>=2021.10",
     "polars>=1.0",
     "SQLAlchemy>=1.4",
-    "numpy>=2.3.4; python_version >= '3.14'",
 ]
 
 # All requirements

@@ -34,6 +34,7 @@
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
+- Bumped `opencv-python` to `~=4.13.0.92` so `experimental_test` resolves on Python 3.14 (the old `~=4.12.0.88` capped `numpy<2.3.0`, which has no Windows cp314 wheel).
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

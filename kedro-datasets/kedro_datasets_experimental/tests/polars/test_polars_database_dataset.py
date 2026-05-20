@@ -356,6 +356,22 @@ class TestPolarsDatabaseDataset:
         )
         assert first.engine is not second.engine
 
+    def test_save_and_load_share_cached_engine(self, numeric_frame):
+        """``save`` and ``load`` go through the same cached ``Engine``.
+
+        With ``sqlite:///:memory:``, each new SQLAlchemy connection is an
+        independent empty database. A round-trip on a single dataset instance
+        therefore only succeeds if ``save`` and ``load`` share the cached
+        ``Engine`` — which would not be the case if ``save`` reopened the
+        connection from the URI string.
+        """
+        dataset = PolarsDatabaseDataset(
+            table_name="round_trip",
+            credentials={"con": CONNECTION},
+        )
+        dataset.save(numeric_frame)
+        assert_frame_equal(dataset.load(), numeric_frame)
+
     def test_str_representation_filepath_excludes_connection_string(self, tmp_path):
         """The string repr never leaks the connection string in filepath mode."""
         query_file = tmp_path / "audit_repr_query.sql"

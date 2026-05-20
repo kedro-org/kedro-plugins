@@ -127,7 +127,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     ``save_args``:
 
     ```yaml
-    shuttles_table:
+    shuttles_configured:
         type: polars.PolarsDatabaseDataset
         table_name: shuttles
         credentials: db_credentials
@@ -285,7 +285,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
     def create_connection(
         cls, connection_str: str, connection_args: dict | None = None
     ) -> None:
-        """Given a connection string, create singleton connection
+        """Given a connection string, create a singleton ``Engine``
         to be used across all instances of `PolarsDatabaseDataset` that
         need to connect to the same source.
         """
@@ -345,6 +345,6 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
         data.write_database(
             table_name=self.table_name,
-            connection=self._connection_str,
+            connection=self.engine,
             **self._save_args
         )

@@ -80,7 +80,11 @@ holoviews = ["kedro-datasets[holoviews-holoviewswriter]"]
 
 huggingface-hfdataset = ["datasets", "huggingface_hub"]
 huggingface-hftransformerpipelinedataset = ["transformers"]
-huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset]"]
+huggingface-arrowdataset = ["datasets"]
+huggingface-csvdataset = ["datasets"]
+huggingface-jsondataset = ["datasets"]
+huggingface-parquetdataset = ["datasets"]
+huggingface = ["kedro-datasets[huggingface-hfdataset,huggingface-hftransformerpipelinedataset,huggingface-arrowdataset,huggingface-csvdataset,huggingface-jsondataset,huggingface-parquetdataset]"]
 
 ibis-athena = ["ibis-framework[athena]"]
 ibis-bigquery = ["ibis-framework[bigquery]"]

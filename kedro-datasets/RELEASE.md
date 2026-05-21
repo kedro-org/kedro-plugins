@@ -16,6 +16,7 @@
 - Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
+- Added `os.PathLike` support for `matplotlib.MatplotlibDataset`.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
 - Restructured the `README.md` file for Opik experimental datasets and added information on `opik.TraceDataset`.
 
@@ -42,6 +43,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Datascienceio](https://github.com/datascienceio)
 - [Guillaume Tauzin](https://github.com/gtauzin)
 - [iwhalen](https://github.com/iwhalen)
+- [Sai Asish Y](https://github.com/SAY-5)
 
 # Release 9.3.0
 

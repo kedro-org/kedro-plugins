@@ -4,16 +4,23 @@
 
 - Add Hugging Face datasets: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`.
 - Kedro-Datasets is now compatible with Python 3.14, except for `tensorflow.TensorFlowModelDataset` and `geopandas.GenericDataset`.
+- Added credentials support to `ibis.FileDataset`.
 - Added the following new **experimental** datasets:
 
-| Type                                 | Description                                          | Location                               |
-| ------------------------------------ | ---------------------------------------------------- | -------------------------------------- |
-| `opik.EvaluationDataset`             | A dataset for managing Opik evaluation datasets.     | `kedro_datasets_experimental.opik`     |
+| Type                     | Description                                      | Location                           |
+| ------------------------ | ------------------------------------------------ | ---------------------------------- |
+| `opik.EvaluationDataset` | A dataset for managing Opik evaluation datasets. | `kedro_datasets_experimental.opik` |
 
 ## Bug fixes and other changes
-- Restructured the `README.md` file for Opik experimental datasets and added information on `OpikTraceDataset`.
+
+- Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
+- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
+- Added `os.PathLike` support for `plotly` datasets.
+- Added `checkpoint.filepath` validation for IncrementalDataset.
+- Restructured the `README.md` file for Opik experimental datasets and added information on `opik.TraceDataset`.
 
 ## Breaking changes to experimental datasets
+
 - Renamed dataset classes and shortened `pyproject.toml` extra names for `langfuse`, `opik`, and `langchain` experimental datasets. The redundant package-family prefix has been dropped:
   - Classes:
     - `langfuse.LangfusePromptDataset` → `langfuse.PromptDataset`
@@ -28,14 +35,8 @@
     - `langchain-langchainpromptdataset` → `langchain-promptdataset`
     - etc.
 
-## Bug fixes and other changes
-
-- Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
-- Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
-- Added `os.PathLike` support for `plotly` datasets.
-- Added `checkpoint.filepath` validation for IncrementalDataset.
-
 ## Community contributions
+
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)

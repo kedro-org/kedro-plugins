@@ -1,6 +1,6 @@
 """Kedro plugin for collecting Kedro usage data."""
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 import logging
 

@@ -15,7 +15,7 @@
 
 - Refactored shared validation and utility logic from the three Opik experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `opik._common` module.
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
-- Added `os.PathLike` support for `plotly` datasets.
+- Added `os.PathLike` support for `plotly` and `pandas` datasets.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
 - Restructured the `README.md` file for Opik experimental datasets and added information on `opik.TraceDataset`.
 

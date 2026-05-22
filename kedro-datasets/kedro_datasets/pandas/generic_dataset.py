@@ -105,6 +105,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
+                Can be a string or a PathLike object.
                 Key assumption: The first argument of either load/save method points to a
                 filepath/buffer/io type location. There are some read/write targets such
                 as 'clipboard' or 'records' that will fail since they do not take a

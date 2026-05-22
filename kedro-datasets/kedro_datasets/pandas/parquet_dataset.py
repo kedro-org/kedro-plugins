@@ -94,6 +94,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 It can also be a path to a directory. If the directory is
                 provided then it can be used for reading partitioned parquet files.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             load_args: Additional options for loading Parquet file(s).
                 Here you can find all available arguments when reading single file:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html

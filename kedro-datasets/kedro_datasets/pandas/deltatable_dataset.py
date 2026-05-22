@@ -105,6 +105,7 @@ class DeltaTableDataset(AbstractDataset):
                 ``GCS``: `gs://<bucket>/<path>`
                 If any of the prefix above is not provided, `file` protocol (local filesystem)
                 will be used.
+                Can be a string or a PathLike object.
             catalog_type (DataCatalog, Optional): `AWS` or `UNITY` if filepath is not provided.
                 Defaults to None.
             catalog_name (str, Optional): the name of catalog in AWS Glue or Databricks Unity.

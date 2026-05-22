@@ -451,7 +451,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
-            filepath: A path to a file with a sql query statement.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:

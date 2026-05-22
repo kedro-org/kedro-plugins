@@ -34,12 +34,14 @@
 - Refactored shared validation and utility logic from the three Langfuse experimental datasets (`PromptDataset`, `EvaluationDataset`, `TraceDataset`) into a common `langfuse._common` module.
 - Added `os.PathLike` support for `plotly` datasets.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
+- Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Datascienceio](https://github.com/datascienceio)
 - [Guillaume Tauzin](https://github.com/gtauzin)
+- [Anton Nikishin](https://github.com/nikanton)
 - [iwhalen](https://github.com/iwhalen)
 
 # Release 9.3.0

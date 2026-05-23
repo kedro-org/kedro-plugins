@@ -37,12 +37,24 @@ def connection_config(request, database):
     )
 
 
+@pytest.fixture(params=[_SENTINEL])
+def credentials_config(request, database):
+    return (
+        None
+        if request.param is _SENTINEL  # `None` is a valid value to test
+        else request.param
+    )
+
+
 @pytest.fixture
-def file_dataset(filepath_csv, connection_config, load_args, save_args):
+def file_dataset(
+    filepath_csv, connection_config, credentials_config, load_args, save_args
+):
     return FileDataset(
         filepath=filepath_csv,
         file_format="csv",
         connection=connection_config,
+        credentials=credentials_config,
         load_args=load_args,
         save_args=save_args,
     )
@@ -143,6 +155,61 @@ class TestFileDataset:
         backend = (
             connection_config["backend"] if connection_config is not None else "duckdb"
         )
+        mocker.patch(f"ibis.{backend}")
+        file_dataset.load()
+        assert ("ibis", key) in file_dataset._connections
+
+    @pytest.mark.parametrize(
+        ("connection_config", "credentials_config", "key"),
+        [
+            (
+                {"backend": "duckdb", "database": "file.db", "extensions": ["spatial"]},
+                {"user": "admin", "password": "secret"},  # pragma: allowlist secret
+                (
+                    ("backend", "duckdb"),
+                    ("database", "file.db"),
+                    ("extensions", ("spatial",)),
+                    ("password", "secret"),
+                    ("user", "admin"),
+                ),
+            ),
+            (
+                [],
+                {
+                    "host": "xxx.sql.azuresynapse.net",
+                    "database": "xxx",
+                    "query": {"driver": "ODBC Driver 17 for SQL Server"},
+                    "backend": "mssql",
+                },
+                (
+                    ("backend", "mssql"),
+                    ("database", "xxx"),
+                    ("host", "xxx.sql.azuresynapse.net"),
+                    ("query", (("driver", "ODBC Driver 17 for SQL Server"),)),
+                ),
+            ),
+            (
+                None,
+                None,
+                (
+                    ("backend", "duckdb"),
+                    ("database", ":memory:"),
+                ),
+            ),
+            (
+                {"backend": "duckdb", "database": "file.db"},
+                {"backend": "mssql", "password": "secret"},  # pragma: allowlist secret
+                (
+                    ("backend", "mssql"),
+                    ("database", "file.db"),
+                    ("password", "secret"),
+                ),
+            ),
+        ],
+        indirect=["connection_config", "credentials_config"],
+    )
+    def test_connection_config_with_credentials(self, mocker, file_dataset, key):
+        backend = file_dataset._connection_config["backend"]
         mocker.patch(f"ibis.{backend}")
         file_dataset.load()
         assert ("ibis", key) in file_dataset._connections

@@ -1,4 +1,6 @@
 # Upcoming release
+
+# Release 0.8.0
 * Added support for Python 3.14.
 * Fixed `Kedro Project Statistics` event so dataset-type counts are accepted by Heap. Counts are now sent as individual scalar properties named `dataset_type_count.<dataset-class-FQN>` instead of a single nested `dataset_types` object, which Heap's API rejects.
 * Fixed formatting of the `tools` property sent to Heap so it is a readable comma-separated string (e.g. `"Linting, Testing"`).

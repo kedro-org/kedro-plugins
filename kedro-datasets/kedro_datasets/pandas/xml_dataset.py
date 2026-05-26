@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -48,7 +49,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -64,6 +65,7 @@ class XMLDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             load_args: Pandas options for loading XML files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html

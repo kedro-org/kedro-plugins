@@ -251,6 +251,13 @@ class TestParquetDataset:
             == "TablePreview"
         )
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / FILENAME
+        dataset = ParquetDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dummy_dataframe, dataset.load())
+
 
 class TestParquetDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

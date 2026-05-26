@@ -165,6 +165,13 @@ class TestJSONDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.json"
+        dataset = JSONDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dummy_dataframe, dataset.load())
+
     def test_preview_json(self, json_lines_data):
         dataset = JSONDataset(filepath=json_lines_data, load_args={"lines": True})
         preview_data = dataset.preview(nrows=2)

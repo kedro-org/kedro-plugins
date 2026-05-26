@@ -166,3 +166,10 @@ class TestDeltaTableDataset:
         history = deltatable_dataset_from_path.history
         assert isinstance(history, list)
         assert history[0]["operation"] == "WRITE"
+
+    def test_pathlike_filepath(self, tmp_path, dummy_df):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test-delta-table"
+        dataset = DeltaTableDataset(filepath=filepath)
+        dataset.save(dummy_df)
+        assert_frame_equal(dummy_df, dataset.load())

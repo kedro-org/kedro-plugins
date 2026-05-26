@@ -14,6 +14,7 @@ on:
       - main
     paths:
       - "kedro-datasets/kedro_datasets_experimental/**"
+      - ".github/workflows/kedro-datasets-experimental.yml"
 
 jobs:
   unit-tests-experimental:

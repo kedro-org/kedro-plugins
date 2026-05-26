@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -75,7 +76,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -93,6 +94,7 @@ class ParquetDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 It can also be a path to a directory. If the directory is
                 provided then it can be used for reading partitioned parquet files.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             load_args: Additional options for loading Parquet file(s).
                 Here you can find all available arguments when reading single file:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html

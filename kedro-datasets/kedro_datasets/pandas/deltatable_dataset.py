@@ -5,6 +5,7 @@ load and save using a pandas dataframe.
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
 
@@ -84,7 +85,7 @@ class DeltaTableDataset(AbstractDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         catalog_type: str | None = None,
         catalog_name: str | None = None,
         database: str | None = None,
@@ -104,6 +105,7 @@ class DeltaTableDataset(AbstractDataset):
                 ``GCS``: `gs://<bucket>/<path>`
                 If any of the prefix above is not provided, `file` protocol (local filesystem)
                 will be used.
+                Can be a string or a PathLike object.
             catalog_type (DataCatalog, Optional): `AWS` or `UNITY` if filepath is not provided.
                 Defaults to None.
             catalog_name (str, Optional): the name of catalog in AWS Glue or Databricks Unity.

@@ -139,9 +139,9 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 in a multi-level table hierarchy.
             connection: Configuration for connecting to an Ibis backend.
                 If not provided, connect to DuckDB in in-memory mode.
-            credentials: Connection information (e.g.
-                user, password, token, account). If provided, these values
-                override the base `connection` configuration.
+            credentials: Credentials or additional configuration used to
+                connect (e.g. user, password, token, account). If given,
+                these values override the base connection configuration.
             load_args: Additional arguments passed to the Ibis backend's
                 `table` method.
             save_args: Additional arguments passed to the Ibis backend's

@@ -18,6 +18,7 @@
 - Added `os.PathLike` support for `plotly`, `matplotlib` and `pandas` datasets.
 - Added `checkpoint.filepath` validation for IncrementalDataset.
 - Restructured the `README.md` file for Opik experimental datasets and added information on `opik.TraceDataset`.
+- Bumped `opencv-python` to `~=4.13.0.92` so `experimental_test` resolves on Python 3.14 (the old `~=4.12.0.88` capped `numpy<2.3.0`, which has no Windows cp314 wheel).
 
 ## Breaking changes to experimental datasets
 
@@ -44,6 +45,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [iwhalen](https://github.com/iwhalen)
 - [Sai Asish Y](https://github.com/SAY-5)
 - [Kaushal Dhungel](https://github.com/Kaushal-Dhungel)
+- [Anton Nikishin](https://github.com/nikanton)
 
 # Release 9.3.0
 

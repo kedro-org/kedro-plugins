@@ -27,6 +27,7 @@ DEFAULT_KEDRO_COMMANDS = [
     "pipeline",
     "registry",
     "run",
+    "server",
     "starter",
     "--version",
     "-V",

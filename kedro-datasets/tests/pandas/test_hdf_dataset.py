@@ -116,6 +116,13 @@ class TestHDFDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.h5"
+        dataset = HDFDataset(filepath=filepath, key=HDF_KEY)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
     def test_save_and_load_df_with_categorical_variables(self, hdf_dataset):
         """Test saving and reloading the dataset with categorical variables."""
         df = pd.DataFrame(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import io
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -91,7 +92,7 @@ class MatplotlibDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         fs_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,

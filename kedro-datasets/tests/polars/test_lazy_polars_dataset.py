@@ -190,7 +190,7 @@ class TestLazyCSVDataset:
             ("s3://bucket/file.csv", S3FileSystem, {}),
             ("file:///tmp/test.csv", LocalFileSystem, {}),
             ("/tmp/test.csv", LocalFileSystem, {}),
-            ("gcs://bucket/file.csv", GCSFileSystem, {}),
+            ("gcs://bucket/file.csv", GCSFileSystem, {"token": "anon"}),
             ("https://example.com/file.csv", HTTPFileSystem, {}),
             (
                 "abfs://bucket/file.csv",

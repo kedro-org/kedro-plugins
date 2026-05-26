@@ -45,7 +45,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [iwhalen](https://github.com/iwhalen)
 - [Sai Asish Y](https://github.com/SAY-5)
 - [Kaushal Dhungel](https://github.com/Kaushal-Dhungel)
-- [Anton Nikshin](https://github.com/nikanton)
+- [Anton Nikishin](https://github.com/nikanton)
 
 # Release 9.3.0
 

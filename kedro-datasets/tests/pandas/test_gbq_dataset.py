@@ -361,3 +361,20 @@ class TestGBQQueryDataset:
         )
         with pytest.raises(DatasetError, match=pattern):
             GBQQueryDataset(sql=SQL_QUERY, filepath=sql_file)
+
+    def test_pathlike_filepath(self, mocker, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.sql"
+        filepath.write_text(SQL_QUERY)
+        dataset = GBQQueryDataset(filepath=filepath, project=PROJECT, credentials=None)
+        mocked_read_gbq = mocker.patch(
+            "kedro_datasets.pandas.gbq_dataset.pd_gbq.read_gbq"
+        )
+        mocked_read_gbq.return_value = dummy_dataframe
+        loaded_data = dataset.load()
+        mocked_read_gbq.assert_called_once_with(
+            project_id=PROJECT,
+            credentials=None,
+            query_or_table=SQL_QUERY,
+        )
+        assert_frame_equal(dummy_dataframe, loaded_data)

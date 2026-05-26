@@ -208,6 +208,13 @@ class TestExcelDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.xlsx"
+        dataset = ExcelDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
 
 class TestExcelDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

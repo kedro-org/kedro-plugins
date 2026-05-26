@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf fil
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from threading import Lock
@@ -60,7 +61,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         key: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -77,6 +78,7 @@ class HDFDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             key: Identifier to the group in the HDF store.
             load_args: PyTables options for loading hdf files.
                 You can find all available arguments at:

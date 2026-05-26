@@ -5,6 +5,7 @@ to read and write from/to BigQuery table.
 from __future__ import annotations
 
 import copy
+import os
 from pathlib import PurePosixPath
 from typing import Any, ClassVar, NoReturn
 
@@ -232,7 +233,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
         credentials: dict[str, Any] | Credentials | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataset``.
@@ -254,7 +255,7 @@ class GBQQueryDataset(AbstractDataset[None, pd.DataFrame]):
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
                 SQL query from filepath.
-            filepath: A path to a file with a sql query statement.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 

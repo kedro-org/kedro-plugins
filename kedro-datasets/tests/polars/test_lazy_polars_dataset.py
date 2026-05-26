@@ -16,7 +16,7 @@ from polars.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro_datasets.polars import LazyPolarsDataset
-from kedro_datasets.polars.lazy_polars_dataset import ACCEPTED_FILE_FORMATS
+# from kedro_datasets.polars.lazy_polars_dataset import ACCEPTED_FILE_FORMATS
 
 BUCKET_NAME = "test_bucket"
 FILE_NAME = "test.csv"
@@ -30,6 +30,11 @@ def filepath_csv(tmp_path):
 @pytest.fixture
 def filepath_pq(tmp_path):
     return (tmp_path / "test.pq").as_posix()
+
+
+@pytest.fixture
+def dirpath_delta(tmp_path):
+    return (tmp_path / "test").as_posix()
 
 
 @pytest.fixture
@@ -122,13 +127,26 @@ class TestLazyCSVDataset:
         df = csv_dataset.load()
         assert df.collect().shape == (2, 3)
 
-    def test_load_s3(self, dummy_dataframe, mocked_csv_in_s3):
-        ds = LazyPolarsDataset(filepath=mocked_csv_in_s3, file_format="csv")
+    def test_load_s3(self, mocker, dummy_dataframe):
+        mock_scan = mocker.patch(
+            "kedro_datasets.polars.lazy_polars_dataset.pl.scan_csv",
+            return_value=dummy_dataframe.lazy(),
+        )
+        credentials = {"key": "fake", "secret": "fake"}
+        ds = LazyPolarsDataset(
+            filepath="s3://bucket/file.csv",
+            file_format="csv",
+            credentials=credentials,
+        )
+        # Patch dataset exists that still relies on fsspec
+        mocker.patch.object(ds, "_exists", return_value=True)
+        result = ds.load()
 
-        assert ds._protocol == "s3"
-
-        loaded_df = ds.load().collect()
-        assert_frame_equal(loaded_df, dummy_dataframe)
+        mock_scan.assert_called_once_with(
+            "s3://bucket/file.csv",
+            storage_options=credentials,
+        )
+        assert_frame_equal(result.collect(), dummy_dataframe)
 
     def test_save_and_load(self, csv_dataset, dummy_dataframe):
         csv_dataset.save(dummy_dataframe)
@@ -417,13 +435,31 @@ class TestLazyParquetDatasetVersioned:
         assert versioned_parquet_dataset.exists()
 
 
-class TestBadLazyPolarsDataset:
-    def test_bad_file_format_argument(self):
-        pattern = (
-            "'kedro' is not an accepted format "
-            f"({ACCEPTED_FILE_FORMATS}) ensure that your 'file_format' parameter "
-            "has been defined correctly as per the Polars API "
-            "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+class TestLazyDeltaLakePolarsDataset:
+    def test_delta_lake_dataset_save(self, dirpath_delta, dummy_dataframe):
+        dataset = LazyPolarsDataset(
+            filepath=dirpath_delta,
+            file_format="delta",
+            save_args={"mode": "append", "storage_options": "my_storage_options"},
         )
-        with pytest.raises(DatasetError, match=re.escape(pattern)):
-            LazyPolarsDataset(filepath="test.kedro", file_format="kedro")
+        dataset.save(dummy_dataframe)
+
+    def test_delta_lake_dataset_load(self, dirpath_delta, dummy_dataframe):
+        dummy_dataframe.write_delta(dirpath_delta)
+
+        dataset = LazyPolarsDataset(filepath=dirpath_delta, file_format="delta")
+
+        load_dataframe = dataset.load()
+        assert_frame_equal(dummy_dataframe, load_dataframe.collect())
+
+
+# class TestBadLazyPolarsDataset:
+#     def test_bad_file_format_argument(self):
+#         pattern = (
+#             "'kedro' is not an accepted format "
+#             f"({ACCEPTED_FILE_FORMATS}) ensure that your 'file_format' parameter "
+#             "has been defined correctly as per the Polars API "
+#             "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
+#         )
+#         with pytest.raises(DatasetError, match=re.escape(pattern)):
+#             LazyPolarsDataset(filepath="test.kedro", file_format="kedro")

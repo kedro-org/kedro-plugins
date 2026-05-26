@@ -2,6 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+
 from __future__ import annotations
 
 import errno
@@ -13,7 +14,6 @@ from typing import Any, ClassVar
 
 import fsspec
 import polars as pl
-import pyarrow.dataset as ds
 from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
@@ -21,9 +21,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
-from pyarrow.fs import FSSpecHandler, PyFileSystem
 
-ACCEPTED_FILE_FORMATS = ["csv", "parquet"]
 
 PolarsFrame = pl.LazyFrame | pl.DataFrame
 
@@ -74,7 +72,7 @@ class LazyPolarsDataset(
 
     DEFAULT_LOAD_ARGS: ClassVar[dict[str, Any]] = {}
     DEFAULT_SAVE_ARGS: ClassVar[dict[str, Any]] = {}
-    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
+    DEFAULT_FS_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
         self,
@@ -101,12 +99,7 @@ class LazyPolarsDataset(
                 a filepath/buffer/io type location. There are some read/write targets
                 such as 'clipboard' or 'records' that will fail since they do not take a
                 filepath like argument.
-            file_format: String which is used to match the appropriate load/save method
-                on a best effort basis. For example if 'csv' is passed the
-                `polars.read_csv` and
-                `polars.DataFrame.write_csv` methods will be identified. An error will
-                be raised unless
-                at least one matching `read_{file_format}` or `write_{file_format}`.
+            file_format: String which is used to match the appropriate scan/write method in polars' python API.
             load_args: polars options for loading files.
                 Here you can find all available arguments:
                 https://pola-rs.github.io/polars/py-polars/html/reference/io.html
@@ -136,25 +129,17 @@ class LazyPolarsDataset(
         """
         self._file_format = file_format.lower()
 
-        if self._file_format not in ACCEPTED_FILE_FORMATS:
-            raise DatasetError(
-                f"'{self._file_format}' is not an accepted format "
-                f"({ACCEPTED_FILE_FORMATS}) ensure that your 'file_format' parameter "
-                "has been defined correctly as per the Polars API "
-                "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
-            )
-
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
+        self._raw_filepath = filepath
         protocol, path = get_protocol_and_path(filepath, version)
-        if protocol == "file":
-            _fs_args.setdefault("auto_mkdir", True)
-
         self._protocol = protocol
         self._storage_options = {**_credentials, **_fs_args}
+
+        # FSSPEC is kept for exists and glob operations currently unsupported by polars I/O API
         self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         self.metadata = metadata
@@ -196,25 +181,45 @@ class LazyPolarsDataset(
             "version": self._version,
         }
 
+    def _get_load_path_url(self) -> str:
+        """Return a URL with protocol that polars/object_store can route."""
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        if self._protocol != "file" and "://" not in load_path:
+            load_path = f"{self._protocol}://{load_path}"
+        return load_path
+
+    def _get_save_path_url(self) -> str:
+        """Return a URL with protocol that polars/object_store can route."""
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        if self._protocol != "file" and "://" not in save_path:
+            save_path = f"{self._protocol}://{save_path}"
+        return save_path
+
     def load(self) -> pl.LazyFrame:
-        load_path = str(self._get_load_path())
+        load_path = self._get_load_path_url()
         if not self._exists():
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), load_path)
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), self._raw_filepath
+            )
+        self._load_args.pop("partitioning", None)
 
-        if self._protocol == "file":
-            # With local filesystems, we can use Polar's build-in I/O method:
-            self._load_args.pop("partitioning", None)
-            load_method = getattr(pl, f"scan_{self._file_format}", None)
-            return load_method(load_path, **self._load_args)  # type: ignore[misc]
-
-        # For object storage, we use pyarrow for I/O:
-        dataset = ds.dataset(
-            load_path, filesystem=self._fs, format=self._file_format, **self._load_args
+        load_method = getattr(pl, f"scan_{self._file_format}", None)
+        if not load_method:
+            raise DatasetError(
+                f"Unable to retrieve 'polars.scan_{self._file_format}' method."
+            )
+        load_kwargs = (
+            {"storage_options": self._storage_options} if self._storage_options else {}
         )
-        return pl.scan_pyarrow_dataset(dataset)
+
+        return load_method(
+            load_path,
+            **load_kwargs,
+            **self._load_args,
+        )
 
     def save(self, data: pl.DataFrame | pl.LazyFrame) -> None:
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = self._get_save_path_url()
 
         collected_data = None
         if isinstance(data, pl.LazyFrame):
@@ -222,32 +227,27 @@ class LazyPolarsDataset(
         else:
             collected_data = data
 
-        # Note: polars does support writing partitioned parquet file
-        # it is leveraging Arrow to do so, see e.g.
-        # https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_parquet.html
-        save_method = getattr(collected_data, f"write_{self._file_format}", None)
-        if save_method:
-            if self._save_args.get("use_pyarrow") is True:
-                pyarrow_opts = self._save_args.get("pyarrow_options", {})
-                pa_fs = PyFileSystem(FSSpecHandler(self._fs))
-                pyarrow_opts["filesystem"] = pa_fs
-                self._save_args["pyarrow_options"] = pyarrow_opts
-                save_method(file=save_path, **self._save_args)
-            else:
-                with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                    save_method(file=fs_file, **self._save_args)
-                self._invalidate_cache()
-        # How the LazyPolarsDataset logic is currently written with
-        # ACCEPTED_FILE_FORMATS and a check in the `__init__` method,
-        # this else loop is never reached, hence we exclude it from coverage report
-        # but leave it in for consistency between the Eager and Lazy classes
-        else:  # pragma: no cover
+        expected_save_method = f"write_{self._file_format}"
+        save_method = getattr(collected_data, expected_save_method, None)
+
+        if not save_method:
             raise DatasetError(
-                f"Unable to retrieve 'polars.DataFrame.write_{self._file_format}' "
-                "method, please ensure that your 'file_format' parameter has been "
-                "defined correctly as per the Polars API"
-                "https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/index.html"
+                f"Unable to retrieve 'polars.{expected_save_method}' method"
             )
+
+        if self._protocol == "file":
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        save_kwargs = (
+            {"storage_options": self._storage_options} if self._storage_options else {}
+        )
+        save_method(
+            save_path,
+            **save_kwargs,
+            **self._save_args,
+        )
+
+        self._invalidate_cache()
 
     def _exists(self) -> bool:
         try:

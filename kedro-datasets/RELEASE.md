@@ -1,6 +1,12 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.4.0
+
+## Major features and improvements
 
 - Add Hugging Face datasets: `ArrowDataset`, `ParquetDataset`, `JSONDataset`, `CSVDataset`.
 - Kedro-Datasets is now compatible with Python 3.14, except for `tensorflow.TensorFlowModelDataset` and `geopandas.GenericDataset`.

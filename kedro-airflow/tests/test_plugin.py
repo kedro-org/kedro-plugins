@@ -476,6 +476,37 @@ def _load_template() -> jinja2.Template:
     return jinja_env.get_template(jinja_file.name)
 
 
+def test_generated_dag_uses_airflow_sdk_imports(cli_runner, metadata):
+    """Generated DAG must import from airflow.sdk (Airflow 3.x API, incompatible with 2.x)."""
+    command = ["airflow", "create"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    dag_content = dag_file.read_text()
+
+    assert "from airflow.sdk import dag, task" in dag_content
+    assert "def _run_kedro_node(" in dag_content
+    dag_file.unlink()
+
+
+def test_schedule_interval_config_maps_to_schedule(cli_runner, metadata):
+    """schedule_interval in airflow.yml is passed through to the schedule= template variable."""
+    file_name = metadata.project_path / "conf" / "base" / "airflow.yml"
+    _create_kedro_airflow_yml(file_name, {"default": {"schedule_interval": "@daily"}})
+
+    command = ["airflow", "create"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    dag_content = dag_file.read_text()
+
+    assert 'schedule="@daily"' in dag_content
+    file_name.unlink()
+    dag_file.unlink()
+
+
 def test_namespace_grouping_renders_namespaces_call():
     """Check that namespace-typed GroupedNodes render session.run with namespaces= parameter."""
     node_objs = [

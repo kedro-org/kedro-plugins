@@ -196,7 +196,7 @@ See ["What if I want to use a different Jinja2 template?"](#what-if-i-want-to-us
 
 ## Migrating from Airflow 2.x
 
-`kedro-airflow` requires **Apache Airflow 3.x** (`>=3.2.0`). The default DAG template was rewritten to use the [TaskFlow API](https://airflow.apache.org/docs/apache-airflow/stable/tutorial/taskflow.html) and is not compatible with Airflow 2.x.
+`kedro-airflow` **0.11.0 and above** requires **Apache Airflow 3.x** (`>=3.2.0`). The default DAG template was rewritten to use the [TaskFlow API](https://airflow.apache.org/docs/apache-airflow/stable/tutorial/taskflow.html) and is not compatible with Airflow 2.x. If you need Airflow 2.x support, pin to `kedro-airflow<0.11.0`.
 
 ### What changed in the generated DAG
 

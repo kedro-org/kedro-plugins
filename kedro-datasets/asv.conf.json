@@ -2,7 +2,7 @@
     "version": 1,
     "project": "kedro-datasets",
     "project_url": "https://kedro.org/",
-    "repo": ".",
+    "repo": "..",
     "install_command": [
         "pip install -e . kedro-datasets[pandas]"
     ],

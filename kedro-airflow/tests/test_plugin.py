@@ -205,6 +205,7 @@ def test_airflow_config_params_env(cli_runner, metadata):
     assert result.exit_code == 0, (result.exit_code, result.stdout)
     assert dag_file.exists()
     assert dag_file.read_text() == expected_content
+    file_name.unlink()
     dag_file.unlink()
 
 

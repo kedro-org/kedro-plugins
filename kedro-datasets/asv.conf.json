@@ -3,8 +3,11 @@
     "project": "kedro-datasets",
     "project_url": "https://kedro.org/",
     "repo": "..",
+    "build_command": [
+        "pip wheel --no-deps --no-build-isolation -w {build_cache_dir} {build_dir}/kedro-datasets"
+    ],
     "install_command": [
-        "pip install -e . kedro-datasets[pandas]"
+        "pip install --no-build-isolation -f {build_cache_dir} kedro-datasets[pandas]"
     ],
     "branches": [
         "main"

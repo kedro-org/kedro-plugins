@@ -142,6 +142,13 @@ class TestXMLDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.xml"
+        dataset = XMLDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dummy_dataframe, dataset.load())
+
 
 class TestXMLDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):

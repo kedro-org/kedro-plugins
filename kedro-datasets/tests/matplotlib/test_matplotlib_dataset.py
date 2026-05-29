@@ -149,6 +149,13 @@ class TestMatplotlibDataset:
         for key, value in save_args.items():
             assert plot_dataset._save_args[key] == value
 
+    def test_pathlike_filepath(self, tmp_path, mock_single_plot):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "matplotlib.png"
+        dataset = MatplotlibDataset(filepath=filepath)
+        dataset.save(mock_single_plot)
+        assert filepath.read_bytes()
+
     def test_list_save(self, tmp_path, mock_list_plot, plot_dataset, mocked_s3_bucket):
         """Test saving list of plots to S3."""
 

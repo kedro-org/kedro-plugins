@@ -150,6 +150,16 @@ class TestGenericSASDataset:
         assert dataset._cached_load_version is None
         assert dataset._cached_save_version is None
 
+    def test_pathlike_filepath(self, tmp_path, sas_binary):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.sas7bdat"
+        filepath.write_bytes(sas_binary)
+        dataset = GenericDataset(
+            filepath=filepath, file_format="sas", load_args={"format": "sas7bdat"}
+        )
+        df = dataset.load()
+        assert df.shape == (32, 6)
+
 
 class TestGenericCSVDatasetVersioned:
     def test_version_str_repr(self, filepath_csv, load_version, save_version):

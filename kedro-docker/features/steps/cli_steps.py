@@ -235,7 +235,7 @@ def exec_kedro_target(context, command):
 @when("I execute kedro docker build with custom base image")
 def exec_docker_build_target(context):
     """Execute Kedro Docker build with custom base image"""
-    base_image = f"python:3.{sys.version_info[1]}-bullseye"
+    base_image = f"python:3.{sys.version_info[1]}-bookworm"
     cmd = [context.kedro, "docker", "build", "--base-image", base_image]
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 

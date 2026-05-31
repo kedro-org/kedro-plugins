@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -102,7 +103,7 @@ class ExcelDataset(
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         engine: str = "openpyxl",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -119,6 +120,7 @@ class ExcelDataset(
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             engine: The engine used to write to Excel files. The default
                 engine is 'openpyxl'.
             load_args: Pandas options for loading Excel files.

@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 ## Bug fixes and other changes
 ## Community contributions
 

@@ -1,6 +1,7 @@
 """``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+
 from __future__ import annotations
 
 import json as json_  # make pylint happy
@@ -151,7 +152,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 https://requests.readthedocs.io/en/latest/api.html#requests.request
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
-                determines the size of the package sent at each request.
+                determines the size of the package sent at each request, and
+                ``send_individually`` to send list items as individual requests.
             credentials: Allows specifying secrets in credentials.yml.
                 Expected format is ``('login', 'password')`` if given as a tuple or
                 list. An ``AuthBase`` instance can be provided for more complex cases.
@@ -178,6 +180,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 unsupported RESTful API method.
         """
         super().__init__()
+
+        self._send_individually = False
 
         if method == "GET":
             self._params = load_args or {}
@@ -299,13 +303,18 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     def _execute_save_with_chunks(
         self,
         json_data: list[dict[str, Any]],
-    ) -> requests.Response | None:
+    ) -> requests.Response:
         # If send_individually is True, send each item as a separate request
         if self._send_individually:
-            response: requests.Response | None = None
+            if not json_data:
+                raise DatasetError(
+                    "Cannot save an empty list with send_individually=True."
+                )
+
+            response = None
             for record in json_data:
                 response = self._execute_save_request(json_data=record)
-            return response
+            return response  # type: ignore[return-value]
 
         # Otherwise, use chunked sending
         chunk_size = self._chunk_size
@@ -315,7 +324,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
             response = self._execute_save_request(json_data=send_data)
 
-        return response
+        return response  # type: ignore[return-value]
 
     def _execute_save_request(self, json_data: Any) -> requests.Response:
         try:
@@ -332,17 +341,14 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             raise DatasetError("Failed to connect to the remote server") from exc
         return response
 
-    def save(self, data: Any) -> requests.Response | None:  # type: ignore[override]
+    def save(self, data: Any) -> requests.Response:  # type: ignore[override]
         if self._request_args["method"] in ["PUT", "POST"]:
             if isinstance(data, list):
-                response: requests.Response | None = self._execute_save_with_chunks(
+                response: requests.Response = self._execute_save_with_chunks(
                     json_data=data
                 )
             else:
                 response: requests.Response = self._execute_save_request(json_data=data)
-
-            if response is None:
-                return None
 
             if self._response_dataset is not None:
                 if isinstance(self._response_dataset, JSONDataset):

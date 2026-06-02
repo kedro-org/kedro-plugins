@@ -3,6 +3,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Community contributions
+- [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 
 # Release 9.4.0
 

@@ -226,10 +226,10 @@ class TestEvaluationDatasetInit:
                 )
 
     def test_init_filters_unknown_credentials(self):
-        """Extra credential keys (e.g. autogen-only ``endpoint``, openai sub-block)
-        are filtered out before reaching ``Opik()`` — so one ``opik_credentials``
+        """Extra credential keys (e.g. autogen-only `endpoint`, openai sub-block)
+        are filtered out before reaching `Opik()` so one `opik_credentials`
         block can serve EvaluationDataset, PromptDataset, and TraceDataset
-        (autogen mode) without raising ``TypeError``."""
+        (autogen mode) without raising `TypeError`."""
         credentials = {
             "api_key": "k", # pragma: allowlist secret
             "workspace": "w",

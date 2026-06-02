@@ -235,7 +235,7 @@ class TestEvaluationDatasetInit:
             "workspace": "w",
             "project_name": "p",
             "endpoint": "https://example.com/otlp",   # TraceDataset autogen only
-            "openai": {"api_key": "sk-x"},            # TraceDataset openai mode only
+            "openai": {"api_key": "sk-x"},            # pragma: allowlist secret
         }
 
         with patch("kedro_datasets_experimental.opik.evaluation_dataset.Opik") as mock_class:

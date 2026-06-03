@@ -226,7 +226,13 @@ my_project()
 
 ### `--pipeline` renamed to `--pipelines`
 
-The CLI flag `--pipeline` (`-p`) has been renamed to `--pipelines`. Update any scripts or CI commands that use `kedro airflow create --pipeline <name>` to use `--pipelines` instead.
+The CLI flag `--pipeline` (`-p`) has been renamed to `--pipelines`. It now accepts a comma-separated list of pipeline names, so you can convert multiple pipelines in one invocation:
+
+```bash
+kedro airflow create --pipelines data_processing,data_science
+```
+
+Update any scripts or CI commands that use `kedro airflow create --pipeline <name>` to use `--pipelines` instead.
 
 ### `schedule_interval` in `airflow.yml`
 

@@ -25,8 +25,8 @@ from slugify import slugify
 from kedro_airflow.grouping import group_memory_nodes
 
 PIPELINE_ARG_HELP = """Name of the registered pipeline to convert.
-If not set, the '__default__' pipeline is used. This argument supports
-passing multiple values using `--pipelines [p1] --pipelines [p2]`.
+If not set, the '__default__' pipeline is used. Multiple pipelines can be
+specified as a comma-separated list: `--pipelines p1,p2`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
 TAGS_ARG_HELP = """Tags to be used for filtering pipeline nodes.
@@ -89,9 +89,10 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     "-p",
     "--pipelines",
     "pipeline_names",
-    multiple=True,
-    default=(DEFAULT_PIPELINE,),
+    type=str,
+    default=DEFAULT_PIPELINE,
     help=PIPELINE_ARG_HELP,
+    callback=split_string,
 )
 @click.option("--all", "convert_all", is_flag=True, help=ALL_ARG_HELP)
 @click.option("-e", "--env", default=DEFAULT_RUN_ENV, help=ENV_HELP)
@@ -158,7 +159,7 @@ def create(  # noqa: PLR0913, PLR0912
 
     if conf_source is None:
         conf_source = ""
-    if convert_all and pipeline_names != (DEFAULT_PIPELINE,):
+    if convert_all and pipeline_names != [DEFAULT_PIPELINE]:
         raise click.BadParameter(
             "The `--all` and `--pipelines` option are mutually exclusive."
         )

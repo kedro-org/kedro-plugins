@@ -379,6 +379,30 @@ def test_create_airflow_all_dags(cli_runner, metadata):
         dag_file.unlink()
 
 
+def test_create_airflow_comma_separated_pipelines(cli_runner, metadata):
+    """Test that --pipelines accepts a comma-separated list."""
+    command = ["airflow", "create", "--pipelines", "__default__,ds"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    for dag_name, pipeline_name in [
+        ("fake_project", "__default__"),
+        ("fake_project", "ds"),
+    ]:
+        dag_file = (
+            metadata.project_path
+            / "airflow_dags"
+            / (
+                f"{dag_name}_dag.py"
+                if pipeline_name == "__default__"
+                else f"{dag_name}_{pipeline_name}_dag.py"
+            )
+        )
+        assert dag_file.exists()
+        dag_file.unlink()
+
+
 def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     command = ["airflow", "create", "--all", "-p", "ds"]
     result = cli_runner.invoke(commands, command, obj=metadata)

@@ -448,8 +448,8 @@ def test_group_by_invalid_value(cli_runner, metadata):
     )
 
 
-def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
-    """Check that namespace grouping generates DAG using --namespace parameter."""
+def test_namespace_groupby_on_non_namespaced_pipeline(cli_runner, metadata):
+    """Check --group-by namespace on a non-namespaced pipeline produces per-node tasks via node_names."""
     command = ["airflow", "create", "--group-by", "namespace"]
     result = cli_runner.invoke(commands, command, obj=metadata)
 
@@ -563,3 +563,36 @@ def test_namespace_grouping_renders_namespaces_call():
     assert "_run_kedro_node(node_names=[" not in dag_content
     # Dependency wiring is preserved
     assert 'tasks["data-engineering"] >> tasks["data-science"]' in dag_content
+
+
+def test_mixed_grouping_renders_both_branches():
+    """Template correctly renders both namespace and nodes branches in the same DAG."""
+    node_objs = [
+        GroupedNodes(
+            name="data_engineering",
+            type="namespace",
+            nodes=["ingest_data", "clean_data"],
+            dependencies=[],
+        ),
+        GroupedNodes(
+            name="split_train_evaluate",
+            type="nodes",
+            nodes=["split_data", "train_model", "evaluate_model"],
+            dependencies=["data_engineering"],
+        ),
+    ]
+    dag_content = _load_template().render(
+        dag_name="my_project",
+        node_objs=node_objs,
+        env="local",
+        pipeline_name="__default__",
+        package_name="my_project",
+        conf_source="",
+    )
+
+    # Namespace group uses namespaces=
+    assert '_run_kedro_node(namespaces=["data_engineering"])' in dag_content
+    # Nodes group uses node_names=
+    assert '_run_kedro_node(node_names=["split_data", "train_model", "evaluate_model"])' in dag_content
+    # Dependency wiring between the two group types
+    assert 'tasks["data-engineering"] >> tasks["split-train-evaluate"]' in dag_content

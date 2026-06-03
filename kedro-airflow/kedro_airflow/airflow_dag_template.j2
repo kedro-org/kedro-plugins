@@ -17,6 +17,7 @@ conf_source = "{{ conf_source }}" or Path.cwd() / "conf"
 
 
 def _run_kedro_node(node_names=None, namespaces=None):
+    """Run a Kedro pipeline slice. Pass node_names for regular node groups or namespaces for namespace groups."""
     configure_project(package_name)
     with KedroSession.create(project_path=project_path, env=env, conf_source=conf_source) as session:
         if namespaces is not None:

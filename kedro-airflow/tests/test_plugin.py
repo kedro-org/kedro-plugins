@@ -593,6 +593,9 @@ def test_mixed_grouping_renders_both_branches():
     # Namespace group uses namespaces=
     assert '_run_kedro_node(namespaces=["data_engineering"])' in dag_content
     # Nodes group uses node_names=
-    assert '_run_kedro_node(node_names=["split_data", "train_model", "evaluate_model"])' in dag_content
+    assert (
+        '_run_kedro_node(node_names=["split_data", "train_model", "evaluate_model"])'
+        in dag_content
+    )
     # Dependency wiring between the two group types
     assert 'tasks["data-engineering"] >> tasks["split-train-evaluate"]' in dag_content

@@ -80,7 +80,11 @@ class CachedPartitionedDataset(PartitionedDataset):
 
 
 class TimePartitionedDatasetLoad:
-    """Benchmark the load path for local and mocked S3 partitioned datasets."""
+    """Benchmark the load path for local and mocked S3 partitioned datasets.
+
+    Note: These benchmarks measure the time taken for partition listing
+    and metadata setup, not the execution of the lazy loader invocation.
+    """
 
     params = (FILESYSTEMS, PARTITION_COUNTS)
     param_names = ("filesystem", "partition_count")

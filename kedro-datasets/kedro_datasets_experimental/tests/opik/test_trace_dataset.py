@@ -158,6 +158,44 @@ def test_load_langchain_tracer(opik_tracer_mock, configure_mock, base_credential
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_forwards_project_name_from_credentials(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """project_name in credentials should reach OpikTracer.
+
+    Regression test for traces landing in "Default Project" — _configure_opik
+    calls configure(force=True), which writes ~/.opik.config without
+    project_name and overrides OPIK_PROJECT_NAME, so OpikTracer must receive
+    the project explicitly.
+    """
+    creds = base_credentials | {"project_name": "my-project"}
+    TraceDataset(creds, mode="langchain").load()
+    opik_tracer_mock.assert_called_once_with(project_name="my-project")
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_trace_kwarg_overrides_credentials(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """An explicit project_name catalog kwarg overrides the credentials value."""
+    creds = base_credentials | {"project_name": "from-creds"}
+    TraceDataset(creds, mode="langchain", project_name="from-kwargs").load()
+    opik_tracer_mock.assert_called_once_with(project_name="from-kwargs")
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_no_project_name_passes_no_kwarg(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """Without project_name anywhere, OpikTracer is called with no extra kwargs."""
+    TraceDataset(base_credentials, mode="langchain").load()
+    opik_tracer_mock.assert_called_once_with()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
 def test_langchain_import_error_raises(configure_mock, base_credentials, monkeypatch):
     """Test that ImportError in LangChain integration raises DatasetError."""
     monkeypatch.setitem(sys.modules, "opik.integrations.langchain", None)

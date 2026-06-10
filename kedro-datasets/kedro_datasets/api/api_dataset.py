@@ -317,6 +317,9 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             return response  # type: ignore[return-value]
 
         # Otherwise, use chunked sending
+        if not json_data:
+            raise DatasetError("Cannot save an empty list.")
+
         chunk_size = self._chunk_size
         n_chunks = math.ceil(len(json_data) / chunk_size)
 

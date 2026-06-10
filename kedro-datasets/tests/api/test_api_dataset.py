@@ -776,7 +776,7 @@ class TestAPIDatasetSendIndividually:
         assert mock_json_echo[-1] == [items[2]]
 
         # Verify items were sent as chunks
-        assert len(mock_json_echo) == len(items) - 1
+        assert len(mock_json_echo) == 2
         assert mock_json_echo[0] == items[:2]  # First chunk: items 1-2
         assert mock_json_echo[1] == items[2:]  # Second chunk: item 3
 
@@ -934,3 +934,11 @@ class TestAPIDatasetSendIndividually:
         with open(json_file) as f:
             stored_data = json.load(f)
         assert stored_data == response_data
+
+
+def test_save_empty_list_chunked():
+    """Test that saving an empty list in chunked mode raises a DatasetError."""
+    dataset = APIDataset(url="http://example.com/api", method="POST")
+
+    with pytest.raises(DatasetError, match="Cannot save an empty list."):
+        dataset.save([])

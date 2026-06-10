@@ -32,8 +32,8 @@ class HFTransformerPipelineDataset(AbstractDataset):
         >>> dataset = HFTransformerPipelineDataset(
         ...     task="text-classification", model_name="prajjwal1/bert-tiny"
         ... )
-        >>> model = dataset.load()  # doctest: +SKIP
-        >>> assert model("Hello world")[0]["label"].startswith("LABEL_")  # doctest: +SKIP
+        >>> model = dataset.load()
+        >>> assert model("Hello world")[0]["label"].startswith("LABEL_")
 
     """
 

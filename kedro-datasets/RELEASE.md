@@ -3,7 +3,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 
-- Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]` instead of the non-existent `u8darts-all`, removing a dependency-confusion risk on `pip install "kedro-datasets[darts-torch-model-dataset]"`.
+- Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 
 ## Community contributions
 

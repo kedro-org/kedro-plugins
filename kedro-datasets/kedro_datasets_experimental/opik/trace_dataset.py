@@ -356,7 +356,17 @@ class TraceDataset(AbstractDataset):
         except ImportError as e:
             raise DatasetError("Opik LangChain integration not available.") from e
 
-        return OpikTracer(**self._trace_kwargs)
+        # Forward project_name from credentials when not explicitly overridden
+        # in catalog trace_kwargs. Without this, OpikTracer logs to the
+        # "Default Project" regardless of credentials.project_name, because
+        # _configure_opik calls configure(force=True), which writes
+        # ~/.opik.config without project_name and overrides OPIK_PROJECT_NAME.
+        project_name = self._credentials.get("project_name")
+        kwargs = {**self._trace_kwargs}
+        if project_name and "project_name" not in kwargs:
+            kwargs["project_name"] = project_name
+
+        return OpikTracer(**kwargs)
 
     def save(self, data: Any) -> None:
         """Saving traces manually is not supported; TraceDataset is read-only."""

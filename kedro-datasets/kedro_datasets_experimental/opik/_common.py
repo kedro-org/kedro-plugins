@@ -28,11 +28,13 @@ OPIK_CLIENT_KEYS = frozenset({
 def build_opik_client_kwargs(credentials: dict[str, Any]) -> dict[str, Any]:
     """Pick only credential keys accepted by `Opik()`.
 
-    Filters out keys used elsewhere in the same credentials block e.g.
-    `endpoint` (consumed by `TraceDataset` autogen mode) or an `openai`
-    sub-block (consumed by `TraceDataset` openai mode) so they don't
-    reach the Opik client constructor and raise `TypeError`. This lets a
-    single `opik_credentials` block serve all three datasets.
+    `PromptDataset` and `EvaluationDataset` pass credentials straight into
+    the `Opik()` constructor, so any unrecognised key raises `TypeError`.
+    A shared `opik_credentials` block may legitimately carry such keys for
+    `TraceDataset` — e.g. `endpoint` (autogen mode) or an `openai` sub-block
+    (openai mode). This helper filters those out before the splat.
+    `TraceDataset` itself does not use this helper: it never splats
+    credentials and already picks its keys explicitly.
 
     Args:
         credentials: Raw credentials dict from the catalog.

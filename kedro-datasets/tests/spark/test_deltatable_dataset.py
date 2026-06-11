@@ -1,3 +1,5 @@
+from pathlib import PurePosixPath
+
 import pytest
 from delta import DeltaTable
 from kedro.io.core import DatasetError
@@ -55,6 +57,20 @@ class TestDeltaTableDataset:
 
         # check that indeed nothing is written
         assert not delta_ds.exists()
+
+    def test_pathlike_filepath(self, tmp_path, sample_spark_df):
+        filepath = tmp_path / "test_data"
+        delta_ds = DeltaTableDataset(filepath=filepath)
+
+        assert isinstance(delta_ds._filepath, PurePosixPath)
+        assert str(delta_ds._filepath) == filepath.as_posix()
+        assert not delta_ds.exists()
+
+        spark_delta_ds = SparkDataset(filepath=filepath, file_format="delta")
+        spark_delta_ds.save(sample_spark_df)
+
+        assert delta_ds.exists()
+        assert isinstance(delta_ds.load(), DeltaTable)
 
     def test_exists(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()

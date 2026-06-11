@@ -1,6 +1,7 @@
 """SparkStreamingDataset to load and save a PySpark Streaming DataFrame."""
 from __future__ import annotations
 
+import os
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -41,7 +42,7 @@ class SparkStreamingDataset(AbstractDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str = "",
+        filepath: str | os.PathLike = "",
         file_format: str = "",
         save_args: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
@@ -50,7 +51,8 @@ class SparkStreamingDataset(AbstractDataset):
         """Creates a new instance of SparkStreamingDataset.
 
         Args:
-            filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
+            filepath: Filepath in POSIX format to a Spark dataframe. This can be a
+                string or an ``os.PathLike`` object. When using Databricks
                 specify ``filepath``s starting with ``/dbfs/``. For message brokers such as
                 Kafka and all filepath is not required.
             file_format: File format used during load and save operations.

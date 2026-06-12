@@ -31,7 +31,7 @@ kedro airflow create
 ```
 
 This command will generate an Airflow DAG file located in the `airflow_dags/` directory in your project.
-You can pass a `--pipelines` flag to generate the DAG file for a specific Kedro pipeline and an `--env` flag to generate the DAG file for a specific Kedro environment.
+You can pass the `--pipelines` flag to generate the DAG file for a specific Kedro pipeline and the `--env` flag to generate the DAG file for a specific Kedro environment.
 Passing `--all` will convert all registered Kedro pipelines to Airflow DAGs.
 
 ### Step 2: Copy the DAG file to the Airflow DAGs folder.

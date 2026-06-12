@@ -2,6 +2,9 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+
+- Fixed `polars.EagerPolarsDataset` so it can save and load Delta tables (`file_format: delta`). `polars.read_delta`/`DataFrame.write_delta` take a path/URI rather than a file buffer, so they are now handled separately from the other polars I/O methods.
+
 ## Community contributions
 
 # Release 9.4.0

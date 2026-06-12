@@ -721,3 +721,49 @@ class TestBadEagerPolarsDataset:
         )
         with pytest.raises(DatasetError, match=pattern2):
             ds.load()
+
+
+@pytest.fixture
+def filepath_delta(tmp_path):
+    return tmp_path / "test_delta"
+
+
+@pytest.fixture
+def delta_dataset(filepath_delta):
+    return EagerPolarsDataset(
+        filepath=filepath_delta.as_posix(),
+        file_format="delta",
+    )
+
+
+class TestEagerDeltaDataset:
+    """Delta needs special handling because ``pl.read_delta`` /
+    ``pl.DataFrame.write_delta`` take a path/URI plus ``storage_options``
+    rather than an open file buffer like the other polars I/O methods.
+    See https://github.com/kedro-org/kedro-plugins/issues/444.
+    """
+
+    def test_save_and_load(self, delta_dataset, dummy_dataframe):
+        """Round-trip a DataFrame through a Delta table."""
+        delta_dataset.save(dummy_dataframe)
+        reloaded = delta_dataset.load()
+        assert_frame_equal(dummy_dataframe, reloaded)
+
+    def test_exists(self, delta_dataset, dummy_dataframe):
+        """`exists` is False before a save and True afterwards."""
+        assert delta_dataset.exists() is False
+        delta_dataset.save(dummy_dataframe)
+        assert delta_dataset.exists() is True
+
+    def test_save_with_mode_overwrite(self, delta_dataset, dummy_dataframe):
+        """`save_args` (e.g. mode='overwrite') are forwarded to write_delta."""
+        delta_dataset.save(dummy_dataframe)
+        overwrite_dataset = EagerPolarsDataset(
+            filepath=delta_dataset._filepath.as_posix(),
+            file_format="delta",
+            save_args={"mode": "overwrite"},
+        )
+        overwrite_dataset.save(dummy_dataframe)
+        reloaded = overwrite_dataset.load()
+        assert_frame_equal(dummy_dataframe, reloaded)
+        assert reloaded.shape == dummy_dataframe.shape

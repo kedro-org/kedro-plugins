@@ -342,9 +342,9 @@ class TraceDataset(AbstractDataset):
     def _load_langchain_tracer(self) -> Any:
         """Return an OpikTracer callback for LangChain integration.
 
-        The project is set by ``_configure_opik`` (via ``configure``), so the
+        The project is set by `_configure_opik` (via `configure`), so the
         tracer inherits it from the configured client. An explicit
-        ``project_name`` catalog kwarg still flows through ``trace_kwargs`` and
+        `project_name` catalog kwarg still flows through `trace_kwargs` and
         takes precedence for this tracer.
         """
         try:

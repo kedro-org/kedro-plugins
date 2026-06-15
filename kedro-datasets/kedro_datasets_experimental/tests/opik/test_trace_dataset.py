@@ -42,22 +42,22 @@ def test_empty_optional_credential_raises(base_credentials):
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
-def test_configure_opik_sets_project_name(configure_mock, base_credentials):
-    """Test that configuring Opik sets the project name environment variable."""
+def test_configure_opik_forwards_project_name(configure_mock, base_credentials):
+    """project_name from credentials is passed to configure() so the configured
+    client (and any tracer derived from it) logs to the right project."""
     creds = base_credentials | {"project_name": "test-proj"}
     TraceDataset(creds)
-    assert os.getenv("OPIK_PROJECT_NAME") == "test-proj"
     configure_mock.assert_called_once()
+    assert configure_mock.call_args.kwargs["project_name"] == "test-proj"
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
-def test_configure_opik_warns_on_project_switch(configure_mock, base_credentials, caplog):
-    """Test that configuring Opik warns when switching to a different project."""
-    os.environ["OPIK_PROJECT_NAME"] = "existing-proj"
-    creds = base_credentials | {"project_name": "new-proj"}
-    TraceDataset(creds)
-    assert "will be ignored" in caplog.text
-    assert os.getenv("OPIK_PROJECT_NAME") == "existing-proj"
+def test_configure_opik_project_name_none_when_absent(configure_mock, base_credentials):
+    """No project_name in credentials -> configure() receives project_name=None
+    (Opik falls back to its own default)."""
+    TraceDataset(base_credentials)
+    configure_mock.assert_called_once()
+    assert configure_mock.call_args.kwargs["project_name"] is None
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
@@ -159,27 +159,25 @@ def test_load_langchain_tracer(opik_tracer_mock, configure_mock, base_credential
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
 @patch("opik.integrations.langchain.OpikTracer")
-def test_load_langchain_tracer_forwards_project_name_from_credentials(
+def test_load_langchain_tracer_routes_project_via_configure(
     opik_tracer_mock, configure_mock, base_credentials
 ):
-    """project_name in credentials should reach OpikTracer.
-
-    Regression test for traces landing in "Default Project" — _configure_opik
-    calls configure(force=True), which writes ~/.opik.config without
-    project_name and overrides OPIK_PROJECT_NAME, so OpikTracer must receive
-    the project explicitly.
-    """
+    """Regression for traces landing in "Default Project": project_name from
+    credentials reaches the Opik client via configure(), so the langchain
+    tracer (created without an explicit project) inherits it."""
     creds = base_credentials | {"project_name": "my-project"}
     TraceDataset(creds, mode="langchain").load()
-    opik_tracer_mock.assert_called_once_with(project_name="my-project")
+    assert configure_mock.call_args.kwargs["project_name"] == "my-project"
+    opik_tracer_mock.assert_called_once_with()
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
 @patch("opik.integrations.langchain.OpikTracer")
-def test_load_langchain_tracer_trace_kwarg_overrides_credentials(
+def test_load_langchain_tracer_trace_kwarg_passed_through(
     opik_tracer_mock, configure_mock, base_credentials
 ):
-    """An explicit project_name catalog kwarg overrides the credentials value."""
+    """An explicit project_name catalog kwarg is passed straight to OpikTracer,
+    taking precedence over the configured client project for that tracer."""
     creds = base_credentials | {"project_name": "from-creds"}
     TraceDataset(creds, mode="langchain", project_name="from-kwargs").load()
     opik_tracer_mock.assert_called_once_with(project_name="from-kwargs")
@@ -190,7 +188,7 @@ def test_load_langchain_tracer_trace_kwarg_overrides_credentials(
 def test_load_langchain_tracer_no_project_name_passes_no_kwarg(
     opik_tracer_mock, configure_mock, base_credentials
 ):
-    """Without project_name anywhere, OpikTracer is called with no extra kwargs."""
+    """Without a catalog project_name kwarg, OpikTracer is called with no kwargs."""
     TraceDataset(base_credentials, mode="langchain").load()
     opik_tracer_mock.assert_called_once_with()
 

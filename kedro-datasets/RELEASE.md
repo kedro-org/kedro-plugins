@@ -2,6 +2,9 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+
+- Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.
+
 ## Community contributions
 
 # Release 9.4.0

@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 ## Bug fixes and other changes
 
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.

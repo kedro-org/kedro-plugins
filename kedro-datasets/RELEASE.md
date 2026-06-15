@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 ## Bug fixes and other changes
 
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.

@@ -1,6 +1,7 @@
 """``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
+
 from __future__ import annotations
 
 import json as json_  # make pylint happy
@@ -112,6 +113,12 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     can be loaded as JSON. If true, it will send the data unchanged in a single request.
     Otherwise, the ``_save`` method will try to dump the data in JSON format and execute
     the request.
+
+    The optional ``send_individually`` parameter in save_args (default: False) allows
+    sending each list item as an individual JSON object instead of as an array. This is
+    useful for APIs that expect one record per request instead of batched arrays.
+    When True and the input is a list, each element is sent separately, which takes
+    precedence over ``chunk_size``.
     """
 
     DEFAULT_SAVE_ARGS = {
@@ -121,6 +128,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         "json": None,
         "timeout": 60,
         "chunk_size": 100,
+        "send_individually": False,
     }
 
     def __init__(  # noqa: PLR0913
@@ -144,7 +152,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
                 https://requests.readthedocs.io/en/latest/api.html#requests.request
             save_args: Options for saving data on server. Includes all parameters used
                 during load method. Adds an optional parameter, ``chunk_size`` which
-                determines the size of the package sent at each request.
+                determines the size of the package sent at each request, and
+                ``send_individually`` to send list items as individual requests.
             credentials: Allows specifying secrets in credentials.yml.
                 Expected format is ``('login', 'password')`` if given as a tuple or
                 list. An ``AuthBase`` instance can be provided for more complex cases.
@@ -172,6 +181,8 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         """
         super().__init__()
 
+        self._send_individually = False
+
         if method == "GET":
             self._params = load_args or {}
 
@@ -180,6 +191,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             if save_args is not None:
                 self._params.update(save_args)
             self._chunk_size = self._params.pop("chunk_size", 1)
+            self._send_individually = self._params.pop("send_individually", False)
         else:
             raise ValueError("Only GET, POST and PUT methods are supported")
 
@@ -292,6 +304,22 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         self,
         json_data: list[dict[str, Any]],
     ) -> requests.Response:
+        # If send_individually is True, send each item as a separate request
+        if self._send_individually:
+            if not json_data:
+                raise DatasetError(
+                    "Cannot save an empty list with send_individually=True."
+                )
+
+            response = None
+            for record in json_data:
+                response = self._execute_save_request(json_data=record)
+            return response  # type: ignore[return-value]
+
+        # Otherwise, use chunked sending
+        if not json_data:
+            raise DatasetError("Cannot save an empty list.")
+
         chunk_size = self._chunk_size
         n_chunks = math.ceil(len(json_data) / chunk_size)
 
@@ -299,7 +327,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             send_data = json_data[i * chunk_size : (i + 1) * chunk_size]
             response = self._execute_save_request(json_data=send_data)
 
-        return response
+        return response  # type: ignore[return-value]
 
     def _execute_save_request(self, json_data: Any) -> requests.Response:
         try:

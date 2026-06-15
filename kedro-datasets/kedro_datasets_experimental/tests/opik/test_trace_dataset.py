@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from kedro.io import DatasetError
 
+from kedro_datasets_experimental.opik import trace_dataset as trace_dataset_module
 from kedro_datasets_experimental.opik.trace_dataset import TraceDataset
 
 OPIK_AUTOGEN_ENDPOINT = "https://www.comet.com/opik/api/v1/private/otel/v1/traces"
@@ -58,6 +59,23 @@ def test_configure_opik_project_name_none_when_absent(configure_mock, base_crede
     TraceDataset(base_credentials)
     configure_mock.assert_called_once()
     assert configure_mock.call_args.kwargs["project_name"] is None
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_configure_opik_warns_on_project_switch_in_session(
+    configure_mock, base_credentials, caplog
+):
+    """Configuring a second, different project in the same process warns, since
+    Opik configuration is global per process. Same project does not warn."""
+    TraceDataset(base_credentials | {"project_name": "proj-a"})
+
+    caplog.clear()
+    TraceDataset(base_credentials | {"project_name": "proj-a"})
+    assert "already configured" not in caplog.text
+
+    caplog.clear()
+    TraceDataset(base_credentials | {"project_name": "proj-b"})
+    assert "already configured for project 'proj-a'" in caplog.text
 
 
 @patch("kedro_datasets_experimental.opik.trace_dataset.configure")
@@ -331,7 +349,8 @@ class TestTraceDatasetAutogenMode:
 
 @pytest.fixture(autouse=True)
 def clean_env():
-    """Clean up environment variables after each test."""
+    """Reset env vars and the per-process project guard after each test."""
     yield
     if "OPIK_PROJECT_NAME" in os.environ:
         del os.environ["OPIK_PROJECT_NAME"]
+    trace_dataset_module._session_project_state["project_name"] = None

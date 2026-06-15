@@ -13,6 +13,12 @@ REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
+# Opik configuration is global per process: the first project configured wins
+# once a client has been created. This tracks the project configured so far (a
+# mutable holder, to avoid a module-level `global` rebind) so we can warn if a
+# later TraceDataset configures a different one.
+_session_project_state: dict[str, str | None] = {"project_name": None}
+
 
 class TraceDataset(AbstractDataset):
     """Kedro dataset for managing Opik tracing clients and callbacks.
@@ -179,15 +185,36 @@ class TraceDataset(AbstractDataset):
         Note: Opik configuration is global within a process, so the project
         cannot be changed once a client has been created. Using multiple
         `TraceDataset` instances with different projects in the same session
-        will log all traces to the first configured project.
+        will log all traces to the first configured project; a warning is
+        emitted in that case.
         """
+        project_name = self._credentials.get("project_name")
+        configured_project = _session_project_state["project_name"]
+
+        if (
+            configured_project is not None
+            and project_name is not None
+            and project_name != configured_project
+        ):
+            logger.warning(
+                "Opik is already configured for project '%s' in this session. "
+                "Opik configuration is global per process, so configuring project "
+                "'%s' may not take effect for all traces — run pipelines targeting "
+                "different projects in separate processes.",
+                configured_project,
+                project_name,
+            )
+
         configure(
             api_key=self._credentials["api_key"],
             workspace=self._credentials["workspace"],
             url=self._credentials.get("url_override"),
-            project_name=self._credentials.get("project_name"),
+            project_name=project_name,
             force=True,
         )
+
+        if configured_project is None and project_name is not None:
+            _session_project_state["project_name"] = project_name
 
     def _validate_openai_client_params(self) -> None:
         """Validate OpenAI credentials in the 'openai' section.

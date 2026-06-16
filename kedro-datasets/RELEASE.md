@@ -7,6 +7,7 @@
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 
 ## Community contributions
+- [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 
 # Release 9.4.0
 

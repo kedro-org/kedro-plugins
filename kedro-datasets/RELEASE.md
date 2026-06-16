@@ -7,6 +7,7 @@
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.
 
 ## Community contributions
+- [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 
 # Release 9.4.0
 

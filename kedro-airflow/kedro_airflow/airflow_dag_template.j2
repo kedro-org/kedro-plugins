@@ -21,7 +21,7 @@ def _run_kedro_node(node_names=None, namespaces=None):
     configure_project(package_name)
     with KedroSession.create(project_path=project_path, env=env, conf_source=conf_source) as session:
         if namespaces is not None:
-            session.run(pipeline_name=pipeline_name, namespaces=namespaces)
+            session.run(pipeline_names=[pipeline_name], namespaces=namespaces)
         else:
             session.run(pipeline_names=[pipeline_name], node_names=node_names)
 

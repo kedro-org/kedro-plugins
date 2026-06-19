@@ -1,0 +1,26 @@
+{
+    "version": 1,
+    "project": "kedro-datasets",
+    "project_url": "https://kedro.org/",
+    "repo": "..",
+    "build_command": [
+        "pip wheel --no-deps --no-build-isolation -w {build_cache_dir} {build_dir}/kedro-datasets"
+    ],
+    "install_command": [
+        "pip install --no-build-isolation -f {build_cache_dir} kedro-datasets[pandas]"
+    ],
+    "branches": [
+        "main"
+    ],
+    "environment_name": "kedro-datasets",
+    "environment_type": "virtualenv",
+    "show_commit_url": "https://github.com/kedro-org/kedro-plugins/commit/",
+    "results_dir": ".asv/results",
+    "benchmark_dir": "kedro_datasets_benchmarks",
+    "html_dir": ".asv/html",
+    "matrix": {
+        "req": {
+            "kedro-datasets[pandas]": []
+        }
+    }
+}

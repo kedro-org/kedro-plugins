@@ -11,6 +11,7 @@ from opik.rest_api.core.api_error import ApiError
 from kedro_datasets._typing import JSONPreview
 
 from ._common import (
+    build_opik_client_kwargs,
     build_preview,
     create_file_dataset,
     validate_credentials,
@@ -206,7 +207,7 @@ class EvaluationDataset(AbstractDataset):
         self._file_dataset = None
 
         try:
-            self._client = Opik(**credentials)
+            self._client = Opik(**build_opik_client_kwargs(credentials))
         except Exception as e:
             raise DatasetError(f"Failed to initialise Opik client: {e}") from e
 

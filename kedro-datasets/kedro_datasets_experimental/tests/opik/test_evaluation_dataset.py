@@ -225,6 +225,26 @@ class TestEvaluationDatasetInit:
                     credentials=mock_credentials,
                 )
 
+    def test_init_filters_unknown_credentials(self):
+        """Extra credential keys (e.g. autogen-only `endpoint`, openai sub-block)
+        are filtered out before reaching `Opik()` so one `opik_credentials`
+        block can serve EvaluationDataset, PromptDataset, and TraceDataset
+        (autogen mode) without raising `TypeError`."""
+        credentials = {
+            "api_key": "k", # pragma: allowlist secret
+            "workspace": "w",
+            "project_name": "p",
+            "endpoint": "https://example.com/otlp",   # TraceDataset autogen only
+            "openai": {"api_key": "sk-x"},            # pragma: allowlist secret
+        }
+
+        with patch("kedro_datasets_experimental.opik.evaluation_dataset.Opik") as mock_class:
+            mock_class.return_value = Mock()
+            EvaluationDataset(dataset_name="ds", credentials=credentials)
+
+        _, kwargs = mock_class.call_args
+        assert set(kwargs) == {"api_key", "workspace", "project_name"}
+
 
 class TestFiledatasetProperty:
     """Test the file_dataset lazy property."""

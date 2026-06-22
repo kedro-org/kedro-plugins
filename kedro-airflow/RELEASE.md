@@ -1,4 +1,7 @@
 # Upcoming Release
+* Migrated default DAG template to use the TaskFlow API (`@dag`/`@task`). The template now imports from `airflow.sdk`, which requires Apache Airflow 3.x; Airflow 2.x is no longer supported.
+* Renamed CLI flag `--pipeline` to `--pipelines` (breaking change). The short form `-p` is unchanged.
+* Added support for Python 3.13 and 3.14.
 * Update for Kedro 1.0.0 compatibility by using `pipeline.group_nodes_by()` for grouping by namespace or `None`, and applying the new `DataCatalog` API syntax.
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 

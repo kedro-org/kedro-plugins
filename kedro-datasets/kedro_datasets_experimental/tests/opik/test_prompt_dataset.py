@@ -220,6 +220,31 @@ class TestPromptDatasetInit:
                         credentials=mock_credentials
                     )
 
+    def test_init_filters_unknown_credentials(self, filepath_json_chat):
+        """Extra credential keys (e.g. autogen-only `endpoint`, openai sub-block)
+        are filtered out before reaching `Opik()` so one `opik_credentials`
+        block can serve PromptDataset, EvaluationDataset, and TraceDataset
+        (autogen mode) without raising `TypeError`."""
+        credentials = {
+            "api_key": "k", # pragma: allowlist secret
+            "workspace": "w",
+            "project_name": "p",
+            "endpoint": "https://example.com/otlp",   # TraceDataset autogen only
+            "openai": {"api_key": "sk-x"},            # pragma: allowlist secret
+        }
+
+        with patch("kedro_datasets_experimental.opik.prompt_dataset.Opik") as mock_opik_class:
+            mock_opik_class.return_value = Mock()
+            PromptDataset(
+                filepath=filepath_json_chat,
+                prompt_name="test-prompt",
+                prompt_type="chat",
+                credentials=credentials,
+            )
+
+        _, kwargs = mock_opik_class.call_args
+        assert set(kwargs) == {"api_key", "workspace", "project_name"}
+
 
 class TestPromptDatasetSave:
     """Test PromptDataset save functionality."""

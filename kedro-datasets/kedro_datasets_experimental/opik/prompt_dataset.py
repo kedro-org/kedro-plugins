@@ -19,6 +19,7 @@ from opik import Opik, Prompt
 from kedro_datasets._typing import JSONPreview
 
 from ._common import (
+    build_opik_client_kwargs,
     build_preview,
     create_file_dataset,
     validate_file_extension,
@@ -173,7 +174,7 @@ class PromptDataset(AbstractDataset):
 
         # Initialise Opik client
         try:
-            self._opik_client = Opik(**credentials, **opik_kwargs)
+            self._opik_client = Opik(**build_opik_client_kwargs(credentials), **opik_kwargs)
         except Exception as e:
             raise DatasetError(f"Failed to initialise Opik client: {e}")
 

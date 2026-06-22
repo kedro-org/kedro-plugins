@@ -511,9 +511,13 @@
                   "type": ["string", "null"],
                   "description": "The name to use for the created table (on load)."
                 },
+                "credentials": {
+                  "type": ["object", "null"],
+                  "description": "Credentials required to get access to the underlying database."
+                },
                 "connection": {
                   "type": "object",
-                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}."
+                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in in-memory mode."
                 },
                 "load_args": {
                   "type": "object",
@@ -557,7 +561,7 @@
                 },
                 "connection": {
                   "type": "object",
-                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in-memory."
+                  "description": "Configuration for connecting to an Ibis backend. E.g. {\"backend\": \"duckdb\", \"database\": \"company.db\"}. If not provided, defaults to DuckDB in in-memory mode."
                 },
                 "load_args": {
                   "type": "object",

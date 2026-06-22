@@ -4,8 +4,11 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+import jinja2
 import pytest
 import yaml
+from kedro.pipeline import GroupedNodes
+from slugify import slugify
 
 from kedro_airflow.plugin import commands
 
@@ -22,7 +25,7 @@ from kedro_airflow.plugin import commands
         # Test execution with alternate pipeline name
         (
             "ds",
-            ["airflow", "create", "--pipeline", "ds"],
+            ["airflow", "create", "--pipelines", "ds"],
             'tasks["node0"] >> tasks["node1"]',
         ),
         # Test with grouping
@@ -30,13 +33,13 @@ from kedro_airflow.plugin import commands
         (
             "__default__",
             ["airflow", "create", "--group-by", "memory"],
-            'task_id="node0-node1-node2-node3-node4",',
+            '@task(task_id="node0-node1-node2-node3-node4")',
         ),
         # As the example pipeline is not namespaced, each node is treated as a separate task.
         (
             "__default__",
             ["airflow", "create", "--group-by", "namespace"],
-            'task_id="node0",',
+            '@task(task_id="node0")',
         ),
     ],
 )
@@ -202,6 +205,7 @@ def test_airflow_config_params_env(cli_runner, metadata):
     assert result.exit_code == 0, (result.exit_code, result.stdout)
     assert dag_file.exists()
     assert dag_file.read_text() == expected_content
+    file_name.unlink()
     dag_file.unlink()
 
 
@@ -338,7 +342,7 @@ def test_create_airflow_dag_tags_parameter_exists(
 
 def test_create_airflow_dag_nonexistent_pipeline(cli_runner, metadata):
     """Test executing with a non-existing pipeline"""
-    command = ["airflow", "create", "--pipeline", "de"]
+    command = ["airflow", "create", "--pipelines", "de"]
     result = cli_runner.invoke(commands, command, obj=metadata)
     assert result.exit_code == 1
     assert (
@@ -375,13 +379,37 @@ def test_create_airflow_all_dags(cli_runner, metadata):
         dag_file.unlink()
 
 
+def test_create_airflow_comma_separated_pipelines(cli_runner, metadata):
+    """Test that --pipelines accepts a comma-separated list."""
+    command = ["airflow", "create", "--pipelines", "__default__,ds"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    for dag_name, pipeline_name in [
+        ("fake_project", "__default__"),
+        ("fake_project", "ds"),
+    ]:
+        dag_file = (
+            metadata.project_path
+            / "airflow_dags"
+            / (
+                f"{dag_name}_dag.py"
+                if pipeline_name == "__default__"
+                else f"{dag_name}_{pipeline_name}_dag.py"
+            )
+        )
+        assert dag_file.exists()
+        dag_file.unlink()
+
+
 def test_create_airflow_all_and_pipeline(cli_runner, metadata):
     command = ["airflow", "create", "--all", "-p", "ds"]
     result = cli_runner.invoke(commands, command, obj=metadata)
 
     assert result.exit_code == 2
     assert (
-        "Error: Invalid value: The `--all` and `--pipeline` option are mutually exclusive."
+        "Error: Invalid value: The `--all` and `--pipelines` option are mutually exclusive."
         in result.stderr
     )
 
@@ -420,8 +448,8 @@ def test_group_by_invalid_value(cli_runner, metadata):
     )
 
 
-def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
-    """Check that namespace grouping generates DAG using --namespace parameter."""
+def test_namespace_groupby_on_non_namespaced_pipeline(cli_runner, metadata):
+    """Check --group-by namespace on a non-namespaced pipeline produces per-node tasks via node_names."""
     command = ["airflow", "create", "--group-by", "namespace"]
     result = cli_runner.invoke(commands, command, obj=metadata)
 
@@ -432,15 +460,13 @@ def test_namespace_grouping_uses_namespace_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method contains namespaces parameter logic
-    assert 'if self.group_type == "namespace":' in dag_content
-    assert "session.run(self.pipeline_name, namespaces=[self.namespace])" in dag_content
+    # Verify TaskFlow @task decorator is used
+    assert "@task(" in dag_content
+    assert "task_id=" in dag_content
 
-    # Verify that group_type parameter is being passed
-    assert "group_type=" in dag_content
-
-    # Verify that namespace parameter is being passed
-    assert "namespace=" in dag_content
+    # With non-namespaced test pipeline, --group-by namespace produces type="nodes" groups,
+    # so each node becomes an individual task using node_names
+    assert "_run_kedro_node(node_names=[" in dag_content
 
     dag_file.unlink()
 
@@ -457,11 +483,119 @@ def test_memory_grouping_uses_node_names_parameter(cli_runner, metadata):
 
     dag_content = dag_file.read_text()
 
-    # Verify that the execute method has node_names
-    assert "session.run(self.pipeline_name, node_names=self.node_name)" in dag_content
-
-    # Verify the conditional logic exists
-    assert "else:" in dag_content
-    assert "if isinstance(self.node_name, str):" in dag_content
+    # Verify memory grouping renders a static node_names list via TaskFlow @task
+    assert "_run_kedro_node(node_names=[" in dag_content
+    assert "@task(" in dag_content
 
     dag_file.unlink()
+
+
+def _load_template() -> jinja2.Template:
+    """Load the default DAG template with the same Jinja2 environment as the plugin."""
+    jinja_file = (
+        Path(__file__).parent.parent / "kedro_airflow" / "airflow_dag_template.j2"
+    )
+    loader = jinja2.FileSystemLoader(jinja_file.parent)
+    jinja_env = jinja2.Environment(autoescape=True, loader=loader, lstrip_blocks=True)
+    jinja_env.filters["slugify"] = slugify
+    return jinja_env.get_template(jinja_file.name)
+
+
+def test_generated_dag_uses_airflow_sdk_imports(cli_runner, metadata):
+    """Generated DAG must import from airflow.sdk (Airflow 3.x API, incompatible with 2.x)."""
+    command = ["airflow", "create"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    dag_content = dag_file.read_text()
+
+    assert "from airflow.sdk import dag, task" in dag_content
+    assert "def _run_kedro_node(" in dag_content
+    dag_file.unlink()
+
+
+def test_schedule_interval_config_maps_to_schedule(cli_runner, metadata):
+    """schedule_interval in airflow.yml is passed through to the schedule= template variable."""
+    file_name = metadata.project_path / "conf" / "base" / "airflow.yml"
+    _create_kedro_airflow_yml(file_name, {"default": {"schedule_interval": "@daily"}})
+
+    command = ["airflow", "create"]
+    result = cli_runner.invoke(commands, command, obj=metadata)
+    assert result.exit_code == 0, (result.exit_code, result.stdout)
+
+    dag_file = metadata.project_path / "airflow_dags" / "fake_project_dag.py"
+    dag_content = dag_file.read_text()
+
+    assert 'schedule="@daily"' in dag_content
+    file_name.unlink()
+    dag_file.unlink()
+
+
+def test_namespace_grouping_renders_namespaces_call():
+    """Check that namespace-typed GroupedNodes render session.run with namespaces= parameter."""
+    node_objs = [
+        GroupedNodes(
+            name="data_engineering",
+            type="namespace",
+            nodes=["ingest_data", "clean_data"],
+            dependencies=[],
+        ),
+        GroupedNodes(
+            name="data_science",
+            type="namespace",
+            nodes=["train_model"],
+            dependencies=["data_engineering"],
+        ),
+    ]
+    dag_content = _load_template().render(
+        dag_name="my_project",
+        node_objs=node_objs,
+        env="local",
+        pipeline_name="__default__",
+        package_name="my_project",
+        conf_source="",
+    )
+
+    # Namespace groups call _run_kedro_node with namespaces=, not node_names=
+    assert '_run_kedro_node(namespaces=["data_engineering"])' in dag_content
+    assert '_run_kedro_node(namespaces=["data_science"])' in dag_content
+    assert "_run_kedro_node(node_names=[" not in dag_content
+    # Dependency wiring is preserved
+    assert 'tasks["data-engineering"] >> tasks["data-science"]' in dag_content
+
+
+def test_mixed_grouping_renders_both_branches():
+    """Template correctly renders both namespace and nodes branches in the same DAG."""
+    node_objs = [
+        GroupedNodes(
+            name="data_engineering",
+            type="namespace",
+            nodes=["ingest_data", "clean_data"],
+            dependencies=[],
+        ),
+        GroupedNodes(
+            name="split_train_evaluate",
+            type="nodes",
+            nodes=["split_data", "train_model", "evaluate_model"],
+            dependencies=["data_engineering"],
+        ),
+    ]
+    dag_content = _load_template().render(
+        dag_name="my_project",
+        node_objs=node_objs,
+        env="local",
+        pipeline_name="__default__",
+        package_name="my_project",
+        conf_source="",
+    )
+
+    # Namespace group uses namespaces=
+    assert '_run_kedro_node(namespaces=["data_engineering"])' in dag_content
+    # Nodes group uses node_names=
+    assert (
+        '_run_kedro_node(node_names=["split_data", "train_model", "evaluate_model"])'
+        in dag_content
+    )
+    # Dependency wiring between the two group types
+    assert 'tasks["data-engineering"] >> tasks["split-train-evaluate"]' in dag_content

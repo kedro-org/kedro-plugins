@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import datetime as dt
+import os
 import re
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -420,7 +421,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         execution_options: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
         encoding: str | None = None,
@@ -450,7 +451,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
-            filepath: A path to a file with a sql query statement.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:

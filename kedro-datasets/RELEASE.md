@@ -6,10 +6,12 @@
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 - Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.
+- Added `os.PathLike` support for `Spark` datasets.
 
 ## Community contributions
 - [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 - [Anton Nikishin](https://github.com/nikanton)
+- [@GDaamn](https://github.com/GDaamn)
 
 # Release 9.4.0
 

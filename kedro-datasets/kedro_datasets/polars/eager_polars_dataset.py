@@ -149,6 +149,13 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        # Delta tables are a directory, not a single file, and `pl.read_delta`
+        # takes a path/URI plus optional `storage_options` rather than an open
+        # file buffer (unlike the other `read_*` methods).
+        if self._file_format == "delta":
+            return pl.read_delta(load_path, **self._load_args)
+
         load_method = getattr(pl, f"read_{self._file_format}", None)
 
         if not load_method:
@@ -164,6 +171,17 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        # `pl.DataFrame.write_delta` writes a Delta table (a directory) and
+        # takes a path/URI plus optional `storage_options` directly. It cannot
+        # write to an in-memory buffer the way `write_parquet`/`write_csv` can
+        # (see https://github.com/kedro-org/kedro-plugins/issues/444), so it
+        # needs to be handled separately from the buffer-based code path below.
+        if self._file_format == "delta":
+            data.write_delta(save_path, **self._save_args)
+            self._invalidate_cache()
+            return
+
         save_method = getattr(data, f"write_{self._file_format}", None)
 
         if not save_method:

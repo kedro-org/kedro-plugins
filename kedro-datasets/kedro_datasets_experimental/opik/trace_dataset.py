@@ -13,6 +13,12 @@ REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
 REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
 OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
 
+# Opik configuration is global per process: the first project configured wins
+# once a client has been created. This tracks the project configured so far (a
+# mutable holder, to avoid a module-level `global` rebind) so we can warn if a
+# later TraceDataset configures a different one.
+_session_project_state: dict[str, str | None] = {"project_name": None}
+
 
 class TraceDataset(AbstractDataset):
     """Kedro dataset for managing Opik tracing clients and callbacks.
@@ -167,37 +173,48 @@ class TraceDataset(AbstractDataset):
                     )
 
     def _configure_opik(self) -> None:
-        """Initialize Opik global configuration with awareness of project switching.
+        """Configure the Opik SDK from the provided credentials.
 
-        This function ensures that the Opik SDK is configured using the provided credentials.
-        If an existing configuration is detected (from a prior dataset instance),
-        a warning is emitted since the active project cannot be changed dynamically.
+        `project_name` is passed to `configure()` so it is persisted to
+        Opik's session configuration and picked up by the auto-created client.
+        This is what routes traces to the right project for both `langchain`
+        mode (the `OpikTracer` inherits the configured project) and `sdk`
+        mode (the `@track` decorator resolves the same way). `configure()`
+        gained the `project_name` parameter in opik 1.11.0.
+
+        Note: Opik configuration is global within a process, so the project
+        cannot be changed once a client has been created. Using multiple
+        `TraceDataset` instances with different projects in the same session
+        will log all traces to the first configured project; a warning is
+        emitted in that case.
         """
         project_name = self._credentials.get("project_name")
+        configured_project = _session_project_state["project_name"]
 
-        # Detect an existing configuration and warn if switching projects
-        existing_project = os.getenv("OPIK_PROJECT_NAME")
-        if existing_project and project_name and project_name != existing_project:
+        if (
+            configured_project is not None
+            and project_name is not None
+            and project_name != configured_project
+        ):
             logger.warning(
-                f"Opik is already configured for project '{existing_project}', "
-                f"as defined by the environment variable OPIK_PROJECT_NAME. "
-                f"The active project cannot be changed dynamically — the new project "
-                f"'{project_name}' will be ignored, and all traces will continue "
-                f"to be logged under '{existing_project}'.\n"
-                f"To log traces to a different project, unset the environment variable "
-                f"`OPIK_PROJECT_NAME` before running your pipeline or in the interactive session."
+                "Opik is already configured for project '%s' in this session. "
+                "Opik configuration is global per process, so configuring project "
+                "'%s' may not take effect for all traces — run pipelines targeting "
+                "different projects in separate processes.",
+                configured_project,
+                project_name,
             )
-        # Set or update the environment variable (used by Opik SDK)
-        elif project_name:
-            os.environ["OPIK_PROJECT_NAME"] = project_name
 
-        # Configure Opik (repeated calls are safe but project name won't change)
         configure(
             api_key=self._credentials["api_key"],
             workspace=self._credentials["workspace"],
             url=self._credentials.get("url_override"),
+            project_name=project_name,
             force=True,
         )
+
+        if configured_project is None and project_name is not None:
+            _session_project_state["project_name"] = project_name
 
     def _validate_openai_client_params(self) -> None:
         """Validate OpenAI credentials in the 'openai' section.
@@ -350,7 +367,13 @@ class TraceDataset(AbstractDataset):
         return track_openai(client, project_name=project_name) if project_name else track_openai(client)
 
     def _load_langchain_tracer(self) -> Any:
-        """Return an OpikTracer callback for LangChain integration."""
+        """Return an OpikTracer callback for LangChain integration.
+
+        The project is set by `_configure_opik` (via `configure`), so the
+        tracer inherits it from the configured client. An explicit
+        `project_name` catalog kwarg still flows through `trace_kwargs` and
+        takes precedence for this tracer.
+        """
         try:
             from opik.integrations.langchain import OpikTracer  # noqa: PLC0415
         except ImportError as e:

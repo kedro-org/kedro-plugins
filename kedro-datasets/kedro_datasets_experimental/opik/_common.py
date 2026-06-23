@@ -16,6 +16,34 @@ if TYPE_CHECKING:
 
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 
+OPIK_CLIENT_KEYS = frozenset({
+    "api_key",
+    "workspace",
+    "host",
+    "url_override",
+    "project_name",
+})
+
+
+def build_opik_client_kwargs(credentials: dict[str, Any]) -> dict[str, Any]:
+    """Pick only credential keys accepted by `Opik()`.
+
+    `PromptDataset` and `EvaluationDataset` pass credentials straight into
+    the `Opik()` constructor, so any unrecognised key raises `TypeError`.
+    A shared `opik_credentials` block may legitimately carry such keys for
+    `TraceDataset` — e.g. `endpoint` (autogen mode) or an `openai` sub-block
+    (openai mode). This helper filters those out before the splat.
+    `TraceDataset` itself does not use this helper: it never splats
+    credentials and already picks its keys explicitly.
+
+    Args:
+        credentials: Raw credentials dict from the catalog.
+
+    Returns:
+        A dict containing only keys recognised by `Opik()`.
+    """
+    return {k: v for k, v in credentials.items() if k in OPIK_CLIENT_KEYS}
+
 
 def validate_credentials(
     credentials: dict[str, Any],

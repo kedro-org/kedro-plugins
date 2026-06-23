@@ -179,6 +179,18 @@ class TestSparkDataset:
         spark_df = spark_dataset.load()
         assert spark_df.count() == 4
 
+    def test_pathlike_filepath(self, tmp_path, sample_pandas_df):
+        filepath = tmp_path / "data"
+        local_parquet_set = ParquetDataset(filepath=filepath.as_posix())
+        local_parquet_set.save(sample_pandas_df)
+
+        spark_dataset = SparkDataset(filepath=filepath)
+        spark_df = spark_dataset.load()
+
+        assert spark_df.count() == 4
+        assert isinstance(spark_dataset._filepath, PurePosixPath)
+        assert str(spark_dataset._filepath) == filepath.as_posix()
+
     def test_save_parquet(self, tmp_path, sample_spark_df):
         # To cross check the correct Spark save operation we save to
         # a single spark partition and retrieve it with Kedro

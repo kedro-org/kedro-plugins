@@ -96,7 +96,7 @@ class VectorStoreHandle(abc.ABC):
     def close(self) -> None:
         """Release the connection held by this handle."""
 
-    def __enter__(self) -> "VectorStoreHandle":
+    def __enter__(self) -> VectorStoreHandle:
         return self
 
     def __exit__(self, *args: Any) -> None:

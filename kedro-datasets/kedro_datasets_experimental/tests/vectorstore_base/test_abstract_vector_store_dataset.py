@@ -16,7 +16,6 @@ from kedro_datasets_experimental.vectorstore_base import (
     VectorStoreHandle,
 )
 
-
 # ---------------------------------------------------------------------------
 # Dummy in-memory implementations
 # ---------------------------------------------------------------------------

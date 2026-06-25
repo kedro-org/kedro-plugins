@@ -63,3 +63,23 @@ class TestPyTorchDataset:
         dummy_state_dict = dummy_model.state_dict()
         for key, value in reloaded_state_dict.items():
             assert torch.equal(dummy_state_dict[key], value)
+
+    def test_weights_only_enforced_by_default(self, filepath_model):
+        """A state_dict (tensors only) round-trips under the safe default."""
+        dataset = PyTorchDataset(filepath=filepath_model)
+        assert dataset._load_args == {"weights_only": True}
+        dataset.save(TheModelClass())
+        model = TheModelClass()
+        model.load_state_dict(dataset.load())
+
+    def test_load_args_are_passed_to_torch_load(self, filepath_model, mocker):
+        """User-supplied load_args must reach torch.load, not be silently dropped."""
+        dataset = PyTorchDataset(
+            filepath=filepath_model, load_args={"weights_only": False}
+        )
+        dataset.save(TheModelClass())
+        mocked_load = mocker.patch(
+            "kedro_datasets_experimental.pytorch.pytorch_dataset.torch.load"
+        )
+        dataset.load()
+        assert mocked_load.call_args.kwargs["weights_only"] is False

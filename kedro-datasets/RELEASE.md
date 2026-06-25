@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 ## Bug fixes and other changes
+- Hardened experimental `pytorch.PyTorchDataset`: `weights_only=True` is now enforced by default on load to block arbitrary code execution from untrusted `.pt` files, user-supplied `load_args` are now correctly passed to `torch.load` (previously silently dropped), and the misleading "pickle-safe" docstring was corrected.
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 - Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.

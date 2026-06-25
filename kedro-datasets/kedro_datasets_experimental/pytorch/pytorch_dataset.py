@@ -16,7 +16,19 @@ from kedro.io.core import (
 
 
 class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
-    """`PyTorchDataset` loads and saves PyTorch models' `state_dict` using PyTorch's recommended zipfile serialization protocol to avoid security issues with Pickle.
+    """`PyTorchDataset` loads and saves PyTorch models' `state_dict` using ``torch.save``
+    and ``torch.load``.
+
+    .. warning::
+        Loading is **not** safe for untrusted files. ``torch.load`` deserializes a
+        pickle stream (the zipfile produced by ``torch.save`` is only a container
+        around that pickle), so a maliciously crafted ``.pt`` file can execute
+        arbitrary code on load. To mitigate this, ``PyTorchDataset`` enforces
+        ``weights_only=True`` by default, which restricts loading to tensors and a
+        small allow-list of safe types. Only set ``load_args: {weights_only: false}``
+        for files you fully trust, and prefer ``torch>=2.6`` (where ``weights_only=True``
+        is also the upstream default) or a non-pickle format such as ``safetensors``
+        when handling untrusted inputs.
 
     ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
 
@@ -47,7 +59,11 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
 
     """
 
-    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    # Enforce safe deserialization by default. ``weights_only=True`` restricts
+    # ``torch.load`` to tensors and a small allow-list of safe types, blocking the
+    # arbitrary-code-execution path through pickle's ``__reduce__``. Users can opt
+    # out for trusted files via ``load_args``.
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {"weights_only": True}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
@@ -64,6 +80,9 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        # PyTorch serialization is binary; open in binary mode by default.
+        _fs_open_args_load.setdefault("mode", "rb")
+        _fs_open_args_save.setdefault("mode", "wb")
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -104,11 +123,15 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
 
     def load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        return torch.load(load_path, **self._fs_open_args_load)  #nosec: B614
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            # ``weights_only=True`` is enforced via DEFAULT_LOAD_ARGS unless the user
+            # explicitly opts out for a trusted file.
+            return torch.load(fs_file, **self._load_args)  # nosec: B614
 
     def save(self, data: torch.nn.Module) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        torch.save(data.state_dict(), save_path, **self._fs_open_args_save)  #nosec: B614
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            torch.save(data.state_dict(), fs_file, **self._save_args)  # nosec: B614
 
         self._invalidate_cache()
 

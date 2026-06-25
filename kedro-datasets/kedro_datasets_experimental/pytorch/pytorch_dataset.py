@@ -124,9 +124,10 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
     def load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            # ``weights_only=True`` is enforced via DEFAULT_LOAD_ARGS unless the user
-            # explicitly opts out for a trusted file.
-            return torch.load(fs_file, **self._load_args)
+            # nosec: B614 - weights_only defaults to True via DEFAULT_LOAD_ARGS,
+            # restricting deserialisation to safe types. Users may override via
+            # load_args only for files they fully trust.
+            return torch.load(fs_file, **self._load_args)  # nosec: B614
 
     def save(self, data: torch.nn.Module) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

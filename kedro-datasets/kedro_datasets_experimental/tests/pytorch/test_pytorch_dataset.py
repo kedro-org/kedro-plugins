@@ -83,3 +83,13 @@ class TestPyTorchDataset:
         )
         dataset.load()
         assert mocked_load.call_args.kwargs["weights_only"] is False
+
+
+    def test_save_args_are_passed_to_torch_save(self, filepath_model, mocker):
+        """User-supplied save_args must reach torch.save, not be silently dropped."""
+        dataset = PyTorchDataset(filepath=filepath_model, save_args={"weights_only": False})
+        mocked_save = mocker.patch(
+            "kedro_datasets_experimental.pytorch.pytorch_dataset.torch.save"
+        )
+        dataset.save(TheModelClass())
+        assert mocked_save.call_args.kwargs["weights_only"] is False

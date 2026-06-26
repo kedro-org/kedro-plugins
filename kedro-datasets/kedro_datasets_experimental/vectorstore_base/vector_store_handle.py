@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+from types import TracebackType
 from typing import Any
 
 
@@ -47,7 +48,9 @@ class VectorStoreHandle(abc.ABC):
     ) -> list[dict[str, Any]]:
         """Return the ``top_k`` nearest neighbours.
 
-        Exactly one of ``vector`` or ``text`` must be provided.
+        Exactly one of ``vector`` or ``text`` must be provided.  This
+        constraint is not enforced at the ABC level: each concrete backend
+        is responsible for raising if neither or both are given.
 
         Args:
             vector: Query embedding.  The backend performs an ANN search.
@@ -72,7 +75,9 @@ class VectorStoreHandle(abc.ABC):
     ) -> None:
         """Delete records from the collection.
 
-        Exactly one of ``ids`` or ``filters`` must be provided.
+        Exactly one of ``ids`` or ``filters`` must be provided.  This
+        constraint is not enforced at the ABC level: each concrete backend
+        is responsible for raising if neither or both are given.
 
         Args:
             ids: List of record IDs to delete.
@@ -99,5 +104,10 @@ class VectorStoreHandle(abc.ABC):
     def __enter__(self) -> VectorStoreHandle:
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.close()

@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataset, DatasetError
 from .vector_store_handle import VectorStoreHandle
 
 
-class AbstractVectorStoreDataset(AbstractDataset["VectorStoreHandle", None]):
+class AbstractVectorStoreDataset(AbstractDataset[Any, "VectorStoreHandle"]):
     """Base class for datasets that expose a vector store as a handle.
 
     Subclasses must implement ``_load()`` (returning a ``VectorStoreHandle``)

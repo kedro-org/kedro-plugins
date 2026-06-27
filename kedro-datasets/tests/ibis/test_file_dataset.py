@@ -95,6 +95,64 @@ class TestFileDataset:
         reloaded = ds.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
+    @pytest.mark.parametrize(
+        "filepath",
+        [
+            "s3://bucket/data/cars.parquet",
+            "abfss://container@account.dfs.core.windows.net/data/cars.parquet",
+            "hf://datasets/user/repo/cars.parquet",
+        ],
+    )
+    def test_load_save_preserve_remote_uri(self, mocker, filepath, dummy_table):
+        """Cloud/remote URIs must reach Ibis intact; the protocol `//` should
+        not be collapsed by ``PurePosixPath`` (see #1298, #918)."""
+        mocker.patch.dict(FileDataset._connections, clear=True)
+        backend = mocker.patch("ibis.duckdb")
+        ds = FileDataset(
+            filepath=filepath,
+            file_format="parquet",
+            connection={"backend": "duckdb"},
+        )
+        connection = backend.connect.return_value
+
+        ds.load()
+        connection.read_parquet.assert_called_once_with(filepath, table_name=None)
+
+        ds.save(dummy_table)
+        connection.to_parquet.assert_called_once_with(dummy_table, filepath)
+
+    def test_remote_exists_uses_filesystem(self, mocker):
+        """`exists` on a remote path should go through ``fsspec`` with a
+        protocol-less path."""
+        mocker.patch.dict(FileDataset._connections, clear=True)
+        mocker.patch("ibis.duckdb")
+        filesystem = mocker.patch("fsspec.filesystem")
+        filesystem.return_value.exists.return_value = True
+        ds = FileDataset(
+            filepath="s3://bucket/data/cars.parquet",
+            file_format="parquet",
+            connection={"backend": "duckdb"},
+        )
+        assert ds.exists()
+        filesystem.return_value.exists.assert_called_once_with(
+            "bucket/data/cars.parquet"
+        )
+
+    def test_remote_unversioned_does_not_build_filesystem(self, mocker, dummy_table):
+        """Unversioned remote IO is delegated to Ibis, so no ``fsspec``
+        filesystem (and therefore no extra dependency like ``s3fs``) is needed."""
+        mocker.patch.dict(FileDataset._connections, clear=True)
+        mocker.patch("ibis.duckdb")
+        filesystem = mocker.patch("fsspec.filesystem")
+        ds = FileDataset(
+            filepath="s3://bucket/data/cars.parquet",
+            file_format="parquet",
+            connection={"backend": "duckdb"},
+        )
+        ds.save(dummy_table)
+        ds.load()
+        filesystem.assert_not_called()
+
     @pytest.mark.parametrize("load_args", [{"filename": True}], indirect=True)
     def test_load_extra_params(self, file_dataset, load_args, dummy_table):
         """Test overriding the default load arguments."""
@@ -312,6 +370,46 @@ class TestFileDatasetVersioned:
             version=Version(None, None),
         )
         assert ds_new.resolve_load_version() == second_load_version
+
+    def test_remote_versioned_uses_filesystem(self, mocker):
+        """Version discovery on remote storage must go through ``fsspec`` and
+        operate on protocol-less paths."""
+        mocker.patch.dict(FileDataset._connections, clear=True)
+        mocker.patch("ibis.duckdb")
+        filesystem = mocker.patch("fsspec.filesystem")
+        filesystem.return_value.glob.return_value = []
+        ds = FileDataset(
+            filepath="s3://bucket/data/cars.parquet",
+            file_format="parquet",
+            connection={"backend": "duckdb"},
+            version=Version(None, None),
+        )
+        with pytest.raises(DatasetError, match="Did not find any versions"):
+            ds.load()
+
+        filesystem.assert_called_once_with("s3")
+        pattern = filesystem.return_value.glob.call_args[0][0]
+        assert not pattern.startswith("s3://")
+        assert pattern.startswith("bucket/data/cars.parquet")
+
+    def test_remote_fs_args_forwarded(self, mocker):
+        """``fs_args`` should be forwarded to ``fsspec.filesystem`` for version
+        discovery, independently of the Ibis connection credentials."""
+        mocker.patch.dict(FileDataset._connections, clear=True)
+        mocker.patch("ibis.duckdb")
+        filesystem = mocker.patch("fsspec.filesystem")
+        filesystem.return_value.glob.return_value = []
+        ds = FileDataset(
+            filepath="s3://bucket/data/cars.parquet",
+            file_format="parquet",
+            connection={"backend": "duckdb"},
+            version=Version(None, None),
+            fs_args={"key": "abc", "secret": "xyz"},  # pragma: allowlist secret
+        )
+        with pytest.raises(DatasetError, match="Did not find any versions"):
+            ds.load()
+
+        filesystem.assert_called_once_with("s3", key="abc", secret="xyz")
 
     def test_no_versions(self, versioned_file_dataset):
         """Check the error if no versions are available for load."""

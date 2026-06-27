@@ -5,10 +5,12 @@ from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, ClassVar
 
+import fsspec
 import ibis.expr.types as ir
 from kedro.io import AbstractVersionedDataset, DatasetError, Version
 
 from kedro_datasets._utils import ConnectionMixin
+from kedro_datasets._utils.file_utils import split_filepath
 
 if TYPE_CHECKING:
     from ibis import BaseBackend
@@ -83,6 +85,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
+        fs_args: dict[str, Any] | None = None,
         version: Version | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
@@ -118,6 +121,12 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
                 `read_{file_format}` method.
             save_args: Additional arguments passed to the Ibis backend's
                 `to_{file_format}` method.
+            fs_args: Extra arguments to pass into underlying filesystem class
+                constructor (e.g. ``{"project": "my-project"}`` for
+                ``GCSFileSystem``). Used only to discover versions and check
+                existence of a remote ``filepath``; reading and writing is left
+                to the Ibis backend. Note that fsspec credentials go here, not
+                in ``credentials`` (which configures the Ibis connection).
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -130,12 +139,17 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         _connection_config = connection or self.DEFAULT_CONNECTION_CONFIG
         _credentials = deepcopy(credentials) or {}
         self._connection_config = {**_connection_config, **_credentials}
+        self._fs_args = deepcopy(fs_args or {})
         self.metadata = metadata
 
+        self._fs_prefix, path = split_filepath(filepath)
+        self._fs: fsspec.AbstractFileSystem | None = None
+
         super().__init__(
-            filepath=PurePosixPath(filepath),
+            filepath=PurePosixPath(path),
             version=version,
-            exists_function=lambda filepath: Path(filepath).exists(),
+            exists_function=self._fs_exists if self._fs_prefix else None,
+            glob_function=self._fs_glob if self._fs_prefix else None,
         )
 
         # Set load and save arguments, overwriting defaults if provided.
@@ -159,20 +173,34 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         """The ``Backend`` instance for the connection configuration."""
         return self._connection
 
+    def _filesystem(self) -> fsspec.AbstractFileSystem:
+        # Build lazily so backend-only users don't need adlfs, s3fs, etc.
+        if self._fs is None:
+            protocol = self._fs_prefix.removesuffix("://")
+            self._fs = fsspec.filesystem(protocol, **self._fs_args)
+        return self._fs
+
+    def _fs_exists(self, path: str) -> bool:
+        return self._filesystem().exists(path)
+
+    def _fs_glob(self, pattern: str) -> list[str]:
+        return self._filesystem().glob(pattern)
+
     def load(self) -> ir.Table:
-        load_path = str(self._get_load_path())
+        load_path = self._fs_prefix + str(self._get_load_path())
         reader = getattr(self.connection, f"read_{self._file_format}")
         return reader(load_path, table_name=self._table_name, **self._load_args)
 
     def save(self, data: ir.Table) -> None:
-        save_path = self._get_save_path()
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        save_path = self._fs_prefix + str(self._get_save_path())
+        if not self._fs_prefix:  # only local paths need their parent created
+            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         writer = getattr(self.connection, f"to_{self._file_format}")
-        writer(data, str(save_path), **self._save_args)
+        writer(data, save_path, **self._save_args)
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "filepath": self._filepath,
+            "filepath": self._fs_prefix + str(self._filepath),
             "file_format": self._file_format,
             "table_name": self._table_name,
             "backend": self._connection_config["backend"],
@@ -187,4 +215,4 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         except DatasetError:
             return False
 
-        return Path(load_path).exists()
+        return self._exists_function(str(load_path))

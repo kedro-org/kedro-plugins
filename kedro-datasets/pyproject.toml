@@ -222,7 +222,7 @@ darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-promptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-promptdataset]"]
-langfuse-evaluationdataset = ["langfuse>=3.14.0,<4.10"]  # 4.10 made DatasetItem.media_references required, breaking EvaluationDataset.load()
+langfuse-evaluationdataset = ["langfuse>=3.14.0"]
 langfuse-promptdataset = ["langfuse>=2.0.0"]
 langfuse-tracedataset = ["langfuse>=2.0.0"]
 langfuse-tracedataset-autogen = ["langfuse>=2.0.0", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http"]

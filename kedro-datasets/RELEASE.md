@@ -1,7 +1,13 @@
-# Upcoming Release
+# Upcoming release
+## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.5.0
 
 ## Major features and improvements
 * Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
+
 ## Bug fixes and other changes
 - Hardened experimental `pytorch.PyTorchDataset`: `weights_only=True` is now enforced by default on load to block arbitrary code execution from untrusted `.pt` files, user-supplied `load_args` and `save_args` are now correctly passed to `torch.load` and `torch.save` (previously silently dropped), and the misleading "pickle-safe" docstring was corrected.
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
@@ -10,9 +16,9 @@
 - Added `os.PathLike` support for `Spark` datasets.
 
 ## Community contributions
-- [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
+- [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 - [Anton Nikishin](https://github.com/nikanton)
-- [@GDaamn](https://github.com/GDaamn)
+- [GDaamn](https://github.com/GDaamn)
 
 # Release 9.4.0
 

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -150,7 +151,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "parquet",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -161,7 +162,8 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
         """Creates a new instance of ``SparkDataset``.
 
         Args:
-            filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
+            filepath: Filepath in POSIX format to a Spark dataframe. This can be a
+                string or an ``os.PathLike`` object. When using Databricks
                 specify ``filepath``s starting with ``/dbfs/``.
             file_format: File format used during load and save
                 operations. These are formats supported by the running

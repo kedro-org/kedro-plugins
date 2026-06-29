@@ -3,6 +3,7 @@
 """
 from __future__ import annotations
 
+import os
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
@@ -60,12 +61,13 @@ class DeltaTableDataset(AbstractDataset[None, DeltaTable]):
     _SINGLE_PROCESS = True
 
     def __init__(
-        self, *, filepath: str, metadata: dict[str, Any] | None = None
+        self, *, filepath: str | os.PathLike, metadata: dict[str, Any] | None = None
     ) -> None:
         """Creates a new instance of ``DeltaTableDataset``.
 
         Args:
-            filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
+            filepath: Filepath in POSIX format to a Spark dataframe. This can be a
+                string or an ``os.PathLike`` object. When using Databricks
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataset``s
                 starting with ``/dbfs/mnt``.

@@ -1,12 +1,12 @@
 # Upcoming release
 ## Major features and improvements
+* Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 ## Bug fixes and other changes
 ## Community contributions
 
 # Release 9.5.0
 
 ## Major features and improvements
-* Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 * Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 
 ## Bug fixes and other changes

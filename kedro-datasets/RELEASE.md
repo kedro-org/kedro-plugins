@@ -1,7 +1,9 @@
 # Upcoming release
 ## Major features and improvements
 ## Bug fixes and other changes
+- Added `os.PathLike` support for `pillow.ImageDataset`.
 ## Community contributions
+- [samiat4911](https://github.com/samiat4911)
 
 # Release 9.5.0
 

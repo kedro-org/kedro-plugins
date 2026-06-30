@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -48,7 +49,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
@@ -63,6 +64,7 @@ class ImageDataset(AbstractVersionedDataset[Image.Image, Image.Image]):
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             save_args: Pillow options for saving image files.
                 Here you can find all available arguments:
                 https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save

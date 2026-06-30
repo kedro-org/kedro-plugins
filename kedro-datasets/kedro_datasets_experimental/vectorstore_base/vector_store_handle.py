@@ -64,6 +64,11 @@ class VectorStoreHandle(abc.ABC):
             List of result dicts.  Each dict contains at minimum:
             ``"id"`` (str), ``"properties"`` (dict).  May also include
             ``"vector"`` (list[float]) and ``"distance"`` (float).
+
+        Note:
+            Backends that only support one search mode (e.g. no server-side
+            vectorizer for text search) should raise ``NotImplementedError``
+            for the unsupported mode rather than silently ignoring it.
         """
 
     @abc.abstractmethod
@@ -99,7 +104,11 @@ class VectorStoreHandle(abc.ABC):
 
     @abc.abstractmethod
     def close(self) -> None:
-        """Release the connection held by this handle."""
+        """Release the connection held by this handle.
+
+        Must be idempotent: calling ``close()`` more than once must be
+        harmless.
+        """
 
     def __enter__(self) -> VectorStoreHandle:
         return self

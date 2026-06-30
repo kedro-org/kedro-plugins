@@ -25,6 +25,9 @@ class AbstractVectorStoreDataset(AbstractDataset[Any, "VectorStoreHandle"]):
             hits = store.search(vector=[...], top_k=5)
     """
 
+    # Intentionally overrides `save` (not `_save`): AbstractDataset.__init_subclass__
+    # skips alias/wrapping for methods whose qualname starts with "Abstract", so
+    # defining `_save` here would be silently ignored by the wrapping machinery.
     def save(self, data: Any) -> None:
         raise DatasetError(
             f"Saving is not supported for '{type(self).__name__}'. "
@@ -39,3 +42,6 @@ class AbstractVectorStoreDataset(AbstractDataset[Any, "VectorStoreHandle"]):
     @abstractmethod
     def _describe(self) -> dict[str, Any]:
         """Return a dict of constructor arguments for display / logging."""
+
+    def _exists(self) -> bool:
+        return False

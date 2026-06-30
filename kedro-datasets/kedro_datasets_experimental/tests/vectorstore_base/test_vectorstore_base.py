@@ -45,12 +45,14 @@ class DummyHandle(VectorStoreHandle):
         top_k: int = 10,
         filters: Any = None,
     ) -> list[dict[str, Any]]:
-        if vector is None and text is None:
+        if (vector is None) == (text is None):
             raise ValueError("Exactly one of vector or text must be provided.")
         results = list(self._records.values())[:top_k]
         return [{"id": r.get("id", ""), "properties": r.get("properties", {})} for r in results]
 
     def delete(self, *, ids: list[str] | None = None, filters: Any = None) -> None:
+        if (ids is None) == (filters is None):
+            raise ValueError("Exactly one of ids or filters must be provided.")
         if ids is not None:
             for rid in ids:
                 self._records.pop(rid, None)
@@ -70,6 +72,7 @@ class DummyVectorStoreDataset(AbstractVectorStoreDataset):
     """Minimal concrete dataset backed by a DummyHandle."""
 
     def __init__(self, collection: str = "test") -> None:
+        super().__init__()
         self._collection = collection
 
     def _load(self) -> DummyHandle:
@@ -107,6 +110,10 @@ class TestAbstractVectorStoreDataset:
     def test_save_raises_dataset_error(self, dataset):
         with pytest.raises(DatasetError, match="Saving is not supported"):
             dataset.save({"anything": True})
+
+    def test_save_none_raises_dataset_error(self, dataset):
+        with pytest.raises(DatasetError, match="Saving is not supported"):
+            dataset.save(None)
 
     def test_describe_returns_dict(self, dataset):
         desc = dataset._describe()
@@ -158,11 +165,23 @@ class TestVectorStoreHandle:
         with pytest.raises((ValueError, DatasetError)):
             handle.search()
 
+    def test_search_rejects_both_vector_and_text(self, handle):
+        with pytest.raises((ValueError, DatasetError)):
+            handle.search(vector=[0.1], text="hello")
+
     def test_delete_by_ids(self, handle):
         handle.add([{"id": "del-me", "properties": {}}])
         handle.delete(ids=["del-me"])
         results = handle.search(vector=[0.0])
         assert not any(r["id"] == "del-me" for r in results)
+
+    def test_delete_requires_ids_or_filters(self, handle):
+        with pytest.raises((ValueError, DatasetError)):
+            handle.delete()
+
+    def test_delete_rejects_both_ids_and_filters(self, handle):
+        with pytest.raises((ValueError, DatasetError)):
+            handle.delete(ids=["x"], filters={"prop": "val"})
 
     def test_describe_returns_dict_with_count(self, handle):
         info = handle.describe()

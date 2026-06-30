@@ -1,5 +1,6 @@
 # Upcoming release
 ## Major features and improvements
+* Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 ## Bug fixes and other changes
 ## Community contributions
 

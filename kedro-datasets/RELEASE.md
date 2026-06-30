@@ -9,6 +9,7 @@
 - Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.
 - Added `os.PathLike` support for `Spark` datasets.
+- Fixed `ibis.FileDataset` to support remote filepaths (e.g. `s3://`, `abfss://`, `hf://`) and added an `fs_args` argument to authenticate the filesystem used for version discovery.
 
 ## Community contributions
 - [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)

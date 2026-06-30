@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING, Union
 from kedro.io.core import get_protocol_and_path
 from pyspark.sql import SparkSession
 
+# Re-exported for backwards compatibility; canonical home is ``file_utils``.
+from kedro_datasets._utils.file_utils import split_filepath  # noqa: F401
+
 if TYPE_CHECKING:
     from databricks.connect import DatabricksSession
     from pyspark.dbutils import DBUtils
@@ -25,13 +28,6 @@ def parse_glob_pattern(pattern: str) -> str:
             break
         clean.append(part)
     return "/".join(clean)
-
-
-def split_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
-    split_ = str(filepath).split("://", 1)
-    if len(split_) == 2:  # noqa: PLR2004
-        return split_[0] + "://", split_[1]
-    return "", split_[0]
 
 
 def strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:

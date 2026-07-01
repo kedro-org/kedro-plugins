@@ -74,7 +74,7 @@ class TestDatasetInit:
     def test_cloud_params(self, cloud_dataset):
         assert cloud_dataset._connection_type == "cloud"
         assert cloud_dataset._url == "https://my-cluster.weaviate.network"
-        assert cloud_dataset._credentials == {"api_key": "secret"}
+        assert cloud_dataset._credentials == {"api_key": "secret"}  # pragma: allowlist secret
 
     def test_none_dicts_become_empty(self):
         ds = WeaviateVectorStoreDataset(

@@ -52,7 +52,7 @@ def cloud_dataset():
         collection_name="MyCollection",
         connection_type="cloud",
         url="https://my-cluster.weaviate.network",
-        credentials={"api_key": "secret"},
+        credentials={"api_key": "secret"},  # pragma: allowlist secret
     )
 
 
@@ -161,7 +161,7 @@ class TestConnect:
                 collection_name="C",
                 connection_type="cloud",
                 url="https://cluster.weaviate.network",
-                credentials={"api_key": "mykey"},
+                credentials={"api_key": "mykey"},  # pragma: allowlist secret
             )
             ds._connect()
             auth_p.assert_called_once_with("mykey")

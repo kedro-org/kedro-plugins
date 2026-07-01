@@ -164,7 +164,7 @@ class TestConnect:
                 credentials={"api_key": "mykey"},  # pragma: allowlist secret
             )
             ds._connect()
-            auth_p.assert_called_once_with("mykey")
+            auth_p.assert_called_once_with("mykey")  # pragma: allowlist secret
             p.assert_called_once_with(
                 cluster_url="https://cluster.weaviate.network",
                 auth_credentials=mock_auth,

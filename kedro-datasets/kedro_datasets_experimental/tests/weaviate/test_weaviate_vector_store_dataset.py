@@ -5,7 +5,7 @@ All tests use mocks — no real Weaviate connection is required.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from kedro.io.core import DatasetError
@@ -188,6 +188,13 @@ class TestConnect:
             collection_name="C", connection_type="cloud"
         )
         with pytest.raises(DatasetError, match="'url' is required"):
+            ds._connect()
+
+    def test_unknown_connection_type_raises(self):
+        ds = WeaviateVectorStoreDataset(
+            collection_name="C", connection_type="grpc"  # type: ignore[arg-type]
+        )
+        with pytest.raises(DatasetError, match="Unknown connection_type"):
             ds._connect()
 
     def test_custom_params_forwarded(self, mock_client):

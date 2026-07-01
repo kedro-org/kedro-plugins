@@ -22,8 +22,7 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
     ``close()`` explicitly or by using the handle as a context manager::
 
         with catalog.load("my_store") as store:
-            store.add([{"properties": {...}, "vector": [...]}])
-            hits = store.search(vector=[...], top_k=5)
+            store.describe()
 
     The ``raw_client`` property exposes the underlying ``weaviate.WeaviateClient``
     for operations outside this interface.
@@ -93,8 +92,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
     The handle owns the underlying gRPC connection; callers **must** close it::
 
         with catalog.load("my_store") as store:
-            store.add([{"properties": {"text": "hello"}, "vector": [0.1, 0.2]}])
-            hits = store.search(vector=[0.1, 0.2], top_k=5)
+            store.describe()
 
     Three connection modes are supported, selected via ``connection_type``:
 
@@ -211,10 +209,15 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
                 )
             elif self._connection_type == "custom":
                 return weaviate.connect_to_custom(**self._connection_params)
-            else:  # local
+            elif self._connection_type == "local":
                 return weaviate.connect_to_local(
                     host=self._url or "localhost",
                     **self._connection_params,
+                )
+            else:
+                raise DatasetError(
+                    f"Unknown connection_type: '{self._connection_type}'. "
+                    "Must be one of: 'local', 'cloud', 'custom'."
                 )
         except DatasetError:
             raise

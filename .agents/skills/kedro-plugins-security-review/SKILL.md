@@ -99,7 +99,10 @@ Use when the user asks to scan the repo, codebase, project, or current branch
 without narrowing to a PR.
 
 Target:
-- the current repo root
+- `kedro-datasets/` by default (this is where all dataset code lives)
+- if the user explicitly asks to scan a different plugin (e.g. `kedro-docker`),
+  scan that directory instead — but note that the triage guidance and manual
+  review checks are designed for dataset code and may not apply
 
 ### PR mode
 
@@ -185,8 +188,8 @@ inspect it.
 For full codebase mode:
 
 ```bash
-SCAN_TARGETS=(.)
-TARGET_LABEL="full codebase"
+SCAN_TARGETS=(kedro-datasets/)
+TARGET_LABEL="kedro-datasets (full codebase)"
 ```
 
 For PR mode:

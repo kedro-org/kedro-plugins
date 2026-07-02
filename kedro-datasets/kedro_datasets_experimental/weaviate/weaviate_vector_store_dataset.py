@@ -7,6 +7,7 @@ from typing import Any, Literal
 import weaviate
 import weaviate.classes as wvc
 from kedro.io.core import DatasetError
+from weaviate.classes.data import DataObject
 
 from kedro_datasets_experimental.vectorstore_base import (
     AbstractVectorStoreDataset,
@@ -78,14 +79,12 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         Raises:
             DatasetError: If any record fails to insert.
         """
-        from weaviate.classes.data import DataObject
-
         objects = []
         for record in records:
-            record = record.copy()
-            vector = record.pop("vector", None)
-            uuid = record.pop("id", None)
-            objects.append(DataObject(properties=record, uuid=uuid, vector=vector))
+            props = record.copy()
+            vector = props.pop("vector", None)
+            uid = props.pop("id", None)
+            objects.append(DataObject(properties=props, uuid=uid, vector=vector))
 
         result = self._collection.data.insert_many(objects)
         if result.errors:

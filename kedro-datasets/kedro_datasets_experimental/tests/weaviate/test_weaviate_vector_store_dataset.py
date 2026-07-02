@@ -5,6 +5,7 @@ All tests use mocks — no real Weaviate connection is required.
 
 from __future__ import annotations
 
+import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -324,7 +325,6 @@ class TestHandleAdd:
 
     @pytest.fixture
     def insert_result(self):
-        import uuid
         result = MagicMock()
         result.uuids = {0: uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001"),
                         1: uuid.UUID("bbbbbbbb-0000-0000-0000-000000000002")}
@@ -411,7 +411,6 @@ class TestHandleSearch:
 
     @pytest.fixture
     def search_result(self):
-        import uuid
         obj1 = MagicMock()
         obj1.uuid = uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001")
         obj1.properties = {"text": "hello", "entity_name": "Diabetes"}

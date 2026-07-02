@@ -64,7 +64,8 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
 
         Each record is a plain dict.  Two keys are reserved:
 
-        - ``"vector"`` — the embedding (required, ``list[float]``).
+        - ``"vector"`` — the embedding (``list[float]``); optional when the
+          collection has a server-side vectorizer configured.
         - ``"id"`` — an optional UUID string; Weaviate auto-generates one if absent.
 
         All remaining keys are stored as Weaviate object properties.
@@ -86,7 +87,11 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             uid = props.pop("id", None)
             objects.append(DataObject(properties=props, uuid=uid, vector=vector))
 
-        result = self._collection.data.insert_many(objects)
+        try:
+            result = self._collection.data.insert_many(objects)
+        except Exception as e:
+            raise DatasetError(f"add() failed: {e}") from e
+
         if result.errors:
             raise DatasetError(
                 f"add() failed for {len(result.errors)} record(s): "
@@ -118,11 +123,14 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         if ids is not None and filters is not None:
             raise DatasetError("delete() accepts 'ids' or 'filters', not both.")
 
-        if ids is not None:
-            for uid in ids:
-                self._collection.data.delete_by_id(uid)
-        else:
-            self._collection.data.delete_many(where=filters)
+        try:
+            if ids is not None:
+                for uid in ids:
+                    self._collection.data.delete_by_id(uid)
+            else:
+                self._collection.data.delete_many(where=filters)
+        except Exception as e:
+            raise DatasetError(f"delete() failed: {e}") from e
 
     # --- read path (ST4) ---
 
@@ -165,13 +173,16 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             return_metadata=wvc.query.MetadataQuery(distance=True),
         )
 
-        if vector is not None:
-            results = self._collection.query.near_vector(near_vector=vector, **common_kwargs)
-        else:
-            results = self._collection.query.near_text(query=text, **common_kwargs)
+        try:
+            if vector is not None:
+                results = self._collection.query.near_vector(near_vector=vector, **common_kwargs)
+            else:
+                results = self._collection.query.near_text(query=text, **common_kwargs)
+        except Exception as e:
+            raise DatasetError(f"search() failed: {e}") from e
 
         return [
-            {"id": str(obj.uuid), "distance": obj.metadata.distance, **obj.properties}
+            {**obj.properties, "id": str(obj.uuid), "distance": obj.metadata.distance}
             for obj in results.objects
         ]
 

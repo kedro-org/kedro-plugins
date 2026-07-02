@@ -368,6 +368,24 @@ class TestHandleAdd:
         with pytest.raises(DatasetError, match="add\\(\\) failed for 1 record"):
             handle.add([{"vector": [0.1], "text": "bad"}])
 
+    def test_add_wraps_weaviate_exception(self, handle, mock_collection):
+        mock_collection.data.insert_many.side_effect = RuntimeError("gRPC timeout")
+        with pytest.raises(DatasetError, match="add\\(\\) failed"):
+            handle.add([{"vector": [0.1], "text": "x"}])
+
+    def test_add_empty_list_returns_empty(self, handle, mock_collection):
+        result = MagicMock()
+        result.uuids = {}
+        result.errors = {}
+        mock_collection.data.insert_many.return_value = result
+        assert handle.add([]) == []
+
+    def test_add_does_not_mutate_input(self, handle, mock_collection, insert_result):
+        mock_collection.data.insert_many.return_value = insert_result
+        original = {"vector": [0.1], "id": "u1", "text": "hello"}
+        handle.add([original])
+        assert original == {"vector": [0.1], "id": "u1", "text": "hello"}
+
 
 # ---------------------------------------------------------------------------
 # WeaviateVectorStoreHandle — delete()
@@ -397,6 +415,16 @@ class TestHandleDelete:
     def test_delete_rejects_both(self, handle):
         with pytest.raises(DatasetError, match="not both"):
             handle.delete(ids=["x"], filters=MagicMock())
+
+    def test_delete_wraps_weaviate_exception_on_ids(self, handle, mock_collection):
+        mock_collection.data.delete_by_id.side_effect = RuntimeError("connection lost")
+        with pytest.raises(DatasetError, match="delete\\(\\) failed"):
+            handle.delete(ids=["uuid-1"])
+
+    def test_delete_wraps_weaviate_exception_on_filter(self, handle, mock_collection):
+        mock_collection.data.delete_many.side_effect = RuntimeError("invalid filter")
+        with pytest.raises(DatasetError, match="delete\\(\\) failed"):
+            handle.delete(filters=MagicMock())
 
 
 # ---------------------------------------------------------------------------
@@ -464,3 +492,22 @@ class TestHandleSearch:
     def test_search_rejects_both(self, handle):
         with pytest.raises(DatasetError, match="not both"):
             handle.search(vector=[0.1], text="query")
+
+    def test_search_wraps_weaviate_exception(self, handle, mock_collection):
+        mock_collection.query.near_vector.side_effect = RuntimeError("gRPC error")
+        with pytest.raises(DatasetError, match="search\\(\\) failed"):
+            handle.search(vector=[0.1])
+
+    def test_search_id_and_distance_override_same_named_properties(
+        self, handle, mock_collection
+    ):
+        obj = MagicMock()
+        obj.uuid = uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001")
+        obj.properties = {"text": "x", "distance": 999.0}
+        obj.metadata.distance = 0.42
+        result = MagicMock()
+        result.objects = [obj]
+        mock_collection.query.near_vector.return_value = result
+        results = handle.search(vector=[0.1])
+        assert results[0]["distance"] == 0.42
+        assert results[0]["id"] == "aaaaaaaa-0000-0000-0000-000000000001"

@@ -78,7 +78,8 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             as the input records.
 
         Raises:
-            DatasetError: If any record fails to insert.
+            DatasetError: If the batch insert call fails, or if Weaviate
+                returns errors for one or more objects.
         """
         objects = []
         for record in records:
@@ -116,7 +117,8 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
                 ``collection.data.delete_many(where=filters)``).
 
         Raises:
-            DatasetError: If neither or both arguments are supplied.
+            DatasetError: If neither or both arguments are supplied, or if
+                the deletion call to Weaviate fails.
         """
         if ids is None and filters is None:
             raise DatasetError("delete() requires exactly one of 'ids' or 'filters'.")
@@ -160,7 +162,8 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             plus ``"id"`` (UUID string) and ``"distance"`` (float).
 
         Raises:
-            DatasetError: If neither or both of ``vector``/``text`` are supplied.
+            DatasetError: If neither or both of ``vector``/``text`` are
+                supplied, or if the query call to Weaviate fails.
         """
         if vector is None and text is None:
             raise DatasetError("search() requires exactly one of 'vector' or 'text'.")
@@ -199,7 +202,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
         with catalog.load("my_store") as store:
             store.describe()
 
-    Three connection modes are supported, selected via ``connection_type``:
+    Three connection modes are supported, selected with ``connection_type``:
 
     - ``"local"`` (default) — connects to a locally running Weaviate instance.
     - ``"cloud"`` — connects to Weaviate Cloud; requires ``url`` (cluster URL)
@@ -281,7 +284,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
                 ``"local"``: optional overrides such as ``port`` or
                 ``grpc_port``.  For ``"custom"``: all required networking
                 parameters (``http_host``, ``http_port``, ``grpc_host``, etc.).
-            credentials: Sensitive connection values, typically supplied via
+            credentials: Sensitive connection values, typically supplied through
                 Kedro's credentials store.  Recognised key: ``"api_key"``
                 (used for ``"cloud"`` connections).
             create_collection_if_missing: When ``True`` (default), the

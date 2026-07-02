@@ -59,7 +59,41 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
     # --- write path (ST3) ---
 
     def add(self, records: list[dict[str, Any]]) -> list[str]:
-        raise NotImplementedError("add() will be implemented in ST3.")  # pragma: no cover
+        """Insert records into the collection and return their UUIDs.
+
+        Each record is a plain dict.  Two keys are reserved:
+
+        - ``"vector"`` — the embedding (required, ``list[float]``).
+        - ``"id"`` — an optional UUID string; Weaviate auto-generates one if absent.
+
+        All remaining keys are stored as Weaviate object properties.
+
+        Args:
+            records: Records to insert.
+
+        Returns:
+            List of UUID strings for the inserted objects, in the same order
+            as the input records.
+
+        Raises:
+            DatasetError: If any record fails to insert.
+        """
+        from weaviate.classes.data import DataObject
+
+        objects = []
+        for record in records:
+            record = record.copy()
+            vector = record.pop("vector", None)
+            uuid = record.pop("id", None)
+            objects.append(DataObject(properties=record, uuid=uuid, vector=vector))
+
+        result = self._collection.data.insert_many(objects)
+        if result.errors:
+            raise DatasetError(
+                f"add() failed for {len(result.errors)} record(s): "
+                + ", ".join(f"index {i}: {e}" for i, e in result.errors.items())
+            )
+        return [str(uid) for uid in result.uuids.values()]
 
     def delete(
         self,
@@ -67,7 +101,29 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         ids: list[str] | None = None,
         filters: Any = None,
     ) -> None:
-        raise NotImplementedError("delete() will be implemented in ST3.")  # pragma: no cover
+        """Delete objects from the collection by ID or filter.
+
+        Exactly one of ``ids`` or ``filters`` must be provided.
+
+        Args:
+            ids: List of UUID strings to delete individually.
+            filters: A ``weaviate.classes.query.Filter`` expression that
+                selects objects to delete (passed directly to
+                ``collection.data.delete_many(where=filters)``).
+
+        Raises:
+            DatasetError: If neither or both arguments are supplied.
+        """
+        if ids is None and filters is None:
+            raise DatasetError("delete() requires exactly one of 'ids' or 'filters'.")
+        if ids is not None and filters is not None:
+            raise DatasetError("delete() accepts 'ids' or 'filters', not both.")
+
+        if ids is not None:
+            for uid in ids:
+                self._collection.data.delete_by_id(uid)
+        else:
+            self._collection.data.delete_many(where=filters)
 
     # --- read path (ST4) ---
 

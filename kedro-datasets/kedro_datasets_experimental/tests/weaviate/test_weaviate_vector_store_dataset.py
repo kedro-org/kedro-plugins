@@ -311,14 +311,93 @@ class TestHandle:
         assert result == {"collection": "MyCollection", "count": 42}
         mock_collection.aggregate.over_all.assert_called_once_with(total_count=True)
 
-    def test_add_raises_not_implemented(self, handle):
-        with pytest.raises(NotImplementedError, match="ST3"):
-            handle.add([])
-
-    def test_delete_raises_not_implemented(self, handle):
-        with pytest.raises(NotImplementedError, match="ST3"):
-            handle.delete(ids=["a"])
-
     def test_search_raises_not_implemented(self, handle):
         with pytest.raises(NotImplementedError, match="ST4"):
             handle.search(vector=[0.1, 0.2])
+
+
+# ---------------------------------------------------------------------------
+# WeaviateVectorStoreHandle — add()
+# ---------------------------------------------------------------------------
+
+
+class TestHandleAdd:
+    @pytest.fixture
+    def handle(self, mock_client, mock_collection):
+        return WeaviateVectorStoreHandle(mock_client, mock_collection)
+
+    @pytest.fixture
+    def insert_result(self):
+        import uuid
+        result = MagicMock()
+        result.uuids = {0: uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001"),
+                        1: uuid.UUID("bbbbbbbb-0000-0000-0000-000000000002")}
+        result.errors = {}
+        return result
+
+    def test_add_calls_insert_many(self, handle, mock_collection, insert_result):
+        mock_collection.data.insert_many.return_value = insert_result
+        records = [
+            {"vector": [0.1, 0.2], "text": "hello"},
+            {"vector": [0.3, 0.4], "text": "world"},
+        ]
+        handle.add(records)
+        mock_collection.data.insert_many.assert_called_once()
+        objects = mock_collection.data.insert_many.call_args[0][0]
+        assert len(objects) == 2
+        assert objects[0].properties == {"text": "hello"}
+        assert objects[0].vector == [0.1, 0.2]
+        assert objects[1].properties == {"text": "world"}
+
+    def test_add_returns_uuid_strings(self, handle, mock_collection, insert_result):
+        mock_collection.data.insert_many.return_value = insert_result
+        uuids = handle.add([{"vector": [0.1], "text": "a"}, {"vector": [0.2], "text": "b"}])
+        assert uuids == [
+            "aaaaaaaa-0000-0000-0000-000000000001",
+            "bbbbbbbb-0000-0000-0000-000000000002",
+        ]
+
+    def test_add_passes_optional_id(self, handle, mock_collection, insert_result):
+        mock_collection.data.insert_many.return_value = insert_result
+        handle.add([{"id": "my-uuid", "vector": [0.1], "text": "x"}])
+        obj = mock_collection.data.insert_many.call_args[0][0][0]
+        assert obj.uuid == "my-uuid"
+        assert "id" not in obj.properties
+
+    def test_add_raises_on_partial_errors(self, handle, mock_collection):
+        result = MagicMock()
+        result.uuids = {}
+        result.errors = {0: "connection reset"}
+        mock_collection.data.insert_many.return_value = result
+        with pytest.raises(DatasetError, match="add\\(\\) failed for 1 record"):
+            handle.add([{"vector": [0.1], "text": "bad"}])
+
+
+# ---------------------------------------------------------------------------
+# WeaviateVectorStoreHandle — delete()
+# ---------------------------------------------------------------------------
+
+
+class TestHandleDelete:
+    @pytest.fixture
+    def handle(self, mock_client, mock_collection):
+        return WeaviateVectorStoreHandle(mock_client, mock_collection)
+
+    def test_delete_by_ids_calls_delete_by_id(self, handle, mock_collection):
+        handle.delete(ids=["uuid-1", "uuid-2"])
+        assert mock_collection.data.delete_by_id.call_count == 2
+        mock_collection.data.delete_by_id.assert_any_call("uuid-1")
+        mock_collection.data.delete_by_id.assert_any_call("uuid-2")
+
+    def test_delete_by_filter_calls_delete_many(self, handle, mock_collection):
+        f = MagicMock()
+        handle.delete(filters=f)
+        mock_collection.data.delete_many.assert_called_once_with(where=f)
+
+    def test_delete_requires_ids_or_filters(self, handle):
+        with pytest.raises(DatasetError, match="requires exactly one"):
+            handle.delete()
+
+    def test_delete_rejects_both(self, handle):
+        with pytest.raises(DatasetError, match="not both"):
+            handle.delete(ids=["x"], filters=MagicMock())

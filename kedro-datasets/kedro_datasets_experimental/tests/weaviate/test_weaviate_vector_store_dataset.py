@@ -26,14 +26,15 @@ MODULE = "kedro_datasets_experimental.weaviate.weaviate_vector_store_dataset"
 @pytest.fixture
 def mock_client():
     client = MagicMock()
-    client.collections.get_or_create.return_value = MagicMock(name="MyCollection")
+    client.collections.exists.return_value = False
+    client.collections.create.return_value = MagicMock(name="MyCollection")
     client.collections.get.return_value = MagicMock(name="MyCollection")
     return client
 
 
 @pytest.fixture
 def mock_collection(mock_client):
-    collection = mock_client.collections.get_or_create.return_value
+    collection = mock_client.collections.create.return_value
     collection.name = "MyCollection"
     agg_result = MagicMock()
     agg_result.total_count = 42
@@ -231,12 +232,23 @@ class TestConnect:
 
 
 class TestLoad:
-    def test_load_returns_handle(self, mock_client, mock_collection):
+    def test_load_creates_collection_when_missing(self, mock_client, mock_collection):
+        mock_client.collections.exists.return_value = False
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
             ds = WeaviateVectorStoreDataset(collection_name="MyCollection")
             handle = ds._load()
             assert isinstance(handle, WeaviateVectorStoreHandle)
-            mock_client.collections.get_or_create.assert_called_once_with("MyCollection")
+            mock_client.collections.exists.assert_called_once_with("MyCollection")
+            mock_client.collections.create.assert_called_once_with("MyCollection")
+
+    def test_load_gets_existing_collection(self, mock_client, mock_collection):
+        mock_client.collections.exists.return_value = True
+        with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
+            ds = WeaviateVectorStoreDataset(collection_name="MyCollection")
+            handle = ds._load()
+            assert isinstance(handle, WeaviateVectorStoreHandle)
+            mock_client.collections.get.assert_called_once_with("MyCollection")
+            mock_client.collections.create.assert_not_called()
 
     def test_load_get_only_when_no_create(self, mock_client):
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
@@ -246,10 +258,10 @@ class TestLoad:
             )
             ds._load()
             mock_client.collections.get.assert_called_once_with("MyCollection")
-            mock_client.collections.get_or_create.assert_not_called()
+            mock_client.collections.exists.assert_not_called()
 
     def test_collection_error_closes_client_and_raises(self, mock_client):
-        mock_client.collections.get_or_create.side_effect = RuntimeError("not found")
+        mock_client.collections.exists.side_effect = RuntimeError("not found")
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
             ds = WeaviateVectorStoreDataset(collection_name="Missing")
             with pytest.raises(DatasetError, match="Failed to access Weaviate collection"):

@@ -231,7 +231,10 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
         client = self._connect()
         try:
             if self._create_collection_if_missing:
-                collection = client.collections.get_or_create(self._collection_name)
+                if client.collections.exists(self._collection_name):
+                    collection = client.collections.get(self._collection_name)
+                else:
+                    collection = client.collections.create(self._collection_name)
             else:
                 collection = client.collections.get(self._collection_name)
         except Exception as e:

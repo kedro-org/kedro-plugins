@@ -311,10 +311,6 @@ class TestHandle:
         assert result == {"collection": "MyCollection", "count": 42}
         mock_collection.aggregate.over_all.assert_called_once_with(total_count=True)
 
-    def test_search_raises_not_implemented(self, handle):
-        with pytest.raises(NotImplementedError, match="ST4"):
-            handle.search(vector=[0.1, 0.2])
-
 
 # ---------------------------------------------------------------------------
 # WeaviateVectorStoreHandle — add()
@@ -401,3 +397,71 @@ class TestHandleDelete:
     def test_delete_rejects_both(self, handle):
         with pytest.raises(DatasetError, match="not both"):
             handle.delete(ids=["x"], filters=MagicMock())
+
+
+# ---------------------------------------------------------------------------
+# WeaviateVectorStoreHandle — search()
+# ---------------------------------------------------------------------------
+
+
+class TestHandleSearch:
+    @pytest.fixture
+    def handle(self, mock_client, mock_collection):
+        return WeaviateVectorStoreHandle(mock_client, mock_collection)
+
+    @pytest.fixture
+    def search_result(self):
+        import uuid
+        obj1 = MagicMock()
+        obj1.uuid = uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001")
+        obj1.properties = {"text": "hello", "entity_name": "Diabetes"}
+        obj1.metadata.distance = 0.12
+        obj2 = MagicMock()
+        obj2.uuid = uuid.UUID("bbbbbbbb-0000-0000-0000-000000000002")
+        obj2.properties = {"text": "world", "entity_name": "Cancer"}
+        obj2.metadata.distance = 0.34
+        result = MagicMock()
+        result.objects = [obj1, obj2]
+        return result
+
+    def test_search_by_vector_calls_near_vector(self, handle, mock_collection, search_result):
+        mock_collection.query.near_vector.return_value = search_result
+        handle.search(vector=[0.1, 0.2], top_k=5)
+        mock_collection.query.near_vector.assert_called_once()
+        kwargs = mock_collection.query.near_vector.call_args[1]
+        assert kwargs["near_vector"] == [0.1, 0.2]
+        assert kwargs["limit"] == 5
+        assert kwargs["filters"] is None
+
+    def test_search_by_text_calls_near_text(self, handle, mock_collection, search_result):
+        mock_collection.query.near_text.return_value = search_result
+        handle.search(text="diabetes treatment", top_k=3)
+        mock_collection.query.near_text.assert_called_once()
+        kwargs = mock_collection.query.near_text.call_args[1]
+        assert kwargs["query"] == "diabetes treatment"
+        assert kwargs["limit"] == 3
+
+    def test_search_passes_filters(self, handle, mock_collection, search_result):
+        mock_collection.query.near_vector.return_value = search_result
+        f = MagicMock()
+        handle.search(vector=[0.1], filters=f)
+        kwargs = mock_collection.query.near_vector.call_args[1]
+        assert kwargs["filters"] is f
+
+    def test_search_returns_formatted_results(self, handle, mock_collection, search_result):
+        mock_collection.query.near_vector.return_value = search_result
+        results = handle.search(vector=[0.1])
+        assert results == [
+            {"id": "aaaaaaaa-0000-0000-0000-000000000001", "distance": 0.12,
+             "text": "hello", "entity_name": "Diabetes"},
+            {"id": "bbbbbbbb-0000-0000-0000-000000000002", "distance": 0.34,
+             "text": "world", "entity_name": "Cancer"},
+        ]
+
+    def test_search_requires_vector_or_text(self, handle):
+        with pytest.raises(DatasetError, match="requires exactly one"):
+            handle.search()
+
+    def test_search_rejects_both(self, handle):
+        with pytest.raises(DatasetError, match="not both"):
+            handle.search(vector=[0.1], text="query")

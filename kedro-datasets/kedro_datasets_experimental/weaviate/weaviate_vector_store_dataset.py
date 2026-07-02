@@ -135,7 +135,46 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         top_k: int = 10,
         filters: Any = None,
     ) -> list[dict[str, Any]]:
-        raise NotImplementedError("search() will be implemented in ST4.")  # pragma: no cover
+        """Search the collection by vector or text and return the top matches.
+
+        Exactly one of ``vector`` or ``text`` must be provided.  ``vector``
+        triggers ``near_vector`` search; ``text`` triggers ``near_text``
+        (requires a vectorizer configured on the collection).
+
+        Args:
+            vector: Query embedding for similarity search.
+            text: Query string for near-text search.
+            top_k: Maximum number of results to return. Defaults to 10.
+            filters: A ``weaviate.classes.query.Filter`` expression to restrict
+                the search scope (passed directly to the underlying query).
+
+        Returns:
+            List of result dicts, each containing all stored object properties
+            plus ``"id"`` (UUID string) and ``"distance"`` (float).
+
+        Raises:
+            DatasetError: If neither or both of ``vector``/``text`` are supplied.
+        """
+        if vector is None and text is None:
+            raise DatasetError("search() requires exactly one of 'vector' or 'text'.")
+        if vector is not None and text is not None:
+            raise DatasetError("search() accepts 'vector' or 'text', not both.")
+
+        common_kwargs = dict(
+            limit=top_k,
+            filters=filters,
+            return_metadata=wvc.query.MetadataQuery(distance=True),
+        )
+
+        if vector is not None:
+            results = self._collection.query.near_vector(near_vector=vector, **common_kwargs)
+        else:
+            results = self._collection.query.near_text(query=text, **common_kwargs)
+
+        return [
+            {"id": str(obj.uuid), "distance": obj.metadata.distance, **obj.properties}
+            for obj in results.objects
+        ]
 
 
 class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):

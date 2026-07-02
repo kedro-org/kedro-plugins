@@ -1,4 +1,3 @@
-# requires semgrep >= 1.45.0 (taint mode + focus-metavariable)
 rules:
   # ──────────────────────────────────────────────────────────────────────
   # Dataset-specific rules

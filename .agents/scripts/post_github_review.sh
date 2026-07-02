@@ -2,8 +2,7 @@
 set -euo pipefail
 
 # Shared helper for posting a structured review (summary + inline comments) to GitHub.
-# Currently used by: review-kedro-pr skill
-# Planned consumers: security-scan skill
+# Used by: kedro-plugins-security-review skill
 #
 # Input: a JSON file matching the GitHub "Create a review" API format.
 #

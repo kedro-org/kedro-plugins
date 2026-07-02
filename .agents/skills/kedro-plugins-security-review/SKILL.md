@@ -43,13 +43,15 @@ Read these before triaging findings:
   - `p/secrets`
   - `p/python`
   - `.agents/skills/kedro-plugins-security-review/rules/kedro-plugins-security-patterns.yml`
-- Path exclusions (every Semgrep invocation):
-  - `--exclude tests/`
-  - `--exclude docs/`
-  - `--exclude features/`
-  - `--exclude .agents/`
-  - `--exclude tools/`
-  - `--exclude kedro_datasets_benchmarks/`
+- Path exclusions (every Semgrep invocation). Note: this is a monorepo, so
+  `tests/`, `docs/`, and `features/` are nested under each plugin directory
+  (e.g. `kedro-datasets/tests/`). Use glob patterns that match at any depth:
+  - `--exclude '**/tests/**'`
+  - `--exclude '**/docs/**'`
+  - `--exclude '**/features/**'`
+  - `--exclude '.agents/'`
+  - `--exclude 'tools/'`
+  - `--exclude '**/kedro_datasets_benchmarks/**'`
 - Temporary working directory:
   - create with `mktemp -d`
   - delete at the end unless the user explicitly asks to keep artifacts
@@ -138,12 +140,12 @@ else
 fi
 
 SEMGREP_EXCLUDE=(
-  --exclude tests/
-  --exclude docs/
-  --exclude features/
-  --exclude .agents/
-  --exclude tools/
-  --exclude kedro_datasets_benchmarks/
+  --exclude '**/tests/**'
+  --exclude '**/docs/**'
+  --exclude '**/features/**'
+  --exclude '.agents/'
+  --exclude 'tools/'
+  --exclude '**/kedro_datasets_benchmarks/**'
 )
 
 "${SEMGREP_CMD[@]}" --version
@@ -194,16 +196,19 @@ PR_NUMBER="<resolved-pr-number>"
 
 # Apply the same path exclusions as full-codebase mode.
 # Semgrep's --exclude only filters during directory walk, so explicit file
-# arguments would otherwise bypass the exclusion list (e.g. tests/foo.py).
-EXCLUDE_PREFIXES=(tests/ docs/ features/ .agents/ tools/ kedro_datasets_benchmarks/)
+# arguments would otherwise bypass the exclusion list.
+# This is a monorepo — excluded dirs are nested (e.g. kedro-datasets/tests/).
+# Use contains-style matching, not prefix matching.
 
 SCAN_TARGETS=()
 while IFS= read -r path; do
   [ -f "$path" ] || continue
   skip=0
-  for prefix in "${EXCLUDE_PREFIXES[@]}"; do
-    [[ "$path" == "$prefix"* ]] && skip=1 && break
+  for segment in /tests/ /docs/ /features/ /kedro_datasets_benchmarks/; do
+    [[ "/$path" == *"$segment"* ]] && skip=1 && break
   done
+  [[ "$path" == .agents/* ]] && skip=1
+  [[ "$path" == tools/* ]] && skip=1
   (( skip == 0 )) && SCAN_TARGETS+=("$path")
 done < <(gh pr diff "$PR_NUMBER" --name-only)
 TARGET_LABEL="PR #$PR_NUMBER"

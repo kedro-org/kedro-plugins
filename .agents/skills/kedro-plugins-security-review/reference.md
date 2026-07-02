@@ -72,7 +72,9 @@ Run these after Semgrep, regardless of whether any rule fired. Semgrep only
 covers known patterns. These checks catch the class of issues that static
 analysis misses.
 
-Apply the same path exclusions as the Semgrep scan when searching.
+Apply the same path exclusions as the Semgrep scan when searching
+(`**/tests/**`, `**/docs/**`, `**/features/**`, `.agents/`, `tools/`,
+`**/kedro_datasets_benchmarks/**`).
 
 ### 1. load_args / save_args passthrough
 

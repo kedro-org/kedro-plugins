@@ -20,6 +20,23 @@ rules:
       - pattern: torch.load(...)
       - pattern-not: torch.load(..., weights_only=True, ...)
 
+  - id: datasets-tf-load-model-no-safe-mode
+    message: >-
+      tf.keras.models.load_model() is called without safe_mode=True.
+      Without this flag, Keras deserialises custom objects which can
+      execute arbitrary code if the model file is untrusted. Pass
+      safe_mode=True (available since TensorFlow 2.12) unless the file
+      is fully trusted and you need custom objects.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    patterns:
+      - pattern: tf.keras.models.load_model(...)
+      - pattern-not: tf.keras.models.load_model(..., safe_mode=True, ...)
+
   - id: datasets-joblib-load
     message: >-
       joblib.load() deserialises pickle data internally and can execute
@@ -66,6 +83,39 @@ rules:
     patterns:
       - pattern: load_dataset(...)
       - pattern-not: load_dataset(..., trust_remote_code=False, ...)
+
+  - id: datasets-transformers-pipeline
+    message: >-
+      transformers.pipeline() can download and execute model code from
+      the Hugging Face Hub. If trust_remote_code=True is passed (directly
+      or via kwargs), arbitrary Python from the Hub will run locally. Pass
+      trust_remote_code=False explicitly or document why remote code is
+      trusted for this use case.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    patterns:
+      - pattern: pipeline(...)
+      - pattern-not: pipeline(..., trust_remote_code=False, ...)
+
+  - id: datasets-scipy-loadmat
+    message: >-
+      scipy.io.loadmat() can deserialise pickled Python objects embedded
+      in MAT v5 files. If the file is untrusted, this can lead to
+      arbitrary code execution. Ensure the data source is trusted and
+      document the risk in the dataset docstring.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    pattern-either:
+      - pattern: scipy.io.loadmat(...)
+      - pattern: io.loadmat(...)
 
   # ──────────────────────────────────────────────────────────────────────
   # Rules carried from kedro-security-review (applicable to plugin code)

@@ -182,6 +182,18 @@ Fires on `torch.load(...)` without `weights_only=True`. Without this flag,
 - If `weights_only` is not set or the load_args are silently dropped, classify
   as `dataset_vulnerability` at ERROR severity.
 
+### `datasets-tf-load-model-no-safe-mode`
+
+Fires on `tf.keras.models.load_model(...)` without `safe_mode=True`. Without
+this flag, Keras deserialises custom objects which can execute arbitrary code.
+
+- If the dataset provides `safe_mode=True` as a default in `load_args` and
+  passes `self._load_args` to `load_model`, verify the args are actually
+  reaching the call (see manual check #1). If they are, classify as
+  `by_design_with_documentation`.
+- If `safe_mode` is not set or the load_args are silently dropped, classify
+  as `dataset_vulnerability` at ERROR severity.
+
 ### `datasets-joblib-load`
 
 Fires on any `joblib.load(...)` call. Joblib uses pickle internally.
@@ -212,6 +224,28 @@ Fires on `load_dataset(...)` without `trust_remote_code=False`.
   `by_design_with_documentation`.
 - If the call always trusts remote code with no user opt-out, classify as
   `dataset_vulnerability` at WARNING severity.
+
+### `datasets-transformers-pipeline`
+
+Fires on `pipeline(...)` without `trust_remote_code=False`. The
+`transformers.pipeline()` function can download and execute model code from
+the Hugging Face Hub.
+
+- If the dataset passes through user-controlled kwargs that can include
+  `trust_remote_code`, and this is documented, classify as
+  `by_design_with_documentation`.
+- If the call could run remote code with no user opt-out or documentation,
+  classify as `dataset_vulnerability` at WARNING severity.
+
+### `datasets-scipy-loadmat`
+
+Fires on `scipy.io.loadmat(...)` or `io.loadmat(...)`. MAT v5 files can
+contain pickled Python objects.
+
+- If the dataset documents the risk and the data source is trusted by design,
+  classify as `by_design_with_documentation`.
+- If there is no risk documentation, classify as `dataset_vulnerability` at
+  WARNING severity.
 
 ### `kedro-dynamic-import`
 

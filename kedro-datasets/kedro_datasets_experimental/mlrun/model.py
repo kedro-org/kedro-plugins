@@ -17,8 +17,13 @@ class MLRunModel(MLRunAbstractDataset):
     and
     [`get_artifact`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.get_artifact).
 
-    `load_args` and `save_args` accept any arguments supported by the corresponding
-    MLRun API for your MLRun version; see the MLRun documentation.
+    .. warning::
+        This dataset uses ``joblib`` for model serialization, which relies on
+        pickle internally. Loading untrusted model files can execute arbitrary
+        code. Only load models from sources you trust.
+
+    ``load_args`` are passed to ``joblib.load`` and ``save_args`` are passed
+    to MLRun's ``log_model``; see the MLRun and joblib documentation.
 
     ## Examples
 
@@ -52,8 +57,8 @@ class MLRunModel(MLRunAbstractDataset):
         key: Artifact key for MLRun (defaults to catalog dataset name).
         framework: ML framework name (e.g. `"sklearn"`, `"xgboost"`, `"lightgbm"`).
         model_format: File format/extension for saving the model (e.g. `"pkl"`).
-        load_args: Passed to MLRun when loading; see MLRun docs for your version.
-        save_args: Passed to `log_model`; see MLRun docs for your version.
+        load_args: Passed to ``joblib.load()``; see joblib docs for your version.
+        save_args: Passed to ``log_model``; see MLRun docs for your version.
     """
 
     def __init__( # noqa: PLR0913
@@ -85,7 +90,7 @@ class MLRunModel(MLRunAbstractDataset):
         target_path = artifact.get_target_path()
         model_file = artifact.model_file
         local_path = get_dataitem(target_path + model_file).local()
-        return joblib.load(local_path)
+        return joblib.load(local_path, **self._load_args)
 
     def _describe(self) -> dict[str, Any]:
         return {

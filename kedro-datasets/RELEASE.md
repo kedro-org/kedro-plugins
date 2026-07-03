@@ -1,6 +1,7 @@
 # Upcoming release
 ## Major features and improvements
 ## Bug fixes and other changes
+- Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 ## Community contributions
 
 # Release 9.5.0

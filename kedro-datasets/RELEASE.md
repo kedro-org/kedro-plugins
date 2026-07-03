@@ -5,7 +5,7 @@
 
 | Type                     | Description                                      | Location                           |
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
-| `weaviate.WeaviateVectorStoreDataset` | A dataset for loading and saving data to Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
+| `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
 
 ## Bug fixes and other changes
 ## Community contributions

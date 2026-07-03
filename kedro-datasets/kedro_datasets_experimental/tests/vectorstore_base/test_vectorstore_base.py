@@ -16,10 +16,6 @@ from kedro_datasets_experimental.vectorstore_base import (
     VectorStoreHandle,
 )
 
-# ---------------------------------------------------------------------------
-# Dummy in-memory implementations
-# ---------------------------------------------------------------------------
-
 
 class DummyHandle(VectorStoreHandle):
     """Minimal in-memory handle for contract testing."""
@@ -97,11 +93,6 @@ def handle(dataset: DummyVectorStoreDataset) -> DummyHandle:
     return dataset.load()
 
 
-# ---------------------------------------------------------------------------
-# AbstractVectorStoreDataset contract
-# ---------------------------------------------------------------------------
-
-
 class TestAbstractVectorStoreDataset:
     def test_load_returns_handle(self, dataset):
         handle = dataset.load()
@@ -134,11 +125,6 @@ class TestAbstractVectorStoreDataset:
 
         with pytest.raises(TypeError):
             Incomplete()  # type: ignore[abstract]
-
-
-# ---------------------------------------------------------------------------
-# VectorStoreHandle contract
-# ---------------------------------------------------------------------------
 
 
 class TestVectorStoreHandle:

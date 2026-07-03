@@ -47,9 +47,9 @@ rules:
       confidence: MEDIUM
       impact: HIGH
     pattern-either:
-      - pattern: getattr($MOD, f"read_{$FMT}")
-      - pattern: getattr($MOD, f"scan_{$FMT}")
-      - pattern: getattr($MOD, f"to_{$FMT}")
+      - pattern: getattr($MOD, f"read_{$FMT}", ...)
+      - pattern: getattr($MOD, f"scan_{$FMT}", ...)
+      - pattern: getattr($MOD, f"to_{$FMT}", ...)
 
   - id: datasets-hub-remote-code
     message: >-

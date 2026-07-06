@@ -1,6 +1,7 @@
 # Upcoming release
 ## Major features and improvements
 ## Bug fixes and other changes
+- Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files (`PickleDataset`, `redis.PickleDataset`, `DartsTorchModelDataset`, `MatlabDataset`, `pandas.GenericDataset`, `geopandas.GenericDataset`).
 ## Community contributions
 
 # Release 9.5.0

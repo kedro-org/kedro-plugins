@@ -38,6 +38,12 @@ class GenericDataset(
 
     fiona (a dependency of geopandas) does not currently support Python 3.14.
 
+    .. warning::
+        When ``file_format`` is set to ``pickle``, this dataset uses
+        ``pd.read_pickle`` which can execute arbitrary code when loading
+        untrusted files. Only use ``file_format: pickle`` with files from
+        sources you trust.
+
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 

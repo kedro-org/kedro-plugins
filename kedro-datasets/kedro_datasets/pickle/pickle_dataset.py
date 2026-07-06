@@ -27,6 +27,11 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
+    .. warning::
+        Pickle-based deserialization (including ``joblib``, ``dill``, ``cloudpickle``,
+        and ``compress_pickle`` backends) can execute arbitrary code when loading
+        untrusted files. Only load pickle files from sources you trust.
+
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 

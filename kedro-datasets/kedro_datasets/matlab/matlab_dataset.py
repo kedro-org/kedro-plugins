@@ -24,6 +24,11 @@ from scipy import io
 class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """`MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 
+    .. warning::
+        MAT v5 files can contain pickled Python objects. ``scipy.io.loadmat()``
+        will deserialize these, which can execute arbitrary code if the file is
+        untrusted. Only load ``.mat`` files from sources you trust.
+
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 

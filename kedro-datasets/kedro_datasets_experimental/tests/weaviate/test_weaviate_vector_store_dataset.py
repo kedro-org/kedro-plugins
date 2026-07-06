@@ -334,8 +334,8 @@ class TestHandleAdd:
     def test_add_calls_insert_many(self, handle, mock_collection, insert_result):
         mock_collection.data.insert_many.return_value = insert_result
         records = [
-            {"vector": [0.1, 0.2], "text": "hello"},
-            {"vector": [0.3, 0.4], "text": "world"},
+            {"properties": {"text": "hello"}, "vector": [0.1, 0.2]},
+            {"properties": {"text": "world"}, "vector": [0.3, 0.4]},
         ]
         handle.add(records)
         mock_collection.data.insert_many.assert_called_once()
@@ -347,7 +347,12 @@ class TestHandleAdd:
 
     def test_add_returns_uuid_strings(self, handle, mock_collection, insert_result):
         mock_collection.data.insert_many.return_value = insert_result
-        uuids = handle.add([{"vector": [0.1], "text": "a"}, {"vector": [0.2], "text": "b"}])
+        uuids = handle.add(
+            [
+                {"properties": {"text": "a"}, "vector": [0.1]},
+                {"properties": {"text": "b"}, "vector": [0.2]},
+            ]
+        )
         assert uuids == [
             "aaaaaaaa-0000-0000-0000-000000000001",
             "bbbbbbbb-0000-0000-0000-000000000002",
@@ -355,7 +360,7 @@ class TestHandleAdd:
 
     def test_add_passes_optional_id(self, handle, mock_collection, insert_result):
         mock_collection.data.insert_many.return_value = insert_result
-        handle.add([{"id": "my-uuid", "vector": [0.1], "text": "x"}])
+        handle.add([{"id": "my-uuid", "properties": {"text": "x"}, "vector": [0.1]}])
         obj = mock_collection.data.insert_many.call_args[0][0][0]
         assert obj.uuid == "my-uuid"
         assert "id" not in obj.properties
@@ -366,12 +371,12 @@ class TestHandleAdd:
         result.errors = {0: "connection reset"}
         mock_collection.data.insert_many.return_value = result
         with pytest.raises(DatasetError, match="add\\(\\) failed for 1 record"):
-            handle.add([{"vector": [0.1], "text": "bad"}])
+            handle.add([{"properties": {"text": "bad"}, "vector": [0.1]}])
 
     def test_add_wraps_weaviate_exception(self, handle, mock_collection):
         mock_collection.data.insert_many.side_effect = RuntimeError("gRPC timeout")
         with pytest.raises(DatasetError, match="add\\(\\) failed"):
-            handle.add([{"vector": [0.1], "text": "x"}])
+            handle.add([{"properties": {"text": "x"}, "vector": [0.1]}])
 
     def test_add_empty_list_returns_empty(self, handle, mock_collection):
         result = MagicMock()
@@ -382,9 +387,9 @@ class TestHandleAdd:
 
     def test_add_does_not_mutate_input(self, handle, mock_collection, insert_result):
         mock_collection.data.insert_many.return_value = insert_result
-        original = {"vector": [0.1], "id": "u1", "text": "hello"}
+        original = {"vector": [0.1], "id": "u1", "properties": {"text": "hello"}}
         handle.add([original])
-        assert original == {"vector": [0.1], "id": "u1", "text": "hello"}
+        assert original == {"vector": [0.1], "id": "u1", "properties": {"text": "hello"}}
 
 
 # ---------------------------------------------------------------------------
@@ -479,10 +484,16 @@ class TestHandleSearch:
         mock_collection.query.near_vector.return_value = search_result
         results = handle.search(vector=[0.1])
         assert results == [
-            {"id": "aaaaaaaa-0000-0000-0000-000000000001", "distance": 0.12,
-             "text": "hello", "entity_name": "Diabetes"},
-            {"id": "bbbbbbbb-0000-0000-0000-000000000002", "distance": 0.34,
-             "text": "world", "entity_name": "Cancer"},
+            {
+                "id": "aaaaaaaa-0000-0000-0000-000000000001",
+                "distance": 0.12,
+                "properties": {"text": "hello", "entity_name": "Diabetes"},
+            },
+            {
+                "id": "bbbbbbbb-0000-0000-0000-000000000002",
+                "distance": 0.34,
+                "properties": {"text": "world", "entity_name": "Cancer"},
+            },
         ]
 
     def test_search_requires_vector_or_text(self, handle):
@@ -497,17 +508,3 @@ class TestHandleSearch:
         mock_collection.query.near_vector.side_effect = RuntimeError("gRPC error")
         with pytest.raises(DatasetError, match="search\\(\\) failed"):
             handle.search(vector=[0.1])
-
-    def test_search_id_and_distance_override_same_named_properties(
-        self, handle, mock_collection
-    ):
-        obj = MagicMock()
-        obj.uuid = uuid.UUID("aaaaaaaa-0000-0000-0000-000000000001")
-        obj.properties = {"text": "x", "distance": 999.0}
-        obj.metadata.distance = 0.42
-        result = MagicMock()
-        result.objects = [obj]
-        mock_collection.query.near_vector.return_value = result
-        results = handle.search(vector=[0.1])
-        assert results[0]["distance"] == 0.42
-        assert results[0]["id"] == "aaaaaaaa-0000-0000-0000-000000000001"

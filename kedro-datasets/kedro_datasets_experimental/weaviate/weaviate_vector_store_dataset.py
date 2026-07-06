@@ -62,13 +62,12 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
     def add(self, records: list[dict[str, Any]]) -> list[str]:
         """Insert records into the collection and return their UUIDs.
 
-        Each record is a plain dict.  Two keys are reserved:
+        Each record is a plain dict with the following keys:
 
+        - ``"properties"`` — the object's properties (``dict``).
         - ``"vector"`` — the embedding (``list[float]``); optional when the
           collection has a server-side vectorizer configured.
         - ``"id"`` — an optional UUID string; Weaviate auto-generates one if absent.
-
-        All remaining keys are stored as Weaviate object properties.
 
         Args:
             records: Records to insert.
@@ -83,9 +82,9 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         """
         objects = []
         for record in records:
-            props = record.copy()
-            vector = props.pop("vector", None)
-            uid = props.pop("id", None)
+            props = record.get("properties", {})
+            vector = record.get("vector")
+            uid = record.get("id")
             objects.append(DataObject(properties=props, uuid=uid, vector=vector))
 
         try:
@@ -158,8 +157,9 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
                 the search scope (passed directly to the underlying query).
 
         Returns:
-            List of result dicts, each containing all stored object properties
-            plus ``"id"`` (UUID string) and ``"distance"`` (float).
+            List of result dicts, each containing ``"id"`` (UUID string),
+            ``"properties"`` (dict of stored object properties), and
+            ``"distance"`` (float).
 
         Raises:
             DatasetError: If neither or both of ``vector``/``text`` are
@@ -185,7 +185,11 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             raise DatasetError(f"search() failed: {e}") from e
 
         return [
-            {**obj.properties, "id": str(obj.uuid), "distance": obj.metadata.distance}
+            {
+                "id": str(obj.uuid),
+                "properties": dict(obj.properties),
+                "distance": obj.metadata.distance,
+            }
             for obj in results.objects
         ]
 

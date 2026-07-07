@@ -19,11 +19,6 @@ from kedro_datasets_experimental.weaviate.weaviate_vector_store_dataset import (
 MODULE = "kedro_datasets_experimental.weaviate.weaviate_vector_store_dataset"
 
 
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-
 @pytest.fixture
 def mock_client():
     client = MagicMock()
@@ -56,11 +51,6 @@ def cloud_dataset():
         url="https://my-cluster.weaviate.network",
         credentials={"api_key": "secret"},  # pragma: allowlist secret
     )
-
-
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreDataset — init and describe
-# ---------------------------------------------------------------------------
 
 
 class TestDatasetInit:
@@ -115,20 +105,10 @@ class TestDescribe:
         assert "api_key" not in str(desc)
 
 
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreDataset — save() disabled
-# ---------------------------------------------------------------------------
-
-
 class TestSaveDisabled:
     def test_save_raises(self, local_dataset):
         with pytest.raises(DatasetError, match="Saving is not supported"):
             local_dataset.save({"data": "value"})
-
-
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreDataset — _connect
-# ---------------------------------------------------------------------------
 
 
 class TestConnect:
@@ -227,11 +207,6 @@ class TestConnect:
                 ds._connect()
 
 
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreDataset — _load
-# ---------------------------------------------------------------------------
-
-
 class TestLoad:
     def test_load_creates_collection_when_missing(self, mock_client, mock_collection):
         mock_client.collections.exists.return_value = False
@@ -270,11 +245,6 @@ class TestLoad:
             mock_client.close.assert_called_once()
 
 
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreHandle — lifecycle
-# ---------------------------------------------------------------------------
-
-
 class TestHandle:
     @pytest.fixture
     def handle(self, mock_client, mock_collection):
@@ -311,11 +281,6 @@ class TestHandle:
         result = handle.describe()
         assert result == {"collection": "MyCollection", "count": 42}
         mock_collection.aggregate.over_all.assert_called_once_with(total_count=True)
-
-
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreHandle — add()
-# ---------------------------------------------------------------------------
 
 
 class TestHandleAdd:
@@ -392,21 +357,35 @@ class TestHandleAdd:
         assert original == {"vector": [0.1], "id": "u1", "properties": {"text": "hello"}}
 
 
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreHandle — delete()
-# ---------------------------------------------------------------------------
-
-
 class TestHandleDelete:
     @pytest.fixture
     def handle(self, mock_client, mock_collection):
         return WeaviateVectorStoreHandle(mock_client, mock_collection)
 
-    def test_delete_by_ids_calls_delete_by_id(self, handle, mock_collection):
-        handle.delete(ids=["uuid-1", "uuid-2"])
-        assert mock_collection.data.delete_by_id.call_count == 2
-        mock_collection.data.delete_by_id.assert_any_call("uuid-1")
-        mock_collection.data.delete_by_id.assert_any_call("uuid-2")
+    def test_delete_by_ids_calls_delete_many_with_contains_any_filter(
+        self, handle, mock_collection
+    ):
+        with patch(f"{MODULE}.wvc.query.Filter") as mock_filter_cls:
+            mock_filter = mock_filter_cls.by_id.return_value.contains_any.return_value
+            handle.delete(ids=["uuid-1", "uuid-2"])
+            mock_filter_cls.by_id.return_value.contains_any.assert_called_once_with(
+                ["uuid-1", "uuid-2"]
+            )
+            mock_collection.data.delete_many.assert_called_once_with(where=mock_filter)
+
+    def test_delete_by_ids_batches_lists_over_10000(self, handle, mock_collection):
+        ids = [f"uuid-{i}" for i in range(10_001)]
+        with patch(f"{MODULE}.wvc.query.Filter") as mock_filter_cls:
+            handle.delete(ids=ids)
+            contains_any = mock_filter_cls.by_id.return_value.contains_any
+            assert contains_any.call_count == 2
+            assert len(contains_any.call_args_list[0].args[0]) == 10_000
+            assert len(contains_any.call_args_list[1].args[0]) == 1
+            assert mock_collection.data.delete_many.call_count == 2
+
+    def test_delete_by_ids_empty_list_is_noop(self, handle, mock_collection):
+        handle.delete(ids=[])
+        mock_collection.data.delete_many.assert_not_called()
 
     def test_delete_by_filter_calls_delete_many(self, handle, mock_collection):
         f = MagicMock()
@@ -422,7 +401,7 @@ class TestHandleDelete:
             handle.delete(ids=["x"], filters=MagicMock())
 
     def test_delete_wraps_weaviate_exception_on_ids(self, handle, mock_collection):
-        mock_collection.data.delete_by_id.side_effect = RuntimeError("connection lost")
+        mock_collection.data.delete_many.side_effect = RuntimeError("connection lost")
         with pytest.raises(DatasetError, match="delete\\(\\) failed"):
             handle.delete(ids=["uuid-1"])
 
@@ -430,11 +409,6 @@ class TestHandleDelete:
         mock_collection.data.delete_many.side_effect = RuntimeError("invalid filter")
         with pytest.raises(DatasetError, match="delete\\(\\) failed"):
             handle.delete(filters=MagicMock())
-
-
-# ---------------------------------------------------------------------------
-# WeaviateVectorStoreHandle — search()
-# ---------------------------------------------------------------------------
 
 
 class TestHandleSearch:

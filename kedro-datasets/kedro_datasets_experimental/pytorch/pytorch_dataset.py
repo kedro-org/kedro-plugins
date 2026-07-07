@@ -19,16 +19,17 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
     """`PyTorchDataset` loads and saves PyTorch models' `state_dict` using ``torch.save``
     and ``torch.load``.
 
-    .. warning::
-        Loading is **not** safe for untrusted files. ``torch.load`` deserializes a
-        pickle stream (the zipfile produced by ``torch.save`` is only a container
-        around that pickle), so a maliciously crafted ``.pt`` file can execute
-        arbitrary code on load. To mitigate this, ``PyTorchDataset`` enforces
-        ``weights_only=True`` by default, which restricts loading to tensors and a
-        small allow-list of safe types. Only set ``load_args: {weights_only: false}``
-        for files you fully trust, and prefer ``torch>=2.6`` (where ``weights_only=True``
-        is also the upstream default) or a non-pickle format such as ``safetensors``
-        when handling untrusted inputs.
+    !!! warning
+        Loading is **not** safe for untrusted files. ``torch.load`` deserializes
+        a pickle stream (the zipfile produced by ``torch.save`` is only a
+        container around that pickle), so a maliciously crafted ``.pt`` file can
+        execute arbitrary code on load. To mitigate this, ``PyTorchDataset``
+        enforces ``weights_only=True`` by default, which restricts loading to
+        tensors and a small allow-list of safe types. Only set
+        ``load_args: {weights_only: false}`` for files you fully trust, and
+        prefer ``torch>=2.6`` (where ``weights_only=True`` is also the upstream
+        default) or a non-pickle format such as ``safetensors`` when handling
+        untrusted inputs.
 
     ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
 

@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 ## Bug fixes and other changes
+- Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 ## Community contributions
 
 # Release 9.5.0

@@ -25,8 +25,58 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
         with catalog.load("my_store") as store:
             store.describe()
 
+    This applies in every case, including when the handle is loaded as a
+    node input in a ``kedro run`` pipeline rather than through a hand-built
+    catalog as above. Kedro never closes it for you, and there's no way to
+    make it do so implicitly.
+
+    The Weaviate client opens a persistent HTTP connection pool and gRPC
+    channel on ``connect()``. This lets repeated ``add()``/``search()``/
+    ``delete()`` calls skip the TCP handshake, TLS negotiation, and version
+    handshake each time. Only ``close()`` tears both down.
+
+    Kedro's own cleanup hook, ``catalog.release()``, operates on the
+    *dataset* object registered in the catalog, not on the *handle* object
+    that ``load()`` returns and that a node function receives. The dataset
+    doesn't keep a reference to the handles it hands out, so there's
+    nothing for ``release()`` to close even when it does run.
+
+    This dataset is atypical in that respect. Unlike a CSV or JSON
+    dataset, where ``load()`` returns inert data, this ``load()`` returns
+    a value that stays tethered to a live external connection.
+
+    If you receive this handle as a node input, close it — or wrap the
+    node body in a ``with`` block — inside that node function. That's the
+    only place with an unambiguous view of when the connection is
+    actually done being used.
+
     The ``raw_client`` property exposes the underlying ``weaviate.WeaviateClient``
     for operations outside this interface.
+
+    Examples:
+        Using a hand-built catalog, with a context manager (recommended)::
+
+            >>> with catalog.load("my_store") as store:
+            ...     store.add([{"properties": {"text": "hello"}, "vector": [0.1, 0.2]}])
+            ...     store.search(vector=[0.1, 0.2], top_k=5)
+            >>> # store.close() has already run here, even if a call above raised.
+
+        Using a hand-built catalog, without a context manager::
+
+            >>> store = catalog.load("my_store")
+            >>> try:
+            ...     store.search(vector=[0.1, 0.2], top_k=5)
+            ... finally:
+            ...     store.close()  # Must close explicitly — nothing else will.
+
+        As a node input in a ``kedro run`` pipeline: Kedro loads the handle
+        and passes it to the node, but never closes it. The node itself
+        must do so::
+
+            def search_products(store: WeaviateVectorStoreHandle, query_vector: list[float]) -> list[dict]:
+                with store:
+                    return store.search(vector=query_vector, top_k=5)
+                # Closed here on return, and also if search() raises.
     """
 
     def __init__(
@@ -211,6 +261,28 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
       ``weaviate.connect_to_custom()`` for self-hosted deployments with
       non-standard networking.
 
+    ``collection_name`` is a lookup key, not a schema definition. After
+    connecting, ``load()`` calls ``client.collections.get(collection_name)``
+    to resolve the [Weaviate collection](https://docs.weaviate.io/weaviate/manage-collections)
+    with that name on the server.
+
+    This dataset does not define or manage a collection's schema — its
+    properties, vectorizer, index config, and so on. That schema lives
+    entirely on the Weaviate side. Create it ahead of time (for example
+    through the Weaviate console, client, or REST API), or let ``load()``
+    create it automatically. When ``create_collection_if_missing=True``
+    (the default) and the collection doesn't exist, ``load()`` calls
+    ``client.collections.create(collection_name)`` with **no schema
+    arguments**. That produces an empty collection with Weaviate's default
+    auto-schema and no vectorizer configured.
+
+    That default is enough for ``add()`` with your own precomputed
+    vectors. ``search(text=...)`` needs a server-side vectorizer, and
+    custom property typing needs its own definition — both require
+    configuring the collection yourself first. See the
+    [collections docs](https://docs.weaviate.io/weaviate/manage-collections/collection-operations)
+    for how to define one.
+
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
@@ -288,8 +360,12 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
                 Kedro's credentials store.  Recognised key: ``"api_key"``
                 (used for ``"cloud"`` connections).
             create_collection_if_missing: When ``True`` (default), the
-                collection is created if it does not already exist.  When
-                ``False``, ``load()`` raises if the collection is absent.
+                collection is created — with no explicit schema, i.e.
+                Weaviate's default auto-schema and no vectorizer — if it
+                does not already exist. When ``False``, ``load()`` raises
+                if the collection is absent. See the class docstring for
+                when you need to define the collection's schema yourself
+                instead of relying on this default.
             metadata: Arbitrary metadata passed through by Kedro; ignored by
                 this dataset.
         """

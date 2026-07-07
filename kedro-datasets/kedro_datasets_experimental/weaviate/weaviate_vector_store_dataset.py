@@ -57,8 +57,6 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
             "count": result.total_count,
         }
 
-    # --- write path (ST3) ---
-
     def add(self, records: list[dict[str, Any]]) -> list[str]:
         """Insert records into the collection and return their UUIDs.
 
@@ -132,8 +130,6 @@ class WeaviateVectorStoreHandle(VectorStoreHandle):
                 self._collection.data.delete_many(where=filters)
         except Exception as e:
             raise DatasetError(f"delete() failed: {e}") from e
-
-    # --- read path (ST4) ---
 
     def search(
         self,

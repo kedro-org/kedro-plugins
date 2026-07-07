@@ -254,8 +254,8 @@ safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
 video-videodataset = ["opencv-python~=4.13.0.92"]
 video = ["kedro-datasets[video-videodataset]"]
 
-vectorstore-weaviatevectorstoredataset = ["weaviate-client>=4.0"]
-vectorstore-weaviate = ["kedro-datasets[vectorstore-weaviatevectorstoredataset]"]
+weaviate-dataset = ["weaviate-client>=4.0"]
+weaviate = ["kedro-datasets[weaviate-dataset]"]
 
 # Docs requirements
 docs = [

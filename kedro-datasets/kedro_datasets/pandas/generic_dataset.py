@@ -36,6 +36,12 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
+    !!! warning
+        When ``file_format`` is set to ``pickle``, this dataset uses
+        ``pd.read_pickle`` which can execute arbitrary code when loading
+        untrusted files. Only use ``file_format: pickle`` with files from
+        sources you trust.
+
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 

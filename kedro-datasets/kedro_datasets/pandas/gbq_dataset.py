@@ -154,7 +154,8 @@ class GBQTableDataset(ConnectionMixin, AbstractDataset[None, pd.DataFrame]):
         )
 
     def load(self) -> pd.DataFrame:
-        sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
+        # B608: dataset/table identifiers come from catalog config, not user input
+        sql = f"select * from {self._dataset}.{self._table_name}"  # nosec B608
         self._load_args.setdefault("query_or_table", sql)
         return pd_gbq.read_gbq(
             project_id=self._project_id,

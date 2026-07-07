@@ -48,7 +48,8 @@ class HFDataset(AbstractDataset[None, DatasetLike]):
         self.metadata = metadata
 
     def load(self) -> DatasetLike:
-        # TODO: Replace suppression with the solution from here: https://github.com/kedro-org/kedro-plugins/issues/1131
+        # Dataset name is catalog-configured; load_dataset may download and execute
+        # Hub code, but the risk is inherent to HF datasets usage.
         return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 
     def save(self):

@@ -27,7 +27,7 @@ def before_scenario(context, scenario):
     context.venv_dir = create_new_venv()
 
     # note the locations of some useful stuff
-    # this is because exe resolution in supbrocess doens't respect a passed env
+    # this is because exe resolution in supbrocess doesn't respect a passed env
     if os.name == "posix":
         bin_dir = context.venv_dir / "bin"
         path_sep = ":"

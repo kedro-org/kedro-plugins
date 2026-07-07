@@ -17,7 +17,7 @@ class MLRunModel(MLRunAbstractDataset):
     and
     [`get_artifact`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.get_artifact).
 
-    .. warning::
+    !!! warning
         This dataset uses ``joblib`` for model serialization, which relies on
         pickle internally. Loading untrusted model files can execute arbitrary
         code. Only load models from sources you trust.

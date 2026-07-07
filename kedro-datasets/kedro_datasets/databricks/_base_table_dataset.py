@@ -561,7 +561,6 @@ class BaseTableDataset(AbstractVersionedDataset):
                 )
 
             update_data.createOrReplaceTempView("update")
-            # B608: table name and primary key come from catalog config, not user input
             upsert_sql = f"""MERGE INTO {full_table} base USING update ON {where_expr}
                 WHEN MATCHED THEN UPDATE SET * WHEN NOT MATCHED THEN INSERT *"""  # nosec B608
             get_spark().sql(upsert_sql)

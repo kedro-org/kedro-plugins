@@ -154,8 +154,6 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
     def _load_dataset(self, load_path: str) -> DatasetLike:
         data_files: str | dict[str, str] = self._build_data_files()
 
-        # Builder/data_files are catalog-configured; load_dataset may download and
-        # execute Hub code, but the risk is inherent to HF datasets usage.
         return load_dataset(  # nosec
             self.BUILDER,
             data_files=data_files,

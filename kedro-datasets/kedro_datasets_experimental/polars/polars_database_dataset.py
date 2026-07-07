@@ -149,22 +149,23 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-    from pathlib import Path
-
-    import polars as pl
-    from kedro_datasets_experimental.polars import PolarsDatabaseDataset
-
-    data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    sql = "SELECT * FROM table_a"
-    tmp_path = Path.cwd() / "tmp"
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
-    dataset = PolarsDatabaseDataset(sql=sql, credentials=credentials, table_name="table_a")
-
-    dataset.save(data)
-    reloaded = dataset.load()
-
-    assert data.equals(reloaded)
+    >>> from pathlib import Path
+    >>> import polars as pl
+    >>> import sqlite3
+    >>>
+    >>> from kedro_datasets_experimental.polars import PolarsDatabaseDataset
+    >>>
+    >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    >>> sql = "SELECT * FROM table_a"
+    >>> tmp_path = Path.cwd() / "tmp"
+    >>> tmp_path.mkdir(parents=True, exist_ok=True)
+    >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
+    >>> dataset = PolarsDatabaseDataset(sql=sql, credentials=credentials, table_name="table_a")
+    >>>
+    >>> dataset.save(data)
+    >>> reloaded = dataset.load()
+    >>>
+    >>> assert data.equals(reloaded)
     ```
     """
     # using Any because of Sphinx but it should be
@@ -328,7 +329,6 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         elif "sql" in load_args:
             query = load_args.pop("sql")
         else:
-            # B608: table name comes from catalog config, not user input
             query = f"SELECT * FROM {self.table_name}"  # nosec B608
 
         return pl.read_database(

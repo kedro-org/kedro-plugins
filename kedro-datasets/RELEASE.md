@@ -1,7 +1,9 @@
 # Upcoming release
 ## Major features and improvements
 ## Bug fixes and other changes
+- Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
+
 ## Community contributions
 
 # Release 9.5.0

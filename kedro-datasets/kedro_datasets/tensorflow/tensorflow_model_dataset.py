@@ -29,7 +29,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
     TensorFlow does not currently support Python 3.14.
 
-    .. warning::
+    !!! warning
         By default, models are loaded with ``safe_mode=True``, which restricts
         deserialization to built-in Keras objects only. Loading untrusted model
         files without this flag can execute arbitrary code. If you need to load

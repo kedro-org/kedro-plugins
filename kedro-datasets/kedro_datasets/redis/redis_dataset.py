@@ -18,9 +18,10 @@ class PickleDataset(AbstractDataset[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    **Warning:** Pickle-based deserialization (including ``dill``, ``cloudpickle``,
-    and ``compress_pickle`` backends) can execute arbitrary code when loading
-    untrusted data. Only load from Redis instances you trust.
+    !!! warning
+        Pickle-based deserialization (including ``dill``, ``cloudpickle``, and
+        ``compress_pickle`` backends) can execute arbitrary code when loading
+        untrusted data. Only load from Redis instances you trust.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):

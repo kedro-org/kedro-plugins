@@ -25,9 +25,10 @@ class DartsTorchModelDataset(
     The underlying functionality is supported by, and passes arguments through to,
     the Darts library's model load and save methods.
 
-    **Warning:** Darts model loading uses PyTorch internally, which deserializes
-    pickle data. Loading untrusted model files can execute arbitrary code. Only
-    load models from sources you trust.
+    !!! warning
+        Darts model loading uses PyTorch internally, which deserializes pickle
+        data. Loading untrusted model files can execute arbitrary code. Only
+        load models from sources you trust.
 
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 

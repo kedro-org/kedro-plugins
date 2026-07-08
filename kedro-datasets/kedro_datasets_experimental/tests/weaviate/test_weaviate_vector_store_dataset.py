@@ -1,4 +1,4 @@
-"""Tests for WeaviateVectorStoreDataset and WeaviateVectorStoreHandle (ST2).
+"""Tests for WeaviateVectorStoreDataset and WeaviateVectorStoreHandle.
 
 All tests use mocks — no real Weaviate connection is required.
 """

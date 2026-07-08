@@ -498,4 +498,5 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
             "connection_type": self._connection_type,
             "url": self._url,
             "create_collection_if_missing": self._create_collection_if_missing,
+            "delete_batch_size": self._delete_batch_size,
         }

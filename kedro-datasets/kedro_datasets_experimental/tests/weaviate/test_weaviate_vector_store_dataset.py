@@ -12,6 +12,7 @@ import pytest
 from kedro.io.core import DatasetError
 
 from kedro_datasets_experimental.weaviate.weaviate_vector_store_dataset import (
+    _DELETE_BY_ID_BATCH_SIZE,
     WeaviateVectorStoreDataset,
     WeaviateVectorStoreHandle,
 )
@@ -92,6 +93,7 @@ class TestDescribe:
             "connection_type": "local",
             "url": None,
             "create_collection_if_missing": True,
+            "delete_batch_size": _DELETE_BY_ID_BATCH_SIZE,
         }
 
     def test_cloud_describe(self, cloud_dataset):
@@ -103,6 +105,12 @@ class TestDescribe:
         desc = cloud_dataset._describe()
         assert "credentials" not in desc
         assert "api_key" not in str(desc)
+
+    def test_describe_reflects_non_default_delete_batch_size(self):
+        ds = WeaviateVectorStoreDataset(
+            collection_name="MyCollection", delete_batch_size=500
+        )
+        assert ds._describe()["delete_batch_size"] == 500
 
 
 class TestSaveDisabled:
@@ -388,9 +396,29 @@ class TestHandleDelete:
         mock_collection.data.delete_many.assert_not_called()
 
     def test_delete_by_filter_calls_delete_many(self, handle, mock_collection):
+        mock_result = MagicMock()
+        mock_result.matches = 0
+        mock_collection.data.delete_many.return_value = mock_result
         f = MagicMock()
         handle.delete(filters=f)
         mock_collection.data.delete_many.assert_called_once_with(where=f)
+
+    def test_delete_by_filter_reruns_until_no_matches(self, handle, mock_collection):
+        first_result = MagicMock()
+        first_result.matches = 5
+        second_result = MagicMock()
+        second_result.matches = 0
+        mock_collection.data.delete_many.side_effect = [first_result, second_result]
+        f = MagicMock()
+        handle.delete(filters=f)
+        assert mock_collection.data.delete_many.call_count == 2
+
+    def test_delete_by_filter_raises_after_max_iterations(self, handle, mock_collection):
+        result = MagicMock()
+        result.matches = 1
+        mock_collection.data.delete_many.return_value = result
+        with pytest.raises(DatasetError, match="still matched objects"):
+            handle.delete(filters=MagicMock())
 
     def test_delete_requires_ids_or_filters(self, handle):
         with pytest.raises(DatasetError, match="requires exactly one"):

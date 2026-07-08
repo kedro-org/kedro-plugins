@@ -29,6 +29,13 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
     TensorFlow does not currently support Python 3.14.
 
+    !!! warning
+        By default, models are loaded with ``safe_mode=True``, which restricts
+        deserialization to built-in Keras objects only. Loading untrusted model
+        files without this flag can execute arbitrary code. If you need to load
+        custom objects from a trusted source, set ``safe_mode: false`` in
+        ``load_args``.
+
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
@@ -64,7 +71,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
     """
 
-    DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS: dict[str, Any] = {"safe_mode": True}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
 
     def __init__(  # noqa: PLR0913
@@ -88,7 +95,10 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
             load_args: TensorFlow options for loading models.
                 Here you can find all available arguments:
                 https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model
-                All defaults are preserved.
+                All defaults are preserved, except for "safe_mode", which is set to True.
+                Set ``safe_mode: false`` to load models containing custom objects from
+                trusted sources. A special key ``tf_device`` can be used to specify the
+                device context for loading.
             save_args: TensorFlow options for saving models.
                 Here you can find all available arguments:
                 https://www.tensorflow.org/api_docs/python/tf/keras/models/save_model
@@ -142,13 +152,13 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
 
             self._fs.get(load_path, path)
 
-            # Pass the local temporary directory/file path to keras.load_model
-            device_name = self._load_args.pop("tf_device", None)
+            load_args = {k: v for k, v in self._load_args.items() if k != "tf_device"}
+            device_name = self._load_args.get("tf_device")
             if device_name:
                 with tf.device(device_name):
-                    model = tf.keras.models.load_model(path, **self._load_args)
+                    model = tf.keras.models.load_model(path, **load_args)
             else:
-                model = tf.keras.models.load_model(path, **self._load_args)
+                model = tf.keras.models.load_model(path, **load_args)
             return model
 
     def save(self, data: tf.keras.Model) -> None:

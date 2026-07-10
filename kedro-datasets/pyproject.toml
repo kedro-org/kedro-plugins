@@ -254,6 +254,9 @@ safetensors = ["kedro-datasets[safetensors-safetensorsdataset]"]
 video-videodataset = ["opencv-python~=4.13.0.92"]
 video = ["kedro-datasets[video-videodataset]"]
 
+weaviate-dataset = ["weaviate-client>=4.0"]
+weaviate = ["kedro-datasets[weaviate-dataset]"]
+
 # Docs requirements
 docs = [
    "mkdocs>=1.6.1",
@@ -373,6 +376,7 @@ lint = [
 
 # Experimental dataset requirements
 experimental = [
+    "weaviate-client>=4.0",
     "langchain-openai",
     "langchain-cohere",
     "langchain-anthropic",
@@ -394,6 +398,7 @@ experimental = [
 ]
 
 experimental_test = [
+    "weaviate-client>=4.0",
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
     "delta-spark>=4.0, <4.1; python_version >= '3.12'",
     "langchain-openai",

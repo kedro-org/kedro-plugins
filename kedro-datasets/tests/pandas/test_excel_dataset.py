@@ -58,7 +58,7 @@ def another_dummy_dataframe():
 
 class TestExcelDataset:
     def test_save_and_load(self, excel_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         excel_dataset.save(dummy_dataframe)
         reloaded = excel_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
@@ -66,7 +66,7 @@ class TestExcelDataset:
     def test_save_and_load_multiple_sheets(
         self, excel_multisheet_dataset, dummy_dataframe, another_dummy_dataframe
     ):
-        """Test saving and reloading the data set with multiple sheets."""
+        """Test saving and reloading the dataset with multiple sheets."""
         dummy_multisheet = {
             "sheet 1": dummy_dataframe,
             "sheet 2": another_dummy_dataframe,
@@ -78,7 +78,7 @@ class TestExcelDataset:
 
     def test_exists(self, excel_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not excel_dataset.exists()
         excel_dataset.save(dummy_dataframe)
         assert excel_dataset.exists()
@@ -169,7 +169,7 @@ class TestExcelDataset:
 
     def test_load_missing_file(self, excel_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set ExcelDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.excel_dataset.ExcelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             excel_dataset.load()
 
@@ -208,6 +208,13 @@ class TestExcelDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.xlsx"
+        dataset = ExcelDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
 
 class TestExcelDatasetVersioned:
     def test_version_str_repr(self, load_version, save_version):
@@ -233,19 +240,19 @@ class TestExcelDatasetVersioned:
         # Default save_args and load_args
         assert "save_args={'index': False}" in str(ds)
         assert "save_args={'index': False}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds)
+        assert "load_args={'engine': 'openpyxl'}" in str(ds_versioned)
+        assert "load_args={'engine': 'openpyxl'}" in str(ds)
 
     def test_save_and_load(self, versioned_excel_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_excel_dataset.save(dummy_dataframe)
         reloaded_df = versioned_excel_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_no_versions(self, versioned_excel_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ExcelDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_excel_dataset.load()
 
@@ -264,17 +271,17 @@ class TestExcelDatasetVersioned:
             )
 
     def test_exists(self, versioned_excel_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_excel_dataset.exists()
         versioned_excel_dataset.save(dummy_dataframe)
         assert versioned_excel_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_excel_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Excel file for a given save version already exists."""
         versioned_excel_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for ExcelDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -293,7 +300,7 @@ class TestExcelDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for ExcelDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.excel_dataset.ExcelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_excel_dataset.save(dummy_dataframe)

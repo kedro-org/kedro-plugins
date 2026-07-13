@@ -3,6 +3,7 @@ filesystem (e.g. local, S3, GCS)."""
 from __future__ import annotations
 
 import io
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn, TypeVar
@@ -25,16 +26,15 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 
-    Example:
-
-    .. code-block:: pycon
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import holoviews as hv
         >>> from kedro_datasets.holoviews import HoloviewsWriter
         >>>
         >>> curve = hv.Curve(range(10))
-        >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
         >>>
+        >>> holoviews_writer = HoloviewsWriter(filepath=tmp_path / "holoviews")
         >>> holoviews_writer.save(curve)
 
     """
@@ -44,7 +44,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         fs_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -58,6 +58,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
+                Can be a string or a PathLike object.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested key `open_args_save`.
@@ -100,9 +101,7 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
         self._fs_open_args_save = _fs_open_args_save
 
         # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -112,10 +111,10 @@ class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
             "version": self._version,
         }
 
-    def _load(self) -> NoReturn:
+    def load(self) -> NoReturn:
         raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: HoloViews) -> None:
+    def save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()
         hv.save(data, bytes_buffer, **self._save_args)
 

@@ -2,9 +2,9 @@
 
 import shlex
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 from sys import version_info
-from typing import Dict, Sequence
 
 import click
 from kedro import __version__ as kedro_version
@@ -122,12 +122,7 @@ def docker_init(spark):
     project_path = Path.cwd()
     template_path = Path(__file__).parent / "template"
 
-    if KEDRO_VERSION.match(">=0.17.0"):
-        verbose = KedroCliError.VERBOSE_ERROR
-    else:
-        from kedro.framework.cli.cli import (
-            _VERBOSE as verbose,
-        )
+    verbose = KedroCliError.VERBOSE_ERROR
 
     docker_file_version = "spark" if spark else "simple"
     docker_file = f"Dockerfile.{docker_file_version}"
@@ -191,7 +186,7 @@ def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):  # noqa:
     call(command)
 
 
-def _mount_info() -> Dict[str, Sequence[str]]:
+def _mount_info() -> dict[str, Sequence[str]]:
     res = {
         "host_root": str(Path.cwd()),
         "container_root": "/home/kedro_docker",

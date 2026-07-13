@@ -4,6 +4,7 @@ type of read/write target.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -35,12 +36,16 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    !!! warning
+        When ``file_format`` is set to ``pickle``, this dataset uses
+        ``pd.read_pickle`` which can execute arbitrary code when loading
+        untrusted files. Only use ``file_format: pickle`` with files from
+        sources you trust.
 
-    .. code-block:: yaml
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
+        ```yaml
         cars:
           type: pandas.GenericDataset
           file_format: csv
@@ -51,28 +56,25 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
           save_args:
             index: False
             date_format: "%Y-%m-%d"
+        ```
 
-    This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
-    Trying to save this dataset will raise a ``DatasetError`` since pandas does not provide an
-    equivalent ``pd.DataFrame.to_sas`` write method.
+        This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
+        Trying to save this dataset will raise a ``DatasetError`` since pandas does not provide an
+        equivalent ``pd.DataFrame.to_sas`` write method.
 
-    .. code-block:: yaml
-
+        ```yaml
         flights:
-           type: pandas.GenericDataset
-           file_format: sas
-           filepath: data/01_raw/airplanes.sas7bdat
-           load_args:
-              format: sas7bdat
+          type: pandas.GenericDataset
+          file_format: sas
+          filepath: data/01_raw/airplanes.sas7bdat
+          load_args:
+            format: sas7bdat
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import GenericDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import GenericDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
@@ -87,11 +89,12 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -108,6 +111,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
+                Can be a string or a PathLike object.
                 Key assumption: The first argument of either load/save method points to a
                 filepath/buffer/io type location. There are some read/write targets such
                 as 'clipboard' or 'records' that will fail since they do not take a
@@ -137,8 +141,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `w` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
@@ -170,16 +173,17 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             glob_function=self._fs.glob,
         )
 
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _ensure_file_system_target(self) -> None:
         # Fail fast if provided a known non-filesystem target
@@ -189,7 +193,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
                 f"does not support a filepath target/source."
             )
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -203,7 +207,7 @@ class GenericDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             "https://pandas.pydata.org/docs/reference/io.html"
         )
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

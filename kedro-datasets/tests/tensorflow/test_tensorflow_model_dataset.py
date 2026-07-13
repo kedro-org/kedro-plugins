@@ -9,11 +9,15 @@ from gcsfs import GCSFileSystem
 from kedro.io.core import PROTOCOL_DELIMITER, DatasetError, Version
 from s3fs import S3FileSystem
 
-if sys.platform == "win32":
-    pytest.skip(
-        "TensorFlow tests have become inexplicably flaky in Windows CI",
-        allow_module_level=True,
-    )
+_skip_on_win32 = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="TensorFlow tests have become inexplicably flaky in Windows CI",
+)
+
+_skip_on_314 = pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="TensorFlow does not support Python 3.14",
+)
 
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
@@ -32,14 +36,14 @@ if sys.platform == "win32":
 # a subprocess spawned by the parallel runner, so we wrap the import inside fixtures.
 @pytest.fixture(scope="module")
 def tf():
-    import tensorflow as tf
+    import tensorflow as tf  # noqa: PLC0415
 
     return tf
 
 
 @pytest.fixture(scope="module")
 def tensorflow_model_dataset():
-    from kedro_datasets.tensorflow import TensorFlowModelDataset
+    from kedro_datasets.tensorflow import TensorFlowModelDataset  # noqa: PLC0415
 
     return TensorFlowModelDataset
 
@@ -138,11 +142,13 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
+@_skip_on_win32
+@_skip_on_314
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
     def test_save_and_load(self, tf_model_dataset, dummy_tf_base_model, dummy_x_test):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         predictions = dummy_tf_base_model.predict(dummy_x_test)
         tf_model_dataset.save(dummy_tf_base_model)
 
@@ -150,19 +156,17 @@ class TestTensorFlowModelDataset:
         new_predictions = reloaded.predict(dummy_x_test)
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
-        assert tf_model_dataset._load_args == {}
+        assert tf_model_dataset._load_args == {"safe_mode": True}
         assert tf_model_dataset._save_args == {}
 
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
-        pattern = (
-            r"Failed while loading data from data set TensorFlowModelDataset\(.*\)"
-        )
+        pattern = r"Failed while loading data from dataset kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 
     def test_exists(self, tf_model_dataset, dummy_tf_base_model):
-        """Test `exists` method invocation for both existing and nonexistent data set."""
+        """Test `exists` method invocation for both existing and nonexistent dataset."""
         assert not tf_model_dataset.exists()
         tf_model_dataset.save(dummy_tf_base_model)
         assert tf_model_dataset.exists()
@@ -245,10 +249,11 @@ class TestTensorFlowModelDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.tf"
         dataset = tensorflow_model_dataset(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
 
     @pytest.mark.parametrize("fs_args", [{"storage_option": "value"}])
     def test_fs_args(self, fs_args, mocker, tensorflow_model_dataset):
@@ -276,6 +281,8 @@ class TestTensorFlowModelDataset:
         assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
+@_skip_on_win32
+@_skip_on_314
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
 
@@ -301,7 +308,7 @@ class TestTensorFlowModelDatasetVersioned:
         load_version,
         save_version,
     ):
-        """Test saving and reloading the versioned data set."""
+        """Test saving and reloading the versioned dataset."""
 
         predictions = dummy_tf_base_model.predict(dummy_x_test)
         versioned_tf_model_dataset.save(dummy_tf_base_model)
@@ -334,11 +341,11 @@ class TestTensorFlowModelDatasetVersioned:
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
     def test_prevent_overwrite(self, dummy_tf_base_model, versioned_tf_model_dataset):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -360,7 +367,7 @@ class TestTensorFlowModelDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version '{load_version}' "
-            rf"for TensorFlowModelDataset\(.+\)"
+            rf"for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
@@ -374,14 +381,14 @@ class TestTensorFlowModelDatasetVersioned:
             )
 
     def test_exists(self, versioned_tf_model_dataset, dummy_tf_base_model):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_tf_model_dataset.exists()
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         assert versioned_tf_model_dataset.exists()
 
     def test_no_versions(self, versioned_tf_model_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for TensorFlowModelDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.load()
 

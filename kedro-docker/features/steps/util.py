@@ -3,13 +3,13 @@
 import tempfile
 import urllib
 import venv
+from collections.abc import Callable
 from pathlib import Path
 from threading import Thread
 from time import sleep, time
-from typing import Any, Callable, List
+from typing import Any
 
 import docker
-from kedro.framework.cli.utils import get_pkg_version
 
 
 class WaitForException(Exception):
@@ -126,11 +126,11 @@ def init_docker_client(**kwargs) -> docker.client.DockerClient:
     # otherwise docker on CircleCI fails with an error:
     # docker.errors.APIError: 400 Client Error: Bad Request ("client version
     # 1.35 is too new. Maximum supported API version is 1.34")
-    kwargs.setdefault("version", "1.34")
+    kwargs.setdefault("version", "1.44")
     return docker.from_env(**kwargs)
 
 
-def get_docker_containers(name: str) -> List[docker.models.containers.Container]:
+def get_docker_containers(name: str) -> list[docker.models.containers.Container]:
     """
     Get list of docker containers which contain `name` in their names.
 
@@ -164,7 +164,7 @@ def docker_prune():
     client.images.prune()
 
 
-def get_docker_images(name: str) -> List[docker.models.images.Image]:
+def get_docker_images(name: str) -> list[docker.models.images.Image]:
     """
     Get docker images with `name` in their names.
 
@@ -177,25 +177,6 @@ def get_docker_images(name: str) -> List[docker.models.images.Image]:
     """
     client = init_docker_client()
     return [i for i in client.images.list() if any(name in t for t in i.tags)]
-
-
-def modify_kedro_ver(req_file: Path, version: str) -> str:
-    """
-    Modify project kedro requirement to deal with invalid kedro version
-    bug when bumping up version.
-
-    Args:
-        req_file: Path to `requirements.txt` in kedro project.
-        version: Version of kedro to insert into project `requirements.txt`.
-
-    Returns:
-        Version of kedro in original project `requirements.txt`
-    """
-    project_reqs = req_file.read_text("utf-8")
-    org_version = get_pkg_version(req_file, "kedro")
-    project_reqs = project_reqs.replace(org_version, version)
-    req_file.write_text(project_reqs)
-    return org_version
 
 
 def create_new_venv() -> Path:

@@ -1,0 +1,356 @@
+import os
+import sys
+from unittest.mock import MagicMock, patch
+
+import pytest
+from kedro.io import DatasetError
+
+from kedro_datasets_experimental.opik import trace_dataset as trace_dataset_module
+from kedro_datasets_experimental.opik.trace_dataset import TraceDataset
+
+OPIK_AUTOGEN_ENDPOINT = "https://www.comet.com/opik/api/v1/private/otel/v1/traces"
+
+
+@pytest.fixture
+def base_credentials():
+    return {"api_key": "test-key", "workspace": "test-workspace"}  # pragma: allowlist secret
+
+
+@pytest.fixture
+def autogen_credentials(base_credentials):
+    return base_credentials | {"endpoint": OPIK_AUTOGEN_ENDPOINT}
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_init_with_valid_credentials(configure_mock, base_credentials):
+    """Test that dataset initializes correctly with valid credentials and calls configure."""
+    dataset = TraceDataset(base_credentials)
+    assert dataset._credentials == base_credentials
+    configure_mock.assert_called_once()
+
+
+def test_missing_required_credentials_raises():
+    """Test that missing required credentials raises DatasetError."""
+    with pytest.raises(DatasetError, match="Missing required Opik credential"):
+        TraceDataset({"workspace": "x"})
+
+
+def test_empty_optional_credential_raises(base_credentials):
+    """Test that empty optional credentials raise DatasetError."""
+    creds = base_credentials | {"project_name": " "}
+    with pytest.raises(DatasetError, match="cannot be empty"):
+        TraceDataset(creds)
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_configure_opik_forwards_project_name(configure_mock, base_credentials):
+    """project_name from credentials is passed to configure() so the configured
+    client (and any tracer derived from it) logs to the right project."""
+    creds = base_credentials | {"project_name": "test-proj"}
+    TraceDataset(creds)
+    configure_mock.assert_called_once()
+    assert configure_mock.call_args.kwargs["project_name"] == "test-proj"
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_configure_opik_project_name_none_when_absent(configure_mock, base_credentials):
+    """No project_name in credentials -> configure() receives project_name=None
+    (Opik falls back to its own default)."""
+    TraceDataset(base_credentials)
+    configure_mock.assert_called_once()
+    assert configure_mock.call_args.kwargs["project_name"] is None
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_configure_opik_warns_on_project_switch_in_session(
+    configure_mock, base_credentials, caplog
+):
+    """Configuring a second, different project in the same process warns, since
+    Opik configuration is global per process. Same project does not warn."""
+    TraceDataset(base_credentials | {"project_name": "proj-a"})
+
+    caplog.clear()
+    TraceDataset(base_credentials | {"project_name": "proj-a"})
+    assert "already configured" not in caplog.text
+
+    caplog.clear()
+    TraceDataset(base_credentials | {"project_name": "proj-b"})
+    assert "already configured for project 'proj-a'" in caplog.text
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("kedro_datasets_experimental.opik.trace_dataset.track")
+def test_load_sdk_client_returns_wrapper(track_mock, configure_mock, base_credentials):
+    """Test that loading SDK mode returns a wrapper client with a track method."""
+    dataset = TraceDataset(base_credentials, mode="sdk")
+    client = dataset.load()
+    assert hasattr(client, "track")
+    assert client.track is track_mock
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.openai.track_openai")
+@patch("openai.OpenAI")
+def test_load_openai_client(openai_mock, track_openai_mock, configure_mock, base_credentials):
+    """Test that loading OpenAI client returns a tracked OpenAI client."""
+    creds = base_credentials | {
+        "openai": {"api_key": "sk-test"},  # pragma: allowlist secret
+        "project_name": "proj-a",
+    }
+    dataset = TraceDataset(creds, mode="openai")
+    dataset.load()
+    openai_mock.assert_called_once()
+    track_openai_mock.assert_called_once()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.openai.track_openai")
+@patch("openai.OpenAI")
+def test_load_openai_client_with_base_url(openai_mock, track_openai_mock, configure_mock, base_credentials):
+    """Test that loading OpenAI client passes base_url when provided."""
+    creds = base_credentials | {
+        "openai": {"api_key": "sk-test", "base_url": "https://custom.openai.com/v1"},  # pragma: allowlist secret
+    }
+    dataset = TraceDataset(creds, mode="openai")
+    dataset.load()
+    openai_mock.assert_called_once_with(api_key="sk-test", base_url="https://custom.openai.com/v1")  # pragma: allowlist secret
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_openai_empty_base_url_raises(configure_mock, base_credentials, mocker):
+    """Test that empty base_url raises DatasetError."""
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
+    creds = base_credentials | {"openai": {"api_key": "sk-test", "base_url": "  "}}  # pragma: allowlist secret
+    dataset = TraceDataset(creds, mode="openai")
+    with pytest.raises(DatasetError, match="'base_url' cannot be empty if provided"):
+        dataset.load()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_openai_missing_credentials_raises(configure_mock, base_credentials, mocker):
+    """Test that missing OpenAI API key raises DatasetError."""
+    # Mock openai and opik.integrations.openai to avoid real imports
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
+    creds = base_credentials | {"openai": {}}
+    dataset = TraceDataset(creds, mode="openai")
+    with pytest.raises(DatasetError, match="Missing or empty OpenAI API key"):
+        dataset.load()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_openai_missing_section_raises(configure_mock, base_credentials, mocker):
+    """Test that missing OpenAI section raises DatasetError."""
+    # Mock openai and opik.integrations.openai to avoid real imports
+    mock_openai = MagicMock()
+    mock_opik_openai = MagicMock()
+    mocker.patch.dict("sys.modules", {
+        "openai": mock_openai,
+        "opik.integrations.openai": mock_opik_openai,
+    })
+
+    dataset = TraceDataset(base_credentials, mode="openai")
+    with pytest.raises(DatasetError, match="Missing 'openai' section in TraceDataset credentials."):
+        dataset.load()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer(opik_tracer_mock, configure_mock, base_credentials):
+    """Test that loading LangChain mode returns an OpikTracer instance."""
+    dataset = TraceDataset(base_credentials, mode="langchain")
+    client = dataset.load()
+    opik_tracer_mock.assert_called_once()
+    assert client == opik_tracer_mock.return_value
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_routes_project_via_configure(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """Regression for traces landing in "Default Project": project_name from
+    credentials reaches the Opik client via configure(), so the langchain
+    tracer (created without an explicit project) inherits it."""
+    creds = base_credentials | {"project_name": "my-project"}
+    TraceDataset(creds, mode="langchain").load()
+    assert configure_mock.call_args.kwargs["project_name"] == "my-project"
+    opik_tracer_mock.assert_called_once_with()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_trace_kwarg_passed_through(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """An explicit project_name catalog kwarg is passed straight to OpikTracer,
+    taking precedence over the configured client project for that tracer."""
+    creds = base_credentials | {"project_name": "from-creds"}
+    TraceDataset(creds, mode="langchain", project_name="from-kwargs").load()
+    opik_tracer_mock.assert_called_once_with(project_name="from-kwargs")
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("opik.integrations.langchain.OpikTracer")
+def test_load_langchain_tracer_no_project_name_passes_no_kwarg(
+    opik_tracer_mock, configure_mock, base_credentials
+):
+    """Without a catalog project_name kwarg, OpikTracer is called with no kwargs."""
+    TraceDataset(base_credentials, mode="langchain").load()
+    opik_tracer_mock.assert_called_once_with()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_langchain_import_error_raises(configure_mock, base_credentials, monkeypatch):
+    """Test that ImportError in LangChain integration raises DatasetError."""
+    monkeypatch.setitem(sys.modules, "opik.integrations.langchain", None)
+    with pytest.raises(DatasetError, match="Opik LangChain integration not available"):
+        TraceDataset(base_credentials, mode="langchain").load()
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+@patch("kedro_datasets_experimental.opik.trace_dataset.track")
+def test_client_is_cached(track_mock, configure_mock, base_credentials):
+    """Test that multiple calls to load() return the cached client instance."""
+    dataset = TraceDataset(base_credentials, mode="sdk")
+    client1 = dataset.load()
+    client2 = dataset.load()
+    assert client1 is client2
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_describe_masks_credentials(configure_mock, base_credentials):
+    """Test that _describe() masks credential values."""
+    dataset = TraceDataset(base_credentials)
+    desc = dataset._describe()
+    assert all(v == "***" for v in desc["credentials"].values())
+
+
+@patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+def test_save_not_implemented(configure_mock, base_credentials):
+    """Test that calling save() raises DatasetError because dataset is read-only."""
+    dataset = TraceDataset(base_credentials)
+    with pytest.raises(DatasetError):
+        dataset.save("data")
+
+
+# AutoGen mode tests
+class TestTraceDatasetAutogenMode:
+    """Tests for AutoGen mode in TraceDataset."""
+
+    def test_autogen_mode_returns_tracer(self, mocker, autogen_credentials):
+        """Test AutoGen mode returns configured Tracer."""
+        mock_tracer = MagicMock()
+        mocker.patch(
+            "kedro_datasets_experimental.opik.trace_dataset.TraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
+
+        dataset = TraceDataset(autogen_credentials, mode="autogen")
+
+        result = dataset.load()
+        assert result == mock_tracer
+
+    def test_autogen_mode_caching(self, mocker, autogen_credentials):
+        """Test that AutoGen mode caches the tracer."""
+        mock_tracer = MagicMock()
+        build_tracer_mock = mocker.patch(
+            "kedro_datasets_experimental.opik.trace_dataset.TraceDataset._build_autogen_tracer",
+            return_value=mock_tracer
+        )
+
+        dataset = TraceDataset(autogen_credentials, mode="autogen")
+
+        # Call load twice
+        result1 = dataset.load()
+        result2 = dataset.load()
+
+        # Should only build tracer once due to caching
+        build_tracer_mock.assert_called_once()
+        assert result1 is result2
+
+    def test_autogen_mode_skips_opik_configure(self, mocker, autogen_credentials):
+        """Test that AutoGen mode does not call Opik SDK configure."""
+        configure_mock = mocker.patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.opik.trace_dataset.TraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
+
+        TraceDataset(autogen_credentials, mode="autogen")
+
+        # configure should not be called for autogen mode
+        configure_mock.assert_not_called()
+
+    def test_autogen_mode_missing_endpoint(self, base_credentials):
+        """Test that autogen mode raises error when endpoint is missing."""
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            TraceDataset(base_credentials, mode="autogen")
+
+    def test_autogen_mode_empty_endpoint(self, base_credentials):
+        """Test that autogen mode raises error when endpoint is empty."""
+        creds = base_credentials | {"endpoint": ""}
+        with pytest.raises(DatasetError, match="AutoGen mode requires 'endpoint'"):
+            TraceDataset(creds, mode="autogen")
+
+    def test_autogen_mode_endpoint_not_required_for_other_modes(self, mocker, base_credentials):
+        """Test that endpoint is not required for non-autogen modes."""
+        mocker.patch("kedro_datasets_experimental.opik.trace_dataset.configure")
+
+        # Endpoint is only required for autogen mode
+        dataset = TraceDataset(base_credentials, mode="sdk")
+        assert dataset._mode == "sdk"
+
+    def test_autogen_mode_import_error(self, mocker, autogen_credentials):
+        """Test AutoGen mode raises DatasetError when OpenTelemetry not installed."""
+
+        def raise_import_error():
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            )
+
+        mocker.patch(
+            "kedro_datasets_experimental.opik.trace_dataset.TraceDataset._build_autogen_tracer",
+            side_effect=raise_import_error
+        )
+
+        dataset = TraceDataset(autogen_credentials, mode="autogen")
+
+        with pytest.raises(DatasetError, match="AutoGen mode requires OpenTelemetry"):
+            dataset.load()
+
+    def test_describe_autogen_mode(self, mocker, autogen_credentials):
+        """Test _describe returns correct format for autogen mode."""
+        # Mock the tracer builder to avoid actual OpenTelemetry imports
+        mocker.patch(
+            "kedro_datasets_experimental.opik.trace_dataset.TraceDataset._build_autogen_tracer",
+            return_value=MagicMock()
+        )
+
+        dataset = TraceDataset(autogen_credentials, mode="autogen")
+        desc = dataset._describe()
+        assert desc["mode"] == "autogen"
+        assert all(v == "***" for v in desc["credentials"].values())
+
+
+@pytest.fixture(autouse=True)
+def clean_env():
+    """Reset env vars and the per-process project guard after each test."""
+    yield
+    if "OPIK_PROJECT_NAME" in os.environ:
+        del os.environ["OPIK_PROJECT_NAME"]
+    trace_dataset_module._session_project_state["project_name"] = None

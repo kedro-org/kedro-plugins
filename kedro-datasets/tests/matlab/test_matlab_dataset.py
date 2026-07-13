@@ -36,16 +36,16 @@ def dummy_data():
 
 class TestMatlabDataset:
     def test_save_and_load(self, matlab_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         matlab_dataset.save(dummy_data)
         reloaded = matlab_dataset.load()
         assert (dummy_data == reloaded["data"]).all()
         assert matlab_dataset._fs_open_args_load == {}
-        assert matlab_dataset._fs_open_args_save == {"mode": "w"}
+        assert matlab_dataset._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, matlab_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not matlab_dataset.exists()
         matlab_dataset.save(dummy_data)
         assert matlab_dataset.exists()
@@ -65,11 +65,11 @@ class TestMatlabDataset:
     )
     def test_open_extra_args(self, matlab_dataset, fs_args):
         assert matlab_dataset._fs_open_args_load == fs_args["open_args_load"]
-        assert matlab_dataset._fs_open_args_save == {"mode": "w"}  # default unchanged
+        assert matlab_dataset._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, matlab_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set MatlabDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             matlab_dataset.load()
 
@@ -125,29 +125,29 @@ class TestMatlabDatasetVersioned:
 
     def test_save_and_load(self, versioned_matlab_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_matlab_dataset.save(dummy_data)
         reloaded = versioned_matlab_dataset.load()
         assert (dummy_data == reloaded["data"]).all()
 
     def test_no_versions(self, versioned_matlab_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MatlabDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_matlab_dataset.load()
 
     def test_exists(self, versioned_matlab_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_matlab_dataset.exists()
         versioned_matlab_dataset.save(dummy_data)
         assert versioned_matlab_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_matlab_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding json file for a given save version already exists."""
         versioned_matlab_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for MatlabDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -167,7 +167,7 @@ class TestMatlabDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MatlabDataset\(.+\)"
+            r"kedro_datasets.matlab.matlab_dataset.MatlabDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_matlab_dataset.save(dummy_data)

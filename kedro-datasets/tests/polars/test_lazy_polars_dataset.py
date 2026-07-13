@@ -111,7 +111,7 @@ class TestLazyCSVDataset:
 
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set.
+        nonexistent dataset.
         """
         assert not csv_dataset.exists()
         csv_dataset.save(dummy_dataframe)
@@ -137,7 +137,7 @@ class TestLazyCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set LazyPolarsDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 
@@ -216,10 +216,20 @@ class TestLazyCSVDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = LazyPolarsDataset(filepath=filepath, file_format="csv")
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = LazyPolarsDataset(filepath=filepath, file_format="csv")
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load().collect(), dummy_dataframe)
 
 
 class TestLazyParquetDatasetVersioned:
@@ -229,7 +239,14 @@ class TestLazyParquetDatasetVersioned:
         assert df.shape == (2, 3)
 
     def test_save_and_load(self, versioned_parquet_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
+        versioned_parquet_dataset.save(dummy_dataframe.lazy())
+        reloaded_df = versioned_parquet_dataset.load().collect()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_save_using_pyarrow(self, versioned_parquet_dataset, dummy_dataframe):
+        """Test saving dataset with pyarrow."""
+        versioned_parquet_dataset._save_args["use_pyarrow"] = True
         versioned_parquet_dataset.save(dummy_dataframe.lazy())
         reloaded_df = versioned_parquet_dataset.load().collect()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -320,41 +337,42 @@ class TestLazyParquetDatasetVersioned:
             file_format="parquet",
             version=Version(None, None),
         )
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = LazyPolarsDataset(
             filepath=filepath_pq,
             file_format="parquet",
             version=Version(None, None),
         )
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_parquet_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for LazyPolarsDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_parquet_dataset.load()
 
     def test_prevent_overwrite(self, versioned_parquet_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Generic (parquet) file for a given save version already exists."""
         versioned_parquet_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for LazyPolarsDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -373,7 +391,7 @@ class TestLazyParquetDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for LazyPolarsDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.polars.lazy_polars_dataset.LazyPolarsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_dataset.save(dummy_dataframe)

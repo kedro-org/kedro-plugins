@@ -2,13 +2,15 @@
 S3, GCS), Databricks unity catalog and AWS Glue catalog respectively. It handles
 load and save using a pandas dataframe.
 """
+
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from typing import Any
 
 import pandas as pd
-from deltalake import DataCatalog, DeltaTable, Metadata
+from deltalake import DeltaTable, Metadata
 from deltalake.exceptions import TableNotFoundError
 from deltalake.writer import write_deltalake
 from kedro.io.core import AbstractDataset, DatasetError
@@ -23,12 +25,10 @@ class DeltaTableDataset(AbstractDataset):
     mode=overwrite together with partition_filters. This will remove all files within the
     matching partition and insert your data as new files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         boats_filesystem:
           type: pandas.DeltaTableDataset
           filepath: data/01_raw/boats
@@ -56,19 +56,16 @@ class DeltaTableDataset(AbstractDataset):
           table: db_table
           save_args:
             mode: overwrite
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.pandas import DeltaTableDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
         >>>
+        >>> dataset = DeltaTableDataset(filepath=tmp_path / "test")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
@@ -88,8 +85,8 @@ class DeltaTableDataset(AbstractDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str | None = None,
-        catalog_type: DataCatalog | None = None,
+        filepath: str | os.PathLike | None = None,
+        catalog_type: str | None = None,
         catalog_name: str | None = None,
         database: str | None = None,
         table: str | None = None,
@@ -108,6 +105,7 @@ class DeltaTableDataset(AbstractDataset):
                 ``GCS``: `gs://<bucket>/<path>`
                 If any of the prefix above is not provided, `file` protocol (local filesystem)
                 will be used.
+                Can be a string or a PathLike object.
             catalog_type (DataCatalog, Optional): `AWS` or `UNITY` if filepath is not provided.
                 Defaults to None.
             catalog_name (str, Optional): the name of catalog in AWS Glue or Databricks Unity.
@@ -136,21 +134,17 @@ class DeltaTableDataset(AbstractDataset):
         self._catalog_name = catalog_name
         self._database = database
         self._table = table
-        self._fs_args = deepcopy(fs_args) or {}
-        self._credentials = deepcopy(credentials) or {}
+        self._fs_args = deepcopy(fs_args or {})
+        self._credentials = deepcopy(credentials or {})
 
         # DeltaTable cannot be instantiated from an empty directory
         # for the first time creation from filepath, we need to delay the instantiation
         self.is_empty_dir: bool = False
         self._delta_table: DeltaTable | None = None
 
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args:
-            self._load_args.update(load_args)
-
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args:
-            self._save_args.update(save_args)
+        # Handle default load and save arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         write_mode = self._save_args.get("mode", None)
         if write_mode not in self.ACCEPTED_WRITE_MODES:
@@ -178,12 +172,20 @@ class DeltaTableDataset(AbstractDataset):
                 )
             except TableNotFoundError:
                 self.is_empty_dir = True
-        else:
-            self._delta_table = DeltaTable.from_data_catalog(
-                data_catalog=DataCatalog[self._catalog_type],  # type: ignore[misc]
-                data_catalog_id=self._catalog_name,
-                database_name=self._database or "",
-                table_name=self._table or "",
+        elif self._catalog_type:
+            if self._catalog_type.upper() == "AWS":
+                table_uri = f"glue:///{self._database}/{self._table}"
+            elif self._catalog_type.upper() == "UNITY":
+                table_uri = (
+                    f"unity://{self._catalog_name}/{self._database}/{self._table}"
+                )
+            else:
+                raise ValueError(f"Unsupported catalog type: {self._catalog_type}")
+
+            self._delta_table = DeltaTable(
+                table_uri=table_uri,
+                storage_options=self.fs_args,
+                version=self._version,
             )
 
     @property
@@ -223,10 +225,10 @@ class DeltaTableDataset(AbstractDataset):
         """Returns the version of the DeltaTableDataset that is currently loaded."""
         return self._delta_table.version() if self._delta_table else None
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         return self._delta_table.to_pandas() if self._delta_table else None
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         if self.is_empty_dir:
             # first time creation of delta table
             write_deltalake(

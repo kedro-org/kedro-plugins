@@ -19,5 +19,6 @@ jobs:
             datasets
             docker
             telemetry
+            all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

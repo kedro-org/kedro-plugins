@@ -44,3 +44,48 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 
 ```
+
+# SparkDatasetV2
+
+`SparkDatasetV2` is a modernised Spark dataset with the following improvements over `SparkDataset`:
+
+- **No hooks required** - Spark session is created automatically inside the dataset
+- **Pandas auto-conversion** - Save Pandas DataFrames directly, they're converted to Spark automatically
+- **Databricks Connect support** - Works with `DatabricksSession.builder.serverless(True)`
+- **Spark Connect support** - Works with Spark 3.4+ remote connections via `SPARK_REMOTE`
+- **Simplified dependencies** - Choose what you need: `spark-local`, `spark-s3`, `spark-gcs`, etc.
+
+## Basic Usage
+```yaml
+# catalog.yml
+my_data:
+  type: spark.SparkDatasetV2
+  filepath: data/output.parquet
+```
+
+## Saving Pandas DataFrames
+```python
+# nodes.py
+import pandas as pd
+
+def create_data() -> pd.DataFrame:
+    return pd.DataFrame({"a": [1, 2, 3]})
+
+# SparkDatasetV2 automatically converts Pandas to Spark on save!
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABRICKS_HOST` + `DATABRICKS_TOKEN` | Enables Databricks Connect |
+| `SPARK_REMOTE` | Enables Spark Connect (e.g., `sc://localhost:15002`) |
+
+## Supported Paths
+
+- Local: `data/output.parquet`
+- S3: `s3://bucket/path/data.parquet` (auto-converts to `s3a://`)
+- GCS: `gs://bucket/path/data.parquet`
+- Azure: `abfs://container@account.dfs.core.windows.net/path`
+- Databricks DBFS: `/dbfs/path` or `dbfs:/path`
+- Unity Catalog: `/Volumes/catalog/schema/volume/path`

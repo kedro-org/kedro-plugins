@@ -4,22 +4,23 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
-import operator
+from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
 import fsspec
-from cachetools import Cache, cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
+
+from kedro_datasets._utils import validate_sub_path
 
 KEY_PROPAGATION_WARNING = (
     "Top-level %(keys)s will not propagate into the %(target)s since "
@@ -34,7 +35,7 @@ def _grandparent(path: str) -> str:
     path_obj = PurePosixPath(path)
     grandparent = path_obj.parents[1]
     if grandparent.name != path_obj.name:
-        last_three_parts = path_obj.relative_to(*path_obj.parts[:-3])
+        last_three_parts = path_obj.relative_to(path_obj.parents[2])
         raise DatasetError(
             f"`{path}` is not a well-formed versioned path ending with "
             f"`filename/timestamp/filename` (got `{last_three_parts}`)."
@@ -47,16 +48,12 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    It also supports advanced features like
-    `lazy saving <https://docs.kedro.org/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_.
+    It also supports advanced features like [lazy saving](https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         station_data:
           type: partitions.PartitionedDataset
           path: data/03_primary/station_data
@@ -68,12 +65,10 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
               sep: '\\t'
               index: true
           filename_suffix: '.dat'
+          save_lazily: True
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -92,6 +87,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         ...     path=str(tmp_path / "df_with_partition"),
         ...     dataset="pandas.CSVDataset",
         ...     filename_suffix=".csv",
+        ...     save_lazily=False,
         ... )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
@@ -108,10 +104,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         >>> # Add the processing logic for individual partition HERE
         >>> # print(partition_data)
 
-    You can also load multiple partitions from a remote storage and combine them
-    like this:
-
-    .. code-block:: pycon
+        You can also load multiple partitions from a remote storage and combine them
+        like this:
 
         >>> import pandas as pd
         >>> from kedro_datasets.partitions import PartitionedDataset
@@ -151,6 +145,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         overwrite: bool = False,
+        save_lazily: bool = True,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Creates a new instance of ``PartitionedDataset``.
@@ -190,13 +185,18 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
+            save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
+                is passed as data to save, the partition’s data will not be materialised until it is time to write.
+                Lazy saving example:
+                https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/#partitioned-dataset-lazy-saving
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        from fsspec.utils import infer_storage_options  # for performance reasons
+        # for performance reasons
+        from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 
@@ -204,7 +204,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
-        self._partition_cache: Cache = Cache(maxsize=1)
+        self._cached_partitions: list[str] | None = None
+        self._save_lazily = save_lazily
         self.metadata = metadata
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
@@ -219,9 +220,9 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
 
-        self._credentials = deepcopy(credentials) or {}
+        self._credentials = deepcopy(credentials or {})
 
-        self._fs_args = deepcopy(fs_args) or {}
+        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -238,7 +239,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args) or {}
+        self._load_args = deepcopy(load_args or {})
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
         self._invalidate_caches()
@@ -254,14 +255,17 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
+        if self._cached_partitions is not None:
+            return self._cached_partitions
+
         dataset_is_versioned = VERSION_KEY in self._dataset_config
-        return [
+        self._cached_partitions = [
             _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]
+        return self._cached_partitions
 
     def _join_protocol(self, path: str) -> str:
         protocol_prefix = f"{self._protocol}://"
@@ -272,27 +276,43 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return path
 
     def _partition_to_path(self, path: str):
-        dir_path = self._path.rstrip(self._sep)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.lstrip(self._sep)
-        full_path = self._sep.join([dir_path, path]) + self._filename_suffix
-        return full_path
+
+        # Validate the path is within the base directory
+        validate_sub_path(path, dir_path)
+
+        full_path = self._sep.join([dir_path, path])
+        return full_path + self._filename_suffix
 
     def _path_to_partition(self, path: str) -> str:
-        dir_path = self._filesystem._strip_protocol(self._normalized_path)
+        dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
+            self._sep
+        )
         path = path.split(dir_path, 1).pop().lstrip(self._sep)
         if self._filename_suffix and path.endswith(self._filename_suffix):
             path = path[: -len(self._filename_suffix)]
+
+        # Validate the partition ID to ensure it doesn't escape the base directory
+        validate_sub_path(path, dir_path)
+
         return path
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def load(self) -> dict[str, Callable[[], Any]]:
+        self._invalidate_caches()  # Invalidate cache before listing partitions
+
         partitions = {}
 
-        for partition in self._list_partitions():
+        # The _list_partitions() call will now always perform a fresh scan
+        # because its cache was just cleared.
+        for partition_file_path in self._list_partitions():
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
+            kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            partition_id = self._path_to_partition(partition)
+            partition_id = self._path_to_partition(partition_file_path)
             partitions[partition_id] = dataset.load
 
         if not partitions:
@@ -300,7 +320,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         return partitions
 
-    def _save(self, data: dict[str, Any]) -> None:
+    def save(self, data: dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
@@ -310,7 +330,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
-            if callable(partition_data):
+            if callable(partition_data) and self._save_lazily:
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
@@ -344,7 +364,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return self._pretty_repr(object_description_repr)
 
     def _invalidate_caches(self) -> None:
-        self._partition_cache.clear()
+        self._cached_partitions = None
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:

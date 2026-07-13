@@ -4,9 +4,10 @@ filesystem (e.g.: local, S3, GCS).
 from __future__ import annotations
 
 import json
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Union
+from typing import Any
 
 import fsspec
 import plotly.io as pio
@@ -21,47 +22,45 @@ from plotly import graph_objects as go
 from kedro_datasets._typing import PlotlyPreview
 
 
-class JSONDataset(
-    AbstractVersionedDataset[go.Figure, Union[go.Figure, go.FigureWidget]]
-):
+class JSONDataset(AbstractVersionedDataset[go.Figure, go.Figure | go.FigureWidget]):
     """``JSONDataset`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         scatter_plot:
           type: plotly.JSONDataset
           filepath: data/08_reporting/scatter_plot.json
           save_args:
             engine: auto
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.plotly import JSONDataset
         >>> import plotly.express as px
+        >>> from kedro_datasets.plotly import JSONDataset
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        >>>
         >>> dataset = JSONDataset(filepath=tmp_path / "test.json")
         >>> dataset.save(fig)
         >>> reloaded = dataset.load()
         >>> assert fig == reloaded
+
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w", "encoding": "utf-8"}
+    }
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -123,17 +122,17 @@ class JSONDataset(
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -144,7 +143,7 @@ class JSONDataset(
             "version": self._version,
         }
 
-    def _load(self) -> go.Figure | go.FigureWidget:
+    def load(self) -> go.Figure | go.FigureWidget:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
@@ -152,7 +151,7 @@ class JSONDataset(
             # the file, decode it manually and pass to the low-level from_json instead.
             return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
 
-    def _save(self, data: go.Figure) -> None:
+    def save(self, data: go.Figure) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

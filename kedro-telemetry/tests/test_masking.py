@@ -13,7 +13,6 @@ from kedro_telemetry.masking import (
     MASK,
     _get_cli_structure,
     _mask_kedro_cli,
-    _recursive_items,
 )
 
 REPO_NAME = "cli_tools_dummy_project"
@@ -23,12 +22,12 @@ DEFAULT_KEDRO_COMMANDS = [
     "info",
     "ipython",
     "jupyter",
-    "micropkg",
     "new",
     "package",
     "pipeline",
     "registry",
     "run",
+    "server",
     "starter",
     "--version",
     "-V",
@@ -62,7 +61,7 @@ def fake_metadata(fake_root_dir):
 class TestCLIMasking:
     def test_get_cli_structure_raw(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -86,7 +85,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_depth(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -126,7 +125,7 @@ class TestCLIMasking:
 
     def test_get_cli_structure_help(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -152,94 +151,60 @@ class TestCLIMasking:
                 assert v.startswith("Usage:  [OPTIONS]")
 
     @pytest.mark.parametrize(
-        "input_dict, expected_output_count",
+        "input_command_args, expected_masked_args",
         [
-            ({}, 0),
-            ({"a": "foo"}, 2),
-            ({"a": {"b": "bar"}, "c": {"baz"}}, 5),
+            ([], []),
             (
-                {
-                    "a": {"b": "bar"},
-                    "c": None,
-                    "d": {"e": "fizz"},
-                    "f": {"g": {"h": "buzz"}},
-                },
-                12,
-            ),
-        ],
-    )
-    def test_recursive_items(self, input_dict, expected_output_count):
-        assert expected_output_count == len(
-            list(_recursive_items(dictionary=input_dict))
-        )
-
-    def test_recursive_items_empty(self):
-        assert len(list(_recursive_items({}))) == 0
-
-    @pytest.mark.parametrize(
-        "input_cli_structure, input_command_args, expected_masked_args",
-        [
-            ({}, [], []),
-            (
-                {"kedro": {"command_a": None, "command_b": None}},
-                ["command_a"],
-                ["command_a"],
+                ["info"],
+                ["info"],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param1": None, "--param2": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "--param1=foo"],
-                ["command_a", "--param1", MASK],
+                ["run", "--pipeline=data_science"],
+                ["run", "--pipeline", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param1": None, "--param2": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "--param1= foo"],
-                ["command_a", "--param1", MASK],
+                ["catalog", "describe-datasets"],
+                ["catalog", "describe-datasets"],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "-p", "bar"],
-                ["command_a", "-p", MASK],
+                ["pipeline", "create", "mypipeline"],
+                ["pipeline", "create", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "-xyz", "bar"],
-                ["command_a", MASK, MASK],
+                ["run", "-p", "bar"],
+                ["run", "-p", MASK],
             ),
             (
-                {
-                    "kedro": {
-                        "command_a": {"--param": None, "-p": None},
-                        "command_b": None,
-                    }
-                },
-                ["command_a", "should", "be", "seen", "only"],
-                ["command_a", MASK, MASK, MASK, MASK],
+                ["run", "--params=hello=4", "--pipeline=my_pipeline"],
+                ["run", "--params", MASK, "--pipeline", MASK],
+            ),
+            (
+                ["new", "--starter=spaceflights-pandas", "--name=my_project"],
+                ["new", "--starter", "spaceflights-pandas", "--name", MASK],
+            ),
+            (
+                ["new", "--starter", "my_starter", "--name=my_project"],
+                ["new", "--starter", MASK, "--name", MASK],
+            ),
+            (
+                ["new", "-s=databricks-iris", "-n=my_project"],
+                ["new", "-s", "databricks-iris", "-n", MASK],
             ),
         ],
     )
     def test_mask_kedro_cli(
-        self, input_cli_structure, input_command_args, expected_masked_args
+        self, input_command_args, expected_masked_args, fake_metadata, mocker
     ):
+        Module = namedtuple("Module", ["cli"])
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
+        )
+        kedro_cli = KedroCLI(fake_metadata.project_path)
         assert expected_masked_args == _mask_kedro_cli(
-            cli_struct=input_cli_structure, command_args=input_command_args
+            cli=kedro_cli, command_args=input_command_args
         )

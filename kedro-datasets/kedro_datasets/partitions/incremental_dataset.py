@@ -9,10 +9,13 @@ new partitions past the checkpoint.It also uses `fsspec` for filesystem level op
 from __future__ import annotations
 
 import operator
+import os
+import posixpath
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any
 
-from cachetools import cachedmethod
+from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -20,7 +23,6 @@ from kedro.io.core import (
     DatasetError,
     parse_dataset_definition,
 )
-from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.utils import load_obj
 
 from .partitioned_dataset import (
@@ -39,9 +41,8 @@ class IncrementalDataset(PartitionedDataset):
     that is persisted to the location of the data partitions by default, so that
     subsequent pipeline run loads only new partitions past the checkpoint.
 
-    Example:
-
-    .. code-block:: pycon
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.partitions import IncrementalDataset
         >>>
@@ -57,6 +58,7 @@ class IncrementalDataset(PartitionedDataset):
         >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
         >>> assert dataset.load() == {}
+
     """
 
     DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
@@ -175,10 +177,55 @@ class IncrementalDataset(PartitionedDataset):
                 {"keys": CREDENTIALS_KEY, "target": "checkpoint"},
             )
 
-        return {**default_config, **checkpoint_config}
+        merged = {**default_config, **checkpoint_config}
 
-    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
+        if self._filepath_arg in checkpoint_config:
+            user_filepath = str(checkpoint_config[self._filepath_arg])
+            if self._protocol == "file":
+                # Local filesystem: use os.path directly so Windows drive
+                # letters are handled correctly across all fsspec versions.
+                base = os.path.normcase(os.path.normpath(self._normalized_path))
+                if os.path.isabs(user_filepath):
+                    resolved = os.path.normcase(os.path.normpath(user_filepath))
+                else:
+                    resolved = os.path.normcase(
+                        os.path.normpath(os.path.join(base, user_filepath))
+                    )
+                if not (resolved == base or resolved.startswith(base + os.sep)):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{resolved}' which is outside the dataset "
+                        f"directory '{base}'."
+                    )
+            else:
+                # Cloud filesystem (S3, GCS, Azure, …): strip protocol from
+                # both paths, then do a direct normpath prefix check — the same
+                # pattern as the local branch — so same-bucket traversal (../)
+                # and cross-bucket paths are both caught without path joining.
+                dir_path = self._filesystem._strip_protocol(
+                    self._normalized_path
+                ).rstrip(self._sep)
+                fp_stripped = self._filesystem._strip_protocol(user_filepath).replace(
+                    "\\", "/"
+                )
+                normalized_dir = posixpath.normpath(dir_path)
+                normalized_fp = posixpath.normpath(fp_stripped)
+                if not (
+                    normalized_fp == normalized_dir
+                    or normalized_fp.startswith(normalized_dir + "/")
+                ):
+                    raise DatasetError(
+                        f"Checkpoint filepath '{user_filepath}' resolves to "
+                        f"'{normalized_fp}' which is outside the dataset "
+                        f"directory '{normalized_dir}'."
+                    )
+
+        return merged
+
     def _list_partitions(self) -> list[str]:
+        if self._cached_partitions is not None:
+            return self._cached_partitions
+
         checkpoint = self._read_checkpoint()
         checkpoint_path = self._filesystem._strip_protocol(
             self._checkpoint_config[self._filepath_arg]
@@ -196,11 +243,12 @@ class IncrementalDataset(PartitionedDataset):
             partition_id = self._path_to_partition(partition)
             return self._comparison_func(partition_id, checkpoint)
 
-        return sorted(
+        self._cached_partitions = sorted(
             _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if _is_valid_partition(path)
         )
+        return self._cached_partitions
 
     @property
     def _checkpoint(self) -> AbstractDataset:
@@ -215,7 +263,7 @@ class IncrementalDataset(PartitionedDataset):
         except DatasetError:
             return None
 
-    def _load(self) -> dict[str, Callable[[], Any]]:
+    def load(self) -> dict[str, Callable[[], Any]]:
         partitions: dict[str, Any] = {}
 
         for partition in self._list_partitions():

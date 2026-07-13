@@ -1,23 +1,27 @@
 import logging
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import requests
 import yaml
 from kedro import __version__ as kedro_version
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline import pipeline as modular_pipeline
 from pytest import fixture, mark
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.plugin import (
     _SKIP_TELEMETRY_ENV_VAR_KEYS,
     KNOWN_CI_ENV_VAR_KEYS,
+    MISSING_USER_IDENTITY,
     KedroTelemetryHook,
     _check_for_telemetry_consent,
+    _format_project_statistics_data,
+    _format_tools,
     _is_known_ci_env,
 )
 
@@ -41,7 +45,7 @@ new-proj = "spaceflights.__main__:main"
 package_name = "spaceflights"
 project_name = "spaceflights"
 kedro_init_version = "0.18.14"
-tools = ["Linting", "Testing", "Custom Logging", "Documentation", "Data Structure", "PySpark"]
+tools = "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure', 'PySpark']"
 example_pipeline = "True"
 
 [project.entry-points."kedro.hooks"]
@@ -56,6 +60,17 @@ attr = "spaceflights.__version__"
 where = [ "src",]
 namespaces = false
 """
+
+
+class CustomDataset(AbstractDataset):
+    def _load(self):
+        pass
+
+    def _save(self, data) -> None:
+        pass
+
+    def _describe(self) -> dict:
+        return {}
 
 
 @fixture
@@ -82,6 +97,7 @@ def fake_catalog():
             "dummy_3": MemoryDataset(),
             "parameters": MemoryDataset(),
             "params:dummy": MemoryDataset(),
+            "custom": CustomDataset(),
         }
     )
     return catalog
@@ -121,10 +137,25 @@ def fake_sub_pipeline():
     return mock_sub_pipeline
 
 
+@fixture
+def pipeline_fixture() -> Pipeline:
+    mock_pipeline = MagicMock(spec=Pipeline)
+    mock_pipeline.nodes = ["node1", "node2"]
+    return mock_pipeline
+
+
+@fixture
+def project_pipelines() -> dict[str, Pipeline]:
+    return {
+        "pipeline1": MagicMock(spec=Pipeline),
+        "pipeline2": MagicMock(spec=Pipeline),
+    }
+
+
 class TestKedroTelemetryHook:
     def test_before_command_run(self, mocker, fake_metadata, caplog):
         mocker.patch(
-            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=True
+            "kedro_telemetry.plugin._check_for_telemetry_consent", return_value=None
         )
         mocker.patch("kedro_telemetry.plugin._is_known_ci_env", return_value=True)
         mocked_anon_id = mocker.patch("kedro_telemetry.plugin._hash")
@@ -172,9 +203,10 @@ class TestKedroTelemetryHook:
         assert any(
             "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
             "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
+            "To hide this message, explicitly grant or deny consent. "
+            "Read more at https://docs.kedro.org/en/stable/about/telemetry/"
             in record.message
             for record in caplog.records
         )
@@ -197,7 +229,10 @@ class TestKedroTelemetryHook:
         )
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
+        mocker.patch(
+            "builtins.open",
+            mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS.encode("utf-8")),
+        )
         mocker.patch("pathlib.Path.exists", return_value=True)
         telemetry_hook = KedroTelemetryHook()
         command_args = ["--version"]
@@ -291,9 +326,10 @@ class TestKedroTelemetryHook:
         assert not any(
             "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
             "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+            "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
             "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/latest/configuration/telemetry.html"
+            "To hide this message, explicitly grant or deny consent. "
+            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
             in record.message
             for record in caplog.records
         )
@@ -347,7 +383,7 @@ class TestKedroTelemetryHook:
         expected_calls = [
             mocker.call(
                 event_name="CLI command",
-                identity="",
+                identity=MISSING_USER_IDENTITY,
                 properties=generic_properties,
             ),
         ]
@@ -372,7 +408,10 @@ class TestKedroTelemetryHook:
         assert msg in caplog.messages[-1]
         mocked_heap_call.assert_called()
 
-    def test_check_for_telemetry_consent_given(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_given(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
@@ -380,7 +419,10 @@ class TestKedroTelemetryHook:
 
         assert _check_for_telemetry_consent(fake_metadata.project_path)
 
-    def test_check_for_telemetry_consent_not_given(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_not_given(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
@@ -400,29 +442,68 @@ class TestKedroTelemetryHook:
 
         assert not _check_for_telemetry_consent(fake_metadata.project_path)
 
-    def test_check_for_telemetry_consent_empty_file(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_empty_file(self, monkeypatch, fake_metadata):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
 
         with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
             yaml.dump({}, telemetry_file)
 
-        assert _check_for_telemetry_consent(fake_metadata.project_path)
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
     def test_check_for_telemetry_consent_file_no_consent_field(
-        self, mocker, fake_metadata
+        self, monkeypatch, fake_metadata
     ):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         with open(telemetry_file_path, "w", encoding="utf8") as telemetry_file:
             yaml.dump({"nonsense": "bla"}, telemetry_file)
 
-        assert _check_for_telemetry_consent(fake_metadata.project_path)
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
 
-    def test_check_for_telemetry_consent_file_invalid_yaml(self, mocker, fake_metadata):
+    def test_check_for_telemetry_consent_file_invalid_yaml(
+        self, monkeypatch, fake_metadata
+    ):
+        # Ensure GITHUB_REPOSITORY_OWNER="kedro-org" doesn't interfere with this test
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
         Path(fake_metadata.project_path, "conf").mkdir(parents=True)
         telemetry_file_path = fake_metadata.project_path / ".telemetry"
         telemetry_file_path.write_text("invalid_ yaml")
+
+        assert _check_for_telemetry_consent(fake_metadata.project_path) is None
+
+    def test_check_for_telemetry_consent_kedro_org_repo(
+        self, monkeypatch, fake_metadata
+    ):
+        """Test that telemetry is disabled when GITHUB_REPOSITORY_OWNER is kedro-org"""
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "kedro-org")
+
+        # Even if consent file says True, should still be disabled for kedro-org
+        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
+        telemetry_file_path = fake_metadata.project_path / ".telemetry"
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({"consent": True}, telemetry_file)
+
+        assert not _check_for_telemetry_consent(fake_metadata.project_path)
+
+    def test_check_for_telemetry_consent_non_kedro_org_repo(
+        self, monkeypatch, fake_metadata
+    ):
+        """Test that telemetry works normally for non-kedro-org repositories"""
+        monkeypatch.setenv("GITHUB_REPOSITORY_OWNER", "some-other-org")
+
+        # Should get the value the consent file
+        Path(fake_metadata.project_path, "conf").mkdir(parents=True)
+        telemetry_file_path = fake_metadata.project_path / ".telemetry"
+        with open(telemetry_file_path, "w", encoding="utf-8") as telemetry_file:
+            yaml.dump({"consent": True}, telemetry_file)
 
         assert _check_for_telemetry_consent(fake_metadata.project_path)
 
@@ -479,8 +560,8 @@ class TestKedroTelemetryHook:
 
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
         mocker.patch("kedro_telemetry.plugin.open")
-        mocker.patch("kedro_telemetry.plugin.toml.load")
-        mocker.patch("kedro_telemetry.plugin.toml.dump")
+        mocker.patch("kedro_telemetry.plugin.tomllib.load")
+        mocker.patch("kedro_telemetry.plugin.tomli_w.dump")
 
         # Without CLI invoked - i.e. `session.run` in Jupyter/IPython
         telemetry_hook = KedroTelemetryHook()
@@ -497,9 +578,11 @@ class TestKedroTelemetryHook:
             "is_ci_env": True,
         }
         project_statistics = {
-            "number_of_datasets": 3,
+            "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
+            "dataset_type_count.custom": 1,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
         expected_call = mocker.call(
@@ -538,8 +621,8 @@ class TestKedroTelemetryHook:
             return_value="project_id",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("kedro_telemetry.plugin.toml.load")
-        mocker.patch("kedro_telemetry.plugin.toml.dump")
+        mocker.patch("kedro_telemetry.plugin.tomllib.load")
+        mocker.patch("kedro_telemetry.plugin.tomli_w.dump")
         # CLI run first
         telemetry_cli_hook = KedroTelemetryHook()
         command_args = ["--version"]
@@ -560,9 +643,11 @@ class TestKedroTelemetryHook:
             "is_ci_env": True,
         }
         project_statistics = {
-            "number_of_datasets": 3,
+            "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
+            "dataset_type_count.custom": 1,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -601,7 +686,10 @@ class TestKedroTelemetryHook:
             return_value="project_id",
         )
         mocked_heap_call = mocker.patch("kedro_telemetry.plugin._send_heap_event")
-        mocker.patch("builtins.open", mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS))
+        mocker.patch(
+            "builtins.open",
+            mocker.mock_open(read_data=MOCK_PYPROJECT_TOOLS.encode("utf-8")),
+        )
         mocker.patch("pathlib.Path.exists", return_value=True)
 
         # CLI run first
@@ -626,9 +714,11 @@ class TestKedroTelemetryHook:
             "example_pipeline": "True",
         }
         project_statistics = {
-            "number_of_datasets": 3,
+            "number_of_datasets": 4,
             "number_of_nodes": 2,
             "number_of_pipelines": 2,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 3,
+            "dataset_type_count.custom": 1,
         }
         expected_properties = {**project_properties, **project_statistics}
 
@@ -651,3 +741,107 @@ class TestKedroTelemetryHook:
         telemetry_hook.after_context_created(fake_context)
 
         mocked_heap_call.assert_not_called()
+
+    def test_old_catalog_with_list_method(self, pipeline_fixture, project_pipelines):
+        # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
+        catalog = MagicMock()
+        catalog.list.return_value = [
+            "dataset1",
+            "params:my_param",
+            "dataset2",
+            "parameters",
+        ]
+
+        # Ensure .keys is not present
+        if hasattr(catalog, "keys"):
+            del catalog.keys
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
+        # dataset types are not available for the old catalog, so no
+        # dataset_type_count.* properties should be emitted at all.
+        assert not any(k.startswith("dataset_type_count.") for k in result)
+
+    def test_new_catalog_with_keys_method(self, pipeline_fixture, project_pipelines):
+        # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
+        catalog = MagicMock()
+        catalog.keys.return_value = [
+            "datasetA",
+            "params:global",
+            "datasetB",
+            "parameters",
+        ]
+        catalog.get_type.side_effect = (
+            lambda ds_name: "kedro.io.memory_dataset.MemoryDataset"
+        )
+
+        # Ensure .list is not present
+        if hasattr(catalog, "list"):
+            del catalog.list
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        ds_nodes_pipes_cnt = 2
+
+        assert result["number_of_datasets"] == ds_nodes_pipes_cnt
+        assert result["number_of_nodes"] == ds_nodes_pipes_cnt
+        assert result["number_of_pipelines"] == ds_nodes_pipes_cnt
+        # Ensure dataset types are counted for the new catalog + doesn't count parameters
+        assert (
+            result["dataset_type_count.kedro.io.memory_dataset.MemoryDataset"]
+            == ds_nodes_pipes_cnt
+        )
+
+
+class TestFormatTools:
+    """Tests for `_format_tools`, which normalises the ``[tool.kedro] tools``
+    value (which Kedro writes as a TOML string containing ``str(list)``) into
+    a comma-separated string suitable for Heap."""
+
+    @mark.parametrize(
+        "tools_value, expected",
+        [
+            # Real Kedro starter format: TOML string containing str(list)
+            (
+                "['Linting', 'Testing', 'Documentation']",
+                "Linting, Testing, Documentation",
+            ),
+            # Default "no tools selected" written by the starter
+            ("['None']", "None"),
+            # Hand-edited / legacy TOML array form
+            (["Linting", "Testing"], "Linting, Testing"),
+            (("Linting", "Testing"), "Linting, Testing"),
+            # Plain comma-separated string (already in the desired shape)
+            ("Linting, Testing", "Linting, Testing"),
+        ],
+    )
+    def test_supported_inputs(self, tools_value, expected):
+        assert _format_tools(tools_value) == expected
+
+    @mark.parametrize(
+        "tools_value",
+        [
+            "",
+            [],
+            (),
+            "[]",
+            None,
+            123,
+        ],
+    )
+    def test_empty_or_unsupported_inputs_return_none(self, tools_value):
+        assert _format_tools(tools_value) is None
+
+    def test_malformed_string_falls_back_to_string_value(self):
+        # Not valid Python literal, but a non-empty string -> sent verbatim
+        # so we still get _something_ in Heap rather than dropping the field.
+        assert _format_tools("Linting; Testing") == "Linting; Testing"

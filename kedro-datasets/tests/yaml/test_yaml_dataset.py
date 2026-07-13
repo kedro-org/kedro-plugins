@@ -39,7 +39,7 @@ def dummy_data():
 
 class TestYAMLDataset:
     def test_save_and_load(self, yaml_dataset, dummy_data):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         yaml_dataset.save(dummy_data)
         reloaded = yaml_dataset.load()
         assert dummy_data == reloaded
@@ -48,7 +48,7 @@ class TestYAMLDataset:
 
     def test_exists(self, yaml_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not yaml_dataset.exists()
         yaml_dataset.save(dummy_data)
         assert yaml_dataset.exists()
@@ -72,7 +72,7 @@ class TestYAMLDataset:
 
     def test_load_missing_file(self, yaml_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set YAMLDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             yaml_dataset.load()
 
@@ -94,6 +94,13 @@ class TestYAMLDataset:
 
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
+
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.yaml"
+        dataset = YAMLDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        assert dataset.load() == dummy_data
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
@@ -137,29 +144,29 @@ class TestYAMLDatasetVersioned:
 
     def test_save_and_load(self, versioned_yaml_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_yaml_dataset.save(dummy_data)
         reloaded = versioned_yaml_dataset.load()
         assert dummy_data == reloaded
 
     def test_no_versions(self, versioned_yaml_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for YAMLDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_yaml_dataset.load()
 
     def test_exists(self, versioned_yaml_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_yaml_dataset.exists()
         versioned_yaml_dataset.save(dummy_data)
         assert versioned_yaml_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_yaml_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding yaml file for a given save version already exists."""
         versioned_yaml_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for YAMLDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -178,7 +185,7 @@ class TestYAMLDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for YAMLDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.yaml.yaml_dataset.YAMLDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_yaml_dataset.save(dummy_data)

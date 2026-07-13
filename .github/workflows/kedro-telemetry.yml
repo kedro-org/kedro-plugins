@@ -9,6 +9,7 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
+      - ".secrets.baseline"
   pull_request:
     branches:
       - main
@@ -16,13 +17,17 @@ on:
       - "kedro-airflow/**"
       - "kedro-datasets/**"
       - "kedro-docker/**"
+      - ".secrets.baseline"
+
+permissions:
+  contents: read
 
 jobs:
   unit-tests:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       plugin: kedro-telemetry
@@ -31,6 +36,13 @@ jobs:
 
   lint:
     uses: ./.github/workflows/lint.yml
+    with:
+      plugin: kedro-telemetry
+      os: ubuntu-latest
+      python-version: "3.11"
+
+  detect-secrets:
+    uses: ./.github/workflows/detect-secrets.yml
     with:
       plugin: kedro-telemetry
       os: ubuntu-latest

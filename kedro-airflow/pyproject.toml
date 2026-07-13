@@ -8,10 +8,10 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Airflow makes it easy to deploy Kedro projects to Airflow"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "kedro>=0.19.0",
+    "kedro>=1.0.0rc1, <2.0.0",
     "python-slugify>=4.0",
     "semver>=2.10",  # Needs to be at least 2.10.0 to make use of `VersionInfo.match`.
 ]
@@ -24,21 +24,24 @@ Tracker = "https://github.com/kedro-org/kedro-plugins/issues"
 
 [project.optional-dependencies]
 test = [
-    "apache-airflow<3.0",
-    "bandit",
+    "apache-airflow>=3.2.0,<4.0",
     "behave",
-    "black~=22.0",
     "coverage>=7.2.0",
     "kedro-datasets",
-    "mypy~=1.0",
-    "pre-commit>=2.9.2",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist",
-    "trufflehog>=2.1.0, <3.0",
-    "ruff~=0.0.290",
     "wheel",
+]
+
+lint = [
+    "bandit",
+    "black~=24.0",
+    "detect-secrets~=1.5.0",
+    "mypy~=1.0",
+    "pre-commit>=2.9.2",
+    "ruff~=0.14.4",
     # mypy requirements
     "types-PyYAML",
     "types-cachetools",
@@ -81,6 +84,8 @@ exclude_also = ["raise NotImplementedError"]
 [tool.ruff]
 line-length = 88
 show-fixes = true
+
+[tool.ruff.lint]
 select = [
     "F",   # Pyflakes
     "W",   # pycodestyle
@@ -92,5 +97,5 @@ select = [
 ]
 ignore = ["E501"]  # Black takes care of line-too-long
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "{tests,features}/*" = ["T201", "PLR2004", "PLR0915", "PLW1510"]

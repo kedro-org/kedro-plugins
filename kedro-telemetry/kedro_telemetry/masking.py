@@ -1,11 +1,18 @@
 """Module containing command masking functionality."""
+
 from __future__ import annotations
 
-from typing import Any, Iterator
+from typing import Any
 
 import click
 
 MASK = "*****"
+STARTERS = [
+    "astro-airflow-iris",
+    "databricks-iris",
+    "spaceflights-pandas",
+    "spaceflights-pyspark",
+]
 
 
 def _recurse_cli(
@@ -81,16 +88,19 @@ def _get_cli_structure(
     return output
 
 
-def _mask_kedro_cli(
-    cli_struct: dict[str | None, Any], command_args: list[str]
-) -> list[str]:
+def _mask_kedro_cli(cli: click.CommandCollection, command_args: list[str]) -> list[str]:
     """Takes a dynamic vocabulary (based on `KedroCLI`) and returns
     a masked CLI input"""
     output = []
-
-    # Preserve the initial part of the command until parameters sections begin
     arg_index = 0
-    current_CLI = cli_struct.get("kedro", {})
+    cmd = command_args[0] if command_args else ""
+    if cmd in {"--help", "--version", "-h", "-v", ""}:
+        return command_args
+    click_cmd = cli.get_command(ctx=None, cmd_name=cmd)  # type: ignore
+    if click_cmd is None:
+        return [MASK]
+
+    current_CLI = _get_cli_structure(click_cmd)
     while (
         arg_index < len(command_args)
         and not command_args[arg_index].startswith("-")
@@ -99,30 +109,30 @@ def _mask_kedro_cli(
         output.append(command_args[arg_index])
         current_CLI = current_CLI[command_args[arg_index]]
         arg_index += 1
-
     # Mask everything except parameter keywords
+    prev_arg = None
     for arg in command_args[arg_index:]:
         if arg.startswith("-"):
             if "=" in arg:
-                arg_left = arg.split("=")[0]
-                if arg_left in current_CLI:
+                arg_left, arg_right = arg.split("=", 1)
+                is_valid_param = arg_left in current_CLI
+                is_starter = arg_left in ("--starter", "-s")
+
+                if is_valid_param:
                     output.append(arg_left)
-                output.append(MASK)
-            elif arg in current_CLI:
-                output.append(arg)
+                    prev_arg = arg_left
+                else:
+                    prev_arg = None
+
+                output.append(
+                    arg_right if is_starter and arg_right in STARTERS else MASK
+                )
             else:
-                output.append(MASK)
+                is_valid_param = arg in current_CLI
+                output.append(arg if is_valid_param else MASK)
+                prev_arg = arg if is_valid_param else None
         else:
-            output.append(MASK)
-
+            is_starter = prev_arg in ("--starter", "-s")
+            output.append(arg if is_starter and arg in STARTERS else MASK)
+            prev_arg = None
     return output
-
-
-def _recursive_items(dictionary: dict[Any, Any]) -> Iterator[Any]:
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            yield key
-            yield from _recursive_items(value)
-        else:
-            yield key
-            yield value

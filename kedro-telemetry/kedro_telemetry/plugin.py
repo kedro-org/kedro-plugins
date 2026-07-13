@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import logging
@@ -13,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-import toml
+import tomli_w
 import yaml
 from appdirs import user_config_dir
 from kedro import __version__ as KEDRO_VERSION
@@ -25,8 +26,13 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
-from kedro_telemetry.masking import _get_cli_structure, _mask_kedro_cli
+from kedro_telemetry.masking import _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
 HEAP_ENDPOINT = "https://heapanalytics.com/api/track"
@@ -49,6 +55,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
+MISSING_USER_IDENTITY = "missing_user_identity"
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +73,8 @@ def _get_or_create_uuid() -> str:
 
     try:
         if os.path.exists(full_path):
-            with open(full_path) as f:
-                config = toml.load(f)
+            with open(full_path, "rb") as f:
+                config = tomllib.load(f)
 
                 if "telemetry" in config and "uuid" in config["telemetry"]:
                     return uuid.UUID(config["telemetry"]["uuid"]).hex
@@ -78,7 +85,7 @@ def _get_or_create_uuid() -> str:
         return new_uuid
 
     except Exception as e:
-        logging.error(f"Failed to retrieve UUID: {e}")
+        logging.debug(f"Failed to retrieve UUID: {e}")
         return ""
 
 
@@ -88,8 +95,8 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
     Returns None if configuration file does not exist or does not relate to Kedro.
     """
     try:
-        with open(pyproject_path, "r+") as file:
-            pyproject_data = toml.load(file)
+        with open(pyproject_path, "r+b") as file:
+            pyproject_data = tomllib.load(file)
 
             # Check if pyproject related to kedro
             try:
@@ -101,10 +108,10 @@ def _get_or_create_project_id(pyproject_path: Path) -> str | None:
                     toml_string = (
                         f'\n[tool.kedro_telemetry]\nproject_id = "{project_id}"\n'
                     )
-                    file.write(toml_string)
+                    file.write(toml_string.encode("utf-8"))
                 return project_id
             except KeyError:
-                logging.error(
+                logging.debug(
                     f"Failed to retrieve project id or save project id: "
                     f"{str(pyproject_path)} does not contain a [tool.kedro] section"
                 )
@@ -121,19 +128,49 @@ def _add_tool_properties(
     Extends project properties with tool's properties.
     """
     if pyproject_path.exists():
-        with open(pyproject_path) as file:
-            pyproject_data = toml.load(file)
+        with open(pyproject_path, "rb") as file:
+            pyproject_data = tomllib.load(file)
 
         try:
             tool_kedro = pyproject_data["tool"]["kedro"]
             if "tools" in tool_kedro:
-                properties["tools"] = ", ".join(tool_kedro["tools"])
+                tools_property = _format_tools(tool_kedro["tools"])
+                if tools_property is not None:
+                    properties["tools"] = tools_property
             if "example_pipeline" in tool_kedro:
                 properties["example_pipeline"] = tool_kedro["example_pipeline"]
         except KeyError:
             pass
 
     return properties
+
+
+def _format_tools(tools_value: Any) -> str | None:
+    """Normalise the `[tool.kedro] tools` value to a comma-separated string.
+
+    Kedro's project template writes `tools` as a TOML string containing the
+    `str()` of a Python list (e.g. ``tools = "['Linting', 'Testing']"``), so
+    `tomllib` returns a string here, not a list. The previous implementation
+    assumed a list and called ``", ".join(...)`` directly, which iterated over
+    the string character-by-character and produced unusable output in Heap.
+
+    This function accepts either form (the real Kedro string, or a TOML array
+    in case the file was hand-edited) and returns ``None`` when there's no
+    usable value to send.
+    """
+    if isinstance(tools_value, str):
+        try:
+            parsed = ast.literal_eval(tools_value)
+        except (ValueError, SyntaxError):
+            parsed = None
+        if isinstance(parsed, (list, tuple)):
+            tools_value = parsed
+
+    if isinstance(tools_value, (list, tuple)):
+        return ", ".join(str(t) for t in tools_value) or None
+    if isinstance(tools_value, str) and tools_value:
+        return tools_value
+    return None
 
 
 def _generate_new_uuid(full_path: str) -> str:
@@ -143,12 +180,12 @@ def _generate_new_uuid(full_path: str) -> str:
         config["telemetry"]["uuid"] = new_uuid
 
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
-        with open(full_path, "w") as f:
-            toml.dump(config, f)
+        with open(full_path, "wb") as f:
+            tomli_w.dump(config, f)
 
         return new_uuid
     except Exception as e:
-        logging.error(f"Failed to create UUID: {e}")
+        logging.debug(f"Failed to create UUID: {e}")
         return ""
 
 
@@ -170,17 +207,15 @@ class KedroTelemetryHook:
 
         project_path = project_metadata.project_path if project_metadata else None
 
-        self._consent = _check_for_telemetry_consent(project_path)
+        consent = _check_for_telemetry_consent(project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         if not self._consent:
             return
 
         # get KedroCLI and its structure from actual project root
         cli = KedroCLI(project_path=project_path if project_path else Path.cwd())
-        cli_struct = _get_cli_structure(cli_obj=cli, get_help=False)
-        masked_command_args = _mask_kedro_cli(
-            cli_struct=cli_struct, command_args=command_args
-        )
-
+        masked_command_args = _mask_kedro_cli(cli, command_args=command_args)
         self._user_uuid = _get_or_create_uuid()
 
         event_properties = _get_project_properties(self._user_uuid, project_path)
@@ -200,13 +235,17 @@ class KedroTelemetryHook:
 
     @hook_impl
     def after_context_created(self, context):
-        """Hook implementation to send project statistics data to Heap"""
+        """Hook implementation to read metadata"""
 
-        self._consent = _check_for_telemetry_consent(context.project_path)
+        consent = _check_for_telemetry_consent(context.project_path)
+        self._consent_is_implicit = consent is None
+        self._consent = self._consent_is_implicit or consent
         self._project_path = context.project_path
 
     @hook_impl
     def after_catalog_created(self, catalog):
+        """Hook implementation to send project statistics data to Heap"""
+
         if self._consent is False:
             return
 
@@ -230,23 +269,25 @@ class KedroTelemetryHook:
     def _send_telemetry_heap_event(self, event_name: str):
         """Hook implementation to send command run data to Heap"""
 
-        logger.info(
-            "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
-            "No personal data or IP addresses are stored on our side. "
-            "If you want to opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
-            "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
-            "Read more at https://docs.kedro.org/en/stable/configuration/telemetry.html"
-        )
+        if self._consent_is_implicit:
+            logger.info(
+                "Kedro is sending anonymous usage data with the sole purpose of improving the product. "
+                "No personal data or IP addresses are stored on our side. "
+                "To opt out, set the `KEDRO_DISABLE_TELEMETRY` or `DO_NOT_TRACK` environment variables, "
+                "or create a `.telemetry` file in the current working directory with the contents `consent: false`. "
+                "To hide this message, explicitly grant or deny consent. "
+                "Read more at https://docs.kedro.org/en/stable/about/telemetry/"
+            )
 
         try:
             _send_heap_event(
                 event_name=event_name,
-                identity=self._user_uuid,
+                identity=self._user_uuid if self._user_uuid else MISSING_USER_IDENTITY,
                 properties=self._event_properties,
             )
             self._sent = True
         except Exception as exc:
-            logger.warning(
+            logger.debug(
                 "Something went wrong in hook implementation to send command run data to Heap. "
                 "Exception: %s",
                 exc,
@@ -292,19 +333,42 @@ def _format_project_statistics_data(
     catalog: DataCatalog,
     default_pipeline: Pipeline,
     project_pipelines: dict,
-):
+) -> dict[str, Any]:
     """Add project statistics to send to Heap."""
-    project_statistics_properties = {}
-    project_statistics_properties["number_of_datasets"] = sum(
-        1
-        for c in catalog.list()
-        if not c.startswith("parameters") and not c.startswith("params:")
-    )
-    project_statistics_properties["number_of_nodes"] = (
-        len(default_pipeline.nodes) if default_pipeline else None  # type: ignore
-    )
-    project_statistics_properties["number_of_pipelines"] = len(project_pipelines.keys())
-    return project_statistics_properties
+    # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
+    dataset_type_counts: dict[str, int] = {}
+    if hasattr(catalog, "keys") and callable(catalog.keys):
+        # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
+        dataset_names = catalog.keys()
+        for ds_name in dataset_names:
+            if ds_name.startswith(("parameters", "params:")):
+                continue
+            ds_type = catalog.get_type(ds_name) or ""
+            if ds_type.startswith(
+                ("kedro_datasets.", "kedro.io.", "kedro_datasets_experimental.")
+            ):
+                key = ds_type
+            else:
+                key = "custom"
+            dataset_type_counts[key] = dataset_type_counts.get(key, 0) + 1
+    else:
+        dataset_names = catalog.list()  # type: ignore
+
+    properties: dict[str, Any] = {
+        "number_of_datasets": sum(
+            1
+            for c in dataset_names
+            if not c.startswith("parameters") and not c.startswith("params:")
+        ),
+        "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
+        "number_of_pipelines": len(project_pipelines.keys()),
+    }
+    # Flatten per-type counts into individual scalar properties so they are
+    # accepted by Heap (which only allows string/number property values) and
+    # can be aggregated/grouped in Heap dashboards.
+    for type_name, count in dataset_type_counts.items():
+        properties[f"dataset_type_count.{type_name}"] = count
+    return properties
 
 
 def _get_heap_app_id() -> str:
@@ -324,36 +388,43 @@ def _send_heap_event(
         "event": event_name,
         "timestamp": datetime.now().strftime(TIMESTAMP_FORMAT),
         "properties": properties or {},
+        "identity": identity,
     }
-    if identity:
-        data["identity"] = identity
 
     try:
         resp = requests.post(
             url=HEAP_ENDPOINT, headers=HEAP_HEADERS, data=json.dumps(data), timeout=10
         )
         if resp.status_code != 200:  # noqa: PLR2004
-            logger.warning(
+            logger.debug(
                 "Failed to send data to Heap. Response code returned: %s, Response reason: %s",
                 resp.status_code,
                 resp.reason,
             )
     except requests.exceptions.RequestException as exc:
-        logger.warning(
+        logger.debug(
             "Failed to send data to Heap. Exception of type '%s' was raised.",
             type(exc).__name__,
         )
 
 
-def _check_for_telemetry_consent(project_path: Path | None) -> bool:
+def _check_for_telemetry_consent(project_path: Path | None) -> bool | None:
     """
     Use telemetry consent from ".telemetry" file if it exists and has a valid format.
     Telemetry is considered as opt-in otherwise.
+    Returns False if telemetry should be disabled via:
+    - Environment variables (DO_NOT_TRACK, KEDRO_DISABLE_TELEMETRY)
+    - From kedro-org CI/CD (GITHUB_REPOSITORY_OWNER == "kedro-org")
+    - ".telemetry" file with consent: false
     """
 
     for env_var in _SKIP_TELEMETRY_ENV_VAR_KEYS:
         if os.environ.get(env_var):
             return False
+
+    # Disable telemetry for kedro-org repositories CI/CD environments
+    if os.environ.get("GITHUB_REPOSITORY_OWNER") == "kedro-org":
+        return False
 
     if project_path:
         telemetry_file_path = project_path / ".telemetry"
@@ -362,7 +433,7 @@ def _check_for_telemetry_consent(project_path: Path | None) -> bool:
                 telemetry = yaml.safe_load(telemetry_file)
                 if _is_valid_syntax(telemetry):
                     return telemetry["consent"]
-    return True
+    return None
 
 
 def _is_valid_syntax(telemetry: Any) -> bool:

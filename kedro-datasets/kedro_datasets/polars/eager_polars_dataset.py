@@ -2,8 +2,10 @@
 filesystem (e.g.: local, S3, GCS). It uses polars to handle the
 type of read/write target.
 """
+
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -19,17 +21,18 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._typing import TablePreview
+
 
 class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     """``polars.EagerPolarsDataset`` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses polars to handle the dynamically select the
     appropriate type of read/write on a best effort basis.
 
-    Example usage for the `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         cars:
           type: polars.EagerPolarsDataset
           file_format: parquet
@@ -38,20 +41,19 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
             low_memory: True
           save_args:
             compression: "snappy"
+        ```
 
-    Example using Python API:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.polars import EagerPolarsDataset
         >>> import polars as pl
+        >>> from kedro_datasets.polars import EagerPolarsDataset
         >>>
         >>> data = pl.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
         >>> dataset = EagerPolarsDataset(filepath=tmp_path / "test.parquet", file_format="parquet")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>> assert data.frame_equal(reloaded)
+        >>> assert data.equals(reloaded)
 
     """
 
@@ -61,7 +63,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -75,7 +77,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         identified by string matching on a best effort basis.
 
         Args:
-            filepath: Filepath in POSIX format to a file prefixed with a protocol like
+            filepath: Filepath as a string or path-like object in POSIX format to a file prefixed with a protocol like
                 `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem)
                 will be used.
@@ -145,7 +147,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> pl.DataFrame:
+    def load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
 
@@ -160,7 +162,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_method(fs_file, **self._load_args)
 
-    def _save(self, data: pl.DataFrame) -> None:
+    def save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = getattr(data, f"write_{self._file_format}", None)
 
@@ -204,3 +206,19 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+    def preview(self, nrows: int = 5) -> TablePreview:
+        """
+        Generate a preview of the dataset with a specified number of rows.
+
+        Args:
+            nrows: The number of rows to include in the preview. Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the data in a split format.
+        """
+        # Create a copy so it doesn't contaminate the original dataset
+        dataset_copy = self._copy()
+        data = dataset_copy.load().limit(nrows if type(nrows) is int else 5)
+        data_dict = data.to_pandas().to_dict(orient="split")
+        return TablePreview(data_dict)

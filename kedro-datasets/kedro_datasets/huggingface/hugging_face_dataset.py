@@ -4,36 +4,36 @@ from typing import Any
 
 from datasets import load_dataset
 from huggingface_hub import HfApi
-from kedro.io import AbstractVersionedDataset
+from kedro.io import AbstractDataset
+
+from ._base import DatasetLike
 
 
-class HFDataset(AbstractVersionedDataset):
+class HFDataset(AbstractDataset[None, DatasetLike]):
     """``HFDataset`` loads Hugging Face datasets
     using the `datasets <https://pypi.org/project/datasets>`_ library.
 
-    Example usage for the :doc:`YAML API <kedro:data/data_catalog_yaml_examples>`:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
+        ```yaml
+        yelp_reviews:
+          type: kedro_hf_datasets.HFDataset
+          dataset_name: yelp_review_full
+        ```
 
-       yelp_reviews:
-         type: kedro_hf_datasets.HFDataset
-         dataset_name: yelp_review_full
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    Example usage for the :doc:`Python API <kedro:data/advanced_data_catalog_usage>`:
-
-    .. code-block:: pycon
-
-       >>> from datasets.utils.logging import disable_progress_bar, set_verbosity, ERROR
-       >>> disable_progress_bar()  # for doctest to pass
-       >>> set_verbosity(ERROR)  # for doctest to pass
-       >>> from kedro_datasets.huggingface import HFDataset
-       >>> dataset = HFDataset(dataset_name="openai_humaneval")
-       >>> ds = dataset.load()  # doctest: +ELLIPSIS
-       Downloading and preparing dataset ...
-       Dataset ...
-       >>> assert "test" in ds
-       >>> assert len(ds["test"]) == 164
-
+        >>> from datasets.utils.logging import ERROR, disable_progress_bar, set_verbosity
+        >>> from kedro_datasets.huggingface import HFDataset
+        >>>
+        >>> disable_progress_bar()  # for doctest to pass
+        >>> set_verbosity(ERROR)  # for doctest to pass
+        >>>
+        >>> dataset = HFDataset(dataset_name="openai_humaneval")
+        >>> ds = dataset.load()  # doctest: +SKIP
+        >>> assert "test" in ds  # doctest: +SKIP
+        >>> assert len(ds["test"]) == 164  # doctest: +SKIP
     """
 
     def __init__(
@@ -47,10 +47,12 @@ class HFDataset(AbstractVersionedDataset):
         self._dataset_kwargs = dataset_kwargs or {}
         self.metadata = metadata
 
-    def _load(self):
-        return load_dataset(self.dataset_name, **self._dataset_kwargs)
+    def load(self) -> DatasetLike:
+        # Dataset name is catalog-configured; load_dataset may download and execute
+        # Hub code, but the risk is inherent to HF datasets usage.
+        return load_dataset(self.dataset_name, **self._dataset_kwargs)  # nosec
 
-    def _save(self):
+    def save(self):
         raise NotImplementedError("Not yet implemented")
 
     def _describe(self) -> dict[str, Any]:

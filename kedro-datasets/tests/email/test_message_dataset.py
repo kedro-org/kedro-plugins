@@ -50,7 +50,7 @@ def dummy_msg():
 
 class TestEmailMessageDataset:
     def test_save_and_load(self, message_dataset, dummy_msg):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         message_dataset.save(dummy_msg)
         reloaded = message_dataset.load()
         assert dummy_msg.__dict__ == reloaded.__dict__
@@ -59,7 +59,7 @@ class TestEmailMessageDataset:
 
     def test_exists(self, message_dataset, dummy_msg):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not message_dataset.exists()
         message_dataset.save(dummy_msg)
         assert message_dataset.exists()
@@ -91,7 +91,7 @@ class TestEmailMessageDataset:
 
     def test_load_missing_file(self, message_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set EmailMessageDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.email.message_dataset.EmailMessageDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             message_dataset.load()
 
@@ -118,10 +118,13 @@ class TestEmailMessageDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test"
         dataset = EmailMessageDataset(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
 
 
 class TestEmailMessageDatasetVersioned:
@@ -149,29 +152,29 @@ class TestEmailMessageDatasetVersioned:
 
     def test_save_and_load(self, versioned_message_dataset, dummy_msg):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_message_dataset.save(dummy_msg)
         reloaded = versioned_message_dataset.load()
         assert dummy_msg.__dict__ == reloaded.__dict__
 
     def test_no_versions(self, versioned_message_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for EmailMessageDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_message_dataset.load()
 
     def test_exists(self, versioned_message_dataset, dummy_msg):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_message_dataset.exists()
         versioned_message_dataset.save(dummy_msg)
         assert versioned_message_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_message_dataset, dummy_msg):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding text file for a given save version already exists."""
         versioned_message_dataset.save(dummy_msg)
         pattern = (
-            r"Save path \'.+\' for EmailMessageDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -191,7 +194,7 @@ class TestEmailMessageDatasetVersioned:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"EmailMessageDataset\(.+\)"
+            r"kedro_datasets.email.message_dataset.EmailMessageDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_message_dataset.save(dummy_msg)

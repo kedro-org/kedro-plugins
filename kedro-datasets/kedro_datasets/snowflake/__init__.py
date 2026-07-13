@@ -4,8 +4,12 @@ from typing import Any
 
 import lazy_loader as lazy
 
+try:
+    from .snowpark_dataset import SnowparkTableDataset
+except (ImportError, RuntimeError):
+    SnowparkTableDataset: Any
+
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-SnowparkTableDataset: Any
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,

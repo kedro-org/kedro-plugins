@@ -9,8 +9,4 @@ TablePreview = NewType("TablePreview", dict)
 ImagePreview = NewType("ImagePreview", str)
 PlotlyPreview = NewType("PlotlyPreview", dict)
 JSONPreview = NewType("JSONPreview", str)
-
-
-# experiment tracking datasets types
-MetricsTrackingPreview = NewType("MetricsTrackingPreview", dict)
-JSONTrackingPreview = NewType("JSONTrackingPreview", dict)
+HTMLPreview = NewType("HTMLPreview", str)

@@ -59,7 +59,7 @@ class TestPickleDataset:
         indirect=True,
     )
     def test_save_and_load(self, pickle_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         pickle_dataset.save(dummy_dataframe)
         reloaded = pickle_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
@@ -68,7 +68,7 @@ class TestPickleDataset:
 
     def test_exists(self, pickle_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not pickle_dataset.exists()
         pickle_dataset.save(dummy_dataframe)
         assert pickle_dataset.exists()
@@ -98,7 +98,7 @@ class TestPickleDataset:
 
     def test_load_missing_file(self, pickle_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PickleDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pickle.pickle_dataset.PickleDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             pickle_dataset.load()
 
@@ -120,6 +120,13 @@ class TestPickleDataset:
 
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
+
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.pkl"
+        dataset = PickleDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
@@ -189,29 +196,29 @@ class TestPickleDatasetVersioned:
 
     def test_save_and_load(self, versioned_pickle_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_pickle_dataset.save(dummy_dataframe)
         reloaded_df = versioned_pickle_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_no_versions(self, versioned_pickle_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for PickleDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_pickle_dataset.load()
 
     def test_exists(self, versioned_pickle_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_pickle_dataset.exists()
         versioned_pickle_dataset.save(dummy_dataframe)
         assert versioned_pickle_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_pickle_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Pickle file for a given save version already exists."""
         versioned_pickle_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for PickleDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -230,7 +237,7 @@ class TestPickleDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for PickleDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pickle.pickle_dataset.PickleDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_pickle_dataset.save(dummy_dataframe)

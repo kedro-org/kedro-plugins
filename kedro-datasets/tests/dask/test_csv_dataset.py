@@ -9,6 +9,8 @@ from s3fs import S3FileSystem
 
 from kedro_datasets.dask import CSVDataset
 
+from . import pytestmark
+
 FILE_NAME = "*.csv"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
@@ -84,7 +86,7 @@ class TestCSVDataset:
     @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials):
         csv_dataset = CSVDataset(filepath=S3_PATH, credentials=bad_credentials)
-        pattern = r"Failed while loading data from data set CSVDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.dask.csv_dataset.CSVDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load().compute()
 
@@ -94,7 +96,7 @@ class TestCSVDataset:
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_dataset = CSVDataset(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
-        pattern = r"Failed while loading data from data set CSVDataset\(.+\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.dask.csv_dataset.CSVDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             s3_dataset.load().compute()
 
@@ -121,10 +123,17 @@ class TestCSVDataset:
 
     def test_exists(self, s3_dataset, dummy_dd_dataframe, mocked_s3_bucket):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not s3_dataset.exists()
         s3_dataset.save(dummy_dd_dataframe)
         assert s3_dataset.exists()
+
+    def test_exists_glob_raises_file_not_found(self, s3_dataset, mocker):
+        """Test that _exists returns False when glob raises FileNotFoundError.
+        Newer versions of s3fs raise FileNotFoundError when globbing an empty bucket."""
+        fs_mock = mocker.patch("fsspec.filesystem")
+        fs_mock.return_value.glob.side_effect = FileNotFoundError
+        assert not s3_dataset.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""

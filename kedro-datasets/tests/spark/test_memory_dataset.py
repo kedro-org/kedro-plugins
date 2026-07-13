@@ -11,6 +11,10 @@ def _update_spark_df(data, idx, jdx, value):
         col("_1.*"), col("_2").alias("__id")
     )
     cname = data.columns[idx]
+
+    # Cast column to string before injecting mixed type value
+    data = data.withColumn(cname, col(cname).cast("string"))
+
     return data.withColumn(
         cname, when(col("__id") == jdx, value).otherwise(col(cname))
     ).drop("__id")
@@ -35,14 +39,14 @@ def memory_dataset(spark_data_frame):
 
 
 def test_load_modify_original_data(memory_dataset, spark_data_frame):
-    """Check that the data set object is not updated when the original
+    """Check that the dataset object is not updated when the original
     SparkDataFrame is changed."""
     spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, -5)
     assert not _check_equals(memory_dataset.load(), spark_data_frame)
 
 
 def test_save_modify_original_data(spark_data_frame):
-    """Check that the data set object is not updated when the original
+    """Check that the dataset object is not updated when the original
     SparkDataFrame is changed."""
     memory_dataset = MemoryDataset()
     memory_dataset.save(spark_data_frame)
@@ -62,5 +66,7 @@ def test_load_returns_same_spark_object(memory_dataset, spark_data_frame):
 
 
 def test_str_representation(memory_dataset):
-    """Test string representation of the data set"""
-    assert "MemoryDataset(data=<DataFrame>)" in str(memory_dataset)
+    """Test string representation of the dataset"""
+    assert "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')" in str(
+        memory_dataset
+    )

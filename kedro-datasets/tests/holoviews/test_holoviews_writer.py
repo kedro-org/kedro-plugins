@@ -83,10 +83,20 @@ class TestHoloviewsWriter:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.png"
         dataset = HoloviewsWriter(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    def test_pathlike_filepath(self, tmp_path, dummy_hv_object):
+        """Test that os.PathLike objects work as filepath."""
+        filepath = tmp_path / "test.png"
+        dataset = HoloviewsWriter(filepath=filepath)
+        dataset.save(dummy_hv_object)
+        assert dataset.exists()
 
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "fmt": "svg"}], indirect=True)
     def test_save_extra_params(self, hv_writer, save_args):
@@ -140,11 +150,11 @@ class TestHoloviewsWriterVersioned:
         assert "save_args" in str(versioned_hv_writer)
 
     def test_prevent_overwrite(self, dummy_hv_object, versioned_hv_writer):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
-            r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.holoviews.holoviews_writer.HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -163,7 +173,7 @@ class TestHoloviewsWriterVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for HoloviewsWriter\(.+\)"
+            rf"'{load_version}' for kedro_datasets.holoviews.holoviews_writer.HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
@@ -185,7 +195,7 @@ class TestHoloviewsWriterVersioned:
             versioned_hv_writer.load()
 
     def test_exists(self, versioned_hv_writer, dummy_hv_object):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_hv_writer.exists()
         versioned_hv_writer.save(dummy_hv_object)
         assert versioned_hv_writer.exists()

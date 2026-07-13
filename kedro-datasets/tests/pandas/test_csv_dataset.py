@@ -87,14 +87,14 @@ def mocked_csv_in_s3(mocked_s3_bucket, mocked_dataframe):
 
 class TestCSVDataset:
     def test_save_and_load(self, csv_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         csv_dataset.save(dummy_dataframe)
         reloaded = csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not csv_dataset.exists()
         csv_dataset.save(dummy_dataframe)
         assert csv_dataset.exists()
@@ -114,6 +114,16 @@ class TestCSVDataset:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert csv_dataset._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"k1": "v1"}, "open_args_save": {"index": "value"}}],
+        indirect=True,
+    )
+    def test_fs_extra_params(self, csv_dataset, fs_args):
+        """Test overriding the default fs arguments."""
+        assert csv_dataset._fs_open_args_load == {"k1": "v1"}
+        assert csv_dataset._fs_open_args_save == {"mode": "w", "index": "value"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",
@@ -185,7 +195,7 @@ class TestCSVDataset:
 
     def test_load_missing_file(self, csv_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set CSVDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             csv_dataset.load()
 
@@ -217,10 +227,20 @@ class TestCSVDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = CSVDataset(filepath=filepath)
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = CSVDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
 
 class TestCSVDatasetVersioned:
@@ -248,7 +268,7 @@ class TestCSVDatasetVersioned:
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_csv_dataset.save(dummy_dataframe)
         reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -301,43 +321,44 @@ class TestCSVDatasetVersioned:
     def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
         """Test that cache invalidation does not affect other instances"""
         ds_a = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = CSVDataset(filepath=filepath_csv, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for CSVDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.csv_dataset.CSVDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_csv_dataset.load()
 
     def test_exists(self, versioned_csv_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_csv_dataset.exists()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding CSV file for a given save version already exists."""
         versioned_csv_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for CSVDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.csv_dataset.CSVDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -356,7 +377,7 @@ class TestCSVDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for CSVDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.csv_dataset.CSVDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_dataset.save(dummy_dataframe)

@@ -138,11 +138,11 @@ class TestSQLTableDataset:
             ).exists()
 
     def test_str_representation_table(self, table_dataset):
-        """Test the data set instance string representation"""
+        """Test the dataset instance string representation"""
         str_repr = str(table_dataset)
         assert (
-            "SQLTableDataset(load_args={}, save_args={'index': False}, "
-            f"table_name={TABLE_NAME})" in str_repr
+            f"kedro_datasets.pandas.sql_dataset.SQLTableDataset(table_name='{TABLE_NAME}', load_args={{}}, save_args={{'index': False}})"
+            in str_repr
         )
         assert CONNECTION not in str(str_repr)
 
@@ -424,33 +424,33 @@ class TestSQLQueryDataset:
             SQLQueryDataset(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR}).load()
 
     def test_save_error(self, query_dataset, dummy_dataframe):
-        """Check the error when trying to save to the data set"""
+        """Check the error when trying to save to the dataset"""
         pattern = r"'save' is not supported on SQLQueryDataset"
         with pytest.raises(DatasetError, match=pattern):
             query_dataset.save(dummy_dataframe)
 
     def test_str_representation_sql(self, query_dataset, sql_file):
-        """Test the data set instance string representation"""
+        """Test the dataset instance string representation"""
         str_repr = str(query_dataset)
         assert (
-            "SQLQueryDataset(execution_options={}, filepath=None, "
-            f"load_args={{}}, sql={SQL_QUERY})" in str_repr
+            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql='{SQL_QUERY}', filepath='None', "
+            f"load_args='{{}}', execution_options='{{}}')" in str_repr
         )
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr
 
     def test_str_representation_filepath(self, query_file_dataset, sql_file):
-        """Test the data set instance string representation with filepath arg."""
+        """Test the dataset instance string representation with filepath arg."""
         str_repr = str(query_file_dataset)
         assert (
-            f"SQLQueryDataset(execution_options={{}}, filepath={str(sql_file)}, "
-            "load_args={}, sql=None)" in str_repr
+            f"kedro_datasets.pandas.sql_dataset.SQLQueryDataset(sql='None', filepath='{str(sql_file)}', "
+            f"load_args='{{}}', execution_options='{{}}')" in str_repr
         )
         assert CONNECTION not in str_repr
         assert SQL_QUERY not in str_repr
 
     def test_sql_and_filepath_args(self, sql_file):
-        """Test that an error is raised when both `sql` and `filepath` args are given."""
+        """Test that an error is raised when both 'sql' and 'filepath' args are given."""
         pattern = (
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
@@ -564,3 +564,12 @@ class TestSQLQueryDataset:
         kedro_datasets.pandas.sql_dataset.create_engine.assert_called_once_with(
             CONNECTION, **additional_params
         )
+
+    def test_pathlike_filepath(self, mocker, tmp_path):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.sql"
+        filepath.write_text(SQL_QUERY)
+        dataset = SQLQueryDataset(filepath=filepath, credentials={"con": CONNECTION})
+        mocker.patch("pandas.read_sql_query")
+        dataset.load()
+        pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=ANY)

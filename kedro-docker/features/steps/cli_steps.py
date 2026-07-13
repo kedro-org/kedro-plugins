@@ -77,7 +77,7 @@ def _get_docker_ipython_output(context):
         return context.ipython_stdout
 
     try:
-        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=128)
+        context.ipython_stdout = _read_lines_with_timeout(context.result, max_lines=256)
     finally:
         kill_docker_containers(context.project_name)
 
@@ -94,7 +94,6 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
     """
     data = download_url(url)
-
     try:
         assert context.result.poll() is None
         assert string in data
@@ -144,6 +143,8 @@ def create_project_from_config_file(context, starter_name):
         cwd=str(context.temp_dir),
     )
 
+    assert res.returncode == 0
+
     # add a consent file to prevent telemetry from prompting for input during e2e test
     telemetry_file = context.root_project_dir / ".telemetry"
     telemetry_file.write_text("consent: false", encoding="utf-8")
@@ -177,8 +178,6 @@ def create_project_from_config_file(context, starter_name):
         """
         )
     )
-
-    assert res.returncode == 0
 
 
 @given('I have executed the kedro command "{command}"')
@@ -236,7 +235,7 @@ def exec_kedro_target(context, command):
 @when("I execute kedro docker build with custom base image")
 def exec_docker_build_target(context):
     """Execute Kedro Docker build with custom base image"""
-    base_image = f"python:3.{sys.version_info[1]}-bullseye"
+    base_image = f"python:3.{sys.version_info[1]}-bookworm"
     cmd = [context.kedro, "docker", "build", "--base-image", base_image]
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
@@ -305,7 +304,7 @@ def check_status_code(context):
         print(context.result.stderr)
         assert (
             False
-        ), f"Expected exit code {OK_EXIT_CODE} but got {context.result.returncode}"
+        ), f"Expected exit code /= {OK_EXIT_CODE} but got {context.result.returncode}"
 
 
 @then("I should get an error exit code")
@@ -328,9 +327,9 @@ def check_docker_ipython_msg(context, msg):
     )
 
 
-@then("Jupyter {command} should run on port {port}")
+@then("Jupyter {command} should run on port {port} given token {token}")
 def check_jupyter_nb_proc_on_port(
-    context: behave.runner.Context, command: str, port: int
+    context: behave.runner.Context, command: str, port: int, token: str
 ):
     """
     Check that jupyter notebook service is running on specified port
@@ -340,15 +339,15 @@ def check_jupyter_nb_proc_on_port(
         command: Jupyter command message to check
         port: Port to check
     """
-    url = f"http://localhost:{int(port)}"
+    url = f"http://localhost:{int(port)}/api?token={token}"
     wait_for(
         func=_check_service_up,
         expected_result=None,
         print_error=False,
         context=context,
         url=url,
-        string=f"Jupyter {command}",
-        timeout_=15,
+        string="version",
+        timeout_=25,
     )
 
 

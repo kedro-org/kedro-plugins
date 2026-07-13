@@ -18,11 +18,15 @@ class PickleDataset(AbstractDataset[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    !!! warning
+        Pickle-based deserialization (including ``dill``, ``cloudpickle``, and
+        ``compress_pickle`` backends) can execute arbitrary code when loading
+        untrusted data. Only load from Redis instances you trust.
 
-    .. code-block:: yaml
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
+        ```yaml
         my_python_object: # simple example
           type: redis.PickleDataset
           key: my_object
@@ -37,15 +41,12 @@ class PickleDataset(AbstractDataset[Any, Any]):
             db: 1
           save_args:
             ex: 10
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.redis import PickleDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.redis import PickleDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
@@ -53,6 +54,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
         >>> my_data.save(data)
         >>> reloaded = my_data.load()
         >>> assert data.equals(reloaded)
+
     """
 
     DEFAULT_REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379")
@@ -74,7 +76,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
         a Redis database while deserialising/serialising. Supports custom backends to
         serialise/deserialise objects.
 
-        Example backends that are compatible (non-exhaustive):
+        Example backends that are compatible - non-exhaustive:
             * `pickle`
             * `dill`
             * `compress_pickle`
@@ -166,7 +168,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.
-    def _load(self) -> Any:
+    def load(self) -> Any:
         if not self.exists():
             raise DatasetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
@@ -174,7 +176,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
             self._redis_db.get(self._key), **self._load_args
         )  # type: ignore
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         try:
             imported_backend = importlib.import_module(self._backend)
             self._redis_db.set(

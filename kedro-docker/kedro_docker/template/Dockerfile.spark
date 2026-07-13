@@ -1,29 +1,33 @@
-ARG BASE_IMAGE=python:3.9-slim
-FROM $BASE_IMAGE as runtime-environment
+ARG BASE_IMAGE=python:3.10-slim
+FROM $BASE_IMAGE AS runtime-environment
 
 # install JVM
 RUN apt-get update && mkdir -p /usr/share/man/man1 && \
-apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
+    apt-get install -y procps default-jre-headless && rm -rf /var/lib/apt/lists/*
 
-# install project requirements
-COPY requirements.txt /tmp/requirements.txt
+# update pip and install uv
 RUN python -m pip install -U "pip>=21.2"
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
+RUN pip install uv
 
 # add kedro user
 ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 RUN groupadd -f -g ${KEDRO_GID} kedro_group && \
-useradd -m -d /home/kedro_docker -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro_docker
+    useradd -m -d /home/kedro_docker -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro_docker
 
 WORKDIR /home/kedro_docker
-USER kedro_docker
 
 FROM runtime-environment
 # copy the whole project except what is in .dockerignore
 ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 COPY --chown=${KEDRO_UID}:${KEDRO_GID} . .
+
+# Install local Spark dependencies for local execution
+RUN uv pip install --system --no-cache-dir "kedro-datasets[spark-local,hdfs-base,s3fs-base]"
+# Install project dependencies from pyproject.toml
+RUN uv pip install --system --no-cache-dir -e .
+USER kedro_docker
 
 EXPOSE 8888
 

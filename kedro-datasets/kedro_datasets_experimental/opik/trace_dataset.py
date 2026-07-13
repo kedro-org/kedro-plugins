@@ -1,0 +1,386 @@
+import logging
+import os
+from typing import Any, Literal
+
+from kedro.io import AbstractDataset, DatasetError
+from opik import configure, track
+
+from ._common import validate_credentials
+
+logger = logging.getLogger(__name__)
+
+REQUIRED_OPIK_CREDENTIALS = {"api_key", "workspace"}
+REQUIRED_OPIK_CREDENTIALS_AUTOGEN = {"endpoint"}
+OPTIONAL_OPIK_CREDENTIALS = {"project_name", "url_override"}
+
+# Opik configuration is global per process: the first project configured wins
+# once a client has been created. This tracks the project configured so far (a
+# mutable holder, to avoid a module-level `global` rebind) so we can warn if a
+# later TraceDataset configures a different one.
+_session_project_state: dict[str, str | None] = {"project_name": None}
+
+
+class TraceDataset(AbstractDataset):
+    """Kedro dataset for managing Opik tracing clients and callbacks.
+
+    This dataset provides Opik tracing integrations for various AI frameworks or direct SDK usage.
+    During initialization, the dataset automatically configures the Opik environment and credentials
+    to ensure that subsequent traces are correctly logged to the specified workspace and project.
+
+    **Modes:**
+
+    - `sdk`: Returns a simple namespace-like client exposing the `track` decorator for manual tracing.
+    - `openai`: Returns an OpenAI client automatically wrapped for Opik tracing.
+    - `langchain`: Returns an `OpikTracer` callback handler for LangChain integration.
+    - `autogen`: Returns a configured `Tracer` for AutoGen integration via OTLP (OpenTelemetry Protocol).
+
+    **Examples**
+
+    Using catalog YAML configuration:
+    ```yaml
+    opik_trace:
+      type: kedro_datasets_experimental.opik.TraceDataset
+      credentials: opik_credentials
+      mode: openai
+    ```
+
+    Using Python API:
+    ```python
+    from kedro_datasets_experimental.opik import TraceDataset
+
+    # Example: OpenAI mode (traced completions)
+    dataset = TraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "kedro-demo",
+            "openai": {
+                "api_key": "sk-...",  # pragma: allowlist secret
+                "base_url": "https://api.openai.com/v1",
+            },
+        },
+        mode="openai",
+    )
+    client = dataset.load()
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Summarize Kedro in one sentence."},
+        ],
+    )
+
+    # Example: SDK mode (manual tracing via decorator)
+    dataset = TraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "kedro-sdk-demo",
+        },
+        mode="sdk",
+    )
+    client = dataset.load()
+
+
+    @client.track(name="demo_workflow")
+    def multiply(x: int, y: int) -> int:
+        return x * y
+
+
+    print(multiply(3, 4))
+
+    # Example: LangChain mode
+    dataset = TraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+        },
+        mode="langchain",
+    )
+    tracer = dataset.load()
+    # Use tracer in your LangChain Runnable or chain.run(callbacks=[tracer])
+
+    # Example: AutoGen mode Opik cloud
+    dataset = TraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "endpoint": "https://www.comet.com/opik/api/v1/private/otel/v1/traces",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()  # Returns configured Tracer, ready to use
+
+    # Option 1: Automatic tracing (LLM calls traced automatically)
+    agent.invoke(context)  # Traces sent to Opik
+
+    # Option 2: Add custom spans with business context (recommended)
+    with tracer.start_as_current_span("response_generation") as span:
+        span.set_attribute("intent", "claim_new")
+        span.set_attribute("user_id", "123")
+        agent.invoke(context)  # Child spans nested under "response_generation"
+
+    # Example: AutoGen mode self-hosted
+    dataset = TraceDataset(
+        credentials={
+            "api_key": "opik_api_key",  # pragma: allowlist secret
+            "workspace": "my-workspace",
+            "project_name": "autogen-demo",
+            "url_override": "http://localhost:5173",
+            "endpoint": "http://localhost:5173/opik/api/v1/private/otel/v1/traces",
+        },
+        mode="autogen",
+    )
+    tracer = dataset.load()
+    ```
+
+    **Notes**
+
+    - Opik configuration is global within the Python process.
+      Using multiple `TraceDataset` instances with different projects in the same session
+      may cause all traces to log to the first configured project.
+    - To switch projects, restart the Python process or reload the Opik module.
+    """
+
+    def __init__(
+        self,
+        credentials: dict[str, Any],
+        mode: Literal["sdk", "openai", "langchain", "autogen"] = "sdk",
+        **trace_kwargs: Any,
+    ):
+        self._credentials = credentials
+        self._mode = mode
+        self._trace_kwargs = trace_kwargs
+        self._cached_client = None
+
+        self._validate_opik_credentials()
+        # Use OTLP directly
+        if self._mode != "autogen":
+            self._configure_opik()
+
+    def _validate_opik_credentials(self) -> None:
+        """Validate Opik credentials before configuring the environment."""
+        validate_credentials(self._credentials, REQUIRED_OPIK_CREDENTIALS, OPTIONAL_OPIK_CREDENTIALS)
+
+        if self._mode == "autogen":
+            for key in REQUIRED_OPIK_CREDENTIALS_AUTOGEN:
+                if not self._credentials.get(key):
+                    raise DatasetError(
+                        f"AutoGen mode requires '{key}' in credentials "
+                        f"(e.g. 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'). "
+                        f"Provide the full OTLP endpoint URL for trace export."
+                    )
+
+    def _configure_opik(self) -> None:
+        """Configure the Opik SDK from the provided credentials.
+
+        `project_name` is passed to `configure()` so it is persisted to
+        Opik's session configuration and picked up by the auto-created client.
+        This is what routes traces to the right project for both `langchain`
+        mode (the `OpikTracer` inherits the configured project) and `sdk`
+        mode (the `@track` decorator resolves the same way). `configure()`
+        gained the `project_name` parameter in opik 1.11.0.
+
+        Note: Opik configuration is global within a process, so the project
+        cannot be changed once a client has been created. Using multiple
+        `TraceDataset` instances with different projects in the same session
+        will log all traces to the first configured project; a warning is
+        emitted in that case.
+        """
+        project_name = self._credentials.get("project_name")
+        configured_project = _session_project_state["project_name"]
+
+        if (
+            configured_project is not None
+            and project_name is not None
+            and project_name != configured_project
+        ):
+            logger.warning(
+                "Opik is already configured for project '%s' in this session. "
+                "Opik configuration is global per process, so configuring project "
+                "'%s' may not take effect for all traces — run pipelines targeting "
+                "different projects in separate processes.",
+                configured_project,
+                project_name,
+            )
+
+        configure(
+            api_key=self._credentials["api_key"],
+            workspace=self._credentials["workspace"],
+            url=self._credentials.get("url_override"),
+            project_name=project_name,
+            force=True,
+        )
+
+        if configured_project is None and project_name is not None:
+            _session_project_state["project_name"] = project_name
+
+    def _validate_openai_client_params(self) -> None:
+        """Validate OpenAI credentials in the 'openai' section.
+
+        Raises:
+            DatasetError: If OpenAI credentials are missing or invalid.
+        """
+        if "openai" not in self._credentials:
+            raise DatasetError(
+                "Missing 'openai' section in TraceDataset credentials. "
+                "For OpenAI mode, include an 'openai' block inside your credentials."
+            )
+
+        openai_creds = self._credentials["openai"]
+
+        api_key = str(openai_creds.get("api_key", "")).strip()
+        if not api_key:
+            raise DatasetError("Missing or empty OpenAI API key")
+
+        # Validate base_url is not empty if provided
+        if "base_url" in openai_creds and not str(openai_creds["base_url"]).strip():
+            raise DatasetError("OpenAI credential 'base_url' cannot be empty if provided")
+
+    def _build_autogen_tracer(self) -> Any:
+        """Build and return a configured Tracer for AutoGen integration with Opik.
+
+        Sets up OpenTelemetry TracerProvider with OTLP exporter to Opik,
+        configures it as the global provider, and returns a ready-to-use Tracer.
+
+        Returns:
+            Tracer configured to export traces to Opik.
+
+        Raises:
+            DatasetError: If required OpenTelemetry dependencies are not installed.
+        """
+        try:
+            from opentelemetry import trace  # noqa: PLC0415
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # noqa: PLC0415
+                OTLPSpanExporter,
+            )
+            from opentelemetry.sdk.trace import TracerProvider  # noqa: PLC0415
+            from opentelemetry.sdk.trace.export import (  # noqa: PLC0415
+                BatchSpanProcessor,
+            )
+        except ImportError as exc:
+            raise DatasetError(
+                "AutoGen mode requires OpenTelemetry. "
+                "Install with: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+            ) from exc
+
+        # Build headers for Opik authentication
+        headers = {
+            "Authorization": self._credentials["api_key"],
+            "Comet-Workspace": self._credentials["workspace"],
+        }
+
+        # Add project name if specified
+        project_name = self._credentials.get("project_name")
+        if project_name:
+            headers["projectName"] = project_name
+
+        # Endpoint is provided by user and validated in _validate_opik_credentials
+        endpoint = self._credentials["endpoint"]
+
+        exporter = OTLPSpanExporter(
+            endpoint=endpoint,
+            headers=headers
+        )
+
+        processor = BatchSpanProcessor(exporter)
+
+        # Use existing provider if already set, otherwise create a new one.
+        existing_provider = trace.get_tracer_provider()
+        if hasattr(existing_provider, "add_span_processor"):
+            existing_provider.add_span_processor(processor)
+        else:
+            provider = TracerProvider()
+            provider.add_span_processor(processor)
+            trace.set_tracer_provider(provider)
+
+        return trace.get_tracer("opik.autogen")
+
+    def _describe(self) -> dict[str, Any]:
+        """Describe dataset configuration with credentials redacted."""
+        creds = self._credentials.copy()
+        if "openai" in creds:
+            creds["openai"] = {k: "***" for k in creds["openai"].keys()}
+
+        return {
+            "mode": self._mode,
+            "credentials": {k: "***" for k in creds.keys()},
+        }
+
+    def load(self) -> Any:
+        """Load the appropriate tracing client based on the configured mode."""
+        if self._cached_client is not None:
+            return self._cached_client
+
+        if self._mode == "sdk":
+            self._cached_client = self._load_sdk_client()
+        elif self._mode == "openai":
+            self._cached_client = self._load_openai_client()
+        elif self._mode == "langchain":
+            self._cached_client = self._load_langchain_tracer()
+        elif self._mode == "autogen":
+            self._cached_client = self._build_autogen_tracer()
+        else:
+            raise DatasetError(f"Unsupported mode '{self._mode}' for TraceDataset")
+
+        return self._cached_client
+
+    def _load_sdk_client(self) -> Any:
+        """Return a simple SDK client exposing the `track` decorator.
+
+        The Opik SDK does not provide a formal client object for direct usage;
+        instead, the `track` decorator is imported at the module level.
+        This wrapper mimics a client interface for consistency across modes.
+        """
+
+        # Simple namespace-like wrapper to mimic a "client"
+        class SDKClient:
+            track = staticmethod(track)
+
+        return SDKClient()
+
+    def _load_openai_client(self) -> Any:
+        """Return an OpenAI client wrapped with Opik tracing integration."""
+        try:
+            import openai  # noqa: PLC0415
+            from opik.integrations.openai import track_openai  # noqa: PLC0415
+        except ImportError as e:
+            raise DatasetError(
+                "OpenAI or Opik OpenAI integration not available. "
+                "Ensure you have installed the required dependencies: "
+                "pip install openai opik"
+            ) from e
+
+        self._validate_openai_client_params()
+        client = openai.OpenAI(**self._credentials["openai"])
+
+        project_name = self._trace_kwargs.get("project_name")
+        env_project = os.getenv("OPIK_PROJECT_NAME")
+        if project_name and env_project and project_name != env_project:
+            logger.warning(
+                f"Project name mismatch detected: trace_kwargs specifies '{project_name}', "
+                f"but environment variable OPIK_PROJECT_NAME is set to '{env_project}'. "
+                f"The environment value will take precedence."
+            )
+
+        return track_openai(client, project_name=project_name) if project_name else track_openai(client)
+
+    def _load_langchain_tracer(self) -> Any:
+        """Return an OpikTracer callback for LangChain integration.
+
+        The project is set by `_configure_opik` (via `configure`), so the
+        tracer inherits it from the configured client. An explicit
+        `project_name` catalog kwarg still flows through `trace_kwargs` and
+        takes precedence for this tracer.
+        """
+        try:
+            from opik.integrations.langchain import OpikTracer  # noqa: PLC0415
+        except ImportError as e:
+            raise DatasetError("Opik LangChain integration not available.") from e
+
+        return OpikTracer(**self._trace_kwargs)
+
+    def save(self, data: Any) -> None:
+        """Saving traces manually is not supported; TraceDataset is read-only."""
+        raise NotImplementedError("TraceDataset is read-only.")

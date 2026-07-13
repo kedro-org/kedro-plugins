@@ -3,40 +3,10 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from airflow import DAG
-from airflow.models import BaseOperator
-from airflow.utils.decorators import apply_defaults
+from airflow.sdk import dag, task
 
 from kedro.framework.session import KedroSession
 from kedro.framework.project import configure_project
-
-
-class KedroOperator(BaseOperator):
-    @apply_defaults
-    def __init__(
-        self,
-        package_name: str,
-        pipeline_name: str,
-        node_name: str | list[str],
-        project_path: str | Path,
-        env: str,
-        conf_source: str,
-        *args, **kwargs
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        self.package_name = package_name
-        self.pipeline_name = pipeline_name
-        self.node_name = node_name
-        self.project_path = project_path
-        self.env = env
-        self.conf_source = conf_source
-
-    def execute(self, context):
-        configure_project(self.package_name)
-        with KedroSession.create(self.project_path, env=self.env, conf_source=self.conf_source) as session:
-            if isinstance(self.node_name, str):
-                self.node_name = [self.node_name]
-            session.run(self.pipeline_name, node_names=self.node_name)
 
 # Kedro settings required to run your pipeline
 env = "{{ env }}"
@@ -46,15 +16,22 @@ package_name = "{{ package_name }}"
 conf_source = "{{ conf_source }}" or Path.cwd() / "conf"
 
 
-# Using a DAG context manager, you don't have to specify the dag property of each task
-with DAG(
+def _run_kedro_node(node_names=None, namespaces=None):
+    """Run a Kedro pipeline slice. Pass node_names for regular node groups or namespaces for namespace groups."""
+    configure_project(package_name)
+    with KedroSession.create(project_path=project_path, env=env, conf_source=conf_source) as session:
+        if namespaces is not None:
+            session.run(pipeline_names=[pipeline_name], namespaces=namespaces)
+        else:
+            session.run(pipeline_names=[pipeline_name], node_names=node_names)
+
+
+@dag(
     dag_id="{{ dag_name | safe | slugify }}",
     start_date=datetime({{ start_date | default([2023, 1, 1]) | join(",")}}),
     max_active_runs={{ max_active_runs | default(3) }},
-    # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
-    schedule_interval="{{ schedule_interval | default('@once') }}",
+    schedule="{{ schedule | default(schedule_interval | default('@once')) }}",
     catchup={{ catchup | default(False) }},
-    # Default settings applied to all tasks
     default_args=dict(
         owner="{{ owner | default('airflow') }}",
         depends_on_past={{ depends_on_past | default(False) }},
@@ -62,21 +39,30 @@ with DAG(
         email_on_retry={{ email_on_retry | default(False) }},
         retries={{ retries | default(1) }},
         retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
-    )
-) as dag:
-    tasks = {
-    {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
-            task_id="{{ node_name | safe | slugify  }}",
-            package_name=package_name,
-            pipeline_name=pipeline_name,
-            node_name={% if node_list | length > 1 %}[{% endif %}{% for node in node_list %}"{{ node.name | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}{% if node_list | length > 1 %}]{% endif %},
-            project_path=project_path,
-            env=env,
-            conf_source=conf_source,
-        ),
-{% endfor %}    }
+    ),
+)
+def {{ dag_name | safe | slugify | replace("-", "_") }}():
+{%- for group in node_objs %}
 
-    {% for parent_node, child_nodes in dependencies.items() -%}
-    {% for child in child_nodes %}    tasks["{{ parent_node | safe | slugify }}"] >> tasks["{{ child | safe | slugify }}"]
-    {% endfor %}
+    @task(task_id="{{ group.name | slugify }}")
+    def {{ group.name | slugify | replace("-", "_") }}():
+{%- if group.type == "namespace" %}
+        _run_kedro_node(namespaces=["{{ group.name }}"])
+{%- else %}
+        _run_kedro_node(node_names=[{% for node in group.nodes %}"{{ node }}"{% if not loop.last %}, {% endif %}{% endfor %}])
+{%- endif %}
+{%- endfor %}
+
+    tasks = {
+    {%- for group in node_objs %}
+        "{{ group.name | slugify }}": {{ group.name | slugify | replace("-", "_") }}(),
     {%- endfor %}
+    }
+{%- for group in node_objs %}
+{%- for dep in group.dependencies %}
+    tasks["{{ dep | slugify }}"] >> tasks["{{ group.name | slugify }}"]
+{%- endfor %}
+{%- endfor %}
+
+
+{{ dag_name | safe | slugify | replace("-", "_") }}()

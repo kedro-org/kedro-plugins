@@ -94,7 +94,7 @@ class TestSparkStreamingDataset:
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataset(
-            filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
+            filepath=filepath, file_format="json", save_args={"mode": "overwrite"}
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
@@ -107,6 +107,27 @@ class TestSparkStreamingDataset:
         schema = sample_schema(schema_path)
         assert streaming_ds.schema == schema
 
+    def test_pathlike_filepath(self, tmp_path, sample_spark_streaming_df):
+        filepath = tmp_path / "test_streams"
+        schema_path = tmp_path / SCHEMA_FILE_NAME
+
+        spark_json_ds = SparkDataset(
+            filepath=filepath,
+            file_format="json",
+            save_args={"mode": "overwrite"},
+        )
+        spark_json_ds.save(sample_spark_streaming_df)
+
+        streaming_ds = SparkStreamingDataset(
+            filepath=filepath,
+            file_format="json",
+            load_args={"schema": {"filepath": schema_path.as_posix()}},
+        )
+
+        loaded = streaming_ds.load()
+        assert loaded.isStreaming
+        assert loaded.schema == sample_schema(schema_path.as_posix())
+
     @pytest.mark.usefixtures("mocked_s3_schema")
     def test_load_options_schema_path_with_credentials(
         self, tmp_path, sample_spark_streaming_df
@@ -115,7 +136,7 @@ class TestSparkStreamingDataset:
         schema_path = (tmp_path / SCHEMA_FILE_NAME).as_posix()
 
         spark_json_ds = SparkDataset(
-            filepath=filepath, file_format="json", save_args=[{"mode", "overwrite"}]
+            filepath=filepath, file_format="json", save_args={"mode": "overwrite"}
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
@@ -144,7 +165,7 @@ class TestSparkStreamingDataset:
         spark_json_ds = SparkDataset(
             filepath=filepath_json,
             file_format="json",
-            save_args=[{"mode", "overwrite"}],
+            save_args={"mode": "overwrite"},
         )
         spark_json_ds.save(sample_spark_streaming_df)
 
@@ -174,12 +195,12 @@ class TestSparkStreamingDataset:
 
         if SPARK_VERSION >= Version("3.4.0"):
             mocker.patch(
-                "kedro_datasets.spark.spark_streaming_dataset._get_spark",
+                "kedro_datasets.spark.spark_streaming_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch(
-                "kedro_datasets.spark.spark_streaming_dataset._get_spark",
+                "kedro_datasets.spark.spark_streaming_dataset.get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
         with pytest.raises(DatasetError, match="Other Exception"):

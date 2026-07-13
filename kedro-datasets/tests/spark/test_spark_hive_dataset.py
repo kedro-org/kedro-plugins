@@ -3,8 +3,10 @@ import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pyspark
 import pytest
 from kedro.io.core import DatasetError
+from packaging.version import parse
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
@@ -13,6 +15,13 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from kedro_datasets.spark import SparkHiveDataset
 
 TESTSPARKDIR = "test_spark_dir"
+
+# Hive support was removed from Spark 4.x in favour of Catalog V2 / DataSourceV2.
+# These tests are skipped because enableHiveSupport() no longer works in Spark ≥ 4.x.
+pytestmark = pytest.mark.skipif(
+    parse(pyspark.__version__) >= parse("4"),
+    reason="Hive catalog not available in Spark 4.x",
+)
 
 
 @pytest.fixture(scope="module")
@@ -135,7 +144,7 @@ def _generate_spark_df_upsert_expected():
 
 class TestSparkHiveDataset:
     def test_cant_pickle(self):
-        import pickle
+        import pickle  # noqa: PLC0415
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(
@@ -294,7 +303,7 @@ class TestSparkHiveDataset:
         )
         with pytest.raises(
             DatasetError,
-            match=r"Failed while loading data from data set SparkHiveDataset"
+            match=r"Failed while loading data from dataset SparkHiveDataset"
             r"|table_doesnt_exist"
             r"|UnresolvedRelation",
         ):

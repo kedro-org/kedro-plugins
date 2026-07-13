@@ -24,27 +24,31 @@ from scipy import io
 class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """`MatlabDataSet` loads and saves data from/to a MATLAB file using scipy.io.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    !!! warning
+        MAT v5 files can contain pickled Python objects.
+        ``scipy.io.loadmat()`` will deserialize these, which can execute
+        arbitrary code if the file is untrusted. Only load ``.mat`` files from
+        sources you trust.
 
-    .. code-block:: yaml
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
+        ```yaml
         cars:
           type: matlab.MatlabDataset
           filepath: gcs://your_bucket/cars.mat
           fs_args:
-            project: my-project
+          project: my-project
           credentials: my_gcp_credentials
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.matlab import MatlabDataset
         >>> import numpy as np
+        >>> from kedro_datasets.matlab import MatlabDataset
+        >>>
         >>> data = np.array([1, 2, 3])
+        >>>
         >>> dataset = MatlabDataset(filepath=tmp_path / "test.mat")
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
@@ -53,6 +57,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """
 
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"indent": 2}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa = PLR0913
         self,
@@ -83,8 +88,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
@@ -106,14 +110,16 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             exists_function=self._fs.exists,
             glob_function=self._fs.glob,
         )
-        # Handle default save arguments
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default save and fs arguments
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -123,7 +129,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             "version": self._version,
         }
 
-    def _load(self) -> np.ndarray:
+    def load(self) -> np.ndarray:
         """
         Access the specific variable in the .mat file, e.g, data['variable_name']
         """
@@ -132,9 +138,9 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
             data = io.loadmat(f)
             return data
 
-    def _save(self, data: np.ndarray) -> None:
+    def save(self, data: np.ndarray) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(save_path, mode="wb") as f:
+        with self._fs.open(save_path, **self._fs_open_args_save) as f:
             io.savemat(f, {"data": data})
         self._invalidate_cache()
 

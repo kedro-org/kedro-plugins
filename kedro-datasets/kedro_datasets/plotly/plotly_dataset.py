@@ -5,6 +5,7 @@ plotly figure.
 from __future__ import annotations
 
 import json
+import os
 from copy import deepcopy
 from typing import Any
 
@@ -25,12 +26,10 @@ class PlotlyDataset(JSONDataset):
     ``PlotlyDataset`` is a convenience wrapper for ``plotly.JSONDataset``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         bar_plot:
           type: plotly.PlotlyDataset
           filepath: data/08_reporting/bar_plot.json
@@ -44,16 +43,13 @@ class PlotlyDataset(JSONDataset):
               xaxis_title: x
               yaxis_title: y
               title: Title
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.plotly import PlotlyDataset
-        >>> import plotly.express as px
         >>> import pandas as pd
+        >>> import plotly.express as px
+        >>> from kedro_datasets.plotly import PlotlyDataset
         >>>
         >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=("x1", "x2"))
         >>>
@@ -70,10 +66,12 @@ class PlotlyDataset(JSONDataset):
 
     """
 
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
+
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         plotly_args: dict[str, Any],
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -131,19 +129,25 @@ class PlotlyDataset(JSONDataset):
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
-        _fs_open_args_save.setdefault("mode", "w")
 
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default fs arguments
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         self.metadata = metadata
 
     def _describe(self) -> dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         fig = self._plot_dataframe(data)
-        super()._save(fig)
+        super().save.__wrapped__(self, fig)  # type: ignore[attr-defined]
 
     def _plot_dataframe(self, data: pd.DataFrame) -> go.Figure:
         plot_type = self._plotly_args.get("type")

@@ -142,10 +142,23 @@ class TestGenericSASDataset:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         dataset = GenericDataset(filepath=filepath, file_format="sas")
-        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        # no cache if unversioned
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert dataset._version_cache.currsize == 0
+        assert dataset._cached_load_version is None
+        assert dataset._cached_save_version is None
+
+    def test_pathlike_filepath(self, tmp_path, sas_binary):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.sas7bdat"
+        filepath.write_bytes(sas_binary)
+        dataset = GenericDataset(
+            filepath=filepath, file_format="sas", load_args={"format": "sas7bdat"}
+        )
+        df = dataset.load()
+        assert df.shape == (32, 6)
 
 
 class TestGenericCSVDatasetVersioned:
@@ -170,7 +183,7 @@ class TestGenericCSVDatasetVersioned:
 
     def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_csv_dataset.save(dummy_dataframe)
         reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -241,47 +254,48 @@ class TestGenericCSVDatasetVersioned:
             file_format="csv",
             version=Version(None, None),
         )
-        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
+        assert ds_a._cached_load_version is not None
+        assert ds_a._cached_save_version is not None
 
         ds_b = GenericDataset(
             filepath=filepath_csv.as_posix(),
             file_format="csv",
             version=Version(None, None),
         )
-        assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
         ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
         ds_a.release()
 
         # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
+        assert ds_a._cached_load_version is None
+        assert ds_a._cached_save_version is None
 
         # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
+        assert ds_b._cached_load_version is not None
+        assert ds_b._cached_save_version is not None
 
     def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GenericDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.generic_dataset.GenericDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_csv_dataset.load()
 
     def test_exists(self, versioned_csv_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_csv_dataset.exists()
         versioned_csv_dataset.save(dummy_dataframe)
         assert versioned_csv_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding Generic (csv) file for a given save version already exists."""
         versioned_csv_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for GenericDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.generic_dataset.GenericDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -300,7 +314,7 @@ class TestGenericCSVDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for GenericDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.generic_dataset.GenericDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_dataset.save(dummy_dataframe)

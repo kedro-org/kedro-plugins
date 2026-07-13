@@ -55,14 +55,14 @@ def json_lines_data(tmp_path):
 
 class TestJSONDataset:
     def test_save_and_load(self, json_dataset, dummy_dataframe):
-        """Test saving and reloading the data set."""
+        """Test saving and reloading the dataset."""
         json_dataset.save(dummy_dataframe)
         reloaded = json_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, json_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
-        nonexistent data set."""
+        nonexistent dataset."""
         assert not json_dataset.exists()
         json_dataset.save(dummy_dataframe)
         assert json_dataset.exists()
@@ -82,6 +82,16 @@ class TestJSONDataset:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert json_dataset._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"k1": "v1"}, "open_args_save": {"index": "value"}}],
+        indirect=True,
+    )
+    def test_fs_extra_params(self, json_dataset, fs_args):
+        """Test overriding the default fs arguments."""
+        assert json_dataset._fs_open_args_load == {"k1": "v1"}
+        assert json_dataset._fs_open_args_save == {"index": "value", "mode": "w"}
 
     @pytest.mark.parametrize(
         "load_args,save_args",
@@ -107,7 +117,7 @@ class TestJSONDataset:
 
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set JSONDataset\(.*\)"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.json_dataset.JSONDataset\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
             json_dataset.load()
 
@@ -155,6 +165,13 @@ class TestJSONDataset:
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.json"
+        dataset = JSONDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        assert_frame_equal(dummy_dataframe, dataset.load())
+
     def test_preview_json(self, json_lines_data):
         dataset = JSONDataset(filepath=json_lines_data, load_args={"lines": True})
         preview_data = dataset.preview(nrows=2)
@@ -198,29 +215,29 @@ class TestJSONDatasetVersioned:
 
     def test_save_and_load(self, versioned_json_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         versioned_json_dataset.save(dummy_dataframe)
         reloaded_df = versioned_json_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_no_versions(self, versioned_json_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for JSONDataset\(.+\)"
+        pattern = r"Did not find any versions for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             versioned_json_dataset.load()
 
     def test_exists(self, versioned_json_dataset, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not versioned_json_dataset.exists()
         versioned_json_dataset.save(dummy_dataframe)
         assert versioned_json_dataset.exists()
 
     def test_prevent_overwrite(self, versioned_json_dataset, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding hdf file for a given save version already exists."""
         versioned_json_dataset.save(dummy_dataframe)
         pattern = (
-            r"Save path \'.+\' for JSONDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -239,7 +256,7 @@ class TestJSONDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for JSONDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets.pandas.json_dataset.JSONDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_dataset.save(dummy_dataframe)

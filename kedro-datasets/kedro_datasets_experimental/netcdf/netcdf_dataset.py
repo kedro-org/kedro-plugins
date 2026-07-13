@@ -20,49 +20,42 @@ logger = logging.getLogger(__name__)
 
 
 class NetCDFDataset(AbstractDataset):
-    """``NetCDFDataset`` loads/saves data from/to a NetCDF file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses xarray to handle the NetCDF file.
+    """`NetCDFDataset` loads and saves data to a local netcdf (.nc) file.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
-
-    .. code-block:: yaml
-
-        single-file:
-          type: netcdf.NetCDFDataset
-          filepath: s3://bucket_name/path/to/folder/data.nc
-          save_args:
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
+    ```yaml
+    single-file:
+        type: netcdf.NetCDFDataset
+        filepath: s3://bucket_name/path/to/folder/data.nc
+        save_args:
             mode: a
-          load_args:
+        load_args:
             decode_times: False
 
-        multi-file:
-          type: netcdf.NetCDFDataset
-          filepath: s3://bucket_name/path/to/folder/data*.nc
-          load_args:
+    multi-file:
+        type: netcdf.NetCDFDataset
+        filepath: s3://bucket_name/path/to/folder/data*.nc
+        load_args:
             concat_dim: time
             combine: nested
             parallel: True
+    ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.netcdf import NetCDFDataset
-        >>> import xarray as xr
-        >>> ds = xr.DataArray(
-        ...     [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
-        ... ).to_dataset()
-        >>> dataset = NetCDFDataset(
-        ...     filepath=tmp_path / "data.nc",
-        ...     save_args={"mode": "w"},
-        ... )
-        >>> dataset.save(ds)
-        >>> reloaded = dataset.load()
-        >>> assert ds.equals(reloaded)
+    ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
+    ```python
+    from kedro_datasets.netcdf import NetCDFDataset
+    import xarray as xr
+    ds = xr.DataArray(
+         [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"
+     ).to_dataset()
+    dataset = NetCDFDataset(
+         filepath=tmp_path / "data.nc",
+         save_args={"mode": "w"},
+    )
+    dataset.save(ds)
+    reloaded = dataset.load()
+    assert ds.equals(reloaded)
+    ```
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
@@ -129,19 +122,15 @@ class NetCDFDataset(AbstractDataset):
         self.metadata = metadata
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Determine if multiple NetCDF files are being loaded in.
         self._is_multifile = (
             True if "*" in str(PurePosixPath(self._filepath).stem) else False
         )
 
-    def _load(self) -> xr.Dataset:
+    def load(self) -> xr.Dataset:
         load_path = self._filepath
         multi_load_path = load_path
 
@@ -163,7 +152,7 @@ class NetCDFDataset(AbstractDataset):
 
         return data
 
-    def _save(self, data: xr.Dataset):
+    def save(self, data: xr.Dataset):
         if self._is_multifile:
             raise DatasetError(
                 "Globbed multifile datasets with '*' in filepath cannot be saved. "

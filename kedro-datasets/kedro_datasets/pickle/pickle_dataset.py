@@ -6,6 +6,7 @@ supports all allowed options for loading and saving pickle files.
 from __future__ import annotations
 
 import importlib
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -26,12 +27,16 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    !!! warning
+        Pickle-based deserialization (including ``joblib``, ``dill``,
+        ``cloudpickle``, and ``compress_pickle`` backends) can execute arbitrary
+        code when loading untrusted files. Only load pickle files from sources
+        you trust.
 
-    .. code-block:: yaml
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
+        ```yaml
         test_model: # simple example without compression
           type: pickle.PickleDataset
           filepath: data/07_model_output/test_model.pkl
@@ -44,15 +49,12 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
           credentials: s3_credentials
           save_args:
             compress: lz4
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pickle import PickleDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pickle import PickleDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
         >>>
@@ -74,11 +76,12 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "wb"}}
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         backend: str = "pickle",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -91,7 +94,7 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         file on a specific filesystem. ``PickleDataset`` supports custom backends to
         serialise/deserialise objects.
 
-        Example backends that are compatible (non-exhaustive):
+        Example backends that are compatible - non-exhaustive:
             * `pickle`
             * `joblib`
             * `dill`
@@ -193,16 +196,16 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
         self._backend = backend
 
         # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -214,14 +217,14 @@ class PickleDataset(AbstractVersionedDataset[Any, Any]):
             "version": self._version,
         }
 
-    def _load(self) -> Any:
+    def load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             imported_backend = importlib.import_module(self._backend)
             return imported_backend.load(fs_file, **self._load_args)  # type: ignore
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

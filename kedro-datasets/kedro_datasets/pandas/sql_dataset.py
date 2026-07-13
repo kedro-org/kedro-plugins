@@ -1,9 +1,9 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
-
 from __future__ import annotations
 
 import copy
 import datetime as dt
+import os
 import re
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -107,12 +107,10 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     the data with no index. This is designed to make load and save methods
     symmetric.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         shuttles_table_dataset:
           type: pandas.SQLTableDataset
           credentials: db_credentials
@@ -122,32 +120,28 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
           save_args:
             schema: dwschema
             if_exists: replace
+        ```
 
-    Sample database credentials entry in ``credentials.yml``:
+        Sample database credentials entry in ``credentials.yml``:
 
-    .. code-block:: yaml
-
+        ```yaml
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
           pool_size: 10 # additional parameters
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.pandas import SQLTableDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import SQLTableDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
         >>> table_name = "table_a"
         >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
         >>> dataset = SQLTableDataset(table_name=table_name, credentials=credentials)
-        >>>
         >>> dataset.save(data)
         >>> reloaded = dataset.load()
-        >>>
         >>> assert data.equals(reloaded)
 
     """
@@ -210,12 +204,8 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             )
 
         # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         self._load_args["table_name"] = table_name
         self._save_args["name"] = table_name
@@ -266,10 +256,10 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
             "save_args": save_args,
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         return pd.read_sql_table(con=self.engine, **self._load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def save(self, data: pd.DataFrame) -> None:
         data.to_sql(con=self.engine, **self._save_args)
 
     def _exists(self) -> bool:
@@ -313,24 +303,22 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     by SQLAlchemy can be found here:
     https://docs.sqlalchemy.org/core/engines.html#database-urls
 
-    It does not support save method so it is a read only data set.
+    It does not support save method so it is a read only dataset.
     To save data to a SQL server use ``SQLTableDataset``.
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/\
-    data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         shuttle_id_dataset:
           type: pandas.SQLQueryDataset
           sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
           credentials: db_credentials
+        ```
 
-    Advanced example using the ``stream_results`` and ``chunksize`` options to reduce memory usage:
+        Advanced example using the ``stream_results`` and ``chunksize`` options to reduce memory usage:
 
-    .. code-block:: yaml
-
+        ```yaml
         shuttle_id_dataset:
           type: pandas.SQLQueryDataset
           sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
@@ -339,27 +327,25 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             stream_results: true
           load_args:
             chunksize: 1000
+        ```
 
-    Sample database credentials entry in ``credentials.yml``:
+        Sample database credentials entry in ``credentials.yml``:
 
-    .. code-block:: yaml
-
+        ```yaml
         db_credentials:
           con: postgresql://scott:tiger@localhost/test
           pool_size: 10 # additional parameters
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> import sqlite3
         >>>
-        >>> from kedro_datasets.pandas import SQLQueryDataset
         >>> import pandas as pd
+        >>> from kedro_datasets.pandas import SQLQueryDataset
         >>>
         >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+        >>>
         >>> sql = "SELECT * FROM table_a"
         >>> credentials = {"con": f"sqlite:///{tmp_path / 'test.db'}"}
         >>> dataset = SQLQueryDataset(sql=sql, credentials=credentials)
@@ -372,12 +358,9 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         <sqlite3.Cursor object at 0x...>
         >>> con.commit()
         >>> reloaded = dataset.load()
-        >>>
         >>> assert data.equals(reloaded)
 
-    Example of usage for MSSQL:
-
-    .. code-block:: pycon
+        Using MSSQL:
 
         >>> credentials = {
         ...     "server": "localhost",
@@ -386,6 +369,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         ...     "user": "SA",
         ...     "password": "StrongPassword",
         ... }
+        >>>
         >>> def _make_mssql_connection_str(
         ...     server: str, port: str, database: str, user: str, password: str
         ... ) -> str:
@@ -405,10 +389,9 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         ... )
         >>> df = dataset.load()
 
-    In addition, here is an example of a catalog with dates parsing:
+        In addition, here is an example of a catalog with dates parsing:
 
-    .. code-block:: yaml
-
+        ```yaml
         mssql_dataset:
           type: kedro_datasets.pandas.SQLQueryDataset
           credentials: mssql_credentials
@@ -424,6 +407,8 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             index_col: date
             parse_dates:
               date: "%Y-%m-%d %H:%M:%S.%f0 %z"
+        ```
+
     """
 
     # using Any because of Sphinx but it should be
@@ -436,9 +421,10 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         execution_options: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
+        encoding: str | None = None,
     ) -> None:
         """Creates a new ``SQLQueryDataset``.
 
@@ -465,7 +451,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
-            filepath: A path to a file with a sql query statement.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:
@@ -505,6 +491,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
         )
 
         self.metadata = metadata
+        self.encoding = encoding
 
         # load sql query from file
         if sql:
@@ -564,19 +551,19 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
             "execution_options": str(self._execution_options),
         }
 
-    def _load(self) -> pd.DataFrame:
+    def load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
-            with self._fs.open(load_path, mode="r") as fs_file:
+            with self._fs.open(load_path, mode="r", encoding=self.encoding) as fs_file:
                 load_args["sql"] = fs_file.read()
 
         return pd.read_sql_query(
             con=self.engine.execution_options(**self._execution_options), **load_args
         )
 
-    def _save(self, data: None) -> NoReturn:
+    def save(self, data: None) -> NoReturn:
         raise DatasetError("'save' is not supported on SQLQueryDataset")
 
     # For mssql only

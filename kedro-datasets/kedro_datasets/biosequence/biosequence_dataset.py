@@ -3,6 +3,7 @@ file.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -15,13 +16,12 @@ from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_pa
 class BioSequenceDataset(AbstractDataset[list, list]):
     r"""``BioSequenceDataset`` loads and saves data to a sequence file.
 
-    Example:
+    Examples:
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
-    .. code-block:: pycon
-
-        >>> from kedro_datasets.biosequence import BioSequenceDataset
-        >>> from io import StringIO
         >>> from Bio import SeqIO
+        >>> from io import StringIO
+        >>> from kedro_datasets.biosequence import BioSequenceDataset
         >>>
         >>> data = ">Alpha\nACCGGATGTA\n>Beta\nAGGCTCGGTTA\n"
         >>> raw_data = []
@@ -36,7 +36,6 @@ class BioSequenceDataset(AbstractDataset[list, list]):
         ... )
         >>> dataset.save(raw_data)
         >>> sequence_list = dataset.load()
-        >>>
         >>> assert raw_data[0].id == sequence_list[0].id
         >>> assert raw_data[0].seq == sequence_list[0].seq
 
@@ -44,11 +43,15 @@ class BioSequenceDataset(AbstractDataset[list, list]):
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {}
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w"},
+        "open_args_load": {"mode": "r"},
+    }
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
@@ -96,18 +99,17 @@ class BioSequenceDataset(AbstractDataset[list, list]):
 
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-        _fs_open_args_load.setdefault("mode", "r")
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default load and save and fs arguments
+        self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
+        self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
         self.metadata = metadata
 
@@ -119,12 +121,12 @@ class BioSequenceDataset(AbstractDataset[list, list]):
             "save_args": self._save_args,
         }
 
-    def _load(self) -> list:
+    def load(self) -> list:
         load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return list(SeqIO.parse(handle=fs_file, **self._load_args))
 
-    def _save(self, data: list) -> None:
+    def save(self, data: list) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

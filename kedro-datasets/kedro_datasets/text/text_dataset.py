@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS).
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -21,20 +22,16 @@ class TextDataset(AbstractVersionedDataset[str, str]):
     """``TextDataset`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-    Example usage for the
-    `YAML API <https://docs.kedro.org/en/stable/data/data_catalog_yaml_examples.html>`_:
+    Examples:
+        Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-    .. code-block:: yaml
-
+        ```yaml
         alice_book:
           type: text.TextDataset
           filepath: data/01_raw/alice.txt
+        ```
 
-    Example usage for the
-    `Python API <https://docs.kedro.org/en/stable/data/\
-    advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: pycon
+        Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
         >>> from kedro_datasets.text import TextDataset
         >>>
@@ -47,10 +44,15 @@ class TextDataset(AbstractVersionedDataset[str, str]):
 
     """
 
+    DEFAULT_FS_ARGS: dict[str, Any] = {
+        "open_args_save": {"mode": "w"},
+        "open_args_load": {"mode": "r"},
+    }
+
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
@@ -102,10 +104,15 @@ class TextDataset(AbstractVersionedDataset[str, str]):
             glob_function=self._fs.glob,
         )
 
-        _fs_open_args_load.setdefault("mode", "r")
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        # Handle default fs arguments
+        self._fs_open_args_load = {
+            **self.DEFAULT_FS_ARGS.get("open_args_load", {}),
+            **(_fs_open_args_load or {}),
+        }
+        self._fs_open_args_save = {
+            **self.DEFAULT_FS_ARGS.get("open_args_save", {}),
+            **(_fs_open_args_save or {}),
+        }
 
     def _describe(self) -> dict[str, Any]:
         return {
@@ -114,13 +121,13 @@ class TextDataset(AbstractVersionedDataset[str, str]):
             "version": self._version,
         }
 
-    def _load(self) -> str:
+    def load(self) -> str:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return fs_file.read()
 
-    def _save(self, data: str) -> None:
+    def save(self, data: str) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

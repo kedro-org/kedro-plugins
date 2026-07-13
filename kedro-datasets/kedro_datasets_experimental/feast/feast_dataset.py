@@ -33,7 +33,9 @@ TIMESTAMP_FIELD_NAME = "event_timestamp"
 # Keys consumed by FeastDataset itself; must be stripped before forwarding
 # load_args / save_args to the underlying GBQTableDataset (pd_gbq.to_gbq
 # rejects unknown kwargs).
-_FEAST_ONLY_ARG_KEYS = frozenset({"feature_view_name", "feature_service_name"})
+_FEAST_ONLY_ARG_KEYS = frozenset(
+    {"feature_view_name", "feature_service_name", "allow_schema_evolution"}
+)
 
 
 def _strip_feast_keys(args: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -48,10 +50,9 @@ def _feast_field_dtype_to_bq(dtype: Any) -> str:
     key = dtype.name if hasattr(dtype, "name") else type(dtype).__name__
     return _FEAST_FIELD_TYPE_TO_BQ.get(key, "STRING")
 
-
 def _parse_bq_table(table_ref: str) -> tuple[str, str, str]:
     parts = table_ref.split(".")
-    if len(parts) != 3:
+    if len(parts) != 3: # noqa: PLR2004
         raise DatasetError(
             f"Expected BigQuery table reference 'project.dataset.table', got: {table_ref!r}"
         )
@@ -162,31 +163,65 @@ class FeastDataset(AbstractDataset):
 
         feast_features:
           type: kedro_utils.datasets.FeastDataset
-          registry_path: gs://bucket/feast/registry.db
+          repo:
+            path: gs://bucket/feast
+            project: project_name
+            provider: gcp
           save_args:
             feature_view_name: features_online_push
             if_exists: append
+            allow_schema_evolution: true
           load_args:
             feature_view_name: features_online_push
+
+    ``save_args`` accepts, in addition to the underlying ``GBQTableDataset``
+    options:
+
+    * ``feature_view_name`` (required): the feature view whose backing
+      BigQuery table is written to.
+    * ``allow_schema_evolution`` (optional, default ``True``): when ``True``,
+      the backing table is created if missing and any columns present in the
+      Feast schema but absent in BigQuery are added before writing. Set to
+      ``False`` to write against the existing table schema unchanged.
     """
 
     def __init__(
         self,
         *,
-        registry_path: str,
+        repo: dict[str, Any],
         credentials: dict[str, Any] | str | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
+        """Create a new ``FeastDataset``.
+
+        Args:
+            repo: Specification of the Feast feature repo. Supports ``path``
+                (the registry path), ``project`` and ``provider``. Only the
+                ``gcp`` provider is supported for now; any other provider or
+                repo specification raises ``NotImplementedError``.
+        """
+        repo = repo or {}
+        path = repo.get("path")
+        project = repo.get("project")
+        provider = repo.get("provider")
+
+        if path is None or project is None or provider is None or provider != "gcp":
+            raise NotImplementedError(
+                "FeastDataset only supports specifying a Feast repo via "
+                "'path', 'project' and 'provider' for now, e.g. "
+                "repo: {path: gs://bucket/feast, project: project, provider: gcp}."
+            )
 
         repo_config = RepoConfig(
-            registry=RegistryConfig(path=registry_path),
-            project="everycure",
-            provider="gcp",
+            registry=RegistryConfig(path=path),
+            project=project,
+            provider=provider,
             offline_store={"type": "bigquery"},
             online_store="null",  # null as Kedro should not write directly to the online store
         )
+        self._repo = repo
         self._feature_store = FeatureStore(config=repo_config)
         self._credentials = credentials
         self._load_args = load_args
@@ -194,7 +229,7 @@ class FeastDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         desc: dict[str, Any] = {
-            "registry_path": self._feature_store.config.registry.path,
+            "repo": self._repo,
             "load_args": self._load_args,
             "save_args": self._save_args,
         }
@@ -270,8 +305,9 @@ class FeastDataset(AbstractDataset):
         known_cols = {f.name for f in bq_schema}
         data = data[[c for c in data.columns if c in known_cols]]
 
-        # 3. Update BQ table schema if necessary
-        self._update_bq_table_schema(bq_table, bq_schema, timestamp_field)
+        # 3. Update BQ table schema if necessary (opt-out via save_args).
+        if self._save_args.get("allow_schema_evolution", True):
+            self._update_bq_table_schema(bq_table, bq_schema, timestamp_field)
 
         # 4. Save data to BQ table
         bq_table.save(data)

@@ -7,6 +7,9 @@
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
 
+## Breaking changes to experimental datasets
+* Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach.
+
 ## Bug fixes and other changes
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.

@@ -196,6 +196,14 @@ class TestCreateClient:
             ds._create_client()
         assert settings == {"path": str(tmp_path)}
 
+    def test_client_error_wrapped(self, dataset):
+        with patch(
+            f"{MODULE}.chromadb.EphemeralClient",
+            side_effect=RuntimeError("permission denied"),
+        ):
+            with pytest.raises(DatasetError, match="Failed to create Chroma client"):
+                dataset._create_client()
+
 
 # ---------------------------------------------------------------------------
 # ChromaDBDataset — load()
@@ -233,6 +241,19 @@ class TestLoad:
         with patch.object(dataset, "_create_client", return_value=mock_client):
             with pytest.raises(DatasetError, match="Failed to access Chroma collection"):
                 dataset.load()
+        # Ephemeral clients must not be closed: the store is process-shared.
+        mock_client.close.assert_not_called()
+
+    def test_load_error_closes_persistent_client(self, collection_name):
+        ds = ChromaDBDataset(
+            collection_name=collection_name, client_type="persistent"
+        )
+        mock_client = MagicMock()
+        mock_client.get_or_create_collection.side_effect = RuntimeError("boom")
+        with patch.object(ds, "_create_client", return_value=mock_client):
+            with pytest.raises(DatasetError, match="Failed to access Chroma collection"):
+                ds.load()
+        mock_client.close.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

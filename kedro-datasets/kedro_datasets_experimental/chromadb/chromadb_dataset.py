@@ -351,26 +351,37 @@ class ChromaDBDataset(AbstractVectorStoreDataset):
 
     def _create_client(self) -> ClientAPI:
         settings = dict(self._client_settings)
-        if self._client_type == "ephemeral":
-            return chromadb.EphemeralClient(**settings)
-        elif self._client_type == "persistent":
-            return chromadb.PersistentClient(
-                path=settings.pop("path", "./chroma_db"), **settings
-            )
-        elif self._client_type == "http":
-            return chromadb.HttpClient(
-                host=settings.pop("host", "localhost"),
-                port=settings.pop("port", 8000),
-                **settings,
-            )
-        else:
+        try:
+            if self._client_type == "ephemeral":
+                return chromadb.EphemeralClient(**settings)
+            elif self._client_type == "persistent":
+                return chromadb.PersistentClient(
+                    path=settings.pop("path", "./chroma_db"), **settings
+                )
+            elif self._client_type == "http":
+                return chromadb.HttpClient(
+                    host=settings.pop("host", "localhost"),
+                    port=settings.pop("port", 8000),
+                    **settings,
+                )
+            else:
+                raise DatasetError(
+                    f"Unsupported client_type: '{self._client_type}'. "
+                    "Must be one of: 'ephemeral', 'persistent', 'http'."
+                )
+        except DatasetError:
+            raise
+        except Exception as e:
             raise DatasetError(
-                f"Unsupported client_type: '{self._client_type}'. "
-                "Must be one of: 'ephemeral', 'persistent', 'http'."
-            )
+                f"Failed to create Chroma client "
+                f"(client_type='{self._client_type}'): {e}"
+            ) from e
 
     def _load(self) -> ChromaVectorStoreHandle:
         client = self._create_client()
+        # Closing an ephemeral client would destroy the process-shared
+        # in-memory store, so only persistent/http clients are ever closed.
+        close_client = self._client_type != "ephemeral"
         try:
             if self._create_collection_if_missing:
                 collection = client.get_or_create_collection(
@@ -379,19 +390,19 @@ class ChromaDBDataset(AbstractVectorStoreDataset):
             else:
                 collection = client.get_collection(name=self._collection_name)
         except NotFoundError as e:
+            if close_client:
+                client.close()
             raise DatasetError(
                 f"Chroma collection '{self._collection_name}' does not exist "
                 "and create_collection_if_missing is False."
             ) from e
         except Exception as e:
+            if close_client:
+                client.close()
             raise DatasetError(
                 f"Failed to access Chroma collection '{self._collection_name}': {e}"
             ) from e
-        # Closing an ephemeral client would destroy the process-shared
-        # in-memory store, so only persistent/http handles close theirs.
-        return ChromaVectorStoreHandle(
-            client, collection, close_client=self._client_type != "ephemeral"
-        )
+        return ChromaVectorStoreHandle(client, collection, close_client=close_client)
 
     def _describe(self) -> dict[str, Any]:
         # client_settings is withheld: for http clients it can carry

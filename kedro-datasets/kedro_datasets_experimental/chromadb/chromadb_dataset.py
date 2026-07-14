@@ -21,52 +21,31 @@ class ChromaVectorStoreHandle(VectorStoreHandle):
     """Handle for interacting with a ChromaDB collection.
 
     Returned by `ChromaDBDataset.load()`. All reads and writes go through
-    this handle; the dataset itself only configures the connection.
+    the handle; the dataset only configures the connection.
 
-    What `close()` releases depends on the client type. Persistent
-    clients hold open SQLite and HNSW index file handles, and HTTP clients
-    hold a connection pool — for both, `close()` releases those resources
-    and the handle must not be used afterwards. Ephemeral clients are a
-    special case: their in-memory store is shared by every ephemeral client
-    in the process and would be destroyed by closing the underlying client,
-    so `close()` is deliberately a no-op for them (the handle stays
-    usable). Either way, calling `close()` — or using the handle as a
-    context manager — is always safe and idempotent::
+    Records passed to `add()` are dicts of the form
+    `{"properties": dict, "vector": list[float], "id": str}`. The reserved
+    `"document"` key inside `properties` maps to Chroma's documents field;
+    all other keys are stored as Chroma metadata. `search()` merges them
+    back into a single `"properties"` dict. When records carry no
+    `"vector"`, Chroma embeds each record's `"document"` with the
+    collection's embedding function (by default
+    [all-MiniLM-L6-v2](https://docs.trychroma.com/docs/embeddings/embedding-functions),
+    downloaded on first use).
+
+    `close()` releases the client's resources (SQLite and HNSW file handles
+    for persistent clients, the connection pool for HTTP clients); a closed
+    handle must not be reused. For ephemeral clients `close()` is a no-op,
+    since their in-memory store is shared by every ephemeral client in the
+    process. Kedro never closes the handle for you — close it explicitly or
+    use it as a context manager::
 
         with catalog.load("my_store") as store:
             store.add([{"properties": {"document": "hello"}, "vector": [0.1, 0.2]}])
             hits = store.search(vector=[0.1, 0.2], top_k=5)
 
-    Kedro never closes the handle for you: whether it arrives as a node
-    input in a `kedro run` or from a hand-built catalog, closing it is
-    the receiving code's responsibility.
-
-    Record format
-        `add()` takes records shaped as
-        `{"properties": dict, "vector": list[float] | None, "id": str | None}`.
-        Chroma stores a record's text separately from its metadata, so one
-        key inside `properties` is reserved:
-
-        - `"document"` — the record's text; mapped to Chroma's
-          `documents` field. Optional.
-        - every other `properties` key–value pair is stored as Chroma
-          metadata (values must be types Chroma accepts as metadata, e.g.
-          `str`, `int`, `float` or `bool` — not `None`).
-
-        `search()` results merge the two back into a single
-        `"properties"` dict, so what you `add()` is what you get back.
-
-    Embeddings
-        Chroma's equivalent of a server-side vectorizer is the collection's
-        embedding function. When records are added without a `"vector"`,
-        Chroma embeds each record's `"document"` with that function — by
-        default [all-MiniLM-L6-v2](https://docs.trychroma.com/docs/embeddings/embedding-functions),
-        which downloads the model on first use. Records with precomputed
-        vectors bypass it entirely.
-
-    The `raw_client` property exposes the underlying `chromadb` client
-    for operations outside this interface (e.g. `where_document`
-    full-text filters, `upsert`, or multi-query batching).
+    `raw_client` exposes the underlying `chromadb` client for operations
+    outside this interface (e.g. `where_document` filters or `upsert`).
     """
 
     def __init__(
@@ -86,13 +65,7 @@ class ChromaVectorStoreHandle(VectorStoreHandle):
         return self._client
 
     def close(self) -> None:
-        """Release the resources held by the client. Safe to call more than once.
-
-        For persistent clients this releases the SQLite and HNSW index file
-        handles; for HTTP clients, the connection pool. The handle must not
-        be used after closing. For ephemeral clients this is a no-op (see
-        the class docstring) and the handle stays usable.
-        """
+        """Release the client's resources. Idempotent; a no-op for ephemeral clients."""
         if not self._closed:
             if self._close_client:
                 self._client.close()
@@ -108,35 +81,23 @@ class ChromaVectorStoreHandle(VectorStoreHandle):
     def add(self, records: list[dict[str, Any]]) -> list[str]:
         """Insert records into the collection and return their IDs.
 
-        Each record is a plain dict with the following keys:
-
-        - `"properties"` — the record's payload (`dict`). The reserved
-          `"document"` key holds the record's text (stored as Chroma's
-          document); all other keys become Chroma metadata.
-        - `"vector"` — the embedding (`list[float]`). Either all records
-          in the batch carry one, or none do; when none do, Chroma embeds
-          each record's `"document"` with the collection's embedding
-          function.
-        - `"id"` — optional ID string. Chroma does not generate IDs, so
-          a UUID is generated for any record without one.
-
-        Records whose ID already exists in the collection are rejected
-        (Chroma would otherwise skip them silently while this method
-        reports success). To update existing records, use `raw_client`
-        with `collection.upsert()`.
+        See the class docstring for the record format. Either all records
+        in the batch carry a `"vector"` or none do. A UUID is generated for
+        any record without an `"id"`. Records whose ID already exists in
+        the collection are rejected (Chroma would otherwise skip them
+        silently); to update existing records, use `raw_client` with
+        `collection.upsert()`.
 
         Args:
             records: Records to insert.
 
         Returns:
-            List of ID strings for the inserted records, in the same order
-            as the input records.
+            List of ID strings for the inserted records, in input order.
 
         Raises:
             DatasetError: If some records have a `"vector"` and others do
                 not, if a record's ID already exists in the collection, or
-                if the insert call to Chroma fails (e.g. a record has
-                neither a vector nor a document to embed).
+                if the insert call to Chroma fails.
         """
         if not records:
             return []
@@ -328,14 +289,14 @@ class ChromaDBDataset(AbstractVectorStoreDataset):
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
-        ``yaml
+        ```yaml
         my_store:
           type: kedro_datasets_experimental.chromadb.ChromaDBDataset
           collection_name: documents
           client_type: persistent
           client_settings:
             path: ./chroma_db
-        ``
+        ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 

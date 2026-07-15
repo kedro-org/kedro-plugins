@@ -139,12 +139,15 @@ def test_save_then_load_round_trips_through_offline_store(
     assert out["trips"].tolist() == [100, 10, 20, 30]
 
     # The online store is populated only when write_mode includes online, and
-    # only with the rows written through the dataset.
-    online = store.get_online_features(
-        features=[f"{feature_view_name}:trips"],
-        entity_rows=[{"driver_id": i} for i in (0, 1, 2, 3)],
-    ).to_dict()
-    assert online["trips"] == expected_online_trips
+    # only with the rows written through the dataset (read via the dataset).
+    online = (
+        dataset.load()
+        .get_online_features(pd.DataFrame({"driver_id": [0, 1, 2, 3]}))
+        .sort_values("driver_id")
+        .reset_index(drop=True)
+    )
+    trips = [None if pd.isna(v) else int(v) for v in online["trips"]]
+    assert trips == expected_online_trips
 
 
 def test_create_table_on_non_bigquery_source_raises(

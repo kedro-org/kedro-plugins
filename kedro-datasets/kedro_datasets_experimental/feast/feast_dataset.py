@@ -53,6 +53,19 @@ class FeastFeatureSource:
             features=self._features,
         ).to_df()
 
+    def get_online_features(self, entity_df: pd.DataFrame) -> pd.DataFrame:
+        """Retrieve the latest feature values from the online store.
+
+        Args:
+            entity_df: DataFrame with the entity join key column(s). Unlike the
+                offline path, the online store serves the latest values, so no
+                event timestamp is needed.
+        """
+        return self._store.get_online_features(
+            features=self._features,
+            entity_rows=entity_df.to_dict(orient="records"),
+        ).to_df()
+
 class FeastDataset(AbstractDataset):
     """Kedro dataset backed by a Feast feature view or feature service.
 

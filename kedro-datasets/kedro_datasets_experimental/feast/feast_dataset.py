@@ -26,6 +26,9 @@ _FEAST_FIELD_TYPE_TO_BQ: dict[str, str] = {
     "Array": "JSON",
 }
 
+# A fully-qualified BigQuery table reference is ``project.dataset.table``.
+_FULLY_QUALIFIED_BQ_TABLE_PARTS = 3
+
 
 class FeastFeatureSource:
     """Returned by ``FeastDataset.load()``.  Provides point-in-time feature
@@ -242,18 +245,22 @@ class FeastDataset(AbstractDataset):
 
         timestamp_field = batch_source.timestamp_field
         schema = self._build_bq_schema(feature_view, timestamp_field)
-        table = bigquery.Table(batch_source.table, schema=schema)
 
         # Run against the project the source table lives in (a fully-qualified
         # `project.dataset.table` ref), falling back to the offline store's.
         offline = self._feature_store.config.offline_store
         parts = batch_source.table.split(".")
+        is_fully_qualified = len(parts) == _FULLY_QUALIFIED_BQ_TABLE_PARTS
         table_project = (
             parts[0]
-            if len(parts) == 3 # noqa: PLR2004
+            if is_fully_qualified
             else (offline.billing_project_id or offline.project_id)
         )
-        table_id = batch_source.table if len(parts) == 3 else f"{table_project}.{batch_source.table}"
+        table_id = (
+            batch_source.table
+            if is_fully_qualified
+            else f"{table_project}.{batch_source.table}"
+        )
         table = bigquery.Table(table_id, schema=schema)
         client = bigquery.Client(project=table_project, location=offline.location)
         client.create_table(table, exists_ok=True)

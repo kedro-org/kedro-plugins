@@ -14,6 +14,7 @@ from kedro.io.core import DatasetError
 from kedro_datasets_experimental.feast import feast_dataset as feast_module
 from kedro_datasets_experimental.feast.feast_dataset import FeastDataset
 
+
 @pytest.fixture
 def data():
     """Three more drivers to append on top of the seeded one."""

@@ -86,7 +86,7 @@ class FeastDataset(AbstractDataset):
           repo:  # forwarded to feast.RepoConfig
             registry: gs://bucket/feast
             project: project_name
-            provider: gcp # default is gcp
+            provider: gcp # default is local
             offline_store:
               type: bigquery # default is bigquery
               location: EU
@@ -221,8 +221,7 @@ class FeastDataset(AbstractDataset):
         """Create the feature view's backing BigQuery table if it doesn't exist.
 
         The table schema is derived from the feature view (entity keys, features,
-        then the event timestamp) and day-partitioned on the timestamp. Raises a
-        ``DatasetError`` for non-BigQuery sources.
+        then the event timestamp). Raises a``DatasetError`` for non-BigQuery sources.
         """
         feature_view = self._feature_store.get_feature_view(feature_view_name)
         source = feature_view.source
@@ -251,9 +250,11 @@ class FeastDataset(AbstractDataset):
         parts = batch_source.table.split(".")
         table_project = (
             parts[0]
-            if len(parts) == 3
+            if len(parts) == 3 # noqa: PLR2004
             else (offline.billing_project_id or offline.project_id)
         )
+        table_id = batch_source.table if len(parts) == 3 else f"{table_project}.{batch_source.table}"
+        table = bigquery.Table(table_id, schema=schema)
         client = bigquery.Client(project=table_project, location=offline.location)
         client.create_table(table, exists_ok=True)
 

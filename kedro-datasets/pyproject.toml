@@ -220,6 +220,7 @@ chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
 darts-torch-model-dataset = ["u8darts[all]"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
+feast = ["feast[gcp]==0.64.0"]
 langchain-promptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-promptdataset]"]
 langfuse-evaluationdataset = ["langfuse>=3.14.0,<4.10"]  # 4.10 made DatasetItem.media_references required, breaking EvaluationDataset.load()
@@ -389,6 +390,10 @@ experimental = [
     "feast[gcp]==0.64.0",
     "google-cloud-bigquery>=3.0",
     "pandas-gbq>=0.12.0",
+    # `u8darts[all]` pulls numba via pyod/shap. Without a floor the resolver
+    # backtracks to the ancient numba 0.53 (loose numpy metadata), which pins
+    # llvmlite 0.36 -- a version with no wheels that fails to build on py>=3.11.
+    "numba>=0.61",
     "torch",
     "opencv-python~=4.13.0.92",
     "prophet>=1.1.5",
@@ -418,6 +423,9 @@ experimental_test = [
     "feast[gcp]==0.64.0",
     "google-cloud-bigquery>=3.0",
     "pandas-gbq>=0.12.0",
+    # See the note in the `experimental` extra: keep numba off the ancient 0.53
+    # pin (llvmlite 0.36) that fails to build on py>=3.11.
+    "numba>=0.61",
     "torch",
     "opencv-python~=4.13.0.92",
     "prophet>=1.1.5",

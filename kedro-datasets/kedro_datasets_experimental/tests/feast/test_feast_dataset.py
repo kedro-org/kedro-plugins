@@ -1,186 +1,272 @@
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
-from feast import Field
+from feast import Entity, FeatureStore, FeatureView, Field, FileSource
 from feast.infra.offline_stores.bigquery_source import BigQuerySource
-from feast.types import Int64
+from feast.repo_config import RepoConfig
+from feast.types import Bool, Float32, Float64, Int64, String
 from google.cloud import bigquery
+from kedro.io.core import DatasetError
 
 from kedro_datasets_experimental.feast import feast_dataset as feast_module
 from kedro_datasets_experimental.feast.feast_dataset import FeastDataset
 
-BQ_TABLE = "my-project.my_dataset.my_table"
-
-
-@pytest.fixture
-def feast_dataset(mock_feature_store):
-    return FeastDataset(
-        repo={"path": "gs://bucket/feast", "project": "everycure", "provider": "gcp"},
-        load_args={"feature_view_name": "driver_features"},
-        save_args={"feature_view_name": "driver_features", "if_exists": "append", "allow_schema_evolution": True},
-    )
-
-
 @pytest.fixture
 def data():
-    """Entity rows to save (no event_timestamp; it is added on save)."""
-    return pd.DataFrame({"driver_id": [1, 2], "trips": [10, 20]})
-
-
-@pytest.fixture
-def feature_view():
-    """A minimal table-backed feature view with a single entity + feature."""
-    fv = MagicMock()
-    fv.name = "driver_features"
-    fv.source = BigQuerySource(table=BQ_TABLE, timestamp_field="event_timestamp")
-    fv.entity_columns = [Field(name="driver_id", dtype=Int64)]
-    fv.schema = [Field(name="driver_id", dtype=Int64), Field(name="trips", dtype=Int64)]
-    return fv
-
-
-@pytest.fixture
-def mock_feature_store(mocker, feature_view):
-    """Patch ``FeatureStore`` so no real Feast registry is contacted."""
-    store = MagicMock()
-    store.get_feature_view.return_value = feature_view
-    mocker.patch.object(feast_module, "FeatureStore", return_value=store)
-    return store
-
-
-@pytest.fixture
-def mock_gbq(mocker):
-    """Patch ``GBQTableDataset`` with a mock backed by a mock BigQuery client.
-
-    Returns the mock class so tests can inspect construction kwargs and the
-    data handed to ``save``. By default the backing table already exists; a
-    test can flip ``mock_gbq.return_value._exists.return_value = False`` to
-    exercise the table-creation path.
-    """
-    gbq_instance = MagicMock()
-
-    # Identifiers used by _update_bq_table_schema to build the bigquery.Table.
-    gbq_instance._project_id = "my-project"
-    gbq_instance._dataset = "my_dataset"
-    gbq_instance._table_name = "my_table"
-
-    # Default: table exists; schema query returns no columns so the update
-    # path is a harmless no-op against the mock BigQuery connection.
-    gbq_instance._exists.return_value = True
-    gbq_instance._connection.get_table.return_value.schema = []
-
-    gbq_class = mocker.patch.object(
-        feast_module, "GBQTableDataset", return_value=gbq_instance
+    """Three more drivers to append on top of the seeded one."""
+    return pd.DataFrame(
+        {
+            "driver_id": [1, 2, 3],
+            "trips": [10, 20, 30],
+            "event_timestamp": pd.to_datetime(
+                ["2024-01-03", "2024-01-03", "2024-01-03"], utc=True
+            ),
+        }
     )
-    return gbq_class
 
 
-def test_save_writes_to_existing_bigquery_table(
-    feast_dataset, mock_feature_store, mock_gbq, data
+@pytest.fixture
+def registry(tmp_path):
+    """The on-disk Feast registry path, shared by the setup store (which
+    materializes it via ``apply``) and the ``FeastDataset`` under test."""
+    return str(tmp_path / "registry.db")
+
+
+@pytest.fixture
+def offline_store():
+    return {"type": "file"}
+
+
+@pytest.fixture
+def online_store(tmp_path):
+    return {"type": "sqlite", "path": str(tmp_path / "online.db")}
+
+
+@pytest.fixture
+def feature_view_name():
+    return "driver_stats"
+
+@pytest.fixture
+def repo(registry, offline_store, online_store):
+    """Repo config used by the ``FeastDataset`` under test."""
+    return {
+        "registry": registry,
+        "project": "test_project",
+        "provider": "local",
+        "offline_store": offline_store,
+        "online_store": online_store,
+    }
+
+
+@pytest.fixture
+def store(tmp_path, repo, registry, feature_view_name, data):
+    """Register an (online-enabled) ``driver_stats`` feature view into the shared
+    registry, and return the setup store (so tests can read the online store)."""
+    data_path = tmp_path / "driver_stats.parquet"
+    pd.DataFrame(
+        {
+            "driver_id": [0],
+            "trips": [100],
+            "event_timestamp": pd.to_datetime(["2024-01-01"], utc=True),
+        }
+    ).to_parquet(data_path)
+
+    driver = Entity(name="driver", join_keys=["driver_id"])
+    source = FileSource(path=str(data_path), timestamp_field="event_timestamp")
+    feature_view = FeatureView(
+        name=feature_view_name,
+        entities=[driver],
+        schema=[Field(name="driver_id", dtype=Int64), Field(name="trips", dtype=Int64)],
+        source=source,
+        online=True,
+    )
+    setup_store = FeatureStore(
+        config=RepoConfig(
+            registry=repo["registry"],
+            project=repo["project"],
+            provider=repo["provider"],
+            offline_store=repo["offline_store"],
+            online_store=repo["online_store"],
+        )
+    )
+    setup_store.apply([driver, feature_view])
+    setup_store.materialize(start_date=pd.Timestamp("2024-01-01", tz="UTC"), end_date=pd.Timestamp("2024-01-02", tz="UTC"))
+    # apply materializes the registry on disk; the FeastDataset under test
+    # reads this exact file.
+    assert Path(registry).exists()
+    return setup_store
+
+
+@pytest.mark.parametrize(
+    "write_mode, expected_online_trips",
+    [
+        # Offline-only write: the online store is left empty for new drivers.
+        ("offline", [100, None, None, None]),
+        # Online-and-offline write appends to the online store too.
+        ("online_and_offline", [100, 10, 20, 30]),
+    ],
+)
+def test_save_then_load_round_trips_through_offline_store(
+    store, repo, feature_view_name, data, write_mode, expected_online_trips
 ):
-    feast_dataset.save(data)
+    dataset = FeastDataset(
+        repo=repo,
+        save_args={"feature_view_name": feature_view_name, "write_mode": write_mode},
+        load_args={"feature_view_name": feature_view_name},
+    )
 
-    # The GBQTableDataset must be pointed at the table backing the feature view.
-    _, kwargs = mock_gbq.call_args
-    assert kwargs["project"] == "my-project"
-    assert kwargs["dataset"] == "my_dataset"
-    assert kwargs["table_name"] == "my_table"
+    # Save appends the three new drivers on top of the seeded one.
+    dataset.save(data)
 
-    # The table already exists, so no new table is created.
-    gbq_instance = mock_gbq.return_value
-    gbq_instance._connection.create_table.assert_not_called()
+    # Load reads the whole offline store back via a point-in-time join: the
+    # seeded driver 0 plus the three appended ones.
+    entity_df = pd.DataFrame(
+        {
+            "driver_id": [0, 1, 2, 3],
+            "event_timestamp": pd.to_datetime(["2024-01-03"] * 4, utc=True),
+        }
+    )
+    out = (
+        dataset.load()
+        .get_historical_features(entity_df)
+        .sort_values("driver_id")
+        .reset_index(drop=True)
+    )
+    assert out["driver_id"].tolist() == [0, 1, 2, 3]
+    assert out["trips"].tolist() == [100, 10, 20, 30]
 
-    # And the data must actually be written to it.
-    gbq_instance.save.assert_called_once()
-    saved = gbq_instance.save.call_args.args[0]
-    assert list(saved["driver_id"]) == [1, 2]
-    assert list(saved["trips"]) == [10, 20]
+    # The online store is populated only when write_mode includes online, and
+    # only with the rows written through the dataset.
+    online = store.get_online_features(
+        features=[f"{feature_view_name}:trips"],
+        entity_rows=[{"driver_id": i} for i in (0, 1, 2, 3)],
+    ).to_dict()
+    assert online["trips"] == expected_online_trips
 
-    # An event_timestamp column is added when absent.
-    assert "event_timestamp" in saved.columns
 
-
-def test_save_creates_bigquery_table_when_missing(
-    feast_dataset, mock_feature_store, mock_gbq, data
+def test_create_table_on_non_bigquery_source_raises(
+    store, repo, feature_view_name, data
 ):
-    gbq_instance = mock_gbq.return_value
-    gbq_instance._exists.return_value = False
+    # The local feature view is backed by a FileSource, so create_table (which
+    # only supports BigQuery) must raise before any write happens.
+    dataset = FeastDataset(
+        repo=repo,
+        save_args={"feature_view_name": feature_view_name, "create_table": True},
+    )
 
-    feast_dataset.save(data)
-
-    connection = gbq_instance._connection
-
-    # The table is created with the schema derived from the
-    # feature view: entity keys, features, then the event timestamp.
-    connection.create_table.assert_called_once()
-    connection.get_table.assert_not_called()
-
-    created = connection.create_table.call_args.args[0]
-    assert created.project == "my-project"
-    assert created.dataset_id == "my_dataset"
-    assert created.table_id == "my_table"
-    assert [f.name for f in created.schema] == ["driver_id", "trips", "event_timestamp"]
-    assert created.time_partitioning.field == "event_timestamp"
-
-    # The data is still written after creating the table.
-    gbq_instance.save.assert_called_once()
-    saved = gbq_instance.save.call_args.args[0]
-    assert list(saved["driver_id"]) == [1, 2]
-    assert list(saved["trips"]) == [10, 20]
+    with pytest.raises(DatasetError, match="only supported for BigQuerySource"):
+        dataset.save(data)
 
 
-def test_save_updates_existing_table_schema_with_missing_column(
-    feast_dataset, mock_feature_store, mock_gbq, data
-):
-    gbq_instance = mock_gbq.return_value
-    # Existing table has the entity key and timestamp, but is missing the
-    # 'trips' feature column present in the feature view schema.
-    gbq_instance._connection.get_table.return_value.schema = [
-        bigquery.SchemaField("driver_id", "INT64"),
-        bigquery.SchemaField("event_timestamp", "TIMESTAMP"),
+def test_invalid_write_mode_raises(repo, feature_view_name, data):
+    # write_mode is validated before any Feast call, so no store is needed.
+    dataset = FeastDataset(
+        repo=repo,
+        save_args={"feature_view_name": feature_view_name, "write_mode": "bogus"},
+    )
+
+    with pytest.raises(DatasetError, match="write_mode"):
+        dataset.save(data)
+
+
+def test_create_table_creates_correct_bigquery_table(mocker):
+    # Mock a BigQuery-backed feature view (schema/table read by create_table).
+    bq_table = "my-project.my_dataset.my_table"
+    feature_view = MagicMock()
+    feature_view.source = BigQuerySource(table=bq_table, timestamp_field="event_timestamp")
+    feature_view.entity_columns = [Field(name="driver_id", dtype=Int64)]
+    feature_view.schema = [
+        Field(name="driver_id", dtype=Int64),
+        Field(name="trips", dtype=Int64),
     ]
 
-    feast_dataset.save(data)
+    # Mock the feast store (no real registry) and the BigQuery client.
+    feast_store = MagicMock()
+    feast_store.get_feature_view.return_value = feature_view
+    mocker.patch.object(feast_module, "FeatureStore", return_value=feast_store)
+    client = mocker.patch.object(feast_module.bigquery, "Client").return_value
 
-    connection = gbq_instance._connection
+    dataset = FeastDataset(
+        repo={
+            "registry": "gs://bucket/feast",
+            "project": "p",
+            "provider": "gcp",
+            "offline_store": {"type": "bigquery"},
+        },
+        save_args={"feature_view_name": "driver_stats", "create_table": True},
+    )
+    dataset.save(
+        pd.DataFrame(
+            {
+                "driver_id": [1],
+                "trips": [10],
+                "event_timestamp": pd.to_datetime(["2024-01-01"], utc=True),
+            }
+        )
+    )
 
-    # Table exists, so it is updated in place rather than created.
-    connection.create_table.assert_not_called()
-    connection.update_table.assert_called_once()
-
-    updated_table, updated_fields = connection.update_table.call_args.args
-    assert updated_fields == ["schema"]
-    # The missing 'trips' column is appended to the existing schema.
-    assert [f.name for f in updated_table.schema] == [
-        "driver_id",
-        "event_timestamp",
-        "trips",
-    ]
-
-    # And the data is still written.
-    gbq_instance.save.assert_called_once()
-    saved = gbq_instance.save.call_args.args[0]
-    assert list(saved["driver_id"]) == [1, 2]
-    assert list(saved["trips"]) == [10, 20]
+    # The table created must be the one backing the feature view.
+    client.create_table.assert_called_once()
+    table = client.create_table.call_args.args[0]
+    assert f"{table.project}.{table.dataset_id}.{table.table_id}" == bq_table
 
 
-def test_load_reads_from_feature_view_table(feast_dataset, mock_feature_store):
-
-    source = feast_dataset.load()
-
-    # The feature view is resolved by name, and the table to load from is the
-    # BigQuery source backing that feature view.
-    mock_feature_store.get_feature_view.assert_called_once_with("driver_features")
-    assert isinstance(source, feast_module.FeastFeatureView)
-    assert source._feature_view.source.table == BQ_TABLE
-
-    # A point-in-time query then goes through the store, requesting the feature
-    # view's (non-entity) features from that table.
-    expected = pd.DataFrame({"driver_id": [1], "trips": [10]})
-    mock_feature_store.get_historical_features.return_value.to_df.return_value = expected
-
-    out = source.get_historical_features(pd.DataFrame({"driver_id": [1]}))
-
-    _, kwargs = mock_feature_store.get_historical_features.call_args
-    assert kwargs["features"] == ["driver_features:trips"]
-    pd.testing.assert_frame_equal(out, expected)
+@pytest.mark.parametrize(
+    "feature_view, timestamp_field, expected",
+    [
+        # Single entity + single int feature (schema also lists the entity).
+        (
+            SimpleNamespace(
+                entity_columns=[Field(name="driver_id", dtype=Int64)],
+                schema=[
+                    Field(name="driver_id", dtype=Int64),
+                    Field(name="trips", dtype=Int64),
+                ],
+            ),
+            "event_timestamp",
+            [
+                bigquery.SchemaField("driver_id", "INT64"),
+                bigquery.SchemaField("trips", "INT64", mode="NULLABLE"),
+                bigquery.SchemaField("event_timestamp", "TIMESTAMP"),
+            ],
+        ),
+        # Mixed feast types map to the right BigQuery types.
+        (
+            SimpleNamespace(
+                entity_columns=[Field(name="user_id", dtype=String)],
+                schema=[
+                    Field(name="score", dtype=Float64),
+                    Field(name="active", dtype=Bool),
+                ],
+            ),
+            "ts",
+            [
+                bigquery.SchemaField("user_id", "STRING"),
+                bigquery.SchemaField("score", "FLOAT64", mode="NULLABLE"),
+                bigquery.SchemaField("active", "BOOL", mode="NULLABLE"),
+                bigquery.SchemaField("ts", "TIMESTAMP"),
+            ],
+        ),
+        # Float32 -> FLOAT64, and the entity is not duplicated from the schema.
+        (
+            SimpleNamespace(
+                entity_columns=[Field(name="driver_id", dtype=Int64)],
+                schema=[
+                    Field(name="driver_id", dtype=Int64),
+                    Field(name="rating", dtype=Float32),
+                ],
+            ),
+            "event_timestamp",
+            [
+                bigquery.SchemaField("driver_id", "INT64"),
+                bigquery.SchemaField("rating", "FLOAT64", mode="NULLABLE"),
+                bigquery.SchemaField("event_timestamp", "TIMESTAMP"),
+            ],
+        ),
+    ],
+)
+def test_build_bq_schema(feature_view, timestamp_field, expected):
+    assert FeastDataset._build_bq_schema(feature_view, timestamp_field) == expected

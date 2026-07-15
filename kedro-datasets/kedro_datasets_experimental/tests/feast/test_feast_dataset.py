@@ -53,7 +53,12 @@ def feature_view_name():
 def repo(registry, offline_store, online_store):
     """Repo config used by the ``FeastDataset`` under test."""
     return {
-        "registry": registry,
+        # Pass the registry as a dict with an explicit ``registry_store_type`` so
+        # Feast skips its URI-scheme guessing. On Windows a bare path like
+        # ``C:\\...\\registry.db`` is parsed as scheme ``c`` (unsupported); naming
+        # the store type routes straight to FileRegistryStore, which reads the
+        # path with ``pathlib.Path``.
+        "registry": {"path": registry, "registry_store_type": "FileRegistryStore"},
         "project": "test_project",
         "provider": "local",
         "offline_store": offline_store,

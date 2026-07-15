@@ -161,6 +161,17 @@ def test_create_table_on_non_bigquery_source_raises(
         dataset.save(data)
 
 
+def test_explicit_credentials_not_supported(repo, feature_view_name):
+    # Only Application Default Credentials are supported; passing credentials
+    # raises at construction (before any store is built).
+    with pytest.raises(NotImplementedError, match="Application Default Credentials"):
+        FeastDataset(
+            repo=repo,
+            credentials={"token": "secret"},
+            save_args={"feature_view_name": feature_view_name},
+        )
+
+
 def test_invalid_write_mode_raises(repo, feature_view_name, data):
     # write_mode is validated before any Feast call, so no store is needed.
     dataset = FeastDataset(

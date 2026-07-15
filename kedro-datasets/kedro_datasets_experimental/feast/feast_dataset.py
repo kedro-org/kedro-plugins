@@ -111,9 +111,9 @@ class FeastDataset(AbstractDataset):
                 either can be overridden via ``repo``. ``online_store`` defaults
                 to disabled (``None``); set it in ``repo`` to enable
                 ``online_and_offline`` writes.
-            credentials: Ignored; Feast authenticates via the offline store
-                config / the ambient environment (application default
-                credentials).
+            credentials: Not supported; Feast authenticates via Application
+                Default Credentials (the ambient environment). Passing anything
+                other than ``None`` raises ``NotImplementedError``.
             load_args: Must contain either ``feature_view_name`` or
                 ``feature_service_name`` identifying what ``load`` retrieves.
             save_args: Must contain ``feature_view_name`` — the feature view to
@@ -125,6 +125,9 @@ class FeastDataset(AbstractDataset):
                 backing table from the feature view schema if it does not exist
                 (BigQuery sources only; raises a ``DatasetError`` otherwise).
         """
+        if credentials is not None:
+            raise NotImplementedError("`FeastDataset` supports only Application Default Credentials")
+
         repo = repo or {}
         repo_config = RepoConfig(
             **{

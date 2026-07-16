@@ -217,8 +217,7 @@ yaml = ["kedro-datasets[yaml-yamldataset]"]
 chromadb-chromadbdataset = ["chromadb>=1.0.0"]
 chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
 
-# numpy cap: numba (pulled in via darts -> shap) does not support numpy 2.5 yet
-darts-torch-model-dataset = ["u8darts[all]", "numpy<2.5"]
+darts-torch-model-dataset = ["u8darts[all]"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
 langchain-promptdataset = ["langchain>=0.3.0"]

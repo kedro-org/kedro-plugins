@@ -8,7 +8,6 @@
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
 
 ## Bug fixes and other changes
-- Temporarily capped `numpy<2.5` alongside `u8darts[all]` so the `darts` extras and `experimental_test` resolve again: `numba` (pulled in via `darts` -> `shap`) does not support numpy 2.5 yet, which made resolvers backtrack to an unbuildable 2021-era `llvmlite`. Remove the cap once numba supports numpy 2.5.
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.

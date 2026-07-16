@@ -159,6 +159,18 @@ class TestSparkHiveDataset:
         )
         assert_df_equal(_generate_spark_df_one(), dataset.load())
 
+    def test_exists(self):
+        dataset = SparkHiveDataset(
+            database="default_1", table="table_1", write_mode="overwrite"
+        )
+        assert dataset.exists()
+
+    def test_exists_non_existent_table(self):
+        dataset = SparkHiveDataset(
+            database="default_1", table="table_doesnt_exist", write_mode="overwrite"
+        )
+        assert not dataset.exists()
+
     def test_overwrite_empty_table(self, spark_session):
         spark_session.sql(
             "create table default_1.test_overwrite_empty_table (name string, age integer)"

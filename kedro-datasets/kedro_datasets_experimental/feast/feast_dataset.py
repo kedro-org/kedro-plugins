@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 import pandas as pd
@@ -31,8 +32,9 @@ _FULLY_QUALIFIED_BQ_TABLE_PARTS = 3
 
 
 class FeastFeatureSource:
-    """Returned by ``FeastDataset.load()``.  Provides point-in-time feature
-    retrieval against the Feast offline store for the given features.
+    """Returned by ``FeastDataset.load()``.  Provides historical feature
+    retrieval against the Feast offline store for the given features, in either
+    an entity-driven (point-in-time join) or timestamp-range mode.
     """
 
     def __init__(
@@ -43,17 +45,43 @@ class FeastFeatureSource:
         self._store = store
         self._features = features
 
-    def get_historical_features(self, entity_df: pd.DataFrame) -> pd.DataFrame:
-        """Retrieve features via a point-in-time join against the offline store.
+    def get_historical_features(
+        self,
+        entity_df: pd.DataFrame | None = None,
+        *,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> pd.DataFrame:
+        """Retrieve historical features from the offline store.
+
+        Feast supports two mutually exclusive retrieval modes; pass the
+        arguments for exactly one of them:
+
+        * **Entity-driven** — pass ``entity_df``: a point-in-time join. The
+          DataFrame holds the entity join key column(s) and an event-timestamp
+          column that defines the point-in-time context for each row (Feast
+          requires the timestamp; it is not fabricated).
+        * **Timestamp range** — pass ``start_date``/``end_date`` and *no*
+          ``entity_df``: retrieve feature rows within the window without an
+          entity join (e.g. for batch scoring). ``end_date`` defaults to the
+          current time when omitted.
 
         Args:
-            entity_df: DataFrame with the entity join key column(s) and the
-                event-timestamp column that defines the point-in-time context
-                for each row. Feast requires the timestamp; it is not fabricated.
+            entity_df: Entity DataFrame for a point-in-time join. Mutually
+                exclusive with ``start_date``/``end_date``.
+            start_date: Start of the retrieval window (timestamp-range mode).
+            end_date: End of the retrieval window (timestamp-range mode);
+                defaults to "now" when omitted.
+
+        Raises:
+            ValueError: If ``entity_df`` is combined with ``start_date``/
+                ``end_date`` (Feast rejects the combination).
         """
         return self._store.get_historical_features(
             entity_df=entity_df,
             features=self._features,
+            start_date=start_date,
+            end_date=end_date,
         ).to_df()
 
     def get_online_features(self, entity_df: pd.DataFrame) -> pd.DataFrame:

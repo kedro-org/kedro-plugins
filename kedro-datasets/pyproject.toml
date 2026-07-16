@@ -220,7 +220,7 @@ chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
 darts-torch-model-dataset = ["u8darts[all]"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
-feast = ["feast[gcp]==0.64.0"]
+feast = ["feast[gcp]>=0.64.0"]
 langchain-promptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-promptdataset]"]
 langfuse-evaluationdataset = ["langfuse>=3.14.0,<4.10"]  # 4.10 made DatasetItem.media_references required, breaking EvaluationDataset.load()
@@ -387,7 +387,7 @@ experimental = [
     "netcdf4>=1.6.4",
     "xarray>=2023.1.0",
     "rioxarray",
-    "feast[gcp]==0.64.0",
+    "feast[gcp]>=0.64.0",
     "google-cloud-bigquery>=3.0",
     "pandas-gbq>=0.12.0",
     # `u8darts[all]` pulls numba via pyod/shap. Without a floor the resolver
@@ -420,7 +420,7 @@ experimental_test = [
     "netcdf4>=1.6.4, <1.7.4",
     "xarray>=2023.1.0",
     "rioxarray",
-    "feast[gcp]==0.64.0",
+    "feast[gcp]>=0.64.0",
     "google-cloud-bigquery>=3.0",
     "pandas-gbq>=0.12.0",
     # See the note in the `experimental` extra: keep numba off the ancient 0.53

@@ -6,7 +6,7 @@
 
 Name | Description
 -----|------------
-[chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads and saves data to ChromaDB vector database collections.
+[chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads a handle for adding, searching, and deleting entries in ChromaDB vector database collections.
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
 [langchain.PromptDataset](langchain.PromptDataset.md) | ``PromptDataset`` loads a `langchain` prompt template.
 [langfuse.EvaluationDataset](langfuse.EvaluationDataset.md) | ``EvaluationDataset`` manages Langfuse evaluation datasets for LLM experiment workflows, supporting local file syncing and remote dataset versioning.

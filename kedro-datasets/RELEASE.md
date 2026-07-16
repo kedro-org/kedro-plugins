@@ -7,6 +7,9 @@
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
 
+## Breaking changes to experimental datasets
+* Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
+
 ## Bug fixes and other changes
 - Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API. The minimum `pyspark` version for the `spark-base` and `spark-local` extras is now `3.3`.
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.

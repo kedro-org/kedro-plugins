@@ -214,8 +214,8 @@ yaml-yamldataset = ["kedro-datasets[pandas-base]", "PyYAML>=4.2, <7.0"]
 yaml = ["kedro-datasets[yaml-yamldataset]"]
 
 # Experimental Datasets
-chromadb-chromadbdataset = ["chromadb>=1.0.0"]
-chromadb = ["kedro-datasets[chromadb-chromadbdataset]"]
+chromadb-dataset = ["chromadb>=1.0.0"]
+chromadb = ["kedro-datasets[chromadb-dataset]"]
 
 darts-torch-model-dataset = ["u8darts[all]"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
@@ -392,6 +392,7 @@ experimental = [
     "opik",
     "optuna",
     "u8darts[all]",
+    "numpy<2.5",  # numba (pulled in via darts -> shap) does not support numpy 2.5 yet
     "pypdf>=3.0.0",
     "polars>=1.0",
     "SQLAlchemy>=1.4",
@@ -425,6 +426,7 @@ experimental_test = [
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "u8darts[all]",
+    "numpy<2.5",  # numba (pulled in via darts -> shap) does not support numpy 2.5 yet
     "pypdf>=3.0.0",
     "moto==5.0.0",
     "gcsfs>=2023.1",

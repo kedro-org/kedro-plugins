@@ -27,11 +27,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (filePath) {
             // Remove any existing kedro-datasets/ prefix to avoid duplication
-            filePath = filePath.replace(/^kedro-datasets\//, '');
-            return filePath;
+            filePath = filePath.replace(/^kedro-datasets\//, '').trim();
+
+            // Allow only safe relative Python source paths
+            const isValidRelativePyPath = /^[A-Za-z0-9._/-]+\.py$/.test(filePath)
+                && !filePath.startsWith('/')
+                && !filePath.includes('..')
+                && !filePath.includes('\\');
+
+            if (isValidRelativePyPath) {
+                return filePath;
+            }
         }
 
         return null;
+    }
+
+    function buildGithubSourceUrl(filePath) {
+        const encodedPath = filePath
+            .split('/')
+            .map(segment => encodeURIComponent(segment))
+            .join('/');
+        return `https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/${encodedPath}`;
     }
 
     // Add [source] buttons to class signatures
@@ -83,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (sourceFilePath) {
-                    const githubUrl = `https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/${sourceFilePath}`;
+                    const githubUrl = buildGithubSourceUrl(sourceFilePath);
                     const sourceButton = createSourceButton(githubUrl);
 
                     // Add the button to the signature

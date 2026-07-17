@@ -54,9 +54,6 @@ class FeastFeatureSource:
     ) -> pd.DataFrame:
         """Retrieve historical features from the offline store.
 
-        NOTE: timestamp-range retrieval currently requires Feast ≥0.65 for
-        the BigQuery offline store; already supported on Postgres/Dask/Spark/Ray.
-
         Feast supports two mutually exclusive retrieval modes; pass the
         arguments for exactly one of them:
 
@@ -68,6 +65,10 @@ class FeastFeatureSource:
           ``entity_df``: retrieve feature rows within the window without an
           entity join (e.g. for batch scoring). ``end_date`` defaults to the
           current time when omitted.
+
+        NOTE: timestamp-range retrieval currently requires Feast ≥0.65 for
+        the BigQuery offline store; already supported on Postgres/Dask/Spark/Ray.
+
 
         Args:
             entity_df: Entity DataFrame for a point-in-time join. Mutually

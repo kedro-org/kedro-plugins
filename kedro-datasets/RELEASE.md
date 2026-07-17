@@ -17,6 +17,7 @@
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 
 ## Community contributions
+- [samiat4911](https://github.com/samiat4911)
 
 # Release 9.5.0
 

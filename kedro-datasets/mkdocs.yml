@@ -345,12 +345,12 @@ nav:
           - yaml.YAMLDataset: api/kedro_datasets/yaml.YAMLDataset.md
       - Experimental Datasets:
         - Overview: api/kedro_datasets_experimental/index.md
-        - Feast:
-          - feast.FeastDataset: api/kedro_datasets_experimental/feast.FeastDataset.md
         - ChromaDB:
           - chromadb.ChromaDBDataset: api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md
         - Databricks:
           - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
+        - Feast:
+          - feast.FeastDataset: api/kedro_datasets_experimental/feast.FeastDataset.md
         - Langchain:
           - langchain.PromptDataset: api/kedro_datasets_experimental/langchain.PromptDataset.md
         - Langfuse:

@@ -54,6 +54,9 @@ class FeastFeatureSource:
     ) -> pd.DataFrame:
         """Retrieve historical features from the offline store.
 
+        NOTE: timestamp-range retrieval currently requires Feast ≥0.65 for
+        the BigQuery offline store; already supported on Postgres/Dask/Spark/Ray.
+
         Feast supports two mutually exclusive retrieval modes; pass the
         arguments for exactly one of them:
 

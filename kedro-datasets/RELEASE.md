@@ -6,6 +6,7 @@
 | Type                     | Description                                      | Location                           |
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
+| `faiss.FAISSVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in a FAISS vector store. | `kedro_datasets_experimental.faiss` |
 
 ## Breaking changes to experimental datasets
 * Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.

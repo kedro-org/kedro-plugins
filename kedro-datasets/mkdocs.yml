@@ -182,6 +182,7 @@ plugins:
           - api/kedro_datasets_experimental/opik.EvaluationDataset.md: Opik evaluation integration
           - api/kedro_datasets_experimental/opik.PromptDataset.md: Opik prompt integration
           - api/kedro_datasets_experimental/opik.TraceDataset.md: Opik tracing integration
+          - api/kedro_datasets_experimental/weaviate.WeaviateVectorStoreDataset.md: Weaviate vector database integration
 
         Experimental Deep Learning:
           - api/kedro_datasets_experimental/pytorch.PyTorchDataset.md: PyTorch model storage
@@ -384,6 +385,8 @@ nav:
           - safetensors.SafetensorsDataset: api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md
         - Video:
           - video.VideoDataset: api/kedro_datasets_experimental/video.VideoDataset.md
+        - Weaviate:
+          - weaviate.WeaviateDataset: api/kedro_datasets_experimental/weaviate.WeaviateVectorStoreDataset.md
 
 not_in_nav: |
   readme.md

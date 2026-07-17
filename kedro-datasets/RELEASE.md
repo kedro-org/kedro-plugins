@@ -9,12 +9,16 @@
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
 | `feast.FeastDataset` | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/). | `kedro_datasets_experimental.feast` |
 
+## Breaking changes to experimental datasets
+* Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
+
 ## Bug fixes and other changes
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 
 ## Community contributions
+- [samiat4911](https://github.com/samiat4911)
 
 # Release 9.5.0
 

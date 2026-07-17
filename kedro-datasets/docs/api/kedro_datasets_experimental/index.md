@@ -6,7 +6,7 @@
 
 Name | Description
 -----|------------
-[chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads and saves data to ChromaDB vector database collections.
+[chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads a handle for adding, searching, and deleting entries in ChromaDB vector database collections.
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
 [feast.FeastDataset](feast.FeastDataset.md) | ``FeastDataset`` loads and saves features to Feast.
 [langchain.PromptDataset](langchain.PromptDataset.md) | ``PromptDataset`` loads a `langchain` prompt template.
@@ -29,3 +29,4 @@ Name | Description
 [rioxarray.GeoTIFFDataset](rioxarray.GeoTIFFDataset.md) | Loads and saves raster data files as xarray DataArrays. Supports single and multiband GeoTIFFs with CRS validation.
 [safetensors.SafetensorsDataset](safetensors.SafetensorsDataset.md) | Loads and saves data using the SafeTensors library with support for multiple backends like numpy and torch.
 [video.VideoDataset](video.VideoDataset.md) | Loads and saves video data as a sequence of images using OpenCV, supporting various codecs and formats.
+[weaviate.WeaviateVectorStoreDataset](weaviate.WeaviateVectorStoreDataset.md) | ``WeaviateVectorStoreDataset`` loads a handle for adding, searching, and deleting entries in Weaviate vector database collections.

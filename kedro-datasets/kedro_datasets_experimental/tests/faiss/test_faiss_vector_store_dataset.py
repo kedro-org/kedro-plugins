@@ -53,11 +53,6 @@ def sample_records():
     ]
 
 
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreDataset — init and describe
-# ---------------------------------------------------------------------------
-
-
 class TestDatasetInit:
     def test_defaults(self, dataset):
         assert dataset._dimension == 4
@@ -216,11 +211,6 @@ class TestHandleTrain:
                 store.train([[0.1, 0.2, 0.3, 0.4]])
 
 
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — add()
-# ---------------------------------------------------------------------------
-
-
 class TestHandleAdd:
     def test_add_returns_ids_in_order(self, store, sample_records):
         ids = store.add(sample_records)
@@ -281,11 +271,6 @@ class TestHandleAdd:
                 store.add([{"vector": [1.0, 0.0, 0.0, 0.0]}])
 
 
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — delete()
-# ---------------------------------------------------------------------------
-
-
 class TestHandleDelete:
     def test_delete_by_ids(self, store, sample_records):
         store.add(sample_records)
@@ -323,11 +308,6 @@ class TestHandleDelete:
         with patch.object(store._index, "remove_ids", side_effect=RuntimeError("boom")):
             with pytest.raises(DatasetError, match="delete\\(\\) failed"):
                 store.delete(ids=["doc1"])
-
-
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — search()
-# ---------------------------------------------------------------------------
 
 
 class TestHandleSearch:
@@ -389,11 +369,6 @@ class TestHandleSearch:
         with patch.object(store._index, "search", side_effect=RuntimeError("boom")):
             with pytest.raises(DatasetError, match="search\\(\\) failed"):
                 store.search(vector=[1.0, 0.0, 0.0, 0.0])
-
-
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — save()
-# ---------------------------------------------------------------------------
 
 
 class TestHandleSave:
@@ -463,11 +438,6 @@ class TestHandleSave:
         with patch(f"{MODULE}.faiss.write_index", side_effect=RuntimeError("disk full")):
             with pytest.raises(DatasetError, match="writing the FAISS index"):
                 store.save(path=str(tmp_path / "should_not_matter.index"))
-
-
-# ---------------------------------------------------------------------------
-# End-to-end
-# ---------------------------------------------------------------------------
 
 
 class TestEndToEnd:

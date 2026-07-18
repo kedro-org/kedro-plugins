@@ -417,9 +417,13 @@ class FAISSVectorStoreDataset(AbstractVectorStoreDataset):
     `handle.save(path=...)` is called with an explicit path.
 
     `index_factory` is passed straight to FAISS's own `index_factory()` —
-    `"Flat"` (the default) is exact search and needs no training; approximate
-    types like `"IVF100,Flat"` or `"HNSW32"` require calling `handle.train()`
-    before `add()`.
+    `"Flat"` (the default) is exact search and needs no training. Clustering-
+    based approximate types like `"IVF100,Flat"` need `handle.train()` called
+    before `add()`, since they need to see representative data before they can
+    decide where to put cluster boundaries. Graph-based types like `"HNSW32"`
+    build incrementally as vectors are added and need no training step at all
+    — check `handle.raw_client.is_trained` if you're unsure whether a given
+    `index_factory` choice needs one.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -462,8 +466,9 @@ class FAISSVectorStoreDataset(AbstractVectorStoreDataset):
                 docstring for the three cases (hydrate / fresh-at-path /
                 pure in-memory). Local filesystem only — no `fsspec` support.
             index_factory: FAISS index factory string, e.g. `"Flat"` (default,
-                exact search, no training needed) or `"IVF100,Flat"`/
-                `"HNSW32"` (approximate, requires `handle.train()` first).
+                exact search, no training needed), `"IVF100,Flat"` (approximate,
+                clustering-based, requires `handle.train()` first), or
+                `"HNSW32"` (approximate, graph-based, no training needed).
             metric: `"l2"` (default) or `"ip"` (inner product). No built-in
                 cosine similarity — normalize vectors yourself and use `"ip"`
                 if that's what you want, the standard FAISS convention.

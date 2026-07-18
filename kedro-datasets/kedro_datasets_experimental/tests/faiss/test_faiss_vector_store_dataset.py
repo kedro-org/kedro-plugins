@@ -66,16 +66,17 @@ class TestDatasetInit:
         assert dataset._metric == "l2"
         assert dataset.metadata is None
 
-    def test_custom_params(self):
+    def test_custom_params(self, tmp_path):
+        index_path = str(tmp_path / "x.index")
         ds = FAISSVectorStoreDataset(
             dimension=8,
-            index_path="/tmp/x.index",
+            index_path=index_path,
             index_factory="IVF4,Flat",
             metric="ip",
             metadata={"owner": "me"},
         )
         assert ds._dimension == 8
-        assert ds._index_path == "/tmp/x.index"
+        assert ds._index_path == index_path
         assert ds._index_factory == "IVF4,Flat"
         assert ds._metric == "ip"
         assert ds.metadata == {"owner": "me"}
@@ -432,11 +433,11 @@ class TestHandleSave:
         assert store2.raw_client.is_trained
         assert store2.describe()["count"] == 1
 
-    def test_save_wraps_index_write_exception(self, store, sample_records):
+    def test_save_wraps_index_write_exception(self, tmp_path, store, sample_records):
         store.add(sample_records)
         with patch(f"{MODULE}.faiss.write_index", side_effect=RuntimeError("disk full")):
             with pytest.raises(DatasetError, match="writing the FAISS index"):
-                store.save(path="/tmp/should_not_matter.index")
+                store.save(path=str(tmp_path / "should_not_matter.index"))
 
 
 # ---------------------------------------------------------------------------

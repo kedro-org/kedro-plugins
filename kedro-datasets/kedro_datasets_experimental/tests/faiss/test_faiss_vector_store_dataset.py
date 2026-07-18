@@ -244,6 +244,16 @@ class TestHandleAdd:
         with pytest.raises(DatasetError, match="does not match the index dimension"):
             store.add([{"id": "x", "vector": [1.0, 0.0]}])
 
+    def test_add_ragged_batch_raises_dataset_error(self, store):
+        with pytest.raises(DatasetError, match="uniform array"):
+            store.add(
+                [
+                    {"id": "a", "vector": [1.0, 0.0, 0.0, 0.0]},
+                    {"id": "b", "vector": [1.0, 0.0]},
+                ]
+            )
+        assert store.describe()["count"] == 0
+
     def test_add_existing_id_raises_and_writes_nothing(self, store, sample_records):
         store.add(sample_records)
         with pytest.raises(DatasetError, match="colliding"):
@@ -293,6 +303,12 @@ class TestHandleDelete:
         assert store.describe()["count"] == 2
         remaining = store.search(vector=[1.0, 0.0, 0.0, 0.0], top_k=10)
         assert all(r["id"] != "doc1" for r in remaining)
+
+    def test_delete_filters_exception_wrapped(self, store, sample_records):
+        store.add(sample_records)
+        with pytest.raises(DatasetError, match="filters\\(\\) raised an exception"):
+            store.delete(filters=lambda props: props["missing_key"] == "x")
+        assert store.describe()["count"] == 3
 
     def test_delete_requires_ids_or_filters(self, store):
         with pytest.raises(DatasetError, match="requires exactly one"):
@@ -346,6 +362,15 @@ class TestHandleSearch:
             vector=[0.0, 0.0, 0.0, 0.0], top_k=10, filters=lambda props: False
         )
         assert hits == []
+
+    def test_search_filters_exception_wrapped(self, store, sample_records):
+        store.add(sample_records)
+        with pytest.raises(DatasetError, match="filters\\(\\) raised an exception"):
+            store.search(
+                vector=[1.0, 0.0, 0.0, 0.0],
+                top_k=10,
+                filters=lambda props: props["missing_key"] == "x",
+            )
 
     def test_search_text_raises_not_implemented(self, store):
         with pytest.raises(NotImplementedError, match="no embedding function"):

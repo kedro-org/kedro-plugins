@@ -127,8 +127,9 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
 
         Raises:
             DatasetError: If the index isn't trained yet, if any record is
-                missing `"vector"`, if any ID collides, or if the underlying
-                FAISS call fails.
+                missing `"vector"`, if any ID collides, if the batch's vectors
+                aren't uniform in length, or if the underlying FAISS call
+                fails.
         """
         if not records:
             return []
@@ -164,7 +165,14 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
         props_list = [record.get("properties", {}) for record in records]
         internal_ids = list(range(self._next_id, self._next_id + len(records)))
 
-        vectors_np = np.asarray(vectors, dtype="float32")
+        try:
+            vectors_np = np.asarray(vectors, dtype="float32")
+        except ValueError as e:
+            raise DatasetError(
+                "add() failed: could not convert the batch's vectors to a "
+                f"uniform array — check that every record's 'vector' has the "
+                f"same length. {e}"
+            ) from e
         if vectors_np.ndim != _VECTOR_ARRAY_NDIM or vectors_np.shape[1] != self._index.d:
             raise DatasetError(
                 f"add() failed: vector dimension does not match the index "
@@ -205,8 +213,9 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
                 this down to.
 
         Raises:
-            DatasetError: If neither or both arguments are supplied, or if the
-                underlying FAISS call fails.
+            DatasetError: If neither or both arguments are supplied, if
+                `filters` raises while evaluating a record's properties, or
+                if the underlying FAISS call fails.
         """
         if ids is None and filters is None:
             raise DatasetError("delete() requires exactly one of 'ids' or 'filters'.")
@@ -214,9 +223,17 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
             raise DatasetError("delete() accepts 'ids' or 'filters', not both.")
 
         if filters is not None:
-            target_ids = [
-                str_id for str_id, props in self._properties.items() if filters(props)
-            ]
+            target_ids = []
+            for str_id, props in self._properties.items():
+                try:
+                    matches = filters(props)
+                except Exception as e:
+                    raise DatasetError(
+                        f"delete() failed: filters() raised an exception for "
+                        f"record '{str_id}': {e}"
+                    ) from e
+                if matches:
+                    target_ids.append(str_id)
         else:
             target_ids = ids
 
@@ -271,6 +288,7 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
         Raises:
             NotImplementedError: If `text` is given.
             DatasetError: If neither or both of `vector`/`text` are supplied,
+                if `filters` raises while evaluating a record's properties,
                 or if the underlying FAISS call fails.
         """
         if vector is None and text is None:
@@ -286,11 +304,17 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
 
         params = None
         if filters is not None:
-            candidate_ids = [
-                self._id_to_internal[str_id]
-                for str_id, props in self._properties.items()
-                if filters(props)
-            ]
+            candidate_ids = []
+            for str_id, props in self._properties.items():
+                try:
+                    matches = filters(props)
+                except Exception as e:
+                    raise DatasetError(
+                        f"search() failed: filters() raised an exception for "
+                        f"record '{str_id}': {e}"
+                    ) from e
+                if matches:
+                    candidate_ids.append(self._id_to_internal[str_id])
             selector = faiss.IDSelectorBatch(np.asarray(candidate_ids, dtype="int64"))
             params = faiss.SearchParameters(sel=selector)
 

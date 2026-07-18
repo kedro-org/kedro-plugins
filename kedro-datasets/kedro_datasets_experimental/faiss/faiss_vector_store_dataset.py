@@ -6,8 +6,9 @@ import json
 import os
 import uuid
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import faiss
 import numpy as np
@@ -19,6 +20,7 @@ from kedro_datasets_experimental.vectorstore_base import (
 )
 
 _METRIC_MAP = {"l2": faiss.METRIC_L2, "ip": faiss.METRIC_INNER_PRODUCT}
+_VECTOR_ARRAY_NDIM = 2
 
 
 class FAISSVectorStoreHandle(VectorStoreHandle):
@@ -163,7 +165,7 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
         internal_ids = list(range(self._next_id, self._next_id + len(records)))
 
         vectors_np = np.asarray(vectors, dtype="float32")
-        if vectors_np.ndim != 2 or vectors_np.shape[1] != self._index.d:
+        if vectors_np.ndim != _VECTOR_ARRAY_NDIM or vectors_np.shape[1] != self._index.d:
             raise DatasetError(
                 f"add() failed: vector dimension does not match the index "
                 f"dimension {self._index.d}."

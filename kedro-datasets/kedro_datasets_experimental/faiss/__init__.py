@@ -5,7 +5,10 @@ from typing import Any
 import lazy_loader as lazy
 
 try:
-    from .faiss_vector_store_dataset import FAISSVectorStoreDataset, FAISSVectorStoreHandle
+    from .faiss_vector_store_dataset import (
+        FAISSVectorStoreDataset,
+        FAISSVectorStoreHandle,
+    )
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
     # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901

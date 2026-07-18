@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import faiss
 import numpy as np
 import pytest
 from kedro.io.core import DatasetError
@@ -154,8 +155,6 @@ class TestDatasetLoad:
 
 class TestHandleLifecycle:
     def test_raw_client_is_index_id_map(self, store):
-        import faiss
-
         assert isinstance(store.raw_client, faiss.IndexIDMap)
 
     def test_close_is_noop(self, store):

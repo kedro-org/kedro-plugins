@@ -19,6 +19,7 @@
 
 ## Community contributions
 - [samiat4911](https://github.com/samiat4911)
+- [Laurens Vijnck](https://github.com/lvijnck)
 
 # Release 9.5.0
 
@@ -359,7 +360,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Minura Punchihewa](https://github.com/MinuraPunchihewa)
 - [Mark Druffel](https://github.com/mark-druffel)
 - [Chris Schopp](https://github.com/chrisschopp)
-- [Laurens Vijnck](https://github.com/lvijnck)
 
 # Release 5.1.0
 

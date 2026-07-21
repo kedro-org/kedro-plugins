@@ -117,24 +117,24 @@ class FeastDataset(AbstractDataset):
     Using the YAML API:
 
     ```yaml
-        feast_features:
-          type: kedro_datasets_experimental.feast.FeastDataset
-          repo:  # forwarded to feast.RepoConfig
-            registry: gs://bucket/feast
-            project: project_name
-            provider: gcp # default is local
-            offline_store:
-              type: bigquery # default is bigquery
-              location: EU
-            online_store:  # optional; required for online_and_offline writes
-              type: sqlite
-              path: /tmp/online_store.db
-          save_args:
-            feature_view_name: features
-            write_mode: online_and_offline  # or "offline" (default)
-            create_table: true  # bootstrap the BigQuery table from the FV schema
-          load_args:
-            feature_view_name: features
+    feast_features:
+        type: kedro_datasets_experimental.feast.FeastDataset
+        repo:  # forwarded to feast.RepoConfig
+        registry: gs://bucket/feast
+        project: project_name
+        provider: gcp # default is local
+        offline_store:
+            type: bigquery # default is bigquery
+            location: EU
+        online_store:  # optional; required for online_and_offline writes
+            type: sqlite
+            path: /tmp/online_store.db
+        save_args:
+        feature_view_name: features
+        write_mode: online_and_offline  # or "offline" (default)
+        create_table: true  # bootstrap the BigQuery table from the FV schema
+        load_args:
+        feature_view_name: features
     ```
     """
 

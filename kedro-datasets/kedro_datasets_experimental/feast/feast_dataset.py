@@ -112,10 +112,11 @@ class FeastDataset(AbstractDataset):
     schema from the *existing* table; set ``create_table: true`` to bootstrap a
     (BigQuery) table from the feature view schema when it does not yet exist.
 
-    Example catalog.yml entry::
+    Examples:
 
-    .. code-block:: yaml
+    Using the YAML API:
 
+    ```yaml
         feast_features:
           type: kedro_datasets_experimental.feast.FeastDataset
           repo:  # forwarded to feast.RepoConfig
@@ -134,6 +135,7 @@ class FeastDataset(AbstractDataset):
             create_table: true  # bootstrap the BigQuery table from the FV schema
           load_args:
             feature_view_name: features
+    ```
     """
 
     #: Accepted values for the ``write_mode`` save arg.
@@ -288,6 +290,15 @@ class FeastDataset(AbstractDataset):
             if is_fully_qualified
             else (offline.billing_project_id or offline.project_id)
         )
+
+        if table_project is None:
+            msg = (
+                f"Cannot resolve a project for table '{batch_source.table}'; set "
+                f"'billing_project_id' or 'project_id' on the offline_store, or use "
+                f"a fully-qualified 'project.dataset.table' reference."
+            )
+            raise DatasetError(msg)
+
         table_id = (
             batch_source.table
             if is_fully_qualified

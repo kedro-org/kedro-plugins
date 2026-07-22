@@ -1,4 +1,5 @@
 # Upcoming release
+
 ## Major features and improvements
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
@@ -6,6 +7,7 @@
 | Type                     | Description                                      | Location                           |
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
+| `feast.FeastDataset` | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/). | `kedro_datasets_experimental.feast` |
 
 ## Breaking changes to experimental datasets
 * Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
@@ -18,6 +20,7 @@
 
 ## Community contributions
 - [samiat4911](https://github.com/samiat4911)
+- [Laurens Vijnck](https://github.com/lvijnck)
 
 # Release 9.5.0
 

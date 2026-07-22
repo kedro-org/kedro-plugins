@@ -7,6 +7,7 @@
 | Type                     | Description                                      | Location                           |
 | ------------------------ | ------------------------------------------------ | ---------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
+| `faiss.FAISSVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in a FAISS vector store. | `kedro_datasets_experimental.faiss` |
 | `feast.FeastDataset` | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/). | `kedro_datasets_experimental.feast` |
 
 ## Breaking changes to experimental datasets

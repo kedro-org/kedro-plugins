@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import uuid
@@ -377,6 +378,8 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
             faiss.write_index(self._index, tmp_path)
             os.replace(tmp_path, target)
         except Exception as e:
+            with contextlib.suppress(OSError):
+                os.unlink(tmp_path)
             raise DatasetError(f"save() failed while writing the FAISS index: {e}") from e
 
         meta = {
@@ -384,9 +387,14 @@ class FAISSVectorStoreHandle(VectorStoreHandle):
             "id_to_internal": self._id_to_internal,
             "properties": self._properties,
         }
+        meta_path = f"{target}.meta.json"
+        meta_tmp_path = f"{meta_path}.tmp"
         try:
-            Path(f"{target}.meta.json").write_text(json.dumps(meta))
+            Path(meta_tmp_path).write_text(json.dumps(meta))
+            os.replace(meta_tmp_path, meta_path)
         except Exception as e:
+            with contextlib.suppress(OSError):
+                os.unlink(meta_tmp_path)
             raise DatasetError(
                 f"save() failed while writing the metadata sidecar: {e}"
             ) from e
@@ -487,12 +495,18 @@ class FAISSVectorStoreDataset(AbstractVectorStoreDataset):
         index_file = Path(self._index_path) if self._index_path else None
         meta_file = Path(f"{self._index_path}.meta.json") if self._index_path else None
 
-        if (
-            index_file is not None
-            and meta_file is not None
-            and index_file.exists()
-            and meta_file.exists()
-        ):
+        index_exists = index_file is not None and index_file.exists()
+        meta_exists = meta_file is not None and meta_file.exists()
+
+        if index_exists != meta_exists:
+            missing = meta_file if index_exists else index_file
+            raise DatasetError(
+                f"Found one persistence file but not the other — "
+                f"'{missing}' is missing. Both '{index_file}' and "
+                f"'{meta_file}' are required to hydrate."
+            )
+
+        if index_exists and meta_exists:
             try:
                 index = faiss.read_index(str(index_file))
             except Exception as e:

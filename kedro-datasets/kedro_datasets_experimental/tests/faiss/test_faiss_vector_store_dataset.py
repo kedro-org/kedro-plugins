@@ -93,11 +93,6 @@ class TestDatasetInit:
             dataset.save({})
 
 
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreDataset — load()
-# ---------------------------------------------------------------------------
-
-
 class TestDatasetLoad:
     def test_load_returns_handle(self, dataset):
         store = dataset.load()
@@ -128,10 +123,9 @@ class TestDatasetLoad:
         assert hits[0]["id"] == "doc1"
         assert hits[0]["properties"] == {"topic": "ml"}
 
-    def test_load_dimension_mismatch_raises(self, tmp_path, sample_records):
+    def test_load_dimension_mismatch_raises(self, tmp_path):
         index_path = str(tmp_path / "my.index")
         ds1 = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
-        ds1.load().add(sample_records)
         ds1.load().save()
 
         ds2 = FAISSVectorStoreDataset(dimension=8, index_path=index_path)
@@ -143,10 +137,25 @@ class TestDatasetLoad:
         with pytest.raises(DatasetError, match="Failed to create FAISS index"):
             dataset.load()
 
+    def test_load_raises_when_only_index_file_present(self, tmp_path):
+        index_path = str(tmp_path / "my.index")
+        ds1 = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
+        ds1.load().save()
+        (tmp_path / "my.index.meta.json").unlink()
 
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — raw_client, close, describe
-# ---------------------------------------------------------------------------
+        ds2 = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
+        with pytest.raises(DatasetError, match="Found one persistence file but not the other"):
+            ds2.load()
+
+    def test_load_raises_when_only_meta_file_present(self, tmp_path):
+        index_path = str(tmp_path / "my.index")
+        ds1 = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
+        ds1.load().save()
+        (tmp_path / "my.index").unlink()
+
+        ds2 = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
+        with pytest.raises(DatasetError, match="Found one persistence file but not the other"):
+            ds2.load()
 
 
 class TestHandleLifecycle:
@@ -178,11 +187,6 @@ class TestHandleLifecycle:
         ds = FAISSVectorStoreDataset(dimension=4, index_path=index_path)
         store = ds.load()
         assert store.describe()["collection"] == index_path
-
-
-# ---------------------------------------------------------------------------
-# FAISSVectorStoreHandle — train()
-# ---------------------------------------------------------------------------
 
 
 class TestHandleTrain:

@@ -175,6 +175,7 @@ plugins:
         Experimental LLM and AI:
           - api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md: ChromaDB vector database integration
           - api/kedro_datasets_experimental/faiss.FAISSVectorStoreDataset.md: FAISS vector database integration
+          - api/kedro_datasets_experimental/feast.FeastDataset.md: Feast feature store integration
           - api/kedro_datasets_experimental/langchain.PromptDataset.md: LangChain prompt templates
           - api/kedro_datasets_experimental/langfuse.EvaluationDataset.md: Langfuse evaluation dataset integration
           - api/kedro_datasets_experimental/langfuse.PromptDataset.md: Langfuse prompt integration
@@ -352,6 +353,8 @@ nav:
           - databricks.ExternalTableDataset: api/kedro_datasets_experimental/databricks.ExternalTableDataset.md
         - FAISS:
           - faiss.FAISSVectorStoreDataset: api/kedro_datasets_experimental/faiss.FAISSVectorStoreDataset.md
+        - Feast:
+          - feast.FeastDataset: api/kedro_datasets_experimental/feast.FeastDataset.md
         - Langchain:
           - langchain.PromptDataset: api/kedro_datasets_experimental/langchain.PromptDataset.md
         - Langfuse:

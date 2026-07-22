@@ -9,6 +9,7 @@ Name | Description
 [chromadb.ChromaDBDataset](chromadb.ChromaDBDataset.md) | ``ChromaDBDataset`` loads a handle for adding, searching, and deleting entries in ChromaDB vector database collections.
 [databricks.ExternalTableDataset](databricks.ExternalTableDataset.md) | ``ExternalTableDataset`` implementation to access external tables in Databricks.
 [faiss.FAISSVectorStoreDataset](faiss.FAISSVectorStoreDataset.md) | ``FAISSVectorStoreDataset`` loads a handle for adding, searching, and deleting entries in a FAISS vector store.
+[feast.FeastDataset](feast.FeastDataset.md) | ``FeastDataset`` loads and saves features to Feast.
 [langchain.PromptDataset](langchain.PromptDataset.md) | ``PromptDataset`` loads a `langchain` prompt template.
 [langfuse.EvaluationDataset](langfuse.EvaluationDataset.md) | ``EvaluationDataset`` manages Langfuse evaluation datasets for LLM experiment workflows, supporting local file syncing and remote dataset versioning.
 [langfuse.PromptDataset](langfuse.PromptDataset.md) | ``PromptDataset`` provides a seamless integration between local prompt files (JSON/YAML) and Langfuse prompt management, supporting version control, labeling, and different synchronization policies.

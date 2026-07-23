@@ -159,6 +159,33 @@ class TestSparkHiveDataset:
         )
         assert_df_equal(_generate_spark_df_one(), dataset.load())
 
+    def test_exists(self):
+        dataset = SparkHiveDataset(
+            database="default_1", table="table_1", write_mode="overwrite"
+        )
+        assert dataset.exists()
+
+    def test_exists_non_existent_table(self):
+        dataset = SparkHiveDataset(
+            database="default_1", table="table_doesnt_exist", write_mode="overwrite"
+        )
+        assert not dataset.exists()
+
+    def test_exists_uses_catalog_api(self, mocker):
+        # Spark Connect sessions have no `_jsparkSession`, so `_exists` must go
+        # through the PySpark Catalog API only (kedro-plugins#467). `spec_set`
+        # makes any other attribute access on the session raise, mirroring a
+        # Connect session.
+        mock_spark = mocker.Mock(spec_set=["catalog"])
+        mock_spark.catalog.tableExists.return_value = True
+        mocker.patch(
+            "kedro_datasets.spark.spark_hive_dataset.get_spark",
+            return_value=mock_spark,
+        )
+        dataset = SparkHiveDataset(database="default_1", table="table_1")
+        assert dataset._exists()
+        mock_spark.catalog.tableExists.assert_called_once_with("default_1.table_1")
+
     def test_overwrite_empty_table(self, spark_session):
         spark_session.sql(
             "create table default_1.test_overwrite_empty_table (name string, age integer)"

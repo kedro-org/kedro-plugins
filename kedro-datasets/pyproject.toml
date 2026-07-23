@@ -220,6 +220,8 @@ chromadb = ["kedro-datasets[chromadb-dataset]"]
 darts-torch-model-dataset = ["u8darts[all]"]
 darts = ["kedro-datasets[darts-torch-model-dataset]"]
 databricks-externaltabledataset = ["kedro-datasets[hdfs-base,s3fs-base]"]
+faiss-dataset = ["faiss-cpu"]
+faiss = ["kedro-datasets[faiss-dataset]"]
 feast = ["feast[gcp]>=0.64.0"]
 langchain-promptdataset = ["langchain>=0.3.0"]
 langchain = ["kedro-datasets[langchain-chatopenaidataset,langchain-openaiembeddingsdataset,langchain-chatanthropicdataset,langchain-chatcoheredataset, langchain-promptdataset]"]
@@ -378,6 +380,7 @@ lint = [
 # Experimental dataset requirements
 experimental = [
     "weaviate-client>=4.0",
+    "faiss-cpu",
     "langchain-openai",
     "langchain-cohere",
     "langchain-anthropic",
@@ -404,6 +407,7 @@ experimental = [
 
 experimental_test = [
     "weaviate-client>=4.0",
+    "faiss-cpu",
     "delta-spark>=1.0, <3.0; python_version <= '3.11'",
     "delta-spark>=4.0, <4.1; python_version >= '3.12'",
     "langchain-openai",

@@ -14,7 +14,7 @@
 * Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
 
 ## Bug fixes and other changes
-- Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API. The minimum `pyspark` version for the `spark-base` and `spark-local` extras is now `3.3`.
+- Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API. **Breaking change:** the minimum `pyspark` version for the `spark-base` and `spark-local` extras is now `3.3` — users still on `pyspark<3.3` must upgrade before using these extras.
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.

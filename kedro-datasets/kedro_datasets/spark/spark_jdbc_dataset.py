@@ -23,7 +23,6 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         weather:
           type: spark.SparkJDBCDataset
           table: weather_table
-          url: jdbc:postgresql://localhost/test
           credentials: db_credentials
           load_args:
             properties:
@@ -31,6 +30,12 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
           save_args:
             properties:
               driver: org.postgresql.Driver
+
+        # credentials.yml
+        db_credentials:
+          url: jdbc:postgresql://localhost/test
+          user: scott
+          password: tiger
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
@@ -67,8 +72,8 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        url: str,
         table: str,
+        url: str | None = None,
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -77,7 +82,8 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         """Creates a new ``SparkJDBCDataset``.
 
         Args:
-            url: A JDBC URL of the form ``jdbc:subprotocol:subname``.
+            url: A JDBC URL of the form ``jdbc:subprotocol:subname``. When not
+                provided, the URL can be supplied as ``url`` in ``credentials``.
             table: The name of the table to load or save data to.
             credentials: A dictionary of JDBC database connection arguments.
                 Normally at least properties ``user`` and ``password`` with
@@ -99,6 +105,9 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             DatasetError: When either ``url`` or ``table`` is empty or
                 when a property is provided with a None value.
         """
+
+        credentials = credentials or {}
+        url = url or credentials.get("url")
 
         if not url:
             raise DatasetError(
@@ -124,9 +133,14 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         # Update properties in load_args and save_args with credentials.
-        if credentials is not None:
+        credentials_properties = {
+            cred_key: cred_value
+            for cred_key, cred_value in credentials.items()
+            if cred_key != "url"
+        }
+        if credentials_properties:
             # Check credentials for bad inputs.
-            for cred_key, cred_value in credentials.items():
+            for cred_key, cred_value in credentials_properties.items():
                 if cred_value is None:
                     raise DatasetError(
                         f"Credential property '{cred_key}' cannot be None. "
@@ -135,8 +149,14 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
 
             load_properties = self._load_args.get("properties", {})
             save_properties = self._save_args.get("properties", {})
-            self._load_args["properties"] = {**load_properties, **credentials}
-            self._save_args["properties"] = {**save_properties, **credentials}
+            self._load_args["properties"] = {
+                **load_properties,
+                **credentials_properties,
+            }
+            self._save_args["properties"] = {
+                **save_properties,
+                **credentials_properties,
+            }
 
     def _describe(self) -> dict[str, Any]:
         load_args = self._load_args

@@ -39,7 +39,19 @@ def test_missing_url():
         " URL of the form 'jdbc:subprotocol:subname'."
     )
     with pytest.raises(DatasetError, match=error_message):
-        SparkJDBCDataset(url=None, table="dummy_table")
+        SparkJDBCDataset(table="dummy_table")
+
+
+def test_missing_url_when_credentials_do_not_contain_url():
+    error_message = (
+        "'url' argument cannot be empty. Please provide a JDBC"
+        " URL of the form 'jdbc:subprotocol:subname'."
+    )
+    with pytest.raises(DatasetError, match=error_message):
+        SparkJDBCDataset(
+            table="dummy_table",
+            credentials={"user": "dummy_user", "password": "dummy_pw"},
+        )
 
 
 def test_missing_table():
@@ -62,6 +74,50 @@ def test_save_credentials(mocker, spark_jdbc_args_credentials):
     mock_data = mocker.Mock()
     dataset = SparkJDBCDataset(**spark_jdbc_args_credentials)
     dataset.save(mock_data)
+    mock_data.write.jdbc.assert_called_with(
+        "dummy_url",
+        "dummy_table",
+        properties={"user": "dummy_user", "password": "dummy_pw"},
+    )
+
+
+def test_save_credentials_url(mocker):
+    mock_data = mocker.Mock()
+    credentials = {
+        "url": "credentials_url",
+        "user": "dummy_user",
+        "password": "dummy_pw",
+    }
+    dataset = SparkJDBCDataset(table="dummy_table", credentials=credentials)
+
+    dataset.save(mock_data)
+
+    mock_data.write.jdbc.assert_called_with(
+        "credentials_url",
+        "dummy_table",
+        properties={"user": "dummy_user", "password": "dummy_pw"},
+    )
+    assert credentials == {
+        "url": "credentials_url",
+        "user": "dummy_user",
+        "password": "dummy_pw",
+    }
+
+
+def test_save_explicit_url_takes_precedence_over_credentials_url(mocker):
+    mock_data = mocker.Mock()
+    dataset = SparkJDBCDataset(
+        url="dummy_url",
+        table="dummy_table",
+        credentials={
+            "url": "credentials_url",
+            "user": "dummy_user",
+            "password": "dummy_pw",
+        },
+    )
+
+    dataset.save(mock_data)
+
     mock_data.write.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
@@ -106,6 +162,31 @@ def test_load_credentials(mocker, spark_jdbc_args_credentials):
         "dummy_table",
         properties={"user": "dummy_user", "password": "dummy_pw"},
     )
+
+
+def test_load_credentials_url(mocker):
+    spark = mocker.patch(
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
+    ).return_value
+    credentials = {
+        "url": "credentials_url",
+        "user": "dummy_user",
+        "password": "dummy_pw",
+    }
+    dataset = SparkJDBCDataset(table="dummy_table", credentials=credentials)
+
+    dataset.load()
+
+    spark.read.jdbc.assert_called_with(
+        "credentials_url",
+        "dummy_table",
+        properties={"user": "dummy_user", "password": "dummy_pw"},
+    )
+    assert credentials == {
+        "url": "credentials_url",
+        "user": "dummy_user",
+        "password": "dummy_pw",
+    }
 
 
 def test_load_args(mocker, spark_jdbc_args_save_load):

@@ -83,7 +83,10 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
 
         Args:
             url: A JDBC URL of the form ``jdbc:subprotocol:subname``. When not
-                provided, the URL can be supplied as ``url`` in ``credentials``.
+                provided, the URL can be supplied as ``url`` in ``credentials``
+                (mirrors the ``pandas.SQLTableDataset`` ``credentials.con``
+                convention for keeping connection endpoints out of
+                ``catalog.yml``).
             table: The name of the table to load or save data to.
             credentials: A dictionary of JDBC database connection arguments.
                 Normally at least properties ``user`` and ``password`` with

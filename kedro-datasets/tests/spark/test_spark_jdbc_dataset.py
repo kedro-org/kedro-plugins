@@ -189,6 +189,29 @@ def test_load_credentials_url(mocker):
     }
 
 
+def test_load_explicit_url_takes_precedence_over_credentials_url(mocker):
+    spark = mocker.patch(
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
+    ).return_value
+    dataset = SparkJDBCDataset(
+        url="dummy_url",
+        table="dummy_table",
+        credentials={
+            "url": "credentials_url",
+            "user": "dummy_user",
+            "password": "dummy_pw",
+        },
+    )
+
+    dataset.load()
+
+    spark.read.jdbc.assert_called_with(
+        "dummy_url",
+        "dummy_table",
+        properties={"user": "dummy_user", "password": "dummy_pw"},
+    )
+
+
 def test_load_args(mocker, spark_jdbc_args_save_load):
     spark = mocker.patch(
         "kedro_datasets.spark.spark_jdbc_dataset.get_spark"

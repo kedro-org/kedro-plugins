@@ -18,6 +18,7 @@
 
 ## Community contributions
 - [samiat4911](https://github.com/samiat4911)
+- [Shizoqua](https://github.com/Shizoqua)
 
 # Release 9.5.0
 

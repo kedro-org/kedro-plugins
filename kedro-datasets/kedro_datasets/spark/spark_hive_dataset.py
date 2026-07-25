@@ -192,11 +192,10 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        return (
-            get_spark()
-            ._jsparkSession.catalog()
-            .tableExists(self._database, self._table)
-        )
+        # Use the PySpark Catalog API rather than `_jsparkSession` so this
+        # works with Spark Connect sessions (e.g. Databricks Connect V2),
+        # which have no JVM access. Requires pyspark>=3.3.
+        return get_spark().catalog.tableExists(self._full_table_address)
 
     def __getstate__(self) -> None:
         raise pickle.PicklingError(

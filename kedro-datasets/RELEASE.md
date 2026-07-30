@@ -22,6 +22,7 @@
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 - Added `os.PathLike` support for NetworkX datasets.
+- Added `os.PathLike` support for `SVMLightDataset`.
 
 ## Community contributions
 - [samiat4911](https://github.com/samiat4911)

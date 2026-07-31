@@ -251,15 +251,12 @@ def test_deep_merge_merges_nested_dicts_and_replaces_values():
 
 
 def test_resolved_type_hints_falls_back_for_unresolved_annotations():
-    namespace: dict[str, Any] = {}
-    exec(  # noqa: S102
-        "from __future__ import annotations\n"
-        "def unresolved(value: MissingType) -> None:\n"
-        "    pass\n",
-        namespace,
-    )
+    def unresolved(value) -> None:
+        pass
 
-    assert generator._resolved_type_hints(namespace["unresolved"]) == {}
+    unresolved.__annotations__ = {"value": "MissingType", "return": None}
+
+    assert generator._resolved_type_hints(unresolved) == {}
 
 
 def test_dataset_then_schema_uses_signature_docstring_and_overrides(monkeypatch):

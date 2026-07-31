@@ -276,6 +276,8 @@ def _submodule_attrs_for(subpackage: str) -> dict[str, str]:
                 continue
             class_to_module: dict[str, str] = {}
             for key, value in zip(keyword.value.keys, keyword.value.values):
+                if key is None:
+                    continue
                 module_name = ast.literal_eval(key)
                 for class_name in ast.literal_eval(value):
                     class_to_module[class_name] = module_name

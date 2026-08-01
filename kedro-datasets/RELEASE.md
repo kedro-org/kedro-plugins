@@ -25,6 +25,7 @@
 - Added `os.PathLike` support for `SVMLightDataset`.
 
 ## Community contributions
+- [JokeGbenro](https://github.com/JokeGbenro)
 - [samiat4911](https://github.com/samiat4911)
 - [Laurens Vijnck](https://github.com/lvijnck)
 

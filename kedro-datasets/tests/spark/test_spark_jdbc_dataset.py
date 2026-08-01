@@ -212,6 +212,21 @@ def test_load_explicit_url_takes_precedence_over_credentials_url(mocker):
     )
 
 
+def test_describe_does_not_include_url_from_credentials():
+    dataset = SparkJDBCDataset(
+        table="dummy_table",
+        credentials={
+            "url": "credentials_url",
+            "user": "dummy_user",
+            "password": "dummy_pw",
+        },
+    )
+
+    described = dataset._describe()
+
+    assert "url" not in described
+
+
 def test_load_args(mocker, spark_jdbc_args_save_load):
     spark = mocker.patch(
         "kedro_datasets.spark.spark_jdbc_dataset.get_spark"

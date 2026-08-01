@@ -178,7 +178,6 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             save_args = {**save_args, "properties": save_properties}
 
         return {
-            "url": self._url,
             "table": self._table,
             "load_args": load_args,
             "save_args": save_args,

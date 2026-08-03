@@ -1,0 +1,176 @@
+rules:
+  # ──────────────────────────────────────────────────────────────────────
+  # Dataset-specific rules
+  # ──────────────────────────────────────────────────────────────────────
+
+  - id: datasets-torch-load-no-weights-only
+    message: >-
+      torch.load() is called without weights_only=True. Without this flag,
+      torch.load deserialises arbitrary pickle data, enabling remote code
+      execution if the file is untrusted. Always pass weights_only=True
+      (available since PyTorch 1.13) unless the file is fully trusted and
+      you need to load non-tensor objects.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    patterns:
+      - pattern: torch.load(...)
+      - pattern-not: torch.load(..., weights_only=True, ...)
+
+  - id: datasets-tf-load-model-no-safe-mode
+    message: >-
+      tf.keras.models.load_model() is called without safe_mode=True.
+      Without this flag, Keras deserialises custom objects which can
+      execute arbitrary code if the model file is untrusted. Pass
+      safe_mode=True (available since TensorFlow 2.12) unless the file
+      is fully trusted and you need custom objects.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    patterns:
+      - pattern: tf.keras.models.load_model(...)
+      - pattern-not: tf.keras.models.load_model(..., safe_mode=True, ...)
+
+  - id: datasets-joblib-load
+    message: >-
+      joblib.load() deserialises pickle data internally and can execute
+      arbitrary code if the file is untrusted. Ensure the data source is
+      trusted and document the risk in the dataset docstring.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: HIGH
+    pattern: joblib.load(...)
+
+  - id: datasets-dynamic-read-dispatch
+    message: >-
+      A dynamic method name is resolved via getattr with a user-controlled
+      format string (e.g. read_{file_format}). If the format parameter is
+      set to 'pickle', this dispatches to read_pickle / to_pickle, enabling
+      arbitrary code execution on load. Validate or restrict the allowed
+      format values.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    pattern-either:
+      - pattern: getattr($MOD, f"read_{$FMT}", ...)
+      - pattern: getattr($MOD, f"scan_{$FMT}", ...)
+      - pattern: getattr($MOD, f"to_{$FMT}", ...)
+
+  - id: datasets-hub-remote-code
+    message: >-
+      load_dataset() can download and execute arbitrary Python dataset
+      scripts from the Hugging Face Hub. Pass trust_remote_code=False
+      explicitly to prevent remote code execution, or document why remote
+      code is trusted for this use case.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    patterns:
+      - pattern: load_dataset(...)
+      - pattern-not: load_dataset(..., trust_remote_code=False, ...)
+
+  - id: datasets-transformers-pipeline
+    message: >-
+      transformers.pipeline() can download and execute model code from
+      the Hugging Face Hub. If trust_remote_code=True is passed (directly
+      or via kwargs), arbitrary Python from the Hub will run locally. Pass
+      trust_remote_code=False explicitly or document why remote code is
+      trusted for this use case.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    patterns:
+      - pattern: pipeline(...)
+      - pattern-not: pipeline(..., trust_remote_code=False, ...)
+
+  - id: datasets-scipy-loadmat
+    message: >-
+      scipy.io.loadmat() can deserialise pickled Python objects embedded
+      in MAT v5 files. If the file is untrusted, this can lead to
+      arbitrary code execution. Ensure the data source is trusted and
+      document the risk in the dataset docstring.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    pattern-either:
+      - pattern: scipy.io.loadmat(...)
+      - pattern: io.loadmat(...)
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Rules carried from kedro-security-review (applicable to plugin code)
+  # ──────────────────────────────────────────────────────────────────────
+
+  - id: kedro-dynamic-import
+    message: >-
+      importlib.import_module() is called with a dynamic argument. In
+      dataset code, module paths often originate from catalog config (e.g.
+      the backend parameter in PickleDataset). Verify the argument cannot
+      be influenced by untrusted external input.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    patterns:
+      - pattern: importlib.import_module($X)
+      - pattern-not: importlib.import_module("...")
+
+  - id: kedro-yaml-unsafe-load
+    message: >-
+      yaml.load() without a safe Loader can deserialise arbitrary Python
+      objects. Dataset code should always use yaml.safe_load() or pass
+      Loader=yaml.SafeLoader explicitly.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: HIGH
+    patterns:
+      - pattern: yaml.load(...)
+      - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
+      - pattern-not: yaml.load(..., yaml.SafeLoader, ...)
+      - pattern-not: yaml.load(..., yaml.CSafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=SafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=CSafeLoader, ...)
+      - pattern-not: yaml.load(..., SafeLoader, ...)
+      - pattern-not: yaml.load(..., CSafeLoader, ...)
+
+  - id: kedro-subprocess-shell-injection
+    message: >-
+      subprocess is called with shell=True and a non-literal command. If
+      the command originates from config or user input, an attacker who
+      controls that value can execute arbitrary shell commands. Prefer
+      shell=False with an explicit argument list.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    patterns:
+      - pattern: subprocess.$FUNC($CMD, ..., shell=True, ...)
+      - pattern-not: subprocess.$FUNC("...", ..., shell=True, ...)

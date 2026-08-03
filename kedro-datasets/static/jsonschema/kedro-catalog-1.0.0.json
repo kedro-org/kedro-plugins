@@ -527,6 +527,10 @@
                   "type": "object",
                   "description": "Additional arguments passed to the Ibis backend's to_{file_format} method."
                 },
+                "fs_args": {
+                  "type": ["object", "null"],
+                  "description": "Extra arguments (e.g. credentials) for the fsspec filesystem used for version discovery and existence checks on a remote filepath. Data reading/writing is delegated to the Ibis backend."
+                },
                 "version": {
                   "type": ["object", "null"],
                   "description": "kedro.io.core.Version instance for versioned data."

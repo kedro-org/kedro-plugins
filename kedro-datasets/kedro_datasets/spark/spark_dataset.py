@@ -240,7 +240,7 @@ class SparkDataset(AbstractVersionedDataset[DataFrame, DataFrame]):
                 glob_function = partial(dbfs_glob, dbutils=dbutils)
                 exists_function = partial(dbfs_exists, dbutils=dbutils)
         else:
-            filesystem = fsspec.filesystem(fs_prefix.strip("://"), **credentials)
+            filesystem = fsspec.filesystem(fs_prefix.removesuffix("://"), **credentials)
             exists_function = filesystem.exists
             glob_function = filesystem.glob
 

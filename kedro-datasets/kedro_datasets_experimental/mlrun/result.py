@@ -11,8 +11,11 @@ class MLRunResult(MLRunAbstractDataset):
     [`log_result`](https://docs.mlrun.org/en/latest/api/mlrun.execution/index.html#mlrun.execution.MLClientCtx.log_result).
     Results are read from `context.results`.
 
-    `load_args` and `save_args` accept any arguments supported by the corresponding
+    ``save_args`` accept any arguments supported by the corresponding
     MLRun API for your MLRun version; see the MLRun documentation.
+
+    Note: ``load_args`` is accepted for interface compatibility but is not used
+    by this dataset. Results are read directly from ``context.results``.
 
     Examples:
         Using the
@@ -43,8 +46,8 @@ class MLRunResult(MLRunAbstractDataset):
             When enabled:
             - Each key is stored as a separate MLRun result.
             - Loading must be performed per key (e.g. from `context.results`).
-        load_args: Passed to MLRun when loading; see MLRun docs for your version.
-        save_args: Passed to `log_result`; see MLRun docs for your version.
+        load_args: Accepted for interface compatibility but not used.
+        save_args: Passed to ``log_result``; see MLRun docs for your version.
     """
 
     def __init__(

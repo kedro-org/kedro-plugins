@@ -54,6 +54,13 @@ class TestImageDataset:
         image_dataset.save(image_object)
         assert image_dataset.exists()
 
+    def test_pathlike_filepath(self, tmp_path, image_object):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.png"
+        dataset = ImageDataset(filepath=filepath)
+        dataset.save(image_object)
+        assert images_equal(dataset.load(), image_object)
+
     @pytest.mark.parametrize(
         "save_args", [{"format": "png", "index": "value"}], indirect=True
     )

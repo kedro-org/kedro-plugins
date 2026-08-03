@@ -1,19 +1,63 @@
-# Upcoming Release
+# Upcoming release
+
+## Major features and improvements
+## Breaking changes
+## Breaking changes to experimental datasets
+## Bug fixes and other changes
+- Fixed `polars.EagerPolarsDataset` so it can save and load Delta tables (`file_format: delta`). `polars.read_delta`/`DataFrame.write_delta` take a path/URI rather than a file buffer, so they are now handled separately from the other polars I/O methods.
+
+## Community contributions
+
+# Release 9.6.0
+
+## Major features and improvements
+* Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
+- Added the following new **experimental** datasets:
+
+| Type                     | Description                                      | Location                           |
+| ------------------------ | ------------------------------------------------ | ---------------------------------- |
+| `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
+| `faiss.FAISSVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in a FAISS vector store. | `kedro_datasets_experimental.faiss` |
+| `feast.FeastDataset` | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/). | `kedro_datasets_experimental.feast` |
+
+## Breaking changes
+- The minimum `pyspark` version for the `spark-base` and `spark-local` extras is now `3.3` — users still on `pyspark<3.3` must upgrade before using these extras.
+
+## Breaking changes to experimental datasets
+* Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
+
+## Bug fixes and other changes
+- Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API.
+- Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
+- Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
+- Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
+- Added support for supplying `SparkJDBCDataset` JDBC URLs through credentials.
+- Added `os.PathLike` support for NetworkX datasets.
+- Added `os.PathLike` support for `SVMLightDataset`.
+
+## Community contributions
+- [JokeGbenro](https://github.com/JokeGbenro)
+- [samiat4911](https://github.com/samiat4911)
+- [Shizoqua](https://github.com/Shizoqua)
+- [Laurens Vijnck](https://github.com/lvijnck)
+
+# Release 9.5.0
 
 ## Major features and improvements
 * Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
-## Bug fixes and other changes
 
-- Fixed `polars.EagerPolarsDataset` so it can save and load Delta tables (`file_format: delta`). `polars.read_delta`/`DataFrame.write_delta` take a path/URI rather than a file buffer, so they are now handled separately from the other polars I/O methods.
+## Bug fixes and other changes
+- Hardened experimental `pytorch.PyTorchDataset`: `weights_only=True` is now enforced by default on load to block arbitrary code execution from untrusted `.pt` files, user-supplied `load_args` and `save_args` are now correctly passed to `torch.load` and `torch.save` (previously silently dropped), and the misleading "pickle-safe" docstring was corrected.
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 - Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
 - Fixed `opik.TraceDataset` so `credentials.project_name` is now passed to `configure()` and persisted to Opik's session configuration.
 - Added `os.PathLike` support for `Spark` datasets.
+- Fixed `ibis.FileDataset` to support remote filepaths (e.g. `s3://`, `abfss://`, `hf://`) and added an `fs_args` argument to authenticate the filesystem used for version discovery.
 
 ## Community contributions
-- [@PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
+- [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 - [Anton Nikishin](https://github.com/nikanton)
-- [@GDaamn](https://github.com/GDaamn)
+- [GDaamn](https://github.com/GDaamn)
 
 # Release 9.4.0
 

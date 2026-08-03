@@ -25,6 +25,11 @@ class DartsTorchModelDataset(
     The underlying functionality is supported by, and passes arguments through to,
     the Darts library's model load and save methods.
 
+    !!! warning
+        Darts model loading uses PyTorch internally, which deserializes pickle
+        data. Loading untrusted model files can execute arbitrary code. Only
+        load models from sources you trust.
+
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
@@ -43,15 +48,13 @@ class DartsTorchModelDataset(
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
-
     from path.to.your.module import DartsTorchModelDataset
     from darts.models import RNNModel
     from kedro.io.core import Version
 
     # Initialize the dataset
     dataset = DartsTorchModelDataset(
-        filepath="data/06_models/darts_model.pt",
-        model_class=RNNModel
+        filepath="data/06_models/darts_model.pt", model_class=RNNModel
     )
 
     # Assuming model is an instance of RNNModel

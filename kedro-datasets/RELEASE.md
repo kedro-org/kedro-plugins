@@ -31,8 +31,10 @@
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 - Added support for supplying `SparkJDBCDataset` JDBC URLs through credentials.
 - Added `os.PathLike` support for NetworkX datasets.
+- Added `os.PathLike` support for `SVMLightDataset`.
 
 ## Community contributions
+- [JokeGbenro](https://github.com/JokeGbenro)
 - [samiat4911](https://github.com/samiat4911)
 - [Shizoqua](https://github.com/Shizoqua)
 - [Laurens Vijnck](https://github.com/lvijnck)

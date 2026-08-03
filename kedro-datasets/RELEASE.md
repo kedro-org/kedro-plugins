@@ -1,6 +1,14 @@
 # Upcoming release
 
 ## Major features and improvements
+## Breaking changes
+## Breaking changes to experimental datasets
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.6.0
+
+## Major features and improvements
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 
@@ -23,8 +31,10 @@
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.
 - Added support for supplying `SparkJDBCDataset` JDBC URLs through credentials.
 - Added `os.PathLike` support for NetworkX datasets.
+- Added `os.PathLike` support for `SVMLightDataset`.
 
 ## Community contributions
+- [JokeGbenro](https://github.com/JokeGbenro)
 - [samiat4911](https://github.com/samiat4911)
 - [Shizoqua](https://github.com/Shizoqua)
 - [Laurens Vijnck](https://github.com/lvijnck)

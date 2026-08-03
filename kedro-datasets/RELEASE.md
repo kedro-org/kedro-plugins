@@ -1,6 +1,14 @@
 # Upcoming release
 
 ## Major features and improvements
+## Breaking changes
+## Breaking changes to experimental datasets
+## Bug fixes and other changes
+## Community contributions
+
+# Release 9.6.0
+
+## Major features and improvements
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 

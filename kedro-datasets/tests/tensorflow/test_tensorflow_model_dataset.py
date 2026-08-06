@@ -159,6 +159,19 @@ class TestTensorFlowModelDataset:
         assert tf_model_dataset._load_args == {"safe_mode": True}
         assert tf_model_dataset._save_args == {}
 
+    def test_pathlike_filepath(
+        self, tmp_path, dummy_tf_base_model, dummy_x_test, tensorflow_model_dataset
+    ):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test_tf.h5"
+        dataset = tensorflow_model_dataset(filepath=filepath)
+        dataset.save(dummy_tf_base_model)
+
+        reloaded = dataset.load()
+        new_predictions = reloaded.predict(dummy_x_test)
+        predictions = dummy_tf_base_model.predict(dummy_x_test)
+        np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
+
     def test_load_missing_model(self, tf_model_dataset):
         """Test error message when trying to load missing model."""
         pattern = r"Failed while loading data from dataset kedro_datasets.tensorflow.tensorflow_model_dataset.TensorFlowModelDataset\(.*\)"

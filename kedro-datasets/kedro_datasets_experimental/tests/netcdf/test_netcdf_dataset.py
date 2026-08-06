@@ -133,6 +133,16 @@ def versioned_netcdf_dataset(tmp_path, load_version, save_version):
     )
 
 
+@pytest.fixture
+def versioned_s3_dataset(tmp_path, load_version, save_version):
+    return NetCDFDataset(
+        filepath=S3_PATH,
+        temppath=tmp_path,
+        credentials=AWS_CREDENTIALS,
+        version=Version(load_version, save_version),
+    )
+
+
 @pytest.fixture()
 def s3fs_cleanup():
     # clear cache so we get a clean slate every time we instantiate a S3FileSystem
@@ -254,6 +264,14 @@ class TestNetCDFDataset:
         loaded_data = dataset.load()
         dummy_xr_dataset.equals(loaded_data)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_xr_dataset):
+        """Test that pathlib paths are accepted as filepaths."""
+        dataset = NetCDFDataset(filepath=tmp_path / FILE_NAME)
+
+        dataset.save(dummy_xr_dataset)
+
+        assert_equal(dataset.load(), dummy_xr_dataset)
+
     def test_load_locally_multi(
         self, tmp_path, dummy_xr_dataset, dummy_xr_dataset_multi
     ):
@@ -316,6 +334,33 @@ class TestNetCDFDatasetVersioned:
         versioned_netcdf_dataset.save(dummy_xr_dataset)
         reloaded = versioned_netcdf_dataset.load()
         assert_equal(reloaded, dummy_xr_dataset)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    def test_save_and_load_remote(self, versioned_s3_dataset, dummy_xr_dataset, mocker):
+        """Test saving and loading a versioned NetCDF file on S3."""
+        mocker.patch.object(
+            versioned_s3_dataset, "_exists_function", return_value=False
+        )
+        mocker.patch.object(versioned_s3_dataset._fs, "exists", return_value=True)
+        mocker.patch.object(versioned_s3_dataset._fs, "put_file")
+        mocker.patch.object(versioned_s3_dataset._fs, "get")
+        mocker.patch.object(versioned_s3_dataset._fs, "invalidate_cache")
+
+        versioned_s3_dataset.save(dummy_xr_dataset)
+
+        assert versioned_s3_dataset.exists()
+        assert_equal(versioned_s3_dataset.load(), dummy_xr_dataset)
+
+        expected_path = "test_bucket/test.nc/2019-01-01T23.59.59.999Z/test.nc"
+        versioned_s3_dataset._fs.put_file.assert_called_once()
+        assert versioned_s3_dataset._fs.put_file.call_args.args[1] == expected_path
+        versioned_s3_dataset._fs.get.assert_called_once()
+        assert versioned_s3_dataset._fs.get.call_args.args[0] == expected_path
 
     def test_no_versions(self, versioned_netcdf_dataset):
         """Check the error if no versions are available for load."""

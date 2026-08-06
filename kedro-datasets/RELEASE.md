@@ -1,6 +1,9 @@
 # Upcoming release
 
 ## Major features and improvements
+- Added standard Kedro versioning support to the experimental
+  `netcdf.NetCDFDataset`, including local and remote (S3) files.
+
 ## Breaking changes
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes

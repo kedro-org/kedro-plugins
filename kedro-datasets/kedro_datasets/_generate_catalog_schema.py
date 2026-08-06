@@ -21,14 +21,12 @@ import argparse
 import ast
 import inspect
 import json
-import os
 import pkgutil
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from types import UnionType
-from typing import Any, Union, get_args, get_origin, get_type_hints
+from typing import Any
 
 import kedro_datasets
 from kedro_datasets._schema_overrides import EXCLUDED_SUBPACKAGES, SCHEMA_OVERRIDES
@@ -38,21 +36,8 @@ from kedro_datasets._schema_overrides import EXCLUDED_SUBPACKAGES, SCHEMA_OVERRI
 # schema-affecting version.
 SCHEMA_FILENAME = "kedro-catalog-1.0.0.json"
 
-_NoneType = type(None)
-
-# Exact-type -> JSON type. Matched by identity first, then ``issubclass``.
-_TYPE_MAP: dict[type, str] = {
-    str: "string",
-    bool: "boolean",
-    int: "integer",
-    float: "number",
-    dict: "object",
-    list: "array",
-    os.PathLike: "string",
-}
-
-# Fallback keyed by annotation ``__name__`` for common non-builtin types that
-# cannot be matched by identity (e.g. Kedro's ``Version``).
+# Mapping keyed by the final name in source annotation strings for common
+# non-builtin types (e.g. Kedro's ``Version``).
 _NAME_TYPE_MAP: dict[str, str] = {
     "str": "string",
     "bool": "boolean",
@@ -88,11 +73,6 @@ class DatasetSpec:
     type_id: str
     parameters: list[DatasetParameter]
     docstring: str | None
-
-
-def _is_union_annotation(annotation: Any) -> bool:
-    origin = get_origin(annotation)
-    return origin is Union or origin is UnionType
 
 
 def _split_union_members(annotation: str) -> list[str]:
@@ -134,57 +114,8 @@ def _json_type_for_annotation_text(annotation: str) -> Any:
     return _NAME_TYPE_MAP.get(base_name, _UNKNOWN)
 
 
-def _json_type_for_union(annotation: Any) -> Any:
-    """Map Optional / Union annotations to a JSON Schema ``type`` value."""
-    members = get_args(annotation)
-    nullable = _NoneType in members
-    json_types: list[str] = []
-
-    for member in members:
-        if member is _NoneType:
-            continue
-        mapped = _json_type_for(member)
-        if mapped is _UNKNOWN:
-            # A union with an unmappable member cannot be typed reliably.
-            return _UNKNOWN
-        json_types.extend(mapped if isinstance(mapped, list) else [mapped])
-
-    if not json_types:
-        return _UNKNOWN
-
-    # De-duplicate preserving order.
-    ordered = list(dict.fromkeys(json_types))
-    if nullable and "null" not in ordered:
-        ordered.append("null")
-    return ordered[0] if len(ordered) == 1 else ordered
-
-
-def _json_type_for_concrete(annotation: Any) -> Any:
-    """Map a non-union annotation to a JSON Schema ``type`` value."""
-    origin = get_origin(annotation)
-    lookup = origin if origin is not None else annotation
-
-    if isinstance(lookup, type):
-        mapped = _TYPE_MAP.get(lookup)
-        if mapped is not None:
-            return mapped
-        for base, json_type in _TYPE_MAP.items():
-            try:
-                if issubclass(lookup, base):
-                    return json_type
-            except TypeError:
-                continue
-        by_name = _NAME_TYPE_MAP.get(getattr(lookup, "__name__", ""))
-        if by_name is not None:
-            return by_name
-
-    # Fall back to the annotation's bare name for unresolved / string annotations.
-    name = getattr(annotation, "__name__", None) or str(annotation)
-    return _NAME_TYPE_MAP.get(name, _UNKNOWN)
-
-
 def _json_type_for(annotation: Any) -> Any:
-    """Map a resolved Python annotation to a JSON Schema ``type`` value.
+    """Map a source-level annotation string to a JSON Schema ``type`` value.
 
     Returns a JSON type string (e.g. ``"string"``), a list of type strings for
     nullable/union annotations (e.g. ``["object", "null"]``), or the ``_UNKNOWN``
@@ -192,11 +123,9 @@ def _json_type_for(annotation: Any) -> Any:
     """
     if annotation is inspect.Parameter.empty or annotation is None:
         return _UNKNOWN
-    if isinstance(annotation, str):
-        return _json_type_for_annotation_text(annotation)
-    if _is_union_annotation(annotation):
-        return _json_type_for_union(annotation)
-    return _json_type_for_concrete(annotation)
+    if not isinstance(annotation, str):
+        return _UNKNOWN
+    return _json_type_for_annotation_text(annotation)
 
 
 _ARGS_HEADER_RE = re.compile(r"^(\s*)Args:\s*$")
@@ -386,20 +315,6 @@ def _property_schema(annotation: Any, description: str | None) -> dict[str, Any]
     if description:
         schema["description"] = description
     return schema
-
-
-def _resolved_type_hints(init: Any) -> dict[str, Any]:
-    """Return resolved annotations for ``init``.
-
-    Dataset modules use ``from __future__ import annotations``. ``inspect`` keeps
-    those annotations as strings, so resolve them explicitly. Some exotic
-    annotations may still fail to resolve; in that case the generator falls back
-    to the raw signature annotations and unknown values render permissively.
-    """
-    try:
-        return get_type_hints(init)
-    except (AttributeError, NameError, TypeError):
-        return {}
 
 
 def _dataset_then_schema(spec: DatasetSpec) -> dict[str, Any]:

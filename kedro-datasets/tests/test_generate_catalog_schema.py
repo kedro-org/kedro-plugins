@@ -40,36 +40,22 @@ SAMPLE_SPEC = generator.DatasetSpec(
 
 
 def test_json_type_for_known_nullable_and_unknown_annotations():
-    class Version:
-        pass
-
-    assert generator._json_type_for(str) == "string"
-    assert generator._json_type_for(Path) == "string"
-    assert generator._json_type_for(Version) == "object"
-    assert generator._json_type_for(dict[str, Any] | None) == ["object", "null"]
-    assert generator._json_type_for(str | dict[str, Any]) == ["string", "object"]
+    assert generator._json_type_for("str") == "string"
+    assert generator._json_type_for("pathlib.Path") == "string"
+    assert generator._json_type_for("Version") == "object"
+    assert generator._json_type_for("dict[str, Any] | None") == ["object", "null"]
+    assert generator._json_type_for("str | dict[str, Any]") == ["string", "object"]
     assert generator._json_type_for(str | Any) is generator._UNKNOWN
     assert generator._json_type_for("str | UnknownType") is generator._UNKNOWN
     assert generator._json_type_for(inspect.Parameter.empty) is generator._UNKNOWN
     assert generator._json_type_for(None) is generator._UNKNOWN
-    assert generator._json_type_for("Version") == "object"
     assert generator._json_type_for("str | os.PathLike") == "string"
-
-
-def test_json_type_for_handles_empty_and_invalid_type_map_entries(monkeypatch):
-    class Unmapped:
-        pass
-
-    monkeypatch.setattr(generator, "get_args", lambda annotation: ())
-    assert generator._json_type_for_union(object()) is generator._UNKNOWN
-
-    monkeypatch.setitem(generator._TYPE_MAP, "not-a-type", "string")
-    assert generator._json_type_for_concrete(Unmapped) is generator._UNKNOWN
+    assert generator._json_type_for(Path) is generator._UNKNOWN
 
 
 def test_property_schema_renders_unknown_as_pattern():
     assert generator._property_schema(Any, None) == {"pattern": ".*"}
-    assert generator._property_schema(str, "A value.") == {
+    assert generator._property_schema("str", "A value.") == {
         "type": "string",
         "description": "A value.",
     }
@@ -248,15 +234,6 @@ def test_deep_merge_merges_nested_dicts_and_replaces_values():
         "properties": {"filepath": {"type": "string", "description": "Path."}},
         "required": [],
     }
-
-
-def test_resolved_type_hints_falls_back_for_unresolved_annotations():
-    def unresolved(value) -> None:
-        pass
-
-    unresolved.__annotations__ = {"value": "MissingType", "return": None}
-
-    assert generator._resolved_type_hints(unresolved) == {}
 
 
 def test_dataset_then_schema_uses_signature_docstring_and_overrides(monkeypatch):

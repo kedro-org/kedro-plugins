@@ -49,6 +49,17 @@ class TestPptxDataset:
         assert pptx_dataset._fs_open_args_load == {}
         assert pptx_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.pptx"
+        dataset = PptxDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        reloaded = dataset.load()
+        assert (
+            dummy_data.slides[0].shapes.title.text
+            == reloaded.slides[0].shapes.title.text
+        )
+
     def test_exists(self, pptx_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""

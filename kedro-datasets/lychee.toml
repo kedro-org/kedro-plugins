@@ -1,0 +1,25 @@
+# Config for the `lychee` link checker used in CI (see .github/workflows/kedro-datasets.yml).
+# Picked up automatically since lychee's default --config value is "lychee.toml".
+
+# Overall cap on concurrent network requests.
+max_concurrency = 12
+
+# Cap on simultaneous requests to any single host, plus a minimum gap between
+# them. Documentation sites like docs.kedro.org and readthedocs.io are linked
+# from nearly every dataset's docstring, so without this they get hit with
+# dozens of concurrent requests and start rate-limiting (HTTP 429) almost
+# immediately, which is the main reason link checks used to be slow.
+host_concurrency = 4
+host_request_interval = "250ms"
+
+# Treat 429 as an accepted response: it means "you're being throttled", not
+# "this link is broken". Accepting it outright avoids lychee's retry/backoff
+# logic, which otherwise re-requests each rate-limited link multiple times
+# and waits between attempts.
+accept = ["100..=103", "200..=299", "429"]
+
+# docs.kedro.org accounts for the vast majority of rate-limit responses, so
+# throttle it further still.
+[hosts."docs.kedro.org"]
+concurrency = 2
+request_interval = "500ms"

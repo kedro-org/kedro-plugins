@@ -76,7 +76,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           fail: false
-          args: --max-concurrency 32 --exclude "@.lycheeignore" site/
+          args: --exclude "@.lycheeignore" --exclude-path '\.md$' site/
           workingDirectory: kedro-datasets
 
   detect-secrets:

@@ -77,7 +77,7 @@ jobs:
         with:
           fail: false
           args: >
-            --extensions py,yml,md
+            --extensions py,yml,md,html
             --exclude-path 'site/'
             --exclude-path '(^|/)tests/'
             .

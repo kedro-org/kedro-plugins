@@ -76,7 +76,11 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           fail: false
-          args: --exclude "@.lycheeignore" --exclude-path '\.md$' site/
+          args: >
+            --extensions py,yml,md
+            --exclude-path 'site/'
+            --exclude-path '(^|/)tests/'
+            .
           workingDirectory: kedro-datasets
 
   detect-secrets:

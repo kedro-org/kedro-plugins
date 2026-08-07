@@ -18,6 +18,16 @@ host_request_interval = "250ms"
 # and waits between attempts.
 accept = ["100..=103", "200..=299", "429"]
 
+# We scan raw .py source, so placeholder/example values inside docstring code
+# samples (credentials snippets, etc.) get picked up as if they were real
+# links. Skip loopback addresses (localhost:*, 127.0.0.1:*) and known fake
+# hostnames used in examples.
+exclude_loopback = true
+exclude = [
+    '^https?://custom\.langfuse\.com',
+    '^https?://[\w-]+\.weaviate\.network',
+]
+
 # docs.kedro.org accounts for the vast majority of rate-limit responses, so
 # throttle it further still.
 [hosts."docs.kedro.org"]

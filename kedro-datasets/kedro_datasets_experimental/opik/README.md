@@ -1066,5 +1066,5 @@ def my_task(dataset_item: dict) -> dict:
 - **Opik Documentation**: [Opik Platform](https://www.comet.com/docs/opik/)
 - **Opik Tracing**: [Tracing overview](https://www.comet.com/docs/opik/tracing/advanced/log_traces)
 - **Opik Evaluation**: [Evaluation overview](https://www.comet.com/docs/opik/evaluation/overview)
-- **Kedro Documentation**: [Kedro Datasets](https://docs.kedro.org/en/stable/)
+- **Kedro Documentation**: [Kedro Datasets](https://docs.kedro.org/)
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)

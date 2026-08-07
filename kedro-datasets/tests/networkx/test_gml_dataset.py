@@ -58,6 +58,20 @@ class TestGMLDataset:
         assert gml_dataset._fs_open_args_load == {"mode": "rb"}
         assert gml_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_graph_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.gml"
+        dataset = GMLDataset(
+            filepath=filepath,
+            load_args={"destringizer": int},
+            save_args={"stringizer": str},
+        )
+
+        dataset.save(dummy_graph_data)
+        reloaded = dataset.load()
+
+        assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+
     def test_load_missing_file(self, gml_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from dataset kedro_datasets.networkx.gml_dataset.GMLDataset\(.*\)"

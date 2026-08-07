@@ -55,6 +55,16 @@ class TestSVMLightDataset:
         svm_dataset.save(dummy_data)
         assert svm_dataset.exists()
 
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that an ``os.PathLike`` filepath is supported."""
+        filepath = tmp_path / "test.svm"
+        dataset = SVMLightDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        reloaded_features, reloaded_label = dataset.load()
+        original_features, original_label = dummy_data
+        assert (original_features == reloaded_features).all()
+        assert (original_label == reloaded_label).all()
+
     @pytest.mark.parametrize(
         "save_args", [{"zero_based": False, "comment": "comment"}], indirect=True
     )

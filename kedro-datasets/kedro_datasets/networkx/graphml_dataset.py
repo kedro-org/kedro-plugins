@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS). NetworkX is used to create GraphML data.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -49,7 +50,7 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -61,6 +62,7 @@ class GraphMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
 
         Args:
             filepath: Filepath in POSIX format to the NetworkX GraphML file.
+                Can be a string or a PathLike object.
             load_args: Arguments passed on to ``networkx.read_graphml``.
                 See the details in
                 https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.graphml.read_graphml.html

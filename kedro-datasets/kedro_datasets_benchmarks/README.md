@@ -1,6 +1,6 @@
 # Kedro-Datasets Benchmarks
 
-This directory contains performance benchmarks for `kedro-datasets` using [airspeed velocity (asv)](https://asv.readthedocs.io/).
+This directory contains performance benchmarks for `kedro-datasets` using [airspeed velocity (asv)](https://asv.readthedocs.io/en/latest/).
 
 ## Running Benchmarks in the Monorepo
 

@@ -578,7 +578,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Removed Dataset classes ending with "DataSet", use the "Dataset" spelling instead.
 - Removed support for Python 3.7 and 3.8.
-- Added [databricks-connect>=13.0](https://docs.databricks.com/en/dev-tools/databricks-connect-ref.html) support for Spark- and Databricks-based datasets.
+- Added [databricks-connect>=13.0](https://docs.databricks.com/aws/en/dev-tools/databricks-connect) support for Spark- and Databricks-based datasets.
 - Bumped `s3fs` to latest calendar-versioned release.
 - `PartitionedDataset` and `IncrementalDataset` now both support versioning of the underlying dataset.
 
@@ -605,7 +605,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 | Type                       | Description                                                            | Location                |
 | -------------------------- | ---------------------------------------------------------------------- | ----------------------- |
-| `polars.LazyPolarsDataset` | A `LazyPolarsDataset` using [polars](https://www.pola.rs/)'s Lazy API. | `kedro_datasets.polars` |
+| `polars.LazyPolarsDataset` | A `LazyPolarsDataset` using [polars](https://pola.rs/)'s Lazy API. | `kedro_datasets.polars` |
 
 - Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
 - Renamed `polars.GenericDataSet` to `polars.EagerPolarsDataset` to better reflect the difference between the two dataset classes.
@@ -644,7 +644,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 | Type                    | Description                                                                                                                | Location                |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://www.pola.rs/), a lightning fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
+| `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://pola.rs/), a lightning fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 
 ## Bug fixes and other changes
 
@@ -797,8 +797,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 | Type                             | Description                                                                                                           | Location                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://www.pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars`    |
-| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/data-cloud/snowpark/) DataFrames from tables in Snowflake.          | `kedro_datasets.snowflake` |
+| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars`    |
+| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/product/features/snowpark/) DataFrames from tables in Snowflake.          | `kedro_datasets.snowflake` |
 
 ## Bug fixes and other changes
 
@@ -823,7 +823,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 First official release of Kedro-Datasets.
 
-Datasets are Kedro’s way of dealing with input and output in a data and machine-learning pipeline. [Kedro supports numerous datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html) out of the box to allow you to process different data formats including Pandas, Plotly, Spark and more.
+Datasets are Kedro’s way of dealing with input and output in a data and machine-learning pipeline. [Kedro supports numerous datasets](https://docs.kedro.org/projects/kedro-datasets/) out of the box to allow you to process different data formats including Pandas, Plotly, Spark and more.
 
 The datasets have always been part of the core Kedro Framework project inside `kedro.extras`. In Kedro `0.19.0`, we will remove datasets from Kedro to reduce breaking changes associated with dataset dependencies. Instead, users will need to use the datasets from the `kedro-datasets` repository instead.
 

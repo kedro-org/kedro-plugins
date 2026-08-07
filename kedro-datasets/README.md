@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro-plugins/blob/main/LICENSE.md)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://pypi.org/project/kedro-datasets/)
 [![PyPI Version](https://badge.fury.io/py/kedro-datasets.svg)](https://pypi.org/project/kedro-datasets/)
-[![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/psf/black)
 
 Welcome to `kedro_datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataset` implementations powering Kedro's DataCatalog created by QuantumBlack and external contributors.
 
@@ -47,12 +47,12 @@ We support a range of data connectors, including CSV, Excel, Parquet, Feather, H
 
 These data connectors are supported with the APIs of `pandas`, `spark`, `networkx`, `matplotlib`, `yaml` and more.
 
-[The Data Catalog](https://docs.kedro.org/en/stable/data/data_catalog.html) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
+[The Data Catalog](https://docs.kedro.org/en/stable/catalog-data/data_catalog/) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
 
-Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets.html).
+Here is a full list of [supported data connectors and APIs](https://docs.kedro.org/projects/kedro-datasets/).
 
 ## How can I create my own `AbstractDataset` implementation?
-Take a look at our [instructions on how to create your own `AbstractDataset` implementation](https://docs.kedro.org/en/stable/data/how_to_create_a_custom_dataset.html).
+Take a look at our [instructions on how to create your own `AbstractDataset` implementation](https://docs.kedro.org/en/stable/extend/how_to_create_a_custom_dataset/).
 
 ## Can I contribute?
 

@@ -153,6 +153,14 @@ class TestGenericDataset:
         assert geojson_dataset._fs_open_args_load == {}
         assert geojson_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.geojson"
+        dataset = GenericDataset(filepath=filepath)
+        dataset.save(dummy_dataframe)
+        reloaded_df = dataset.load()
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
     @pytest.mark.parametrize("geojson_dataset", [{"index": False}], indirect=True)
     def test_load_missing_file(self, geojson_dataset):
         """Check the error while trying to load from missing source."""

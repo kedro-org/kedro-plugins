@@ -132,14 +132,16 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         }
 
     def load(self) -> dd.DataFrame:
+        filepath = os.fspath(self._filepath)
         return dd.read_parquet(
-            self._filepath, storage_options=self.fs_args, **self._load_args
+            filepath, storage_options=self.fs_args, **self._load_args
         )
 
     def save(self, data: dd.DataFrame) -> None:
         self._process_schema()
+        filepath = os.fspath(self._filepath)
         data.to_parquet(
-            path=self._filepath, storage_options=self.fs_args, **self._save_args
+            path=filepath, storage_options=self.fs_args, **self._save_args
         )
 
     def _process_schema(self) -> None:
@@ -193,6 +195,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             self._save_args["schema"] = triad.Schema(schema).pyarrow_schema
 
     def _exists(self) -> bool:
-        protocol = get_protocol_and_path(self._filepath)[0]
+        filepath = os.fspath(self._filepath)
+        protocol = get_protocol_and_path(filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
-        return file_system.exists(self._filepath)
+        return file_system.exists(filepath)

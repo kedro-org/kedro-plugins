@@ -140,9 +140,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     def save(self, data: dd.DataFrame) -> None:
         self._process_schema()
         filepath = os.fspath(self._filepath)
-        data.to_parquet(
-            path=filepath, storage_options=self.fs_args, **self._save_args
-        )
+        data.to_parquet(path=filepath, storage_options=self.fs_args, **self._save_args)
 
     def _process_schema(self) -> None:
         """This method processes the schema in the catalog.yml or the API, if provided.

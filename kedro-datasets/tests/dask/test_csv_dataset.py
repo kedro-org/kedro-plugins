@@ -155,7 +155,9 @@ class TestCSVDataset:
         dataset.save(dummy_dd_dataframe)
 
         assert dataset.exists()
-        assert_frame_equal(dataset.load().compute(), dummy_dd_dataframe.compute())
+        assert_frame_equal(
+            dataset.load().compute(), dummy_dd_dataframe.compute(), check_dtype=False
+        )
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True

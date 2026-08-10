@@ -108,9 +108,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
 
     def load(self) -> dd.DataFrame:
         filepath = os.fspath(self._filepath)
-        return dd.read_csv(
-            filepath, storage_options=self.fs_args, **self._load_args
-        )
+        return dd.read_csv(filepath, storage_options=self.fs_args, **self._load_args)
 
     def save(self, data: dd.DataFrame) -> None:
         filepath = os.fspath(self._filepath)

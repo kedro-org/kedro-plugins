@@ -159,6 +159,14 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 " API"
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
+
+        # Prefer path-based I/O for local files when no custom open args are needed.
+        # Passing a Python file object can trigger Polars' "found a filename"
+        # UserWarning and prevents path-aware optimisations (see #789). This matches
+        # LazyPolarsDataset / polars.CSVDataset local load behaviour.
+        if self._protocol == "file" and not self._fs_open_args_load:
+            return load_method(load_path, **self._load_args)
+
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return load_method(fs_file, **self._load_args)
 

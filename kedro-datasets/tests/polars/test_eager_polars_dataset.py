@@ -1,4 +1,5 @@
 import inspect
+import warnings
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -205,6 +206,59 @@ class TestEagerExcelDataset:
         dataset = EagerPolarsDataset(filepath=filepath, file_format="parquet")
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
+
+
+class TestEagerPolarsDatasetLocalLoad:
+    """Regression coverage for #789: local loads should use path-based I/O."""
+
+    @pytest.mark.parametrize("file_format", ["csv", "parquet"])
+    def test_local_load_uses_path_not_file_object(
+        self, tmp_path, dummy_dataframe, file_format, mocker
+    ):
+        """Local loads must pass a path string to Polars, not an fsspec file object.
+
+        Opening via ``fs.open`` and handing Polars a file-like with a ``.name`` can
+        emit ``UserWarning: Polars found a filename`` and blocks path-aware features.
+        """
+        filepath = tmp_path / f"test.{file_format}"
+        dataset = EagerPolarsDataset(
+            filepath=filepath.as_posix(),
+            file_format=file_format,
+        )
+        dataset.save(dummy_dataframe)
+
+        open_spy = mocker.spy(dataset._fs, "open")
+        with warnings.catch_warnings(record=True) as recorded:
+            warnings.simplefilter("always")
+            reloaded = dataset.load()
+
+        open_spy.assert_not_called()
+        filename_warnings = [
+            w
+            for w in recorded
+            if issubclass(w.category, UserWarning)
+            and "filename" in str(w.message).lower()
+        ]
+        assert filename_warnings == []
+        assert_frame_equal(dummy_dataframe, reloaded)
+
+    def test_custom_open_args_load_still_uses_filesystem(
+        self, tmp_path, dummy_dataframe, mocker
+    ):
+        """Custom ``fs_args.open_args_load`` must keep fsspec ``open`` behaviour."""
+        filepath = tmp_path / "test.csv"
+        dataset = EagerPolarsDataset(
+            filepath=filepath.as_posix(),
+            file_format="csv",
+            fs_args={"open_args_load": {"mode": "rb"}},
+        )
+        dataset.save(dummy_dataframe)
+
+        open_spy = mocker.spy(dataset._fs, "open")
+        reloaded = dataset.load()
+
+        open_spy.assert_called()
+        assert_frame_equal(dummy_dataframe, reloaded)
 
 
 class TestEagerParquetDatasetVersioned:

@@ -4,7 +4,10 @@
 ## Breaking changes
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes
+- Fixed `polars.EagerPolarsDataset` local loads to pass a path string to Polars instead of an fsspec file object, avoiding the "Polars found a filename" `UserWarning` and aligning with `LazyPolarsDataset` / `polars.CSVDataset` (#789).
 ## Community contributions
+- [Tanmay Singh](https://github.com/tannnmayy)
+
 
 # Release 9.6.0
 

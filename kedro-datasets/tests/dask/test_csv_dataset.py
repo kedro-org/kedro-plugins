@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from kedro.io.core import DatasetError
 from moto import mock_aws
+from pandas.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro_datasets.dask import CSVDataset
@@ -145,6 +146,16 @@ class TestCSVDataset:
         assert dataset.exists()
         loaded_data = dataset.load()
         dummy_dd_dataframe.compute().equals(loaded_data.compute())
+
+    def test_save_load_path_object(self, tmp_path, dummy_dd_dataframe):
+        """Test saving and loading with a pathlib.Path filepath."""
+        file_path = tmp_path / "some" / "dir" / FILE_NAME
+        dataset = CSVDataset(filepath=file_path)
+
+        dataset.save(dummy_dd_dataframe)
+
+        assert dataset.exists()
+        assert_frame_equal(dataset.load().compute(), dummy_dd_dataframe.compute())
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True

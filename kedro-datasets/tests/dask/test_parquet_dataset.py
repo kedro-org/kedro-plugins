@@ -142,6 +142,16 @@ class TestParquetDataset:
         loaded_data = dataset.load()
         dummy_dd_dataframe.compute().equals(loaded_data.compute())
 
+    def test_save_load_path_object(self, tmp_path, dummy_dd_dataframe):
+        """Test saving and loading with a pathlib.Path filepath."""
+        file_path = tmp_path / "some" / "dir" / FILE_NAME
+        dataset = ParquetDataset(filepath=file_path)
+
+        dataset.save(dummy_dd_dataframe)
+
+        assert dataset.exists()
+        assert_frame_equal(dataset.load().compute(), dummy_dd_dataframe.compute())
+
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )

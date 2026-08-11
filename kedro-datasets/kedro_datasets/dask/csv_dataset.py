@@ -107,19 +107,18 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         }
 
     def load(self) -> dd.DataFrame:
-        filepath = os.fspath(self._filepath)
-        return dd.read_csv(filepath, storage_options=self.fs_args, **self._load_args)
+        return dd.read_csv(
+            self._filepath, storage_options=self.fs_args, **self._load_args
+        )
 
     def save(self, data: dd.DataFrame) -> None:
-        filepath = os.fspath(self._filepath)
-        data.to_csv(filepath, storage_options=self.fs_args, **self._save_args)
+        data.to_csv(self._filepath, storage_options=self.fs_args, **self._save_args)
 
     def _exists(self) -> bool:
-        filepath = os.fspath(self._filepath)
-        protocol = get_protocol_and_path(filepath)[0]
+        protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         try:
-            files = file_system.glob(filepath)
+            files = file_system.glob(self._filepath)
         except FileNotFoundError:
             return False
         return bool(files)

@@ -193,6 +193,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
             self._save_args["schema"] = triad.Schema(schema).pyarrow_schema
 
     def _exists(self) -> bool:
-        protocol = get_protocol_and_path(self._filepath)[0]
+        filepath = os.fspath(self._filepath)
+        protocol = get_protocol_and_path(filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
-        return file_system.exists(self._filepath)
+        return file_system.exists(filepath)

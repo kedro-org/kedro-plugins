@@ -92,6 +92,18 @@ class TestSparkDatasetV2Basic:
         assert loaded_df.count() == sample_spark_df.count()
         assert set(loaded_df.columns) == set(sample_spark_df.columns)
 
+    def test_pathlike_filepath(self, tmp_path, sample_spark_df):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.parquet"
+        dataset = SparkDatasetV2(filepath=filepath)
+
+        dataset.save(sample_spark_df)
+        assert Path(filepath).exists()
+
+        loaded_df = dataset.load()
+        assert loaded_df.count() == sample_spark_df.count()
+        assert set(loaded_df.columns) == set(sample_spark_df.columns)
+
     def test_load_save_csv(self, tmp_path, sample_spark_df):
         """Test load and save with CSV format."""
         filepath = str(tmp_path / "test.csv")

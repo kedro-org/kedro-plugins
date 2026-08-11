@@ -545,6 +545,31 @@ class TestSparkDatasetV2CloudStorage:
         # Verify s3a:// normalization
         assert dataset._spark_path.startswith("s3a://")
 
+    @pytest.mark.parametrize("protocol", ["s3", "s3a", "s3n"])
+    def test_s3_glob_bypasses_listing_cache(self, mock_s3_filesystem, protocol):
+        """Test that S3 globbing refreshes the listing cache.
+
+        Without ``refresh=True``, a versioned dataset can resolve a stale
+        version from the s3fs directory listing cache.
+        """
+        dataset = SparkDatasetV2(
+            filepath=f"{protocol}://bucket/data.parquet", version=Version(None, None)
+        )
+
+        dataset._glob_function("bucket/data.parquet/*/data.parquet")
+
+        mock_s3_filesystem.glob.assert_called_once_with(
+            "bucket/data.parquet/*/data.parquet", refresh=True
+        )
+
+    def test_non_s3_glob_does_not_pass_refresh(self, mock_s3_filesystem):
+        """Test that ``refresh`` is not passed to filesystems that reject it."""
+        dataset = SparkDatasetV2(filepath="gs://bucket/data.parquet")
+
+        dataset._glob_function("bucket/data.parquet")
+
+        mock_s3_filesystem.glob.assert_called_once_with("bucket/data.parquet")
+
     def test_gcs_handling(self, mock_s3_filesystem):
         """Test GCS handling."""
         dataset = SparkDatasetV2(

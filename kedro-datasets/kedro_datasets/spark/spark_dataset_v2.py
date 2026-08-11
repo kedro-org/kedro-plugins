@@ -363,6 +363,12 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
         # Regular fsspec for everything else
         fs = get_spark_filesystem(protocol, credentials)
+
+        if protocol in ("s3", "s3a", "s3n"):
+            # Bypass the s3fs listing cache so versioned datasets resolve the
+            # latest version rather than a stale directory listing.
+            return fs.exists, partial(fs.glob, refresh=True)
+
         return fs.exists, fs.glob
 
     def _handle_delta_format(self) -> None:

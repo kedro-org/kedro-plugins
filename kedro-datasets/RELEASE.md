@@ -4,6 +4,8 @@
 ## Breaking changes
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes
+- Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
+
 ## Community contributions
 
 # Release 9.6.0

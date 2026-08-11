@@ -2,6 +2,7 @@
 
 import importlib
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -59,6 +60,31 @@ def pickle_dataset(mocker, key, backend, load_args, save_args, redis_args):
 
 
 class TestPickleDataset:
+    def test_pathlike_key(
+        self,
+        mocker,
+        backend,
+        dummy_object,
+        serialised_dummy_object,
+    ):
+        """Test that os.PathLike keys are normalized for Redis operations."""
+        key = Path("namespace") / "key"
+        redis_db = mocker.MagicMock()
+        redis_db.exists.return_value = True
+        redis_db.get.return_value = serialised_dummy_object
+        mocker.patch("redis.StrictRedis.from_url", return_value=redis_db)
+
+        dataset = PickleDataset(key=key, backend=backend)
+        dataset.save(dummy_object)
+        loaded = dataset.load()
+
+        redis_key = str(key)
+        redis_db.set.assert_called_once_with(redis_key, serialised_dummy_object)
+        redis_db.exists.assert_called_once_with(redis_key)
+        redis_db.get.assert_called_once_with(redis_key)
+        assert_frame_equal(loaded, dummy_object)
+        assert dataset._describe()["key"] == redis_key
+
     @pytest.mark.parametrize(
         "key,backend,load_args,save_args",
         [

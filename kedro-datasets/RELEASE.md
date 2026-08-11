@@ -4,7 +4,9 @@
 ## Breaking changes
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes
+- Added `os.PathLike` support for `redis.PickleDataset` keys.
 ## Community contributions
+- [akira-in-tech](https://github.com/akira-in-tech)
 
 # Release 9.6.0
 

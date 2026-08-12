@@ -4,6 +4,7 @@ TensorFlow models.
 from __future__ import annotations
 
 import copy
+import os
 import tempfile
 from pathlib import PurePath, PurePosixPath
 from typing import Any
@@ -77,7 +78,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,

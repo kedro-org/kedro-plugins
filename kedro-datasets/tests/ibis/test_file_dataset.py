@@ -82,6 +82,18 @@ class TestFileDataset:
         reloaded = file_dataset.load()
         assert_frame_equal(dummy_table.execute(), reloaded.execute())
 
+    def test_pathlike_filepath(self, tmp_path, connection_config, dummy_table):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.csv"
+        dataset = FileDataset(
+            filepath=filepath,
+            file_format="csv",
+            connection=connection_config,
+        )
+        dataset.save(dummy_table)
+        reloaded = dataset.load()
+        assert_frame_equal(dummy_table.execute(), reloaded.execute())
+
     def test_save_and_load_parquet(
         self, filepath_parquet, connection_config, dummy_table
     ):

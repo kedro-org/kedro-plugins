@@ -144,7 +144,7 @@ class NetCDFDataset(AbstractVersionedDataset[xr.Dataset, xr.Dataset]):
         self._is_multifile = (
             True if "*" in str(PurePosixPath(self._filepath).stem) else False
         )
-        if self._is_multifile and version:
+        if self._is_multifile and self._version:
             raise DatasetError(
                 "Versioning is not supported for globbed multifile NetCDF datasets."
             )

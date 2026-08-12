@@ -2,7 +2,7 @@
 
 import importlib
 import pickle
-from pathlib import Path
+from pathlib import PureWindowsPath
 
 import numpy as np
 import pandas as pd
@@ -68,7 +68,7 @@ class TestPickleDataset:
         serialised_dummy_object,
     ):
         """Test that os.PathLike keys are normalized for Redis operations."""
-        key = Path("namespace") / "key"
+        key = PureWindowsPath("namespace") / "key"
         redis_db = mocker.MagicMock()
         redis_db.exists.return_value = True
         redis_db.get.return_value = serialised_dummy_object
@@ -78,7 +78,7 @@ class TestPickleDataset:
         dataset.save(dummy_object)
         loaded = dataset.load()
 
-        redis_key = str(key)
+        redis_key = "namespace/key"
         redis_db.set.assert_called_once_with(redis_key, serialised_dummy_object)
         redis_db.exists.assert_called_once_with(redis_key)
         redis_db.get.assert_called_once_with(redis_key)

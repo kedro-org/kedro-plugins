@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib
 import os
 from copy import deepcopy
+from pathlib import PurePath
 from typing import Any
 
 import redis
@@ -143,7 +144,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
         self._backend = backend
 
-        self._key = os.fspath(key) if isinstance(key, os.PathLike) else key
+        self._key = PurePath(key).as_posix() if isinstance(key, os.PathLike) else key
 
         self.metadata = metadata
 

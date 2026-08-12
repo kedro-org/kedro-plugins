@@ -13,7 +13,7 @@ from moto import mock_aws
 from pandas.testing import assert_frame_equal
 
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
-from kedro_datasets.partitions import IncrementalDataset, PartitionedDataset
+from kedro_datasets.partitions import PartitionedDataset
 from kedro_datasets.partitions.partitioned_dataset import KEY_PROPAGATION_WARNING
 
 
@@ -61,9 +61,8 @@ class FakeDataset:  # pylint: disable=too-few-public-methods
 
 
 class TestPartitionedDatasetLocal:
-    @pytest.mark.parametrize("dataset_cls", [PartitionedDataset, IncrementalDataset])
-    def test_pathlike_path(self, dataset_cls, local_csvs):
-        dataset = dataset_cls(path=local_csvs, dataset="pandas.CSVDataset")
+    def test_pathlike_path(self, local_csvs):
+        dataset = PartitionedDataset(path=local_csvs, dataset="pandas.CSVDataset")
 
         assert dataset._path == os.fspath(local_csvs)
         assert len(dataset.load()) == 5

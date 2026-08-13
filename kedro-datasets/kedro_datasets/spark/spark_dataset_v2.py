@@ -171,9 +171,6 @@ class SparkDatasetV2(AbstractVersionedDataset):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
-        # Normalise PathLike to string so helpers can call str methods
-        filepath = str(filepath)
-
         # Store original filepath for reference
         self._original_filepath = filepath
 
@@ -340,7 +337,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         }
 
     def _get_filesystem_ops(
-        self, protocol: str, filepath: str, credentials: dict[str, Any]
+        self, protocol: str, filepath: str | os.PathLike, credentials: dict[str, Any]
     ) -> tuple:
         """Get filesystem operations for exists and glob.
 

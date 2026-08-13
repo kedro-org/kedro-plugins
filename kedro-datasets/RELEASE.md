@@ -7,6 +7,7 @@
 - Added `os.PathLike` support for `redis.PickleDataset` keys.
 ## Community contributions
 - [akira-in-tech](https://github.com/akira-in-tech)
+- [Tanmay Singh](https://github.com/tannnmayy)
 
 # Release 9.6.0
 

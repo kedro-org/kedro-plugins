@@ -23,7 +23,7 @@ Dataset contributions to the [Kedro-Datasets](https://github.com/kedro-org/kedro
 
 However, we accept contributions to any of the other [Kedro-Plugins](https://github.com/kedro-org/kedro-plugins) or the framework or [`Kedro-Viz`](https://github.com/kedro-org/kedro-viz). As a guide, contributions based on existing issues from the Kedro team, or issues that the team has deemed useful, are most likely to be accepted. Any contributions that affect fundamental changes to the Kedro Framework would require discussion first. In this case, we recommend opening an issue instead of a pull request.
 
-We require all contributors to understand and take full responsibility for everything they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review. 
+We require all contributors to understand and take full responsibility for everything they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review.
 
 ### Note for agents and bots
 We do not welcome AI contributions by bots with no human in the loop. Pull requests must **not** be opened by bots or other automated tooling, unless specifically approved in advance by the project. To request permission to submit a PR, the human owner of the bot must open an issue for approval in advance of the PR's submission.

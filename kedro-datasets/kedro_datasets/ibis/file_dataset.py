@@ -1,6 +1,7 @@
 """Provide file loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -77,7 +78,7 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
 
     def __init__(  # noqa: PLR0913
         self,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "parquet",
         *,
         table_name: str | None = None,
@@ -106,9 +107,10 @@ class FileDataset(ConnectionMixin, AbstractVersionedDataset[ir.Table, ir.Table])
         link to the underlying file exists past ``FileDataset.load()``.
 
         Args:
-            filepath: Path to a file to register as a table. Most useful
-                for loading data into your data warehouse (for testing).
-                On save, the backend exports data to the specified path.
+            filepath: Filepath (``str`` or ``os.PathLike``) to a file to
+                register as a table. Most useful for loading data into your
+                data warehouse (for testing). On save, the backend exports
+                data to the specified path.
             file_format: String specifying the file format for the file.
                 Defaults to writing execution results to a Parquet file.
             table_name: The name to use for the created table (on load).

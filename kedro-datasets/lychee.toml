@@ -1,0 +1,18 @@
+# Config for the `lychee` link checker used in CI (see .github/workflows/kedro-datasets.yml).
+# Picked up automatically since lychee's default --config value is "lychee.toml".
+
+# Treat 429 as an accepted response: it means "you're being throttled", not
+# "this link is broken". Accepting it outright avoids lychee's retry/backoff
+# logic, which otherwise re-requests each rate-limited link multiple times
+# and waits between attempts.
+accept = ["100..=103", "200..=299", "429"]
+
+# We scan raw .py source, so placeholder/example values inside docstring code
+# samples (credentials snippets, etc.) get picked up as if they were real
+# links. Skip loopback addresses (localhost:*, 127.0.0.1:*) and known fake
+# hostnames used in examples.
+exclude_loopback = true
+exclude = [
+    '^https?://custom\.langfuse\.com',
+    '^https?://[\w-]+\.weaviate\.network',
+]

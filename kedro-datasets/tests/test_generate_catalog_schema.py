@@ -42,6 +42,7 @@ SAMPLE_SPEC = generator.DatasetSpec(
 def test_json_type_for_known_nullable_and_unknown_annotations():
     assert generator._json_type_for("str") == "string"
     assert generator._json_type_for("pathlib.Path") == "string"
+    assert generator._json_type_for("os.PathLike[str]") == "string"
     assert generator._json_type_for("Version") == "object"
     assert generator._json_type_for("dict[str, Any] | None") == ["object", "null"]
     assert generator._json_type_for("str | dict[str, Any]") == ["string", "object"]
@@ -105,7 +106,7 @@ def test_submodule_attrs_for_reads_lazy_exports(tmp_path, monkeypatch):
         "lazy.attach(__name__, submodules=[])\n"
         "__getattr__, __dir__, __all__ = lazy.attach(\n"
         "    __name__,\n"
-        "    submod_attrs={'sample_dataset': ['SampleDataset']},\n"
+        "    submod_attrs={**{}, 'sample_dataset': ['SampleDataset']},\n"
         ")\n",
         encoding="utf-8",
     )
@@ -297,6 +298,10 @@ def test_schema_io_paths(monkeypatch, tmp_path):
     generator.write_schema()
     assert schema_path.read_text(encoding="utf-8") == '{\n  "type": "object"\n}\n'
     assert generator.check_schema() is True
+
+
+def test_committed_schema_is_current():
+    assert generator.check_schema()
 
 
 def test_schema_path_points_to_static_schema_file():

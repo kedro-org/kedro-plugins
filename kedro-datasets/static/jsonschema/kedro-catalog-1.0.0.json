@@ -689,7 +689,7 @@
             "properties": {
               "filepath": {
                 "type": "string",
-                "description": "Path to a file to register as a table. Most useful\nfor loading data into your data warehouse (for testing).\nOn save, the backend exports data to the specified path."
+                "description": "Filepath (``str`` or ``os.PathLike``) to a file to\nregister as a table. Most useful for loading data into your\ndata warehouse (for testing). On save, the backend exports\ndata to the specified path."
               },
               "file_format": {
                 "type": "string",
@@ -3067,17 +3067,19 @@
           },
           "then": {
             "required": [
-              "url",
               "table"
             ],
             "properties": {
-              "url": {
-                "type": "string",
-                "description": "A JDBC URL of the form ``jdbc:subprotocol:subname``."
-              },
               "table": {
                 "type": "string",
                 "description": "The name of the table to load or save data to."
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A JDBC URL of the form ``jdbc:subprotocol:subname``. When not\nprovided, the URL can be supplied as ``url`` in ``credentials``\n(mirrors the ``pandas.SQLTableDataset`` ``credentials.con``\nconvention for keeping connection endpoints out of\n``catalog.yml``)."
               },
               "credentials": {
                 "type": [
@@ -3167,7 +3169,7 @@
             "properties": {
               "filepath": {
                 "type": "string",
-                "description": "Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``."
+                "description": "Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nCan be a string or a PathLike object."
               },
               "load_args": {
                 "type": [

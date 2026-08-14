@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -88,6 +88,21 @@ class TestSparkDatasetV2Basic:
         assert Path(filepath).exists()
 
         # Load
+        loaded_df = dataset.load()
+        assert loaded_df.count() == sample_spark_df.count()
+        assert set(loaded_df.columns) == set(sample_spark_df.columns)
+
+    def test_pathlike_filepath(self, tmp_path, sample_spark_df):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.parquet"
+        dataset = SparkDatasetV2(filepath=filepath)
+
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == filepath.as_posix()
+
+        dataset.save(sample_spark_df)
+        assert Path(filepath).exists()
+
         loaded_df = dataset.load()
         assert loaded_df.count() == sample_spark_df.count()
         assert set(loaded_df.columns) == set(sample_spark_df.columns)

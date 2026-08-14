@@ -5,6 +5,7 @@
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes
 ## Community contributions
+- [Tanmay Singh](https://github.com/tannnmayy)
 
 # Release 9.6.0
 

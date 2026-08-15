@@ -110,15 +110,16 @@ def deployed_on_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def parse_spark_filepath(filepath: str) -> tuple[str, str]:
+def parse_spark_filepath(filepath: str | os.PathLike) -> tuple[str, str]:
     """Parse filepath handling special cases like DBFS and Unity Catalog.
 
     Args:
-        filepath: Path to parse.
+        filepath: Path to parse (``str`` or ``os.PathLike``).
 
     Returns:
         Tuple of (protocol, path).
     """
+    filepath = os.fspath(filepath)
     # Handle DBFS paths with /dbfs/ prefix
     if filepath.startswith("/dbfs/"):
         # /dbfs/path -> dbfs protocol with /path
@@ -147,12 +148,13 @@ def parse_spark_filepath(filepath: str) -> tuple[str, str]:
     return protocol, path
 
 
-def validate_databricks_path(filepath: str) -> None:
+def validate_databricks_path(filepath: str | os.PathLike) -> None:
     """Warn about potential Databricks path issues.
 
     Args:
         filepath: Path to validate.
     """
+    filepath = os.fspath(filepath)
     if not deployed_on_databricks():
         return
 

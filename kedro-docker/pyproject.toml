@@ -33,7 +33,7 @@ test = [
     "pytest-mock",
     "pytest-xdist[psutil]>=3.0,<4.0",
     "PyYAML>=5.1, <7.0",
-    "wheel==0.32.2",
+    "wheel==0.38.1",
 ]
 
 lint = [

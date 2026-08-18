@@ -30,7 +30,6 @@ test = [
     "pytest-cov",
     "pytest-mock",
     "pytest-xdist[psutil]>=3.0,<4.0",
-    "PyYAML==5.4", # Temporary fix, to be removed
     "wheel",
 ]
 

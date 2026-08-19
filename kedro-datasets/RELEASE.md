@@ -5,8 +5,10 @@
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
+- Added `os.PathLike` support for `redis.PickleDataset` keys.
 
 ## Community contributions
+- [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 
 # Release 9.6.0

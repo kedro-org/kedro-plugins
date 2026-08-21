@@ -12,6 +12,7 @@
               "partitions.IncrementalDataset",
               "partitions.PartitionedDataset",
               "api.APIDataset",
+              "api.PaginatedAPIDataset",
               "biosequence.BioSequenceDataset",
               "dask.ParquetDataset",
               "email.EmailMessageDataset",
@@ -46,6 +47,68 @@
           }
         },
         "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "api.PaginatedAPIDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "url",
+                "pagination"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "The first API URL endpoint."
+                },
+                "load_args": {
+                  "type": "object",
+                  "description": "Arguments passed to requests for every page."
+                },
+                "pagination": {
+                  "type": "object",
+                  "required": [
+                    "next_url_path",
+                    "results_path"
+                  ],
+                  "properties": {
+                    "next_url_path": {
+                      "type": "string",
+                      "description": "Dotted path to an absolute HTTP(S) next-page URL."
+                    },
+                    "results_path": {
+                      "type": "string",
+                      "description": "Dotted path to the list of items in each JSON response."
+                    },
+                    "max_pages": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "Maximum number of pages to request; defaults to 1000."
+                    }
+                  }
+                },
+                "credentials": {
+                  "type": [
+                    "array",
+                    "object",
+                    "null"
+                  ],
+                  "description": "Authentication credentials passed to every request."
+                },
+                "metadata": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "Arbitrary metadata ignored by Kedro."
+                }
+              }
+            }
+          },
           {
             "if": {
               "properties": {

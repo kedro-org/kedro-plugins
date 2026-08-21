@@ -1,4 +1,4 @@
-"""``APIDataset`` loads the data from HTTP(S) APIs.
+"""``APIDataset`` and ``PaginatedAPIDataset`` load data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 
@@ -8,6 +8,7 @@ import json as json_  # make pylint happy
 import math
 from copy import deepcopy
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 from kedro.io.core import AbstractDataset, DatasetError, parse_dataset_definition
@@ -270,9 +271,15 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
         return result
 
-    def _execute_request(self, session: Session) -> requests.Response:
+    def _execute_request(
+        self,
+        session: Session,
+        request_args: dict[str, Any] | None = None,
+    ) -> requests.Response:
         try:
-            response = session.request(**self._request_args)
+            response = session.request(
+                **(self._request_args if request_args is None else request_args)
+            )
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
             raise DatasetError("Failed to fetch data", exc) from exc
@@ -375,3 +382,212 @@ class APIDataset(AbstractDataset[None, requests.Response]):
             response = self._execute_request(session)
 
         return response.ok
+
+
+class PaginatedAPIDataset(APIDataset):
+    """Load and combine list results from a JSON API with next-page links.
+
+    The API response must be a JSON object. ``pagination.next_url_path`` locates
+    an absolute HTTP(S) URL for the next page, and ``pagination.results_path``
+    locates the list of items in each response. Paths use dot-separated object
+    keys, for example ``meta.next``. Missing or null next-page values terminate
+    pagination. The collected lists are concatenated in request order and
+    returned from :meth:`load` as one list; response metadata is not retained.
+
+    Only next-link pagination is supported. Page-number, offset, cursor-token,
+    HTTP ``Link`` header, and top-level JSON-list conventions are not inferred.
+    ``max_pages`` defaults to 1000 and can be set in ``pagination`` to protect
+    against an API that keeps returning new links.
+
+    Example YAML configuration:
+
+    ```yaml
+    items:
+      type: api.PaginatedAPIDataset
+      url: https://example.com/api/items
+      load_args:
+        params:
+          page_size: 100
+        headers:
+          Authorization: Bearer ${runtime_params:api_token}
+        timeout: 30
+      pagination:
+        next_url_path: links.next
+        results_path: data.items
+        max_pages: 100
+    ```
+
+    The Python API accepts the same configuration:
+
+    >>> from kedro_datasets.api import PaginatedAPIDataset
+    >>> dataset = PaginatedAPIDataset(
+    ...     url="https://example.com/api/items",
+    ...     load_args={"params": {"page_size": 100}},
+    ...     pagination={"next_url_path": "links.next", "results_path": "data.items"},
+    ... )
+    >>> items = dataset.load()  # doctest: +SKIP
+
+    Authentication, headers, timeout, and other ``load_args`` are passed to
+    every request. Query parameters are sent on the initial request; a next
+    URL is treated as complete, so its own query string is used on later
+    requests instead of appending the initial parameters again.
+
+    Args:
+        url: The first API URL endpoint.
+        load_args: Additional arguments passed to ``requests`` for each page.
+        pagination: Mapping with ``next_url_path`` and ``results_path`` string
+            keys, plus an optional positive integer ``max_pages``. All keys are
+            required except ``max_pages``.
+        credentials: Authentication credentials passed to every request.
+        metadata: Arbitrary metadata ignored by Kedro.
+
+    Raises:
+        ValueError: If the pagination configuration or HTTP method is invalid.
+        DatasetError: If a request fails, a response has an invalid JSON shape,
+            a next link is malformed or repeated, or the page limit is reached.
+    """
+
+    DEFAULT_MAX_PAGES = 1000
+    _PAGINATION_KEYS = {"next_url_path", "results_path", "max_pages"}
+
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        url: str,
+        load_args: dict[str, Any] | None = None,
+        pagination: dict[str, Any],
+        credentials: tuple[str, str] | list[str] | AuthBase | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if not isinstance(pagination, dict):
+            raise ValueError("PaginatedAPIDataset requires a pagination mapping.")
+        if load_args is not None and load_args.get("method", "GET") != "GET":
+            raise ValueError("PaginatedAPIDataset only supports GET requests.")
+
+        unknown_keys = set(pagination) - self._PAGINATION_KEYS
+        if unknown_keys:
+            raise ValueError(
+                "PaginatedAPIDataset pagination contains unsupported keys: "
+                f"{sorted(unknown_keys)}."
+            )
+
+        next_url_path = pagination.get("next_url_path")
+        results_path = pagination.get("results_path")
+        if not isinstance(next_url_path, str) or not next_url_path:
+            raise ValueError(
+                "PaginatedAPIDataset pagination requires a non-empty "
+                "'next_url_path'."
+            )
+        if not isinstance(results_path, str) or not results_path:
+            raise ValueError(
+                "PaginatedAPIDataset pagination requires a non-empty " "'results_path'."
+            )
+
+        max_pages = pagination.get("max_pages", self.DEFAULT_MAX_PAGES)
+        if (
+            isinstance(max_pages, bool)
+            or not isinstance(max_pages, int)
+            or max_pages < 1
+        ):
+            raise ValueError(
+                "PaginatedAPIDataset pagination 'max_pages' must be a positive integer."
+            )
+
+        super().__init__(
+            url=url,
+            method="GET",
+            load_args=deepcopy(load_args) if load_args is not None else None,
+            credentials=credentials,
+            metadata=metadata,
+        )
+        self._next_url_path: str = next_url_path
+        self._results_path: str = results_path
+        self._max_pages: int = max_pages
+
+    def _describe(self) -> dict[str, Any]:
+        description = super()._describe()
+        description["pagination"] = {
+            "next_url_path": self._next_url_path,
+            "results_path": self._results_path,
+            "max_pages": self._max_pages,
+        }
+        return description
+
+    @staticmethod
+    def _get_path(data: Any, path: str) -> tuple[bool, Any]:
+        current = data
+        for key in path.split("."):
+            if not isinstance(current, dict) or key not in current:
+                return False, None
+            current = current[key]
+        return True, current
+
+    @staticmethod
+    def _validate_next_url(next_url: Any) -> str:
+        if not isinstance(next_url, str):
+            raise DatasetError(
+                "PaginatedAPIDataset received a next-page value that is not a URL."
+            )
+        parsed = urlparse(next_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise DatasetError(
+                "PaginatedAPIDataset received a malformed next-page URL: "
+                f"{next_url!r}. Expected an absolute HTTP(S) URL."
+            )
+        return next_url
+
+    def _load(self) -> list[Any]:
+        items: list[Any] = []
+        request_args = deepcopy(self._request_args)
+        requested_urls: set[str] = set()
+
+        with sessions.Session() as session:
+            while True:
+                page_url = request_args["url"]
+                requested_urls.add(page_url)
+
+                response = self._execute_request(session, request_args)
+                try:
+                    payload = response.json()
+                except ValueError as exc:
+                    raise DatasetError(
+                        "PaginatedAPIDataset expected each response to contain a JSON object."
+                    ) from exc
+
+                if not isinstance(payload, dict):
+                    raise DatasetError(
+                        "PaginatedAPIDataset expected each response to be a JSON object."
+                    )
+
+                results_found, page_items = self._get_path(payload, self._results_path)
+                if not results_found:
+                    raise DatasetError(
+                        "PaginatedAPIDataset response is missing results at "
+                        f"'{self._results_path}'."
+                    )
+                if not isinstance(page_items, list):
+                    raise DatasetError(
+                        "PaginatedAPIDataset expected results at "
+                        f"'{self._results_path}' to be a list."
+                    )
+                items.extend(page_items)
+
+                next_found, next_value = self._get_path(payload, self._next_url_path)
+                if not next_found or next_value is None or next_value == "":
+                    return items
+
+                next_url = self._validate_next_url(next_value)
+                if next_url in requested_urls:
+                    raise DatasetError(
+                        "PaginatedAPIDataset encountered a repeated next-page URL: "
+                        f"{next_url!r}. Pagination cannot terminate safely."
+                    )
+                if len(requested_urls) >= self._max_pages:
+                    raise DatasetError(
+                        "PaginatedAPIDataset exceeded the configured maximum of "
+                        f"{self._max_pages} pages."
+                    )
+
+                request_args = deepcopy(self._request_args)
+                request_args["url"] = next_url
+                request_args.pop("params", None)

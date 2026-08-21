@@ -33,6 +33,8 @@ Make sure to add the necessary files for the new dataset so that it shows up in 
 3. Create a markdown file for your dataset in the appropriate `pages/api` directory.
 4. Add your dataset's markdown file to the navigation in `mkdocs.yml`.
 
+After adding a dataset or changing its constructor signature or docstring, regenerate the catalog schema by running `python -m kedro_datasets._generate_catalog_schema` from the `kedro-datasets` directory.
+
 Below is a guide to help you understand the process of contributing a new dataset, whether it falls under the category of core or experimental datasets.
 
 ### Difference between core and experimental datasets

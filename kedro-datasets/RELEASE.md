@@ -1,6 +1,8 @@
 # Upcoming release
 
 ## Major features and improvements
+- Added source-based generation and CI validation for the Kedro catalog JSON schema.
+
 ## Breaking changes
 ## Breaking changes to experimental datasets
 ## Bug fixes and other changes

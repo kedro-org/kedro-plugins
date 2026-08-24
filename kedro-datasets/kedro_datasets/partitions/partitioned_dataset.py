@@ -4,6 +4,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -137,7 +138,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        path: str,
+        path: str | os.PathLike,
         dataset: str | type[AbstractDataset] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -151,7 +152,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         """Creates a new instance of ``PartitionedDataset``.
 
         Args:
-            path: Path to the folder containing partitioned data.
+            path: Path to the folder containing partitioned data. Accepts strings
+                and ``os.PathLike`` objects.
                 If path starts with the protocol (e.g., ``s3://``) then the
                 corresponding ``fsspec`` concrete filesystem implementation will
                 be used. If protocol is not specified,
@@ -200,7 +202,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         super().__init__()
 
-        self._path = path
+        self._path = os.fspath(path)
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]

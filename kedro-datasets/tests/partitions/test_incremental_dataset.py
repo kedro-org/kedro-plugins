@@ -65,6 +65,12 @@ def dummy_lt_func(value1: str, value2: str):
 
 
 class TestIncrementalDatasetLocal:
+    def test_pathlike_path(self, local_csvs):
+        dataset = IncrementalDataset(path=local_csvs, dataset=DATASET)
+
+        assert dataset._path == os.fspath(local_csvs)
+        assert len(dataset.load()) == 5
+
     def test_load_and_confirm(self, local_csvs, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         an IncrementalDataset"""

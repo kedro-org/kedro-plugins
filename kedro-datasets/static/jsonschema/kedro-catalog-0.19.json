@@ -88,6 +88,14 @@
                       "type": "integer",
                       "minimum": 1,
                       "description": "Maximum number of pages to request; defaults to 1000."
+                    },
+                    "allowed_hosts": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "description": "Exact additional host authorities allowed for next-page requests."
                     }
                   }
                 },
@@ -97,7 +105,7 @@
                     "object",
                     "null"
                   ],
-                  "description": "Authentication credentials passed to every request."
+                  "description": "Authentication credentials passed to every trusted request."
                 },
                 "metadata": {
                   "type": [

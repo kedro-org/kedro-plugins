@@ -8,7 +8,7 @@ import json as json_  # make pylint happy
 import math
 from copy import deepcopy
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 import requests
 from kedro.io.core import AbstractDataset, DatasetError, parse_dataset_definition
@@ -396,6 +396,11 @@ class PaginatedAPIDataset(APIDataset):
 
     Only next-link pagination is supported. Page-number, offset, cursor-token,
     HTTP ``Link`` header, and top-level JSON-list conventions are not inferred.
+    Pagination is restricted to the initial URL's host and port by default.
+    Additional exact host authorities can be supplied through
+    ``pagination.allowed_hosts``. Hostnames are case-insensitive, ports are
+    significant, and wildcard or suffix matching is not supported.
+
     ``max_pages`` defaults to 1000 and can be set in ``pagination`` to protect
     against an API that keeps returning new links.
 
@@ -405,11 +410,10 @@ class PaginatedAPIDataset(APIDataset):
     items:
       type: api.PaginatedAPIDataset
       url: https://example.com/api/items
+      credentials: api_credentials
       load_args:
         params:
           page_size: 100
-        headers:
-          Authorization: Bearer ${runtime_params:api_token}
         timeout: 30
       pagination:
         next_url_path: links.next
@@ -427,28 +431,36 @@ class PaginatedAPIDataset(APIDataset):
     ... )
     >>> items = dataset.load()  # doctest: +SKIP
 
-    Authentication, headers, timeout, and other ``load_args`` are passed to
-    every request. Query parameters are sent on the initial request; a next
-    URL is treated as complete, so its own query string is used on later
-    requests instead of appending the initial parameters again.
+    ``api_credentials`` should be defined in ``credentials.yml`` as the
+    username/password pair accepted by ``requests``. Authentication, headers,
+    timeout, and other ``load_args`` are passed to every trusted request. Query
+    parameters are sent on the initial request; a next URL is treated as
+    complete, so its own query string is used on later requests instead of
+    appending the initial parameters again.
 
     Args:
         url: The first API URL endpoint.
         load_args: Additional arguments passed to ``requests`` for each page.
         pagination: Mapping with ``next_url_path`` and ``results_path`` string
-            keys, plus an optional positive integer ``max_pages``. All keys are
-            required except ``max_pages``.
+            keys, plus optional positive integer ``max_pages`` and a list of
+            exact additional host authorities in ``allowed_hosts``.
         credentials: Authentication credentials passed to every request.
         metadata: Arbitrary metadata ignored by Kedro.
 
     Raises:
-        ValueError: If the pagination configuration or HTTP method is invalid.
+        ValueError: If the URL, pagination configuration, or HTTP method is invalid.
         DatasetError: If a request fails, a response has an invalid JSON shape,
-            a next link is malformed or repeated, or the page limit is reached.
+            a next link is malformed, untrusted, or repeated, or the page limit
+            is reached.
     """
 
     DEFAULT_MAX_PAGES = 1000
-    _PAGINATION_KEYS = {"next_url_path", "results_path", "max_pages"}
+    _PAGINATION_KEYS = {
+        "next_url_path",
+        "results_path",
+        "max_pages",
+        "allowed_hosts",
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -493,6 +505,24 @@ class PaginatedAPIDataset(APIDataset):
                 "PaginatedAPIDataset pagination 'max_pages' must be a positive integer."
             )
 
+        allowed_hosts = pagination.get("allowed_hosts", [])
+        if not isinstance(allowed_hosts, list) or any(
+            not isinstance(host, str) or not host for host in allowed_hosts
+        ):
+            raise ValueError(
+                "PaginatedAPIDataset pagination 'allowed_hosts' must be a list "
+                "of non-empty strings."
+            )
+
+        initial_url = self._parse_initial_url(url)
+        self._initial_scheme = initial_url.scheme.lower()
+        self._initial_authority = self._authority_from_parsed_url(initial_url)
+        self._allowed_hosts = list(allowed_hosts)
+        self._trusted_authorities = {
+            self._initial_authority,
+            *(self._normalise_host_entry(host) for host in self._allowed_hosts),
+        }
+
         super().__init__(
             url=url,
             method="GET",
@@ -504,12 +534,80 @@ class PaginatedAPIDataset(APIDataset):
         self._results_path: str = results_path
         self._max_pages: int = max_pages
 
+    @staticmethod
+    def _parse_initial_url(url: str) -> ParseResult:
+        if not isinstance(url, str):
+            raise ValueError("PaginatedAPIDataset requires a URL string.")
+
+        parsed = urlparse(url)
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+            raise ValueError(
+                "PaginatedAPIDataset requires an absolute HTTP(S) initial URL."
+            )
+        try:
+            hostname = parsed.hostname
+            parsed.port
+        except ValueError as exc:
+            raise ValueError(
+                "PaginatedAPIDataset requires a valid initial URL host and port."
+            ) from exc
+        if not hostname:
+            raise ValueError(
+                "PaginatedAPIDataset requires a valid initial URL host and port."
+            )
+        return parsed
+
+    @staticmethod
+    def _authority_from_parsed_url(parsed_url: ParseResult) -> tuple[str, int]:
+        try:
+            hostname = parsed_url.hostname
+            port = parsed_url.port
+        except ValueError as exc:
+            raise ValueError(
+                "PaginatedAPIDataset received an invalid URL port."
+            ) from exc
+
+        if not hostname:
+            raise ValueError("PaginatedAPIDataset received a URL without a hostname.")
+
+        if port is None:
+            port = 80 if parsed_url.scheme.lower() == "http" else 443
+        return hostname.lower(), port
+
+    def _normalise_host_entry(self, host: str) -> tuple[str, int]:
+        parsed = urlparse(f"//{host}")
+        if (
+            host != host.strip()
+            or not parsed.netloc
+            or parsed.netloc.endswith(":")
+            or parsed.path
+            or parsed.params
+            or parsed.query
+            or parsed.fragment
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            raise ValueError(
+                "PaginatedAPIDataset pagination 'allowed_hosts' entries must be "
+                "hostnames with optional ports."
+            )
+
+        parsed = parsed._replace(scheme=self._initial_scheme)
+        try:
+            return self._authority_from_parsed_url(parsed)
+        except ValueError as exc:
+            raise ValueError(
+                "PaginatedAPIDataset pagination 'allowed_hosts' entries must "
+                "contain valid hosts and ports."
+            ) from exc
+
     def _describe(self) -> dict[str, Any]:
         description = super()._describe()
         description["pagination"] = {
             "next_url_path": self._next_url_path,
             "results_path": self._results_path,
             "max_pages": self._max_pages,
+            "allowed_hosts": list(self._allowed_hosts),
         }
         return description
 
@@ -522,17 +620,34 @@ class PaginatedAPIDataset(APIDataset):
             current = current[key]
         return True, current
 
-    @staticmethod
-    def _validate_next_url(next_url: Any) -> str:
+    def _validate_next_url(self, next_url: Any) -> str:
         if not isinstance(next_url, str):
             raise DatasetError(
                 "PaginatedAPIDataset received a next-page value that is not a URL."
             )
+
         parsed = urlparse(next_url)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
             raise DatasetError(
-                "PaginatedAPIDataset received a malformed next-page URL: "
-                f"{next_url!r}. Expected an absolute HTTP(S) URL."
+                "PaginatedAPIDataset received a malformed next-page URL. "
+                "Expected an absolute HTTP(S) URL."
+            )
+        if parsed.scheme.lower() != self._initial_scheme:
+            raise DatasetError(
+                "PaginatedAPIDataset rejected a next-page URL with an unexpected scheme."
+            )
+
+        try:
+            authority = self._authority_from_parsed_url(parsed)
+        except ValueError as exc:
+            raise DatasetError(
+                "PaginatedAPIDataset received a next-page URL with an invalid host or port."
+            ) from exc
+
+        if authority not in self._trusted_authorities:
+            raise DatasetError(
+                "PaginatedAPIDataset rejected a next-page URL on an untrusted host. "
+                "Use pagination.allowed_hosts to explicitly allow additional hosts."
             )
         return next_url
 
@@ -579,8 +694,8 @@ class PaginatedAPIDataset(APIDataset):
                 next_url = self._validate_next_url(next_value)
                 if next_url in requested_urls:
                     raise DatasetError(
-                        "PaginatedAPIDataset encountered a repeated next-page URL: "
-                        f"{next_url!r}. Pagination cannot terminate safely."
+                        "PaginatedAPIDataset encountered a repeated next-page URL. "
+                        "Pagination cannot terminate safely."
                     )
                 if len(requested_urls) >= self._max_pages:
                     raise DatasetError(

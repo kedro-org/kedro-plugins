@@ -8,6 +8,7 @@ from kedro_datasets.api import PaginatedAPIDataset
 TEST_URL = "http://example.com/api/items"
 NEXT_URL = "http://example.com/api/items?page=2"
 LAST_URL = "http://example.com/api/items?page=3"
+OTHER_URL = "http://other.example/api/items?page=2"
 
 
 def make_dataset(**pagination):
@@ -86,6 +87,99 @@ def test_load_propagates_request_options_and_does_not_mutate_load_args(requests_
     assert second_request.qs == {"page": ["2"]}
 
 
+def test_different_host_is_rejected_before_request(requests_mock):
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": OTHER_URL}},
+    )
+
+    with pytest.raises(DatasetError, match="untrusted host"):
+        PaginatedAPIDataset(
+            url=TEST_URL,
+            load_args={
+                "headers": {"X-Api-Key": "secret-key"},
+                "auth": ("user", "password"),
+            },
+            pagination={"next_url_path": "links.next", "results_path": "data.items"},
+        ).load()
+
+    assert len(requests_mock.request_history) == 1
+
+
+def test_allowed_host_succeeds_and_receives_request_options(requests_mock):
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": OTHER_URL}},
+    )
+    requests_mock.get(OTHER_URL, json={"data": {"items": [2]}, "links": {}})
+
+    dataset = PaginatedAPIDataset(
+        url=TEST_URL,
+        load_args={
+            "headers": {"X-Api-Key": "secret-key"},
+            "auth": ("user", "password"),
+        },
+        pagination={
+            "next_url_path": "links.next",
+            "results_path": "data.items",
+            "allowed_hosts": ["other.example"],
+        },
+    )
+
+    assert dataset.load() == [1, 2]
+    second_request = requests_mock.request_history[1]
+    assert second_request.headers["X-Api-Key"] == "secret-key"
+    assert second_request.headers["Authorization"].startswith("Basic ")
+
+
+def test_host_comparison_is_case_insensitive(requests_mock):
+    next_url = "http://EXAMPLE.com/api/items?page=2"
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": next_url}},
+    )
+    requests_mock.get(next_url, json={"data": {"items": [2]}, "links": {}})
+
+    assert make_dataset().load() == [1, 2]
+
+
+def test_different_port_is_rejected_unless_allowed(requests_mock):
+    next_url = "http://example.com:8080/api/items?page=2"
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": next_url}},
+    )
+
+    with pytest.raises(DatasetError, match="untrusted host"):
+        make_dataset().load()
+
+    requests_mock.reset_mock()
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": next_url}},
+    )
+    requests_mock.get(next_url, json={"data": {"items": [2]}, "links": {}})
+
+    assert make_dataset(allowed_hosts=["example.com:8080"]).load() == [1, 2]
+
+
+def test_https_to_http_downgrade_is_rejected(requests_mock):
+    initial_url = "https://example.com/api/items"
+    next_url = "http://example.com/api/items?page=2"
+    requests_mock.get(
+        initial_url,
+        json={"data": {"items": [1]}, "links": {"next": next_url}},
+    )
+
+    with pytest.raises(DatasetError, match="unexpected scheme"):
+        PaginatedAPIDataset(
+            url=initial_url,
+            pagination={"next_url_path": "links.next", "results_path": "data.items"},
+        ).load()
+
+    assert len(requests_mock.request_history) == 1
+
+
 def test_load_handles_empty_page_and_missing_or_null_next(requests_mock):
     requests_mock.get(
         TEST_URL,
@@ -154,6 +248,17 @@ def test_load_rejects_malformed_pagination_metadata(requests_mock, next_value):
         make_dataset().load()
 
 
+def test_load_rejects_invalid_port(requests_mock):
+    next_url = "http://example.com:invalid/api/items?page=2"
+    requests_mock.get(
+        TEST_URL,
+        json={"data": {"items": [1]}, "links": {"next": next_url}},
+    )
+
+    with pytest.raises(DatasetError, match="invalid host or port"):
+        make_dataset().load()
+
+
 def test_load_rejects_repeated_next_urls(requests_mock):
     requests_mock.get(
         TEST_URL,
@@ -198,6 +303,14 @@ def test_load_enforces_max_pages(requests_mock):
             {
                 "next_url_path": "next",
                 "results_path": "results",
+                "allowed_hosts": "example.com",
+            },
+            "allowed_hosts",
+        ),
+        (
+            {
+                "next_url_path": "next",
+                "results_path": "results",
                 "unsupported": True,
             },
             "unsupported keys",
@@ -218,8 +331,21 @@ def test_invalid_request_method():
         )
 
 
+def test_credentials_are_not_exposed_in_description_or_repr():
+    dataset = PaginatedAPIDataset(
+        url=TEST_URL,
+        credentials=("secret-user", "secret-password"),
+        pagination={"next_url_path": "links.next", "results_path": "data.items"},
+    )
+
+    description = repr(dataset)
+    assert "secret-user" not in description
+    assert "secret-password" not in description
+    assert "auth" not in dataset._describe()
+
+
 def test_describe_includes_pagination_without_authentication():
-    dataset = make_dataset(max_pages=5)
+    dataset = make_dataset(max_pages=5, allowed_hosts=["other.example"])
 
     description = dataset._describe()
 
@@ -227,5 +353,6 @@ def test_describe_includes_pagination_without_authentication():
         "next_url_path": "links.next",
         "results_path": "data.items",
         "max_pages": 5,
+        "allowed_hosts": ["other.example"],
     }
     assert "auth" not in description

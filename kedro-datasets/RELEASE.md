@@ -18,6 +18,7 @@
 # Release 9.6.0
 
 ## Major features and improvements
+- Added `api.PaginatedAPIDataset` for combining list results across JSON API pages. Pagination follows same-host links by default and supports explicitly configured `allowed_hosts` for trusted cross-host APIs.
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 

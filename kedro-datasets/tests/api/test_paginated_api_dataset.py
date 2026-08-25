@@ -1,4 +1,5 @@
 from copy import deepcopy
+from urllib.parse import urlparse
 
 import pytest
 from kedro.io.core import DatasetError
@@ -328,6 +329,64 @@ def test_invalid_request_method():
             url=TEST_URL,
             load_args={"method": "POST"},
             pagination={"next_url_path": "next", "results_path": "results"},
+        )
+
+
+@pytest.mark.parametrize(
+    ("url", "message"),
+    [
+        (None, "requires a URL string"),
+        ("/api/items", "absolute HTTP\\(S\\) initial URL"),
+        ("ftp://example.com/api/items", "absolute HTTP\\(S\\) initial URL"),
+        ("http://example.com:invalid/api/items", "valid initial URL host and port"),
+        ("http://:8080/api/items", "valid initial URL host and port"),
+    ],
+)
+def test_invalid_initial_url(url, message):
+    with pytest.raises(ValueError, match=message):
+        PaginatedAPIDataset(
+            url=url,
+            pagination={"next_url_path": "next", "results_path": "results"},
+        )
+
+
+def test_authority_helper_rejects_url_without_hostname():
+    with pytest.raises(ValueError, match="without a hostname"):
+        PaginatedAPIDataset._authority_from_parsed_url(urlparse("//:8080"))
+
+
+@pytest.mark.parametrize(
+    "allowed_host",
+    [
+        " example.com",
+        "example.com/path",
+        "user:password@example.com",
+        "example.com?query=value",
+        "example.com#fragment",
+        "example.com:",
+    ],
+)
+def test_invalid_allowed_host_syntax(allowed_host):
+    with pytest.raises(ValueError, match="hostnames with optional ports"):
+        PaginatedAPIDataset(
+            url=TEST_URL,
+            pagination={
+                "next_url_path": "next",
+                "results_path": "results",
+                "allowed_hosts": [allowed_host],
+            },
+        )
+
+
+def test_invalid_allowed_host_port():
+    with pytest.raises(ValueError, match="valid hosts and ports"):
+        PaginatedAPIDataset(
+            url=TEST_URL,
+            pagination={
+                "next_url_path": "next",
+                "results_path": "results",
+                "allowed_hosts": ["example.com:invalid"],
+            },
         )
 
 

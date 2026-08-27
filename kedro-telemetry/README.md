@@ -29,20 +29,13 @@ Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`re
 Other first-party Kedro plugins can send usage events through
 `kedro_telemetry.api.send_telemetry_event`. These events go through the same
 consent flow as the built-in ones — every opt-out mechanism described below
-disables them too, and no plugin may introduce a separate opt-in.
+disables them too, and no plugin may introduce a separate opt-in. Plugins must
+not include personal data, file paths or project details in event properties.
 
-Currently the [`kedro-skills`](https://github.com/kedro-org/kedro-skills) plugin sends:
-
-| Event | Properties |
-|---|---|
-| `kedro_skills_install` | `skill_id`, `target_ides` (sorted, comma-separated), `install_all` (whether `--all` was used), `success` |
-| `kedro_skills_update` | `skills_updated` (count), `drift_detected` (whether locally modified skill files were found), `success` |
-| `kedro_skills_uninstall` | `skill_id` |
-
-Skill identifiers are only reported when they match a skill shipped with the
-`kedro-skills` package; arbitrary user input is replaced with `unknown`. The
-`kedro skills list` command sends no event. No skill content, file paths or
-project details are collected.
+Each plugin documents its own event schema alongside its code — for example,
+the [`kedro-skills` events](https://github.com/kedro-org/kedro-skills#telemetry) —
+and every collected field is listed in
+[the telemetry documentation](https://docs.kedro.org/en/stable/about/telemetry/).
 
 ## How do I withdraw consent?
 

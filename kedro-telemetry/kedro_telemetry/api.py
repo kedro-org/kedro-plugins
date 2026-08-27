@@ -47,8 +47,8 @@ def send_telemetry_event(
             project id.
 
     Returns:
-        True if the event was dispatched, False if consent was withheld
-        or dispatching failed. Never raises.
+        True if Heap accepted the event, False if consent was withheld,
+        the request failed, or Heap rejected the payload. Never raises.
     """
     try:
         consent = _check_for_telemetry_consent(project_path)
@@ -63,12 +63,11 @@ def send_telemetry_event(
         }
         merged.update(_get_project_properties(user_uuid, project_path))
 
-        _send_heap_event(
+        return _send_heap_event(
             event_name=event_name,
             identity=user_uuid if user_uuid else MISSING_USER_IDENTITY,
             properties=merged,
         )
-        return True
     except Exception as exc:
         logger.debug(
             "Failed to send telemetry event '%s'. Exception: %s", event_name, exc

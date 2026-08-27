@@ -18,7 +18,9 @@ class TestSendTelemetryEvent:
             "kedro_telemetry.api._get_project_properties",
             return_value={"username": "user-uuid", "project_version": "1.0.0"},
         )
-        mocked_heap_call = mocker.patch("kedro_telemetry.api._send_heap_event")
+        mocked_heap_call = mocker.patch(
+            "kedro_telemetry.api._send_heap_event", return_value=True
+        )
 
         sent = send_telemetry_event(
             "kedro_skills_install",
@@ -73,12 +75,29 @@ class TestSendTelemetryEvent:
             "kedro_telemetry.api._get_project_properties",
             return_value={"username": ""},
         )
-        mocked_heap_call = mocker.patch("kedro_telemetry.api._send_heap_event")
+        mocked_heap_call = mocker.patch(
+            "kedro_telemetry.api._send_heap_event", return_value=True
+        )
 
         sent = send_telemetry_event("kedro_skills_uninstall", {"skill_id": "x"})
 
         assert sent is True
         assert mocked_heap_call.call_args.kwargs["identity"] == MISSING_USER_IDENTITY
+
+    def test_returns_false_when_heap_rejects(self, mocker):
+        mocker.patch(
+            "kedro_telemetry.api._check_for_telemetry_consent", return_value=None
+        )
+        mocker.patch(
+            "kedro_telemetry.api._get_or_create_uuid", return_value="user-uuid"
+        )
+        mocker.patch(
+            "kedro_telemetry.api._get_project_properties",
+            return_value={"username": "user-uuid"},
+        )
+        mocker.patch("kedro_telemetry.api._send_heap_event", return_value=False)
+
+        assert send_telemetry_event("kedro_skills_install", {"skill_id": "x"}) is False
 
     def test_base_properties_cannot_be_overridden(self, mocker):
         mocker.patch(

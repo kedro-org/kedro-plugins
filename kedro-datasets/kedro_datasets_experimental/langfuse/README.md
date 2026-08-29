@@ -469,7 +469,7 @@ DatasetError: Remote sync policy specified but no remote prompt exists
 
 ## TraceDataset
 
-A Kedro dataset for managing [Langfuse tracing](https://langfuse.com/docs/tracing) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Langfuse SDK usage. Environment variables are automatically configured during initialization.
+A Kedro dataset for managing [Langfuse tracing](https://langfuse.com/docs/observability/overview) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Langfuse SDK usage. Environment variables are automatically configured during initialization.
 
 ### Quick Start
 
@@ -1085,6 +1085,6 @@ DatasetError: Langfuse API error while fetching dataset '...': 401 Unauthorized
 
 ## Related Resources
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)
-- **Langfuse Tracing**: [Tracing overview](https://langfuse.com/docs/tracing)
+- **Langfuse Tracing**: [Tracing overview](https://langfuse.com/docs/observability/overview)
 - **Langfuse Evaluation**: [Dataset experiments](https://langfuse.com/docs/evaluation/experiments/datasets)
-- **Langfuse Prompts**: [Prompt management](https://langfuse.com/docs/prompt-management)
+- **Langfuse Prompts**: [Prompt management](https://langfuse.com/docs/prompt-management/overview)

@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib
 import os
 from copy import deepcopy
+from pathlib import PurePath
 from typing import Any
 
 import redis
@@ -64,7 +65,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        key: str,
+        key: str | os.PathLike,
         backend: str = "pickle",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -86,7 +87,8 @@ class PickleDataset(AbstractDataset[Any, Any]):
             * `torch`
 
         Args:
-            key: The key to use for saving/loading object to Redis.
+            key: The key to use for saving/loading object to Redis. Can be a
+                string or a PathLike object.
             backend: Backend to use, must be an import path to a module which satisfies the
                 ``pickle`` interface. That is, contains a `loads` and `dumps` function.
                 Defaults to 'pickle'.
@@ -142,7 +144,7 @@ class PickleDataset(AbstractDataset[Any, Any]):
 
         self._backend = backend
 
-        self._key = key
+        self._key = PurePath(key).as_posix() if isinstance(key, os.PathLike) else key
 
         self.metadata = metadata
 

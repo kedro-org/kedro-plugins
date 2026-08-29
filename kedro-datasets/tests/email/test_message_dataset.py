@@ -57,6 +57,14 @@ class TestEmailMessageDataset:
         assert message_dataset._fs_open_args_load == {"mode": "r"}
         assert message_dataset._fs_open_args_save == {"mode": "w"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_msg):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test"
+        dataset = EmailMessageDataset(filepath=filepath)
+        dataset.save(dummy_msg)
+        reloaded = dataset.load()
+        assert dummy_msg.__dict__ == reloaded.__dict__
+
     def test_exists(self, message_dataset, dummy_msg):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""

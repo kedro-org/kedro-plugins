@@ -5,6 +5,7 @@ supports all allowed options for loading and saving matlab files.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -61,7 +62,7 @@ class MatlabDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
 
     def __init__(  # noqa = PLR0913
         self,
-        filepath: str,
+        filepath: str | os.PathLike,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,

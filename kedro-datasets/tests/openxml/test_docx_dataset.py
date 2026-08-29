@@ -44,6 +44,14 @@ class TestDocxDataset:
         assert docx_dataset._fs_open_args_load == {}
         assert docx_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.docx"
+        dataset = DocxDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        reloaded = dataset.load()
+        assert dummy_data.paragraphs[0].text == reloaded.paragraphs[0].text
+
     def test_exists(self, docx_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""

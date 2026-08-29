@@ -43,6 +43,14 @@ class TestMatlabDataset:
         assert matlab_dataset._fs_open_args_load == {}
         assert matlab_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.mat"
+        dataset = MatlabDataset(filepath=filepath)
+        dataset.save(dummy_data)
+        reloaded = dataset.load()
+        assert (dummy_data == reloaded["data"]).all()
+
     def test_exists(self, matlab_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""

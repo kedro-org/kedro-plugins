@@ -432,7 +432,7 @@ DatasetError: Remote sync policy specified but no remote prompt exists in Opik
 
 ## TraceDataset
 
-A Kedro dataset for managing [Opik tracing](https://www.comet.com/docs/opik/tracing/log_traces) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Opik SDK usage. Opik credentials are automatically configured during initialization.
+A Kedro dataset for managing [Opik tracing](https://www.comet.com/docs/opik/tracing/advanced/log_traces) clients and callbacks. It provides the appropriate tracing object based on a configurable mode, enabling seamless integration with LangChain, OpenAI, AutoGen, or direct Opik SDK usage. Opik credentials are automatically configured during initialization.
 
 ### Quick Start
 
@@ -1064,7 +1064,7 @@ def my_task(dataset_item: dict) -> dict:
 
 ## Related Resources
 - **Opik Documentation**: [Opik Platform](https://www.comet.com/docs/opik/)
-- **Opik Tracing**: [Tracing overview](https://www.comet.com/docs/opik/tracing/log_traces)
+- **Opik Tracing**: [Tracing overview](https://www.comet.com/docs/opik/tracing/advanced/log_traces)
 - **Opik Evaluation**: [Evaluation overview](https://www.comet.com/docs/opik/evaluation/overview)
 - **Kedro Documentation**: [Kedro Datasets](https://docs.kedro.org/)
 - **Kedro Academy**: [Agentic Workflows](https://github.com/kedro-org/kedro-academy/tree/main/kedro-agentic-workflows)

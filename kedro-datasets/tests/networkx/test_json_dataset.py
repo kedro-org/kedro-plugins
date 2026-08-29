@@ -56,6 +56,16 @@ class TestJSONDataset:
         assert json_dataset._fs_open_args_load == {}
         assert json_dataset._fs_open_args_save == {"mode": "w"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_graph_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.json"
+        dataset = JSONDataset(filepath=filepath)
+
+        dataset.save(dummy_graph_data)
+        reloaded = dataset.load()
+
+        assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+
     def test_load_missing_file(self, json_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from dataset kedro_datasets.networkx.json_dataset.JSONDataset\(.*\)"

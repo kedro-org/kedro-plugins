@@ -25,7 +25,7 @@ If you have new ideas for Kedro-Datasets then please open a [GitHub issue](https
 ## Contribute a new dataset
 
 If you're unsure where to begin contributing to Kedro-Datasets, please start by looking through the `good first issue` and `help wanted` on [GitHub](https://github.com/kedro-org/kedro-plugins/issues).
-If you want to contribute a new dataset, read the [tutorial to create and contribute a custom dataset](https://docs.kedro.org/en/stable/data/how_to_create_a_custom_dataset.html) in the Kedro documentation.
+If you want to contribute a new dataset, read the [tutorial to create and contribute a custom dataset](https://docs.kedro.org/en/stable/extend/how_to_create_a_custom_dataset/) in the Kedro documentation.
 Make sure to add the necessary files for the new dataset so that it shows up in the API documentation:
 
 1. Ensure the dataset's docstring is markdown-parseable.
@@ -39,7 +39,7 @@ Below is a guide to help you understand the process of contributing a new datase
 
 #### Core datasets
 
-Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html) and adhere to specific standards. These datasets adhere to the following requirements:
+Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](https://docs.kedro.org/en/stable/about/technical_steering_committee/) and adhere to specific standards. These datasets adhere to the following requirements:
 
 1. Must be something that the Kedro TSC is willing to maintain.
 2. Must be fully documented.
@@ -82,15 +82,15 @@ Working on your first pull request? You can learn how from these resources:
 ### Guidelines
 
 - Aim for cross-platform compatibility on Windows, macOS and Linux
-- We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
+- We use [Anaconda](https://www.anaconda.com/download) as a preferred virtual environment
 - We use [SemVer](https://semver.org/) for versioning
 - We use [mkdocs](https://www.mkdocs.org/) for our documentation
 
 Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
 
-- [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
+- [PEP 8 conventions](https://peps.python.org/pep-0008/) for all Python code
 - [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
-- [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions / class methods e.g.
+- [PEP 484 type hints](https://peps.python.org/pep-0484/) for all user-facing functions / class methods e.g.
 
 ```
 def count_truthy(elements: List[Any]) -> int:

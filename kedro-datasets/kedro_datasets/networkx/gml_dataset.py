@@ -4,6 +4,7 @@ create GML data.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -50,7 +51,7 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -62,6 +63,7 @@ class GMLDataset(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
 
         Args:
             filepath: Filepath in POSIX format to the NetworkX GML file.
+                Can be a string or a PathLike object.
             load_args: Arguments passed on to ``networkx.read_gml``.
                 See the details in
                 https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.gml.read_gml.html

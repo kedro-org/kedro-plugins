@@ -4,6 +4,7 @@ underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -94,7 +95,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
@@ -108,6 +109,7 @@ class SVMLightDataset(AbstractVersionedDataset[_DI, _DO]):
             filepath: Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
+                Can be a string or a PathLike object.
             load_args: Arguments passed on to ``load_svmlight_file``.
                 See the details in
                 https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_svmlight_file.html

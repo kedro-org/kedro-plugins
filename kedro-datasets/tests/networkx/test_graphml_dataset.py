@@ -58,6 +58,16 @@ class TestGraphMLDataset:
         assert graphml_dataset._fs_open_args_load == {"mode": "rb"}
         assert graphml_dataset._fs_open_args_save == {"mode": "wb"}
 
+    def test_pathlike_filepath(self, tmp_path, dummy_graph_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.graphml"
+        dataset = GraphMLDataset(filepath=filepath, load_args={"node_type": int})
+
+        dataset.save(dummy_graph_data)
+        reloaded = dataset.load()
+
+        assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+
     def test_load_missing_file(self, graphml_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from dataset kedro_datasets.networkx.graphml_dataset.GraphMLDataset\(.*\)"

@@ -1,8 +1,11 @@
 # Upcoming release
 
 ## Major features and improvements
+- Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
+
 ## Breaking changes
 ## Breaking changes to experimental datasets
+
 ## Bug fixes and other changes
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
 - Added `os.PathLike` support for `redis.PickleDataset` keys.
@@ -10,6 +13,7 @@
 ## Community contributions
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
+- [Shizoqua](https://github.com/Shizoqua)
 
 # Release 9.6.0
 
@@ -31,7 +35,6 @@
 
 ## Bug fixes and other changes
 - Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API.
-- Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
 - Added deserialization risk warnings to docstrings of datasets that can execute arbitrary code when loading untrusted files.

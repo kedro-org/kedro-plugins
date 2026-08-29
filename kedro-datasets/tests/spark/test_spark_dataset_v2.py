@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -88,6 +88,21 @@ class TestSparkDatasetV2Basic:
         assert Path(filepath).exists()
 
         # Load
+        loaded_df = dataset.load()
+        assert loaded_df.count() == sample_spark_df.count()
+        assert set(loaded_df.columns) == set(sample_spark_df.columns)
+
+    def test_pathlike_filepath(self, tmp_path, sample_spark_df):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "test.parquet"
+        dataset = SparkDatasetV2(filepath=filepath)
+
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == filepath.as_posix()
+
+        dataset.save(sample_spark_df)
+        assert Path(filepath).exists()
+
         loaded_df = dataset.load()
         assert loaded_df.count() == sample_spark_df.count()
         assert set(loaded_df.columns) == set(sample_spark_df.columns)
@@ -544,6 +559,31 @@ class TestSparkDatasetV2CloudStorage:
 
         # Verify s3a:// normalization
         assert dataset._spark_path.startswith("s3a://")
+
+    @pytest.mark.parametrize("protocol", ["s3", "s3a", "s3n"])
+    def test_s3_glob_bypasses_listing_cache(self, mock_s3_filesystem, protocol):
+        """Test that S3 globbing refreshes the listing cache.
+
+        Without ``refresh=True``, a versioned dataset can resolve a stale
+        version from the s3fs directory listing cache.
+        """
+        dataset = SparkDatasetV2(
+            filepath=f"{protocol}://bucket/data.parquet", version=Version(None, None)
+        )
+
+        dataset._glob_function("bucket/data.parquet/*/data.parquet")
+
+        mock_s3_filesystem.glob.assert_called_once_with(
+            "bucket/data.parquet/*/data.parquet", refresh=True
+        )
+
+    def test_non_s3_glob_does_not_pass_refresh(self, mock_s3_filesystem):
+        """Test that ``refresh`` is not passed to filesystems that reject it."""
+        dataset = SparkDatasetV2(filepath="gs://bucket/data.parquet")
+
+        dataset._glob_function("bucket/data.parquet")
+
+        mock_s3_filesystem.glob.assert_called_once_with("bucket/data.parquet")
 
     def test_gcs_handling(self, mock_s3_filesystem):
         """Test GCS handling."""

@@ -174,22 +174,44 @@ def test_dataset_spec_from_source_extracts_init_parameters(tmp_path, monkeypatch
     )
 
 
-def test_dataset_spec_from_source_handles_missing_init(tmp_path, monkeypatch):
+def test_dataset_spec_from_source_handles_missing_init_with_override(
+    tmp_path, monkeypatch
+):
     package_path = tmp_path / "kedro_datasets"
     subpackage_path = package_path / "sample"
     subpackage_path.mkdir(parents=True)
     (package_path / "__init__.py").touch()
     (subpackage_path / "sample_dataset.py").write_text(
-        "class SampleDataset:\n" "    pass\n",
+        "class SampleDataset:\n    pass\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        generator.kedro_datasets, "__file__", str(package_path / "__init__.py")
+    )
+    monkeypatch.setitem(generator.SCHEMA_OVERRIDES, "sample.SampleDataset", {})
+
+    assert generator._dataset_spec_from_source(
+        "sample", "sample_dataset", "SampleDataset"
+    ) == generator.DatasetSpec("sample.SampleDataset", [], None)
+
+
+def test_dataset_spec_from_source_aborts_on_missing_init_without_override(
+    tmp_path, monkeypatch
+):
+    package_path = tmp_path / "kedro_datasets"
+    subpackage_path = package_path / "sample"
+    subpackage_path.mkdir(parents=True)
+    (package_path / "__init__.py").touch()
+    (subpackage_path / "sample_dataset.py").write_text(
+        "class SampleDataset:\n    pass\n",
         encoding="utf-8",
     )
     monkeypatch.setattr(
         generator.kedro_datasets, "__file__", str(package_path / "__init__.py")
     )
 
-    assert generator._dataset_spec_from_source(
-        "sample", "sample_dataset", "SampleDataset"
-    ) == generator.DatasetSpec("sample.SampleDataset", [], None)
+    with pytest.raises(ValueError, match="defines no __init__ method"):
+        generator._dataset_spec_from_source("sample", "sample_dataset", "SampleDataset")
 
 
 def test_dataset_spec_from_source_aborts_when_class_is_missing(tmp_path, monkeypatch):

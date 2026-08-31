@@ -20,5 +20,48 @@ from typing import Any
 # catalog in the usual way).
 EXCLUDED_SUBPACKAGES: set[str] = {"langchain"}
 
+_HF_FS_DATASET_OVERRIDE: dict[str, Any] = {
+    "required": ["path"],
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "Path to a file or directory for persisting Hugging Face datasets. Supports local paths, ``os.PathLike`` objects, and remote URIs (e.g. ``s3://bucket/data``).",
+        },
+        "version": {
+            "type": ["object", "null"],
+            "description": "Optional versioning configuration (see :class:`~kedro.io.core.Version`).",
+        },
+        "data_files": {
+            "type": ["object", "null"],
+            "description": "Mapping of split name to filename for loading and saving a ``DatasetDict`` from a directory (e.g. ``{\"train\": \"train.csv\"}``). The keys must match the split names of the ``DatasetDict`` being saved, and the filenames must use the correct extension for the format (e.g. ``.csv`` for ``CSVDataset``).",
+        },
+        "load_args": {
+            "type": ["object", "null"],
+            "description": "Additional keyword arguments passed to the underlying load function. This cannot include ``data_files``; use the top-level ``data_files`` argument instead.",
+        },
+        "save_args": {
+            "type": ["object", "null"],
+            "description": "Additional keyword arguments passed to the underlying save function. This cannot include ``data_files``; use the top-level ``data_files`` argument instead.",
+        },
+        "credentials": {
+            "type": ["object", "null"],
+            "description": "Credentials for the underlying filesystem (e.g. ``key``/``secret`` for S3). Passed to the ``storage_options`` parameter in the underlying ``datasets`` implementation.",
+        },
+        "fs_args": {
+            "type": ["object", "null"],
+            "description": "Extra arguments passed to the ``fsspec`` filesystem initialiser. Passed to the ``storage_options`` parameter in the underlying ``datasets`` implementation.",
+        },
+        "metadata": {
+            "type": ["object", "null"],
+            "description": "Any arbitrary metadata. This is ignored by Kedro but may be consumed by users or external plugins.",
+        },
+    },
+}
+
 # Dataset type id -> partial ``then`` fragment (deep-merged over generated output).
-SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {}
+SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
+    "huggingface.ArrowDataset": _HF_FS_DATASET_OVERRIDE,
+    "huggingface.CSVDataset": _HF_FS_DATASET_OVERRIDE,
+    "huggingface.JSONDataset": _HF_FS_DATASET_OVERRIDE,
+    "huggingface.ParquetDataset": _HF_FS_DATASET_OVERRIDE,
+}

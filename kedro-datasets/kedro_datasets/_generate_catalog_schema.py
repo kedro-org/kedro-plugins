@@ -48,6 +48,7 @@ _NAME_TYPE_MAP: dict[str, str] = {
     "tuple": "array",
     "Version": "object",
     "PathLike": "string",
+    "os.PathLike": "string",
     "Path": "string",
     "PurePath": "string",
     "PurePosixPath": "string",
@@ -271,8 +272,15 @@ def _dataset_spec_from_source(
                     parameters=_parameters_from_init(child),
                     docstring=ast.get_docstring(child),
                 )
+        type_id = f"{subpackage}.{class_name}"
+        if type_id not in SCHEMA_OVERRIDES:
+            raise ValueError(
+                f"{type_id} defines no __init__ method (likely inherited). "
+                "You must add a manual schema override for it in _schema_overrides.py "
+                "so that it does not silently get an empty catalog schema."
+            )
         return DatasetSpec(
-            type_id=f"{subpackage}.{class_name}",
+            type_id=type_id,
             parameters=[],
             docstring=None,
         )

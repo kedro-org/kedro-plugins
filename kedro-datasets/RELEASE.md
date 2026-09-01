@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
+- Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
 ## Breaking changes
 ## Breaking changes to experimental datasets

@@ -3,7 +3,7 @@ import os
 import boto3
 import pytest
 import xarray as xr
-from kedro.io.core import DatasetError
+from kedro.io.core import DatasetError, Version
 from moto import mock_aws
 from s3fs import S3FileSystem
 from xarray.testing import assert_equal
@@ -122,6 +122,24 @@ def s3_dataset_multi(save_args, tmp_path):
         credentials=AWS_CREDENTIALS,
         load_args={"concat_dim": "dummy", "combine": "nested"},
         save_args=save_args,
+    )
+
+
+@pytest.fixture
+def versioned_netcdf_dataset(tmp_path, load_version, save_version):
+    return NetCDFDataset(
+        filepath=(tmp_path / FILE_NAME).as_posix(),
+        version=Version(load_version, save_version),
+    )
+
+
+@pytest.fixture
+def versioned_s3_dataset(tmp_path, load_version, save_version):
+    return NetCDFDataset(
+        filepath=S3_PATH,
+        temppath=tmp_path,
+        credentials=AWS_CREDENTIALS,
+        version=Version(load_version, save_version),
     )
 
 
@@ -246,6 +264,14 @@ class TestNetCDFDataset:
         loaded_data = dataset.load()
         dummy_xr_dataset.equals(loaded_data)
 
+    def test_pathlike_filepath(self, tmp_path, dummy_xr_dataset):
+        """Test that pathlib paths are accepted as filepaths."""
+        dataset = NetCDFDataset(filepath=tmp_path / FILE_NAME)
+
+        dataset.save(dummy_xr_dataset)
+
+        assert_equal(dataset.load(), dummy_xr_dataset)
+
     def test_load_locally_multi(
         self, tmp_path, dummy_xr_dataset, dummy_xr_dataset_multi
     ):
@@ -280,3 +306,110 @@ class TestNetCDFDataset:
 
         for key, value in s3_dataset.DEFAULT_SAVE_ARGS.items():
             assert s3_dataset._save_args[key] == value
+
+
+class TestNetCDFDatasetVersioned:
+    def test_version_str_repr(self, tmp_path, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        filepath = FILE_NAME
+        ds = NetCDFDataset(filepath=filepath)
+        ds_versioned = NetCDFDataset(
+            filepath=filepath, version=Version(load_version, save_version)
+        )
+        assert filepath in str(ds)
+        assert "version" not in str(ds)
+
+        assert filepath in str(ds_versioned)
+        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
+        assert ver_str in str(ds_versioned)
+        assert "NetCDFDataset" in str(ds_versioned)
+        assert "NetCDFDataset" in str(ds)
+        assert "protocol" in str(ds_versioned)
+        assert "protocol" in str(ds)
+
+    def test_save_and_load(self, versioned_netcdf_dataset, dummy_xr_dataset):
+        """Test that saved and reloaded data matches the original one for
+        the versioned dataset."""
+        versioned_netcdf_dataset.save(dummy_xr_dataset)
+        reloaded = versioned_netcdf_dataset.load()
+        assert_equal(reloaded, dummy_xr_dataset)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    def test_save_and_load_remote(self, versioned_s3_dataset, dummy_xr_dataset, mocker):
+        """Test saving and loading a versioned NetCDF file on S3."""
+        mocker.patch.object(
+            versioned_s3_dataset, "_exists_function", return_value=False
+        )
+        mocker.patch.object(versioned_s3_dataset._fs, "exists", return_value=True)
+        mocker.patch.object(versioned_s3_dataset._fs, "put_file")
+        mocker.patch.object(versioned_s3_dataset._fs, "get")
+        mocker.patch.object(versioned_s3_dataset._fs, "invalidate_cache")
+
+        versioned_s3_dataset.save(dummy_xr_dataset)
+
+        assert versioned_s3_dataset.exists()
+        assert_equal(versioned_s3_dataset.load(), dummy_xr_dataset)
+
+        expected_path = "test_bucket/test.nc/2019-01-01T23.59.59.999Z/test.nc"
+        versioned_s3_dataset._fs.put_file.assert_called_once()
+        assert versioned_s3_dataset._fs.put_file.call_args.args[1] == expected_path
+        versioned_s3_dataset._fs.get.assert_called_once()
+        assert versioned_s3_dataset._fs.get.call_args.args[0] == expected_path
+
+    def test_no_versions(self, versioned_netcdf_dataset):
+        """Check the error if no versions are available for load."""
+        pattern = r"Did not find any versions for kedro_datasets_experimental.netcdf.netcdf_dataset.NetCDFDataset\(.+\)"
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_netcdf_dataset.load()
+
+    def test_exists(self, versioned_netcdf_dataset, dummy_xr_dataset):
+        """Test `exists` method invocation for versioned dataset."""
+        assert not versioned_netcdf_dataset.exists()
+        versioned_netcdf_dataset.save(dummy_xr_dataset)
+        assert versioned_netcdf_dataset.exists()
+
+    def test_prevent_overwrite(self, versioned_netcdf_dataset, dummy_xr_dataset):
+        """Check the error when attempting to override the dataset if the
+        corresponding NetCDF file for a given save version already exists."""
+        versioned_netcdf_dataset.save(dummy_xr_dataset)
+        pattern = (
+            r"Save path \'.+\' for "
+            r"kedro_datasets_experimental.netcdf.netcdf_dataset.NetCDFDataset"
+            r"\(.+\) must not exist if versioning is enabled\."
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_netcdf_dataset.save(dummy_xr_dataset)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_save_version_warning(
+        self, versioned_netcdf_dataset, load_version, save_version, dummy_xr_dataset
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for "
+            rf"kedro_datasets_experimental.netcdf.netcdf_dataset.NetCDFDataset\(.+\)"
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_netcdf_dataset.save(dummy_xr_dataset)
+
+    def test_multifile_no_versioning(self, tmp_path):
+        pattern = "Versioning is not supported for globbed multifile NetCDF datasets."
+
+        with pytest.raises(DatasetError, match=pattern):
+            NetCDFDataset(
+                filepath=(tmp_path / MULTIFILE_NAME).as_posix(),
+                version=Version(None, None),
+            )

@@ -33,7 +33,7 @@ _HF_FS_DATASET_OVERRIDE: dict[str, Any] = {
         },
         "data_files": {
             "type": ["object", "null"],
-            "description": "Mapping of split name to filename for loading and saving a ``DatasetDict`` from a directory (e.g. ``{\"train\": \"train.csv\"}``). The keys must match the split names of the ``DatasetDict`` being saved, and the filenames must use the correct extension for the format (e.g. ``.csv`` for ``CSVDataset``).",
+            "description": 'Mapping of split name to filename for loading and saving a ``DatasetDict`` from a directory (e.g. ``{"train": "train.csv"}``). The keys must match the split names of the ``DatasetDict`` being saved, and the filenames must use the correct extension for the format (e.g. ``.csv`` for ``CSVDataset``).',
         },
         "load_args": {
             "type": ["object", "null"],

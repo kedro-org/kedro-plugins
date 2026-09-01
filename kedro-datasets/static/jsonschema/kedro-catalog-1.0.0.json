@@ -2965,7 +2965,7 @@
             "properties": {
               "key": {
                 "type": "string",
-                "description": "The key to use for saving/loading object to Redis."
+                "description": "The key to use for saving/loading object to Redis. Can be a\nstring or a PathLike object."
               },
               "backend": {
                 "type": "string",

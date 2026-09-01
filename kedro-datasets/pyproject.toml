@@ -185,10 +185,12 @@ plotly = ["kedro-datasets[plotly-htmldataset,plotly-jsondataset,plotly-plotlydat
 
 polars-csvdataset = ["kedro-datasets[polars-base]"]
 polars-eagerpolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "xlsx2csv>=0.8.0", "deltalake>=0.6.2"]
+polars-icebergdataset = ["kedro-datasets[polars-base]", "pyiceberg>=0.7.0; python_version < '3.14'", "pyarrow>=6.0"]
 polars-lazypolarsdataset = ["kedro-datasets[polars-base]", "pyarrow>=4.0", "deltalake>=0.6.2"]
 polars = [
     """kedro-datasets[polars-csvdataset,\
     polars-eagerpolarsdataset,\
+    polars-icebergdataset,\
     polars-lazypolarsdataset]"""
 ]
 
@@ -325,6 +327,7 @@ test = [
     "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyiceberg>=0.7.0; python_version < '3.14'",
     "pyodbc~=5.0",
     "pyspark>=3.3, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
@@ -480,6 +483,7 @@ omit = [
     "kedro_datasets/databricks/*",
     "kedro_datasets/geopandas/*",  # TODO: remove once fiona supports Python 3.14
     "kedro_datasets/holoviews/*",
+    "kedro_datasets/polars/iceberg_dataset.py",  # TODO: remove once pyiceberg supports Python 3.14
     "kedro_datasets/snowflake/*",
     "kedro_datasets/spark/spark_hive_dataset.py",
     "kedro_datasets/tensorflow/*",

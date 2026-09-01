@@ -1,8 +1,8 @@
 # Upcoming release
 
 ## Major features and improvements
-- Added standard Kedro versioning support to the experimental
-  `netcdf.NetCDFDataset`, including local and remote (S3) files.
+- Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
+- Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
 ## Breaking changes
 ## Breaking changes to experimental datasets
@@ -13,6 +13,7 @@
 ## Community contributions
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
+- [Shizoqua](https://github.com/Shizoqua)
 
 # Release 9.6.0
 

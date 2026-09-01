@@ -346,3 +346,85 @@ class TestSparkHiveDataset:
             "default_1.delta_table", mode="errorifexists", format="delta"
         )
         assert dataset._format == "delta"
+
+    def test_save_external_table_passes_path_and_save_options(self, mocker):
+        external_path = "/tmp/external_table"
+        dataset = SparkHiveDataset(
+            database="default_1",
+            table="external_table",
+            write_mode="overwrite",
+            save_args={
+                "format": "parquet",
+                "path": external_path,
+                "partitionBy": ["name"],
+            },
+        )
+        mocker.patch.object(dataset, "_exists", return_value=False)
+        mocked_save = mocker.patch("pyspark.sql.DataFrameWriter.saveAsTable")
+
+        dataset.save(_generate_spark_df_one())
+
+        mocked_save.assert_called_once_with(
+            "default_1.external_table",
+            mode="overwrite",
+            format="parquet",
+            path=external_path,
+            partitionBy=["name"],
+        )
+        assert dataset._describe()["external_location"] == external_path
+
+    @pytest.mark.parametrize("path", [None, "", 123])
+    def test_invalid_external_path(self, path):
+        with pytest.raises(
+            DatasetError,
+            match=re.escape(
+                "'save_args.path' must be a non-empty local or Hadoop-compatible "
+                "filesystem path when configuring an external Hive table"
+            ),
+        ):
+            SparkHiveDataset(
+                database="default_1",
+                table="external_table",
+                save_args={"path": path},
+            )
+
+    def test_external_table_can_be_loaded_and_exists(self, spark_session, tmp_path):
+        dataset = SparkHiveDataset(
+            database="default_1",
+            table="external_table_load",
+            write_mode="overwrite",
+            save_args={"format": "parquet", "path": str(tmp_path / "table")},
+        )
+
+        dataset.save(_generate_spark_df_one())
+
+        assert dataset.exists()
+        assert (
+            spark_session.catalog.getTable("default_1.external_table_load").tableType
+            == "EXTERNAL"
+        )
+        assert_df_equal(dataset.load(), _generate_spark_df_one())
+
+    def test_external_table_upsert(self, spark_session, tmp_path):
+        save_args = {"format": "parquet", "path": str(tmp_path / "table")}
+        overwrite_dataset = SparkHiveDataset(
+            database="default_1",
+            table="external_table_upsert",
+            write_mode="overwrite",
+            save_args=save_args,
+        )
+        overwrite_dataset.save(_generate_spark_df_one())
+
+        upsert_dataset = SparkHiveDataset(
+            database="default_1",
+            table="external_table_upsert",
+            write_mode="upsert",
+            table_pk=["name"],
+            save_args=save_args,
+        )
+        upsert_dataset.save(_generate_spark_df_upsert())
+
+        assert_df_equal(
+            upsert_dataset.load().sort("name"),
+            _generate_spark_df_upsert_expected().sort("name"),
+        )

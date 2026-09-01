@@ -124,7 +124,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         file_format: str = "parquet",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
@@ -135,7 +135,8 @@ class SparkDatasetV2(AbstractVersionedDataset):
         """Creates a new instance of ``SparkDatasetV2``.
 
         Args:
-            filepath: Filepath in POSIX format to a Spark dataframe. Supports:
+            filepath: Filepath (``str`` or ``os.PathLike``) in POSIX format to a Spark
+                dataframe. Supports:
                 - Local paths: ``data/output.parquet`` or ``/absolute/path/data.parquet``
                 - S3: ``s3://bucket/path`` or ``s3a://bucket/path``
                 - GCS: ``gs://bucket/path``
@@ -336,7 +337,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         }
 
     def _get_filesystem_ops(
-        self, protocol: str, filepath: str, credentials: dict[str, Any]
+        self, protocol: str, filepath: str | os.PathLike, credentials: dict[str, Any]
     ) -> tuple:
         """Get filesystem operations for exists and glob.
 
@@ -363,6 +364,12 @@ class SparkDatasetV2(AbstractVersionedDataset):
 
         # Regular fsspec for everything else
         fs = get_spark_filesystem(protocol, credentials)
+
+        if protocol in ("s3", "s3a", "s3n"):
+            # Bypass the s3fs listing cache so versioned datasets resolve the
+            # latest version rather than a stale directory listing.
+            return fs.exists, partial(fs.glob, refresh=True)
+
         return fs.exists, fs.glob
 
     def _handle_delta_format(self) -> None:

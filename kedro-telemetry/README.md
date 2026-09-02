@@ -24,6 +24,19 @@ For technical information on how the telemetry collection works, you can browse
 
 Kedro-Telemetry uses [`pluggy`](https://pypi.org/project/pluggy/) hooks and [`requests`](https://pypi.org/project/requests/) to send data to [Heap Analytics](https://heap.io/). Project maintainers have access to the data and can create dashboards that show adoption and feature usage.
 
+## Events sent by other Kedro plugins
+
+Other first-party Kedro plugins can send usage events through
+`kedro_telemetry.api.send_telemetry_event`. These events go through the same
+consent flow as the built-in ones — every opt-out mechanism described below
+disables them too, and no plugin may introduce a separate opt-in. Plugins must
+not include personal data, file paths or project details in event properties.
+
+Each plugin documents its own event schema alongside its code — for example,
+the [`kedro-skills` events](https://github.com/kedro-org/kedro-skills#telemetry) —
+and every collected field is listed in
+[the telemetry documentation](https://docs.kedro.org/en/stable/about/telemetry/).
+
 ## How do I withdraw consent?
 
 Data collection for telemetry is enabled by default. To withdraw consent, you have a few options:

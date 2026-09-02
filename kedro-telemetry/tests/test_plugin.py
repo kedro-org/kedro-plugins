@@ -23,6 +23,7 @@ from kedro_telemetry.plugin import (
     _format_project_statistics_data,
     _format_tools,
     _is_known_ci_env,
+    _send_heap_event,
 )
 
 REPO_NAME = "dummy_project"
@@ -845,3 +846,20 @@ class TestFormatTools:
         # Not valid Python literal, but a non-empty string -> sent verbatim
         # so we still get _something_ in Heap rather than dropping the field.
         assert _format_tools("Linting; Testing") == "Linting; Testing"
+
+
+class TestSendHeapEvent:
+    def test_returns_true_when_heap_accepts(self, mocker):
+        mocker.patch("requests.post", return_value=mocker.Mock(status_code=200))
+        assert _send_heap_event("some event", "identity") is True
+
+    def test_returns_false_on_non_200_response(self, mocker):
+        mocker.patch(
+            "requests.post",
+            return_value=mocker.Mock(status_code=400, reason="Bad Request"),
+        )
+        assert _send_heap_event("some event", "identity") is False
+
+    def test_returns_false_on_request_exception(self, mocker):
+        mocker.patch("requests.post", side_effect=requests.exceptions.ConnectionError())
+        assert _send_heap_event("some event", "identity") is False

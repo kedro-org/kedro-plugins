@@ -1,4 +1,5 @@
 # Upcoming release
+* Added validator declaration counts to the project statistics event: `number_of_validated_datasets` and per-library `validator_type_count.*`, with user-defined validators reported as `custom`.
 * Added `kedro_telemetry.api.send_telemetry_event`, a public helper other Kedro plugins can call to send usage events through the standard consent flow — opt-out settings (`DO_NOT_TRACK`, `KEDRO_DISABLE_TELEMETRY`, `.telemetry`) apply to these events exactly as they do to built-in ones.
 * Added support for `kedro skills` usage events sent by the [`kedro-skills`](https://github.com/kedro-org/kedro-skills) plugin via the new helper: `kedro_skills_install` (skill id, target IDEs, `--all` flag, success), `kedro_skills_update` (number of skills updated, drift detected, success) and `kedro_skills_uninstall` (skill id).
 

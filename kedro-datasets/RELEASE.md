@@ -1,6 +1,7 @@
 # Upcoming release
 
 ## Major features and improvements
+- Added `api.PaginatedAPIDataset` for combining list results across JSON API pages. Pagination follows same-host links by default and supports explicitly configured `allowed_hosts` for trusted cross-host APIs.
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
@@ -18,7 +19,6 @@
 # Release 9.6.0
 
 ## Major features and improvements
-- Added `api.PaginatedAPIDataset` for combining list results across JSON API pages. Pagination follows same-host links by default and supports explicitly configured `allowed_hosts` for trusted cross-host APIs.
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 

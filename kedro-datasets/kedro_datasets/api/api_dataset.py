@@ -401,6 +401,13 @@ class PaginatedAPIDataset(APIDataset):
     ``pagination.allowed_hosts``. Hostnames are case-insensitive, ports are
     significant, and wildcard or suffix matching is not supported.
 
+    .. note::
+       The next-page value must be a **fully-qualified absolute URL**
+       (e.g. ``https://example.com/api/items?page=2``). Relative paths such as
+       ``/api/items?page=2`` are **not** supported and will raise a
+       ``DatasetError``. If your API returns relative links, consider
+       ``APIDataset`` with manual pagination logic instead.
+
     ``max_pages`` defaults to 1000 and can be set in ``pagination`` to protect
     against an API that keeps returning new links.
 
@@ -437,6 +444,11 @@ class PaginatedAPIDataset(APIDataset):
     parameters are sent on the initial request; a next URL is treated as
     complete, so its own query string is used on later requests instead of
     appending the initial parameters again.
+
+    .. note::
+       The inherited :meth:`_exists` method only checks whether the **first
+       page** responds successfully (HTTP status OK). It does not verify that
+       the full paginated fetch will succeed.
 
     Args:
         url: The first API URL endpoint.

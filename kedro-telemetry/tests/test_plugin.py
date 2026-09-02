@@ -770,6 +770,51 @@ class TestKedroTelemetryHook:
         # dataset_type_count.* properties should be emitted at all.
         assert not any(k.startswith("dataset_type_count.") for k in result)
 
+    def test_validator_specs_counted_with_pii_bucketing(
+        self, pipeline_fixture, project_pipelines
+    ):
+        class Spec:
+            def __init__(self, class_path):
+                self.class_path = class_path
+
+        catalog = MagicMock()
+        catalog.keys.return_value = ["datasetA", "datasetB", "datasetC"]
+        catalog.get_type.side_effect = (
+            lambda ds_name: "kedro.io.memory_dataset.MemoryDataset"
+        )
+        catalog.validator_specs = {
+            "datasetA": Spec("pandera.pandas.DataFrameModel"),
+            "datasetB": Spec("my_project.schemas.CompaniesSchema"),
+            "datasetC": Spec("my_project.validators.check_rows"),
+        }
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        validated_cnt, pandera_cnt, custom_cnt = 3, 1, 2
+        assert result["number_of_validated_datasets"] == validated_cnt
+        assert result["validator_type_count.pandera"] == pandera_cnt
+        assert result["validator_type_count.custom"] == custom_cnt
+        assert not any("my_project" in key for key in result)
+
+    def test_catalog_without_validator_support_emits_no_validator_fields(
+        self, pipeline_fixture, project_pipelines
+    ):
+        catalog = MagicMock()
+        catalog.keys.return_value = ["datasetA"]
+        catalog.get_type.side_effect = (
+            lambda ds_name: "kedro.io.memory_dataset.MemoryDataset"
+        )
+        del catalog.validator_specs
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        assert "number_of_validated_datasets" not in result
+        assert not any(k.startswith("validator_type_count.") for k in result)
+
     def test_new_catalog_with_keys_method(self, pipeline_fixture, project_pipelines):
         # catalog.list() was replaces with catalog.keys() in `kedro >= 1.0`
         catalog = MagicMock()

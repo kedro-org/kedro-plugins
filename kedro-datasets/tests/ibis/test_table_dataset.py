@@ -61,7 +61,12 @@ def table_dataset(
         save_args=save_args,
     )
     yield ds
-    getattr(ds._connection, f"drop_{ds._materialized}")("test", force=True)
+    if ds._connection.name == "duckdb":
+        relation = "TABLE" if ds._materialized == "table" else "VIEW"
+        quoted_name = ds._table_name.replace('"', '""')
+        ds._connection.raw_sql(f'DROP {relation} IF EXISTS "{quoted_name}"')
+    else:
+        getattr(ds._connection, f"drop_{ds._materialized}")("test", force=True)
 
 
 @pytest.fixture
@@ -271,8 +276,10 @@ class TestTableDataset:
         mock_connection = mocker.MagicMock()
         mock_connection.name = "duckdb"
         mock_connection.create_table = mocker.MagicMock()
-        mocker.patch.object(type(table_dataset), "_connect", return_value=mock_connection)
-        type(table_dataset)._connections = {}
+        mocker.patch.object(
+            type(table_dataset), "_connect", return_value=mock_connection
+        )
+        mocker.patch.object(type(table_dataset), "_connections", {})
         exists = mocker.patch.object(table_dataset, "_exists", return_value=False)
 
         table_dataset.save(dummy_table)
@@ -291,14 +298,18 @@ class TestTableDataset:
     ):
         mock_connection = mocker.MagicMock()
         mock_connection.name = "duckdb"
-        mocker.patch.object(type(table_dataset), "_connect", return_value=mock_connection)
-        type(table_dataset)._connections = {}
+        mocker.patch.object(
+            type(table_dataset), "_connect", return_value=mock_connection
+        )
+        mocker.patch.object(type(table_dataset), "_connections", {})
         exists = mocker.patch.object(table_dataset, "_exists", return_value=True)
 
         table_dataset.save(dummy_table)
 
         exists.assert_called_once()
-        mock_connection.insert.assert_called_once_with("test", dummy_table, overwrite=True)
+        mock_connection.insert.assert_called_once_with(
+            "test", dummy_table, overwrite=True
+        )
 
     def test_unsupported_save_mode_raises(self, database_name, connection_config):
         """Providing an unsupported save mode should raise a DatasetError."""

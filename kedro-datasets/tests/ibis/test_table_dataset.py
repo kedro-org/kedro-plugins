@@ -262,6 +262,44 @@ class TestTableDataset:
         # Should remain as first save only
         assert_frame_equal(reloaded.reset_index(drop=True), df1.reset_index(drop=True))
 
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "overwrite"}], indirect=True
+    )
+    def test_save_mode_overwrite_duckdb_uses_create_without_overwrite_for_new_table(
+        self, table_dataset, dummy_table, mocker
+    ):
+        mock_connection = mocker.MagicMock()
+        mock_connection.name = "duckdb"
+        mock_connection.create_table = mocker.MagicMock()
+        mocker.patch.object(type(table_dataset), "_connect", return_value=mock_connection)
+        type(table_dataset)._connections = {}
+        exists = mocker.patch.object(table_dataset, "_exists", return_value=False)
+
+        table_dataset.save(dummy_table)
+
+        exists.assert_called_once()
+        mock_connection.insert.assert_not_called()
+        mock_connection.create_table.assert_called_once_with(
+            "test", dummy_table, overwrite=False, **table_dataset._save_args
+        )
+
+    @pytest.mark.parametrize(
+        "save_args", [{"materialized": "table", "mode": "overwrite"}], indirect=True
+    )
+    def test_save_mode_overwrite_duckdb_uses_insert_for_existing_table(
+        self, table_dataset, dummy_table, mocker
+    ):
+        mock_connection = mocker.MagicMock()
+        mock_connection.name = "duckdb"
+        mocker.patch.object(type(table_dataset), "_connect", return_value=mock_connection)
+        type(table_dataset)._connections = {}
+        exists = mocker.patch.object(table_dataset, "_exists", return_value=True)
+
+        table_dataset.save(dummy_table)
+
+        exists.assert_called_once()
+        mock_connection.insert.assert_called_once_with("test", dummy_table, overwrite=True)
+
     def test_unsupported_save_mode_raises(self, database_name, connection_config):
         """Providing an unsupported save mode should raise a DatasetError."""
         with pytest.raises(

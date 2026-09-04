@@ -242,7 +242,20 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                     f"not support {method_name}s."
                 )
         elif self._mode == "overwrite":
-            writer(self._table_name, data, overwrite=True, **self._save_args)
+            if self.connection.name == "duckdb" and self._materialized == "table":
+                if self._exists() and hasattr(self.connection, "insert"):
+                    insert_args = (
+                        {"database": self._save_args["database"]}
+                        if "database" in self._save_args
+                        else {}
+                    )
+                    self.connection.insert(
+                        self._table_name, data, overwrite=True, **insert_args
+                    )
+                else:
+                    writer(self._table_name, data, overwrite=False, **self._save_args)
+            else:
+                writer(self._table_name, data, overwrite=True, **self._save_args)
         elif self._mode in {"error", "errorifexists"}:
             writer(self._table_name, data, overwrite=False, **self._save_args)
         elif self._mode == "ignore" and not self._exists():

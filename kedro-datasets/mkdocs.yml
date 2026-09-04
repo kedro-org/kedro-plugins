@@ -162,6 +162,7 @@ plugins:
 
         API and External Services:
           - api/kedro_datasets/api.APIDataset.md: REST API data fetching
+          - api/kedro_datasets/api.PaginatedAPIDataset.md: Paginated REST API data fetching
 
         Experimental Datasets Overview:
           - api/kedro_datasets_experimental/index.md: Experimental features documentation
@@ -255,6 +256,7 @@ nav:
         - Overview: index.md
         - API:
           - api.APIDataset: api/kedro_datasets/api.APIDataset.md
+          - api.PaginatedAPIDataset: api/kedro_datasets/api.PaginatedAPIDataset.md
         - Biosequence:
           - biosequence.BioSequenceDataset: api/kedro_datasets/biosequence.BioSequenceDataset.md
         - Dask:

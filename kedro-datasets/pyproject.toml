@@ -301,6 +301,7 @@ test = [
     "hdfs>=2.5.8, <3.0",
     "holoviews>=1.13.0",
     "ibis-framework[duckdb,examples]",
+    "sqlglot<30.18.0",
     "ipython>=7.31.1, <8.0",
     "Jinja2<3.2.0",
     "joblib>=0.14",

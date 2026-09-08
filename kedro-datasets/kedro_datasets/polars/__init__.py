@@ -19,6 +19,13 @@ except (ImportError, RuntimeError):
     EagerPolarsDataset: Any
 
 try:
+    from .iceberg_dataset import IcebergDataset
+except (ImportError, RuntimeError):
+    # For documentation builds that might fail due to dependency issues
+    # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+    IcebergDataset: Any
+
+try:
     from .lazy_polars_dataset import LazyPolarsDataset
 except (ImportError, RuntimeError):
     # For documentation builds that might fail due to dependency issues
@@ -32,6 +39,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "eager_polars_dataset": [
             "EagerPolarsDataset",
         ],
+        "iceberg_dataset": ["IcebergDataset"],
         "lazy_polars_dataset": ["LazyPolarsDataset"],
     },
 )

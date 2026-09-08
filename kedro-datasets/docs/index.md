@@ -7,6 +7,7 @@
 Name | Description
 ------|-------------
 [api.APIDataset](api/kedro_datasets/api.APIDataset.md) | ``APIDataset`` loads/saves data from/to HTTP(S) APIs. It uses the python requests library: <https://requests.readthedocs.io/en/latest/>
+[api.PaginatedAPIDataset](api/kedro_datasets/api.PaginatedAPIDataset.md) | ``PaginatedAPIDataset`` loads and combines list results from JSON APIs using next-page links.
 [biosequence.BioSequenceDataset](api/kedro_datasets/biosequence.BioSequenceDataset.md) | ``BioSequenceDataset`` loads and saves data to a sequence file.
 [dask.CSVDataset](api/kedro_datasets/dask.CSVDataset.md) | ``CSVDataset`` loads and saves data to comma-separated value file(s). It uses Dask remote data services to handle the corresponding load and save operations.
 [dask.ParquetDataset](api/kedro_datasets/dask.ParquetDataset.md) | ``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask remote data services to handle the corresponding load and save operations.

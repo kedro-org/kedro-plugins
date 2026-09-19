@@ -2327,7 +2327,7 @@
             "properties": {
               "path": {
                 "type": "string",
-                "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
+                "description": "Path to the folder containing partitioned data. Accepts strings\nand ``os.PathLike`` objects.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
               },
               "dataset": {
                 "pattern": ".*",
@@ -2396,7 +2396,7 @@
             "properties": {
               "path": {
                 "type": "string",
-                "description": "Path to the folder containing partitioned data.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
+                "description": "Path to the folder containing partitioned data. Accepts strings\nand ``os.PathLike`` objects.\nIf path starts with the protocol (e.g., ``s3://``) then the\ncorresponding ``fsspec`` concrete filesystem implementation will\nbe used. If protocol is not specified,\n``fsspec.implementations.local.LocalFileSystem`` will be used.\n**Note:** Some concrete implementations are bundled with ``fsspec``,\nwhile others (like ``s3`` or ``gcs``) must be installed separately\nprior to usage of the ``PartitionedDataset``."
               },
               "dataset": {
                 "pattern": ".*",
@@ -3273,7 +3273,7 @@
                   "object",
                   "null"
                 ],
-                "description": "Optional mapping of any options,\npassed to the `DataFrameWriter.saveAsTable` as kwargs.\nKey example of this is `partitionBy` which allows data partitioning\non a list of column names.\nOther `HiveOptions` can be found here:\nhttps://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables"
+                "description": "Optional mapping of any options,\npassed to the `DataFrameWriter.saveAsTable` as kwargs.\nKey example of this is `partitionBy` which allows data partitioning\non a list of column names.\nSet `path` to a non-empty local or Hadoop-compatible filesystem path\nto create an external table at that location. If omitted, Spark uses\nits default managed-table location.\nOther `HiveOptions` can be found here:\nhttps://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables"
               },
               "metadata": {
                 "type": [

@@ -57,6 +57,12 @@ PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 MISSING_USER_IDENTITY = "missing_user_identity"
 
+# Validator class paths from these top-level packages are public library names;
+# anything else is user-defined and reported as "custom".
+_PUBLIC_VALIDATOR_NAMESPACES = frozenset(
+    {"pandera", "pydantic", "great_expectations", "kedro", "kedro_datasets"}
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -368,6 +374,21 @@ def _format_project_statistics_data(
     # can be aggregated/grouped in Heap dashboards.
     for type_name, count in dataset_type_counts.items():
         properties[f"dataset_type_count.{type_name}"] = count
+
+    # Validator declarations, exposed by the public `validator_specs` property
+    # on `kedro >= 1.6` catalogs. Only public library names are reported;
+    # user-defined validators are bucketed as "custom".
+    validator_specs = getattr(catalog, "validator_specs", None)
+    if validator_specs:
+        properties["number_of_validated_datasets"] = len(validator_specs)
+        validator_type_counts: dict[str, int] = {}
+        for spec in validator_specs.values():
+            class_path = getattr(spec, "class_path", "") or ""
+            top_level = class_path.split(".")[0]
+            key = top_level if top_level in _PUBLIC_VALIDATOR_NAMESPACES else "custom"
+            validator_type_counts[key] = validator_type_counts.get(key, 0) + 1
+        for type_name, count in validator_type_counts.items():
+            properties[f"validator_type_count.{type_name}"] = count
     return properties
 
 
@@ -382,7 +403,8 @@ def _get_heap_app_id() -> str:
 
 def _send_heap_event(
     event_name: str, identity: str, properties: dict[str, Any] | None = None
-) -> None:
+) -> bool:
+    """Send one event to Heap. Returns True if Heap accepted it."""
     data = {
         "app_id": _get_heap_app_id(),
         "event": event_name,
@@ -401,11 +423,14 @@ def _send_heap_event(
                 resp.status_code,
                 resp.reason,
             )
+            return False
+        return True
     except requests.exceptions.RequestException as exc:
         logger.debug(
             "Failed to send data to Heap. Exception of type '%s' was raised.",
             type(exc).__name__,
         )
+        return False
 
 
 def _check_for_telemetry_consent(project_path: Path | None) -> bool | None:

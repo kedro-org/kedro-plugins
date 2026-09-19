@@ -67,7 +67,7 @@ class IncrementalDataset(PartitionedDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        path: str,
+        path: str | os.PathLike,
         dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
@@ -80,7 +80,8 @@ class IncrementalDataset(PartitionedDataset):
         """Creates a new instance of ``IncrementalDataset``.
 
         Args:
-            path: Path to the folder containing partitioned data.
+            path: Path to the folder containing partitioned data. Accepts strings
+                and ``os.PathLike`` objects.
                 If path starts with the protocol (e.g., ``s3://``) then the
                 corresponding ``fsspec`` concrete filesystem implementation will
                 be used. If protocol is not specified,

@@ -1,5 +1,10 @@
 # Upcoming release
 
+# Release 0.9.0
+* Added validator declaration counts to the `Kedro Project Statistics` event, it includes `number_of_validated_datasets` and per-library `validator_type_count.*`, with user-defined validators reported as `custom`.
+* Added `kedro_telemetry.api.send_telemetry_event`, a public helper other Kedro plugins can call to send usage events through the standard consent flow.
+* Added support for `kedro skills` usage events sent by the [`kedro-skills`](https://github.com/kedro-org/kedro-skills) plugin.
+
 # Release 0.8.0
 * Added support for Python 3.14.
 * Fixed `Kedro Project Statistics` event so dataset-type counts are accepted by Heap. Counts are now sent as individual scalar properties named `dataset_type_count.<dataset-class-FQN>` instead of a single nested `dataset_types` object, which Heap's API rejects.

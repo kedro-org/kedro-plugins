@@ -3,6 +3,7 @@
 """
 from __future__ import annotations
 
+import os
 import pickle
 from copy import deepcopy
 from typing import Any
@@ -38,6 +39,29 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
           table: table_name
           write_mode: overwrite
         ```
+
+        An external Hive table can be configured by passing Spark's ``path`` option
+        through ``save_args``. Spark stores the table metadata in the Hive metastore
+        and the table data at the supplied location:
+
+        ```yaml
+        external_hive_dataset:
+          type: spark.SparkHiveDataset
+          database: hive_database
+          table: external_table
+          write_mode: overwrite
+          save_args:
+            format: parquet
+            path: s3a://bucket/path/to/external_table
+            partitionBy:
+              - name
+        ```
+
+        If ``save_args.path`` is omitted, Spark's default managed-table location is
+        used. The path must be a non-empty local or Hadoop-compatible filesystem path
+        when it is provided. The existing ``append``, ``error``, ``errorifexists``,
+        ``overwrite`` and ``upsert`` modes are passed through unchanged; overwrite and
+        upsert replace data at the configured external location.
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
@@ -84,6 +108,9 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
                 passed to the `DataFrameWriter.saveAsTable` as kwargs.
                 Key example of this is `partitionBy` which allows data partitioning
                 on a list of column names.
+                Set `path` to a non-empty local or Hadoop-compatible filesystem path
+                to create an external table at that location. If omitted, Spark uses
+                its default managed-table location.
                 Other `HiveOptions` can be found here:
                 https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables
             metadata: Any arbitrary metadata.
@@ -116,13 +143,26 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+
+        if "path" in self._save_args:
+            external_location = self._save_args["path"]
+            if isinstance(external_location, os.PathLike):
+                external_location = os.fspath(external_location)
+                self._save_args["path"] = external_location
+            if not isinstance(external_location, str) or not external_location.strip():
+                raise DatasetError(
+                    "'save_args.path' must be a non-empty local or Hadoop-compatible "
+                    "filesystem path when configuring an external Hive table"
+                )
+
+        self._external_location = self._save_args.get("path")
         self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
         self.metadata = metadata
 
     def _describe(self) -> dict[str, Any]:
-        return {
+        description = {
             "database": self._database,
             "table": self._table,
             "write_mode": self._write_mode,
@@ -130,6 +170,9 @@ class SparkHiveDataset(AbstractDataset[DataFrame, DataFrame]):
             "partition_by": self._save_args.get("partitionBy"),
             "format": self._format,
         }
+        if self._external_location is not None:
+            description["external_location"] = self._external_location
+        return description
 
     def _create_hive_table(self, data: DataFrame, mode: str | None = None):
         _mode: str = mode or self._write_mode

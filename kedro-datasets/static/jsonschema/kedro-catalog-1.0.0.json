@@ -1396,6 +1396,10 @@
                 "fs_args": {
                   "type": "object",
                   "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)"
+                },
+                "skip_existing": {
+                  "type": "boolean",
+                  "description": "If True, skip partitions whose destination file or directory already exists, without evaluating their lazy data or writing them again. Cannot be combined with ``overwrite=True``."
                 }
               }
             }

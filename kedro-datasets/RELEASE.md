@@ -3,6 +3,7 @@
 ## Major features and improvements
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
+- Added `skip_existing=True` to `partitions.PartitionedDataset` to preserve existing outputs and avoid recomputing their lazy data when retrying a save.
 
 ## Breaking changes
 ## Breaking changes to experimental datasets
@@ -18,7 +19,6 @@
 # Release 9.6.0
 
 ## Major features and improvements
-* Added `skip_existing=True` to `partitions.PartitionedDataset` to preserve existing outputs and avoid recomputing their lazy data when retrying a save.
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 

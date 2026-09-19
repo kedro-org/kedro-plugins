@@ -67,6 +67,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
               index: true
           filename_suffix: '.dat'
           save_lazily: True
+          skip_existing: True
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
@@ -146,6 +147,7 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
         overwrite: bool = False,
+        skip_existing: bool = False,
         save_lazily: bool = True,
         metadata: dict[str, Any] | None = None,
     ) -> None:
@@ -187,6 +189,14 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
+            skip_existing: If True, skip partitions whose destination file or
+                directory already exists, without evaluating their lazy data or
+                writing them again. Defaults to False. Cannot be combined with
+                ``overwrite=True``. For versioned datasets, an existing partition
+                directory is skipped regardless of the save version. Existence
+                does not guarantee completeness or freshness: remove incomplete
+                outputs before retrying, and disable skipping to recompute data.
+                The existence check and write are not atomic across concurrent writers.
             save_lazily: Parameter to enable/disable lazy saving, the default is True. Meaning that if callable object
                 is passed as data to save, the partition’s data will not be materialised until it is time to write.
                 Lazy saving example:
@@ -195,16 +205,20 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DatasetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If both ``overwrite`` and ``skip_existing`` are True.
         """
         # for performance reasons
         from fsspec.utils import infer_storage_options  # noqa: PLC0415
 
         super().__init__()
 
+        if overwrite and skip_existing:
+            raise DatasetError("'overwrite' and 'skip_existing' cannot both be True.")
+
         self._path = os.fspath(path)
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
+        self._skip_existing = skip_existing
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._cached_partitions: list[str] | None = None
         self._save_lazily = save_lazily
@@ -323,12 +337,17 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         return partitions
 
     def save(self, data: dict[str, Any]) -> None:
+        if self._skip_existing:
+            self._invalidate_caches()
+
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
         for partition_id, partition_data in sorted(data.items()):
-            kwargs = deepcopy(self._dataset_config)
             partition = self._partition_to_path(partition_id)
+            if self._skip_existing and self._filesystem.exists(partition):
+                continue
+            kwargs = deepcopy(self._dataset_config)
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore

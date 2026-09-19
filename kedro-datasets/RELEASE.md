@@ -18,6 +18,7 @@
 # Release 9.6.0
 
 ## Major features and improvements
+* Added `skip_existing=True` to `partitions.PartitionedDataset` to preserve existing outputs and avoid recomputing their lazy data when retrying a save.
 * Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
 - Added the following new **experimental** datasets:
 

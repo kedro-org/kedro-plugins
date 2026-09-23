@@ -473,7 +473,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
                 f"(connection_type='{self._connection_type}'): {e}"
             ) from e
 
-    def _load(self) -> WeaviateVectorStoreHandle:
+    def load(self) -> WeaviateVectorStoreHandle:
         client = self._connect()
         try:
             if self._create_collection_if_missing:

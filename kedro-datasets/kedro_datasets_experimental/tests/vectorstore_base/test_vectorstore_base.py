@@ -71,7 +71,7 @@ class DummyVectorStoreDataset(AbstractVectorStoreDataset):
         super().__init__()
         self._collection = collection
 
-    def _load(self) -> DummyHandle:
+    def load(self) -> DummyHandle:
         return DummyHandle(self._collection)
 
     def _describe(self) -> dict[str, Any]:

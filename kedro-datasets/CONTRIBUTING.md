@@ -39,9 +39,9 @@ Below is a guide to help you understand the process of contributing a new datase
 
 #### Core datasets
 
-Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](https://docs.kedro.org/en/stable/about/technical_steering_committee/) and adhere to specific standards. These datasets adhere to the following requirements:
+Core datasets are maintained by the [Kedro Technical Steering Committee (TSC) maintainers](https://docs.kedro.org/en/stable/about/technical_steering_committee/#maintainers) and adhere to specific standards. These datasets adhere to the following requirements:
 
-1. Must be something that the Kedro TSC is willing to maintain.
+1. Must be something that the Kedro TSC maintainers are willing to maintain.
 2. Must be fully documented.
 3. Must have working doctests (unless complex cloud/DB setup required, which can be discussed in the review).
 4. Must run as part of the regular CI/CD jobs.
@@ -51,7 +51,7 @@ Core datasets are maintained by the [Kedro Technical Steering Committee (TSC)](h
 
 #### Experimental datasets
 
-The requirements for experimental datasets are more flexible and these datasets are not maintained by the Kedro TSC. Experimental datasets:
+The requirements for experimental datasets are more flexible and these datasets are not maintained by the Kedro TSC maintainers. Experimental datasets:
 
 1. Do not need to be fully documented but must have docstrings explaining their use.
 2. Do not need to run as part of regular CI/CD jobs.
@@ -62,7 +62,7 @@ The requirements for experimental datasets are more flexible and these datasets 
 If your dataset is initially considered experimental but matures over time, it may qualify for graduation to a core dataset.
 
 1. Anyone, including TSC members and users, can trigger the graduation process.
-2. An experimental dataset requires 1/2 approval from the TSC to graduate to the core datasets space.
+2. An experimental dataset requires 1/2 approval from the TSC maintainers to graduate to the core datasets space.
 3. Your dataset can graduate when it meets all requirements of a core dataset.
 
 ### Demotion of datasets
@@ -70,7 +70,7 @@ If your dataset is initially considered experimental but matures over time, it m
 A dataset initially considered core might be demoted if it no longer meets the required standards.
 
 1. The demotion process will be initiated by someone from the TSC.
-2. A core dataset requires 1/2 approval from the TSC to be demoted to the experimental datasets space.
+2. A core dataset requires 1/2 approval from the TSC maintainers to be demoted to the experimental datasets space.
 
 ## Your first contribution
 
@@ -117,7 +117,7 @@ We use a branching model that helps us keep track of branches in a logical, cons
 3. Add your dataset to `kedro_datasets_experimental`.
 4. Make sure all your commits are signed off by using `-s` flag with `git commit`.
 5. Open a PR against the `main` branch and make sure that the PR title follows the [Conventional Commits specs](https://www.conventionalcommits.org/en/v1.0.0/) with the scope `(datasets)`.
-6. The TSC will review your contribution and decide whether they want to maintain the dataset, and thus, whether it is contributed as a core or experimental dataset.
+6. The TSC maintainers will review your contribution and decide whether they want to maintain the dataset, and thus, whether it is contributed as a core or experimental dataset.
 7. Make sure the CI builds are green (have a look at the section [Running checks locally](#running-checks-locally) below).
 8. Update the PR according to the reviewer's comments.
 

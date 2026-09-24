@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.JSONDataset
     options:
-        members: true
         show_source: true

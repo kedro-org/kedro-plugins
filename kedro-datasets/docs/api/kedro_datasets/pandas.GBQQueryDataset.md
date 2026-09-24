@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.pandas.GBQQueryDataset
     options:
-        members: true
         show_source: true

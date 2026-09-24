@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.networkx.GMLDataset
     options:
-        members: true
         show_source: true

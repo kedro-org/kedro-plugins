@@ -67,6 +67,12 @@ plugins:
             docstring_section_style: list
             separate_signature: true
             show_root_heading: true
+            filters: ["!^_"]
+            inherited_members: true
+            show_if_no_docstring: true
+            # Load `kedro_datasets` up front, so experimental datasets can inherit
+            # members from its base classes regardless of page build order.
+            preload_modules: [kedro_datasets]
             docstring_options:
               ignore_init_summary: true
               warn_unknown_params: false

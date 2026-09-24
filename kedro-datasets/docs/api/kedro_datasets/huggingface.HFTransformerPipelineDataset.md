@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.HFTransformerPipelineDataset
     options:
-        members: true
         show_source: true

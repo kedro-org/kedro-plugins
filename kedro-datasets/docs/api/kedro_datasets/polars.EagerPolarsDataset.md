@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.polars.EagerPolarsDataset
     options:
-        members: true
         show_source: true

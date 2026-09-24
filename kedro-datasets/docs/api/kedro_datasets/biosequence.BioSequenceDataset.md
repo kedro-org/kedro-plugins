@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.biosequence.BioSequenceDataset
     options:
-        members: true
         show_source: true

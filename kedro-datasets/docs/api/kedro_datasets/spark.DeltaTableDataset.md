@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.spark.DeltaTableDataset
     options:
-        members: true
         show_source: true

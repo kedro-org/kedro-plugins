@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.CSVDataset
     options:
-        members: true
         show_source: true

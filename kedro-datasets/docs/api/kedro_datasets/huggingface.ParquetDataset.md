@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.ParquetDataset
     options:
-        members: true
         show_source: true

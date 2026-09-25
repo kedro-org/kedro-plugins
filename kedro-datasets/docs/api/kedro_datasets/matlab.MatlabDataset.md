@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.matlab.MatlabDataset
     options:
-        members: true
         show_source: true

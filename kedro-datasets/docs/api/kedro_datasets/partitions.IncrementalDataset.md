@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.partitions.IncrementalDataset
     options:
-        members: true
         show_source: true

@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.spark.SparkDatasetV2
     options:
-        members: true
         show_source: true

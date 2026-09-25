@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.HFDataset
     options:
-        members: true
         show_source: true

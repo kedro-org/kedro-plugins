@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.holoviews.HoloviewsWriter
     options:
-        members: true
         show_source: true

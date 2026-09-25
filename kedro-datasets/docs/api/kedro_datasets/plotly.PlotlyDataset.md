@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.plotly.PlotlyDataset
     options:
-        members: true
         show_source: true

@@ -3,6 +3,7 @@
 ## Major features and improvements
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
+- Added `polars.IcebergDataset` to support loading and saving Apache Iceberg tables using Polars and PyIceberg.
 
 ## Breaking changes
 ## Breaking changes to experimental datasets
@@ -12,6 +13,7 @@
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 
 ## Community contributions
+- [Saurav Gupta](https://github.com/Saurav-Gupta-9741)
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)

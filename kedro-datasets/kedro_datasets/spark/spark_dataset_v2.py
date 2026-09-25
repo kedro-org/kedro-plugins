@@ -234,7 +234,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
         """
         return to_spark_path(self._protocol, self._path)
 
-    def _load(self) -> DataFrame:
+    def load(self) -> DataFrame:
         """Loads data from filepath.
 
         Returns:
@@ -255,7 +255,7 @@ class SparkDatasetV2(AbstractVersionedDataset):
             .load(spark_load_path)
         )
 
-    def _save(self, data: DataFrame | pd.DataFrame) -> None:
+    def save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves pyspark dataframe.
 
         Args:

@@ -417,7 +417,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             primary_key=primary_key,
         )
 
-    def _load(self) -> DataFrame | pd.DataFrame:
+    def load(self) -> DataFrame | pd.DataFrame:
         """Loads the version of data in the format defined in the init
         (spark|pandas dataframe).
 
@@ -445,7 +445,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             data = data.toPandas()
         return data
 
-    def _save(self, data: DataFrame | pd.DataFrame) -> None:
+    def save(self, data: DataFrame | pd.DataFrame) -> None:
         """Saves the data based on the write_mode and dataframe_type in the init.
         If write_mode is pandas, Spark dataframe is created first.
         If schema is provided, data is matched to schema before saving

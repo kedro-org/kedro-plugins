@@ -377,7 +377,7 @@ class ChromaDBDataset(AbstractVectorStoreDataset):
                 f"(client_type='{self._client_type}'): {e}"
             ) from e
 
-    def _load(self) -> ChromaVectorStoreHandle:
+    def load(self) -> ChromaVectorStoreHandle:
         client = self._create_client()
         # Closing an ephemeral client would destroy the process-shared
         # in-memory store, so only persistent/http clients are ever closed.

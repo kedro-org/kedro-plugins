@@ -9,6 +9,7 @@
 ## Bug fixes and other changes
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
 - Added `os.PathLike` support for `redis.PickleDataset` keys.
+- Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 
 ## Community contributions
 - [akira-in-tech](https://github.com/akira-in-tech)

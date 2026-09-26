@@ -45,6 +45,7 @@ spark-cloud = ["kedro-datasets[spark-s3,spark-gcs,spark-azure]"]  # All cloud fi
 
 # Individual Spark datasets
 spark-deltatabledataset = ["kedro-datasets[spark-core,delta-base]"]
+spark-gbqquerydataset = ["kedro-datasets[spark-core]"]
 spark-sparkdataset = ["kedro-datasets[spark-core]"]
 spark-sparkhivedataset = ["kedro-datasets[spark-core]"]
 spark-sparkjdbcdataset = ["kedro-datasets[spark-core]"]
@@ -52,6 +53,7 @@ spark-sparkstreamingdataset = ["kedro-datasets[spark-core]"]
 
 spark-all = [
     """kedro-datasets[spark-deltatabledataset,\
+    spark-gbqquerydataset,\
     spark-sparkdataset,\
     spark-sparkhivedataset,\
     spark-sparkjdbcdataset,\

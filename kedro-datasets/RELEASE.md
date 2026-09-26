@@ -1,18 +1,23 @@
 # Upcoming release
 
 ## Major features and improvements
+
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
 ## Breaking changes
+
 ## Breaking changes to experimental datasets
+
 ## Bug fixes and other changes
+
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
 - Added `os.PathLike` support for `redis.PickleDataset` keys.
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 - Added the missing `spark-gbqquerydataset` extra for `spark.GBQQueryDataset` and included it in `spark-all`.
 
 ## Community contributions
+
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
@@ -20,22 +25,27 @@
 # Release 9.6.0
 
 ## Major features and improvements
-* Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
-- Added the following new **experimental** datasets:
 
-| Type                     | Description                                      | Location                           |
-| ------------------------ | ------------------------------------------------ | ---------------------------------- |
+- Added `vectorstore_base.AbstractVectorStoreDataset` and `vectorstore_base.VectorStoreHandle`, backend-agnostic abstract base classes for vector store datasets.
+
+* Added the following new **experimental** datasets:
+
+| Type                                  | Description                                                                                                        | Location                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
 | `weaviate.WeaviateVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in Weaviate vector database collections. | `kedro_datasets_experimental.weaviate` |
-| `faiss.FAISSVectorStoreDataset` | A dataset that loads a handle for adding, searching, and deleting entries in a FAISS vector store. | `kedro_datasets_experimental.faiss` |
-| `feast.FeastDataset` | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/). | `kedro_datasets_experimental.feast` |
+| `faiss.FAISSVectorStoreDataset`       | A dataset that loads a handle for adding, searching, and deleting entries in a FAISS vector store.                 | `kedro_datasets_experimental.faiss`    |
+| `feast.FeastDataset`                  | A dataset that handles storing and retrieving features from [Feast](https://feast.dev/).                           | `kedro_datasets_experimental.feast`    |
 
 ## Breaking changes
+
 - The minimum `pyspark` version for the `spark-base` and `spark-local` extras is now `3.3` — users still on `pyspark<3.3` must upgrade before using these extras.
 
 ## Breaking changes to experimental datasets
-* Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
+
+- Refactored `chromadb.ChromaDBDataset` to the `VectorStoreHandle` approach. `load_args`/`save_args` are removed; the extras group is renamed from `chromadb-chromadbdataset` to `chromadb-dataset`.
 
 ## Bug fixes and other changes
+
 - Fixed `spark.SparkHiveDataset.exists()` failing on Spark Connect sessions (e.g. Databricks Connect V2) by replacing the JVM-only `_jsparkSession` call with the PySpark `Catalog.tableExists` API.
 - Fixed `MLRunModel` so user-supplied `load_args` are now passed to `joblib.load()` (previously silently dropped). Added a deserialization warning to the docstring.
 - Hardened `TensorFlowModelDataset`: `safe_mode=True` is now the default for `load_model()` to prevent arbitrary code execution from untrusted model files. Fixed a bug where `tf_device` was lost from `load_args` after the first load call.
@@ -45,6 +55,7 @@
 - Added `os.PathLike` support for `SVMLightDataset`.
 
 ## Community contributions
+
 - [JokeGbenro](https://github.com/JokeGbenro)
 - [samiat4911](https://github.com/samiat4911)
 - [Shizoqua](https://github.com/Shizoqua)
@@ -53,9 +64,11 @@
 # Release 9.5.0
 
 ## Major features and improvements
-* Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
+
+- Added `send_individually` option to `APIDataset` to send list items as individual requests instead of batched arrays.
 
 ## Bug fixes and other changes
+
 - Hardened experimental `pytorch.PyTorchDataset`: `weights_only=True` is now enforced by default on load to block arbitrary code execution from untrusted `.pt` files, user-supplied `load_args` and `save_args` are now correctly passed to `torch.load` and `torch.save` (previously silently dropped), and the misleading "pickle-safe" docstring was corrected.
 - Fixed the `darts-torch-model-dataset` optional dependency to point at the real PyPI package `u8darts[all]`.
 - Repaired `polars.PolarsDatabaseDataset` end-to-end and added a full test suite for it.
@@ -64,6 +77,7 @@
 - Fixed `ibis.FileDataset` to support remote filepaths (e.g. `s3://`, `abfss://`, `hf://`) and added an `fs_args` argument to authenticate the filesystem used for version discovery.
 
 ## Community contributions
+
 - [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 - [Anton Nikishin](https://github.com/nikanton)
 - [GDaamn](https://github.com/GDaamn)
@@ -614,8 +628,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added the following new datasets:
 
-| Type                       | Description                                                            | Location                |
-| -------------------------- | ---------------------------------------------------------------------- | ----------------------- |
+| Type                       | Description                                                        | Location                |
+| -------------------------- | ------------------------------------------------------------------ | ----------------------- |
 | `polars.LazyPolarsDataset` | A `LazyPolarsDataset` using [polars](https://pola.rs/)'s Lazy API. | `kedro_datasets.polars` |
 
 - Moved `PartitionedDataSet` and `IncrementalDataSet` from the core Kedro repo to `kedro-datasets` and renamed to `PartitionedDataset` and `IncrementalDataset`.
@@ -653,8 +667,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added the following new datasets:
 
-| Type                    | Description                                                                                                                | Location                |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Type                    | Description                                                                                                            | Location                |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | `polars.GenericDataSet` | A `GenericDataSet` backed by [polars](https://pola.rs/), a lightning fast dataframe package built entirely using Rust. | `kedro_datasets.polars` |
 
 ## Bug fixes and other changes
@@ -806,10 +820,10 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - Added the following new datasets:
 
-| Type                             | Description                                                                                                           | Location                   |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://pola.rs/), a lighting fast dataframe package built entirely using Rust. | `kedro_datasets.polars`    |
-| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/product/features/snowpark/) DataFrames from tables in Snowflake.          | `kedro_datasets.snowflake` |
+| Type                             | Description                                                                                                        | Location                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `polars.CSVDataSet`              | A `CSVDataSet` backed by [polars](https://pola.rs/), a lighting fast dataframe package built entirely using Rust.  | `kedro_datasets.polars`    |
+| `snowflake.SnowparkTableDataSet` | Work with [Snowpark](https://www.snowflake.com/en/product/features/snowpark/) DataFrames from tables in Snowflake. | `kedro_datasets.snowflake` |
 
 ## Bug fixes and other changes
 

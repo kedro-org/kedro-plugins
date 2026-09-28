@@ -34,7 +34,7 @@ def versioned_study_dataset(database_name, load_args, load_version, save_version
 
 @pytest.fixture
 def dummy_study():
-    study = optuna.create_study("sqlite:///:memory:")
+    study = optuna.create_study(storage="sqlite:///:memory:")
     trial = optuna.trial.create_trial(
         params={"x": 2.0},
         distributions={"x": optuna.distributions.FloatDistribution(0, 10)},

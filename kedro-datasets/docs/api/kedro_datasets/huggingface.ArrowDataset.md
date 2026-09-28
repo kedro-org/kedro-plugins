@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.huggingface.ArrowDataset
     options:
-        members: true
         show_source: true

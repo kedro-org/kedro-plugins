@@ -13,7 +13,7 @@ from .vector_store_handle import VectorStoreHandle
 class AbstractVectorStoreDataset(AbstractDataset[Any, "VectorStoreHandle"]):
     """Base class for datasets that expose a vector store as a handle.
 
-    Subclasses must implement ``_load()`` (returning a ``VectorStoreHandle``)
+    Subclasses must implement ``load()`` (returning a ``VectorStoreHandle``)
     and ``_describe()``.  Saving is intentionally disabled: all write
     operations go through the handle (``handle.add()``, ``handle.delete()``).
 
@@ -36,7 +36,7 @@ class AbstractVectorStoreDataset(AbstractDataset[Any, "VectorStoreHandle"]):
         )
 
     @abstractmethod
-    def _load(self) -> VectorStoreHandle:
+    def load(self) -> VectorStoreHandle:
         """Return a connected handle for the target collection."""
 
     @abstractmethod

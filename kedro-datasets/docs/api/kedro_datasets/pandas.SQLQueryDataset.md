@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.pandas.SQLQueryDataset
     options:
-        members: true
         show_source: true

@@ -491,7 +491,7 @@ class FAISSVectorStoreDataset(AbstractVectorStoreDataset):
         self._metric = metric
         self.metadata = metadata
 
-    def _load(self) -> FAISSVectorStoreHandle:
+    def load(self) -> FAISSVectorStoreHandle:
         index_file = Path(self._index_path) if self._index_path else None
         meta_file = Path(f"{self._index_path}.meta.json") if self._index_path else None
 

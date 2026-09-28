@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.ibis.TableDataset
     options:
-        members: true
         show_source: true

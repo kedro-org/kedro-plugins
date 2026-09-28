@@ -111,7 +111,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
 
     If the data passed to the save method is not a list, ``APIDataset`` will check if it
     can be loaded as JSON. If true, it will send the data unchanged in a single request.
-    Otherwise, the ``_save`` method will try to dump the data in JSON format and execute
+    Otherwise, the ``save`` method will try to dump the data in JSON format and execute
     the request.
 
     The optional ``send_individually`` parameter in save_args (default: False) allows

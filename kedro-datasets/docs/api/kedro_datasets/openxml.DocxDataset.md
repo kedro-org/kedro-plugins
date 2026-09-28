@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.openxml.DocxDataset
     options:
-        members: true
         show_source: true

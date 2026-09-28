@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.dask.CSVDataset
     options:
-        members: true
         show_source: true

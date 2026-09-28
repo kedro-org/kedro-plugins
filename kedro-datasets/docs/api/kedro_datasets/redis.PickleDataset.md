@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.redis.PickleDataset
     options:
-        members: true
         show_source: true

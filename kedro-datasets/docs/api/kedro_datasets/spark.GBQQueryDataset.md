@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.spark.GBQQueryDataset
     options:
-        members: true
         show_source: true

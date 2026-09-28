@@ -220,7 +220,7 @@ class TestLoad:
         mock_client.collections.exists.return_value = False
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
             ds = WeaviateVectorStoreDataset(collection_name="MyCollection")
-            handle = ds._load()
+            handle = ds.load()
             assert isinstance(handle, WeaviateVectorStoreHandle)
             mock_client.collections.exists.assert_called_once_with("MyCollection")
             mock_client.collections.create.assert_called_once_with("MyCollection")
@@ -229,7 +229,7 @@ class TestLoad:
         mock_client.collections.exists.return_value = True
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
             ds = WeaviateVectorStoreDataset(collection_name="MyCollection")
-            handle = ds._load()
+            handle = ds.load()
             assert isinstance(handle, WeaviateVectorStoreHandle)
             mock_client.collections.get.assert_called_once_with("MyCollection")
             mock_client.collections.create.assert_not_called()
@@ -240,7 +240,7 @@ class TestLoad:
                 collection_name="MyCollection",
                 create_collection_if_missing=False,
             )
-            ds._load()
+            ds.load()
             mock_client.collections.get.assert_called_once_with("MyCollection")
             mock_client.collections.exists.assert_not_called()
 
@@ -249,7 +249,7 @@ class TestLoad:
         with patch(f"{MODULE}.weaviate.connect_to_local", return_value=mock_client):
             ds = WeaviateVectorStoreDataset(collection_name="Missing")
             with pytest.raises(DatasetError, match="Failed to access Weaviate collection"):
-                ds._load()
+                ds.load()
             mock_client.close.assert_called_once()
 
 

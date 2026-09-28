@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.openxml.PptxDataset
     options:
-        members: true
         show_source: true

@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.databricks.ManagedTableDataset
     options:
-        members: true
         show_source: true

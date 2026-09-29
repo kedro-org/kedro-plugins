@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.email.EmailMessageDataset
     options:
-        members: true
         show_source: true

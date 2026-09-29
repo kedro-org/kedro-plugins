@@ -4,10 +4,8 @@
 
 ::: kedro_datasets_experimental.weaviate.WeaviateVectorStoreDataset
     options:
-        members: true
         show_source: true
 
 ::: kedro_datasets_experimental.weaviate.WeaviateVectorStoreHandle
     options:
-        members: true
         show_source: true

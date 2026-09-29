@@ -4,5 +4,4 @@
 
 ::: kedro_datasets.svmlight.SVMLightDataset
     options:
-        members: true
         show_source: true

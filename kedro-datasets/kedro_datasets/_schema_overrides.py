@@ -60,8 +60,80 @@ _HF_FS_DATASET_OVERRIDE: dict[str, Any] = {
 
 # Dataset type id -> partial ``then`` fragment (deep-merged over generated output).
 SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
+    "databricks.ManagedTableDataset": {
+        "properties": {
+            "write_mode": {"enum": ["overwrite", "append", "upsert", None]},
+            "dataframe_type": {"enum": ["spark", "pandas"]},
+        },
+    },
     "huggingface.ArrowDataset": _HF_FS_DATASET_OVERRIDE,
     "huggingface.CSVDataset": _HF_FS_DATASET_OVERRIDE,
     "huggingface.JSONDataset": _HF_FS_DATASET_OVERRIDE,
     "huggingface.ParquetDataset": _HF_FS_DATASET_OVERRIDE,
+    "pandas.DeltaTableDataset": {
+        # The constructor accepts any letter case for AWS and UNITY.
+        "properties": {
+            "catalog_type": {"pattern": r"^([Aa][Ww][Ss]|[Uu][Nn][Ii][Tt][Yy])$"}
+        },
+    },
+    "pandas.SQLQueryDataset": {
+        "required": ["credentials"],
+        "anyOf": [
+            {
+                "required": ["sql"],
+                "properties": {"sql": {"type": "string", "minLength": 1}},
+            },
+            {
+                "required": ["filepath"],
+                "properties": {"filepath": {"type": "string", "minLength": 1}},
+            },
+        ],
+        # A catalog may use a named credentials reference or an inline mapping.
+        "properties": {
+            "credentials": {
+                "type": ["object", "string"],
+                "minProperties": 1,
+                "minLength": 1,
+            }
+        },
+    },
+    "polars.LazyPolarsDataset": {
+        # The constructor lowercases the format before checking these values.
+        "properties": {
+            "file_format": {"pattern": r"^([Cc][Ss][Vv]|[Pp][Aa][Rr][Qq][Uu][Ee][Tt])$"}
+        },
+    },
+    "snowflake.SnowparkTableDataset": {
+        "required": ["table_name", "credentials"],
+        "properties": {
+            "credentials": {
+                "type": ["object", "string"],
+                "minProperties": 1,
+                "minLength": 1,
+            }
+        },
+    },
+    "spark.SparkJDBCDataset": {
+        "anyOf": [
+            {
+                "required": ["url"],
+                "properties": {"url": {"type": "string", "minLength": 1}},
+            },
+            {
+                "required": ["credentials"],
+                "properties": {
+                    "credentials": {
+                        "type": "object",
+                        "required": ["url"],
+                        "properties": {"url": {"type": "string", "minLength": 1}},
+                    }
+                },
+            },
+            {
+                "required": ["credentials"],
+                "properties": {"credentials": {"type": "string", "minLength": 1}},
+            },
+        ],
+        "properties": {"credentials": {"type": ["object", "string", "null"]}},
+    },
 }

@@ -303,6 +303,7 @@ test = [
     "ibis-framework[duckdb,examples]",
     "sqlglot<30.18.0",  # https://github.com/ibis-project/ibis/issues/12101
     "ipython>=7.31.1, <8.0",
+    "jsonschema>=4.0,<5.0",
     "Jinja2<3.2.0",
     "joblib>=0.14",
     "jupyterlab>=3.0",

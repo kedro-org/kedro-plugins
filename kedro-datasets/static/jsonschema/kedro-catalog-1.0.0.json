@@ -323,11 +323,21 @@
                   "string",
                   "null"
                 ],
-                "description": "the mode to write the data into the table. If not\npresent, the dataset is read-only.\nOptions are:[\"overwrite\", \"append\", \"upsert\"].\n\"upsert\" mode requires primary_key field to be populated.\nDefaults to None."
+                "description": "the mode to write the data into the table. If not\npresent, the dataset is read-only.\nOptions are:[\"overwrite\", \"append\", \"upsert\"].\n\"upsert\" mode requires primary_key field to be populated.\nDefaults to None.",
+                "enum": [
+                  "overwrite",
+                  "append",
+                  "upsert",
+                  null
+                ]
               },
               "dataframe_type": {
                 "type": "string",
-                "description": "\"pandas\" or \"spark\" dataframe.\nDefaults to \"spark\"."
+                "description": "\"pandas\" or \"spark\" dataframe.\nDefaults to \"spark\".",
+                "enum": [
+                  "spark",
+                  "pandas"
+                ]
               },
               "primary_key": {
                 "type": [
@@ -1579,7 +1589,8 @@
                   "string",
                   "null"
                 ],
-                "description": "`AWS` or `UNITY` if filepath is not provided.\nDefaults to None."
+                "description": "`AWS` or `UNITY` if filepath is not provided.\nDefaults to None.",
+                "pattern": "^([Aa][Ww][Ss]|[Uu][Nn][Ii][Tt][Yy])$"
               },
               "catalog_name": {
                 "type": [
@@ -2155,9 +2166,11 @@
               "credentials": {
                 "type": [
                   "object",
-                  "null"
+                  "string"
                 ],
-                "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/core/engines.html#database-urls\nAdditional parameters for the sqlalchemy engine can be provided\nalongside the 'con' parameter."
+                "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/core/engines.html#database-urls\nAdditional parameters for the sqlalchemy engine can be provided\nalongside the 'con' parameter.",
+                "minProperties": 1,
+                "minLength": 1
               },
               "load_args": {
                 "type": [
@@ -2200,7 +2213,34 @@
                   "null"
                 ]
               }
-            }
+            },
+            "required": [
+              "credentials"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "sql"
+                ],
+                "properties": {
+                  "sql": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "filepath"
+                ],
+                "properties": {
+                  "filepath": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
           }
         },
         {
@@ -2903,7 +2943,8 @@
               },
               "file_format": {
                 "type": "string",
-                "description": "String which is used to match the appropriate load/save method\non a best effort basis. For example if 'csv' is passed the\n`polars.read_csv` and\n`polars.DataFrame.write_csv` methods will be identified. An error will\nbe raised unless\nat least one matching `read_{file_format}` or `write_{file_format}`."
+                "description": "String which is used to match the appropriate load/save method\non a best effort basis. For example if 'csv' is passed the\n`polars.read_csv` and\n`polars.DataFrame.write_csv` methods will be identified. An error will\nbe raised unless\nat least one matching `read_{file_format}` or `write_{file_format}`.",
+                "pattern": "^([Cc][Ss][Vv]|[Pp][Aa][Rr][Qq][Uu][Ee][Tt])$"
               },
               "load_args": {
                 "type": [
@@ -3019,7 +3060,8 @@
           },
           "then": {
             "required": [
-              "table_name"
+              "table_name",
+              "credentials"
             ],
             "properties": {
               "table_name": {
@@ -3057,9 +3099,11 @@
               "credentials": {
                 "type": [
                   "object",
-                  "null"
+                  "string"
                 ],
-                "description": "A dictionary with a snowpark connection string.\nTo find all supported arguments, see here:\nhttps://docs.snowflake.com/en/user-guide/python-connector-api.html#connect"
+                "description": "A dictionary with a snowpark connection string.\nTo find all supported arguments, see here:\nhttps://docs.snowflake.com/en/user-guide/python-connector-api.html#connect",
+                "minProperties": 1,
+                "minLength": 1
               },
               "session": {
                 "pattern": ".*"
@@ -3312,6 +3356,7 @@
               "credentials": {
                 "type": [
                   "object",
+                  "string",
                   "null"
                 ],
                 "description": "A dictionary of JDBC database connection arguments.\nNormally at least properties ``user`` and ``password`` with\ntheir corresponding values.  It updates ``properties``\nparameter in ``load_args`` and ``save_args`` in case it is\nprovided."
@@ -3337,7 +3382,50 @@
                 ],
                 "description": "Any arbitrary metadata.\nThis is ignored by Kedro, but may be consumed by users or external plugins."
               }
-            }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "credentials"
+                ],
+                "properties": {
+                  "credentials": {
+                    "type": "object",
+                    "required": [
+                      "url"
+                    ],
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "required": [
+                  "credentials"
+                ],
+                "properties": {
+                  "credentials": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
           }
         },
         {

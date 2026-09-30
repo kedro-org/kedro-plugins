@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from jsonschema import Draft7Validator
 
 from kedro_datasets import _generate_catalog_schema as generator
 
@@ -324,6 +325,100 @@ def test_schema_io_paths(monkeypatch, tmp_path):
 
 def test_committed_schema_is_current():
     assert generator.check_schema()
+
+
+@pytest.fixture(scope="module")
+def catalog_validator():
+    return Draft7Validator(generator.build_schema())
+
+
+@pytest.mark.parametrize(
+    ("dataset_type", "options", "valid"),
+    [
+        ("databricks.ManagedTableDataset", {"table": "t", "write_mode": None}, True),
+        (
+            "databricks.ManagedTableDataset",
+            {"table": "t", "write_mode": "append"},
+            True,
+        ),
+        (
+            "databricks.ManagedTableDataset",
+            {"table": "t", "write_mode": "invalid"},
+            False,
+        ),
+        (
+            "databricks.ManagedTableDataset",
+            {"table": "t", "dataframe_type": "pandas"},
+            True,
+        ),
+        (
+            "databricks.ManagedTableDataset",
+            {"table": "t", "dataframe_type": "polars"},
+            False,
+        ),
+        ("pandas.DeltaTableDataset", {"catalog_type": None}, True),
+        ("pandas.DeltaTableDataset", {"catalog_type": "Aws"}, True),
+        ("pandas.DeltaTableDataset", {"catalog_type": "UNITY"}, True),
+        ("pandas.DeltaTableDataset", {"catalog_type": "other"}, False),
+        (
+            "polars.LazyPolarsDataset",
+            {"filepath": "data.csv", "file_format": "CSV"},
+            True,
+        ),
+        (
+            "polars.LazyPolarsDataset",
+            {"filepath": "data.parquet", "file_format": "parquet"},
+            True,
+        ),
+        (
+            "polars.LazyPolarsDataset",
+            {"filepath": "data.json", "file_format": "json"},
+            False,
+        ),
+        (
+            "snowflake.SnowparkTableDataset",
+            {"table_name": "t", "credentials": "snowflake"},
+            True,
+        ),
+        (
+            "snowflake.SnowparkTableDataset",
+            {"table_name": "t", "credentials": {}},
+            False,
+        ),
+        ("snowflake.SnowparkTableDataset", {"table_name": "t"}, False),
+        (
+            "snowflake.SnowparkTableDataset",
+            {"table_name": "t", "credentials": None},
+            False,
+        ),
+        ("pandas.SQLQueryDataset", {"sql": "SELECT 1", "credentials": "db"}, True),
+        (
+            "pandas.SQLQueryDataset",
+            {"filepath": "query.sql", "credentials": {"con": "sqlite:///db"}},
+            True,
+        ),
+        ("pandas.SQLQueryDataset", {"sql": "SELECT 1"}, False),
+        ("pandas.SQLQueryDataset", {"sql": "SELECT 1", "credentials": {}}, False),
+        ("pandas.SQLQueryDataset", {"credentials": "db"}, False),
+        ("pandas.SQLQueryDataset", {"sql": "", "credentials": "db"}, False),
+        ("spark.SparkJDBCDataset", {"table": "t", "url": "jdbc:db"}, True),
+        (
+            "spark.SparkJDBCDataset",
+            {"table": "t", "credentials": {"url": "jdbc:db"}},
+            True,
+        ),
+        ("spark.SparkJDBCDataset", {"table": "t", "credentials": "db"}, True),
+        ("spark.SparkJDBCDataset", {"table": "t"}, False),
+        ("spark.SparkJDBCDataset", {"table": "t", "credentials": {"user": "a"}}, False),
+        ("spark.SparkJDBCDataset", {"table": "t", "url": ""}, False),
+    ],
+)
+def test_generated_schema_preserves_runtime_constraints(
+    catalog_validator, dataset_type, options, valid
+):
+    dataset = {"dataset": {"type": dataset_type, **options}}
+
+    assert catalog_validator.is_valid(dataset) is valid
 
 
 def test_schema_path_points_to_static_schema_file():

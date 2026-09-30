@@ -98,8 +98,8 @@ jobs:
           activate-environment: true
       - name: Install dependencies
         run: |
-          uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
           uv pip install -e kedro-datasets
+          python -c "import kedro; print(f'Kedro {kedro.__version__}')"
       - name: Check generated catalog schema
         working-directory: kedro-datasets
         run: python -m kedro_datasets._generate_catalog_schema --check

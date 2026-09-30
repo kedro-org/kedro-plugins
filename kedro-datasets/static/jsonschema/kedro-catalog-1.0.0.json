@@ -1399,7 +1399,7 @@
                 },
                 "skip_existing": {
                   "type": "boolean",
-                  "description": "If True, skip partitions whose destination file or directory already exists, without evaluating their lazy data or writing them again. Cannot be combined with ``overwrite=True``."
+                  "description": "If True, skip partitions for which the underlying dataset's `exists()` returns True, without evaluating their lazy data or writing them again. Cannot be combined with ``overwrite=True``."
                 }
               }
             }

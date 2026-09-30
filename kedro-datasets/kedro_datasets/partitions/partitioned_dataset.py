@@ -189,11 +189,12 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             overwrite: If True, any existing partitions will be removed.
-            skip_existing: If True, skip partitions whose destination file or
-                directory already exists, without evaluating their lazy data or
-                writing them again. Defaults to False. Cannot be combined with
-                ``overwrite=True``. For versioned datasets, an existing partition
-                directory is skipped regardless of the save version. Existence
+            skip_existing: If True, skip partitions for which the underlying
+                dataset's ``exists()`` returns True, without evaluating their
+                lazy data or writing them again. Defaults to False. Cannot be
+                combined with ``overwrite=True``. For versioned datasets,
+                ``exists()`` checks the latest load version. Datasets without
+                an existence implementation are treated as missing. Existence
                 does not guarantee completeness or freshness: remove incomplete
                 outputs before retrying, and disable skipping to recompute data.
                 The existence check and write are not atomic across concurrent writers.
@@ -345,12 +346,12 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
 
         for partition_id, partition_data in sorted(data.items()):
             partition = self._partition_to_path(partition_id)
-            if self._skip_existing and self._filesystem.exists(partition):
-                continue
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
+            if self._skip_existing and dataset.exists():
+                continue
             if callable(partition_data) and self._save_lazily:
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)

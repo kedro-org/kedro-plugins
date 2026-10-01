@@ -32,6 +32,10 @@ else:
     import tomli as tomllib
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
+from kedro_telemetry.collectors import (
+    collect_dataset_properties,
+    collect_validator_properties,
+)
 from kedro_telemetry.masking import _mask_kedro_cli
 
 HEAP_APPID_PROD = "2388822444"
@@ -56,12 +60,6 @@ CONFIG_FILENAME = "telemetry.toml"
 PYPROJECT_CONFIG_NAME = "pyproject.toml"
 UNDEFINED_PACKAGE_NAME = "undefined_package_name"
 MISSING_USER_IDENTITY = "missing_user_identity"
-
-# Validator class paths from these top-level packages are public library names;
-# anything else is user-defined and reported as "custom".
-_PUBLIC_VALIDATOR_NAMESPACES = frozenset(
-    {"pandera", "pydantic", "great_expectations", "kedro", "kedro_datasets"}
-)
 
 logger = logging.getLogger(__name__)
 
@@ -341,55 +339,12 @@ def _format_project_statistics_data(
     project_pipelines: dict,
 ) -> dict[str, Any]:
     """Add project statistics to send to Heap."""
-    # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
-    dataset_type_counts: dict[str, int] = {}
-    if hasattr(catalog, "keys") and callable(catalog.keys):
-        # Only collect dataset types for kedro >= 1.0 because `get_type` method is not available in earlier versions
-        dataset_names = catalog.keys()
-        for ds_name in dataset_names:
-            if ds_name.startswith(("parameters", "params:")):
-                continue
-            ds_type = catalog.get_type(ds_name) or ""
-            if ds_type.startswith(
-                ("kedro_datasets.", "kedro.io.", "kedro_datasets_experimental.")
-            ):
-                key = ds_type
-            else:
-                key = "custom"
-            dataset_type_counts[key] = dataset_type_counts.get(key, 0) + 1
-    else:
-        dataset_names = catalog.list()  # type: ignore
-
-    properties: dict[str, Any] = {
-        "number_of_datasets": sum(
-            1
-            for c in dataset_names
-            if not c.startswith("parameters") and not c.startswith("params:")
-        ),
+    return {
+        **collect_dataset_properties(catalog),
         "number_of_nodes": len(default_pipeline.nodes) if default_pipeline else None,  # type: ignore
         "number_of_pipelines": len(project_pipelines.keys()),
+        **collect_validator_properties(catalog),
     }
-    # Flatten per-type counts into individual scalar properties so they are
-    # accepted by Heap (which only allows string/number property values) and
-    # can be aggregated/grouped in Heap dashboards.
-    for type_name, count in dataset_type_counts.items():
-        properties[f"dataset_type_count.{type_name}"] = count
-
-    # Validator declarations, exposed by the public `validator_specs` property
-    # on `kedro >= 1.6` catalogs. Only public library names are reported;
-    # user-defined validators are bucketed as "custom".
-    validator_specs = getattr(catalog, "validator_specs", None)
-    if validator_specs:
-        properties["number_of_validated_datasets"] = len(validator_specs)
-        validator_type_counts: dict[str, int] = {}
-        for spec in validator_specs.values():
-            class_path = getattr(spec, "class_path", "") or ""
-            top_level = class_path.split(".")[0]
-            key = top_level if top_level in _PUBLIC_VALIDATOR_NAMESPACES else "custom"
-            validator_type_counts[key] = validator_type_counts.get(key, 0) + 1
-        for type_name, count in validator_type_counts.items():
-            properties[f"validator_type_count.{type_name}"] = count
-    return properties
 
 
 def _get_heap_app_id() -> str:

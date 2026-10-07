@@ -264,19 +264,16 @@ weaviate = ["kedro-datasets[weaviate-dataset]"]
 
 # Docs requirements
 docs = [
-   "mkdocs>=1.6.1",
-   "mkdocs-material>=9.6.11",
-   "mkdocs-material-extensions>=1.3.1",
-   "mkdocs-mermaid2-plugin>=1.2.1",
+   "zensical>=0.0.58",
    "mkdocs-autorefs>=1.4.1",
-   "mkdocs-get-deps>=0.2.0",
-   "mkdocstrings-python>=0.29.1",
+   "mkdocstrings>=0.29.1",
+   "mkdocstrings-python>=1.0.2",  # Zensical's mkdocstrings integration needs >= 1.0.2.
+   "griffe",  # Required by mkdocstrings-python for API documentation generation.
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
    "Jinja2<3.2.0",
    "black",
    "ruff",
-   "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 
 # Test requirements

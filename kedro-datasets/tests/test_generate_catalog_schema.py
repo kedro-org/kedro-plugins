@@ -356,10 +356,26 @@ def catalog_validator():
             {"table": "t", "dataframe_type": "polars"},
             False,
         ),
-        ("pandas.DeltaTableDataset", {"catalog_type": None}, True),
-        ("pandas.DeltaTableDataset", {"catalog_type": "Aws"}, True),
-        ("pandas.DeltaTableDataset", {"catalog_type": "UNITY"}, True),
-        ("pandas.DeltaTableDataset", {"catalog_type": "other"}, False),
+        (
+            "pandas.DeltaTableDataset",
+            {"filepath": "data/table", "catalog_type": None},
+            True,
+        ),
+        (
+            "pandas.DeltaTableDataset",
+            {"catalog_type": "Aws", "database": "db", "table": "t"},
+            True,
+        ),
+        (
+            "pandas.DeltaTableDataset",
+            {"catalog_type": "UNITY", "database": "db", "table": "t"},
+            True,
+        ),
+        (
+            "pandas.DeltaTableDataset",
+            {"catalog_type": "other", "database": "db", "table": "t"},
+            False,
+        ),
         (
             "polars.LazyPolarsDataset",
             {"filepath": "data.csv", "file_format": "CSV"},
@@ -417,6 +433,95 @@ def test_generated_schema_preserves_runtime_constraints(
     catalog_validator, dataset_type, options, valid
 ):
     dataset = {"dataset": {"type": dataset_type, **options}}
+
+    assert catalog_validator.is_valid(dataset) is valid
+
+
+@pytest.mark.parametrize(
+    ("dataset_type", "required_options"),
+    [
+        ("pandas.SQLQueryDataset", {"credentials": "db"}),
+        ("pandas.GBQQueryDataset", {}),
+        ("spark.GBQQueryDataset", {"materialization_dataset": "results"}),
+    ],
+)
+@pytest.mark.parametrize(
+    ("source_options", "valid"),
+    [
+        ({"sql": "SELECT 1"}, True),
+        ({"filepath": "query.sql"}, True),
+        ({"sql": "SELECT 1", "filepath": "query.sql"}, False),
+        ({}, False),
+        ({"sql": None}, False),
+        ({"filepath": None}, False),
+        ({"sql": ""}, False),
+        ({"filepath": ""}, False),
+        ({"sql": None, "filepath": None}, False),
+        ({"sql": "", "filepath": ""}, False),
+        ({"sql": "SELECT 1", "filepath": None}, True),
+        ({"sql": None, "filepath": "query.sql"}, True),
+        ({"sql": "SELECT 1", "filepath": ""}, True),
+        ({"sql": "", "filepath": "query.sql"}, True),
+    ],
+)
+def test_query_schema_requires_exactly_one_source(
+    catalog_validator, dataset_type, required_options, source_options, valid
+):
+    dataset = {"dataset": {"type": dataset_type, **required_options, **source_options}}
+
+    assert catalog_validator.is_valid(dataset) is valid
+
+
+@pytest.mark.parametrize(
+    ("options", "valid"),
+    [
+        ({"filepath": "data/table"}, True),
+        ({"catalog_type": "AWS", "database": "db", "table": "t"}, True),
+        (
+            {
+                "catalog_type": "UNITY",
+                "catalog_name": "catalog",
+                "database": "db",
+                "table": "t",
+            },
+            True,
+        ),
+        (
+            {
+                "filepath": "data/table",
+                "catalog_type": "AWS",
+                "database": "db",
+                "table": "t",
+            },
+            False,
+        ),
+        ({"filepath": "data/table", "catalog_type": "AWS"}, False),
+        ({}, False),
+        ({"filepath": None}, False),
+        ({"filepath": ""}, False),
+        ({"catalog_type": "AWS"}, False),
+        ({"catalog_type": "AWS", "database": "db"}, False),
+        ({"catalog_type": "AWS", "table": "t"}, False),
+        ({"database": "db", "table": "t"}, False),
+        ({"catalog_type": None, "database": "db", "table": "t"}, False),
+        ({"catalog_type": "AWS", "database": None, "table": "t"}, False),
+        ({"catalog_type": "AWS", "database": "db", "table": None}, False),
+        ({"catalog_type": "AWS", "database": "", "table": "t"}, False),
+        ({"catalog_type": "AWS", "database": "db", "table": ""}, False),
+        (
+            {"filepath": None, "catalog_type": "AWS", "database": "db", "table": "t"},
+            True,
+        ),
+        (
+            {"filepath": "", "catalog_type": "AWS", "database": "db", "table": "t"},
+            True,
+        ),
+    ],
+)
+def test_delta_table_schema_requires_filepath_or_catalog(
+    catalog_validator, options, valid
+):
+    dataset = {"dataset": {"type": "pandas.DeltaTableDataset", **options}}
 
     assert catalog_validator.is_valid(dataset) is valid
 

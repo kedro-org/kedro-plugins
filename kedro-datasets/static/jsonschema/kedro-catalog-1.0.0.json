@@ -1641,7 +1641,63 @@
                 ],
                 "description": "Extra arguments to pass into underlying\nfilesystem class constructor.\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``)."
               }
-            }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "filepath"
+                ],
+                "properties": {
+                  "filepath": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "not": {
+                  "required": [
+                    "catalog_type"
+                  ],
+                  "properties": {
+                    "catalog_type": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              {
+                "required": [
+                  "catalog_type",
+                  "database",
+                  "table"
+                ],
+                "properties": {
+                  "catalog_type": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "database": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "table": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "not": {
+                  "required": [
+                    "filepath"
+                  ],
+                  "properties": {
+                    "filepath": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         {
@@ -1828,7 +1884,31 @@
                 ],
                 "description": "Any arbitrary metadata.\nThis is ignored by Kedro, but may be consumed by users or external plugins."
               }
-            }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "sql"
+                ],
+                "properties": {
+                  "sql": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "filepath"
+                ],
+                "properties": {
+                  "filepath": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
           }
         },
         {
@@ -2214,10 +2294,7 @@
                 ]
               }
             },
-            "required": [
-              "credentials"
-            ],
-            "anyOf": [
+            "oneOf": [
               {
                 "required": [
                   "sql"
@@ -2240,6 +2317,9 @@
                   }
                 }
               }
+            ],
+            "required": [
+              "credentials"
             ]
           }
         },
@@ -3217,7 +3297,31 @@
                 ],
                 "description": "Any arbitrary metadata.\nThis is ignored by Kedro, but may be consumed by users or external plugins."
               }
-            }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "sql"
+                ],
+                "properties": {
+                  "sql": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "filepath"
+                ],
+                "properties": {
+                  "filepath": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
           }
         },
         {

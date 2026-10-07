@@ -20,6 +20,21 @@ from typing import Any
 # catalog in the usual way).
 EXCLUDED_SUBPACKAGES: set[str] = {"langchain"}
 
+# Query datasets require exactly one non-empty source, even though both
+# constructor parameters have defaults.
+_QUERY_SOURCE_OVERRIDE: dict[str, Any] = {
+    "oneOf": [
+        {
+            "required": ["sql"],
+            "properties": {"sql": {"type": "string", "minLength": 1}},
+        },
+        {
+            "required": ["filepath"],
+            "properties": {"filepath": {"type": "string", "minLength": 1}},
+        },
+    ],
+}
+
 _HF_FS_DATASET_OVERRIDE: dict[str, Any] = {
     "required": ["path"],
     "properties": {
@@ -71,23 +86,39 @@ SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
     "huggingface.JSONDataset": _HF_FS_DATASET_OVERRIDE,
     "huggingface.ParquetDataset": _HF_FS_DATASET_OVERRIDE,
     "pandas.DeltaTableDataset": {
+        "oneOf": [
+            {
+                "required": ["filepath"],
+                "properties": {"filepath": {"type": "string", "minLength": 1}},
+                # A catalog type conflicts with a filepath even if the other
+                # catalog fields are missing.
+                "not": {
+                    "required": ["catalog_type"],
+                    "properties": {"catalog_type": {"type": "string", "minLength": 1}},
+                },
+            },
+            {
+                "required": ["catalog_type", "database", "table"],
+                "properties": {
+                    "catalog_type": {"type": "string", "minLength": 1},
+                    "database": {"type": "string", "minLength": 1},
+                    "table": {"type": "string", "minLength": 1},
+                },
+                "not": {
+                    "required": ["filepath"],
+                    "properties": {"filepath": {"type": "string", "minLength": 1}},
+                },
+            },
+        ],
         # The constructor accepts any letter case for AWS and UNITY.
         "properties": {
             "catalog_type": {"pattern": r"^([Aa][Ww][Ss]|[Uu][Nn][Ii][Tt][Yy])$"}
         },
     },
+    "pandas.GBQQueryDataset": _QUERY_SOURCE_OVERRIDE,
     "pandas.SQLQueryDataset": {
+        **_QUERY_SOURCE_OVERRIDE,
         "required": ["credentials"],
-        "anyOf": [
-            {
-                "required": ["sql"],
-                "properties": {"sql": {"type": "string", "minLength": 1}},
-            },
-            {
-                "required": ["filepath"],
-                "properties": {"filepath": {"type": "string", "minLength": 1}},
-            },
-        ],
         # A catalog may use a named credentials reference or an inline mapping.
         "properties": {
             "credentials": {
@@ -113,6 +144,7 @@ SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
             }
         },
     },
+    "spark.GBQQueryDataset": _QUERY_SOURCE_OVERRIDE,
     "spark.SparkJDBCDataset": {
         "anyOf": [
             {

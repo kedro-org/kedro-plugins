@@ -745,13 +745,16 @@ class TestEagerDeltaDataset:
         dataset = EagerPolarsDataset(
             filepath="s3://bucket/table",
             file_format="delta",
-            credentials={"key": "my_key", "secret": "my_secret"},
+            credentials={
+                "key": "my_key",
+                "secret": "my_secret",  # pragma: allowlist secret
+            },
             fs_args={"region": "eu-west-1"},
             save_args={"mode": "overwrite"},
         )
         expected_options = {
             "key": "my_key",
-            "secret": "my_secret",
+            "secret": "my_secret",  # pragma: allowlist secret
             "region": "eu-west-1",
         }
 

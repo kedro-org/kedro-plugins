@@ -61,6 +61,91 @@ class FakeDataset:  # pylint: disable=too-few-public-methods
 
 
 class TestPartitionedDatasetLocal:
+    def test_skip_existing(self, local_csvs, mocker):
+        pds = PartitionedDataset(
+            path=str(local_csvs),
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            skip_existing=True,
+        )
+        original = (local_csvs / "p2.csv").read_bytes()
+        skipped = mocker.Mock(side_effect=AssertionError("must not compute"))
+        new_data = original_data_callable()
+
+        pds.save({"p2": skipped, "new": lambda: new_data})
+
+        skipped.assert_not_called()
+        assert (local_csvs / "p2.csv").read_bytes() == original
+        assert_frame_equal(pds.load()["new"](), new_data)
+
+    def test_skip_existing_disabled_by_default(self, tmp_path):
+        pds = PartitionedDataset(path=str(tmp_path), dataset="pandas.CSVDataset")
+        pds.save({"data": original_data_callable()})
+        replacement = pd.DataFrame({"foo": [99]})
+
+        pds.save({"data": replacement})
+
+        assert_frame_equal(pds.load()["data"](), replacement)
+
+    def test_skip_existing_overwrite_conflict(self, tmp_path):
+        with pytest.raises(DatasetError, match="'overwrite' and 'skip_existing'"):
+            PartitionedDataset(
+                path=str(tmp_path),
+                dataset="pandas.CSVDataset",
+                overwrite=True,
+                skip_existing=True,
+            )
+
+    def test_skip_existing_resumes_after_failure(self, tmp_path, mocker):
+        config = {
+            "path": str(tmp_path),
+            "dataset": "pandas.CSVDataset",
+            "skip_existing": True,
+        }
+        pds = PartitionedDataset(**config)
+        first = mocker.Mock(return_value=original_data_callable())
+        failing = mocker.Mock(side_effect=ValueError("processing failed"))
+        last = mocker.Mock(return_value=original_data_callable())
+        data = {"a": first, "b": failing, "c": last}
+
+        with pytest.raises(DatasetError, match="processing failed"):
+            pds.save(data)
+
+        assert (tmp_path / "a").is_file()
+        last.assert_not_called()
+        failing.side_effect = None
+        failing.return_value = original_data_callable()
+
+        PartitionedDataset(**config).save(data)
+
+        first.assert_called_once_with()
+        last.assert_called_once_with()
+        assert set(pds.load()) == {"a", "b", "c"}
+
+    def test_skip_existing_versioned_dataset(self, tmp_path, mocker):
+        config = {
+            "path": str(tmp_path),
+            "dataset": {"type": "pandas.CSVDataset", "versioned": True},
+            "skip_existing": True,
+        }
+        timestamp = mocker.patch(
+            "kedro.io.core.generate_timestamp", return_value="2020-01-01T00.00.00.000Z"
+        )
+        PartitionedDataset(**config).save({"existing": original_data_callable()})
+        (tmp_path / "empty").mkdir()
+        timestamp.return_value = "2020-01-02T00.00.00.000Z"
+        skipped = mocker.Mock(side_effect=AssertionError("must not compute"))
+
+        PartitionedDataset(**config).save(
+            {"existing": skipped, "empty": original_data_callable()}
+        )
+
+        skipped.assert_not_called()
+        assert {p.name for p in (tmp_path / "existing").iterdir()} == {
+            "2020-01-01T00.00.00.000Z"
+        }
+        assert (tmp_path / "empty" / "2020-01-02T00.00.00.000Z" / "empty").is_file()
+
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataset", ParquetDataset])
     def test_repr(self, dataset):
         pds = PartitionedDataset(path="", dataset=dataset)
@@ -705,6 +790,32 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 class TestPartitionedDatasetS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+
+    def test_skip_existing(self, mocked_csvs_in_s3, mocked_s3_bucket, mocker):
+        pds = PartitionedDataset(
+            path=mocked_csvs_in_s3,
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            skip_existing=True,
+        )
+        original = mocked_s3_bucket.get_object(Bucket=BUCKET_NAME, Key="csvs/p2.csv")[
+            "Body"
+        ].read()
+        skipped = mocker.Mock(side_effect=AssertionError("must not compute"))
+        producer = mocker.Mock(return_value=original_data_callable())
+        new_partition = "nested_s3/new"
+
+        pds.save({"p2": skipped, new_partition: producer})
+
+        skipped.assert_not_called()
+        producer.assert_called_once_with()
+        assert (
+            mocked_s3_bucket.get_object(Bucket=BUCKET_NAME, Key="csvs/p2.csv")[
+                "Body"
+            ].read()
+            == original
+        )
+        mocked_s3_bucket.head_object(Bucket=BUCKET_NAME, Key="csvs/nested_s3/new.csv")
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):

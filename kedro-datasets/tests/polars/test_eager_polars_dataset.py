@@ -701,6 +701,87 @@ class TestEagerCSVDatasetVersioned:
         )
 
 
+class TestEagerDeltaDataset:
+    @pytest.fixture
+    def delta_dataset(self, tmp_path):
+        return EagerPolarsDataset(
+            filepath=(tmp_path / "test_delta").as_posix(), file_format="delta"
+        )
+
+    def test_save_and_load(self, delta_dataset, dummy_dataframe):
+        """Test saving and reloading a Delta table."""
+        delta_dataset.save(dummy_dataframe)
+        reloaded_df = delta_dataset.load()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_exists(self, delta_dataset, dummy_dataframe):
+        """Test `exists` method invocation for a Delta table directory."""
+        assert not delta_dataset.exists()
+        delta_dataset.save(dummy_dataframe)
+        assert delta_dataset.exists()
+
+    def test_save_and_load_args(self, tmp_path, dummy_dataframe):
+        """Test that `save_args` and `load_args` are passed to polars."""
+        filepath = (tmp_path / "test_delta").as_posix()
+        EagerPolarsDataset(filepath=filepath, file_format="delta").save(dummy_dataframe)
+        EagerPolarsDataset(
+            filepath=filepath, file_format="delta", save_args={"mode": "append"}
+        ).save(dummy_dataframe)
+
+        appended = EagerPolarsDataset(filepath=filepath, file_format="delta").load()
+        assert appended.height == 2 * dummy_dataframe.height
+
+        first_version = EagerPolarsDataset(
+            filepath=filepath, file_format="delta", load_args={"version": 0}
+        ).load()
+        assert_frame_equal(dummy_dataframe, first_version)
+
+    def test_credentials_passed_as_storage_options(self, mocker, dummy_dataframe):
+        """Test that credentials and `fs_args` are passed to polars as
+        `storage_options`, together with the full table URI."""
+        mocker.patch("fsspec.filesystem")
+        read_delta = mocker.patch("polars.read_delta")
+        write_delta = mocker.patch.object(pl.DataFrame, "write_delta", autospec=True)
+        dataset = EagerPolarsDataset(
+            filepath="s3://bucket/table",
+            file_format="delta",
+            credentials={"key": "my_key", "secret": "my_secret"},
+            fs_args={"region": "eu-west-1"},
+            save_args={"mode": "overwrite"},
+        )
+        expected_options = {
+            "key": "my_key",
+            "secret": "my_secret",
+            "region": "eu-west-1",
+        }
+
+        dataset.save(dummy_dataframe)
+        write_delta.assert_called_once_with(
+            dummy_dataframe,
+            "s3://bucket/table",
+            storage_options=expected_options,
+            mode="overwrite",
+        )
+
+        dataset.load()
+        read_delta.assert_called_once_with(
+            "s3://bucket/table", storage_options=expected_options
+        )
+
+    def test_storage_options_in_load_args_take_precedence(self, mocker):
+        mocker.patch("fsspec.filesystem")
+        read_delta = mocker.patch("polars.read_delta")
+        EagerPolarsDataset(
+            filepath="s3://bucket/table",
+            file_format="delta",
+            credentials={"key": "my_key"},
+            load_args={"storage_options": {"aws_region": "eu-west-1"}},
+        ).load()
+        read_delta.assert_called_once_with(
+            "s3://bucket/table", storage_options={"aws_region": "eu-west-1"}
+        )
+
+
 class TestBadEagerPolarsDataset:
     def test_bad_file_format_argument(self):
         ds = EagerPolarsDataset(filepath="test.kedro", file_format="kedro")

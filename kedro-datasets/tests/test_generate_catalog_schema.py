@@ -333,6 +333,73 @@ def catalog_validator():
 
 
 @pytest.mark.parametrize(
+    ("dataset_type", "options"),
+    [
+        ("pandas.CSVDataset", {"filepath": "s3://bucket/companies.csv"}),
+        ("spark.SparkDataset", {"filepath": "s3://bucket/companies.parquet"}),
+        ("huggingface.CSVDataset", {"path": "s3://bucket/companies.csv"}),
+    ],
+)
+@pytest.mark.parametrize(
+    ("credentials", "valid"),
+    [
+        ("dev_s3", True),
+        ({"key": "access-key"}, True),
+        (None, True),
+        (123, False),
+        ([], False),
+    ],
+)
+def test_catalog_credentials_accept_references_and_inline_mappings(
+    catalog_validator, dataset_type, options, credentials, valid
+):
+    dataset = {
+        "companies": {"type": dataset_type, **options, "credentials": credentials}
+    }
+
+    assert catalog_validator.is_valid(dataset) is valid
+
+
+@pytest.mark.parametrize(
+    ("dataset_type", "options"),
+    [
+        ("pandas.CSVDataset", {"filepath": "companies.csv"}),
+        ("huggingface.CSVDataset", {"path": "companies.csv"}),
+    ],
+)
+@pytest.mark.parametrize(
+    ("versioned", "valid"),
+    [(True, True), (False, True), ("true", False), ({}, False), (None, False)],
+)
+def test_catalog_versioning_accepts_only_booleans(
+    catalog_validator, dataset_type, options, versioned, valid
+):
+    dataset = {"companies": {"type": dataset_type, **options, "versioned": versioned}}
+
+    assert catalog_validator.is_valid(dataset) is valid
+
+
+def test_catalog_versioning_replaces_constructor_version():
+    for spec in generator._iter_dataset_specs():
+        schema = generator._dataset_then_schema(spec)
+        assert "version" not in schema["properties"]
+        if any(parameter.name == "version" for parameter in spec.parameters):
+            assert schema["properties"]["versioned"]["type"] == "boolean"
+
+
+def test_catalog_versioning_does_not_require_internal_version():
+    spec = generator.DatasetSpec(
+        "sample.VersionedDataset",
+        [generator.DatasetParameter("version", "Version", True)],
+        None,
+    )
+    schema = generator._dataset_then_schema(spec)
+
+    assert Draft7Validator(schema).is_valid({"versioned": True})
+    assert Draft7Validator(schema).is_valid({})
+
+
+@pytest.mark.parametrize(
     ("dataset_type", "options", "valid"),
     [
         ("databricks.ManagedTableDataset", {"table": "t", "write_mode": None}, True),

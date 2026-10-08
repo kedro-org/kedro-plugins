@@ -346,6 +346,32 @@ def _dataset_then_schema(spec: DatasetSpec) -> dict[str, Any]:
     override = SCHEMA_OVERRIDES.get(spec.type_id)
     if override:
         then = _deep_merge(then, override.copy())
+
+    # Catalog configuration is resolved by Kedro before reaching constructors.
+    # Apply these conventions after overrides so inherited datasets use them too.
+    properties = then["properties"]
+    if "version" in properties:
+        del properties["version"]
+        properties["versioned"] = {
+            "type": "boolean",
+            "description": "Enable dataset versioning by setting this to true.",
+        }
+        if "required" in then:
+            then["required"] = [name for name in then["required"] if name != "version"]
+
+    credentials = properties.get("credentials", {})
+    credential_types = credentials.get("type")
+    if credential_types is not None:
+        types = (
+            credential_types.copy()
+            if isinstance(credential_types, list)
+            else [credential_types]
+        )
+        if "string" not in types:
+            types.insert(
+                types.index("null") if "null" in types else len(types), "string"
+            )
+        properties["credentials"] = {**credentials, "type": types}
     return then
 
 

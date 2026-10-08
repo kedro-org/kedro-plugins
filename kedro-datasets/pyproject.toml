@@ -22,8 +22,7 @@ pandas-base = ["pandas>=1.3, <4.0"]
 spark-base = ["pyspark>=3.3, <5.0"]  # >=3.3 for Catalog.tableExists (Spark Connect support)
 hdfs-base = ["hdfs>=2.5.8, <3.0"]
 s3fs-base = ["s3fs>=2021.4"]
-# Polars 2 removed read_csv(rechunk=...), which CSVDataset still uses.
-polars-base = ["polars>=0.18.0, <2.0"]
+polars-base = ["polars>=0.18.0"]
 plotly-base = ["plotly>=4.8.0, <6.0"]
 delta-base = ["delta-spark>=1.0, <5.0"]
 networkx-base = ["networkx~=3.4"]
@@ -327,7 +326,7 @@ test = [
     "pandas>=3.0; python_version >= '3.11'",
     "Pillow>=12.2,<13.0",
     "plotly>=4.8.0, <6.0",
-    "polars[deltalake,xlsx2csv]>=1.0, <2.0",
+    "polars[deltalake,xlsx2csv]>=1.0",
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
@@ -407,7 +406,7 @@ experimental = [
     "u8darts[all]",
     "numpy<2.5",  # numba (pulled in via darts -> shap) does not support numpy 2.5 yet
     "pypdf>=3.0.0",
-    "polars>=1.0, <2.0",
+    "polars>=1.0",
     "SQLAlchemy>=1.4",
 ]
 
@@ -452,7 +451,7 @@ experimental_test = [
     "chromadb>=1.0.0",
     "litellm<1.80.12; python_version >= '3.14'",  # For compatibility with chromadb's opentelemetry-proto
     "dask[complete]>=2021.10",
-    "polars>=1.0, <2.0",
+    "polars>=1.0",
     "SQLAlchemy>=1.4",
     # scipy is pulled transitively which has no cp314 wheel and
     # fails to build from source in CI 1.16.0 is the first release with cp314 wheels.

@@ -28,17 +28,17 @@ class PDFDataset(AbstractDataset[NoReturn, list[str]]):
 
         ```yaml
         my_pdf_document:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: data/01_raw/document.pdf
 
         password_protected_pdf:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: data/01_raw/protected.pdf
           load_args:
             password: "pass123"  # pragma: allowlist secret
 
         s3_pdf:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: s3://your_bucket/document.pdf
           credentials: dev_s3
         ```

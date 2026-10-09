@@ -154,7 +154,15 @@ class TestMatplotlibDataset:
         filepath = tmp_path / "matplotlib.png"
         dataset = MatplotlibDataset(filepath=filepath)
         dataset.save(mock_single_plot)
-        assert filepath.read_bytes()
+
+        expected = tmp_path / "locally_saved.png"
+        mock_single_plot.savefig(str(expected))
+        assert filepath.read_bytes() == expected.read_bytes()
+
+        # Loading is not supported; a Path filepath must still raise that error.
+        pattern = r"Loading not supported for 'MatplotlibDataset'"
+        with pytest.raises(DatasetError, match=pattern):
+            dataset.load()
 
     def test_list_save(self, tmp_path, mock_list_plot, plot_dataset, mocked_s3_bucket):
         """Test saving list of plots to S3."""

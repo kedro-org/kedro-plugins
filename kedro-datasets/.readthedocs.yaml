@@ -8,18 +8,11 @@ version: 2
 build:
   os: "ubuntu-24.04"
   tools:
-    python: "3.10"
-  jobs:
-    post_create_environment:
-      - pip install uv
-    post_install:
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH cd kedro-datasets && uv pip install .[docs]
-      # Build the MkDocs documentation
-      - cd kedro-datasets && mkdocs build
-      # Ensure the output directory exists
-      - cd kedro-datasets && mkdir -p $READTHEDOCS_OUTPUT/html
-      # Move the built site to the Read the Docs output directory
-      - cd kedro-datasets && mv site/* $READTHEDOCS_OUTPUT/html
-
-mkdocs:
-  configuration: kedro-datasets/mkdocs.yml
+    python: "3.12"
+  commands:
+    - pip install uv
+    - cd kedro-datasets && uv pip install --system .[docs]
+    - cd kedro-datasets && zensical build --clean
+    # Publish the Zensical site to the Read the Docs output directory.
+    - mkdir --parents $READTHEDOCS_OUTPUT/html
+    - cp --recursive kedro-datasets/site/. $READTHEDOCS_OUTPUT/html

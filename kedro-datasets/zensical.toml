@@ -1,0 +1,353 @@
+# Zensical configuration for the Kedro-Datasets documentation.
+
+[project]
+site_name = ""
+site_url = "https://docs.kedro.org/projects/kedro-datasets/en/stable/"
+site_description = "Kedro-Datasets is a collection of data connectors for the Kedro framework's Data Catalog."
+site_dir = "site"
+docs_dir = "docs"
+use_directory_urls = true
+
+repo_name = "kedro-org/kedro-plugins"
+repo_url = "https://github.com/kedro-org/kedro-plugins"
+
+extra_css = [
+  "stylesheets/source-buttons.css",
+  "stylesheets/colors.css",
+  "stylesheets/globals.css",
+  "stylesheets/typography.css",
+  "stylesheets/themes.css",
+  "stylesheets/footer.css",
+  "stylesheets/welcome.css",
+  "stylesheets/code-select.css"
+]
+
+extra_javascript = [
+  "https://kedro.org/consent/kedro-consent.js",
+  "javascript/readthedocs.js",
+  "javascript/deindex-old-docs.js",
+  "javascript/code-select.js",
+  "javascript/source-links.js"
+]
+
+nav = [
+  {"Welcome" = "https://docs.kedro.org/en/stable/"},
+  {"Kedro" = "https://docs.kedro.org/en/stable/getting-started/course/"},
+  {"Kedro-Viz" = "https://docs.kedro.org/projects/kedro-viz/en/stable/"},
+  {"Kedro-Datasets" = [
+    {"API documentation" = [
+      {"Core Datasets" = [
+        {"Overview" = "index.md"},
+        {"API" = [
+          {"api.APIDataset" = "api/kedro_datasets/api.APIDataset.md"}
+        ]},
+        {"Biosequence" = [
+          {"biosequence.BioSequenceDataset" = "api/kedro_datasets/biosequence.BioSequenceDataset.md"}
+        ]},
+        {"Dask" = [
+          {"dask.CSVDataset" = "api/kedro_datasets/dask.CSVDataset.md"},
+          {"dask.ParquetDataset" = "api/kedro_datasets/dask.ParquetDataset.md"}
+        ]},
+        {"Databricks" = [
+          {"databricks.ManagedTableDataset" = "api/kedro_datasets/databricks.ManagedTableDataset.md"}
+        ]},
+        {"Email" = [
+          {"email.EmailMessageDataset" = "api/kedro_datasets/email.EmailMessageDataset.md"}
+        ]},
+        {"Geopandas" = [
+          {"geopandas.GenericDataset" = "api/kedro_datasets/geopandas.GenericDataset.md"}
+        ]},
+        {"Holoviews" = [
+          {"holoviews.HoloviewsWriter" = "api/kedro_datasets/holoviews.HoloviewsWriter.md"}
+        ]},
+        {"Huggingface" = [
+          {"huggingface.ArrowDataset" = "api/kedro_datasets/huggingface.ArrowDataset.md"},
+          {"huggingface.CSVDataset" = "api/kedro_datasets/huggingface.CSVDataset.md"},
+          {"huggingface.HFDataset" = "api/kedro_datasets/huggingface.HFDataset.md"},
+          {"huggingface.HFTransformerPipelineDataset" = "api/kedro_datasets/huggingface.HFTransformerPipelineDataset.md"},
+          {"huggingface.JSONDataset" = "api/kedro_datasets/huggingface.JSONDataset.md"},
+          {"huggingface.ParquetDataset" = "api/kedro_datasets/huggingface.ParquetDataset.md"}
+        ]},
+        {"Ibis" = [
+          {"ibis.FileDataset" = "api/kedro_datasets/ibis.FileDataset.md"},
+          {"ibis.TableDataset" = "api/kedro_datasets/ibis.TableDataset.md"}
+        ]},
+        {"JSON" = [
+          {"json.JSONDataset" = "api/kedro_datasets/json.JSONDataset.md"}
+        ]},
+        {"Langchain" = [
+          {"langchain.ChatAnthropicDataset" = "api/kedro_datasets/langchain.ChatAnthropicDataset.md"},
+          {"langchain.ChatCohereDataset" = "api/kedro_datasets/langchain.ChatCohereDataset.md"},
+          {"langchain.ChatOpenAIDataset" = "api/kedro_datasets/langchain.ChatOpenAIDataset.md"},
+          {"langchain.OpenAIEmbeddingsDataset" = "api/kedro_datasets/langchain.OpenAIEmbeddingsDataset.md"}
+        ]},
+        {"Matlab" = [
+          {"matlab.MatlabDataset" = "api/kedro_datasets/matlab.MatlabDataset.md"}
+        ]},
+        {"Matplotlib" = [
+          {"matplotlib.MatplotlibDataset" = "api/kedro_datasets/matplotlib.MatplotlibDataset.md"}
+        ]},
+        {"NetworkX" = [
+          {"networkx.GMLDataset" = "api/kedro_datasets/networkx.GMLDataset.md"},
+          {"networkx.GraphMLDataset" = "api/kedro_datasets/networkx.GraphMLDataset.md"},
+          {"networkx.JSONDataset" = "api/kedro_datasets/networkx.JSONDataset.md"}
+        ]},
+        {"OpenXML" = [
+          {"docx.DocxDataset" = "api/kedro_datasets/openxml.DocxDataset.md"},
+          {"pptx.PptxDataset" = "api/kedro_datasets/openxml.PptxDataset.md"}
+        ]},
+        {"Pandas" = [
+          {"pandas.CSVDataset" = "api/kedro_datasets/pandas.CSVDataset.md"},
+          {"pandas.DeltaTableDataset" = "api/kedro_datasets/pandas.DeltaTableDataset.md"},
+          {"pandas.ExcelDataset" = "api/kedro_datasets/pandas.ExcelDataset.md"},
+          {"pandas.FeatherDataset" = "api/kedro_datasets/pandas.FeatherDataset.md"},
+          {"pandas.GBQQueryDataset" = "api/kedro_datasets/pandas.GBQQueryDataset.md"},
+          {"pandas.GBQTableDataset" = "api/kedro_datasets/pandas.GBQTableDataset.md"},
+          {"pandas.GenericDataset" = "api/kedro_datasets/pandas.GenericDataset.md"},
+          {"pandas.HDFDataset" = "api/kedro_datasets/pandas.HDFDataset.md"},
+          {"pandas.JSONDataset" = "api/kedro_datasets/pandas.JSONDataset.md"},
+          {"pandas.ParquetDataset" = "api/kedro_datasets/pandas.ParquetDataset.md"},
+          {"pandas.SQLQueryDataset" = "api/kedro_datasets/pandas.SQLQueryDataset.md"},
+          {"pandas.SQLTableDataset" = "api/kedro_datasets/pandas.SQLTableDataset.md"},
+          {"pandas.XMLDataset" = "api/kedro_datasets/pandas.XMLDataset.md"}
+        ]},
+        {"Partitions" = [
+          {"partitions.IncrementalDataset" = "api/kedro_datasets/partitions.IncrementalDataset.md"},
+          {"partitions.PartitionedDataset" = "api/kedro_datasets/partitions.PartitionedDataset.md"}
+        ]},
+        {"Pickle" = [
+          {"pickle.PickleDataset" = "api/kedro_datasets/pickle.PickleDataset.md"}
+        ]},
+        {"Pillow" = [
+          {"pillow.ImageDataset" = "api/kedro_datasets/pillow.ImageDataset.md"}
+        ]},
+        {"Plotly" = [
+          {"plotly.HTMLDataset" = "api/kedro_datasets/plotly.HTMLDataset.md"},
+          {"plotly.JSONDataset" = "api/kedro_datasets/plotly.JSONDataset.md"},
+          {"plotly.PlotlyDataset" = "api/kedro_datasets/plotly.PlotlyDataset.md"}
+        ]},
+        {"Polars" = [
+          {"polars.CSVDataset" = "api/kedro_datasets/polars.CSVDataset.md"},
+          {"polars.EagerPolarsDataset" = "api/kedro_datasets/polars.EagerPolarsDataset.md"},
+          {"polars.LazyPolarsDataset" = "api/kedro_datasets/polars.LazyPolarsDataset.md"}
+        ]},
+        {"Redis" = [
+          {"redis.PickleDataset" = "api/kedro_datasets/redis.PickleDataset.md"}
+        ]},
+        {"Snowflake" = [
+          {"snowflake.SnowparkTableDataset" = "api/kedro_datasets/snowflake.SnowparkTableDataset.md"}
+        ]},
+        {"Spark" = [
+          {"spark.DeltaTableDataset" = "api/kedro_datasets/spark.DeltaTableDataset.md"},
+          {"spark.GBQQueryDataset" = "api/kedro_datasets/spark.GBQQueryDataset.md"},
+          {"spark.SparkDataset" = "api/kedro_datasets/spark.SparkDataset.md"},
+          {"spark.SparkDatasetV2" = "api/kedro_datasets/spark.SparkDatasetV2.md"},
+          {"spark.SparkHiveDataset" = "api/kedro_datasets/spark.SparkHiveDataset.md"},
+          {"spark.SparkJDBCDataset" = "api/kedro_datasets/spark.SparkJDBCDataset.md"},
+          {"spark.SparkStreamingDataset" = "api/kedro_datasets/spark.SparkStreamingDataset.md"}
+        ]},
+        {"SVMLight" = [
+          {"svmlight.SVMLightDataset" = "api/kedro_datasets/svmlight.SVMLightDataset.md"}
+        ]},
+        {"TensorFlow" = [
+          {"tensorflow.TensorFlowModelDataset" = "api/kedro_datasets/tensorflow.TensorFlowModelDataset.md"}
+        ]},
+        {"Text" = [
+          {"text.TextDataset" = "api/kedro_datasets/text.TextDataset.md"}
+        ]},
+        {"YAML" = [
+          {"yaml.YAMLDataset" = "api/kedro_datasets/yaml.YAMLDataset.md"}
+        ]}
+      ]},
+      {"Experimental Datasets" = [
+        {"Overview" = "api/kedro_datasets_experimental/index.md"},
+        {"ChromaDB" = [
+          {"chromadb.ChromaDBDataset" = "api/kedro_datasets_experimental/chromadb.ChromaDBDataset.md"}
+        ]},
+        {"Databricks" = [
+          {"databricks.ExternalTableDataset" = "api/kedro_datasets_experimental/databricks.ExternalTableDataset.md"}
+        ]},
+        {"FAISS" = [
+          {"faiss.FAISSVectorStoreDataset" = "api/kedro_datasets_experimental/faiss.FAISSVectorStoreDataset.md"}
+        ]},
+        {"Feast" = [
+          {"feast.FeastDataset" = "api/kedro_datasets_experimental/feast.FeastDataset.md"}
+        ]},
+        {"Langchain" = [
+          {"langchain.PromptDataset" = "api/kedro_datasets_experimental/langchain.PromptDataset.md"}
+        ]},
+        {"Langfuse" = [
+          {"langfuse.EvaluationDataset" = "api/kedro_datasets_experimental/langfuse.EvaluationDataset.md"},
+          {"langfuse.PromptDataset" = "api/kedro_datasets_experimental/langfuse.PromptDataset.md"},
+          {"langfuse.TraceDataset" = "api/kedro_datasets_experimental/langfuse.TraceDataset.md"}
+        ]},
+        {"MLRun" = [
+          {"mlrun.MLRunAbstractDataset" = "api/kedro_datasets_experimental/mlrun.MLRunAbstractDataset.md"},
+          {"mlrun.MLRunDataframeDataset" = "api/kedro_datasets_experimental/mlrun.MLRunDataframeDataset.md"},
+          {"mlrun.MLRunModel" = "api/kedro_datasets_experimental/mlrun.MLRunModel.md"},
+          {"mlrun.MLRunResult" = "api/kedro_datasets_experimental/mlrun.MLRunResult.md"}
+        ]},
+        {"NetCDF" = [
+          {"netcdf.NetCDFDataset" = "api/kedro_datasets_experimental/netcdf.NetCDFDataset.md"}
+        ]},
+        {"Opik" = [
+          {"opik.EvaluationDataset" = "api/kedro_datasets_experimental/opik.EvaluationDataset.md"},
+          {"opik.PromptDataset" = "api/kedro_datasets_experimental/opik.PromptDataset.md"},
+          {"opik.TraceDataset" = "api/kedro_datasets_experimental/opik.TraceDataset.md"}
+        ]},
+        {"Optuna" = [
+          {"optuna.StudyDataset" = "api/kedro_datasets_experimental/optuna.StudyDataset.md"}
+        ]},
+        {"PyPDF" = [
+          {"pypdf.PDFDataset" = "api/kedro_datasets_experimental/pypdf.PDFDataset.md"}
+        ]},
+        {"Polars" = [
+          {"polars.PolarsDatabaseDataset" = "api/kedro_datasets_experimental/polars.PolarsDatabaseDataset.md"}
+        ]},
+        {"Prophet" = [
+          {"prophet.ProphetModelDataset" = "api/kedro_datasets_experimental/prophet.ProphetModelDataset.md"}
+        ]},
+        {"PyTorch" = [
+          {"pytorch.PyTorchDataset" = "api/kedro_datasets_experimental/pytorch.PyTorchDataset.md"}
+        ]},
+        {"RioXarray" = [
+          {"rioxarray.GeoTIFFDataset" = "api/kedro_datasets_experimental/rioxarray.GeoTIFFDataset.md"}
+        ]},
+        {"Safetensors" = [
+          {"safetensors.SafetensorsDataset" = "api/kedro_datasets_experimental/safetensors.SafetensorsDataset.md"}
+        ]},
+        {"Video" = [
+          {"video.VideoDataset" = "api/kedro_datasets_experimental/video.VideoDataset.md"}
+        ]},
+        {"Weaviate" = [
+          {"weaviate.WeaviateDataset" = "api/kedro_datasets_experimental/weaviate.WeaviateVectorStoreDataset.md"}
+        ]}
+      ]}
+    ]}
+  ]}
+]
+
+# -------------------------
+# theme
+# -------------------------
+[project.theme]
+language = "en"
+custom_dir = "docs/overrides"
+variant = "classic"
+favicon = "https://kedro.org/images/favicon.ico"
+logo = "assets/kedro_logo_black.svg"
+features = [
+  "navigation.instant",
+  "navigation.tabs",
+  "navigation.tabs.sticky",
+  "navigation.sections",
+  "navigation.tracking",
+  "navigation.footer",
+  "search.suggest",
+  "search.highlight",
+  "content.tabs.link",
+  "content.code.annotation",
+  "content.code.copy",
+  "content.code.annotate",
+  "content.code.highlight"
+]
+
+[project.theme.font]
+text = "Inter"
+code = "Inter Regular"
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[project.theme.icon.admonition]
+note = "octicons/note-16"
+tip = "octicons/info-16"
+warning = "octicons/alert-16"
+example = "octicons/code-16"
+
+[[project.theme.palette]]
+scheme = "light"
+toggle.icon = "material/white-balance-sunny"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "dark"
+toggle.icon = "material/white-balance-sunny"
+toggle.name = "Switch to light mode"
+
+# -------------------------
+# markdown_extensions
+# -------------------------
+[project.markdown_extensions.attr_list]
+
+[project.markdown_extensions.md_in_html]
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+
+[project.markdown_extensions.pymdownx.snippets]
+
+[project.markdown_extensions.tables]
+
+[project.markdown_extensions.footnotes]
+
+[project.markdown_extensions.admonition]
+
+[project.markdown_extensions.pymdownx.details]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.def_list]
+
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true
+
+[project.markdown_extensions.toc]
+permalink = true
+title = "Contents"
+
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
+
+[project.markdown_extensions.pymdownx.highlight]
+
+[project.markdown_extensions.pymdownx.superfences]
+
+[[project.markdown_extensions.pymdownx.superfences.custom_fences]]
+name = "mermaid"
+class = "mermaid"
+format = "pymdownx.superfences.fence_code_format"
+
+# -------------------------
+# plugins
+# -------------------------
+[project.plugins.search]
+
+[project.plugins.autorefs]
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+inventories = [
+  "https://docs.kedro.org/en/stable/objects.inv",
+  "https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv"
+]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+show_root_toc_entry = true
+show_source = false
+docstring_style = "google"
+merge_init_into_class = true
+docstring_section_style = "list"
+separate_signature = true
+show_root_heading = true
+filters = ["!^_"]
+inherited_members = true
+show_if_no_docstring = true
+# Load `kedro_datasets` up front, so experimental datasets can inherit
+# members from its base classes regardless of page build order.
+preload_modules = ["kedro_datasets"]
+
+[project.plugins.mkdocstrings.handlers.python.options.docstring_options]
+ignore_init_summary = true
+warn_unknown_params = false
+returns_named_value = false

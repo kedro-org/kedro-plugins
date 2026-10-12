@@ -270,6 +270,7 @@ docs = [
    "mkdocs-mermaid2-plugin>=1.2.1",
    "mkdocs-autorefs>=1.4.1",
    "mkdocs-get-deps>=0.2.0",
+   "mkdocstrings>=1.0.7",
    "mkdocstrings-python>=0.29.1",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",

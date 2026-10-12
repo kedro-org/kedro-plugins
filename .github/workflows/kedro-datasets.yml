@@ -67,6 +67,7 @@ jobs:
           uv pip install --system "kedro-datasets[docs,test] @ ."
       - name: Install experimental dependencies
         run: |
+          cd kedro-datasets
           uv pip install --system "kedro-datasets[experimental] @ ." || true
       - name: Build datasets documentation
         run: |

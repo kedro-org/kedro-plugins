@@ -266,7 +266,7 @@ weaviate = ["kedro-datasets[weaviate-dataset]"]
 docs = [
    "zensical>=0.0.58",
    "mkdocs-autorefs>=1.4.1",
-   "mkdocstrings>=0.29.1",
+   "mkdocstrings>=0.24.0, <0.30.0",
    "mkdocstrings-python>=1.0.2",  # Zensical's mkdocstrings integration needs >= 1.0.2.
    "griffe",  # Required by mkdocstrings-python for API documentation generation.
    "linkchecker>=10.2.1",

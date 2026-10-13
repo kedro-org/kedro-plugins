@@ -1,4 +1,4 @@
-""" Utilities for use with click docker commands """
+"""Utilities for use with click docker commands"""
 
 from __future__ import annotations
 
@@ -55,11 +55,13 @@ def _list_docker_volumes(host_root: str, container_root: str, volumes: Sequence[
     container_root_path = PurePosixPath(container_root)
     for volume in volumes:
         hpath = host_root_path / volume  # host path
+        if not hpath.exists():
+            hpath.mkdir(parents=True, exist_ok=True)
         cpath = PurePosixPath(container_root_path) / volume  # container path
         yield "-v", str(hpath) + ":" + str(cpath)
 
 
-def compose_docker_run_args(  # noqa: PLR0913
+def compose_docker_run_args(  # noqa: PLR0913, PLR0917
     host_root: str | None = None,
     container_root: str | None = None,
     mount_volumes: Sequence[str] | None = None,

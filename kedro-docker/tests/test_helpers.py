@@ -68,6 +68,26 @@ class TestComposeDockerRunArgs:
             expected.extend(["-v", _mount_vol])
         expected += kwargs["user_args"]
         assert compose_docker_run_args(**kwargs) == expected
+        for _vol in kwargs["mount_volumes"]:
+            assert (host_root / _vol).is_dir()
+
+    def test_mount_creates_nonexistent_directories(self, tmp_path):
+        """Check that non-existent directories are created on host and existing files preserved"""
+        host_root = tmp_path.resolve()
+        existing_file = host_root / "conf" / "local" / "config.yml"
+        existing_file.parent.mkdir(parents=True, exist_ok=True)
+        existing_file.write_text("key: value")
+
+        mount_volumes = ("conf/local/config.yml", "results", "references")
+        compose_docker_run_args(
+            host_root=str(host_root),
+            container_root="/home/kedro",
+            mount_volumes=mount_volumes,
+        )
+
+        assert existing_file.is_file()
+        assert (host_root / "results").is_dir()
+        assert (host_root / "references").is_dir()
 
     @pytest.mark.parametrize("host_root", ["host_root", None])
     @pytest.mark.parametrize("container_root", ["container_root", None])

@@ -1,4 +1,4 @@
-""" Kedro plugin for packaging a project with Docker """
+"""Kedro plugin for packaging a project with Docker"""
 
 import shlex
 import subprocess
@@ -164,7 +164,7 @@ def docker_init(spark):
     help="Optional arguments to be passed to `docker build` command"
 )
 @click.pass_context
-def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):  # noqa: PLR0913
+def docker_build(ctx, uid, gid, spark, base_image, image, docker_args):  # noqa: PLR0913, PLR0917
     """Build a Docker image for the project."""
     uid, gid = get_uid_gid(uid, gid)
     project_path = Path.cwd()

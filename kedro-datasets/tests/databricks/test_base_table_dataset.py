@@ -323,9 +323,9 @@ class TestBaseTableDataset:
         upserted_table = unity_ds.load()
         assert expected_upsert_spark_df.exceptAll(upserted_table).count() == 0
 
-        assert (
-            mock_add_pk.call_count == 2
-        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        assert mock_add_pk.call_count == 2, (
+            f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        )
         expected_add_pk_calls = [
             mocker.call([unity_ds._table.primary_key]),
             mocker.call([unity_ds._table.primary_key]),
@@ -359,9 +359,9 @@ class TestBaseTableDataset:
             == 0
         )
 
-        assert (
-            mock_add_pk.call_count == 2
-        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        assert mock_add_pk.call_count == 2, (
+            f"Expected 2 calls, but got {mock_add_pk.call_count}"
+        )
         expected_add_pk_calls = [
             mocker.call(unity_ds._table.primary_key),
             mocker.call(unity_ds._table.primary_key),
@@ -385,9 +385,9 @@ class TestBaseTableDataset:
         with pytest.raises(DatasetError):
             unity_ds.save(mismatched_upsert_spark_df)
 
-        assert (
-            mock_add_pk.call_count == 1
-        ), f"Expected 1 call, but got {mock_add_pk.call_count}"
+        assert mock_add_pk.call_count == 1, (
+            f"Expected 1 call, but got {mock_add_pk.call_count}"
+        )
 
         mock_add_pk.assert_called_once_with([unity_ds._table.primary_key])
 
@@ -456,6 +456,60 @@ class TestBaseTableDataset:
         loaded_df = loaded_ds.load()
 
         assert loaded_df.exceptAll(sample_spark_df).count() == 0
+
+    def test_load_version_none_loads_latest(
+        self,
+        sample_spark_df: DataFrame,
+        append_spark_df: DataFrame,
+        expected_append_spark_df: DataFrame,
+    ):
+        unity_ds = BaseTableDataset(
+            database="test", table="test_load_version_none", write_mode="append"
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        # Version(load=None, save="...") occurs when versioned: true is configured
+        loaded_ds = BaseTableDataset(
+            database="test",
+            table="test_load_version_none",
+            version=Version(None, "2024-10-30T10.17.55.613Z"),
+        )
+        loaded_df = loaded_ds.load()
+
+        assert expected_append_spark_df.exceptAll(loaded_df).count() == 0
+
+    def test_load_version_string(
+        self, sample_spark_df: DataFrame, append_spark_df: DataFrame
+    ):
+        unity_ds = BaseTableDataset(
+            database="test", table="test_load_version_string", write_mode="append"
+        )
+        unity_ds.save(sample_spark_df)
+        unity_ds.save(append_spark_df)
+
+        loaded_ds = BaseTableDataset(
+            database="test",
+            table="test_load_version_string",
+            version=Version("0", None),
+        )
+        loaded_df = loaded_ds.load()
+
+        assert loaded_df.exceptAll(sample_spark_df).count() == 0
+
+    def test_load_invalid_negative_version(self, sample_spark_df: DataFrame):
+        unity_ds = BaseTableDataset(
+            database="test", table="test_load_invalid_version", write_mode="overwrite"
+        )
+        unity_ds.save(sample_spark_df)
+
+        delta_ds = BaseTableDataset(
+            database="test",
+            table="test_load_invalid_version",
+            version=Version(-1, None),
+        )
+        with pytest.raises(VersionNotFoundError):
+            _ = delta_ds.load()
 
     def test_load_pandas(self, sample_pandas_df: pd.DataFrame):
         unity_ds = BaseTableDataset(

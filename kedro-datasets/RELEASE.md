@@ -18,6 +18,7 @@
 
 ## Bug fixes and other changes
 
+- Fixed `databricks.ManagedTableDataset` and `databricks.ExternalTableDataset` raising `TypeError` when `version.load` is `None` (#920).
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
 - Added `os.PathLike` filepath support for remaining datasets in `kedro-datasets` and `kedro-datasets-experimental`.
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.

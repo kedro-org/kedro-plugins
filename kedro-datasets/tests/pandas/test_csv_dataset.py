@@ -1,6 +1,8 @@
 import inspect
 import os
+import pickle
 import sys
+from multiprocessing.reduction import ForkingPickler
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -433,3 +435,41 @@ class TestCSVDatasetS3:
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)
+
+
+class TestCSVDatasetSerialization:
+    @pytest.mark.parametrize(
+        "filepath",
+        [
+            "s3://bucket/file.csv",
+            "file:///tmp/test.csv",
+            "/tmp/test.csv",
+            "gcs://bucket/file.csv",
+            "https://example.com/file.csv",
+            "http://example.com/file.csv",
+        ],
+    )
+    def test_pickle_dataset(self, filepath):
+        dataset = CSVDataset(filepath=filepath)
+        dumped = pickle.dumps(dataset)
+        loaded = pickle.loads(dumped)
+        assert loaded._filepath == dataset._filepath
+        assert loaded._protocol == dataset._protocol
+
+    @pytest.mark.parametrize(
+        "filepath",
+        [
+            "s3://bucket/file.csv",
+            "file:///tmp/test.csv",
+            "/tmp/test.csv",
+            "gcs://bucket/file.csv",
+            "https://example.com/file.csv",
+            "http://example.com/file.csv",
+        ],
+    )
+    def test_forking_pickler_dataset(self, filepath):
+        dataset = CSVDataset(filepath=filepath)
+        dumped = ForkingPickler.dumps(dataset)
+        loaded = pickle.loads(dumped)
+        assert loaded._filepath == dataset._filepath
+        assert loaded._protocol == dataset._protocol

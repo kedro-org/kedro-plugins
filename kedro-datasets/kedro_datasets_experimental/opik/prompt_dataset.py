@@ -92,6 +92,8 @@ class PromptDataset(AbstractDataset):
           prompt_name: customer_support_v1
           sync_policy: remote
           mode: sdk
+          load_args:
+            commit: "a1b2c3d4"  # Or version: "v2"
         ```
 
         Using Python API:
@@ -123,7 +125,7 @@ class PromptDataset(AbstractDataset):
         ```
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         filepath: str,
         prompt_name: str,
@@ -133,7 +135,7 @@ class PromptDataset(AbstractDataset):
         mode: Literal["langchain", "sdk"] = "sdk",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-        **opik_kwargs: Any
+        **opik_kwargs: Any,
     ):
         """Initialise PromptDataset with local and remote configuration.
 
@@ -150,10 +152,14 @@ class PromptDataset(AbstractDataset):
                 - "langchain": Returns ChatPromptTemplate object
             credentials: Dictionary with Opik client configuration. Keys may include
                 'api_key', 'workspace', 'project_name', etc.
-            load_args: Dictionary with loading parameters. Currently reserved for future use
-                when Opik supports version/label retrieval.
+            load_args: Dictionary with loading parameters. Keys may include:
+                - commit: Commit hash of the specific prompt version to fetch.
+                - version: Semantic version of the prompt (e.g. "v1", "v2").
+                - project_name: Opik project name if different from default.
             save_args: Dictionary with saving parameters. Keys may include:
-                - metadata: Additional metadata to store with the prompt
+                - metadata: Additional metadata to store with the prompt.
+                - change_description: Description of changes in this version.
+                - tags: List of tags to associate with the prompt version.
             **opik_kwargs: Additional kwargs passed to Opik client initialisation.
 
         Raises:
@@ -174,7 +180,9 @@ class PromptDataset(AbstractDataset):
 
         # Initialise Opik client
         try:
-            self._opik_client = Opik(**build_opik_client_kwargs(credentials), **opik_kwargs)
+            self._opik_client = Opik(
+                **build_opik_client_kwargs(credentials), **opik_kwargs
+            )
         except Exception as e:
             raise DatasetError(f"Failed to initialise Opik client: {e}")
 
@@ -182,11 +190,7 @@ class PromptDataset(AbstractDataset):
         self._ensure_dataset_exists()
 
     def _validate_init_params(
-        self,
-        filepath: str,
-        prompt_type: str,
-        sync_policy: str,
-        mode: str
+        self, filepath: str, prompt_type: str, sync_policy: str, mode: str
     ) -> None:
         """Validate initialisation parameters.
 
@@ -235,7 +239,9 @@ class PromptDataset(AbstractDataset):
                     description=f"Prompt versions for {self._prompt_name}",
                 )
             except Exception as e:
-                raise DatasetError(f"Failed to create Opik dataset '{dataset_name}': {e}")
+                raise DatasetError(
+                    f"Failed to create Opik dataset '{dataset_name}': {e}"
+                )
 
     @property
     def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
@@ -255,7 +261,8 @@ class PromptDataset(AbstractDataset):
             "prompt_name": self._prompt_name,
             "prompt_type": self._prompt_type,
             "sync_policy": self._sync_policy,
-            "mode": self._mode
+            "mode": self._mode,
+            "load_args": self._load_args,
         }
 
     def save(self, data: str | list[dict[str, str]]) -> None:
@@ -275,9 +282,11 @@ class PromptDataset(AbstractDataset):
             raise DatasetError("Text prompts must be a string")
 
         try:
-            create_kwargs = {
+            create_kwargs: dict[str, Any] = {
                 "name": self._prompt_name,
-                "prompt": json.dumps(data, ensure_ascii=False) if not isinstance(data, str) else data,
+                "prompt": json.dumps(data, ensure_ascii=False)
+                if not isinstance(data, str)
+                else data,
             }
 
             # Add metadata if provided
@@ -286,21 +295,73 @@ class PromptDataset(AbstractDataset):
                 metadata.update(self._save_args["metadata"])
             create_kwargs["metadata"] = metadata
 
+            for key in ("change_description", "description", "tags", "project_name"):
+                if key in self._save_args:
+                    create_kwargs[key] = self._save_args[key]
+
             self._opik_client.create_prompt(**create_kwargs)
             logger.info(f"Successfully saved prompt '{self._prompt_name}' to Opik")
         except Exception as e:
             raise DatasetError(f"Failed to save prompt to Opik: {e}")
 
-    def _get_prompt_data(self) -> tuple[Prompt | None, str | list[dict[str, str]] | None]:
-        """Fetch latest prompt from Opik.
+    @property
+    def _get_build_args(self) -> dict[str, Any]:
+        """Build kwargs for fetching prompt from Opik based on load_args and sync_policy.
+
+        When sync_policy="local", load_args (commit/version) are ignored since local files
+        are the source of truth. Users get a warning and the latest prompt is fetched
+        for synchronization purposes only.
+
+        When sync_policy="remote" or "strict", load_args are respected.
+
+        Returns:
+            Kwargs dictionary for opik_client.get_prompt().
+        """
+        get_kwargs: dict[str, Any] = {"name": self._prompt_name}
+
+        has_version_args = (
+            self._load_args.get("commit") is not None
+            or self._load_args.get("version") is not None
+        )
+
+        if self._sync_policy == "local" and has_version_args:
+            specified_args = []
+            if self._load_args.get("commit") is not None:
+                specified_args.append(f"commit='{self._load_args['commit']}'")
+            if self._load_args.get("version") is not None:
+                specified_args.append(f"version='{self._load_args['version']}'")
+
+            logger.warning(
+                f"Ignoring load_args ({', '.join(specified_args)}) for prompt '{self._prompt_name}' "
+                f"because sync_policy='local'. Local files are the source of truth. "
+                f"Latest prompt is used to fetch remote prompt for synchronization. "
+                f"To use specific versions/commits, switch to sync_policy='remote'."
+            )
+        else:
+            if self._load_args.get("commit") is not None:
+                get_kwargs["commit"] = self._load_args["commit"]
+            if self._load_args.get("version") is not None:
+                get_kwargs["version"] = self._load_args["version"]
+
+        for k, v in self._load_args.items():
+            if k not in ("commit", "version") and v is not None:
+                get_kwargs[k] = v
+
+        return get_kwargs
+
+    def _get_prompt_data(
+        self,
+    ) -> tuple[Prompt | None, str | list[dict[str, str]] | None]:
+        """Fetch prompt from Opik based on load_args and sync_policy.
 
         Returns:
             Tuple of (Prompt object or None, prompt data as str/list or None).
         """
         try:
-            # TODO: If Opik supports version/label in the future, add logic here to fetch prompt by version/label using self._load_args.
-
-            opik_prompt = self._opik_client.get_prompt(name=self._prompt_name)
+            get_kwargs = self._get_build_args
+            opik_prompt = self._opik_client.get_prompt(**get_kwargs)
+            if opik_prompt is None:
+                return None, None
             prompt_data = opik_prompt.prompt
 
             # Try to parse JSON if it's a string
@@ -394,7 +455,9 @@ class PromptDataset(AbstractDataset):
             except json.JSONDecodeError:
                 pass
 
-        if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(opik_data)):
+        if not local_data or _hash(_get_content(local_data)) != _hash(
+            _get_content(opik_data)
+        ):
             logger.info(
                 f"Creating/Overwriting local file '{self._filepath}' with remote prompt "
                 f"'{self._prompt_name}' from Opik (remote sync policy)"

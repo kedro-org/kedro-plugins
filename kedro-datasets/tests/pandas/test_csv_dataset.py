@@ -1,6 +1,8 @@
 import inspect
 import os
+import pickle
 import sys
+from multiprocessing.reduction import ForkingPickler
 from pathlib import Path, PurePosixPath
 from time import sleep
 
@@ -62,6 +64,7 @@ def mocked_s3_bucket():
     with mock_aws():
         conn = boto3.client(
             "s3",
+            region_name="us-east-1",
             aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )
@@ -222,6 +225,50 @@ class TestCSVDataset:
 
         assert str(dataset._filepath) == path
         assert isinstance(dataset._filepath, PurePosixPath)
+
+    @pytest.mark.parametrize(
+        "filepath,credentials",
+        [
+            ("s3://bucket/file.csv", {}),
+            ("file:///tmp/test.csv", {}),
+            ("/tmp/test.csv", {}),
+            ("gcs://bucket/file.csv", {}),
+            ("https://example.com/file.csv", {}),
+            ("http://example.com/file.csv", {}),
+            (
+                "abfs://bucket/file.csv",
+                {"account_name": "test", "account_key": "test"},
+            ),
+        ],
+    )
+    def test_pickle_dataset(self, filepath, credentials):
+        dataset = CSVDataset(filepath=filepath, credentials=credentials)
+        dumped = pickle.dumps(dataset)
+        loaded = pickle.loads(dumped)
+        assert loaded._filepath == dataset._filepath
+        assert loaded._protocol == dataset._protocol
+
+    @pytest.mark.parametrize(
+        "filepath,credentials",
+        [
+            ("s3://bucket/file.csv", {}),
+            ("file:///tmp/test.csv", {}),
+            ("/tmp/test.csv", {}),
+            ("gcs://bucket/file.csv", {}),
+            ("https://example.com/file.csv", {}),
+            ("http://example.com/file.csv", {}),
+            (
+                "abfs://bucket/file.csv",
+                {"account_name": "test", "account_key": "test"},
+            ),
+        ],
+    )
+    def test_forking_pickler_dataset(self, filepath, credentials):
+        dataset = CSVDataset(filepath=filepath, credentials=credentials)
+        dumped = ForkingPickler.dumps(dataset)
+        loaded = pickle.loads(dumped)
+        assert loaded._filepath == dataset._filepath
+        assert loaded._protocol == dataset._protocol
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value

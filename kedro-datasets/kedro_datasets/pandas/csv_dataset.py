@@ -1,6 +1,7 @@
 """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 """
+
 from __future__ import annotations
 
 import logging
@@ -129,8 +130,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         super().__init__(
             filepath=PurePosixPath(path),
             version=version,
-            exists_function=self._fs.exists,
-            glob_function=self._fs.glob,
+            exists_function=self._fs_exists,
+            glob_function=self._fs_glob,
         )
 
         # Handle default load and save and fs arguments
@@ -192,6 +193,12 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             return False
 
         return self._fs.exists(load_path)
+
+    def _fs_exists(self, path: str | os.PathLike) -> bool:
+        return self._fs.exists(str(path))
+
+    def _fs_glob(self, pattern: str | os.PathLike) -> list[str]:
+        return self._fs.glob(str(pattern))
 
     def _release(self) -> None:
         super()._release()

@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path, PurePosixPath
 
 import holoviews as hv
@@ -36,10 +35,6 @@ def versioned_hv_writer(filepath_png, load_version, save_version):
     )
 
 
-@pytest.mark.skipif(
-    sys.version_info.minor == 10,
-    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
-)
 class TestHoloviewsWriter:
     def test_save_data(self, tmp_path, dummy_hv_object, hv_writer):
         """Test saving Holoviews object."""
@@ -129,10 +124,6 @@ class TestHoloviewsWriter:
         assert isinstance(dataset._filepath, PurePosixPath)
 
 
-@pytest.mark.skipif(
-    sys.version_info.minor == 10,
-    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
-)
 class TestHoloviewsWriterVersioned:
     def test_version_str_repr(self, hv_writer, versioned_hv_writer):
         """Test that version is in string representation of the class instance

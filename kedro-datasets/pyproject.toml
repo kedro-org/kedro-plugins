@@ -271,6 +271,7 @@ docs = [
    "mkdocs-autorefs>=1.4.1",
    "mkdocs-get-deps>=0.2.0",
    "mkdocstrings-python>=0.29.1",
+   "pymdown-extensions<12.2",
    "linkchecker>=10.2.1",
    "ipykernel>=5.3, <7.0",
    "Jinja2<3.2.0",

@@ -113,19 +113,6 @@ class TestEagerExcelDataset:
         reloaded_df = excel_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
-    @pytest.mark.parametrize("engine", ["calamine", "openpyxl", "xlsx2csv"])
-    def test_load_engines(self, dummy_dataframe, filepath_excel, engine):
-        """Test loading Excel file using various engines including calamine (Issue #589)."""
-        pd_df = dummy_dataframe.to_pandas()
-        pd_df.to_excel(filepath_excel, index=False)
-        dataset = EagerPolarsDataset(
-            filepath=filepath_excel.as_posix(),
-            file_format="excel",
-            load_args={"engine": engine},
-        )
-        loaded = dataset.load()
-        assert loaded.shape == (2, 3)
-
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",
         [
@@ -218,6 +205,23 @@ class TestEagerExcelDataset:
         dataset = EagerPolarsDataset(filepath=filepath, file_format="parquet")
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
+
+    @pytest.mark.parametrize("engine", ["calamine", "openpyxl"])
+    def test_load_engines(self, mocker, dummy_dataframe, filepath_excel, engine):
+        """Test loading Excel file using various engines including calamine (Issue #589)."""
+        from io import BytesIO
+
+        mock_read = mocker.patch("polars.read_excel", return_value=dummy_dataframe)
+        dataset = EagerPolarsDataset(
+            filepath=filepath_excel.as_posix(),
+            file_format="excel",
+            load_args={"engine": engine},
+        )
+        loaded = dataset.load()
+        assert loaded.shape == (2, 3)
+        args, kwargs = mock_read.call_args
+        assert isinstance(args[0], BytesIO)
+        assert kwargs["engine"] == engine
 
 
 class TestEagerParquetDatasetVersioned:

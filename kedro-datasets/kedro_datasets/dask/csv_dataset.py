@@ -52,7 +52,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
@@ -118,7 +118,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         try:
-            files = file_system.glob(self._filepath)
+            files = file_system.glob(str(self._filepath))
         except FileNotFoundError:
             return False
         return bool(files)

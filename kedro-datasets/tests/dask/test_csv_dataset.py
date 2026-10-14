@@ -157,7 +157,6 @@ class TestCSVDataset:
         loaded_data = dataset.load()
         assert (dummy_dd_dataframe.compute().values == loaded_data.compute().values).all()
 
-
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )

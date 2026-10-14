@@ -142,7 +142,6 @@ class TestParquetDataset:
         loaded_data = dataset.load()
         dummy_dd_dataframe.compute().equals(loaded_data.compute())
 
-
     def test_pathlike_filepath(self, tmp_path, dummy_dd_dataframe):
         """Test that os.PathLike filepaths are supported."""
         filepath = tmp_path / "some" / "dir" / FILE_NAME

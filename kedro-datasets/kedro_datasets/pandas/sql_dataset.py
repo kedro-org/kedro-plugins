@@ -279,9 +279,12 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         """
 
         table_name = self._load_args["table_name"]
+        schema = self._load_args.get("schema", None)
 
         metadata = MetaData()
-        table_ref = Table(table_name, metadata, autoload_with=self.engine)
+        table_ref = Table(
+            table_name, metadata, schema=schema, autoload_with=self.engine
+        )
 
         query = select(table_ref).limit(nrows)  # type: ignore[arg-type]
 

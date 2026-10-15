@@ -4,6 +4,7 @@
 
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
+- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 
 ## Breaking changes
 
@@ -22,6 +23,7 @@
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
+- [Dhruv Gupta](https://github.com/DG47)
 
 # Release 9.6.0
 

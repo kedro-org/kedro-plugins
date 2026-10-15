@@ -2018,8 +2018,7 @@
             },
             "then": {
               "required": [
-                "url",
-                "table"
+                "url"
               ],
               "properties": {
                 "url": {
@@ -2028,7 +2027,11 @@
                 },
                 "table": {
                   "type": "string",
-                  "description": "The name of the table to load or save data to."
+                  "description": "The name of the table to load or save data to.\nCannot be used together with ``query``."
+                },
+                "query": {
+                  "type": "string",
+                  "description": "A SQL query to load data from, passed to Spark's JDBC\n``query`` option. The dataset is read-only when ``query``\nis provided, and ``load_args`` may only contain\n``properties``. Cannot be used together with ``table``."
                 },
                 "credentials": {
                   "type": [
@@ -2045,7 +2048,15 @@
                   "type": "object",
                   "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html"
                 }
-              }
+              },
+              "oneOf": [
+                {
+                  "required": ["table"]
+                },
+                {
+                  "required": ["query"]
+                }
+              ]
             }
           },
           {

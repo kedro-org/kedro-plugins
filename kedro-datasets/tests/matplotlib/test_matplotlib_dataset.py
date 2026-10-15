@@ -290,6 +290,30 @@ class TestMatplotlibDataset:
             dataset.save({unsafe_plot_name: plot})
 
     @pytest.mark.parametrize(
+        "absolute_plot_name",
+        [
+            "/outside.png",
+            "\\outside.png",
+            "C:\\outside.png",
+            "C:outside.png",
+            "\\\\server\\share\\outside.png",
+        ],
+    )
+    def test_save_dict_absolute_plot_names(self, tmp_path, absolute_plot_name):
+        """Test that absolute plot names are rejected instead of escaping the dataset directory."""
+        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        with pytest.raises(DatasetError, match="must be a relative path"):
+            dataset.save({absolute_plot_name: plt.figure()})
+
+    def test_save_dict_absolute_plot_name_not_written(self, tmp_path):
+        """Test that an absolute plot name pointing outside the dataset directory writes nothing."""
+        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        target = tmp_path / "outside" / "pwned.png"
+        with pytest.raises(DatasetError, match="must be a relative path"):
+            dataset.save({target.as_posix(): plt.figure()})
+        assert not target.exists()
+
+    @pytest.mark.parametrize(
         "safe_plot_name,expected_path",
         [
             ("red.png", "plots/red.png"),

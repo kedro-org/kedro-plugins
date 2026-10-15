@@ -531,6 +531,18 @@ class TestPartitionedDatasetLocal:
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             pds.save({unsafe_partition_id: original_data})
 
+    @pytest.mark.parametrize(
+        "absolute_partition_id",
+        ["\\secrets", "C:\\secrets", "C:secrets", "\\\\server\\share\\secrets"],
+    )
+    def test_save_partition_absolute_paths(self, tmpdir, absolute_partition_id):
+        """Test absolute partition IDs are rejected during save."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        with pytest.raises(DatasetError, match="must be a relative path"):
+            pds.save({absolute_partition_id: original_data})
+
     def test_unsafe_partition_error_message(self, tmpdir):
         """Test DatasetError message includes the resolved path and base directory."""
         pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")

@@ -160,7 +160,10 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return load_method(fs_file, **self._load_args)
+            file_obj = (
+                BytesIO(fs_file.read()) if self._file_format == "excel" else fs_file
+            )
+            return load_method(file_obj, **self._load_args)
 
     def save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

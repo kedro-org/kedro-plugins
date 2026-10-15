@@ -206,6 +206,16 @@ class TestEagerExcelDataset:
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
 
+    def test_load_calamine_engine(self, mocker, excel_dataset, dummy_dataframe):
+        """Test loading Excel file with calamine engine uses BytesIO (Issue #589)."""
+        mock_read = mocker.patch("polars.read_excel", return_value=dummy_dataframe)
+        excel_dataset._load_args = {"engine": "calamine"}
+        loaded = excel_dataset.load()
+        assert loaded.shape == (2, 3)
+        args, kwargs = mock_read.call_args
+        assert kwargs["engine"] == "calamine"
+        assert hasattr(args[0], "getvalue")
+
 
 class TestEagerParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore):

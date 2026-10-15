@@ -35,7 +35,7 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
 
     ```yaml
     model:
-        type: pytorch.PyTorchDataset
+        type: kedro_datasets_experimental.pytorch.PyTorchDataset
         filepath: data/06_models/model.pt
     ```
 

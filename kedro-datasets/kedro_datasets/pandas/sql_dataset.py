@@ -1,4 +1,5 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+
 from __future__ import annotations
 
 import copy
@@ -279,9 +280,12 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         """
 
         table_name = self._load_args["table_name"]
+        schema = self._load_args.get("schema")
 
         metadata = MetaData()
-        table_ref = Table(table_name, metadata, autoload_with=self.engine)
+        table_ref = Table(
+            table_name, metadata, schema=schema, autoload_with=self.engine
+        )
 
         query = select(table_ref).limit(nrows)  # type: ignore[arg-type]
 
@@ -415,7 +419,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: dict[str, Any] = {}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         sql: str | None = None,
         credentials: dict[str, Any] | None = None,

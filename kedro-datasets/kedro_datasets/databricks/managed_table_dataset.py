@@ -1,6 +1,7 @@
 """``ManagedTableDataset`` implementation to access managed delta tables
 in Databricks.
 """
+
 from __future__ import annotations
 
 import logging
@@ -45,6 +46,46 @@ class ManagedTableDataset(BaseTableDataset):
           type: databricks.ManagedTableDataset
           table: names_and_ages
           dataframe_type: pandas
+
+        # Table with schema definition (Spark StructType JSON format in YAML)
+        names_and_salaries:
+          type: databricks.ManagedTableDataset
+          table: names_and_salaries
+          database: default
+          write_mode: overwrite
+          schema:
+            type: struct
+            fields:
+              - name: name
+                type: string
+                nullable: true
+                metadata: {}
+              - name: salary
+                type: decimal(10,2)
+                nullable: true
+                metadata: {}
+              - name: age
+                type: integer
+                nullable: true
+                metadata: {}
+
+        # Upsert mode with primary key and partitioning
+        customers:
+          type: databricks.ManagedTableDataset
+          table: customers
+          database: analytics
+          catalog: main
+          write_mode: upsert
+          primary_key: customer_id
+          partition_columns:
+            - country
+
+        # Versioned table
+        metrics:
+          type: databricks.ManagedTableDataset
+          table: metrics
+          database: default
+          versioned: true
         ```
 
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
@@ -150,7 +191,7 @@ class ManagedTableDataset(BaseTableDataset):
             owner_group=owner_group,
         )
 
-    def _create_table(  # noqa: PLR0913
+    def _create_table(  # noqa: PLR0913, PLR0917
         self,
         table: str,
         catalog: str | None,

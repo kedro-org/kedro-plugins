@@ -1,6 +1,7 @@
 """``BaseTableDataset`` implementation used to add the base for
 ``ManagedTableDataset`` and ``ExternalTableDataset``.
 """
+
 from __future__ import annotations
 
 import logging
@@ -148,8 +149,7 @@ class BaseTable:
         if self.primary_key is None or len(self.primary_key) == 0:
             if self.write_mode == "upsert":
                 raise DatasetError(
-                    f"`primary_key` must be provided for"
-                    f"`write_mode` {self.write_mode}"
+                    f"`primary_key` must be provided for`write_mode` {self.write_mode}"
                 )
 
     def full_table_location(self) -> str | None:
@@ -371,7 +371,7 @@ class BaseTableDataset(AbstractVersionedDataset):
             exists_function=self._exists,  # type: ignore[arg-type]
         )
 
-    def _create_table(  # noqa: PLR0913
+    def _create_table(  # noqa: PLR0913, PLR0917
         self,
         table: str,
         catalog: str | None,
@@ -429,7 +429,12 @@ class BaseTableDataset(AbstractVersionedDataset):
             Union[DataFrame, pd.DataFrame]: Returns a dataframe
                 in the format defined in the init.
         """
-        if self._version and self._version.load >= 0:
+        if self._version and self._version.load is not None:
+            try:
+                if int(self._version.load) < 0:
+                    raise VersionNotFoundError(self._version.load)
+            except (ValueError, TypeError):
+                pass
             try:
                 data = (
                     get_spark()

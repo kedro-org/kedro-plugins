@@ -239,6 +239,30 @@ class TestSQLTableDataset:
         return_annotation = inspect.signature(sql_dataset.preview).return_annotation
         assert return_annotation == "TablePreview"
 
+    def test_preview_with_schema(self, tmp_path):
+        main_db = tmp_path / "main.db"
+        schema_db = tmp_path / "schema.db"
+        con_url = f"sqlite:///{main_db}"
+
+        dataset = SQLTableDataset(
+            table_name="custom_table",
+            credentials={"con": con_url},
+            load_args={"schema": "custom_schema"},
+            save_args={"schema": "custom_schema"},
+        )
+
+        @sqlalchemy.event.listens_for(dataset.engine, "connect")
+        def attach_db(dbapi_con, _):
+            dbapi_con.execute(f"ATTACH DATABASE '{schema_db}' AS custom_schema")
+
+        df = pd.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
+        dataset.save(df)
+        assert dataset.exists()
+
+        preview = dataset.preview(nrows=2)
+        assert preview["columns"] == ["a", "b"]
+        assert len(preview["data"]) == 2
+
     def test_preview_sql_error(self, table_dataset, mocker):
         mocker.patch(
             "pandas.read_sql_query",
@@ -543,8 +567,7 @@ class TestSQLQueryDataset:
         mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         load_args = {"params": {"value": 1000}}
         pattern = (
-            "Unrecognized `params` format. It can be only a `list`, "
-            "got <class 'dict'>"
+            "Unrecognized `params` format. It can be only a `list`, got <class 'dict'>"
         )
         with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataset(

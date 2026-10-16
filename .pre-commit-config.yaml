@@ -43,6 +43,14 @@ repos:
         stages: [ manual ]
         entry: ruff check kedro-datasets --fix --exit-non-zero-on-fix
 
+      - id: generate-kedro-catalog-schema
+        name: "Generate Kedro catalog JSON schema"
+        language: system
+        files: ^kedro-datasets/(kedro_datasets/|static/jsonschema/kedro-catalog-1\.0\.0\.json)
+        pass_filenames: false
+        stages: [ manual ]
+        entry: python -c "import subprocess, sys; sys.exit(subprocess.call([sys.executable, '-m', 'kedro_datasets._generate_catalog_schema'], cwd='kedro-datasets'))"
+
       - id: ruff-kedro-airflow
         name: "Ruff on kedro_airflow/*"
         language: system

@@ -51,6 +51,15 @@ def mocked_s3_bucket():
 
 
 class TestVideoDataset:
+    def test_pathlike_filepath(self, filepath_mp4):
+        from pathlib import Path, PurePosixPath
+        pathlike = Path(filepath_mp4)
+        ds = VideoDataset(filepath=pathlike)
+        assert isinstance(ds._filepath, PurePosixPath)
+        assert str(ds._filepath) == pathlike.as_posix()
+        fv = FileVideo(pathlike)
+        assert fv.filepath == str(pathlike)
+
     def test_load_mp4(self, filepath_mp4, mp4_object):
         """Loading a mp4 dataset should create a FileVideo"""
         ds = VideoDataset(filepath=filepath_mp4)

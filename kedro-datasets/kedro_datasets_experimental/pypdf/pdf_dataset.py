@@ -4,6 +4,7 @@ filesystem (e.g.: local, S3, GCS). It uses pypdf to read and extract text from P
 from __future__ import annotations
 
 from copy import deepcopy
+import os
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
 
@@ -60,7 +61,7 @@ class PDFDataset(AbstractDataset[NoReturn, list[str]]):
     def __init__(
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

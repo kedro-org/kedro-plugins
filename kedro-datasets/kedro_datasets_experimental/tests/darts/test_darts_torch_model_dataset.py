@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+from pathlib import PurePosixPath
 
 import numpy as np
 import pandas as pd
@@ -109,3 +110,9 @@ class TestDartsTorchModelDataset:
 
         # Two models with the same parameters should deterministically yield the same output
         np.testing.assert_array_equal(pred1.values(), pred2.values())
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "model.pt"
+        dataset = DartsTorchModelDataset(filepath=filepath, model_class="RNNModel")
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == filepath.as_posix()

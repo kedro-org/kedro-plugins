@@ -133,6 +133,17 @@ class TestPromptDatasetInit:
         assert dataset._sync_policy == "local"  # default
         assert dataset._mode == "sdk"  # default
 
+    def test_pathlike_filepath(self, filepath_json_chat, mock_credentials, mock_langfuse):
+        from pathlib import Path, PurePosixPath
+        pathlike = Path(filepath_json_chat)
+        dataset = PromptDataset(
+            filepath=pathlike,
+            prompt_name="test-prompt",
+            credentials=mock_credentials,
+        )
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == pathlike.as_posix()
+
     def test_init_all_params(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test initialization with all parameters."""
         load_args = {"version": 1}

@@ -238,3 +238,9 @@ class TestSafetensorsDatasetVersioned:
         safetensors_dataset_copy = versioned_safetensors_dataset._copy()
         assert safetensors_dataset_copy is not versioned_safetensors_dataset
         assert safetensors_dataset_copy._describe() == versioned_safetensors_dataset._describe()
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "model.safetensors"
+        dataset = SafetensorsDataset(filepath=filepath)
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == filepath.as_posix()

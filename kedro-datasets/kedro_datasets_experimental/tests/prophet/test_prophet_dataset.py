@@ -207,3 +207,9 @@ class TestProphetModelDatasetVersioned:
         Path(prophet_model_dataset._filepath.as_posix()).unlink()
         versioned_prophet_model_dataset.save(dummy_model)
         assert versioned_prophet_model_dataset.exists()
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "model.json"
+        dataset = ProphetModelDataset(filepath=filepath)
+        assert isinstance(dataset._filepath, PurePosixPath)
+        assert str(dataset._filepath) == filepath.as_posix()

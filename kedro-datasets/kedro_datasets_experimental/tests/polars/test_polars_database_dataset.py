@@ -383,3 +383,13 @@ class TestPolarsDatabaseDataset:
             credentials={"con": CONNECTION},
         )
         assert CONNECTION not in str(dataset)
+
+    def test_pathlike_filepath(self, tmp_path):
+        """Test that os.PathLike filepath is supported."""
+        query_file = tmp_path / "test_query.sql"
+        query_file.write_text("SELECT * FROM test_table")
+        dataset = PolarsDatabaseDataset(
+            filepath=query_file,
+            credentials={"con": CONNECTION},
+        )
+        assert dataset._filepath == query_file.as_posix()

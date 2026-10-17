@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import numpy as np
 import pytest
@@ -179,3 +179,10 @@ def test_load_missing_file(tmp_path):
     pattern = r"Failed while loading data from dataset kedro_datasets_experimental.rioxarray.geotiff_dataset.GeoTIFFDataset\(.*\)"
     with pytest.raises(DatasetError, match=pattern):
         dataset.load()
+
+
+def test_pathlike_filepath(tmp_path):
+    filepath = tmp_path / "test.tif"
+    dataset = GeoTIFFDataset(filepath=filepath)
+    assert isinstance(dataset._filepath, PurePosixPath)
+    assert str(dataset._filepath) == filepath.as_posix()

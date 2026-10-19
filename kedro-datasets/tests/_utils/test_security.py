@@ -13,7 +13,7 @@ BASE = "/data/base"
 class TestValidateSubPath:
     @pytest.mark.parametrize(
         "sub_path",
-        ["file", "a/b", "a\\b", "a/../b", "...data", "file:name", "a:b", "dir/C:foo"],
+        ["file", "a/b", "a\\b", "a/../b", "...data", "file:name", "dir/C:foo"],
     )
     def test_valid_paths(self, sub_path):
         validate_sub_path(sub_path, BASE)

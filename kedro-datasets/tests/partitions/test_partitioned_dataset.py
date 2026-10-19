@@ -539,6 +539,7 @@ class TestPartitionedDatasetLocal:
         with pytest.raises(DatasetError, match="must be a relative path"):
             pds.save({"/secrets": original_data})
 
+    @pytest.mark.skipif(os.name == "nt", reason="Drive letters are absolute on Windows")
     def test_load_partition_drive_like_name(self, tmpdir, mocker):
         """Test a listed file whose name looks like a drive doesn't break load."""
         pds = PartitionedDataset(

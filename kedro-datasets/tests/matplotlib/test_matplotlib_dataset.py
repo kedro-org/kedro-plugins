@@ -117,9 +117,9 @@ def plot_dataset(mocked_s3_bucket, fs_args, save_args, overwrite):
 
 @pytest.fixture
 def versioned_plot_dataset(tmp_path, load_version, save_version):
-    filepath = (tmp_path / "matplotlib.png").as_posix()
     return MatplotlibDataset(
-        filepath=filepath, version=Version(load_version, save_version)
+        filepath=tmp_path / "matplotlib.png",
+        version=Version(load_version, save_version),
     )
 
 
@@ -149,20 +149,44 @@ class TestMatplotlibDataset:
         for key, value in save_args.items():
             assert plot_dataset._save_args[key] == value
 
-    def test_pathlike_filepath(self, tmp_path, mock_single_plot):
-        """Test that os.PathLike filepaths are supported."""
+    @pytest.mark.parametrize(
+        "plot_fixture", ["mock_single_plot", "mock_list_plot", "mock_dict_plot"]
+    )
+    def test_pathlike_filepath(self, tmp_path, request, plot_fixture):
+        """Test that os.PathLike filepaths work for single, list and dict plots."""
+        plot = request.getfixturevalue(plot_fixture)
         filepath = tmp_path / "matplotlib.png"
         dataset = MatplotlibDataset(filepath=filepath)
-        dataset.save(mock_single_plot)
+        assert not dataset.exists()
+
+        dataset.save(plot)
+        assert dataset.exists()
 
         expected = tmp_path / "locally_saved.png"
-        mock_single_plot.savefig(str(expected))
-        assert filepath.read_bytes() == expected.read_bytes()
+        if isinstance(plot, list):
+            for index, figure in enumerate(plot):
+                figure.savefig(str(expected))
+                assert (filepath / f"{index}.png").read_bytes() == expected.read_bytes()
+        elif isinstance(plot, dict):
+            for name, figure in plot.items():
+                figure.savefig(str(expected))
+                assert (filepath / name).read_bytes() == expected.read_bytes()
+        else:
+            plot.savefig(str(expected))
+            assert filepath.read_bytes() == expected.read_bytes()
 
         # Loading is not supported; a Path filepath must still raise that error.
         pattern = r"Loading not supported for 'MatplotlibDataset'"
         with pytest.raises(DatasetError, match=pattern):
             dataset.load()
+
+    def test_release_pathlike_filepath(self, tmp_path, mocker):
+        """Test that `release()` invalidates the cache for an os.PathLike filepath."""
+        fs_mock = mocker.patch("fsspec.filesystem").return_value
+        filepath = tmp_path / "matplotlib.png"
+        dataset = MatplotlibDataset(filepath=filepath)
+        dataset.release()
+        fs_mock.invalidate_cache.assert_called_once_with(filepath.as_posix())
 
     def test_list_save(self, tmp_path, mock_list_plot, plot_dataset, mocked_s3_bucket):
         """Test saving list of plots to S3."""
@@ -292,7 +316,7 @@ class TestMatplotlibDataset:
     )
     def test_save_dict_unsafe_plot_names(self, tmp_path, unsafe_plot_name):
         """Test that plot names with path traversal components are rejected."""
-        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        dataset = MatplotlibDataset(filepath=tmp_path / "plots")
         plot = plt.figure()
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             dataset.save({unsafe_plot_name: plot})
@@ -308,7 +332,7 @@ class TestMatplotlibDataset:
     )
     def test_save_dict_safe_plot_names(self, tmp_path, safe_plot_name, expected_path):
         """Test that safe plot names (including intra-directory traversal) save successfully."""
-        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        dataset = MatplotlibDataset(filepath=tmp_path / "plots")
         dataset.save({safe_plot_name: plt.figure()})
         assert (tmp_path / expected_path).exists()
 

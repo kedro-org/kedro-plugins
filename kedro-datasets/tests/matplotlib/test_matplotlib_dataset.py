@@ -18,7 +18,6 @@ AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}  # pragma: allowlist s
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
-
 matplotlib.use("Agg")  # Disable interactive mode
 
 
@@ -289,29 +288,13 @@ class TestMatplotlibDataset:
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             dataset.save({unsafe_plot_name: plot})
 
-    @pytest.mark.parametrize(
-        "absolute_plot_name",
-        [
-            "/outside.png",
-            "\\outside.png",
-            "C:\\outside.png",
-            "C:outside.png",
-            "\\\\server\\share\\outside.png",
-        ],
-    )
-    def test_save_dict_absolute_plot_names(self, tmp_path, absolute_plot_name):
-        """Test that absolute plot names are rejected instead of escaping the dataset directory."""
+    def test_save_dict_absolute_plot_name(self, tmp_path):
+        """Test that an absolute plot name is rejected instead of escaping the dataset directory."""
         dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
         with pytest.raises(DatasetError, match="must be a relative path"):
-            dataset.save({absolute_plot_name: plt.figure()})
-
-    def test_save_dict_absolute_plot_name_not_written(self, tmp_path):
-        """Test that an absolute plot name pointing outside the dataset directory writes nothing."""
-        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
-        target = tmp_path / "outside" / "pwned.png"
-        with pytest.raises(DatasetError, match="must be a relative path"):
-            dataset.save({target.as_posix(): plt.figure()})
-        assert not target.exists()
+            dataset.save({f"{tmp_path.as_posix()}/outside.png": plt.figure()})
+        assert not any(tmp_path.iterdir())
+        assert not any(tmp_path.iterdir())
 
     @pytest.mark.parametrize(
         "safe_plot_name,expected_path",

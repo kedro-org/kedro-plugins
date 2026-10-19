@@ -16,7 +16,7 @@
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 - Added the missing `spark-gbqquerydataset` extra for `spark.GBQQueryDataset` and included it in `spark-all`.
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
-- Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory when given absolute plot names.
+- Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names and partition IDs now raise `DatasetError`.
 
 ## Community contributions
 

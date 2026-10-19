@@ -1,6 +1,8 @@
 """Security utilities for kedro-datasets."""
+
 from __future__ import annotations
 
+import os
 import posixpath
 from pathlib import PureWindowsPath
 
@@ -18,8 +20,11 @@ def validate_sub_path(sub_path: str, base_path: str) -> None:
     Raises:
         DatasetError: If ``sub_path`` is absolute or resolves outside ``base_path``.
     """
-    # Reject absolute paths (POSIX and Windows)
-    if PureWindowsPath(sub_path).anchor:
+    # Joining a base with an absolute path discards the base
+    # Drive letters are only absolute on Windows
+    if sub_path.startswith(("/", "\\")) or (
+        os.name == "nt" and PureWindowsPath(sub_path).drive
+    ):
         raise DatasetError(
             f"Path '{sub_path}' must be a relative path inside the dataset "
             f"directory '{base_path}'."

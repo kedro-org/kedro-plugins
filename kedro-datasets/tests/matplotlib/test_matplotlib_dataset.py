@@ -294,7 +294,6 @@ class TestMatplotlibDataset:
         with pytest.raises(DatasetError, match="must be a relative path"):
             dataset.save({f"{tmp_path.as_posix()}/outside.png": plt.figure()})
         assert not any(tmp_path.iterdir())
-        assert not any(tmp_path.iterdir())
 
     @pytest.mark.parametrize(
         "safe_plot_name,expected_path",

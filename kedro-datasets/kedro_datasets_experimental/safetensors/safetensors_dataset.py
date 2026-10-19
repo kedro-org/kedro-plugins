@@ -19,11 +19,11 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     """`SafetensorsDataset` loads/saves data from/to a Safetensors file using an underlying filesystem (e.g., local, S3, GCS).
     The underlying functionality is supported by the specified backend library (defaults to the `numpy` library), so it supports all allowed options for loading and saving Safetensors files.
 
-    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
     test_model:
-        type: safetensors.SafetensorsDataset
+        type: kedro_datasets_experimental.safetensors.SafetensorsDataset
         filepath: data/07_model_output/test_model.safetensors
     ```
 

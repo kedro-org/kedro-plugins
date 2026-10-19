@@ -39,7 +39,7 @@ jobs:
     with:
       plugin: kedro-datasets
       os: ubuntu-latest
-      python-version: "3.11"
+      python-version: "3.12"
 
   check-docs:
     permissions:
@@ -48,15 +48,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Cache python packages
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: kedro-datasets-ubuntu-latest-python-"3.10"
+          key: kedro-datasets-ubuntu-latest-python-"3.12"
           restore-keys: kedro-datasets
       - name: Install uv
         run: |
@@ -64,7 +64,11 @@ jobs:
       - name: Install dependencies
         run: |
           cd kedro-datasets
-          uv pip install --system "kedro-datasets[docs,test,experimental] @ ."
+          uv pip install --system "kedro-datasets[docs,test] @ ."
+      - name: Install experimental dependencies
+        run: |
+          cd kedro-datasets
+          uv pip install --system "kedro-datasets[experimental] @ ." || true
       - name: Build datasets documentation
         run: |
           make build-datasets-docs

@@ -35,7 +35,7 @@ class DartsTorchModelDataset(
     ```yaml
 
     darts_model:
-        type: path.to.DartsTorchModelDataset
+        type: kedro_datasets_experimental.darts.DartsTorchModelDataset
         filepath: data/06_models/darts_model.pt
         model_class: RNNModel
         load_args:
@@ -48,7 +48,7 @@ class DartsTorchModelDataset(
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
-    from path.to.your.module import DartsTorchModelDataset
+    from kedro_datasets_experimental.darts import DartsTorchModelDataset
     from darts.models import RNNModel
     from kedro.io.core import Version
 

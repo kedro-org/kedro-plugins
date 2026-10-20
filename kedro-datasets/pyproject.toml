@@ -518,7 +518,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501", "F401", "PLR0917"]  # Black takes care of line-too-long, PLR0917 ignored
+ignore = ["E501", "F401"]  # Black takes care of line-too-long
 
 [tool.ruff.lint.per-file-ignores]
 "{tests,docs,kedro_datasets_experimental/tests}/*" = ["PLR2004", "PLR0913", "T201"]

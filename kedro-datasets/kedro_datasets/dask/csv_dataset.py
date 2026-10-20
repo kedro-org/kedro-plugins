@@ -52,7 +52,7 @@ class CSVDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
 
-    def __init__(  # noqa: PLR0913, PLR0917
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,

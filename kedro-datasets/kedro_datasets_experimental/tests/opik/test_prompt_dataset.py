@@ -1,4 +1,5 @@
 import json
+from pathlib import Path, PurePosixPath
 from unittest.mock import Mock, patch
 
 import pytest
@@ -125,7 +126,6 @@ class TestPromptDatasetInit:
         assert dataset._mode == "sdk"  # default
 
     def test_pathlike_filepath(self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset):
-        from pathlib import Path, PurePosixPath
         pathlike = Path(filepath_json_chat)
         dataset = PromptDataset(
             filepath=pathlike,

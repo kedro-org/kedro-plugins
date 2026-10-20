@@ -1,3 +1,5 @@
+from pathlib import Path, PurePosixPath
+
 import boto3
 import pytest
 from kedro.io.core import DatasetError
@@ -51,9 +53,8 @@ def mocked_s3_bucket():
 
 
 class TestVideoDataset:
-    def test_pathlike_filepath(self, filepath_mp4):
-        from pathlib import Path, PurePosixPath
-        pathlike = Path(filepath_mp4)
+    def test_pathlike_filepath(self, tmp_path):
+        pathlike = tmp_path / "test.mp4"
         ds = VideoDataset(filepath=pathlike)
         assert isinstance(ds._filepath, PurePosixPath)
         assert str(ds._filepath) == pathlike.as_posix()

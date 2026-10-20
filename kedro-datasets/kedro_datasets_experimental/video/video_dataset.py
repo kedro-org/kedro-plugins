@@ -5,11 +5,11 @@ and decode videos and OpenCV VideoWriter to encode and write video.
 from __future__ import annotations
 
 import itertools
+import os
 import tempfile
 from collections import abc
 from collections.abc import Generator, Sequence
 from copy import deepcopy
-import os
 from pathlib import Path, PurePosixPath
 from typing import Any
 

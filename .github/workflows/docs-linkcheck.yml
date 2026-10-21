@@ -1,4 +1,4 @@
-name: Check links in MkDocs
+name: Check links in docs
 
 on:
   push:
@@ -45,6 +45,6 @@ jobs:
         run: |
           cd kedro-datasets && uv pip install -e ".[docs]"
 
-      - name: Run MkDocs on strict mode.
+      - name: Build docs with Zensical
         run: |
           make build-datasets-docs

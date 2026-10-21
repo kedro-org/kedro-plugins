@@ -31,7 +31,7 @@ Make sure to add the necessary files for the new dataset so that it shows up in 
 1. Ensure the dataset's docstring is markdown-parseable.
 2. Add an entry for your dataset to the table in `index.md` in either `docs/pages/api/kedro_datasets` or `docs/pages/api/kedro_datasets_experimental`, depending on the type.
 3. Create a markdown file for your dataset in the appropriate `pages/api` directory.
-4. Add your dataset's markdown file to the navigation in `mkdocs.yml`.
+4. Add your dataset's markdown file to the navigation in `zensical.toml`.
 
 After adding a dataset or changing its constructor signature or docstring, regenerate the catalog schema by running `python -m kedro_datasets._generate_catalog_schema` from the `kedro-datasets` directory.
 
@@ -86,7 +86,7 @@ Working on your first pull request? You can learn how from these resources:
 - Aim for cross-platform compatibility on Windows, macOS and Linux
 - We use [Anaconda](https://www.anaconda.com/download) as a preferred virtual environment
 - We use [SemVer](https://semver.org/) for versioning
-- We use [mkdocs](https://www.mkdocs.org/) for our documentation
+- We use [Zensical](https://zensical.org/) for our documentation
 
 Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
 

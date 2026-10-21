@@ -1,12 +1,22 @@
 ##########################
 # Kedro PROJECT
 
-# ignore Dockerfile and .dockerignore
+# Unlike .gitignore, a plain name only matches at the project root:
+# use **/name to match it at any depth.
+# Do not ignore pyproject.toml, uv.lock, uv.toml or requirements.txt:
+# the Dockerfile installs the dependencies from them.
+
+# ignore Docker files
 Dockerfile
 .dockerignore
+.dive-ci
 
 # ignore potentially sensitive credentials files
 conf/**/*credentials*
+**/.env
+**/.env.*
+!**/.env.example
+**/.envrc
 
 # ignore all local configuration
 conf/local
@@ -24,3 +34,44 @@ results
 !notebooks/.gitkeep
 !references/.gitkeep
 !results/.gitkeep
+
+# ignore log files and experiment tracking output
+**/*.log
+**/*.log.*
+mlruns
+
+##########################
+# Version control and local environments
+# (the image has its own virtual environment, and its Python comes from BASE_IMAGE)
+.git
+.venv
+venv
+.python-version
+
+##########################
+# Caches and build artefacts
+**/__pycache__
+**/*.py[cod]
+**/.ipynb_checkpoints
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+.coverage.*
+htmlcov
+coverage.xml
+build
+dist
+**/*.egg-info
+.viz
+
+# local Spark files
+spark-warehouse
+metastore_db
+derby.log
+
+##########################
+# Editor and OS files
+.idea
+.vscode
+**/.DS_Store

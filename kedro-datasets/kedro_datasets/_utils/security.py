@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import os
 import posixpath
-from pathlib import PureWindowsPath
 
 from kedro.io.core import DatasetError
 
@@ -21,10 +19,7 @@ def validate_sub_path(sub_path: str, base_path: str) -> None:
         DatasetError: If ``sub_path`` is absolute or resolves outside ``base_path``.
     """
     # Joining a base with an absolute path discards the base
-    # Drive letters are only absolute on Windows
-    if sub_path.startswith(("/", "\\")) or (
-        os.name == "nt" and PureWindowsPath(sub_path).drive
-    ):
+    if sub_path.startswith(("/", "\\")):
         raise DatasetError(
             f"Path '{sub_path}' must be a relative path inside the dataset "
             f"directory '{base_path}'."

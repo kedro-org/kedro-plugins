@@ -1,7 +1,5 @@
 """Tests for utility functions in security.py."""
 
-import os
-
 import pytest
 from kedro.io.core import DatasetError
 
@@ -13,7 +11,17 @@ BASE = "/data/base"
 class TestValidateSubPath:
     @pytest.mark.parametrize(
         "sub_path",
-        ["file", "a/b", "a\\b", "a/../b", "...data", "file:name", "dir/C:foo"],
+        [
+            "file",
+            "a/b",
+            "a\\b",
+            "a/../b",
+            "...data",
+            "file:name",
+            "dir/C:foo",
+            "a:1.csv",
+            "C:secrets",
+        ],
     )
     def test_valid_paths(self, sub_path):
         validate_sub_path(sub_path, BASE)
@@ -27,15 +35,6 @@ class TestValidateSubPath:
             match=r"^Path '.*' must be a relative path inside the dataset "
             r"directory '/data/base'\.$",
         ):
-            validate_sub_path(sub_path, BASE)
-
-    @pytest.mark.parametrize("sub_path", ["C:\\secrets", "C:secrets"])
-    def test_drive_paths(self, mocker, sub_path):
-        mocker.patch("kedro_datasets._utils.security.os.name", "posix")
-        validate_sub_path(sub_path, BASE)
-
-        mocker.patch("kedro_datasets._utils.security.os.name", "nt")
-        with pytest.raises(DatasetError, match="must be a relative path"):
             validate_sub_path(sub_path, BASE)
 
     @pytest.mark.parametrize(

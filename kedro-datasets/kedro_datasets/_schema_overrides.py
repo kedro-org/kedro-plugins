@@ -166,6 +166,5 @@ SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
                 "properties": {"credentials": {"type": "string", "minLength": 1}},
             },
         ],
-        "properties": {"credentials": {"type": ["object", "string", "null"]}},
     },
 }

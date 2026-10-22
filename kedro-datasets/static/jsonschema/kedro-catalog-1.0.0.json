@@ -1503,7 +1503,7 @@
                   "object",
                   "null"
                 ],
-                "description": "Pandas options for saving CSV files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nDefaults are preserved, apart from \"index\", which is set to False."
+                "description": "Pandas options for saving CSV files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nDefaults are preserved, apart from \"index\", which is set to False\nto ensure save/load symmetry. To persist the index, specify\n``{\"index\": True}`` and pass ``index_col`` in ``load_args``."
               },
               "credentials": {
                 "type": [

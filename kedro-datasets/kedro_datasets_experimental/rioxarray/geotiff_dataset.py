@@ -29,18 +29,18 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
     Supported dimensions are `("band", "x", "y")` and `("x", "y")`. xarray `DataArray`s with other dimensions cannot be saved to a GeoTIFF file.
     If you need other formats, consider using NetCDF.
 
-    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
     sentinal_data:
-        type: rioxarray.GeoTIFFDataset
+        type: kedro_datasets_experimental.rioxarray.GeoTIFFDataset
         filepath: sentinal_data.tif
     ```
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
-    from kedro_datasets.rioxarray import GeoTIFFDataset
+    from kedro_datasets_experimental.rioxarray import GeoTIFFDataset
     import xarray as xr
     import numpy as np
 

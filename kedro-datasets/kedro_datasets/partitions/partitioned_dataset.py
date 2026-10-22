@@ -345,8 +345,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             self._filesystem.rm(self._normalized_path, recursive=True)
 
         for partition_id, partition_data in sorted(data.items()):
-            partition = self._partition_to_path(partition_id)
             kwargs = deepcopy(self._dataset_config)
+            partition = self._partition_to_path(partition_id)
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore

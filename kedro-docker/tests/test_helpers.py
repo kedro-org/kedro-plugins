@@ -1,3 +1,6 @@
+import fnmatch
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -8,11 +11,24 @@ from kedro_docker.helpers import (
     add_jupyter_args,
     check_docker_image_exists,
     compose_docker_run_args,
+    compose_kedro_run_command,
     copy_template_files,
+    dockerfile_declares_arg,
+    get_base_image,
+    get_image_env,
+    get_python_version,
     get_uid_gid,
     is_port_in_use,
     make_container_name,
+    make_pipeline_image_name,
+    parse_python_version,
+    selects_pipelines,
+    set_dockerfile_arg_defaults,
+    uses_custom_dockerfile,
+    warn_if_uv_lock_outdated,
 )
+
+TEMPLATE_PATH = Path(__file__).parents[1] / "kedro_docker" / "template"
 
 
 def test_missing_docker_image(mocker):
@@ -127,6 +143,343 @@ class TestCopyTemplateFiles:
         assert not dest_file.exists()
         copy_template_files(tmp_path, dockerfile.parent, [dockerfile.name])
         assert dest_file.exists()
+
+    def test_copy_dockerfile_with_arg_defaults(self, tmp_path):
+        """Test setting build argument defaults while copying a Dockerfile"""
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "Dockerfile.simple").write_text(
+            "ARG BASE_IMAGE=python:3.12-slim\nFROM ${BASE_IMAGE}\n", encoding="utf-8"
+        )
+        (src / ".dockerignore").write_text("ARG BASE_IMAGE=keep\n", encoding="utf-8")
+
+        copy_template_files(
+            tmp_path,
+            src,
+            ["Dockerfile.simple", ".dockerignore"],
+            arg_defaults={"BASE_IMAGE": "python:3.11-slim"},
+        )
+
+        assert (tmp_path / "Dockerfile").read_text(encoding="utf-8") == (
+            "ARG BASE_IMAGE=python:3.11-slim\nFROM ${BASE_IMAGE}\n"
+        )
+        assert (tmp_path / ".dockerignore").read_text(
+            encoding="utf-8"
+        ) == "ARG BASE_IMAGE=keep\n"
+
+
+class TestTemplates:
+    @pytest.mark.parametrize("template", ["Dockerfile.simple", "Dockerfile.spark"])
+    def test_dockerfile_templates(self, template, tmp_path):
+        """Test that both Dockerfile templates get the base image and declare
+        the build arguments that the plugin passes"""
+        copy_template_files(
+            tmp_path, TEMPLATE_PATH, [template], arg_defaults={"BASE_IMAGE": "img"}
+        )
+        dockerfile = tmp_path / "Dockerfile"
+        content = dockerfile.read_text(encoding="utf-8")
+
+        assert content.count("ARG BASE_IMAGE=") == 1
+        assert "ARG BASE_IMAGE=img\n" in content
+        for name in ("KEDRO_UID", "KEDRO_GID", "KEDRO_PIPELINES", "UV_VERSION"):
+            assert dockerfile_declares_arg(dockerfile, name)
+        assert not re.search(r"^FROM .* as ", content, flags=re.MULTILINE)
+
+    @staticmethod
+    def _dockerignore_excludes(path):
+        """Approximate Docker's .dockerignore matching for a path relative to the
+        build context: the last matching pattern wins, `!` re-includes, and a
+        pattern that matches a directory excludes everything in it."""
+        content = (TEMPLATE_PATH / ".dockerignore").read_text(encoding="utf-8")
+        parts = path.split("/")
+        prefixes = ["/".join(parts[:i]) for i in range(1, len(parts) + 1)]
+        excluded = False
+        for line in content.splitlines():
+            pattern = line.strip()
+            if not pattern or pattern.startswith("#"):
+                continue
+            negate = pattern.startswith("!")
+            pattern = pattern.removeprefix("!")
+            patterns = [pattern, pattern.removeprefix("**/")]
+            if any(fnmatch.fnmatchcase(p, pat) for p in prefixes for pat in patterns):
+                excluded = not negate
+        return excluded
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "pyproject.toml",
+            "uv.lock",
+            "uv.toml",
+            "requirements.txt",
+            "src/my_project/__init__.py",
+            "conf/base/catalog.yml",
+            "conf/logging.yml",
+            "conf/local/.gitkeep",
+            "logs/.gitkeep",
+            ".telemetry",
+            ".env.example",
+        ],
+    )
+    def test_dockerignore_keeps(self, path):
+        assert not self._dockerignore_excludes(path)
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "Dockerfile",
+            "conf/local/catalog.yml",
+            "conf/base/credentials.yml",
+            ".env",
+            ".env.local",
+            "src/my_project/.env.production",
+            ".envrc",
+            ".git/config",
+            ".venv/bin/python",
+            ".python-version",
+            "data/01_raw/companies.csv",
+            "info.log",
+            "logs/info.log.1",
+            "src/my_project/__pycache__/pipeline.cpython-312.pyc",
+        ],
+    )
+    def test_dockerignore_excludes(self, path):
+        assert self._dockerignore_excludes(path)
+
+
+@pytest.mark.parametrize(
+    "content, arg_defaults, expected",
+    [
+        ("ARG A=1\nARG B=2\n", {"A": "x"}, "ARG A=x\nARG B=2\n"),
+        ("ARG A=1\n", {"A": "x", "C": "y"}, "ARG A=x\n"),
+        ('ARG A=""\n', {"A": "x"}, "ARG A=x\n"),
+        ("ARG AB=1\nARG A\n", {"A": "x"}, "ARG AB=1\nARG A\n"),
+        ("# ARG A=1\n", {"A": "x"}, "# ARG A=1\n"),
+        ("ARG A=1\n", {"A": r"\1"}, "ARG A=\\1\n"),
+    ],
+)
+def test_set_dockerfile_arg_defaults(content, arg_defaults, expected):
+    """Test setting the default values of ARG lines"""
+    assert set_dockerfile_arg_defaults(content, arg_defaults) == expected
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        ("ARG KEDRO_PIPELINES\n", True),
+        ('ARG KEDRO_PIPELINES=""\n', True),
+        ("  arg KEDRO_PIPELINES=a,b\n", True),
+        ("ARG KEDRO_UID=1 KEDRO_PIPELINES\n", True),
+        ("ENV KEDRO_PIPELINES=a\n", False),
+        ("ARG KEDRO_PIPELINES_X=a\n", False),
+        ("ARG kedro_pipelines\n", False),
+        ("# ARG KEDRO_PIPELINES\n", False),
+    ],
+)
+def test_dockerfile_declares_arg(tmp_path, content, expected):
+    """Test checking whether a Dockerfile declares a build argument"""
+    dockerfile = tmp_path / "Dockerfile"
+    dockerfile.write_text(content, encoding="utf-8")
+    assert dockerfile_declares_arg(dockerfile, "KEDRO_PIPELINES") is expected
+
+
+def test_dockerfile_declares_arg_missing_file(tmp_path):
+    assert not dockerfile_declares_arg(tmp_path / "Dockerfile", "KEDRO_PIPELINES")
+
+
+@pytest.mark.parametrize(
+    "docker_args, expected",
+    [
+        ([], False),
+        (["--no-cache", "--force-rm"], False),
+        (["-f", "Dockerfile.prod"], True),
+        (["-fDockerfile.prod"], True),
+        (["--file", "Dockerfile.prod"], True),
+        (["--file=Dockerfile.prod"], True),
+    ],
+)
+def test_uses_custom_dockerfile(docker_args, expected):
+    assert uses_custom_dockerfile(docker_args) is expected
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("3.12\n", "3.12"),
+        ("3.12.4", "3.12"),
+        ("  3.11  \n", "3.11"),
+        ("# pinned\n\n3.13\n3.12\n", "3.13"),
+        ("cpython@3.12", "3.12"),
+        ("CPython-3.10", "3.10"),
+        ("cp312", None),
+        ("cpython-3.12.4-linux-x86_64-gnu", "3.12"),
+        ("3.12 3.11", "3.12"),
+        ("pypy@3.10", None),
+        ("3.13t", None),
+        ("system\n3.12", None),
+        ("2.7", None),
+        ("", None),
+        ("# only a comment\n", None),
+    ],
+)
+def test_parse_python_version(text, expected):
+    """Test reading the version from a .python-version file"""
+    assert parse_python_version(text) == expected
+
+
+class TestGetPythonVersion:
+    def test_from_file(self, tmp_path):
+        (tmp_path / ".python-version").write_bytes(b"\xef\xbb\xbf3.11.9\n")
+        assert get_python_version(tmp_path, (3, 12)) == (
+            "3.11",
+            "from `.python-version`",
+        )
+
+    def test_without_file(self, tmp_path):
+        assert get_python_version(tmp_path, (3, 13, 1)) == (
+            "3.13",
+            "of the current environment",
+        )
+
+    def test_current_python(self, tmp_path):
+        expected = f"{sys.version_info.major}.{sys.version_info.minor}"
+        assert get_python_version(tmp_path)[0] == expected
+
+    def test_invalid_file(self, tmp_path, capsys):
+        (tmp_path / ".python-version").write_text("pypy@3.10\n", encoding="utf-8")
+        assert get_python_version(tmp_path, (3, 12)) == (
+            "3.12",
+            "of the current environment",
+        )
+        assert "does not name a CPython version" in capsys.readouterr().out
+
+
+def test_get_base_image():
+    assert get_base_image("3.12") == "python:3.12-slim"
+
+
+@pytest.mark.parametrize(
+    "pipelines, expected",
+    [
+        ("data_processing", "proj-data_processing"),
+        ("data_processing,data_science", "proj-data_processing-data_science"),
+        ("Data Science", "proj-data-science"),
+        ("__default__", "proj-default"),
+        ("a__b..c", "proj-a-b-c"),
+    ],
+)
+def test_make_pipeline_image_name(pipelines, expected):
+    assert make_pipeline_image_name("proj", pipelines) == expected
+
+
+@pytest.mark.parametrize("pipelines", ["", ",", "__"])
+def test_make_pipeline_image_name_error(pipelines):
+    with pytest.raises(ClickException, match="Use --image to name the image"):
+        make_pipeline_image_name("proj", pipelines)
+
+
+class TestWarnIfUvLockOutdated:
+    @pytest.fixture
+    def project(self, tmp_path):
+        (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+        return tmp_path
+
+    @pytest.fixture
+    def uv(self, mocker):
+        return mocker.patch("shutil.which", return_value="/bin/uv")
+
+    @pytest.mark.usefixtures("uv")
+    @pytest.mark.parametrize("returncode, warns", [(0, False), (1, True), (2, False)])
+    def test_check(self, project, mocker, capsys, returncode, warns):
+        run = mocker.patch("subprocess.run")
+        run.return_value.returncode = returncode
+        warn_if_uv_lock_outdated(project)
+        assert run.call_args.args[0] == ["/bin/uv", "lock", "--check"]
+        assert run.call_args.kwargs["cwd"] == project
+        assert run.call_args.kwargs["env"]["UV_PYTHON_DOWNLOADS"] == "never"
+        assert ("`uv.lock` is out of date" in capsys.readouterr().out) is warns
+
+    @pytest.mark.parametrize(
+        "error", [OSError("boom"), subprocess.TimeoutExpired("uv", 120)]
+    )
+    @pytest.mark.usefixtures("uv")
+    def test_check_fails(self, project, mocker, capsys, error):
+        mocker.patch("subprocess.run", side_effect=error)
+        warn_if_uv_lock_outdated(project)
+        assert capsys.readouterr().out == ""
+
+    @pytest.mark.usefixtures("uv")
+    def test_no_lock(self, tmp_path, mocker):
+        run = mocker.patch("subprocess.run")
+        warn_if_uv_lock_outdated(tmp_path)
+        run.assert_not_called()
+
+    def test_no_uv(self, project, mocker):
+        mocker.patch("shutil.which", return_value=None)
+        run = mocker.patch("subprocess.run")
+        warn_if_uv_lock_outdated(project)
+        run.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "returncode, stdout, expected",
+    [
+        (
+            0,
+            b'["PATH=/opt/venv/bin:/usr/bin","KEDRO_PIPELINES=a,b","A=x=y","B"]\n',
+            {"PATH": "/opt/venv/bin:/usr/bin", "KEDRO_PIPELINES": "a,b", "A": "x=y"},
+        ),
+        (0, b"null\n", {}),
+        (0, b"not json", {}),
+        (1, b"", {}),
+    ],
+)
+def test_get_image_env(mocker, returncode, stdout, expected):
+    run = mocker.patch("subprocess.run")
+    run.return_value.returncode = returncode
+    run.return_value.stdout = stdout
+    assert get_image_env("my-image") == expected
+    assert run.call_args.args[0][:3] == ["docker", "image", "inspect"]
+    assert run.call_args.args[0][-1] == "my-image"
+
+
+@pytest.mark.parametrize(
+    "run_args, expected",
+    [
+        ([], False),
+        (["--runner=ParallelRunner", "--params", "a=1"], False),
+        (["--pipelines", "a"], True),
+        (["--pipelines=a"], True),
+        (["--pipeline=a"], True),
+        (["--pipeline", "a"], True),
+        (["-p", "a"], True),
+        (["-pa"], True),
+        (["--pipeline-x"], False),
+    ],
+)
+def test_selects_pipelines(run_args, expected):
+    assert selects_pipelines(run_args) is expected
+
+
+@pytest.mark.parametrize(
+    "run_args, image_env, expected",
+    [
+        ([], {}, ["kedro", "run"]),
+        (["--env=prod"], {"KEDRO_PIPELINES": ""}, ["kedro", "run", "--env=prod"]),
+        (
+            ["--env=prod"],
+            {"KEDRO_PIPELINES": "a,b"},
+            ["kedro", "run", "--pipelines", "a,b", "--env=prod"],
+        ),
+        (
+            ["--pipeline=c"],
+            {"KEDRO_PIPELINES": "a,b"},
+            ["kedro", "run", "--pipeline=c"],
+        ),
+    ],
+)
+def test_compose_kedro_run_command(run_args, image_env, expected):
+    assert compose_kedro_run_command(run_args, image_env) == expected
 
 
 class TestGetUidGid:

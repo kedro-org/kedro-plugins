@@ -291,8 +291,10 @@ class TestMatplotlibDataset:
     def test_save_dict_absolute_plot_name(self, tmp_path):
         """Test that an absolute plot name is rejected instead of escaping the dataset directory."""
         dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        # Drop the drive on Windows so the plot name is root-anchored on all platforms
+        absolute_dir = tmp_path.as_posix()[len(tmp_path.drive) :]
         with pytest.raises(DatasetError, match="must be a relative path"):
-            dataset.save({f"{tmp_path.as_posix()}/outside.png": plt.figure()})
+            dataset.save({f"{absolute_dir}/outside.png": plt.figure()})
         assert not any(tmp_path.iterdir())
 
     @pytest.mark.parametrize(

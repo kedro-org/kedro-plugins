@@ -6,10 +6,9 @@ import tempfile
 
 import pytest
 from kedro.io import DatasetError
+from kedro_datasets.spark import GBQQueryDataset
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
-
-from kedro_datasets.spark import GBQQueryDataset
 
 SQL_QUERY = "SELECT * FROM table"
 SQL_FILEPATH = "/path/to/file.sql"

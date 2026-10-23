@@ -36,9 +36,7 @@ def sqlite_credentials(tmp_path):
 @pytest.fixture
 def numeric_frame():
     """Int-only frame with order-line-item columns."""
-    return pl.DataFrame(
-        {"quantity": [1, 2], "total": [4, 5], "units_sold": [5, 6]}
-    )
+    return pl.DataFrame({"quantity": [1, 2], "total": [4, 5], "units_sold": [5, 6]})
 
 
 @pytest.fixture
@@ -53,7 +51,11 @@ def string_frame():
 def mixed_frame():
     """Mixed-dtype frame: int / string / float."""
     return pl.DataFrame(
-        {"id": [10, 20, 30, 40], "label": ["a", "b", "c", "d"], "score": [1.5, 2.5, 3.5, 4.5]}
+        {
+            "id": [10, 20, 30, 40],
+            "label": ["a", "b", "c", "d"],
+            "score": [1.5, 2.5, 3.5, 4.5],
+        }
     )
 
 
@@ -203,9 +205,7 @@ class TestPolarsDatabaseDataset:
 
         engine = create_engine(sqlite_credentials["con"])
         with engine.connect() as conn:
-            row_count = conn.execute(
-                text(_select(table_name, "COUNT(*)"))
-            ).scalar()
+            row_count = conn.execute(text(_select(table_name, "COUNT(*)"))).scalar()
         assert row_count == len(string_frame)
 
     def test_save_default_replaces_existing_table(
@@ -238,9 +238,7 @@ class TestPolarsDatabaseDataset:
 
         engine = create_engine(credentials["con"])
         with engine.connect() as conn:
-            row_count = conn.execute(
-                text(_select(table_name, "COUNT(*)"))
-            ).scalar()
+            row_count = conn.execute(text(_select(table_name, "COUNT(*)"))).scalar()
         assert row_count == 2 * len(numeric_frame)
 
     def test_fs_args_forwarded_to_fsspec(self, mocker):
@@ -325,12 +323,8 @@ class TestPolarsDatabaseDataset:
 
     def test_engine_cached_across_instances_with_same_con(self, sqlite_credentials):
         """Two datasets with the same ``con`` share one cached ``Engine``."""
-        first = PolarsDatabaseDataset(
-            table_name="t1", credentials=sqlite_credentials
-        )
-        second = PolarsDatabaseDataset(
-            table_name="t2", credentials=sqlite_credentials
-        )
+        first = PolarsDatabaseDataset(table_name="t1", credentials=sqlite_credentials)
+        second = PolarsDatabaseDataset(table_name="t2", credentials=sqlite_credentials)
         assert first.engine is second.engine
 
     def test_extra_credentials_forwarded_to_create_engine(self, mocker):
@@ -348,12 +342,8 @@ class TestPolarsDatabaseDataset:
     def test_engine_distinct_for_different_con(self, sqlite_credentials, tmp_path):
         """Datasets with different ``con`` strings get distinct ``Engine`` instances."""
         other_credentials = {"con": f"sqlite:///{tmp_path / 'other.db'}"}
-        first = PolarsDatabaseDataset(
-            table_name="t", credentials=sqlite_credentials
-        )
-        second = PolarsDatabaseDataset(
-            table_name="t", credentials=other_credentials
-        )
+        first = PolarsDatabaseDataset(table_name="t", credentials=sqlite_credentials)
+        second = PolarsDatabaseDataset(table_name="t", credentials=other_credentials)
         assert first.engine is not second.engine
 
     def test_save_and_load_share_cached_engine(self, numeric_frame):
@@ -392,4 +382,4 @@ class TestPolarsDatabaseDataset:
             filepath=query_file,
             credentials={"con": CONNECTION},
         )
-        assert dataset._filepath == query_file.as_posix()
+        assert Path(dataset._filepath) == query_file

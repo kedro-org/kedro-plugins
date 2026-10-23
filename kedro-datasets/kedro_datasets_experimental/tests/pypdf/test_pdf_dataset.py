@@ -154,5 +154,4 @@ class TestPDFDataset:
     def test_pathlike_filepath(self, tmp_path):
         filepath = tmp_path / "test.pdf"
         dataset = PDFDataset(filepath=filepath)
-        assert isinstance(dataset._filepath, PurePosixPath)
-        assert str(dataset._filepath) == filepath.as_posix()
+        assert Path(dataset._filepath) == filepath

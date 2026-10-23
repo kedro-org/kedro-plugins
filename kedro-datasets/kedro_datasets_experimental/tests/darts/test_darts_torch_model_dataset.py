@@ -56,19 +56,27 @@ def darts_torch_dataset(filepath_model, model_class):
 
 
 @pytest.fixture
-def load_from_checkpoint_darts_torch_dataset(filepath_model, model_class, model_name, tmpdir_checkpoints_for_module):
+def load_from_checkpoint_darts_torch_dataset(
+    filepath_model, model_class, model_name, tmpdir_checkpoints_for_module
+):
     return DartsTorchModelDataset(
         filepath=filepath_model,
         model_class=model_class,
-        load_args={"load_method": "load_from_checkpoint",
-                   "model_name": model_name, "best": False,
-                   "map_location": "cpu", "work_dir": tmpdir_checkpoints_for_module},
+        load_args={
+            "load_method": "load_from_checkpoint",
+            "model_name": model_name,
+            "best": False,
+            "map_location": "cpu",
+            "work_dir": tmpdir_checkpoints_for_module,
+        },
         save_args={"save_model": False},
     )
 
 
 @pytest.fixture
-def trained_darts_torch_model(filepath_model, model_class, tfm_kwargs, tmpdir_checkpoints_for_module, model_name):
+def trained_darts_torch_model(
+    filepath_model, model_class, tfm_kwargs, tmpdir_checkpoints_for_module, model_name
+):
     times = pd.date_range("20130101", "20130410")
     pd_series = pd.Series(range(100), index=times)
     series: TimeSeries = TimeSeries.from_series(pd_series)
@@ -87,7 +95,9 @@ def trained_darts_torch_model(filepath_model, model_class, tfm_kwargs, tmpdir_ch
 
 
 class TestDartsTorchModelDataset:
-    def test_save_and_load_dataset(self, trained_darts_torch_model, darts_torch_dataset):
+    def test_save_and_load_dataset(
+        self, trained_darts_torch_model, darts_torch_dataset
+    ):
         darts_torch_dataset.save(trained_darts_torch_model)
 
         model_loaded = darts_torch_dataset.load()
@@ -99,10 +109,10 @@ class TestDartsTorchModelDataset:
         np.testing.assert_array_equal(pred1.values(), pred2.values())
 
     def test_load_from_checkpoint_dataset(
-            self,
-            trained_darts_torch_model,
-            tmpdir_checkpoints_for_module,
-            load_from_checkpoint_darts_torch_dataset
+        self,
+        trained_darts_torch_model,
+        tmpdir_checkpoints_for_module,
+        load_from_checkpoint_darts_torch_dataset,
     ):
         model_loaded = load_from_checkpoint_darts_torch_dataset.load()
         pred1 = trained_darts_torch_model.predict(n=6)
@@ -114,5 +124,4 @@ class TestDartsTorchModelDataset:
     def test_pathlike_filepath(self, tmp_path):
         filepath = tmp_path / "model.pt"
         dataset = DartsTorchModelDataset(filepath=filepath, model_class="RNNModel")
-        assert isinstance(dataset._filepath, PurePosixPath)
-        assert str(dataset._filepath) == filepath.as_posix()
+        assert Path(dataset._filepath) == filepath

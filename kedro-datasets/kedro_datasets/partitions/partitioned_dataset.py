@@ -296,7 +296,6 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         dir_path = self._filesystem._strip_protocol(self._normalized_path).rstrip(
             self._sep
         )
-        path = path.lstrip(self._sep)
 
         # Validate the path is within the base directory
         validate_sub_path(path, dir_path)

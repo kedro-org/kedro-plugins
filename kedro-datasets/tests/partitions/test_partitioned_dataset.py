@@ -573,6 +573,28 @@ class TestPartitionedDatasetLocal:
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             pds.save({unsafe_partition_id: original_data})
 
+    def test_save_partition_absolute_path(self, tmpdir):
+        """Test absolute partition IDs are rejected during save."""
+        pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        with pytest.raises(DatasetError, match="must be a relative path"):
+            pds.save({"/secrets": original_data})
+
+    def test_load_partition_drive_like_name(self, tmpdir, mocker):
+        """Test a listed file whose name looks like a drive doesn't break load."""
+        pds = PartitionedDataset(
+            path=str(tmpdir), dataset="pandas.CSVDataset", filename_suffix=".csv"
+        )
+        dir_path = pds._filesystem._strip_protocol(pds._normalized_path).rstrip(
+            pds._sep
+        )
+        mocker.patch.object(
+            pds, "_list_partitions", return_value=[f"{dir_path}/C:legit.csv"]
+        )
+
+        assert list(pds.load()) == ["C:legit"]
+
     def test_unsafe_partition_error_message(self, tmpdir):
         """Test DatasetError message includes the resolved path and base directory."""
         pds = PartitionedDataset(path=str(tmpdir), dataset="pandas.CSVDataset")

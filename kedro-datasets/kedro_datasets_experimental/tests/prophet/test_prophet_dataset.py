@@ -33,7 +33,9 @@ def versioned_prophet_model_dataset(filepath_json, load_version, save_version):
 
 @pytest.fixture
 def dummy_model():
-    df = pd.DataFrame({"ds": ["2024-01-01", "2024-01-02", "2024-01-03"], "y": [100, 200, 300]})
+    df = pd.DataFrame(
+        {"ds": ["2024-01-01", "2024-01-02", "2024-01-03"], "y": [100, 200, 300]}
+    )
     model = Prophet()
     # Fit the model with dummy data
     model.fit(df)
@@ -84,7 +86,7 @@ class TestProphetModelDataset:
         [
             ("s3://bucket/model.json", S3FileSystem),
             ("file:///tmp/test_model.json", LocalFileSystem),
-            ("/tmp/test_model.json", LocalFileSystem),  #nosec: B108
+            ("/tmp/test_model.json", LocalFileSystem),  # nosec: B108
             ("gcs://bucket/model.json", GCSFileSystem),
             ("https://example.com/model.json", HTTPFileSystem),
         ],
@@ -207,3 +209,8 @@ class TestProphetModelDatasetVersioned:
         Path(prophet_model_dataset._filepath.as_posix()).unlink()
         versioned_prophet_model_dataset.save(dummy_model)
         assert versioned_prophet_model_dataset.exists()
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "model.json"
+        dataset = ProphetModelDataset(filepath=filepath)
+        assert Path(dataset._filepath) == filepath

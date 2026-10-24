@@ -337,3 +337,10 @@ class TestPromptDataset:
         assert isinstance(data, dict)
         assert data['messages'][0]['role'] == 'system'
         assert data['messages'][1]['role'] == 'user'
+
+    def test_pathlike_filepath(self, txt_prompt_file: Path):
+        """Test that os.PathLike filepath is supported."""
+        dataset = PromptDataset(filepath=txt_prompt_file)
+        template = dataset.load()
+        assert isinstance(template, PromptTemplate)
+        assert template.format(name="Kedro") == "Hello, this is Kedro!"

@@ -150,3 +150,8 @@ class TestPDFDataset:
         dataset = PDFDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "test.pdf"
+        dataset = PDFDataset(filepath=filepath)
+        assert Path(dataset._filepath) == filepath

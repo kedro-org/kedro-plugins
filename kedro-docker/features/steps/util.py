@@ -179,6 +179,17 @@ def get_docker_images(name: str) -> list[docker.models.images.Image]:
     return [i for i in client.images.list() if any(name in t for t in i.tags)]
 
 
+def remove_docker_images(name: str):
+    """Remove docker images with `name` in their names.
+
+    Args:
+        name: Name (or substring) of docker images.
+    """
+    client = init_docker_client()
+    for image in get_docker_images(name):
+        client.images.remove(image.id, force=True)
+
+
 def create_new_venv() -> Path:
     """Create a new venv.
 

@@ -42,11 +42,11 @@ RUN uv venv --seed --python "$(command -v python3)" /opt/venv && \
     else \
         uv pip install --python /opt/venv/bin/python -r pyproject.toml; \
     fi
-# Add local Spark support (PySpark and the HDFS and S3 filesystems). The packages
-# installed above are used as constraints, so their versions are kept.
-RUN uv pip freeze --python /opt/venv/bin/python --exclude-editable > /tmp/constraints.txt && \
-    uv pip install --python /opt/venv/bin/python -c /tmp/constraints.txt \
-        "kedro-datasets[spark-local,hdfs-base,s3fs-base]"
+# Add local Spark support (PySpark and the HDFS and S3 filesystems) for the
+# kedro-datasets version installed above. Other packages can change if these extras need it.
+RUN DATASETS_VERSION="$(uv pip show --python /opt/venv/bin/python kedro-datasets 2>/dev/null | sed -n 's/^Version: //p')" && \
+    uv pip install --python /opt/venv/bin/python \
+        "kedro-datasets[spark-local,hdfs-base,s3fs-base]${DATASETS_VERSION:+==${DATASETS_VERSION}}"
 
 FROM ${BASE_IMAGE} AS runtime
 

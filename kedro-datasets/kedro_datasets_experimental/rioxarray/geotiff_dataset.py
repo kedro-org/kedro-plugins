@@ -3,6 +3,7 @@ underlying functionality is supported by rioxarray and xarray. A read rasterdata
 returns a xarray.DataArray object.
 """
 import logging
+import os
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -65,7 +66,7 @@ class GeoTIFFDataset(AbstractVersionedDataset[xarray.DataArray, xarray.DataArray
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,

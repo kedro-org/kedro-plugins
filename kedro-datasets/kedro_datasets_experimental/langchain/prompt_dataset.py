@@ -1,4 +1,5 @@
 import json
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Union
@@ -68,7 +69,7 @@ class PromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], A
 
     def __init__(  # noqa: PLR0913
         self,
-        filepath: str,
+        filepath: str | os.PathLike,
         template: str = "PromptTemplate",
         dataset: dict[str, Any] | str | None = None,
         credentials: dict[str, Any] | None = None,

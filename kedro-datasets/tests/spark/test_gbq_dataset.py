@@ -6,10 +6,9 @@ import tempfile
 
 import pytest
 from kedro.io import DatasetError
+from kedro_datasets.spark import GBQQueryDataset
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
-
-from kedro_datasets.spark import GBQQueryDataset
 
 SQL_QUERY = "SELECT * FROM table"
 SQL_FILEPATH = "/path/to/file.sql"
@@ -204,6 +203,32 @@ def test_raise_error_if_both_sql_and_filepath_are_provided():
 def test_filepath_sql_query_load(mocker, spark_session, sql_file):
     gbq_query_dataset = GBQQueryDataset(
         filepath=sql_file,
+        materialization_dataset=MATERIALIZATION_DATASET,
+        materialization_project=MATERIALIZATION_PROJECT,
+    )
+    mocker.patch(
+        "kedro_datasets.spark.gbq_dataset.get_spark", return_value=spark_session
+    )
+    read_obj = mocker.MagicMock()
+    spark_session.read.format.return_value = read_obj
+    read_obj.load.return_value = mocker.MagicMock()
+
+    gbq_query_dataset.load()
+
+    read_obj.load.assert_called_once_with(
+        query=SQL_QUERY,
+        materializationDataset=MATERIALIZATION_DATASET,
+        materializationProject=MATERIALIZATION_PROJECT,
+        viewsEnabled="true",
+    )
+
+
+def test_pathlike_filepath_sql_query_load(mocker, spark_session, tmp_path):
+    sql_path = tmp_path / "query.sql"
+    sql_path.write_text(SQL_QUERY)
+
+    gbq_query_dataset = GBQQueryDataset(
+        filepath=sql_path,
         materialization_dataset=MATERIALIZATION_DATASET,
         materialization_project=MATERIALIZATION_PROJECT,
     )

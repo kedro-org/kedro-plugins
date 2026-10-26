@@ -78,7 +78,9 @@ class TestSafetensorsDataset:
     )
     def test_open_extra_args(self, safetensors_dataset, fs_args):
         assert safetensors_dataset._fs_open_args_load == fs_args["open_args_load"]
-        assert safetensors_dataset._fs_open_args_save == {"mode": "wb"}  # default unchanged
+        assert safetensors_dataset._fs_open_args_save == {
+            "mode": "wb"
+        }  # default unchanged
 
     def test_load_missing_file(self, safetensors_dataset):
         """Check the error when trying to load missing file."""
@@ -210,7 +212,8 @@ class TestSafetensorsDatasetVersioned:
 
         with pytest.raises(DatasetError, match=pattern):
             SafetensorsDataset(
-                filepath="https://example.com/file.safetensors", version=Version(None, None)
+                filepath="https://example.com/file.safetensors",
+                version=Version(None, None),
             )
 
     @pytest.mark.skip(reason="Skipping for now, need to investigate")
@@ -237,4 +240,12 @@ class TestSafetensorsDatasetVersioned:
     def test_copy(self, versioned_safetensors_dataset):
         safetensors_dataset_copy = versioned_safetensors_dataset._copy()
         assert safetensors_dataset_copy is not versioned_safetensors_dataset
-        assert safetensors_dataset_copy._describe() == versioned_safetensors_dataset._describe()
+        assert (
+            safetensors_dataset_copy._describe()
+            == versioned_safetensors_dataset._describe()
+        )
+
+    def test_pathlike_filepath(self, tmp_path):
+        filepath = tmp_path / "model.safetensors"
+        dataset = SafetensorsDataset(filepath=filepath)
+        assert Path(dataset._filepath) == filepath

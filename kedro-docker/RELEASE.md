@@ -4,13 +4,12 @@
 * Added support for Python 3.14
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 * Modernised the generated `Dockerfile` with a multi-stage build that installs dependencies into a virtual environment from `uv.lock`, falling back to `requirements.txt`.
-* Changed the default base image to use the Python version from `.python-version` or the current environment, instead of Python 3.10.
+* The default base image now uses the Python version from the project's `.python-version` file, or the current Python version if there is none. The generated `Dockerfile` used to default to Python 3.10.
 * Added a `--pipelines` option to `kedro docker build` to build an image that runs specific pipelines.
 * Refreshed the generated `.dockerignore`.
 
 ## Bug fixes and other changes
 * Removed `_VERBOSE` legacy code usage.
-* Removed the unused `semver` dependency.
 
 # Release 0.6.2
 

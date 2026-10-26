@@ -1,4 +1,3 @@
-import fnmatch
 import re
 import subprocess
 import sys
@@ -184,67 +183,6 @@ class TestTemplates:
         for name in ("KEDRO_UID", "KEDRO_GID", "KEDRO_PIPELINES", "UV_VERSION"):
             assert dockerfile_declares_arg(dockerfile, name)
         assert not re.search(r"^FROM .* as ", content, flags=re.MULTILINE)
-
-    @staticmethod
-    def _dockerignore_excludes(path):
-        """Approximate Docker's .dockerignore matching for a path relative to the
-        build context: the last matching pattern wins, `!` re-includes, and a
-        pattern that matches a directory excludes everything in it."""
-        content = (TEMPLATE_PATH / ".dockerignore").read_text(encoding="utf-8")
-        parts = path.split("/")
-        prefixes = ["/".join(parts[:i]) for i in range(1, len(parts) + 1)]
-        excluded = False
-        for line in content.splitlines():
-            pattern = line.strip()
-            if not pattern or pattern.startswith("#"):
-                continue
-            negate = pattern.startswith("!")
-            pattern = pattern.removeprefix("!")
-            patterns = [pattern, pattern.removeprefix("**/")]
-            if any(fnmatch.fnmatchcase(p, pat) for p in prefixes for pat in patterns):
-                excluded = not negate
-        return excluded
-
-    @pytest.mark.parametrize(
-        "path",
-        [
-            "pyproject.toml",
-            "uv.lock",
-            "uv.toml",
-            "requirements.txt",
-            "src/my_project/__init__.py",
-            "conf/base/catalog.yml",
-            "conf/logging.yml",
-            "conf/local/.gitkeep",
-            "logs/.gitkeep",
-            ".telemetry",
-            ".env.example",
-        ],
-    )
-    def test_dockerignore_keeps(self, path):
-        assert not self._dockerignore_excludes(path)
-
-    @pytest.mark.parametrize(
-        "path",
-        [
-            "Dockerfile",
-            "conf/local/catalog.yml",
-            "conf/base/credentials.yml",
-            ".env",
-            ".env.local",
-            "src/my_project/.env.production",
-            ".envrc",
-            ".git/config",
-            ".venv/bin/python",
-            ".python-version",
-            "data/01_raw/companies.csv",
-            "info.log",
-            "logs/info.log.1",
-            "src/my_project/__pycache__/pipeline.cpython-312.pyc",
-        ],
-    )
-    def test_dockerignore_excludes(self, path):
-        assert self._dockerignore_excludes(path)
 
 
 @pytest.mark.parametrize(

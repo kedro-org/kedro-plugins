@@ -16,6 +16,7 @@ from features.steps.util import (
     download_url,
     get_docker_images,
     kill_docker_containers,
+    remove_docker_images,
     timeout,
     wait_for,
 )
@@ -211,8 +212,26 @@ def pip_install_dependencies(context):
 
 @given("I have removed old docker image of test project")
 def remove_old_docker_images(context):
-    """Remove old docker images of project"""
-    run(["docker", "rmi", context.project_name])
+    """Remove old docker images of project, including images built
+    for specific pipelines"""
+    remove_docker_images(context.project_name)
+
+
+@given('I have a "{filename}" file containing "{content}"')
+def write_project_file(context, filename, content):
+    """Write a file in the project root directory."""
+    (context.root_project_dir / filename).write_text(f"{content}\n", encoding="utf-8")
+
+
+@given('I have run the command "{command}"')
+def exec_command(context, command):
+    """Execute a command in the project root directory and check the status."""
+    res = run(command.split(), env=context.env, cwd=str(context.root_project_dir))
+
+    if res.returncode != OK_EXIT_CODE:
+        print(res.stdout)
+        print(res.stderr)
+        assert False
 
 
 @when('I execute the kedro command "{command}"')
@@ -229,6 +248,14 @@ def exec_kedro_target(context, command):
         context.result = run(
             make_cmd, env=context.env, cwd=str(context.root_project_dir)
         )
+
+
+@when('I run the command "{command}"')
+def exec_command_target(context, command):
+    """Execute a command in the project root directory."""
+    context.result = run(
+        command.split(), env=context.env, cwd=str(context.root_project_dir)
+    )
 
 
 @given("I have executed kedro docker build with custom base image")
@@ -263,6 +290,21 @@ def read_docker_stdout(context, msg):
         if msg not in context.result.stdout:
             print(context.result.stdout)
             assert False, f"Message '{msg}' not found in stdout"
+    finally:
+        kill_docker_containers(context.project_name)
+
+
+@then('I should not get a message including "{msg}"')
+def check_docker_stdout_excludes(context, msg):
+    """Read stdout and raise AssertionError if the given message is there."""
+
+    if hasattr(context.result.stdout, "read"):
+        context.result.stdout = context.result.stdout.read().decode("utf-8")
+
+    try:
+        if msg in context.result.stdout:
+            print(context.result.stdout)
+            assert False, f"Message '{msg}' found in stdout"
     finally:
         kill_docker_containers(context.project_name)
 

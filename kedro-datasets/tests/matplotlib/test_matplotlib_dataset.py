@@ -18,7 +18,6 @@ AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}  # pragma: allowlist s
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
-
 matplotlib.use("Agg")  # Disable interactive mode
 
 
@@ -320,6 +319,15 @@ class TestMatplotlibDataset:
         plot = plt.figure()
         with pytest.raises(DatasetError, match="outside the dataset directory"):
             dataset.save({unsafe_plot_name: plot})
+
+    def test_save_dict_absolute_plot_name(self, tmp_path):
+        """Test that an absolute plot name is rejected instead of escaping the dataset directory."""
+        dataset = MatplotlibDataset(filepath=(tmp_path / "plots").as_posix())
+        # Drop the drive on Windows so the plot name is root-anchored on all platforms
+        absolute_dir = tmp_path.as_posix()[len(tmp_path.drive) :]
+        with pytest.raises(DatasetError, match="must be a relative path"):
+            dataset.save({f"{absolute_dir}/outside.png": plt.figure()})
+        assert not any(tmp_path.iterdir())
 
     @pytest.mark.parametrize(
         "safe_plot_name,expected_path",

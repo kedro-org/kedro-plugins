@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
 import socket
 import subprocess
-from collections.abc import Sequence
+import sys
+from collections.abc import Mapping, Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path, PurePosixPath
@@ -15,6 +17,16 @@ from subprocess import DEVNULL, PIPE
 
 from click import secho
 from kedro.framework.cli.utils import KedroCliError
+
+PYTHON_VERSION_FILE = ".python-version"
+PIPELINES_ARG = "KEDRO_PIPELINES"
+
+# CPython versions as written by uv or pyenv, e.g. 3.12, 3.12.4, cpython@3.12 or
+# cpython-3.12.4-linux-x86_64-gnu
+_CPYTHON_VERSION = re.compile(
+    r"(?:cpython[@-]?|cp)?3\.(?P<minor>\d{1,2})(?:\.\d+)?(?:-\w+-\w+-\w+)?",
+    re.IGNORECASE,
+)
 
 
 def check_docker_image_exists(image: str):
@@ -153,6 +165,7 @@ def copy_template_files(
     template_path: Path,
     template_files: Sequence[str],
     verbose: bool = False,
+    arg_defaults: Mapping[str, str] | None = None,
 ):
     """
     If necessary copy files from a template directory into a project directory.
@@ -162,6 +175,8 @@ def copy_template_files(
         template_path: Source path.
         template_files: Files to copy.
         verbose: Echo the names of any created files.
+        arg_defaults: New default values for ``ARG NAME=value`` lines in the
+            Dockerfile. Other files are copied as they are.
 
     """
     for file_ in template_files:
@@ -169,12 +184,259 @@ def copy_template_files(
         dest = project_path / dest_file
         if not dest.exists():
             src = template_path / file_
-            shutil.copyfile(str(src), str(dest))
+            if arg_defaults and dest_file == "Dockerfile":
+                content = src.read_bytes().decode("utf-8")
+                content = set_dockerfile_arg_defaults(content, arg_defaults)
+                dest.write_bytes(content.encode("utf-8"))
+            else:
+                shutil.copyfile(str(src), str(dest))
             if verbose:
                 secho(f"Creating `{dest}`")
         else:
             msg = f"{dest_file} already exists and won't be overwritten."
             secho(msg, fg="yellow")
+
+
+def set_dockerfile_arg_defaults(content: str, arg_defaults: Mapping[str, str]) -> str:
+    """
+    Set the default values of ``ARG NAME=value`` lines in a Dockerfile.
+    Names that the Dockerfile does not declare are ignored.
+
+    Args:
+        content: Dockerfile text.
+        arg_defaults: Mapping of argument names to their new default values.
+
+    Returns:
+        Dockerfile text with the new default values.
+    """
+    for name, value in arg_defaults.items():
+        pattern = rf"^(ARG[ \t]+{re.escape(name)}=)\S*"
+        content = re.sub(
+            pattern, lambda m: m.group(1) + value, content, flags=re.MULTILINE
+        )
+    return content
+
+
+def dockerfile_declares_arg(dockerfile: Path, name: str) -> bool:
+    """
+    Check whether a Dockerfile has an ``ARG`` instruction for a build argument.
+
+    Args:
+        dockerfile: Path to the Dockerfile.
+        name: Build argument name.
+
+    Returns:
+        True if the Dockerfile exists and declares the build argument.
+    """
+    if not dockerfile.is_file():
+        return False
+    content = dockerfile.read_bytes().decode("utf-8", errors="replace")
+    pattern = rf"^[ \t]*(?i:ARG)[ \t]+(?:\S+[ \t]+)*{re.escape(name)}(?:=|\s|$)"
+    return re.search(pattern, content, flags=re.MULTILINE) is not None
+
+
+def uses_custom_dockerfile(docker_args: Sequence[str]) -> bool:
+    """
+    Check whether ``docker build`` arguments choose a Dockerfile with ``-f/--file``.
+
+    Args:
+        docker_args: Arguments for ``docker build``.
+
+    Returns:
+        True if another Dockerfile is used.
+    """
+    return any(
+        arg == "--file" or arg.startswith("--file=") or arg.startswith("-f")
+        for arg in docker_args
+    )
+
+
+def parse_python_version(text: str) -> str | None:
+    """
+    Get the ``3.Y`` Python version from the content of a ``.python-version`` file.
+    As in uv and pyenv, only the first word of the first line that is
+    neither blank nor a ``#`` comment is used.
+
+    Args:
+        text: Content of a ``.python-version`` file.
+
+    Returns:
+        ``3.Y`` for a CPython version, otherwise None.
+    """
+    for line in text.splitlines():
+        words = line.split()
+        if not words or words[0].startswith("#"):
+            continue
+        match = _CPYTHON_VERSION.fullmatch(words[0])
+        return f"3.{match.group('minor')}" if match else None
+    return None
+
+
+def get_python_version(
+    project_path: Path, current: Sequence[int] | None = None
+) -> tuple[str, str]:
+    """
+    Get the ``X.Y`` Python version for the default base image: from the
+    project's ``.python-version`` file if it names a CPython version,
+    otherwise from the current environment.
+
+    Args:
+        project_path: Project root directory.
+        current: Current Python version, defaults to ``sys.version_info``.
+
+    Returns:
+        ``X.Y`` and where it comes from, e.g. "from `.python-version`".
+    """
+    version_file = project_path / PYTHON_VERSION_FILE
+    if version_file.is_file():
+        text = version_file.read_bytes().decode("utf-8-sig", errors="replace")
+        version = parse_python_version(text)
+        if version:
+            return version, f"from `{PYTHON_VERSION_FILE}`"
+        secho(
+            f"Ignoring `{version_file}` because it does not name a CPython version "
+            f"such as 3.12. Using the Python version of the current environment.",
+            fg="yellow",
+        )
+    major, minor = (current or sys.version_info)[:2]
+    return f"{major}.{minor}", "of the current environment"
+
+
+def get_base_image(python_version: str) -> str:
+    """
+    Get the default base image for a Python version. Patch versions are not used,
+    because images tagged with them stop receiving updates.
+
+    Args:
+        python_version: ``X.Y`` Python version.
+
+    Returns:
+        Base image name.
+    """
+    return f"python:{python_version}-slim"
+
+
+def make_pipeline_image_name(image: str, pipelines: str) -> str:
+    """
+    Make the default name of an image that runs specific pipelines.
+
+    Args:
+        image: Image name for the whole project.
+        pipelines: Comma-separated pipeline names.
+
+    Raises:
+        KedroCliError: If no valid name can be made from the pipeline names.
+
+    Returns:
+        ``<image>-<pipelines>``, lowercased, with characters that are not
+        allowed in an image name replaced by ``-``.
+    """
+    suffix = re.sub(
+        r"[^a-z0-9]+",
+        lambda m: "_" if m.group() == "_" else "-",
+        pipelines.lower(),
+    ).strip("-_")
+    if not suffix:
+        raise KedroCliError(
+            f"Cannot make an image name from the pipelines `{pipelines}`. "
+            f"Use --image to name the image."
+        )
+    return f"{image}-{suffix}"
+
+
+def warn_if_uv_lock_outdated(project_path: Path):
+    """
+    Warn if the project's ``uv.lock`` does not match its ``pyproject.toml``,
+    because the Dockerfile installs the locked versions as they are. Nothing is
+    checked if there is no ``uv.lock`` or uv is not installed.
+
+    Args:
+        project_path: Project root directory.
+    """
+    uv = shutil.which("uv")
+    if not uv or not (project_path / "uv.lock").is_file():
+        return
+    env = dict(os.environ, UV_PYTHON_DOWNLOADS="never")
+    try:
+        res = subprocess.run(
+            [uv, "lock", "--check"],
+            cwd=project_path,
+            env=env,
+            stdout=DEVNULL,
+            stderr=DEVNULL,
+            check=False,
+            timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return
+    # uv exits with 1 when the lock file needs updating, and 2 for other errors
+    if res.returncode == 1:
+        secho(
+            "`uv.lock` is out of date, so the image will have the versions in it "
+            "rather than the ones `pyproject.toml` asks for. Run `uv lock` to "
+            "update it.",
+            fg="yellow",
+        )
+
+
+def get_image_env(image: str) -> dict[str, str]:
+    """
+    Get the environment variables set in a Docker image.
+
+    Args:
+        image: Docker image name.
+
+    Returns:
+        Environment variables of the image, or an empty dict if they
+        cannot be read.
+    """
+    command = ["docker", "image", "inspect", "--format", "{{json .Config.Env}}", image]
+    res = subprocess.run(command, stdout=PIPE, stderr=DEVNULL, check=False)
+    try:
+        env = json.loads(res.stdout) if res.returncode == 0 else None
+    except ValueError:
+        env = None
+    if not isinstance(env, list):
+        return {}
+    return dict(item.split("=", 1) for item in env if "=" in item)
+
+
+def selects_pipelines(run_args: Sequence[str]) -> bool:
+    """
+    Check whether ``kedro run`` arguments choose the pipelines to run.
+
+    Args:
+        run_args: Arguments for ``kedro run``.
+
+    Returns:
+        True if ``-p``, ``--pipeline`` or ``--pipelines`` is used.
+    """
+    return any(
+        arg.split("=", 1)[0] in ("--pipeline", "--pipelines")
+        or (arg.startswith("-p") and not arg.startswith("--"))
+        for arg in run_args
+    )
+
+
+def compose_kedro_run_command(
+    run_args: Sequence[str], image_env: Mapping[str, str]
+) -> list[str]:
+    """
+    Make the ``kedro run`` command for ``kedro docker run``. If the image was
+    built for specific pipelines (``KEDRO_PIPELINES``), they are run unless
+    the arguments choose other pipelines.
+
+    Args:
+        run_args: Arguments for ``kedro run``.
+        image_env: Environment variables of the image.
+
+    Returns:
+        Command to run in the container.
+    """
+    pipelines = image_env.get(PIPELINES_ARG, "")
+    if pipelines and not selects_pipelines(run_args):
+        return ["kedro", "run", "--pipelines", pipelines, *run_args]
+    return ["kedro", "run", *run_args]
 
 
 def get_uid_gid(uid: int | None = None, gid: int | None = None) -> tuple[int, int]:

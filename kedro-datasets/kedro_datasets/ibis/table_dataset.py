@@ -1,6 +1,7 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
+import inspect
 import sys
 from copy import deepcopy
 from enum import auto
@@ -235,7 +236,34 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 method_name := "insert" if self._mode == "append" else "upsert",
             ):
                 method = getattr(self.connection, method_name)
-                method(self._table_name, data, **self._save_args)
+                save_args = self._save_args
+                if method_name == "insert":
+                    create_only_args = {"format", "temp", "partition_by", "schema"}
+                    try:
+                        sig = inspect.signature(method)
+                        has_var_keyword = any(
+                            param.kind == inspect.Parameter.VAR_KEYWORD
+                            for param in sig.parameters.values()
+                        )
+                        if not has_var_keyword:
+                            valid_params = set(sig.parameters.keys())
+                            save_args = {
+                                k: v for k, v in save_args.items() if k in valid_params
+                            }
+                        else:
+                            save_args = {
+                                k: v
+                                for k, v in save_args.items()
+                                if k not in create_only_args
+                            }
+                    except (ValueError, TypeError):
+                        save_args = {
+                            k: v
+                            for k, v in save_args.items()
+                            if k not in create_only_args
+                        }
+
+                method(self._table_name, data, **save_args)
             else:
                 raise DatasetError(
                     f"The {self.connection.name} backend for Ibis does "

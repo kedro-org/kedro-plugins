@@ -28,6 +28,12 @@ jobs:
           version: "latest"
           python-version: ${{ inputs.python-version }}
           activate-environment: true
+      - name: Set up Java 17 for Spark
+        if: inputs.os != 'windows-latest' && inputs.plugin == 'kedro-datasets'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
       - name: Install dependencies
         run: |
           uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"

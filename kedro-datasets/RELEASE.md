@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added source-based generation and CI validation for the Kedro catalog JSON schema.
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
@@ -28,6 +29,7 @@
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
 - [Dhruv Gupta](https://github.com/DG47)
+- [JokeGbenro](https://github.com/JokeGbenro)
 - [Mohamed Fouad](https://github.com/mohamd764)
 
 # Release 9.6.0

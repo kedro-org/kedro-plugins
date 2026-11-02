@@ -26,10 +26,8 @@
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
-- [akira-in-tech](https://github.com/akira-in-tech)
-- [Tanmay Singh](https://github.com/tannnmayy)
-- [Shizoqua](https://github.com/Shizoqua)
 - [Mohamed Fouad](https://github.com/mohamd764)
+
 # Release 9.6.0
 
 ## Major features and improvements

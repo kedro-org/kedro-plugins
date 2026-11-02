@@ -190,6 +190,48 @@ class TestPartitionedDatasetLocal:
         assert part_id in loaded_partitions
         assert len(loaded_partitions.keys()) == expected_num_parts
 
+    @pytest.mark.parametrize("skip_existing", [False, True])
+    def test_skip_existing(self, local_csvs, partitioned_data_pandas, skip_existing):
+        pds = PartitionedDataset(
+            path=str(local_csvs),
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            skip_existing=skip_existing,
+        )
+        new_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        pds.save({"p2": new_data})
+
+        expected_data = partitioned_data_pandas["p2.csv"] if skip_existing else new_data
+        assert_frame_equal(pds.load()["p2"](), expected_data)
+
+    def test_skip_existing_does_not_evaluate_lazy_data(self, local_csvs):
+        """Test that skipped partitions do not have their data computed"""
+        pds = PartitionedDataset(
+            path=str(local_csvs),
+            dataset="pandas.CSVDataset",
+            filename_suffix=".csv",
+            skip_existing=True,
+        )
+        evaluated = []
+
+        def original_data():
+            evaluated.append("computed")
+            return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        pds.save({"p2": original_data, "new/data": original_data})
+
+        assert evaluated == ["computed"]
+        assert (local_csvs / "new" / "data.csv").is_file()
+
+    def test_skip_existing_with_overwrite(self, tmp_path):
+        with pytest.raises(DatasetError, match="'overwrite' and 'skip_existing'"):
+            PartitionedDataset(
+                path=str(tmp_path),
+                dataset="pandas.CSVDataset",
+                overwrite=True,
+                skip_existing=True,
+            )
+
     def test_release_instance_cache(self, local_csvs):
         """Test that cache invalidation does not affect other instances"""
         ds_a = PartitionedDataset(path=str(local_csvs), dataset="pandas.CSVDataset")

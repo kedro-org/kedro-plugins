@@ -44,7 +44,6 @@ def dummy_data():
 
 
 class TestSafetensorsDataset:
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     @pytest.mark.parametrize(
         "backend",
         [

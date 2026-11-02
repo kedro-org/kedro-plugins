@@ -20,6 +20,7 @@
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
+- Fixed `matplotlib.MatplotlibDataset` failing to save versioned datasets on Windows when `filepath` is an `os.PathLike`.
 
 ## Community contributions
 
@@ -27,6 +28,7 @@
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
 - [JokeGbenro](https://github.com/JokeGbenro)
+- [Mohamed Fouad](https://github.com/mohamd764)
 
 # Release 9.6.0
 

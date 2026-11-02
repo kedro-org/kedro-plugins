@@ -438,7 +438,7 @@ class FAISSVectorStoreDataset(AbstractVectorStoreDataset):
 
         ```yaml
         my_index:
-          type: faiss.FAISSVectorStoreDataset
+          type: kedro_datasets_experimental.faiss.FAISSVectorStoreDataset
           dimension: 384
           index_path: data/06_models/my_index.faiss
         ```

@@ -343,7 +343,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
 
         ```yaml
         my_store:
-          type: weaviate.WeaviateVectorStoreDataset
+          type: kedro_datasets_experimental.weaviate.WeaviateVectorStoreDataset
           collection_name: MyCollection
         ```
 
@@ -351,7 +351,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
 
         ```yaml
         my_store:
-          type: weaviate.WeaviateVectorStoreDataset
+          type: kedro_datasets_experimental.weaviate.WeaviateVectorStoreDataset
           collection_name: MyCollection
           connection_type: cloud
           url: "https://my-cluster.weaviate.network"
@@ -363,7 +363,7 @@ class WeaviateVectorStoreDataset(AbstractVectorStoreDataset):
 
         ```yaml
         my_store:
-          type: weaviate.WeaviateVectorStoreDataset
+          type: kedro_datasets_experimental.weaviate.WeaviateVectorStoreDataset
           collection_name: MyCollection
           connection_type: custom
           connection_params:

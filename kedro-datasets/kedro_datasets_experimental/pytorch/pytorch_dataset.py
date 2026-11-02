@@ -31,11 +31,11 @@ class PyTorchDataset(AbstractVersionedDataset[Any, Any]):
         default) or a non-pickle format such as ``safetensors`` when handling
         untrusted inputs.
 
-    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
     model:
-        type: pytorch.PyTorchDataset
+        type: kedro_datasets_experimental.pytorch.PyTorchDataset
         filepath: data/06_models/model.pt
     ```
 

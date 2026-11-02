@@ -1,6 +1,7 @@
 """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 """
+
 from __future__ import annotations
 
 import logging
@@ -28,6 +29,13 @@ logger = logging.getLogger(__name__)
 class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+
+    Note:
+        Unlike ``pandas.DataFrame.to_csv()`` which defaults to saving the index (``index=True``),
+        ``CSVDataset`` defaults to ``index=False`` in ``DEFAULT_SAVE_ARGS`` to ensure
+        symmetry between saving and loading (preventing row indices from being reloaded
+        as an extra unnamed column). To preserve DataFrame indices when saving, specify
+        ``save_args={"index": True}`` and ``load_args={"index_col": 0}`` (or the index column name).
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -68,6 +76,8 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """
 
     DEFAULT_LOAD_ARGS: dict[str, Any] = {}
+    # Default index is set to False to ensure symmetry between save and load
+    # operations, preventing the index from being written as an extra unnamed column.
     DEFAULT_SAVE_ARGS: dict[str, Any] = {"index": False}
     DEFAULT_FS_ARGS: dict[str, Any] = {"open_args_save": {"mode": "w"}}
 
@@ -98,7 +108,9 @@ class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             save_args: Pandas options for saving CSV files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-                Defaults are preserved, apart from "index", which is set to False.
+                Defaults are preserved, apart from "index", which is set to False
+                to ensure save/load symmetry. To persist the index, specify
+                ``{"index": True}`` and pass ``index_col`` in ``load_args``.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

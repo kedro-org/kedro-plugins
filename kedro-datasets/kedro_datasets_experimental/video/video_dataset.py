@@ -204,11 +204,11 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     ```yaml
     cars:
-        type: video.VideoDataset
+        type: kedro_datasets_experimental.video.VideoDataset
         filepath: data/01_raw/cars.mp4
 
     motorbikes:
-        type: video.VideoDataset
+        type: kedro_datasets_experimental.video.VideoDataset
         filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
         credentials: dev_s3
     ```
@@ -216,7 +216,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
-    from kedro_datasets.video import VideoDataset
+    from kedro_datasets_experimental.video import VideoDataset
     import numpy as np
 
     video = VideoDataset(
@@ -228,7 +228,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example creating a video from numpy frames using Python API
 
     ```python
-    from kedro_datasets.video.video_dataset import VideoDataset, SequenceVideo
+    from kedro_datasets_experimental.video.video_dataset import VideoDataset, SequenceVideo
     import numpy as np
     from PIL import Image
 
@@ -245,7 +245,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example creating a video from numpy frames using a generator and the Python API
 
     ```python
-    from kedro_datasets.video.video_dataset import VideoDataset, GeneratorVideo
+    from kedro_datasets_experimental.video.video_dataset import VideoDataset, GeneratorVideo
     import numpy as np
     from PIL import Image
 

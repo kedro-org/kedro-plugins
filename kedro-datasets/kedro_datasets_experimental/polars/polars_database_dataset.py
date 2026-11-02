@@ -109,7 +109,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttles_table:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         table_name: shuttles
         credentials: db_credentials
     ```
@@ -118,7 +118,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttle_id_dataset:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         sql: "SELECT shuttle, shuttle_id FROM spaceflights.shuttles;"
         credentials: db_credentials
     ```
@@ -128,7 +128,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttles_configured:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         table_name: shuttles
         credentials: db_credentials
         load_args:

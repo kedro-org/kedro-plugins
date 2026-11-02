@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let sourceFilePath = null;
 
                 for (let element of allElements) {
-                    const elementText = element.textContent || element.innerText;
+                    const elementText = element.textContent || element.innerText || '';
                     if (elementText.includes('Source code in') && elementText.includes('.py')) {
                         sourceFilePath = extractFilePath(elementText);
                         break;

@@ -20,6 +20,7 @@
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
 - Fixed `polars.EagerPolarsDataset` failing to save and load Delta tables with `file_format: delta`.
+- Fixed `matplotlib.MatplotlibDataset` failing to save versioned datasets on Windows when `filepath` is an `os.PathLike`.
 
 ## Community contributions
 
@@ -27,6 +28,7 @@
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
 - [Dhruv Gupta](https://github.com/DG47)
+- [Mohamed Fouad](https://github.com/mohamd764)
 
 # Release 9.6.0
 

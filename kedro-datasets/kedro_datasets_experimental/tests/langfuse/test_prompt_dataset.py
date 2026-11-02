@@ -184,7 +184,7 @@ class TestPromptDatasetInit:
         invalid_credentials = {
             "public_key": invalid_value,
             "secret_key": "sk_test_67890", # pragma: allowlist secret
-        }  
+        }
 
         with pytest.raises(
             DatasetError, match="Langfuse credential 'public_key' cannot be empty"

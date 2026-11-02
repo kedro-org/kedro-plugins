@@ -121,7 +121,14 @@ class TestDartsTorchModelDataset:
         # Two models with the same parameters should deterministically yield the same output
         np.testing.assert_array_equal(pred1.values(), pred2.values())
 
-    def test_pathlike_filepath(self, tmp_path):
-        filepath = tmp_path / "model.pt"
-        dataset = DartsTorchModelDataset(filepath=filepath, model_class="RNNModel")
-        assert Path(dataset._filepath) == filepath
+    def test_pathlike_filepath(self, tmp_path, trained_darts_torch_model, model_class):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "pathlike_model.pt"
+        dataset = DartsTorchModelDataset(filepath=filepath, model_class=model_class)
+        dataset.save(trained_darts_torch_model)
+
+        model_loaded = dataset.load()
+
+        pred1 = trained_darts_torch_model.predict(n=6)
+        pred2 = model_loaded.predict(n=6)
+        np.testing.assert_array_equal(pred1.values(), pred2.values())

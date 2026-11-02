@@ -137,7 +137,7 @@ class TestPromptDatasetInit:
             prompt_type="chat",
             credentials=mock_credentials,
         )
-        assert Path(dataset._filepath) == pathlike
+        assert dataset.file_dataset.load() == json.loads(pathlike.read_text())
 
     def test_init_all_params(
         self, filepath_json_chat, mock_credentials, mock_opik, mock_opik_dataset

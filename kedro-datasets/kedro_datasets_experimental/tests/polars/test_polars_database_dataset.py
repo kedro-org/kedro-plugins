@@ -374,12 +374,11 @@ class TestPolarsDatabaseDataset:
         )
         assert CONNECTION not in str(dataset)
 
-    def test_pathlike_filepath(self, tmp_path):
-        """Test that os.PathLike filepath is supported."""
-        query_file = tmp_path / "test_query.sql"
-        query_file.write_text("SELECT * FROM test_table")
-        dataset = PolarsDatabaseDataset(
-            filepath=query_file,
-            credentials={"con": CONNECTION},
-        )
-        assert Path(dataset._filepath) == query_file
+    def test_pathlike_filepath(self, seed_table, numeric_frame, tmp_path):
+        """Test that os.PathLike filepaths are supported."""
+        table_name = "orders"
+        credentials = seed_table(table_name, numeric_frame)
+        query_file = tmp_path / "orders_query.sql"
+        query_file.write_text(_select(table_name))
+        dataset = PolarsDatabaseDataset(filepath=query_file, credentials=credentials)
+        assert_frame_equal(dataset.load(), numeric_frame)

@@ -53,12 +53,15 @@ def mocked_s3_bucket():
 
 
 class TestVideoDataset:
-    def test_pathlike_filepath(self, tmp_path):
-        pathlike = tmp_path / "test.mp4"
-        ds = VideoDataset(filepath=pathlike)
-        assert Path(ds._filepath) == pathlike
-        fv = FileVideo(pathlike)
-        assert Path(fv.filepath) == pathlike
+    def test_pathlike_filepath(self, tmp_path, color_video):
+        """Test that os.PathLike filepaths are supported."""
+        ds = VideoDataset(filepath=tmp_path / "test.mp4")
+        ds.save(color_video)
+        assert_videos_equal(color_video, ds.load())
+
+    def test_file_video_pathlike_filepath(self, filepath_mp4, mp4_object):
+        """Test that ``FileVideo`` accepts an os.PathLike filepath."""
+        assert_videos_equal(FileVideo(Path(filepath_mp4)), mp4_object)
 
     def test_load_mp4(self, filepath_mp4, mp4_object):
         """Loading a mp4 dataset should create a FileVideo"""

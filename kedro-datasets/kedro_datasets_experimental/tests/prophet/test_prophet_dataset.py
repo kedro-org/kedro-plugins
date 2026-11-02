@@ -210,7 +210,9 @@ class TestProphetModelDatasetVersioned:
         versioned_prophet_model_dataset.save(dummy_model)
         assert versioned_prophet_model_dataset.exists()
 
-    def test_pathlike_filepath(self, tmp_path):
+    def test_pathlike_filepath(self, tmp_path, dummy_model):
+        """Test that os.PathLike filepaths are supported."""
         filepath = tmp_path / "model.json"
         dataset = ProphetModelDataset(filepath=filepath)
-        assert Path(dataset._filepath) == filepath
+        dataset.save(dummy_model)
+        assert isinstance(dataset.load(), Prophet)

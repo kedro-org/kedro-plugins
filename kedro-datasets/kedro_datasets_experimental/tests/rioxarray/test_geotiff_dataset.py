@@ -201,7 +201,10 @@ def test_load_missing_file(tmp_path):
         dataset.load()
 
 
-def test_pathlike_filepath(tmp_path):
+def test_pathlike_filepath(tmp_path, synthetic_xarray_multiband):
+    """Test that os.PathLike filepaths are supported."""
     filepath = tmp_path / "test.tif"
     dataset = GeoTIFFDataset(filepath=filepath)
-    assert Path(dataset._filepath) == filepath
+    dataset.save(synthetic_xarray_multiband)
+    reloaded_xr = dataset.load()
+    assert (synthetic_xarray_multiband.values == reloaded_xr.values).all()

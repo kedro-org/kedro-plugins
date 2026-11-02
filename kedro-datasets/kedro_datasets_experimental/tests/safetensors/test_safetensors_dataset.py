@@ -99,7 +99,7 @@ class TestSafetensorsDataset:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        dataset = SafetensorsDataset(filepath=filepath)
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
         assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
@@ -110,7 +110,7 @@ class TestSafetensorsDataset:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.safetensors"
-        dataset = SafetensorsDataset(filepath=filepath)
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
@@ -245,7 +245,10 @@ class TestSafetensorsDatasetVersioned:
             == versioned_safetensors_dataset._describe()
         )
 
-    def test_pathlike_filepath(self, tmp_path):
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
         filepath = tmp_path / "model.safetensors"
-        dataset = SafetensorsDataset(filepath=filepath)
-        assert Path(dataset._filepath) == filepath
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
+        dataset.save(dummy_data)
+        reloaded = dataset.load()
+        assert torch.equal(dummy_data["embeddings"], reloaded["embeddings"])

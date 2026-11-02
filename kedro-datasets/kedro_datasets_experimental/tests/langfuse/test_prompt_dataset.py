@@ -128,7 +128,7 @@ class TestPromptDatasetInit:
             prompt_name="test-prompt",
             credentials=mock_credentials,
         )
-        assert Path(dataset._filepath) == pathlike
+        assert dataset.file_dataset.load() == json.loads(pathlike.read_text())
 
     def test_init_all_params(self, filepath_json_chat, mock_credentials, mock_langfuse):
         """Test initialization with all parameters."""

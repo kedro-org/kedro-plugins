@@ -13,10 +13,51 @@ Feature: Docker commands in new projects
     And A .dive-ci file should exist
     And A .dockerignore file should exist
 
+  Scenario: Execute docker init with a .python-version file
+    Given I have a ".python-version" file containing "3.11"
+    When I execute the kedro command "docker init"
+    Then I should get a successful exit code
+    And A Dockerfile file should contain ARG BASE_IMAGE=python:3\.11-slim string
+
+  Scenario: Generated Dockerfile passes the Docker build checks
+    Given I have executed the kedro command "docker init"
+    When I run the command "docker build --check ."
+    Then I should get a successful exit code
+
   Scenario: Execute docker build target
     When I execute the kedro command "docker build"
     Then I should get a successful exit code
     And A new docker image for test project should be created
+
+  Scenario: Execute docker build and run with a uv.lock file
+    Given I have run the command "uv lock"
+    # the build only succeeds if the dependencies are installed from uv.lock
+    And I have a "requirements.txt" file containing "kedro-docker-e2e-no-such-package"
+    When I execute the kedro command "docker build"
+    Then I should get a successful exit code
+    When I execute the kedro command "docker run"
+    Then I should get a successful exit code
+    And I should get a message including "Pipeline execution completed"
+    When I execute the kedro command "docker cmd pip --version"
+    Then I should get a message including "/opt/venv/"
+
+  Scenario: Execute docker build and run for one pipeline
+    Given I have executed the kedro command "docker build --pipelines data_processing"
+    When I execute the kedro command "docker cmd --image project-dummy-data_processing"
+    Then I should get a successful exit code
+    And I should get a message including "Pipeline execution completed"
+    And I should get a message including "preprocess_companies_node"
+    And I should not get a message including "split_data_node"
+    When I execute the kedro command "docker run --image project-dummy-data_processing"
+    Then I should get a successful exit code
+    And I should get a message including "preprocess_companies_node"
+    And I should not get a message including "split_data_node"
+
+  Scenario: Execute docker build for one pipeline with an old Dockerfile
+    Given I have a "Dockerfile" file containing "FROM python:3.12-slim"
+    When I execute the kedro command "docker build --pipelines data_processing"
+    Then I should get an error exit code
+    And Standard output should contain a message including "does not declare `ARG KEDRO_PIPELINES`"
 
   Scenario: Execute docker build target with custom base image
     Given I have executed kedro docker build with custom base image

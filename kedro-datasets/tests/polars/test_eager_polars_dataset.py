@@ -206,15 +206,15 @@ class TestEagerExcelDataset:
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
 
-    def test_load_calamine_engine(self, mocker, excel_dataset, dummy_dataframe):
-        """Test loading Excel file with calamine engine uses BytesIO (Issue #589)."""
-        mock_read = mocker.patch("polars.read_excel", return_value=dummy_dataframe)
-        excel_dataset._load_args = {"engine": "calamine"}
-        loaded = excel_dataset.load()
-        assert loaded.shape == (2, 3)
-        args, kwargs = mock_read.call_args
-        assert kwargs["engine"] == "calamine"
-        assert hasattr(args[0], "getvalue")
+    @pytest.mark.parametrize("engine", ["calamine", "openpyxl", "xlsx2csv"])
+    def test_load_excel_engines(self, filepath_excel, dummy_dataframe, engine):
+        dummy_dataframe.to_pandas().to_excel(filepath_excel, index=False)
+        dataset = EagerPolarsDataset(
+            filepath=filepath_excel.as_posix(),
+            file_format="excel",
+            load_args={"engine": engine},
+        )
+        assert_frame_equal(dataset.load(), dummy_dataframe)
 
 
 class TestEagerParquetDatasetVersioned:

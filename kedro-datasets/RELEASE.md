@@ -19,12 +19,14 @@
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
+- Fixed `polars.EagerPolarsDataset` failing to load Excel files with the `calamine` engine (`fastexcel`). Since `calamine` is Polars' default Excel engine, this affects anyone with `fastexcel` installed, not just those who set the engine explicitly.
 
 ## Community contributions
 
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
+- [aakash1552005](https://github.com/aakash1552005)
 
 # Release 9.6.0
 

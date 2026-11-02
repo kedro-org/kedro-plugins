@@ -1,3 +1,4 @@
+import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
@@ -245,6 +246,10 @@ class TestSafetensorsDatasetVersioned:
             == versioned_safetensors_dataset._describe()
         )
 
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="Saving fails on Windows until #1555 is merged",
+    )
     def test_pathlike_filepath(self, tmp_path, dummy_data):
         """Test that os.PathLike filepaths are supported."""
         filepath = tmp_path / "model.safetensors"

@@ -35,7 +35,6 @@
 - [AAKASH S S](https://github.com/aakash1552005)
 - [JokeGbenro](https://github.com/JokeGbenro)
 - [Mohamed Fouad](https://github.com/mohamd764)
-- [Dhruv Gupta](https://github.com/DG47)
 
 # Release 9.6.0
 

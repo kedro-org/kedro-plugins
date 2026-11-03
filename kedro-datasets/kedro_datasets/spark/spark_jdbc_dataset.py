@@ -1,4 +1,5 @@
 """SparkJDBCDataset to load and save a PySpark DataFrame via JDBC."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -8,15 +9,30 @@ from pyspark.sql import DataFrame
 
 from kedro_datasets._utils.spark_utils import get_spark
 
+# Spark JDBC reader options that conflict with the ``query`` option. Spark
+# matches option names case-insensitively, so the comparison does too.
+_QUERY_INCOMPATIBLE_OPTIONS = frozenset(
+    name.lower()
+    for name in (
+        "dbtable",
+        "query",
+        "url",
+        "partitionColumn",
+        "lowerBound",
+        "upperBound",
+        "numPartitions",
+    )
+)
+
 
 class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
-    """``SparkJDBCDataset`` loads data from a database table accessible
-    via JDBC URL url and connection properties and saves the content of
-    a PySpark DataFrame to an external database table via JDBC.  It uses
-    ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
-    internally, so it supports all allowed PySpark options on ``jdbc``.
-    Instead of a table, a SQL ``query`` can be provided to load the result
-    of that query; such a dataset is read-only.
+    """``SparkJDBCDataset`` loads data from a database table, or from the
+    result of a SQL ``query``, accessible via a JDBC URL and connection
+    properties, and saves the content of a PySpark DataFrame to an external
+    database table via JDBC.  It uses ``pyspark.sql.DataFrameReader`` and
+    ``pyspark.sql.DataFrameWriter`` internally, so it supports all allowed
+    PySpark options on ``jdbc``. A dataset configured with ``query`` is
+    read-only.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -98,33 +114,47 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 (mirrors the ``pandas.SQLTableDataset`` ``credentials.con``
                 convention for keeping connection endpoints out of
                 ``catalog.yml``).
-            table: The name of the table to load or save data to.
-                Cannot be used together with ``query``.
-            query: A SQL query to load data from, passed to Spark's JDBC
-                ``query`` option. The dataset is read-only when ``query``
-                is provided, and ``load_args`` may only contain
-                ``properties``. Cannot be used together with ``table``.
+            table: The name of the table to load or save data to. Required
+                unless ``query`` is provided. Cannot be used together with
+                ``query``.
+            query: A SQL query whose result is loaded, passed to Spark's JDBC
+                ``query`` option. Setting ``query`` makes the dataset read-only:
+                ``save`` raises ``DatasetError``, ``save_args`` cannot be
+                provided, and ``load_args`` may only contain ``properties``.
+                Cannot be used together with ``table``. A trailing semicolon
+                is stripped, because Spark runs the query as a subquery
+                (``SELECT * FROM (<query>) SPARK_GEN_SUBQ_n``); for the same
+                reason some databases reject ``ORDER BY`` without ``LIMIT``
+                inside the query.
             credentials: A dictionary of JDBC database connection arguments.
                 Normally at least properties ``user`` and ``password`` with
                 their corresponding values.  It updates ``properties``
                 parameter in ``load_args`` and ``save_args`` in case it is
                 provided.
             load_args: Provided to underlying PySpark ``jdbc`` function along
-                with the JDBC URL and the name of the table. To find all
-                supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
+                with the JDBC URL and the table name (``table`` mode only).
+                When ``query`` is provided, only ``properties`` is allowed,
+                and its entries are passed as reader options; they cannot
+                include ``dbtable``, ``query``, ``url`` or the partitioning
+                options ``partitionColumn``, ``lowerBound``, ``upperBound``
+                and ``numPartitions``. To find all supported arguments, see
+                here:
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameReader.jdbc.html
             save_args: Provided to underlying PySpark ``jdbc`` function along
-                with the JDBC URL and the name of the table. To find all
-                supported arguments, see here:
+                with the JDBC URL and the name of the table. Cannot be used
+                together with ``query``. To find all supported arguments,
+                see here:
                 https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DatasetError: When ``url`` is empty, when neither or both of
-                ``table`` and ``query`` are provided, when ``load_args``
-                contains arguments other than ``properties`` together with
-                ``query``, or when a property is provided with a None value.
+                ``table`` and ``query`` are provided, when ``table`` or
+                ``query`` is blank, when ``query`` is combined with
+                ``save_args`` or with ``load_args`` other than ``properties``
+                (or with reader options in ``properties`` that conflict with
+                ``query``), or when a property is provided with a None value.
         """
 
         credentials = credentials or {}
@@ -137,23 +167,40 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 "'jdbc:subprotocol:subname'."
             )
 
-        if table and query:
+        if table is not None and query is not None:
             raise DatasetError(
                 "'table' and 'query' arguments cannot be used together. "
                 "Please provide either the name of the table to load or "
                 "save data to, or a query to load data from."
             )
 
-        if not table and not query:
+        if table is None and query is None:
+            raise DatasetError(
+                "Either 'table' or 'query' must be provided. Please provide "
+                "the name of the table to load or save data to, or a query "
+                "to load data from."
+            )
+
+        if table is not None and not table.strip():
             raise DatasetError(
                 "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
-                "data to, or a 'query' to load data from."
+                "data to."
             )
 
+        if query is not None:
+            # Spark wraps the query as a subquery, so a trailing ``;`` would
+            # produce a confusing database syntax error at load time.
+            query = query.strip().rstrip(";").rstrip()
+            if not query:
+                raise DatasetError(
+                    "'query' argument cannot be empty. Please "
+                    "provide a SQL query to load data from."
+                )
+
         self._url = url
-        self._table = table or None
-        self._query = query or None
+        self._table = table
+        self._query = query
 
         self.metadata = metadata
 
@@ -162,13 +209,13 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
         if self._query:
-            unsupported_load_args = sorted(set(self._load_args) - {"properties"})
-            if unsupported_load_args:
+            if save_args is not None:
                 raise DatasetError(
-                    "Only 'properties' can be provided in 'load_args' when "
-                    "'query' is used, got: "
-                    f"{', '.join(repr(arg) for arg in unsupported_load_args)}."
+                    "'save_args' cannot be used together with 'query', as a "
+                    "dataset with 'query' is read-only. Please provide 'table' "
+                    "instead to save data to a database table."
                 )
+            self._validate_query_load_args()
 
         # Update properties in load_args and save_args with credentials.
         credentials_properties = {
@@ -186,15 +233,39 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                     )
 
             load_properties = self._load_args.get("properties", {})
-            save_properties = self._save_args.get("properties", {})
             self._load_args["properties"] = {
                 **load_properties,
                 **credentials_properties,
             }
-            self._save_args["properties"] = {
-                **save_properties,
-                **credentials_properties,
-            }
+            if not self._query:
+                save_properties = self._save_args.get("properties", {})
+                self._save_args["properties"] = {
+                    **save_properties,
+                    **credentials_properties,
+                }
+
+    def _validate_query_load_args(self) -> None:
+        unsupported_load_args = sorted(set(self._load_args) - {"properties"})
+        if unsupported_load_args:
+            raise DatasetError(
+                "Only 'properties' can be provided in 'load_args' when "
+                "'query' is used, got: "
+                f"{', '.join(repr(arg) for arg in unsupported_load_args)}."
+            )
+
+        incompatible_options = sorted(
+            option
+            for option in self._load_args.get("properties", {})
+            if option.lower() in _QUERY_INCOMPATIBLE_OPTIONS
+        )
+        if incompatible_options:
+            raise DatasetError(
+                "'properties' in 'load_args' cannot contain reader options "
+                "that conflict with 'query' ('dbtable', 'query', 'url', "
+                "'partitionColumn', 'lowerBound', 'upperBound', "
+                "'numPartitions'), got: "
+                f"{', '.join(repr(option) for option in incompatible_options)}."
+            )
 
     def _describe(self) -> dict[str, Any]:
         load_args = self._load_args
@@ -220,7 +291,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         }
 
     def load(self) -> DataFrame:
-        if self._table is None:
+        if self._query:
             return (
                 get_spark()
                 .read.format("jdbc")
@@ -232,7 +303,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         return get_spark().read.jdbc(self._url, self._table, **self._load_args)
 
     def save(self, data: DataFrame) -> None:
-        if self._table is None:
+        if self._query:
             raise DatasetError(
                 "'save' is not supported when 'query' is provided. Please "
                 "provide 'table' instead to save data to a database table."

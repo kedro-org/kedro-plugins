@@ -56,8 +56,8 @@ def test_missing_url_when_credentials_do_not_contain_url():
 
 def test_missing_table():
     error_message = (
-        "'table' argument cannot be empty. Please provide"
-        " the name of the table to load or save data to."
+        "Either 'table' or 'query' must be provided. Please provide the name"
+        " of the table to load or save data to, or a query to load data from."
     )
     with pytest.raises(DatasetError, match=error_message):
         SparkJDBCDataset(url="dummy_url", table=None)
@@ -65,17 +65,38 @@ def test_missing_table():
 
 def test_missing_table_and_query():
     error_message = (
-        "'table' argument cannot be empty. Please provide the name of the"
-        " table to load or save data to, or a 'query' to load data from."
+        "Either 'table' or 'query' must be provided. Please provide the name"
+        " of the table to load or save data to, or a query to load data from."
     )
     with pytest.raises(DatasetError, match=error_message):
         SparkJDBCDataset(url="dummy_url")
 
 
-def test_table_and_query_together():
+@pytest.mark.parametrize("table", ["", "   "])
+def test_blank_table(table):
+    error_message = (
+        "'table' argument cannot be empty. Please provide"
+        " the name of the table to load or save data to."
+    )
+    with pytest.raises(DatasetError, match=error_message):
+        SparkJDBCDataset(url="dummy_url", table=table)
+
+
+@pytest.mark.parametrize("query", ["SELECT 1 AS col1", "", "   "])
+def test_table_and_query_together(query):
     error_message = "'table' and 'query' arguments cannot be used together."
     with pytest.raises(DatasetError, match=error_message):
-        SparkJDBCDataset(url="dummy_url", table="dummy_table", query="SELECT 1 AS col1")
+        SparkJDBCDataset(url="dummy_url", table="dummy_table", query=query)
+
+
+@pytest.mark.parametrize("query", ["", "   ", ";", " ; "])
+def test_blank_query(query):
+    error_message = (
+        "'query' argument cannot be empty. Please provide a SQL query"
+        " to load data from."
+    )
+    with pytest.raises(DatasetError, match=error_message):
+        SparkJDBCDataset(url="dummy_url", query=query)
 
 
 def test_save(mocker, spark_jdbc_args):
@@ -309,10 +330,31 @@ def test_load_query_with_credentials_and_load_args(mocker):
     query_reader.load.assert_called_once_with()
 
 
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT col1 FROM dummy_table;",
+        "SELECT col1 FROM dummy_table ; ",
+        "  SELECT col1 FROM dummy_table;;",
+    ],
+)
+def test_load_query_strips_trailing_semicolon(mocker, query):
+    spark = mocker.patch(
+        "kedro_datasets.spark.spark_jdbc_dataset.get_spark"
+    ).return_value
+    dataset = SparkJDBCDataset(url="dummy_url", query=query)
+
+    dataset.load()
+
+    _, _, url_reader, _ = _mock_query_reader(spark)
+    url_reader.option.assert_called_once_with("query", "SELECT col1 FROM dummy_table")
+    assert dataset._describe()["query"] == "SELECT col1 FROM dummy_table"
+
+
 def test_query_with_unsupported_load_args():
     pattern = (
         r"Only 'properties' can be provided in 'load_args' when 'query' is used,"
-        r" got: 'column', 'numPartitions'\."
+        r" got: 'column', 'numPartitions', 'predicates'\."
     )
     with pytest.raises(DatasetError, match=pattern):
         SparkJDBCDataset(
@@ -321,8 +363,47 @@ def test_query_with_unsupported_load_args():
             load_args={
                 "column": "col1",
                 "numPartitions": 4,
+                "predicates": ["col1 > 5"],
                 "properties": {"driver": "dummy_driver"},
             },
+        )
+
+
+@pytest.mark.parametrize(
+    ("properties", "reported"),
+    [
+        ({"dbtable": "dummy_table"}, "'dbtable'"),
+        ({"query": "SELECT 1"}, "'query'"),
+        ({"url": "other_url"}, "'url'"),
+        ({"partitionColumn": "col1"}, "'partitionColumn'"),
+        (
+            {"lowerBound": 0, "upperBound": 10, "numPartitions": 2},
+            "'lowerBound', 'numPartitions', 'upperBound'",
+        ),
+        ({"DBTABLE": "dummy_table", "driver": "dummy_driver"}, "'DBTABLE'"),
+    ],
+)
+def test_query_with_incompatible_load_properties(properties, reported):
+    pattern = (
+        r"'properties' in 'load_args' cannot contain reader options that conflict"
+        rf" with 'query' \(.*\), got: {reported}\."
+    )
+    with pytest.raises(DatasetError, match=pattern):
+        SparkJDBCDataset(
+            url="dummy_url",
+            query="SELECT col1 FROM dummy_table",
+            load_args={"properties": properties},
+        )
+
+
+@pytest.mark.parametrize(
+    "save_args", [{}, {"properties": {"driver": "dummy_driver"}}, {"mode": "append"}]
+)
+def test_query_with_save_args(save_args):
+    pattern = r"'save_args' cannot be used together with 'query'"
+    with pytest.raises(DatasetError, match=pattern):
+        SparkJDBCDataset(
+            url="dummy_url", query="SELECT col1 FROM dummy_table", save_args=save_args
         )
 
 
@@ -348,3 +429,4 @@ def test_describe_query():
     assert described["query"] == query
     assert described["table"] is None
     assert described["load_args"] == {"properties": {}}
+    assert described["save_args"] == {}

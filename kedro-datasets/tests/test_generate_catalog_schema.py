@@ -540,6 +540,39 @@ def test_query_schema_requires_exactly_one_source(
 
 
 @pytest.mark.parametrize(
+    ("source_options", "valid"),
+    [
+        ({"table": "t"}, True),
+        ({"query": "SELECT 1"}, True),
+        ({"table": "t", "query": "SELECT 1"}, False),
+        ({}, False),
+        ({"table": None}, False),
+        ({"query": None}, False),
+        ({"table": ""}, False),
+        ({"query": ""}, False),
+        ({"table": None, "query": None}, False),
+        ({"table": "", "query": ""}, False),
+        ({"table": "t", "query": None}, True),
+        ({"table": None, "query": "SELECT 1"}, True),
+        ({"table": "t", "query": ""}, False),
+        ({"table": "", "query": "SELECT 1"}, False),
+    ],
+)
+def test_spark_jdbc_schema_requires_table_or_query(
+    catalog_validator, source_options, valid
+):
+    dataset = {
+        "dataset": {
+            "type": "spark.SparkJDBCDataset",
+            "url": "jdbc:db",
+            **source_options,
+        }
+    }
+
+    assert catalog_validator.is_valid(dataset) is valid
+
+
+@pytest.mark.parametrize(
     ("options", "valid"),
     [
         ({"filepath": "data/table"}, True),

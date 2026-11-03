@@ -21,6 +21,7 @@
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
+- Fixed `polars.EagerPolarsDataset` failing to load Excel files with the `calamine` engine (`fastexcel`). Since `calamine` is Polars' default Excel engine, this affects anyone with `fastexcel` installed, not just those who set the engine explicitly.
 - Fixed `matplotlib.MatplotlibDataset` failing to save versioned datasets on Windows when `filepath` is an `os.PathLike`.
 
 ## Community contributions

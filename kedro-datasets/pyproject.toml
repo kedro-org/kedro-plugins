@@ -293,6 +293,7 @@ test = [
     "dill~=0.3.1; python_version < '3.14'",
     "dill~=0.4.1; python_version >= '3.14'",  # Python 3.14 Pickler compatibility
     "duckdb>=1.4.0, <2.0",  # https://github.com/ibis-project/ibis/issues/12196
+    "fastexcel",
     "filelock>=3.4.0, <4.0",
     "fiona>=1.8, <2.0; python_version < '3.14'",
     "gcsfs>=2023.1",

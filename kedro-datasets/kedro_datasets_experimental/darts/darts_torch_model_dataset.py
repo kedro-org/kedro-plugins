@@ -74,7 +74,7 @@ class DartsTorchModelDataset(
     def __init__(  # noqa: PLR0913
             self,
             *,
-            filepath: str,
+            filepath: str | os.PathLike,
             model_class: str | type[TorchForecastingModel],
             load_args: dict[str, Any] | None = None,
             save_args: dict[str, Any] | None = None,

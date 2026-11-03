@@ -142,6 +142,17 @@ class TestParquetDataset:
         loaded_data = dataset.load()
         dummy_dd_dataframe.compute().equals(loaded_data.compute())
 
+    def test_pathlike_filepath(self, tmp_path, dummy_dd_dataframe):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "some" / "dir" / FILE_NAME
+        dataset = ParquetDataset(filepath=filepath)
+
+        assert not dataset.exists()
+        dataset.save(dummy_dd_dataframe)
+        assert dataset.exists()
+        loaded_data = dataset.load()
+        assert dummy_dd_dataframe.compute().equals(loaded_data.compute())
+
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )

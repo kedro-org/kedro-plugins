@@ -15,12 +15,14 @@
 
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
 - Added `os.PathLike` support for `redis.PickleDataset` keys.
+- Added `os.PathLike` filepath support for remaining datasets in `kedro-datasets` and `kedro-datasets-experimental`.
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 - Added the missing `spark-gbqquerydataset` extra for `spark.GBQQueryDataset` and included it in `spark-all`.
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
 - Fixed `pandas.SQLTableDataset.preview()` ignoring the `schema` in `load_args`, which made it fail with `NoSuchTableError` or preview a same-named table from the default schema.
+- Fixed `polars.EagerPolarsDataset` failing to load Excel files with the `calamine` engine (`fastexcel`). Since `calamine` is Polars' default Excel engine, this affects anyone with `fastexcel` installed, not just those who set the engine explicitly.
 - Fixed `matplotlib.MatplotlibDataset` failing to save versioned datasets on Windows when `filepath` is an `os.PathLike`.
 
 ## Community contributions
@@ -29,6 +31,7 @@
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
 - [Dhruv Gupta](https://github.com/DG47)
+- [AAKASH S S](https://github.com/aakash1552005)
 - [JokeGbenro](https://github.com/JokeGbenro)
 - [Mohamed Fouad](https://github.com/mohamd764)
 

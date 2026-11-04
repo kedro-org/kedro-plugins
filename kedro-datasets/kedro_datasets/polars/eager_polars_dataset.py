@@ -14,6 +14,7 @@ from typing import Any
 import fsspec
 import polars as pl
 from kedro.io.core import (
+    PROTOCOL_DELIMITER,
     AbstractVersionedDataset,
     DatasetError,
     Version,
@@ -126,6 +127,8 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
             _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
+        self._credentials = _credentials
+        self._fs_args = _fs_args
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
         self.metadata = metadata
 
@@ -147,6 +150,13 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
+    @property
+    def _storage_options(self) -> dict[str, Any] | None:
+        if self._protocol == "file":
+            return None
+        combined = {**self._fs_args, **self._credentials}
+        return combined if combined else None
+
     def load(self) -> pl.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
@@ -159,6 +169,18 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 " API"
                 " https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
+
+        if self._file_format == "delta":
+            if PROTOCOL_DELIMITER not in load_path and self._protocol != "file":
+                load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+            load_args = deepcopy(self._load_args)
+            if self._storage_options:
+                storage_options = deepcopy(self._storage_options)
+                if "storage_options" in load_args:
+                    storage_options.update(load_args["storage_options"])
+                load_args["storage_options"] = storage_options
+            return load_method(load_path, **load_args)
+
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             file_obj = (
                 BytesIO(fs_file.read()) if self._file_format == "excel" else fs_file
@@ -177,6 +199,20 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 " per the Polars API "
                 "https://pola-rs.github.io/polars/py-polars/html/reference/io.html"
             )
+
+        if self._file_format == "delta":
+            if PROTOCOL_DELIMITER not in save_path and self._protocol != "file":
+                save_path = f"{self._protocol}{PROTOCOL_DELIMITER}{save_path}"
+            save_args = deepcopy(self._save_args)
+            if self._storage_options:
+                storage_options = deepcopy(self._storage_options)
+                if "storage_options" in save_args:
+                    storage_options.update(save_args["storage_options"])
+                save_args["storage_options"] = storage_options
+            save_method(save_path, **save_args)
+            self._invalidate_cache()
+            return
+
         buf = BytesIO()
         save_method(buf, **self._save_args)
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

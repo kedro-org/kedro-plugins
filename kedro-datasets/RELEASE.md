@@ -1,7 +1,13 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+## Bug fixes and other changes
+
+- Fixed `polars.EagerPolarsDataset` failing with `IsADirectoryError` when loading and `ValueError: table_or_uri must be a str, Path or DeltaTable` when saving with `file_format: delta`, and added automatic forwarding of cloud storage credentials/options.
+
 ## Community contributions
+
+- [AAKASH S S](https://github.com/aakash1552005)
 
 
 # Release 10.0.0

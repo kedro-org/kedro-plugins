@@ -63,6 +63,29 @@ def versioned_parquet_dataset(filepath_parquet, load_version, save_version):
 
 
 @pytest.fixture
+def filepath_delta(tmp_path):
+    return tmp_path / "test_delta"
+
+
+@pytest.fixture
+def delta_dataset(filepath_delta):
+    return EagerPolarsDataset(
+        filepath=filepath_delta.as_posix(),
+        file_format="delta",
+    )
+
+
+@pytest.fixture
+def versioned_delta_dataset(filepath_delta, load_version, save_version):
+    return EagerPolarsDataset(
+        filepath=filepath_delta.as_posix(),
+        file_format="delta",
+        version=Version(load_version, save_version),
+        save_args={},
+    )
+
+
+@pytest.fixture
 def csv_dataset(filepath_csv):
     return EagerPolarsDataset(
         filepath=filepath_csv.as_posix(),
@@ -709,6 +732,128 @@ class TestEagerCSVDatasetVersioned:
             inspect.signature(versioned_csv_dataset.preview).return_annotation
             == "TablePreview"
         )
+
+
+class TestEagerDeltaDataset:
+    def test_save_and_load(self, delta_dataset, dummy_dataframe):
+        """Test basic save and reload of delta format."""
+        delta_dataset.save(dummy_dataframe)
+        reloaded_df = delta_dataset.load()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_save_modes(self, delta_dataset, dummy_dataframe, filepath_delta):
+        """Test append and overwrite save modes for delta tables."""
+        delta_dataset.save(dummy_dataframe)
+        new_df = pl.DataFrame({"col1": [3], "col2": [6], "col3": [7]})
+
+        # Append
+        append_ds = EagerPolarsDataset(
+            filepath=filepath_delta.as_posix(),
+            file_format="delta",
+            save_args={"mode": "append"},
+        )
+        append_ds.save(new_df)
+        reloaded = delta_dataset.load()
+        expected = pl.concat([dummy_dataframe, new_df])
+        assert_frame_equal(reloaded.sort("col1"), expected.sort("col1"))
+
+        # Overwrite
+        overwrite_ds = EagerPolarsDataset(
+            filepath=filepath_delta.as_posix(),
+            file_format="delta",
+            save_args={"mode": "overwrite"},
+        )
+        overwrite_ds.save(new_df)
+        reloaded_overwrite = delta_dataset.load()
+        assert_frame_equal(reloaded_overwrite, new_df)
+
+    def test_preview(self, delta_dataset, dummy_dataframe):
+        """Test preview functionality for delta format."""
+        delta_dataset.save(dummy_dataframe)
+        previewed = delta_dataset.preview(nrows=1)
+        assert previewed["columns"] == ["col1", "col2", "col3"]
+        assert len(previewed["data"]) == 1
+
+    def test_cloud_storage_options(self, mocker, dummy_dataframe):
+        """Test propagation of credentials and fs_args as storage_options for cloud protocols."""
+        mocker.patch("fsspec.filesystem")
+        mock_write = mocker.patch("polars.DataFrame.write_delta")
+        mock_read = mocker.patch("polars.read_delta")
+
+        ds = EagerPolarsDataset(
+            filepath="s3://my-bucket/delta_table",
+            file_format="delta",
+            credentials={"aws_access_key_id": "TEST_KEY"},
+            fs_args={"endpoint_url": "http://localhost:9000"},
+        )
+
+        ds.save(dummy_dataframe)
+        mock_write.assert_called_once_with(
+            "s3://my-bucket/delta_table",
+            storage_options={
+                "endpoint_url": "http://localhost:9000",
+                "aws_access_key_id": "TEST_KEY",
+            },
+        )
+
+        ds.load()
+        mock_read.assert_called_once_with(
+            "s3://my-bucket/delta_table",
+            storage_options={
+                "endpoint_url": "http://localhost:9000",
+                "aws_access_key_id": "TEST_KEY",
+            },
+        )
+
+    def test_cloud_storage_options_override(self, mocker, dummy_dataframe):
+        """Test that explicit storage_options in load_args/save_args merges with credentials."""
+        mocker.patch("fsspec.filesystem")
+        mock_write = mocker.patch("polars.DataFrame.write_delta")
+        mock_read = mocker.patch("polars.read_delta")
+
+        ds = EagerPolarsDataset(
+            filepath="s3://my-bucket/delta_table",
+            file_format="delta",
+            credentials={"aws_access_key_id": "TEST_KEY"},
+            save_args={"storage_options": {"AWS_REGION": "us-east-1"}},
+            load_args={"storage_options": {"AWS_REGION": "us-east-1"}},
+        )
+
+        ds.save(dummy_dataframe)
+        mock_write.assert_called_once_with(
+            "s3://my-bucket/delta_table",
+            storage_options={
+                "aws_access_key_id": "TEST_KEY",
+                "AWS_REGION": "us-east-1",
+            },
+        )
+
+        ds.load()
+        mock_read.assert_called_once_with(
+            "s3://my-bucket/delta_table",
+            storage_options={
+                "aws_access_key_id": "TEST_KEY",
+                "AWS_REGION": "us-east-1",
+            },
+        )
+
+    def test_versioned_save_and_load(self, versioned_delta_dataset, dummy_dataframe):
+        """Test versioned save and load of delta table."""
+        versioned_delta_dataset.save(dummy_dataframe)
+        reloaded_df = versioned_delta_dataset.load()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_versioned_save_prevent_duplicate(
+        self, versioned_delta_dataset, dummy_dataframe
+    ):
+        """Test that saving to an existing version raises DatasetError."""
+        versioned_delta_dataset.save(dummy_dataframe)
+        pattern = (
+            r"Save path '.+' for kedro_datasets.polars.eager_polars_dataset.EagerPolarsDataset\(.+\) must "
+            r"not exist if versioning is enabled\."
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            versioned_delta_dataset.save(dummy_dataframe)
 
 
 class TestBadEagerPolarsDataset:

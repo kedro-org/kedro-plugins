@@ -53,7 +53,7 @@ kedro-telemetry = "kedro_telemetry.plugin:telemetry_hook"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["kedro_telemetry"]
+packages = ["kedro_telemetry", "kedro_telemetry.collectors"]
 zip-safe = false
 
 [tool.setuptools.dynamic]

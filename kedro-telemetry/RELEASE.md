@@ -1,4 +1,5 @@
 # Upcoming release
+* Moved the dataset and validator metric collection out of `plugin.py` into a new `kedro_telemetry.collectors` package. No change in the data sent.
 
 # Release 0.9.0
 * Added validator declaration counts to the `Kedro Project Statistics` event, it includes `number_of_validated_datasets` and per-library `validator_type_count.*`, with user-defined validators reported as `custom`.

@@ -49,11 +49,11 @@ class IncrementalDataset(PartitionedDataset):
         >>> dataset = IncrementalDataset(
         ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
         ... )
-        >>> loaded = dataset.load()  # loads all available partitions
-        >>> # assert isinstance(loaded, dict)
+        >>> loaded = dataset.load()  # loads all available partition loader functions
+        >>> # data = {p_id: load_func() for p_id, load_func in loaded.items()}
         >>>
         >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = dataset.load()  # still loads all available partitions
+        >>> reloaded = dataset.load()  # still loads all available partition loader functions
         >>>
         >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
@@ -265,16 +265,15 @@ class IncrementalDataset(PartitionedDataset):
             return None
 
     def load(self) -> dict[str, Callable[[], Any]]:
-        partitions: dict[str, Any] = {}
+        partitions: dict[str, Callable[[], Any]] = {}
 
         for partition in self._list_partitions():
             partition_id = self._path_to_partition(partition)
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
-            partitions[partition_id] = self._dataset_type(  # type: ignore
-                **kwargs
-            ).load()
+            dataset = self._dataset_type(**kwargs)  # type: ignore
+            partitions[partition_id] = dataset.load
 
         return partitions
 

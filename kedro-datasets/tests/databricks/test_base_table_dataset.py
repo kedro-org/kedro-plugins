@@ -323,9 +323,9 @@ class TestBaseTableDataset:
         upserted_table = unity_ds.load()
         assert expected_upsert_spark_df.exceptAll(upserted_table).count() == 0
 
-        assert mock_add_pk.call_count == 2, (
-            f"Expected 2 calls, but got {mock_add_pk.call_count}"
-        )
+        assert (
+            mock_add_pk.call_count == 2
+        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
         expected_add_pk_calls = [
             mocker.call([unity_ds._table.primary_key]),
             mocker.call([unity_ds._table.primary_key]),
@@ -359,9 +359,9 @@ class TestBaseTableDataset:
             == 0
         )
 
-        assert mock_add_pk.call_count == 2, (
-            f"Expected 2 calls, but got {mock_add_pk.call_count}"
-        )
+        assert (
+            mock_add_pk.call_count == 2
+        ), f"Expected 2 calls, but got {mock_add_pk.call_count}"
         expected_add_pk_calls = [
             mocker.call(unity_ds._table.primary_key),
             mocker.call(unity_ds._table.primary_key),
@@ -385,9 +385,9 @@ class TestBaseTableDataset:
         with pytest.raises(DatasetError):
             unity_ds.save(mismatched_upsert_spark_df)
 
-        assert mock_add_pk.call_count == 1, (
-            f"Expected 1 call, but got {mock_add_pk.call_count}"
-        )
+        assert (
+            mock_add_pk.call_count == 1
+        ), f"Expected 1 call, but got {mock_add_pk.call_count}"
 
         mock_add_pk.assert_called_once_with([unity_ds._table.primary_key])
 

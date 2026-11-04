@@ -150,3 +150,10 @@ class TestPDFDataset:
         dataset = PDFDataset(filepath=filepath)
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_pathlike_filepath(self, dummy_pdf_with_text):
+        """Test that os.PathLike filepaths are supported."""
+        dataset = PDFDataset(filepath=dummy_pdf_with_text)
+        pages = dataset.load()
+        assert len(pages) == 2
+        assert "page 1" in pages[0].lower()

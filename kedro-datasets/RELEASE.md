@@ -1,29 +1,47 @@
 # Upcoming release
+## Major features and improvements
+## Breaking changes
+## Community contributions
 
+
+# Release 10.0.0
 ## Major features and improvements
 
+- Added source-based generation and CI validation for the Kedro catalog JSON schema.
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
 
 ## Breaking changes
 
+- `partitions.PartitionedDataset` now raises `DatasetError` when saving partition IDs with a leading separator (e.g. `"/2020/01"`); use relative IDs (e.g. `"2020/01"`) instead.
 ## Breaking changes to experimental datasets
 
 ## Bug fixes and other changes
 
 - Fixed `spark.SparkDatasetV2` resolving a stale version for versioned S3 datasets by bypassing the `s3fs` listing cache when globbing (`s3://`, `s3a://`, `s3n://`).
-- Added `os.PathLike` support for `redis.PickleDataset` keys.
+- Added `os.PathLike` filepath support for remaining datasets in `kedro-datasets` and `kedro-datasets-experimental`.
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 - Added the missing `spark-gbqquerydataset` extra for `spark.GBQQueryDataset` and included it in `spark-all`.
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
 - Filtered `create_table`-only arguments (`format`, `temp`, `partition_by`, `schema`) from `save_args` when appending to existing tables in `ibis.TableDataset`.
+- Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
+- Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
+- Fixed `pandas.SQLTableDataset.preview()` ignoring the `schema` in `load_args`, which made it fail with `NoSuchTableError` or preview a same-named table from the default schema.
+- Fixed `polars.EagerPolarsDataset` failing to load Excel files with the `calamine` engine (`fastexcel`). Since `calamine` is Polars' default Excel engine, this affects anyone with `fastexcel` installed, not just those who set the engine explicitly.
+- Fixed `matplotlib.MatplotlibDataset` failing to save versioned datasets on Windows when `filepath` is an `os.PathLike`.
+- Fixed `polars.CSVDataset` compatibility with Polars 2 when `rechunk` is passed in `load_args`.
+- Updated YAML examples for experimental datasets in the docstrings and API documentation.
 
 ## Community contributions
 
 - [akira-in-tech](https://github.com/akira-in-tech)
 - [Tanmay Singh](https://github.com/tannnmayy)
 - [Shizoqua](https://github.com/Shizoqua)
+- [Dhruv Gupta](https://github.com/DG47)
 - [AAKASH S S](https://github.com/aakash1552005)
+- [JokeGbenro](https://github.com/JokeGbenro)
+- [Mohamed Fouad](https://github.com/mohamd764)
+- [Harkamal S](https://github.com/htoor2026)
 
 # Release 9.6.0
 

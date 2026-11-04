@@ -9,19 +9,20 @@ from pyspark.sql import DataFrame
 
 from kedro_datasets._utils.spark_utils import get_spark
 
-# Spark JDBC reader options that conflict with the ``query`` option. Spark
-# matches option names case-insensitively, so the comparison does too.
+# Spark JDBC reader options that conflict with the ``query`` option, as Spark
+# spells them. Spark matches option names case-insensitively, so the check
+# compares lower-cased names.
+_QUERY_INCOMPATIBLE_OPTION_NAMES = (
+    "dbtable",
+    "query",
+    "url",
+    "partitionColumn",
+    "lowerBound",
+    "upperBound",
+    "numPartitions",
+)
 _QUERY_INCOMPATIBLE_OPTIONS = frozenset(
-    name.lower()
-    for name in (
-        "dbtable",
-        "query",
-        "url",
-        "partitionColumn",
-        "lowerBound",
-        "upperBound",
-        "numPartitions",
-    )
+    name.lower() for name in _QUERY_INCOMPATIBLE_OPTION_NAMES
 )
 
 
@@ -30,9 +31,9 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
     result of a SQL ``query``, accessible via a JDBC URL and connection
     properties, and saves the content of a PySpark DataFrame to an external
     database table via JDBC.  It uses ``pyspark.sql.DataFrameReader`` and
-    ``pyspark.sql.DataFrameWriter`` internally, so it supports all allowed
-    PySpark options on ``jdbc``. A dataset configured with ``query`` is
-    read-only.
+    ``pyspark.sql.DataFrameWriter`` internally, so it supports the PySpark
+    ``jdbc`` options, subject to the restrictions for ``query`` described
+    below. A dataset configured with ``query`` is read-only.
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
@@ -153,8 +154,9 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 ``table`` and ``query`` are provided, when ``table`` or
                 ``query`` is blank, when ``query`` is combined with
                 ``save_args`` or with ``load_args`` other than ``properties``
-                (or with reader options in ``properties`` that conflict with
-                ``query``), or when a property is provided with a None value.
+                (or with reader options in ``properties`` or ``credentials``
+                that conflict with ``query``), when ``query`` is not a string,
+                or when a property is provided with a None value.
         """
 
         credentials = credentials or {}
@@ -189,14 +191,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             )
 
         if query is not None:
-            # Spark wraps the query as a subquery, so a trailing ``;`` would
-            # produce a confusing database syntax error at load time.
-            query = query.strip().rstrip(";").rstrip()
-            if not query:
-                raise DatasetError(
-                    "'query' argument cannot be empty. Please "
-                    "provide a SQL query to load data from."
-                )
+            query = self._normalize_query(query)
 
         self._url = url
         self._table = table
@@ -208,14 +203,12 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         self._load_args = {**self.DEFAULT_LOAD_ARGS, **(load_args or {})}
         self._save_args = {**self.DEFAULT_SAVE_ARGS, **(save_args or {})}
 
-        if self._query:
-            if save_args is not None:
-                raise DatasetError(
-                    "'save_args' cannot be used together with 'query', as a "
-                    "dataset with 'query' is read-only. Please provide 'table' "
-                    "instead to save data to a database table."
-                )
-            self._validate_query_load_args()
+        if self._query and save_args is not None:
+            raise DatasetError(
+                "'save_args' cannot be used together with 'query', as a "
+                "dataset with 'query' is read-only. Please provide 'table' "
+                "instead to save data to a database table."
+            )
 
         # Update properties in load_args and save_args with credentials.
         credentials_properties = {
@@ -232,17 +225,40 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                         f"Please provide a value."
                     )
 
-            load_properties = self._load_args.get("properties", {})
+            load_properties = self._load_args.get("properties") or {}
             self._load_args["properties"] = {
                 **load_properties,
                 **credentials_properties,
             }
             if not self._query:
-                save_properties = self._save_args.get("properties", {})
+                save_properties = self._save_args.get("properties") or {}
                 self._save_args["properties"] = {
                     **save_properties,
                     **credentials_properties,
                 }
+
+        # Validate after merging credentials, so options passed through
+        # ``credentials`` are checked as well.
+        if self._query:
+            self._validate_query_load_args()
+
+    @staticmethod
+    def _normalize_query(query: Any) -> str:
+        if not isinstance(query, str):
+            raise DatasetError(
+                f"'query' argument must be a string, got "
+                f"{type(query).__name__}. Please provide a SQL query to "
+                "load data from."
+            )
+        # Spark wraps the query as a subquery, so a trailing ``;`` would
+        # produce a confusing database syntax error at load time.
+        query = query.strip().rstrip(";").rstrip()
+        if not query:
+            raise DatasetError(
+                "'query' argument cannot be empty. Please "
+                "provide a SQL query to load data from."
+            )
+        return query
 
     def _validate_query_load_args(self) -> None:
         unsupported_load_args = sorted(set(self._load_args) - {"properties"})
@@ -255,16 +271,17 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
 
         incompatible_options = sorted(
             option
-            for option in self._load_args.get("properties", {})
+            for option in self._load_args.get("properties") or {}
             if option.lower() in _QUERY_INCOMPATIBLE_OPTIONS
         )
         if incompatible_options:
+            conflicting = ", ".join(
+                repr(name) for name in _QUERY_INCOMPATIBLE_OPTION_NAMES
+            )
             raise DatasetError(
-                "'properties' in 'load_args' cannot contain reader options "
-                "that conflict with 'query' ('dbtable', 'query', 'url', "
-                "'partitionColumn', 'lowerBound', 'upperBound', "
-                "'numPartitions'), got: "
-                f"{', '.join(repr(option) for option in incompatible_options)}."
+                "'properties' in 'load_args' and 'credentials' cannot contain "
+                f"reader options that conflict with 'query' ({conflicting}), "
+                f"got: {', '.join(repr(option) for option in incompatible_options)}."
             )
 
     def _describe(self) -> dict[str, Any]:
@@ -272,12 +289,12 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         save_args = self._save_args
 
         # Remove user and password values from load and save properties.
-        if "properties" in load_args:
+        if load_args.get("properties"):
             load_properties = load_args["properties"].copy()
             load_properties.pop("user", None)
             load_properties.pop("password", None)
             load_args = {**load_args, "properties": load_properties}
-        if "properties" in save_args:
+        if save_args.get("properties"):
             save_properties = save_args["properties"].copy()
             save_properties.pop("user", None)
             save_properties.pop("password", None)
@@ -295,7 +312,7 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
             return (
                 get_spark()
                 .read.format("jdbc")
-                .options(**self._load_args.get("properties", {}))
+                .options(**(self._load_args.get("properties") or {}))
                 .option("url", self._url)
                 .option("query", self._query)
                 .load()

@@ -1,7 +1,12 @@
 # Upcoming release
 ## Major features and improvements
+
+- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
+
 ## Breaking changes
 ## Community contributions
+
+- [Dhruv Gupta](https://github.com/DG47)
 
 
 # Release 10.0.0
@@ -10,7 +15,6 @@
 - Added source-based generation and CI validation for the Kedro catalog JSON schema.
 - Added support for configuring external Hive table locations in `spark.SparkHiveDataset` through `save_args.path`.
 - Added standard Kedro versioning support to the experimental `netcdf.NetCDFDataset`, including local and remote (S3) files.
-- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 
 ## Breaking changes
 

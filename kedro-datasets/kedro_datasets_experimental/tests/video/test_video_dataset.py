@@ -6,14 +6,15 @@ from kedro.io import DataCatalog
 from kedro.io.core import DatasetError
 from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
+from moto import mock_aws
+from utils import TEST_FPS, assert_videos_equal
+
 from kedro_datasets_experimental.video import (
     FileVideo,
     GeneratorVideo,
     SequenceVideo,
     VideoDataset,
 )
-from moto import mock_aws
-from utils import TEST_FPS, assert_videos_equal
 
 S3_BUCKET_NAME = "test_bucket"
 S3_KEY_PATH = "video"

@@ -2,15 +2,18 @@ from pathlib import Path, PurePosixPath
 
 import boto3
 import pytest
+from kedro.io import DataCatalog
 from kedro.io.core import DatasetError
+from kedro.pipeline import node, pipeline
+from kedro.runner import SequentialRunner
+from kedro_datasets_experimental.video import (
+    FileVideo,
+    GeneratorVideo,
+    SequenceVideo,
+    VideoDataset,
+)
 from moto import mock_aws
 from utils import TEST_FPS, assert_videos_equal
-
-from kedro_datasets_experimental.video import VideoDataset
-from kedro_datasets_experimental.video.video_dataset import (
-    FileVideo,
-    SequenceVideo,
-)
 
 S3_BUCKET_NAME = "test_bucket"
 S3_KEY_PATH = "video"
@@ -118,6 +121,33 @@ class TestVideoDataset:
         loaded video to.
         """
         empty_dataset_mp4.save(color_video_generator)
+        reloaded_video = empty_dataset_mp4.load()
+        assert_videos_equal(color_video, reloaded_video)
+
+    def test_save_generator_video_in_pipeline(
+        self, color_video_generator, empty_dataset_mp4, color_video
+    ):
+        """Test save a GeneratorVideo object produced by a node in a Kedro pipeline (#232).
+
+        Verifies that Kedro's runner treats GeneratorVideo as a business data object
+        rather than misinterpreting it as an iterator node, successfully saving to
+        the VideoDataset.
+        """
+
+        def node_producing_generator_video():
+            return color_video_generator
+
+        test_node = node(
+            func=node_producing_generator_video,
+            inputs=None,
+            outputs="video_dataset_output",
+        )
+        test_pipe = pipeline([test_node])
+        catalog = DataCatalog({"video_dataset_output": empty_dataset_mp4})
+
+        runner = SequentialRunner()
+        runner.run(test_pipe, catalog)
+
         reloaded_video = empty_dataset_mp4.load()
         assert_videos_equal(color_video, reloaded_video)
 

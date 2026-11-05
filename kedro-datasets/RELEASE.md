@@ -1,7 +1,13 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+## Bug fixes and other changes
+
+- Exposed `GeneratorVideo`, `SequenceVideo`, `FileVideo`, `AbstractVideo`, and `SlicedVideo` from `kedro_datasets_experimental.video` and added pipeline regression test for saving generator video outputs (#232).
+
 ## Community contributions
+
+- [AAKASH S S](https://github.com/aakash1552005)
 
 
 # Release 10.0.0

@@ -491,12 +491,7 @@ exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.pytest.ini_options]
 addopts = [
-    "--cov-report=xml:coverage.xml",
-    "--cov-report=term-missing",
-    "--cov=kedro_datasets",
-    "--cov=tests",
     "--ignore=tests/template/fake_repo",
-    "--no-cov-on-fail",
     "-ra",
     "-W",
     "ignore"

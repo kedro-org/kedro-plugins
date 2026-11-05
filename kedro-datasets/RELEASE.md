@@ -1,6 +1,10 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+## Bug fixes and other changes
+
+- Removed default coverage flags from `pyproject.toml` pytest options to allow IDE debuggers (VS Code, PyCharm) to attach properly (#568).
+
 ## Community contributions
 
 

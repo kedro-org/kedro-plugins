@@ -1,6 +1,10 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+## Bug fixes and other changes
+
+- Re-arranged arguments for `pandas.SQLQueryDataset` so that `filepath` and `execution_options` precede `load_args` and `fs_args` (#533).
+
 ## Community contributions
 
 

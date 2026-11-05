@@ -2478,7 +2478,7 @@
               },
               "dataset": {
                 "pattern": ".*",
-                "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration."
+                "description": "Underlying dataset definition. This is used to instantiate\nthe dataset for each file located inside the ``path``.\nAccepted formats are:\na) object of a class that inherits from ``AbstractDataset``\nb) a string representing a fully qualified class name to such class\nc) a dictionary with ``type`` key pointing to a string from b),\nother keys are passed to the Dataset initializer.\nCredentials for the dataset can be explicitly specified in\nthis configuration.\nd) a dictionary mapping file extensions (e.g. ``{\".csv\": \"pandas.CSVDataset\", \".json\": \"json.JSONDataset\"}``)\nto definitions from a), b), or c), to support multiple underlying dataset types."
               },
               "filepath_arg": {
                 "type": "string",

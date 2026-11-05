@@ -377,7 +377,7 @@ class TestPartitionedDatasetLocal:
     @pytest.mark.parametrize(
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
     )
-    def test_versioned_dataset_save_and_load(
+    def test_versioned_dataset_save_and_load(  # noqa: PLR0917
         self,
         mocker,
         filepath_csvs,
@@ -854,3 +854,154 @@ class TestPartitionedDatasetS3:
         assert "path" in pds_descr and pds_descr["path"] == path
         assert "dataset_type" in pds_descr and pds_descr["dataset_type"] == "CSVDataset"
         assert "dataset_config" in pds_descr
+
+
+class TestPartitionedDatasetMultiDataset:
+    def test_multi_dataset_load(self, tmp_path):
+        data_dir = tmp_path / "multi_data"
+        data_dir.mkdir()
+
+        # Create a CSV partition
+        df_csv = pd.DataFrame({"col1": [1, 2], "col2": ["a", "b"]})
+        df_csv.to_csv(data_dir / "data1.csv", index=False)
+
+        # Create a JSON partition
+        json_data = {"key": "value", "numbers": [1, 2, 3]}
+        (data_dir / "data2.json").write_text('{"key": "value", "numbers": [1, 2, 3]}')
+
+        # Create nested partition
+        sub_dir = data_dir / "subdir"
+        sub_dir.mkdir()
+        df_sub = pd.DataFrame({"sub_col": [10, 20]})
+        df_sub.to_csv(sub_dir / "sub_data.csv", index=False)
+
+        pds = PartitionedDataset(
+            path=str(data_dir),
+            dataset={
+                ".csv": "pandas.CSVDataset",
+                ".json": "json.JSONDataset",
+            },
+        )
+
+        loaded = pds.load()
+        assert len(loaded) == 3
+        assert "data1.csv" in loaded
+        assert "data2.json" in loaded
+        # check partition IDs
+        matching_sub_keys = [k for k in loaded if "sub_data.csv" in k]
+        assert len(matching_sub_keys) == 1
+
+        # Check loaded contents
+        assert_frame_equal(loaded["data1.csv"](), df_csv)
+        assert loaded["data2.json"]() == json_data
+        assert_frame_equal(loaded[matching_sub_keys[0]](), df_sub)
+
+    def test_multi_dataset_save(self, tmp_path):
+        data_dir = tmp_path / "multi_save"
+
+        df_to_save = pd.DataFrame({"a": [100, 200]})
+        json_to_save = {"status": "ok", "count": 42}
+
+        pds = PartitionedDataset(
+            path=str(data_dir),
+            dataset={
+                "csv": "pandas.CSVDataset",  # without leading dot
+                ".json": "json.JSONDataset",
+            },
+            save_lazily=False,
+        )
+
+        pds.save(
+            {
+                "table.csv": df_to_save,
+                "metadata.json": json_to_save,
+            }
+        )
+
+        reloaded = pds.load()
+        assert "table.csv" in reloaded
+        assert "metadata.json" in reloaded
+        assert_frame_equal(reloaded["table.csv"](), df_to_save)
+        assert reloaded["metadata.json"]() == json_to_save
+
+    def test_multi_dataset_wildcard_fallback(self, tmp_path):
+        data_dir = tmp_path / "multi_wildcard"
+        data_dir.mkdir()
+
+        df_csv = pd.DataFrame({"a": [1]})
+        df_csv.to_csv(data_dir / "known.csv", index=False)
+
+        # Unknown extension that should be caught by wildcard
+        df_other = pd.DataFrame({"b": [2]})
+        df_other.to_csv(data_dir / "unknown.dat", index=False)
+
+        pds = PartitionedDataset(
+            path=str(data_dir),
+            dataset={
+                ".csv": "pandas.CSVDataset",
+                "*": "pandas.CSVDataset",
+            },
+        )
+
+        loaded = pds.load()
+        assert len(loaded) == 2
+        assert "known.csv" in loaded
+        assert "unknown.dat" in loaded
+
+    def test_multi_dataset_unmatched_partition_error(self, tmp_path):
+        data_dir = tmp_path / "multi_unmatched"
+        data_dir.mkdir()
+
+        (data_dir / "unsupported.xyz").write_text("hello")
+
+        pds = PartitionedDataset(
+            path=str(data_dir),
+            dataset={
+                ".csv": "pandas.CSVDataset",
+            },
+        )
+
+        # Unsupported file is ignored during partition listing if no wildcard
+        with pytest.raises(DatasetError, match="No partitions found"):
+            pds.load()
+
+        # Trying to save unsupported partition raises DatasetError
+        with pytest.raises(DatasetError, match="No matching dataset definition found"):
+            pds.save({"file.xyz": "content"})
+
+    def test_multi_dataset_describe_and_repr(self):
+        pds = PartitionedDataset(
+            path="data/partitions",
+            dataset={
+                ".csv": {"type": "pandas.CSVDataset", "load_args": {"sep": ","}},
+                ".json": "json.JSONDataset",
+            },
+        )
+
+        descr = pds._describe()
+        assert descr["path"] == "data/partitions"
+        assert ".csv" in descr["dataset_configs"]
+        assert ".json" in descr["dataset_configs"]
+        assert descr["dataset_configs"][".csv"]["dataset_type"] == "CSVDataset"
+        assert descr["dataset_configs"][".json"]["dataset_type"] == "JSONDataset"
+
+        repr_str = repr(pds)
+        assert "PartitionedDataset" in repr_str
+        assert ".csv" in repr_str
+        assert ".json" in repr_str
+
+    def test_multi_dataset_credentials_propagation(self):
+        credentials = {"auth_token": "token_123"}
+        pds = PartitionedDataset(
+            path="data/partitions",
+            dataset={
+                ".csv": "pandas.CSVDataset",
+                ".json": "json.JSONDataset",
+            },
+            credentials=credentials,
+        )
+
+        csv_config = pds._dataset_configs[".csv"][1]
+        json_config = pds._dataset_configs[".json"][1]
+        assert csv_config[CREDENTIALS_KEY] == credentials
+        assert json_config[CREDENTIALS_KEY] == credentials

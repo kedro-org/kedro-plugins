@@ -170,6 +170,8 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
                 other keys are passed to the Dataset initializer.
                 Credentials for the dataset can be explicitly specified in
                 this configuration.
+                d) a dictionary mapping file extensions (e.g. ``{".csv": "pandas.CSVDataset", ".json": "json.JSONDataset"}``)
+                to definitions from a), b), or c), to support multiple underlying dataset types.
             filepath_arg: Underlying dataset initializer argument that will
                 contain a path to each corresponding partition file.
                 If unspecified, defaults to "filepath".
@@ -210,21 +212,39 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         self._save_lazily = save_lazily
         self.metadata = metadata
 
-        dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
-        self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
+        self._is_multi_dataset = (
+            isinstance(dataset, dict) and "type" not in dataset and bool(dataset)
+        )
+        self._credentials = deepcopy(credentials or {})
+        self._fs_args = deepcopy(fs_args or {})
+        self._filepath_arg = filepath_arg
 
-        if credentials:
+        if not self._is_multi_dataset:
+            self._init_single_dataset(dataset)
+        else:
+            assert isinstance(dataset, dict)
+            self._init_multi_dataset(dataset)
+
+        self._load_args = deepcopy(load_args or {})
+        self._sep = self._filesystem.sep
+        # since some filesystem implementations may implement a global cache
+        self._invalidate_caches()
+
+    def _init_single_dataset(
+        self, dataset: str | type[AbstractDataset] | dict[str, Any]
+    ) -> None:
+        dataset_def = dataset if isinstance(dataset, dict) else {"type": dataset}
+        self._dataset_type, self._dataset_config = parse_dataset_definition(dataset_def)
+
+        if self._credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
                     KEY_PROPAGATION_WARNING,
                     {"keys": CREDENTIALS_KEY, "target": "underlying dataset"},
                 )
             else:
-                self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
+                self._dataset_config[CREDENTIALS_KEY] = deepcopy(self._credentials)
 
-        self._credentials = deepcopy(credentials or {})
-
-        self._fs_args = deepcopy(fs_args or {})
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
@@ -234,17 +254,61 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             else:
                 self._dataset_config["fs_args"] = deepcopy(self._fs_args)
 
-        self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
             warn(
                 f"'{self._filepath_arg}' key must not be specified in the dataset "
                 f"definition as it will be overwritten by partition path"
             )
 
-        self._load_args = deepcopy(load_args or {})
-        self._sep = self._filesystem.sep
-        # since some filesystem implementations may implement a global cache
-        self._invalidate_caches()
+    def _init_multi_dataset(self, dataset: dict[str, Any]) -> None:
+        self._dataset_type = AbstractDataset  # type: ignore[type-abstract]
+        self._dataset_config = {}
+        self._dataset_configs: dict[
+            str, tuple[type[AbstractDataset], dict[str, Any]]
+        ] = {}
+
+        for pattern, sub_dataset in dataset.items():
+            pattern_key = (
+                pattern
+                if (pattern.startswith(".") or pattern == "*")
+                else f".{pattern}"
+            )
+            sub_def = (
+                sub_dataset if isinstance(sub_dataset, dict) else {"type": sub_dataset}
+            )
+            sub_type, sub_config = parse_dataset_definition(sub_def)
+
+            if self._credentials:
+                if CREDENTIALS_KEY in sub_config:
+                    self._logger.warning(
+                        KEY_PROPAGATION_WARNING,
+                        {
+                            "keys": CREDENTIALS_KEY,
+                            "target": f"underlying dataset for '{pattern_key}'",
+                        },
+                    )
+                else:
+                    sub_config[CREDENTIALS_KEY] = deepcopy(self._credentials)
+
+            if self._fs_args:
+                if "fs_args" in sub_config:
+                    self._logger.warning(
+                        KEY_PROPAGATION_WARNING,
+                        {
+                            "keys": "filesystem arguments",
+                            "target": f"underlying dataset for '{pattern_key}'",
+                        },
+                    )
+                else:
+                    sub_config["fs_args"] = deepcopy(self._fs_args)
+
+            if self._filepath_arg in sub_config:
+                warn(
+                    f"'{self._filepath_arg}' key must not be specified in the dataset "
+                    f"definition for '{pattern_key}' as it will be overwritten by partition path"
+                )
+
+            self._dataset_configs[pattern_key] = (sub_type, sub_config)
 
     @property
     def _filesystem(self):
@@ -257,16 +321,70 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
+    def _get_dataset_config_for_path(
+        self, path: str
+    ) -> tuple[type[AbstractDataset], dict[str, Any]]:
+        if not self._is_multi_dataset:
+            return self._dataset_type, self._dataset_config  # type: ignore
+
+        sorted_patterns = sorted(
+            [k for k in self._dataset_configs if k != "*"],
+            key=len,
+            reverse=True,
+        )
+        for pattern in sorted_patterns:
+            if path.endswith(pattern):
+                return self._dataset_configs[pattern]
+
+        if "*" in self._dataset_configs:
+            return self._dataset_configs["*"]
+
+        configured = list(self._dataset_configs.keys())
+        raise DatasetError(
+            f"No matching dataset definition found for partition path '{path}'. "
+            f"Configured extensions/patterns: {configured}"
+        )
+
     def _list_partitions(self) -> list[str]:
         if self._cached_partitions is not None:
             return self._cached_partitions
 
-        dataset_is_versioned = VERSION_KEY in self._dataset_config
-        self._cached_partitions = [
-            _grandparent(path) if dataset_is_versioned else path
-            for path in self._filesystem.find(self._normalized_path, **self._load_args)
-            if path.endswith(self._filename_suffix)
-        ]
+        files = self._filesystem.find(self._normalized_path, **self._load_args)
+
+        if not self._is_multi_dataset:
+            dataset_is_versioned = VERSION_KEY in self._dataset_config  # type: ignore
+            self._cached_partitions = [
+                _grandparent(path) if dataset_is_versioned else path
+                for path in files
+                if path.endswith(self._filename_suffix)
+            ]
+            return self._cached_partitions
+
+        sorted_patterns = sorted(
+            [k for k in self._dataset_configs if k != "*"],
+            key=len,
+            reverse=True,
+        )
+        has_wildcard = "*" in self._dataset_configs
+
+        matched = []
+        for path in files:
+            if not path.endswith(self._filename_suffix):
+                continue
+            matching_pattern = None
+            for pattern in sorted_patterns:
+                if path.endswith(pattern):
+                    matching_pattern = pattern
+                    break
+            if matching_pattern is None and has_wildcard:
+                matching_pattern = "*"
+
+            if matching_pattern is not None:
+                sub_type, sub_config = self._dataset_configs[matching_pattern]
+                dataset_is_versioned = VERSION_KEY in sub_config
+                matched.append(_grandparent(path) if dataset_is_versioned else path)
+
+        self._cached_partitions = matched
         return self._cached_partitions
 
     def _join_protocol(self, path: str) -> str:
@@ -309,10 +427,13 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
         # The _list_partitions() call will now always perform a fresh scan
         # because its cache was just cleared.
         for partition_file_path in self._list_partitions():
-            kwargs = deepcopy(self._dataset_config)
+            sub_type, sub_config = self._get_dataset_config_for_path(
+                partition_file_path
+            )
+            kwargs = deepcopy(sub_config)
             # join the protocol back since PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition_file_path)
-            dataset = self._dataset_type(**kwargs)  # type: ignore
+            dataset = sub_type(**kwargs)  # type: ignore
             partition_id = self._path_to_partition(partition_file_path)
             partitions[partition_id] = dataset.load
 
@@ -326,42 +447,74 @@ class PartitionedDataset(AbstractDataset[dict[str, Any], dict[str, Callable[[], 
             self._filesystem.rm(self._normalized_path, recursive=True)
 
         for partition_id, partition_data in sorted(data.items()):
-            kwargs = deepcopy(self._dataset_config)
             partition = self._partition_to_path(partition_id)
+            sub_type, sub_config = self._get_dataset_config_for_path(partition)
+            kwargs = deepcopy(sub_config)
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
-            dataset = self._dataset_type(**kwargs)  # type: ignore
+            dataset = sub_type(**kwargs)  # type: ignore
             if callable(partition_data) and self._save_lazily:
                 partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
 
     def _describe(self) -> dict[str, Any]:
-        clean_dataset_config = (
-            {k: v for k, v in self._dataset_config.items() if k != CREDENTIALS_KEY}
-            if isinstance(self._dataset_config, dict)
-            else self._dataset_config
-        )
+        if not self._is_multi_dataset:
+            clean_dataset_config = (
+                {k: v for k, v in self._dataset_config.items() if k != CREDENTIALS_KEY}
+                if isinstance(self._dataset_config, dict)
+                else self._dataset_config
+            )
+            return {
+                "path": self._path,
+                "dataset_type": self._dataset_type.__name__,  # type: ignore
+                "dataset_config": clean_dataset_config,
+            }
+
+        clean_configs = {}
+        for pattern, (sub_type, sub_config) in self._dataset_configs.items():
+            clean_sub = (
+                {k: v for k, v in sub_config.items() if k != CREDENTIALS_KEY}
+                if isinstance(sub_config, dict)
+                else sub_config
+            )
+            clean_configs[pattern] = {
+                "dataset_type": sub_type.__name__,
+                "dataset_config": clean_sub,
+            }
         return {
             "path": self._path,
-            "dataset_type": self._dataset_type.__name__,
-            "dataset_config": clean_dataset_config,
+            "dataset_configs": clean_configs,
         }
 
     def __repr__(self) -> str:
         object_description = self._describe()
 
-        # Dummy object to call _pretty_repr
-        # Only clean_dataset_config parameters are exposed
-        kwargs = deepcopy(self._dataset_config)
-        kwargs[self._filepath_arg] = ""
-        dataset = self._dataset_type(**kwargs)  # type: ignore
+        if not self._is_multi_dataset:
+            # Dummy object to call _pretty_repr
+            # Only clean_dataset_config parameters are exposed
+            kwargs = deepcopy(self._dataset_config)
+            kwargs[self._filepath_arg] = ""
+            dataset = self._dataset_type(**kwargs)  # type: ignore
+
+            object_description_repr = {
+                "filepath": object_description["path"],
+                "dataset": dataset._pretty_repr(object_description["dataset_config"]),
+            }
+            return self._pretty_repr(object_description_repr)
+
+        dataset_reprs = {}
+        for pattern, (sub_type, sub_config) in self._dataset_configs.items():
+            kwargs = deepcopy(sub_config)
+            kwargs[self._filepath_arg] = ""
+            sub_dataset = sub_type(**kwargs)  # type: ignore
+            clean_sub = object_description["dataset_configs"][pattern]["dataset_config"]
+            dataset_reprs[pattern] = sub_dataset._pretty_repr(clean_sub)
 
         object_description_repr = {
             "filepath": object_description["path"],
-            "dataset": dataset._pretty_repr(object_description["dataset_config"]),
+            "dataset": dataset_reprs,
         }
-
         return self._pretty_repr(object_description_repr)
 
     def _invalidate_caches(self) -> None:

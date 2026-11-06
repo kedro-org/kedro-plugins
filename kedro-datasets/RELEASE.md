@@ -2,7 +2,12 @@
 ## Major features and improvements
 ## Breaking changes
 ## Bug fixes and other changes
+
+- Fixed `polars.EagerPolarsDataset` failing to save and load Delta tables with `file_format: delta`.
+
 ## Community contributions
+
+- [Dhruv Gupta](https://github.com/DG47)
 
 
 # Release 10.0.0

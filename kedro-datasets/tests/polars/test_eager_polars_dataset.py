@@ -766,7 +766,7 @@ class TestEagerDeltaDataset:
             "aws_secret_access_key": "my_secret",  # pragma: allowlist secret
             "aws_region": "eu-west-1",
         }
-        fsspec_filesystem.assert_called_once_with("s3")
+        fsspec_filesystem.assert_not_called()
 
         dataset.save(dummy_dataframe)
         write_delta.assert_called_once_with(
@@ -799,6 +799,31 @@ class TestEagerDeltaDataset:
             "s3://bucket/table", storage_options={"aws_access_key_id": "my_key"}
         )
         fsspec_filesystem.return_value.exists.assert_not_called()
+
+    def test_abfs_credentials_without_azure_env(self, monkeypatch, mocker):
+        """Test that an abfs:// table with credentials can be created without
+        Azure environment variables, as no adlfs filesystem is built for it."""
+        pytest.importorskip("adlfs")
+        for var in ("AZURE_STORAGE_ACCOUNT_NAME", "AZURE_STORAGE_CONNECTION_STRING"):
+            monkeypatch.delenv(var, raising=False)
+        is_deltatable = mocker.patch(
+            "deltalake.DeltaTable.is_deltatable", return_value=True
+        )
+        credentials = {
+            "account_name": "myaccount",
+            "account_key": "bXlrZXk=",  # pragma: allowlist secret
+        }
+        dataset = EagerPolarsDataset(
+            filepath="abfs://container/table",
+            file_format="delta",
+            credentials=credentials,
+        )
+
+        assert dataset.exists()
+        is_deltatable.assert_called_once_with(
+            "abfs://container/table", storage_options=credentials
+        )
+        dataset.release()
 
     def test_exists_empty_directory(self, tmp_path):
         """Test that a directory that is not a Delta table does not exist."""

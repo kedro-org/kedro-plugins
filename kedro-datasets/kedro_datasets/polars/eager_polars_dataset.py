@@ -144,23 +144,25 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
             # Delta tables are read, written and checked for existence by
             # delta-rs, so credentials and fs_args are passed on only as
             # ``storage_options`` (consistent with ``pandas.DeltaTableDataset``).
-            # fsspec expects different key names, so it doesn't get them.
             self._storage_options = {**_credentials, **_fs_args}
-            _credentials, _fs_args = {}, {}
 
         protocol, path = get_protocol_and_path(filepath)
-        if protocol == "file":
-            _fs_args.setdefault("auto_mkdir", True)
-
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        # No fsspec filesystem for Delta: delta-rs doesn't use one, and some
+        # filesystems connect on creation (adlfs for abfs:// needs credentials,
+        # which go to delta-rs here)
+        self._fs: fsspec.AbstractFileSystem | None = None
+        if self._file_format != "delta":
+            if protocol == "file":
+                _fs_args.setdefault("auto_mkdir", True)
+            self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
         self.metadata = metadata
 
         super().__init__(
             filepath=PurePosixPath(path),
             version=version,
-            exists_function=self._fs.exists,
-            glob_function=self._fs.glob,
+            exists_function=self._fs.exists if self._fs else None,
+            glob_function=self._fs.glob if self._fs else None,
         )
 
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -189,6 +191,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 **self._with_storage_options(self._load_args),
             )
 
+        assert self._fs is not None
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = getattr(pl, f"read_{self._file_format}", None)
 
@@ -213,9 +216,9 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 self._get_delta_uri(self._get_save_path()),
                 **self._with_storage_options(self._save_args),
             )
-            self._invalidate_cache()
             return
 
+        assert self._fs is not None
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = getattr(data, f"write_{self._file_format}", None)
 
@@ -252,6 +255,7 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
                 storage_options=self._storage_options or None,
             )
 
+        assert self._fs is not None
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
         except DatasetError:
@@ -275,6 +279,8 @@ class EagerPolarsDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
+        if self._fs is None:
+            return
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 

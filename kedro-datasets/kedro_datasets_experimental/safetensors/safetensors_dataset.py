@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -54,7 +55,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         backend: str = "numpy",
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,

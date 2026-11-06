@@ -6,7 +6,7 @@ import base64
 import io
 import os
 from copy import deepcopy
-from pathlib import PurePosixPath
+from pathlib import PurePath, PurePosixPath
 from typing import Any, NoReturn
 from warnings import warn
 
@@ -132,6 +132,10 @@ class MatplotlibDataset(
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _fs_open_args_save.setdefault("mode", "wb")
 
+        # ``str()`` of a Windows path keeps backslashes, which ``PurePosixPath``
+        # treats as part of a single segment and so breaks versioned paths.
+        if isinstance(filepath, os.PathLike):
+            filepath = PurePath(filepath).as_posix()
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
             _fs_args.setdefault("auto_mkdir", True)

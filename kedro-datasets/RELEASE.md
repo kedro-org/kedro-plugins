@@ -2,7 +2,12 @@
 ## Major features and improvements
 ## Breaking changes
 ## Bug fixes and other changes
+
+- Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.
+
 ## Community contributions
+
+- [Eric Del Orefice](https://github.com/ericdelorefice)
 
 
 # Release 10.0.0

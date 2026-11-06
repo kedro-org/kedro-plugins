@@ -2,9 +2,6 @@
 ## Major features and improvements
 ## Breaking changes
 ## Bug fixes and other changes
-
-- Fixed display name for `WeaviateVectorStoreDataset` in documentation navigation (#606).
-
 ## Community contributions
 
 

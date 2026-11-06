@@ -65,6 +65,14 @@ def dummy_lt_func(value1: str, value2: str):
 
 
 class TestIncrementalDatasetLocal:
+    def test_load_returns_callables(self, local_csvs):
+        """Test that IncrementalDataset.load returns callable lazy loaders (#250)."""
+        pds = IncrementalDataset(path=str(local_csvs), dataset=DATASET)
+        loaded = pds.load()
+        assert loaded
+        for partition_id, load_func in loaded.items():
+            assert callable(load_func)
+
     def test_pathlike_path(self, local_csvs):
         dataset = IncrementalDataset(path=local_csvs, dataset=DATASET)
 
@@ -77,8 +85,8 @@ class TestIncrementalDatasetLocal:
         pds = IncrementalDataset(path=str(local_csvs), dataset=DATASET)
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
-            assert_frame_equal(data, partitioned_data_pandas[partition_id])
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
         checkpoint_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
         assert not checkpoint_path.exists()
@@ -106,7 +114,7 @@ class TestIncrementalDatasetLocal:
         pds.save({new_partition_key: df})
         assert new_partition_path.exists()
         loaded = pds.load()
-        assert_frame_equal(loaded[new_partition_key], df)
+        assert_frame_equal(loaded[new_partition_key](), df)
 
     @pytest.mark.parametrize(
         "filename_suffix,expected_partitions",
@@ -321,7 +329,7 @@ class TestIncrementalDatasetLocal:
             actual_save_versions |= {each.name for each in partition_dir.iterdir()}
             assert partition_dir.is_dir()
             assert_frame_equal(
-                loaded_partitions[part], partitioned_data_pandas[part + suffix]
+                loaded_partitions[part](), partitioned_data_pandas[part + suffix]
             )
 
         if expected_num_parts:
@@ -472,8 +480,8 @@ class TestIncrementalDatasetS3:
         assert pds._checkpoint._protocol == "s3"
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
-            assert_frame_equal(data, partitioned_data_pandas[partition_id])
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
         assert not pds._checkpoint.exists()
         assert pds._read_checkpoint() is None

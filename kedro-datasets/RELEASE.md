@@ -1,6 +1,7 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+## Bug fixes and other changes
 ## Community contributions
 
 

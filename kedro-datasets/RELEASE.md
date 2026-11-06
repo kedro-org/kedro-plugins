@@ -3,7 +3,7 @@
 ## Breaking changes
 ## Bug fixes and other changes
 
-- Exposed `GeneratorVideo`, `SequenceVideo`, `FileVideo`, `AbstractVideo`, and `SlicedVideo` from `kedro_datasets_experimental.video` and added pipeline regression test for saving generator video outputs (#232).
+- Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 
 ## Community contributions
 

@@ -9,11 +9,11 @@ from kedro.runner import SequentialRunner
 from moto import mock_aws
 from utils import TEST_FPS, assert_videos_equal
 
-from kedro_datasets_experimental.video import (
+from kedro_datasets_experimental.video import VideoDataset
+from kedro_datasets_experimental.video.video_dataset import (
     FileVideo,
     GeneratorVideo,
     SequenceVideo,
-    VideoDataset,
 )
 
 S3_BUCKET_NAME = "test_bucket"

@@ -1,9 +1,9 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
-
 - `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects.
 
+## Bug fixes and other changes
 ## Community contributions
 
 - [AAKASH S S](https://github.com/aakash1552005)

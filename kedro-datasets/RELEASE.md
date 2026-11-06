@@ -2,6 +2,7 @@
 ## Major features and improvements
 ## Breaking changes
 ## Bug fixes and other changes
+- Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 ## Community contributions
 
 

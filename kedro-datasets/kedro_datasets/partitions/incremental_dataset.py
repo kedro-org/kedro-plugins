@@ -49,11 +49,11 @@ class IncrementalDataset(PartitionedDataset):
         >>> dataset = IncrementalDataset(
         ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
         ... )
-        >>> loaded = dataset.load()  # loads all available partition loader functions
-        >>> # data = {p_id: load_func() for p_id, load_func in loaded.items()}
+        >>> loaded = dataset.load()  # returns load functions for available partitions
+        >>> data = {p_id: load_func() for p_id, load_func in loaded.items()}
         >>>
         >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = dataset.load()  # still loads all available partition loader functions
+        >>> reloaded = dataset.load()  # still returns load functions for available partitions
         >>>
         >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added

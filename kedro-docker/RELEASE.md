@@ -1,4 +1,8 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+
+# Release 0.7.0
 
 ## Major features and improvements
 * Added support for Python 3.14

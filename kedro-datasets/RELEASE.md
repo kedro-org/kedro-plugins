@@ -4,6 +4,7 @@
 - Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 
 ## Breaking changes
+## Bug fixes and other changes
 ## Community contributions
 
 - [Dhruv Gupta](https://github.com/DG47)

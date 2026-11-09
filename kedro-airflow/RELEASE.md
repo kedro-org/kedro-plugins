@@ -1,5 +1,5 @@
 # Upcoming Release
-* Dropped support for Python 3.10. kedro-airflow now requires Python 3.11 or later.
+* Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 # Release 0.11.0
 * Migrated default DAG template to use the TaskFlow API (`@dag`/`@task`). The template now imports from `airflow.sdk`, which requires Apache Airflow 3.x; Airflow 2.x is no longer supported.

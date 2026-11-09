@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Dropped support for Python 3.10. kedro-docker now requires Python 3.11 or later.
 ## Bug fixes and other changes
 
 # Release 0.7.0

@@ -1,9 +1,9 @@
 # Upcoming release
 ## Major features and improvements
+
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
 ## Breaking changes
-
-- Dropped support for Python 3.10. `kedro-datasets` now requires Python 3.11 or later.
-
 ## Bug fixes and other changes
 ## Community contributions
 

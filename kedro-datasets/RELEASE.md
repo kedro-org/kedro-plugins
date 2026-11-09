@@ -1,6 +1,9 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
+
+- Dropped support for Python 3.10. `kedro-datasets` now requires Python 3.11 or later.
+
 ## Bug fixes and other changes
 ## Community contributions
 

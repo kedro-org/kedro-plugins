@@ -1,4 +1,5 @@
 # Upcoming release
+* Dropped support for Python 3.10. kedro-telemetry now requires Python 3.11 or later.
 
 # Release 0.9.0
 * Added validator declaration counts to the `Kedro Project Statistics` event, it includes `number_of_validated_datasets` and per-library `validator_type_count.*`, with user-defined validators reported as `custom`.

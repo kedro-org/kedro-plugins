@@ -72,31 +72,45 @@ def test_missing_table_and_query():
         SparkJDBCDataset(url="dummy_url")
 
 
+# A blank ``table`` is reported as blank even when a valid ``query`` is also
+# given, matching the catalog schema's ``minLength`` on ``table``.
+@pytest.mark.parametrize("query", [None, "SELECT 1 AS col1"])
 @pytest.mark.parametrize("table", ["", "   "])
-def test_blank_table(table):
+def test_blank_table(table, query):
     error_message = (
         "'table' argument cannot be empty. Please provide"
         " the name of the table to load or save data to."
     )
     with pytest.raises(DatasetError, match=error_message):
-        SparkJDBCDataset(url="dummy_url", table=table)
+        SparkJDBCDataset(url="dummy_url", table=table, query=query)
 
 
-@pytest.mark.parametrize("query", ["SELECT 1 AS col1", "", "   "])
-def test_table_and_query_together(query):
+@pytest.mark.parametrize("query", [None, "SELECT 1 AS col1"])
+@pytest.mark.parametrize("table", [123, 1.5, ["dummy_table"], {"name": "t"}])
+def test_non_string_table(table, query):
+    pattern = (
+        rf"'table' argument must be a string, got {type(table).__name__}\."
+        r" Please provide the name of the table to load or save data to\."
+    )
+    with pytest.raises(DatasetError, match=pattern):
+        SparkJDBCDataset(url="dummy_url", table=table, query=query)
+
+
+def test_table_and_query_together():
     error_message = "'table' and 'query' arguments cannot be used together."
     with pytest.raises(DatasetError, match=error_message):
-        SparkJDBCDataset(url="dummy_url", table="dummy_table", query=query)
+        SparkJDBCDataset(url="dummy_url", table="dummy_table", query="SELECT 1 AS col1")
 
 
+@pytest.mark.parametrize("table", [None, "dummy_table"])
 @pytest.mark.parametrize("query", ["", "   ", ";", " ; "])
-def test_blank_query(query):
+def test_blank_query(query, table):
     error_message = (
         "'query' argument cannot be empty. Please provide a SQL query"
         " to load data from."
     )
     with pytest.raises(DatasetError, match=error_message):
-        SparkJDBCDataset(url="dummy_url", query=query)
+        SparkJDBCDataset(url="dummy_url", table=table, query=query)
 
 
 def test_save(mocker, spark_jdbc_args):

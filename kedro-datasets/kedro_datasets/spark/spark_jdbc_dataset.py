@@ -155,8 +155,9 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 ``query`` is blank, when ``query`` is combined with
                 ``save_args`` or with ``load_args`` other than ``properties``
                 (or with reader options in ``properties`` or ``credentials``
-                that conflict with ``query``), when ``query`` is not a string,
-                or when a property is provided with a None value.
+                that conflict with ``query``), when ``table`` or ``query`` is
+                not a string, or when a property is provided with a None
+                value.
         """
 
         credentials = credentials or {}
@@ -168,6 +169,14 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 "provide a JDBC URL of the form "
                 "'jdbc:subprotocol:subname'."
             )
+
+        # Validate each source argument on its own first, so a malformed
+        # value is reported as such rather than as a combination error.
+        if table is not None:
+            self._validate_table(table)
+
+        if query is not None:
+            query = self._normalize_query(query)
 
         if table is not None and query is not None:
             raise DatasetError(
@@ -182,16 +191,6 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
                 "the name of the table to load or save data to, or a query "
                 "to load data from."
             )
-
-        if table is not None and not table.strip():
-            raise DatasetError(
-                "'table' argument cannot be empty. Please "
-                "provide the name of the table to load or save "
-                "data to."
-            )
-
-        if query is not None:
-            query = self._normalize_query(query)
 
         self._url = url
         self._table = table
@@ -241,6 +240,21 @@ class SparkJDBCDataset(AbstractDataset[DataFrame, DataFrame]):
         # ``credentials`` are checked as well.
         if self._query:
             self._validate_query_load_args()
+
+    @staticmethod
+    def _validate_table(table: Any) -> None:
+        if not isinstance(table, str):
+            raise DatasetError(
+                f"'table' argument must be a string, got "
+                f"{type(table).__name__}. Please provide the name of the "
+                "table to load or save data to."
+            )
+        if not table.strip():
+            raise DatasetError(
+                "'table' argument cannot be empty. Please "
+                "provide the name of the table to load or save "
+                "data to."
+            )
 
     @staticmethod
     def _normalize_query(query: Any) -> str:

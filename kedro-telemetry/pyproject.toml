@@ -8,13 +8,12 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Telemetry"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
     "appdirs>=1.4.4",
     "kedro>=0.18.0, <2.0.0",
     "requests~=2.20",
-    "tomli>=1.1.0;python_version<'3.11'",  # tomllib is part of the standard library in Python 3.11+
     "tomli-w",
 ]
 dynamic = ["readme", "version"]

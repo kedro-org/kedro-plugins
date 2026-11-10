@@ -567,8 +567,7 @@ class TestSQLQueryDataset:
         mocker.patch("kedro_datasets.pandas.sql_dataset.create_engine")
         load_args = {"params": {"value": 1000}}
         pattern = (
-            "Unrecognized `params` format. It can be only a `list`, "
-            "got <class 'dict'>"
+            "Unrecognized `params` format. It can be only a `list`, got <class 'dict'>"
         )
         with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataset(
@@ -597,3 +596,29 @@ class TestSQLQueryDataset:
         mocker.patch("pandas.read_sql_query")
         dataset.load()
         pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=ANY)
+
+    def test_rearranged_positional_arguments(self):
+        """Test that positional arguments follow the rearranged order (#533):
+        sql, filepath, credentials, execution_options, load_args, fs_args, metadata, encoding.
+        """
+        credentials = {"con": CONNECTION}
+        execution_options = {"stream_results": True}
+        load_args = {"chunksize": 100}
+        metadata = {"creator": "kedro"}
+        dataset = SQLQueryDataset(
+            SQL_QUERY,
+            None,
+            credentials,
+            execution_options,
+            load_args,
+            None,
+            metadata,
+            "utf-8",
+        )
+        assert dataset._load_args["sql"] == SQL_QUERY
+        assert dataset._filepath is None
+        assert dataset._connection_str == CONNECTION
+        assert dataset._execution_options == execution_options
+        assert dataset._load_args["chunksize"] == 100
+        assert dataset.metadata == metadata
+        assert dataset.encoding == "utf-8"

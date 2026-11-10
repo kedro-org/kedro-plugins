@@ -2199,6 +2199,13 @@
                 ],
                 "description": "The sql query statement."
               },
+              "filepath": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A path to a file with a sql query statement. Can be a string or a PathLike object."
+              },
               "credentials": {
                 "type": [
                   "object",
@@ -2207,6 +2214,13 @@
                 "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/core/engines.html#database-urls\nAdditional parameters for the sqlalchemy engine can be provided\nalongside the 'con' parameter.",
                 "minProperties": 1,
                 "minLength": 1
+              },
+              "execution_options": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "A dictionary with non-SQL advanced options for the connection to\nbe applied to the underlying engine. To find all supported execution\noptions, see here:\nhttps://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options\nNote that this is not a standard argument supported by pandas API, but could be\nuseful for handling large datasets."
               },
               "load_args": {
                 "type": [
@@ -2222,20 +2236,6 @@
                 ],
                 "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading."
               },
-              "filepath": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "description": "A path to a file with a sql query statement. Can be a string or a PathLike object."
-              },
-              "execution_options": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "description": "A dictionary with non-SQL advanced options for the connection to\nbe applied to the underlying engine. To find all supported execution\noptions, see here:\nhttps://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options\nNote that this is not a standard argument supported by pandas API, but could be\nuseful for handling large datasets."
-              },
               "metadata": {
                 "type": [
                   "object",
@@ -2247,7 +2247,8 @@
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Text encoding for reading the sql file from ``filepath`` (e.g. ``\"utf-8\"``)."
               }
             },
             "oneOf": [

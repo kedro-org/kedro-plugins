@@ -1,4 +1,5 @@
 """``SQLDataset`` to load and save data to a SQL backend."""
+
 from __future__ import annotations
 
 import copy
@@ -152,7 +153,7 @@ class SQLTableDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: dict[str, Any] = {}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         *,
         table_name: str,
@@ -418,14 +419,14 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: dict[str, Any] = {}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         sql: str | None = None,
+        filepath: str | os.PathLike | None = None,
         credentials: dict[str, Any] | None = None,
+        execution_options: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | os.PathLike | None = None,
-        execution_options: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
         encoding: str | None = None,
     ) -> None:
@@ -433,6 +434,7 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
 
         Args:
             sql: The sql query statement.
+            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
                 through credentials. It overwrites `con` parameter in
@@ -441,6 +443,12 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 https://docs.sqlalchemy.org/core/engines.html#database-urls
                 Additional parameters for the sqlalchemy engine can be provided
                 alongside the 'con' parameter.
+            execution_options: A dictionary with non-SQL advanced options for the connection to
+                be applied to the underlying engine. To find all supported execution
+                options, see here:
+                https://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                Note that this is not a standard argument supported by pandas API, but could be
+                useful for handling large datasets.
             load_args: Provided to underlying pandas ``read_sql_query``
                 function along with the connection string.
                 To find all supported arguments, see here:
@@ -454,15 +462,9 @@ class SQLQueryDataset(AbstractDataset[None, pd.DataFrame]):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
-            filepath: A path to a file with a sql query statement. Can be a string or a PathLike object.
-            execution_options: A dictionary with non-SQL advanced options for the connection to
-                be applied to the underlying engine. To find all supported execution
-                options, see here:
-                https://docs.sqlalchemy.org/core/connections.html#sqlalchemy.engine.Connection.execution_options
-                Note that this is not a standard argument supported by pandas API, but could be
-                useful for handling large datasets.
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
+            encoding: Text encoding for reading the sql file from ``filepath`` (e.g. ``"utf-8"``).
 
         Raises:
             DatasetError: When either ``sql`` or ``con`` parameters is empty.

@@ -3384,13 +3384,20 @@
             }
           },
           "then": {
-            "required": [
-              "table"
-            ],
             "properties": {
               "table": {
-                "type": "string",
-                "description": "The name of the table to load or save data to."
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The name of the table to load or save data to. Required\nunless ``query`` is provided. Cannot be used together with\n``query``."
+              },
+              "query": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A SQL query whose result is loaded, passed to Spark's JDBC\n``query`` option. Setting ``query`` makes the dataset read-only:\n``save`` raises ``DatasetError``, ``save_args`` cannot be\nprovided, and ``load_args`` may only contain ``properties``.\nCannot be used together with ``table``. A trailing semicolon\nis stripped, because Spark runs the query as a subquery\n(``SELECT * FROM (<query>) SPARK_GEN_SUBQ_n``); for the same\nreason some databases reject ``ORDER BY`` without ``LIMIT``\ninside the query."
               },
               "url": {
                 "type": [
@@ -3412,14 +3419,14 @@
                   "object",
                   "null"
                 ],
-                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html"
+                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the table name (``table`` mode only).\nWhen ``query`` is provided, only ``properties`` is allowed,\nand its entries are passed as reader options; they cannot\ninclude ``dbtable``, ``query``, ``url`` or the partitioning\noptions ``partitionColumn``, ``lowerBound``, ``upperBound``\nand ``numPartitions``. To find all supported arguments, see\nhere:\nhttps://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameReader.jdbc.html"
               },
               "save_args": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html"
+                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. Cannot be used\ntogether with ``query``. To find all supported arguments,\nsee here:\nhttps://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html"
               },
               "metadata": {
                 "type": [
@@ -3429,6 +3436,36 @@
                 "description": "Any arbitrary metadata.\nThis is ignored by Kedro, but may be consumed by users or external plugins."
               }
             },
+            "oneOf": [
+              {
+                "required": [
+                  "table"
+                ],
+                "properties": {
+                  "table": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "query": {
+                    "type": "null"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "query"
+                ],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "table": {
+                    "type": "null"
+                  }
+                }
+              }
+            ],
             "anyOf": [
               {
                 "required": [

@@ -5,6 +5,9 @@
 
 ## Breaking changes
 ## Bug fixes and other changes
+
+- Fixed `pandas.ExcelDataset.preview()` to support multiple loaded sheets by previewing the first loaded sheet.
+
 ## Community contributions
 
 

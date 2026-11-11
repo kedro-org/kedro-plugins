@@ -1,6 +1,7 @@
 """``ExcelDataset`` loads/saves data from/to a Excel file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
+
 from __future__ import annotations
 
 import logging
@@ -273,5 +274,8 @@ class ExcelDataset(
         dataset_copy = self._copy()
         dataset_copy._load_args["nrows"] = nrows  # type: ignore[attr-defined]
         data = dataset_copy.load()
+
+        if isinstance(data, dict):
+            data = next(iter(data.values()))
 
         return data.to_dict(orient="split")

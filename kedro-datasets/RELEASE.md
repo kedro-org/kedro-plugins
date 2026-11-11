@@ -1,12 +1,16 @@
 # Upcoming release
 ## Major features and improvements
-## Breaking changes
-## Bug fixes and other changes
 
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
+## Breaking changes
+
+## Bug fixes and other changes
+- Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 - Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.
 
 ## Community contributions
-
+- [AAKASH S S](https://github.com/aakash1552005)
 - [Eric Del Orefice](https://github.com/ericdelorefice)
 
 
@@ -20,7 +24,6 @@
 ## Breaking changes
 
 - `partitions.PartitionedDataset` now raises `DatasetError` when saving partition IDs with a leading separator (e.g. `"/2020/01"`); use relative IDs (e.g. `"2020/01"`) instead.
-## Breaking changes to experimental datasets
 
 ## Bug fixes and other changes
 

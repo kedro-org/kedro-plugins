@@ -6,6 +6,7 @@
 ## Breaking changes
 
 ## Bug fixes and other changes
+- Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 - Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 
 ## Community contributions

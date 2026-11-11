@@ -1,6 +1,6 @@
 # Upcoming release
 ## Major features and improvements
-
+- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Breaking changes
@@ -11,6 +11,8 @@
 
 ## Community contributions
 - [AAKASH S S](https://github.com/aakash1552005)
+
+- [Dhruv Gupta](https://github.com/DG47)
 
 
 # Release 10.0.0

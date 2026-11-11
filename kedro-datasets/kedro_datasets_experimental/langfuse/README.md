@@ -1,6 +1,6 @@
 # Langfuse Integration
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![Langfuse](https://img.shields.io/badge/langfuse-integration-orange)](https://langfuse.com/)
 
@@ -51,7 +51,7 @@ pip install "kedro-datasets[langfuse]"
 ```
 
 #### Requirements:
-- Python 3.10+
+- Python 3.11+
 - Kedro
 - Langfuse SDK
 - LangChain (optional, for `mode="langchain"`)
@@ -512,7 +512,7 @@ pip install "kedro-datasets[langfuse]"
 ```
 
 #### Requirements:
-- Python 3.10+
+- Python 3.11+
 - Kedro
 - Langfuse SDK
 - OpenAI (for `mode="openai"`)
@@ -812,7 +812,7 @@ pip install "kedro-datasets[langfuse]"
 ```
 
 #### Requirements:
-- Python 3.10+
+- Python 3.11+
 - Kedro
 - Langfuse SDK ≥ 3.14.0
 

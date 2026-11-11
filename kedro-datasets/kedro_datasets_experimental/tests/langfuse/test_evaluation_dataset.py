@@ -1,5 +1,5 @@
 import json
-from datetime import timezone
+from datetime import UTC
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -796,7 +796,7 @@ class TestHelpers:
 
     def test_parse_version_naive_gets_utc(self):
         result = EvaluationDataset._parse_version("2026-01-15T00:00:00")
-        assert result.tzinfo == timezone.utc
+        assert result.tzinfo == UTC
 
     def test_parse_version_invalid(self):
         with pytest.raises(DatasetError, match="Invalid version"):

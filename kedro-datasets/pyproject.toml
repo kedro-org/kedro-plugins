@@ -8,10 +8,9 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro-Datasets is where you can find all of Kedro's data connectors."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "Apache Software License (Apache 2.0)"}
 dependencies = [
-    "backports.strenum; python_version < '3.11'",
     "kedro>=1.0.0rc1, <2.0.0",
     "lazy_loader",
 ]
@@ -320,15 +319,12 @@ test = [
     "networkx==3.4", # pinned strictly to support Python >= 3.10
     "openpyxl>=3.0.3, <4.0",
     "pandas-gbq>=0.12.0",
-    "pandas>=2.0; python_version < '3.11'",
-    "pandas>=3.0; python_version >= '3.11'",
+    "pandas>=3.0",
     "Pillow>=12.2,<13.0",
     "plotly>=4.8.0, <6.0",
     "polars[deltalake,xlsx2csv]>=1.0",
-    "pyarrow>=1.0; python_version < '3.11'",
-    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyarrow>=7.0",  # Adding to avoid numpy build errors
     "pyodbc~=5.0",
-    "pyspark>=3.3, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0, <4.1; python_version >= '3.12'",  # Temporary pin till delta-spark is compatible
     "pytest-cov>=7.0,<8.0",
@@ -432,7 +428,6 @@ experimental_test = [
     "prophet>=1.1.5",
     "opik",
     "optuna",
-    "pyspark>=3.3, <4.0; python_version < '3.11'",
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0; python_version >= '3.12'",
     "pytest-cov>=7.0,<8.0",

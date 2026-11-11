@@ -255,6 +255,37 @@ class TestTableDataset:
         ):
             table_dataset.save(df2)
 
+    @pytest.mark.skipif(
+        Version(ibis.__version__) < Version("12.0.0"),
+        reason="upsert() was introduced in Ibis 12.0",
+    )
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {"materialized": "table", "mode": "upsert", "on": "col1", "temp": False},
+        ],
+        indirect=True,
+    )
+    def test_save_mode_upsert_with_create_table_kwargs(
+        self, table_dataset, dummy_table
+    ):
+        """Saving with mode=upsert should filter create_table-only arguments on subsequent saves."""
+        df1 = dummy_table
+        df2 = dummy_table.mutate(s.across(s.all(), lambda x: x * 2))
+
+        table_dataset.save(df1)
+        table_dataset.save(df2)
+
+        df1 = df1.execute()
+        df2 = df2.execute()
+        reloaded = table_dataset.load().execute()
+        expected = (
+            pd.concat([df1, df2])
+            .drop_duplicates(subset=["col1"], keep="last")
+            .reset_index(drop=True)
+        )
+        assert_frame_equal(reloaded, expected)
+
     @pytest.mark.parametrize(
         "save_args",
         [

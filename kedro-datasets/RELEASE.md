@@ -4,8 +4,12 @@
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Breaking changes
+
 ## Bug fixes and other changes
+- Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
+
 ## Community contributions
+- [AAKASH S S](https://github.com/aakash1552005)
 
 
 # Release 10.0.0
@@ -18,7 +22,6 @@
 ## Breaking changes
 
 - `partitions.PartitionedDataset` now raises `DatasetError` when saving partition IDs with a leading separator (e.g. `"/2020/01"`); use relative IDs (e.g. `"2020/01"`) instead.
-## Breaking changes to experimental datasets
 
 ## Bug fixes and other changes
 

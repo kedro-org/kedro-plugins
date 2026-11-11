@@ -1,4 +1,5 @@
 # Upcoming release
+* Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 # Release 0.9.0
 * Added validator declaration counts to the `Kedro Project Statistics` event, it includes `number_of_validated_datasets` and per-library `validator_type_count.*`, with user-defined validators reported as `custom`.

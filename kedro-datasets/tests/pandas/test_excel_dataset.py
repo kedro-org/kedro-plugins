@@ -167,6 +167,48 @@ class TestExcelDataset:
             inspect.signature(excel_dataset.preview).return_annotation == "TablePreview"
         )
 
+    @pytest.mark.parametrize(
+        "load_args",
+        [
+            {"sheet_name": None},
+            {"sheet_name": ["Sheet1", "Sheet2"]},
+        ],
+    )
+    def test_preview_multiple_sheets(
+        self,
+        filepath_excel,
+        save_args,
+        fs_args,
+        dummy_dataframe,
+        another_dummy_dataframe,
+        load_args,
+    ):
+        """Test preview returns the first sheet for a multi-sheet dataset."""
+        dataset = ExcelDataset(
+            filepath=filepath_excel,
+            load_args=load_args,
+            save_args=save_args,
+            fs_args=fs_args,
+        )
+
+        dataset.save(
+            {
+                "Sheet1": dummy_dataframe,
+                "Sheet2": another_dummy_dataframe,
+            }
+        )
+
+        original_load_args = dataset._load_args.copy()
+
+        previewed = dataset.preview(nrows=1)
+
+        assert previewed == {
+            "index": [0],
+            "columns": ["col1", "col2", "col3"],
+            "data": [[1, 4, 5]],
+        }
+        assert dataset._load_args == original_load_args
+
     def test_load_missing_file(self, excel_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from dataset kedro_datasets.pandas.excel_dataset.ExcelDataset\(.*\)"

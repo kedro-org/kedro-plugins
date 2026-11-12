@@ -8,9 +8,11 @@
 ## Bug fixes and other changes
 - Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 - Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
+- Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.
 
 ## Community contributions
 - [AAKASH S S](https://github.com/aakash1552005)
+- [Eric Del Orefice](https://github.com/ericdelorefice)
 
 - [Dhruv Gupta](https://github.com/DG47)
 

@@ -1,14 +1,19 @@
 # Upcoming release
 ## Major features and improvements
-
+- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Breaking changes
-## Bug fixes and other changes
 
+## Bug fixes and other changes
 - Fixed `pandas.ExcelDataset.preview()` to support multiple loaded sheets by previewing the first loaded sheet.
+- Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
+- Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 
 ## Community contributions
+- [AAKASH S S](https://github.com/aakash1552005)
+
+- [Dhruv Gupta](https://github.com/DG47)
 
 
 # Release 10.0.0
@@ -21,7 +26,6 @@
 ## Breaking changes
 
 - `partitions.PartitionedDataset` now raises `DatasetError` when saving partition IDs with a leading separator (e.g. `"/2020/01"`); use relative IDs (e.g. `"2020/01"`) instead.
-## Breaking changes to experimental datasets
 
 ## Bug fixes and other changes
 

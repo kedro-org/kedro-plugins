@@ -112,6 +112,20 @@ def patch_aiobotocore():
         if hasattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr):
             delattr(aiobotocore.httpchecksum.AioAwsChunkedWrapper, attr)
 
+    try:
+        import moto.core.botocore_stubber as moto_stubber  # noqa: PLC0415
+
+        class _AsyncReader:
+            def __init__(self, stream):
+                self._stream = stream
+
+            async def read(self, n=-1):
+                return self._stream.read(n)
+
+        moto_stubber.MockRawResponse.content = property(_AsyncReader)
+    except (ImportError, AttributeError):
+        pass
+
 
 @fixture(params=[None])
 def load_version(request):

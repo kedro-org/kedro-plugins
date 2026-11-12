@@ -39,7 +39,8 @@ class IncrementalDataset(PartitionedDataset):
     https://github.com/intake/filesystem_spec. ``IncrementalDataset`` also stores
     the information about the last processed partition in so-called `checkpoint`
     that is persisted to the location of the data partitions by default, so that
-    subsequent pipeline run loads only new partitions past the checkpoint.
+    subsequent pipeline run returns lazy loaders for only new partitions past the
+    checkpoint rather than loading the data itself.
 
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
@@ -50,13 +51,12 @@ class IncrementalDataset(PartitionedDataset):
         ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
         ... )
         >>> loaded = dataset.load()  # returns load functions for available partitions
-        >>> data = {p_id: load_func() for p_id, load_func in loaded.items()}
+        >>> assert all(callable(f) for f in loaded.values())
+        >>> # returns an empty dictionary as there are no partitions to load
+        >>> assert dataset.load() == {}
         >>>
         >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = dataset.load()  # still returns load functions for available partitions
-        >>>
         >>> dataset.release()  # clears load cache
-        >>> # returns an empty dictionary as no new partitions were added
         >>> assert dataset.load() == {}
 
     """
@@ -265,6 +265,19 @@ class IncrementalDataset(PartitionedDataset):
             return None
 
     def load(self) -> dict[str, Callable[[], Any]]:
+        """Return a lazy loader for each partition not yet processed.
+
+        Partitions at or before the checkpoint are excluded. The dataset for each
+        partition is constructed here, but its data is only read when the returned
+        callable is invoked. Calling a loader does not update the checkpoint; use
+        ``confirm()`` for that.
+
+        The partition listing is cached until ``release()``.
+
+        Returns:
+            Dictionary mapping each partition ID to a zero-argument callable that
+            returns that partition's data. Empty if there are no new partitions.
+        """
         partitions: dict[str, Callable[[], Any]] = {}
 
         for partition in self._list_partitions():

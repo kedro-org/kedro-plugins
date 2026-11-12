@@ -1,7 +1,7 @@
 # Upcoming release
 ## Major features and improvements
 ## Breaking changes
-- `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects.
+- `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects. Nodes consuming it must now call each function to get the data, e.g. `{k: f() for k, f in partitions.items()}`.
 
 ## Bug fixes and other changes
 ## Community contributions

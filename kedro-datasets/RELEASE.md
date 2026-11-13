@@ -4,6 +4,7 @@
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Breaking changes
+- `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects. Nodes consuming it must now call each function to get the data, e.g. `{k: f() for k, f in partitions.items()}`.
 
 ## Bug fixes and other changes
 - Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
@@ -11,7 +12,6 @@
 
 ## Community contributions
 - [AAKASH S S](https://github.com/aakash1552005)
-
 - [Dhruv Gupta](https://github.com/DG47)
 
 

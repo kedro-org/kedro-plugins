@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import sys
+import tomllib
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -25,11 +26,6 @@ from kedro.framework.project import PACKAGE_NAME, pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import Pipeline
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 from kedro_telemetry import __version__ as TELEMETRY_VERSION
 from kedro_telemetry.masking import _mask_kedro_cli

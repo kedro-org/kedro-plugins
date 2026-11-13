@@ -536,26 +536,27 @@ class TestIncrementalDatasetS3:
 
     def test_load_does_not_fetch_s3_objects(self, mocked_csvs_in_s3, mocker):
         """Test that IncrementalDataset.load() in S3 does not open partition S3 files at load time."""
-        open_spy = mocker.spy(s3fs.S3FileSystem, "open")
+        open_calls = []
+        orig_open = s3fs.S3FileSystem.open
+
+        def spy_open(fs, *args, **kwargs):
+            open_calls.append(args)
+            return orig_open(fs, *args, **kwargs)
+
+        mocker.patch.object(s3fs.S3FileSystem, "open", spy_open)
         pds = IncrementalDataset(path=mocked_csvs_in_s3, dataset=DATASET)
 
         loaded = pds.load()
         assert loaded
         # Partition data files must not be opened during load()
-        assert not any(
-            len(c.args) > 1 and str(c.args[1]).endswith(".csv")
-            for c in open_spy.call_args_list
-        )
+        assert not any(args and str(args[0]).endswith(".csv") for args in open_calls)
 
         # S3 partition object is only opened when a loader is invoked
         first_loader = next(iter(loaded.values()))
         assert callable(first_loader)
         df = first_loader()
         assert isinstance(df, pd.DataFrame)
-        assert any(
-            len(c.args) > 1 and str(c.args[1]).endswith(".csv")
-            for c in open_spy.call_args_list
-        )
+        assert any(args and str(args[0]).endswith(".csv") for args in open_calls)
 
     def test_load_and_confirm_s3a(
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker

@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Any
 
 import boto3
+import fsspec
 import pandas as pd
 import pytest
+import s3fs
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import AbstractDataset, DatasetError
 from moto import mock_aws
@@ -73,33 +75,38 @@ class TestIncrementalDatasetLocal:
         loaded = pds.load()
         assert loaded
         assert read_csv_spy.call_count == 0
+        assert all(callable(f) for f in loaded.values())
 
         first_loader = next(iter(loaded.values()))
-        assert callable(first_loader)
         df = first_loader()
         assert isinstance(df, pd.DataFrame)
         assert read_csv_spy.call_count == 1
 
-        for load_func in loaded.values():
-            assert callable(load_func)
+    def test_load_args_and_credentials_reach_callable(self, local_csvs, mocker):
+        """Test that configured load_args and credentials are used when loading."""
+        read_csv_mock = mocker.patch(
+            "pandas.read_csv", return_value=pd.DataFrame({"a": [1]})
+        )
+        fs_spy = mocker.spy(fsspec, "filesystem")
 
-    def test_load_args_and_credentials_reach_callable(self, local_csvs):
-        """Test that load_args and credentials configured on IncrementalDataset
-        reach the inner dataset when the loader callable runs."""
         dataset_config = {
             "type": DATASET,
-            "load_args": {"sep": ","},
-            "credentials": {"fake_cred": "secret"},
+            "load_args": {"sep": ";"},
+            "credentials": {"token": "dummy_token"},
         }
         pds = IncrementalDataset(path=str(local_csvs), dataset=dataset_config)
         loaded = pds.load()
         assert loaded
+
+        assert any(
+            call.kwargs.get("token") == "dummy_token" for call in fs_spy.call_args_list
+        )
+
         first_loader = next(iter(loaded.values()))
-        inner_dataset = first_loader.__self__
-        assert inner_dataset._load_args == {"sep": ","}
-        assert inner_dataset._storage_options["fake_cred"] == "secret"
-        df = first_loader()
-        assert isinstance(df, pd.DataFrame)
+        first_loader()
+
+        assert read_csv_mock.called
+        assert read_csv_mock.call_args.kwargs.get("sep") == ";"
 
     def test_pathlike_path(self, local_csvs):
         dataset = IncrementalDataset(path=local_csvs, dataset=DATASET)
@@ -113,6 +120,10 @@ class TestIncrementalDatasetLocal:
         pds = IncrementalDataset(path=str(local_csvs), dataset=DATASET)
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
+
+        # Compare loaded partition data before confirm()
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
         checkpoint_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
         assert not checkpoint_path.exists()
@@ -523,22 +534,22 @@ class TestIncrementalDatasetS3:
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
 
-    def test_load_is_lazy_in_s3(self, mocked_csvs_in_s3, mocker):
-        """Test that IncrementalDataset.load() in S3 does not read object data at load time."""
+    def test_load_does_not_fetch_s3_objects(self, mocked_csvs_in_s3, mocker):
+        """Test that IncrementalDataset.load() in S3 does not open S3 files at load time."""
+        open_spy = mocker.spy(s3fs.S3FileSystem, "open")
         pds = IncrementalDataset(path=mocked_csvs_in_s3, dataset=DATASET)
-        read_csv_spy = mocker.spy(pd, "read_csv")
 
         loaded = pds.load()
         assert loaded
-        # S3 object data must not be read during load()
-        assert read_csv_spy.call_count == 0
+        # S3 filesystem open must not be called during load()
+        assert open_spy.call_count == 0
 
-        # Data is only read when the loader callable is invoked
+        # S3 object is only opened when a loader is invoked
         first_loader = next(iter(loaded.values()))
         assert callable(first_loader)
         df = first_loader()
         assert isinstance(df, pd.DataFrame)
-        assert read_csv_spy.call_count == 1
+        assert open_spy.call_count >= 1
 
     def test_load_and_confirm_s3a(
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker

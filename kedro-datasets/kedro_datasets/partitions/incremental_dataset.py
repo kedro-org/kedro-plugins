@@ -45,19 +45,16 @@ class IncrementalDataset(PartitionedDataset):
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
+        >>> import pandas as pd
         >>> from kedro_datasets.partitions import IncrementalDataset
-        >>>
-        >>> dataset = IncrementalDataset(
-        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
-        ... )
-        >>> loaded = dataset.load()  # returns load functions for available partitions
-        >>> assert all(callable(f) for f in loaded.values())
-        >>> # returns an empty dictionary as there are no partitions to load
-        >>> assert dataset.load() == {}
-        >>>
-        >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
-        >>> dataset.release()  # clears load cache
-        >>> assert dataset.load() == {}
+        >>> dataset = IncrementalDataset(path="data/partitions", dataset="pandas.CSVDataset")
+        >>> dataset.save({"p01/data.csv": pd.DataFrame({"a": [1]})})
+        >>> list(dataset.load())  # no checkpoint yet, so every partition is new
+        ['p01/data.csv']
+        >>> dataset.confirm()  # writes "p01/data.csv" to the checkpoint file
+        >>> dataset.release()  # clears the cached partition listing
+        >>> dataset.load()
+        {}
 
     """
 
@@ -265,18 +262,26 @@ class IncrementalDataset(PartitionedDataset):
             return None
 
     def load(self) -> dict[str, Callable[[], Any]]:
-        """Return a lazy loader for each partition not yet processed.
+        """Return a lazy loader for each partition not yet confirmed.
 
-        Partitions at or before the checkpoint are excluded. The dataset for each
-        partition is constructed here, but its data is only read when the returned
-        callable is invoked. Calling a loader does not update the checkpoint; use
-        ``confirm()`` for that.
+        Partitions are selected by applying ``comparison_func`` to each partition ID
+        and the checkpoint. By default, only partitions after the checkpoint are
+        returned. If no checkpoint can be read, every partition is returned. A forced
+        ``checkpoint`` value takes precedence over the stored one. The dataset for
+        each partition is constructed here, but its data is only read when the
+        returned callable is invoked. Calling a loader does not update the
+        checkpoint; use ``confirm()`` for that.
 
         The partition listing is cached until ``release()``.
 
         Returns:
-            Dictionary mapping each partition ID to a zero-argument callable that
-            returns that partition's data. Empty if there are no new partitions.
+            Dictionary mapping each partition ID (path relative to ``path``, without
+            ``filename_suffix``) to a zero-argument callable that returns that
+            partition's data. Empty if there are no new partitions.
+
+        Raises:
+            DatasetError: If versioning is enabled and a partition path is not a
+                well-formed ``filename/timestamp/filename`` path.
         """
         partitions: dict[str, Callable[[], Any]] = {}
 

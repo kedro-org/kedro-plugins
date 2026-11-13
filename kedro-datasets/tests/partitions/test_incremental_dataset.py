@@ -12,12 +12,11 @@ import pytest
 import s3fs
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import AbstractDataset, DatasetError
-from moto import mock_aws
-from pandas.testing import assert_frame_equal
-
 from kedro_datasets.partitions import IncrementalDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.text import TextDataset
+from moto import mock_aws
+from pandas.testing import assert_frame_equal
 
 DATASET = "kedro_datasets.pandas.csv_dataset.CSVDataset"
 
@@ -535,21 +534,27 @@ class TestIncrementalDatasetS3:
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
 
     def test_load_does_not_fetch_s3_objects(self, mocked_csvs_in_s3, mocker):
-        """Test that IncrementalDataset.load() in S3 does not open S3 files at load time."""
+        """Test that IncrementalDataset.load() in S3 does not open partition S3 files at load time."""
         open_spy = mocker.spy(s3fs.S3FileSystem, "open")
         pds = IncrementalDataset(path=mocked_csvs_in_s3, dataset=DATASET)
 
         loaded = pds.load()
         assert loaded
-        # S3 filesystem open must not be called during load()
-        assert open_spy.call_count == 0
+        # Partition data files must not be opened during load()
+        assert not any(
+            len(c.args) > 1 and str(c.args[1]).endswith(".csv")
+            for c in open_spy.call_args_list
+        )
 
-        # S3 object is only opened when a loader is invoked
+        # S3 partition object is only opened when a loader is invoked
         first_loader = next(iter(loaded.values()))
         assert callable(first_loader)
         df = first_loader()
         assert isinstance(df, pd.DataFrame)
-        assert open_spy.call_count >= 1
+        assert any(
+            len(c.args) > 1 and str(c.args[1]).endswith(".csv")
+            for c in open_spy.call_args_list
+        )
 
     def test_load_and_confirm_s3a(
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker

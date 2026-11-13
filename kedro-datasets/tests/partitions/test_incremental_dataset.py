@@ -12,11 +12,12 @@ import pytest
 import s3fs
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import AbstractDataset, DatasetError
+from moto import mock_aws
+from pandas.testing import assert_frame_equal
+
 from kedro_datasets.partitions import IncrementalDataset
 from kedro_datasets.pickle import PickleDataset
 from kedro_datasets.text import TextDataset
-from moto import mock_aws
-from pandas.testing import assert_frame_equal
 
 DATASET = "kedro_datasets.pandas.csv_dataset.CSVDataset"
 

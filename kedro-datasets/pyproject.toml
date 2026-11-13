@@ -328,9 +328,9 @@ test = [
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0, <4.1; python_version >= '3.12'",  # Temporary pin till delta-spark is compatible
     "pytest-cov>=7.0,<8.0",
-    "pytest-mock>=1.7.1, <2.0",
+    "pytest-mock>=3.17,<4.0",
     "pytest-xdist[psutil]>=3.0,<4.0",
-    "pytest~=7.2",
+    "pytest>=9.2,<10.0",
     "python-docx",
     "python-pptx",
     "redis~=4.1",
@@ -431,9 +431,9 @@ experimental_test = [
     "pyspark>=3.4, <4.0; python_version == '3.11'",
     "pyspark>=4.0; python_version >= '3.12'",
     "pytest-cov>=7.0,<8.0",
-    "pytest-mock>=1.7.1, <2.0",
+    "pytest-mock>=3.17,<4.0",
     "pytest-xdist[psutil]>=3.0,<4.0",
-    "pytest~=7.2",
+    "pytest>=9.2,<10.0",
     "u8darts[all]",
     "numpy<2.5",  # numba (pulled in via darts -> shap) does not support numpy 2.5 yet
     "pypdf>=3.0.0",

@@ -33,9 +33,9 @@ def safetensors_dataset(filepath, backend, fs_args):
 
 
 @pytest.fixture
-def versioned_safetensors_dataset(filepath, load_version, save_version):
+def versioned_safetensors_dataset(filepath, backend, load_version, save_version):
     return SafetensorsDataset(
-        filepath=filepath, version=Version(load_version, save_version)
+        filepath=filepath, backend=backend, version=Version(load_version, save_version)
     )
 
 
@@ -45,7 +45,6 @@ def dummy_data():
 
 
 class TestSafetensorsDataset:
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     @pytest.mark.parametrize(
         "backend",
         [
@@ -64,7 +63,6 @@ class TestSafetensorsDataset:
         assert safetensors_dataset._fs_open_args_load == {}
         assert safetensors_dataset._fs_open_args_save == {"mode": "wb"}
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_exists(self, safetensors_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""
@@ -155,7 +153,6 @@ class TestSafetensorsDatasetVersioned:
         assert "backend" in str(ds_versioned)
         assert "backend" in str(ds)
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_save_and_load(self, versioned_safetensors_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned dataset."""
@@ -170,26 +167,23 @@ class TestSafetensorsDatasetVersioned:
         with pytest.raises(DatasetError, match=pattern):
             versioned_safetensors_dataset.load()
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_exists(self, versioned_safetensors_dataset, dummy_data):
         """Test `exists` method invocation for versioned dataset."""
         assert not versioned_safetensors_dataset.exists()
         versioned_safetensors_dataset.save(dummy_data)
         assert versioned_safetensors_dataset.exists()
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_prevent_overwrite(self, versioned_safetensors_dataset, dummy_data):
         """Check the error when attempting to override the dataset if the
         corresponding Safetensors file for a given save version already exists."""
         versioned_safetensors_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for SafetensorsDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets_experimental.safetensors.safetensors_dataset.SafetensorsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
             versioned_safetensors_dataset.save(dummy_data)
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
     )
@@ -203,7 +197,7 @@ class TestSafetensorsDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for SafetensorsDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets_experimental.safetensors.safetensors_dataset.SafetensorsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_safetensors_dataset.save(dummy_data)
@@ -217,7 +211,6 @@ class TestSafetensorsDatasetVersioned:
                 version=Version(None, None),
             )
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_versioning_existing_dataset(
         self, safetensors_dataset, versioned_safetensors_dataset, dummy_data
     ):

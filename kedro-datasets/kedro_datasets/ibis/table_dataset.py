@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from copy import deepcopy
 from enum import StrEnum, auto
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -231,34 +230,12 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 method_name := "insert" if self._mode == "append" else "upsert",
             ):
                 method = getattr(self.connection, method_name)
-                save_args = self._save_args
                 create_only_args = {"format", "temp", "partition_by", "schema"}
-                try:
-                    sig = inspect.signature(method)
-                    has_var_keyword = any(
-                        param.kind == inspect.Parameter.VAR_KEYWORD
-                        for param in sig.parameters.values()
-                    )
-                    if not has_var_keyword:
-                        valid_params = {
-                            k
-                            for k, p in sig.parameters.items()
-                            if p.kind != inspect.Parameter.POSITIONAL_ONLY
-                        }
-                        save_args = {
-                            k: v for k, v in save_args.items() if k in valid_params
-                        }
-                    else:
-                        save_args = {
-                            k: v
-                            for k, v in save_args.items()
-                            if k not in create_only_args
-                        }
-                except (ValueError, TypeError):
-                    save_args = {
-                        k: v for k, v in save_args.items() if k not in create_only_args
-                    }
-
+                save_args = {
+                    k: v
+                    for k, v in self._save_args.items()
+                    if k not in create_only_args
+                }
                 method(self._table_name, data, **save_args)
             else:
                 raise DatasetError(

@@ -1,4 +1,5 @@
 """Provide data loading and saving functionality for Ibis's backends."""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -229,7 +230,13 @@ class TableDataset(ConnectionMixin, AbstractDataset[ir.Table, ir.Table]):
                 method_name := "insert" if self._mode == "append" else "upsert",
             ):
                 method = getattr(self.connection, method_name)
-                method(self._table_name, data, **self._save_args)
+                create_only_args = {"format", "temp", "partition_by", "schema"}
+                save_args = {
+                    k: v
+                    for k, v in self._save_args.items()
+                    if k not in create_only_args
+                }
+                method(self._table_name, data, **save_args)
             else:
                 raise DatasetError(
                     f"The {self.connection.name} backend for Ibis does "

@@ -1,17 +1,20 @@
 # Upcoming release
 ## Major features and improvements
-
+- Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Breaking changes
 
 ## Bug fixes and other changes
+- Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 - Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 - Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.
 
 ## Community contributions
 - [AAKASH S S](https://github.com/aakash1552005)
 - [Eric Del Orefice](https://github.com/ericdelorefice)
+
+- [Dhruv Gupta](https://github.com/DG47)
 
 
 # Release 10.0.0

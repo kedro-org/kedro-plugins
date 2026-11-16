@@ -239,6 +239,30 @@ class TestSQLTableDataset:
         return_annotation = inspect.signature(sql_dataset.preview).return_annotation
         assert return_annotation == "TablePreview"
 
+    def test_preview_with_schema(self, tmp_path):
+        """Test that ``preview`` reads the table from the ``schema`` in
+        ``load_args``, like ``load`` and ``exists`` do."""
+        schema_db = (tmp_path / "ingested.db").as_posix()
+        dataset = SQLTableDataset(
+            table_name=TABLE_NAME,
+            credentials={"con": f"sqlite:///{(tmp_path / 'main.db').as_posix()}"},
+            load_args={"schema": "ingested"},
+            save_args={"schema": "ingested"},
+        )
+
+        @sqlalchemy.event.listens_for(dataset.engine, "connect")
+        def attach_schema(dbapi_connection, _):
+            dbapi_connection.execute(f"ATTACH DATABASE '{schema_db}' AS ingested")
+
+        # A same-named table in the default schema must not be previewed.
+        pd.DataFrame({"other": ["x"]}).to_sql(TABLE_NAME, dataset.engine, index=False)
+        dataset.save(pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]}))
+
+        preview = dataset.preview(nrows=2)
+
+        assert preview["columns"] == ["col1", "col2"]
+        assert preview["data"] == [[1, "a"], [2, "b"]]
+
     def test_preview_sql_error(self, table_dataset, mocker):
         mocker.patch(
             "pandas.read_sql_query",

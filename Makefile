@@ -53,8 +53,10 @@ test-snowflake-only:
 	cd kedro-datasets && pytest kedro_datasets/snowflake --doctest-modules --doctest-continue-on-failure --no-cov
 
 build-datasets-docs:
-	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
-	cd kedro-datasets && mkdocs build --strict
+	# Build the site with Zensical. NOTE: Zensical has no --strict mode yet, so
+	# broken internal links/anchors are not caught at build time; link checking
+	# (internal + external) is handled separately by lychee: kedro-datasets/lychee.toml
+	cd kedro-datasets && zensical build --clean
 
 fix-markdownlint:
 	npm install -g markdownlint-cli2

@@ -172,17 +172,21 @@ class CSVDataset(AbstractVersionedDataset[pl.DataFrame, pl.DataFrame]):
 
     def load(self) -> pl.DataFrame:
         load_path = str(self._get_load_path())
+        load_args = self._load_args.copy()
+        rechunk = load_args.pop("rechunk", False)
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
             # (<urlopen error file not on local host>),
             # so we don't join that back to the filepath;
             # storage_options also don't work with local paths
-            return pl.read_csv(load_path, **self._load_args)
+            data = pl.read_csv(load_path, **load_args)
+        else:
+            load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+            data = pl.read_csv(
+                load_path, storage_options=self._storage_options, **load_args
+            )
 
-        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
-        return pl.read_csv(
-            load_path, storage_options=self._storage_options, **self._load_args
-        )
+        return data.rechunk() if rechunk else data
 
     def save(self, data: pl.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

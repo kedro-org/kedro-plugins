@@ -3,6 +3,7 @@ filesystem (e.g.: local, S3, GCS). It uses pypdf to read and extract text from P
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -28,17 +29,17 @@ class PDFDataset(AbstractDataset[NoReturn, list[str]]):
 
         ```yaml
         my_pdf_document:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: data/01_raw/document.pdf
 
         password_protected_pdf:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: data/01_raw/protected.pdf
           load_args:
             password: "pass123"  # pragma: allowlist secret
 
         s3_pdf:
-          type: pypdf.PDFDataset
+          type: kedro_datasets_experimental.pypdf.PDFDataset
           filepath: s3://your_bucket/document.pdf
           credentials: dev_s3
         ```
@@ -60,7 +61,7 @@ class PDFDataset(AbstractDataset[NoReturn, list[str]]):
     def __init__(
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         load_args: dict[str, Any] | None = None,
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

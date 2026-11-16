@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Union
 
@@ -140,7 +141,7 @@ class PromptDataset(AbstractDataset):
     """
     def __init__(   # noqa: PLR0913
         self,
-        filepath: str,
+        filepath: str | os.PathLike,
         prompt_name: str,
         credentials: dict[str, Any],
         prompt_type: Literal["chat", "text"] = "text",
@@ -239,7 +240,7 @@ class PromptDataset(AbstractDataset):
 
     def _validate_init_params(  # noqa: PLR0912, PLR0913
         self,
-        filepath: str,
+        filepath: str | os.PathLike,
         credentials: dict[str, Any],
         prompt_type: str,
         sync_policy: str,

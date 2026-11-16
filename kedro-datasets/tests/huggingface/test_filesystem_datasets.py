@@ -174,6 +174,20 @@ class TestFilesystemDataset:
         with pytest.raises(DatasetError, match=r"do not match"):
             kedro_dataset.save(dataset_dict)
 
+    @pytest.mark.parametrize(
+        "unsafe_split", ["../outside", "../../outside", "nested/../../outside"]
+    )
+    def test_save_dataset_dict_unsafe_split_names(
+        self, kedro_dataset_cls, tmp_path, extension, unsafe_split
+    ):
+        """Split names that resolve outside the dataset directory are rejected."""
+        kedro_dataset = kedro_dataset_cls(path=(tmp_path / "data").as_posix())
+        data = DatasetDict({unsafe_split: Dataset.from_dict({"col": [1, 2]})})
+
+        with pytest.raises(DatasetError, match="outside the dataset directory"):
+            kedro_dataset.save(data)
+        assert not (tmp_path / f"outside{extension}").exists()
+
     @pytest.mark.parametrize("args_name", ["load_args", "save_args"])
     @pytest.mark.parametrize("top_level_data_files", [True, False])
     def test_data_files_in_args_raises_dataset_error(

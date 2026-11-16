@@ -21,6 +21,8 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+from kedro_datasets._utils import validate_sub_path
+
 DatasetLike: TypeAlias = Dataset | DatasetDict | IterableDataset | IterableDatasetDict
 
 
@@ -192,7 +194,13 @@ class FilesystemDataset(AbstractVersionedDataset[DatasetLike, DatasetLike]):
         self._fs.mkdirs(save_path, exist_ok=True)
         ext = self.EXTENSION
         for split, split_ds in data.items():
-            filename = self._data_files[split] if self._data_files else f"{split}{ext}"
+            if self._data_files:
+                filename = self._data_files[split]
+            else:
+                # Split names come from the data rather than the catalog, so they
+                # must not be able to escape the dataset directory.
+                filename = f"{split}{ext}"
+                validate_sub_path(filename, save_path)
             split_path = f"{save_path}/{filename}"
             self._save_dataset(split_ds, split_path)
 

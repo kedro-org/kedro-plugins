@@ -95,6 +95,23 @@ class TestCSVDataset:
         reloaded = csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
 
+    @pytest.mark.parametrize("rechunk", [True, False])
+    def test_load_rechunk(self, mocker, filepath_csv, rechunk):
+        """Test rechunking is handled after loading."""
+        read_csv = mocker.patch("polars.read_csv")
+        loaded = read_csv.return_value
+        dataset = CSVDataset(filepath=filepath_csv, load_args={"rechunk": rechunk})
+
+        result = dataset.load()
+
+        read_csv.assert_called_once_with(filepath_csv)
+        if rechunk:
+            loaded.rechunk.assert_called_once_with()
+            assert result is loaded.rechunk.return_value
+        else:
+            loaded.rechunk.assert_not_called()
+            assert result is loaded
+
     def test_exists(self, csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""
@@ -422,9 +439,7 @@ class TestCSVDatasetS3:
         if sys.version_info[1] >= 10:
             read_patch = mocker.patch("polars.read_csv", return_value=mocked_dataframe)
             df.load()
-            read_patch.assert_called_once_with(
-                mocked_csv_in_s3, storage_options={}, rechunk=True
-            )
+            read_patch.assert_called_once_with(mocked_csv_in_s3, storage_options={})
         else:
             loaded = df.load()
             assert_frame_equal(loaded, mocked_dataframe)

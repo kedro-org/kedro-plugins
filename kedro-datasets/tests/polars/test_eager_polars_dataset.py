@@ -206,6 +206,16 @@ class TestEagerExcelDataset:
         dataset.save(dummy_dataframe)
         assert_frame_equal(dataset.load(), dummy_dataframe)
 
+    @pytest.mark.parametrize("engine", ["calamine", "openpyxl", "xlsx2csv"])
+    def test_load_excel_engines(self, filepath_excel, dummy_dataframe, engine):
+        dummy_dataframe.to_pandas().to_excel(filepath_excel, index=False)
+        dataset = EagerPolarsDataset(
+            filepath=filepath_excel.as_posix(),
+            file_format="excel",
+            load_args={"engine": engine},
+        )
+        assert_frame_equal(dataset.load(), dummy_dataframe)
+
 
 class TestEagerParquetDatasetVersioned:
     def test_load_args(self, parquet_dataset_ignore):

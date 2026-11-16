@@ -1,4 +1,5 @@
 """Security utilities for kedro-datasets."""
+
 from __future__ import annotations
 
 import posixpath
@@ -15,11 +16,18 @@ def validate_sub_path(sub_path: str, base_path: str) -> None:
         base_path: The base directory path that ``sub_path`` must remain within.
 
     Raises:
-        DatasetError: If ``sub_path`` resolves outside ``base_path``.
+        DatasetError: If ``sub_path`` is absolute or resolves outside ``base_path``.
     """
+    # Joining a base with an absolute path discards the base
+    if sub_path.startswith(("/", "\\")):
+        raise DatasetError(
+            f"Path '{sub_path}' must be a relative path inside the dataset "
+            f"directory '{base_path}'."
+        )
+
     # Normalize only for validation - handle Windows backslashes
     # fsspec uses forward slashes internally, so we normalize to forward slashes
-    path_to_check = sub_path.replace("\\", "/").lstrip("/")
+    path_to_check = sub_path.replace("\\", "/")
     full_path = "/".join([base_path, path_to_check])
 
     # Normalize the path to resolve any '..' or '.' components for the security check.

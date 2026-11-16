@@ -1,3 +1,4 @@
+import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
@@ -32,9 +33,9 @@ def safetensors_dataset(filepath, backend, fs_args):
 
 
 @pytest.fixture
-def versioned_safetensors_dataset(filepath, load_version, save_version):
+def versioned_safetensors_dataset(filepath, backend, load_version, save_version):
     return SafetensorsDataset(
-        filepath=filepath, version=Version(load_version, save_version)
+        filepath=filepath, backend=backend, version=Version(load_version, save_version)
     )
 
 
@@ -44,7 +45,6 @@ def dummy_data():
 
 
 class TestSafetensorsDataset:
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     @pytest.mark.parametrize(
         "backend",
         [
@@ -63,7 +63,6 @@ class TestSafetensorsDataset:
         assert safetensors_dataset._fs_open_args_load == {}
         assert safetensors_dataset._fs_open_args_save == {"mode": "wb"}
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_exists(self, safetensors_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent dataset."""
@@ -78,7 +77,9 @@ class TestSafetensorsDataset:
     )
     def test_open_extra_args(self, safetensors_dataset, fs_args):
         assert safetensors_dataset._fs_open_args_load == fs_args["open_args_load"]
-        assert safetensors_dataset._fs_open_args_save == {"mode": "wb"}  # default unchanged
+        assert safetensors_dataset._fs_open_args_save == {
+            "mode": "wb"
+        }  # default unchanged
 
     def test_load_missing_file(self, safetensors_dataset):
         """Check the error when trying to load missing file."""
@@ -97,7 +98,7 @@ class TestSafetensorsDataset:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        dataset = SafetensorsDataset(filepath=filepath)
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
         assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
@@ -108,7 +109,7 @@ class TestSafetensorsDataset:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.safetensors"
-        dataset = SafetensorsDataset(filepath=filepath)
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
         dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
@@ -152,7 +153,6 @@ class TestSafetensorsDatasetVersioned:
         assert "backend" in str(ds_versioned)
         assert "backend" in str(ds)
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_save_and_load(self, versioned_safetensors_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned dataset."""
@@ -167,26 +167,23 @@ class TestSafetensorsDatasetVersioned:
         with pytest.raises(DatasetError, match=pattern):
             versioned_safetensors_dataset.load()
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_exists(self, versioned_safetensors_dataset, dummy_data):
         """Test `exists` method invocation for versioned dataset."""
         assert not versioned_safetensors_dataset.exists()
         versioned_safetensors_dataset.save(dummy_data)
         assert versioned_safetensors_dataset.exists()
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_prevent_overwrite(self, versioned_safetensors_dataset, dummy_data):
         """Check the error when attempting to override the dataset if the
         corresponding Safetensors file for a given save version already exists."""
         versioned_safetensors_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for SafetensorsDataset\(.+\) must "
+            r"Save path \'.+\' for kedro_datasets_experimental.safetensors.safetensors_dataset.SafetensorsDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
             versioned_safetensors_dataset.save(dummy_data)
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
     )
@@ -200,7 +197,7 @@ class TestSafetensorsDatasetVersioned:
         the subsequent load path."""
         pattern = (
             rf"Save version '{save_version}' did not match load version "
-            rf"'{load_version}' for SafetensorsDataset\(.+\)"
+            rf"'{load_version}' for kedro_datasets_experimental.safetensors.safetensors_dataset.SafetensorsDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_safetensors_dataset.save(dummy_data)
@@ -210,10 +207,10 @@ class TestSafetensorsDatasetVersioned:
 
         with pytest.raises(DatasetError, match=pattern):
             SafetensorsDataset(
-                filepath="https://example.com/file.safetensors", version=Version(None, None)
+                filepath="https://example.com/file.safetensors",
+                version=Version(None, None),
             )
 
-    @pytest.mark.skip(reason="Skipping for now, need to investigate")
     def test_versioning_existing_dataset(
         self, safetensors_dataset, versioned_safetensors_dataset, dummy_data
     ):
@@ -237,4 +234,19 @@ class TestSafetensorsDatasetVersioned:
     def test_copy(self, versioned_safetensors_dataset):
         safetensors_dataset_copy = versioned_safetensors_dataset._copy()
         assert safetensors_dataset_copy is not versioned_safetensors_dataset
-        assert safetensors_dataset_copy._describe() == versioned_safetensors_dataset._describe()
+        assert (
+            safetensors_dataset_copy._describe()
+            == versioned_safetensors_dataset._describe()
+        )
+
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="Saving fails on Windows until #1555 is merged",
+    )
+    def test_pathlike_filepath(self, tmp_path, dummy_data):
+        """Test that os.PathLike filepaths are supported."""
+        filepath = tmp_path / "model.safetensors"
+        dataset = SafetensorsDataset(filepath=filepath, backend="torch")
+        dataset.save(dummy_data)
+        reloaded = dataset.load()
+        assert torch.equal(dummy_data["embeddings"], reloaded["embeddings"])

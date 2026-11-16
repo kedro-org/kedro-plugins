@@ -1,16 +1,10 @@
 """Provide data loading and saving functionality for Ibis's backends."""
 from __future__ import annotations
 
-import sys
 from copy import deepcopy
-from enum import auto
+from enum import StrEnum, auto
 from typing import TYPE_CHECKING, Any, ClassVar
 from warnings import warn
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum  # pragma: no cover
-else:
-    from backports.strenum import StrEnum  # pragma: no cover
 
 import ibis.expr.types as ir
 from kedro.io import AbstractDataset, DatasetError

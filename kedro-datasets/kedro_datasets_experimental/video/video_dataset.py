@@ -5,6 +5,7 @@ and decode videos and OpenCV VideoWriter to encode and write video.
 from __future__ import annotations
 
 import itertools
+import os
 import tempfile
 from collections import abc
 from collections.abc import Generator, Sequence
@@ -70,9 +71,9 @@ class AbstractVideo(abc.Sequence):
 class FileVideo(AbstractVideo):
     """A video object read from a file"""
 
-    def __init__(self, filepath: str) -> None:
-        self._filepath = filepath
-        self._cap = cv2.VideoCapture(filepath)
+    def __init__(self, filepath: str | os.PathLike) -> None:
+        self._filepath = str(filepath)
+        self._cap = cv2.VideoCapture(str(filepath))
         self._n_frames = self._get_length()
 
     @property
@@ -204,11 +205,11 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     ```yaml
     cars:
-        type: video.VideoDataset
+        type: kedro_datasets_experimental.video.VideoDataset
         filepath: data/01_raw/cars.mp4
 
     motorbikes:
-        type: video.VideoDataset
+        type: kedro_datasets_experimental.video.VideoDataset
         filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
         credentials: dev_s3
     ```
@@ -216,7 +217,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
     ```python
-    from kedro_datasets.video import VideoDataset
+    from kedro_datasets_experimental.video import VideoDataset
     import numpy as np
 
     video = VideoDataset(
@@ -228,7 +229,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example creating a video from numpy frames using Python API
 
     ```python
-    from kedro_datasets.video.video_dataset import VideoDataset, SequenceVideo
+    from kedro_datasets_experimental.video.video_dataset import VideoDataset, SequenceVideo
     import numpy as np
     from PIL import Image
 
@@ -245,7 +246,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     ### Example creating a video from numpy frames using a generator and the Python API
 
     ```python
-    from kedro_datasets.video.video_dataset import VideoDataset, GeneratorVideo
+    from kedro_datasets_experimental.video.video_dataset import VideoDataset, GeneratorVideo
     import numpy as np
     from PIL import Image
 
@@ -265,7 +266,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         fourcc: str | None = "mp4v",
         credentials: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
@@ -330,7 +331,9 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
                     with tmp_file.open("r+b") as f_tmp:
                         f_target.write(f_tmp.read())
 
-    def _write_to_filepath(self, video: AbstractVideo, filepath: str) -> None:
+    def _write_to_filepath(
+        self, video: AbstractVideo, filepath: str | os.PathLike
+    ) -> None:
         # TODO: This uses the codec specified in the VideoDataset if it is not None, this is due
         # to compatibility issues since e.g. h264 coded is licensed and is thus not included in
         # opencv if installed from a binary distribution. Since a h264 video can be read, but not
@@ -341,7 +344,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         fourcc = self._fourcc or video.fourcc
 
         writer = cv2.VideoWriter(
-            filepath, cv2.VideoWriter_fourcc(*fourcc), video.fps, video.size
+            str(filepath), cv2.VideoWriter_fourcc(*fourcc), video.fps, video.size
         )
         if not writer.isOpened():
             raise ValueError(

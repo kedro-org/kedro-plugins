@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from kedro.io.core import Version, get_filepath_str
@@ -13,11 +14,11 @@ class ProphetModelDataset(JSONDataset):
     """
     `ProphetModelDataset` loads/saves Facebook Prophet models to a JSON file using an underlying filesystem (e.g., local, S3, GCS). It uses Prophet's built-in serialization to handle the JSON file.
 
-    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
     model:
-        type: custom_datasets.ProphetModelDataset
+        type: kedro_datasets_experimental.prophet.ProphetModelDataset
         filepath: gcs://your_bucket/model.json
         fs_args:
             project: my-project
@@ -47,7 +48,7 @@ class ProphetModelDataset(JSONDataset):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         save_args: dict[str, Any] | None = None,
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,

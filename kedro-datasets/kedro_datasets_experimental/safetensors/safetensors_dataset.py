@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any
@@ -19,11 +20,11 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     """`SafetensorsDataset` loads/saves data from/to a Safetensors file using an underlying filesystem (e.g., local, S3, GCS).
     The underlying functionality is supported by the specified backend library (defaults to the `numpy` library), so it supports all allowed options for loading and saving Safetensors files.
 
-    ### Example usage for the [YAML API](https://kedro.readthedocs.io/en/stable/data/data_catalog_yaml_examples.html)
+    ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
 
     ```yaml
     test_model:
-        type: safetensors.SafetensorsDataset
+        type: kedro_datasets_experimental.safetensors.SafetensorsDataset
         filepath: data/07_model_output/test_model.safetensors
     ```
 
@@ -54,7 +55,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
     def __init__(  # noqa: PLR0913
         self,
         *,
-        filepath: str,
+        filepath: str | os.PathLike,
         backend: str = "numpy",
         version: Version | None = None,
         credentials: dict[str, Any] | None = None,
@@ -151,7 +152,7 @@ class SafetensorsDataset(AbstractVersionedDataset[Any, Any]):
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
                 imported_backend = importlib.import_module(f"safetensors.{self._backend}")
-                imported_backend.save_file(data, fs_file.name)
+                fs_file.write(imported_backend.save(data))
             except Exception as exc:
                 raise DatasetError(
                     f"{data.__class__} was not serialised due to: {exc}"

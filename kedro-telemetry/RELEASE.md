@@ -1,4 +1,5 @@
 # Upcoming release
+* Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 * Moved the dataset and validator metric collection out of `plugin.py` into a new `kedro_telemetry.collectors` package. No change in the data sent.
 
 # Release 0.9.0

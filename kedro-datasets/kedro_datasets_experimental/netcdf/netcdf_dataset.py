@@ -28,7 +28,7 @@ class NetCDFDataset(AbstractVersionedDataset[xr.Dataset, xr.Dataset]):
     ### Example usage for the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):
     ```yaml
     single-file:
-        type: netcdf.NetCDFDataset
+        type: kedro_datasets_experimental.netcdf.NetCDFDataset
         filepath: s3://bucket_name/path/to/folder/data.nc
         save_args:
             mode: a
@@ -36,7 +36,7 @@ class NetCDFDataset(AbstractVersionedDataset[xr.Dataset, xr.Dataset]):
             decode_times: False
 
     multi-file:
-        type: netcdf.NetCDFDataset
+        type: kedro_datasets_experimental.netcdf.NetCDFDataset
         filepath: s3://bucket_name/path/to/folder/data*.nc
         load_args:
             concat_dim: time
@@ -46,7 +46,7 @@ class NetCDFDataset(AbstractVersionedDataset[xr.Dataset, xr.Dataset]):
 
     ### Example usage for the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
     ```python
-    from kedro_datasets.netcdf import NetCDFDataset
+    from kedro_datasets_experimental.netcdf import NetCDFDataset
     import xarray as xr
     ds = xr.DataArray(
          [0, 1, 2], dims=["x"], coords={"x": [0, 1, 2]}, name="data"

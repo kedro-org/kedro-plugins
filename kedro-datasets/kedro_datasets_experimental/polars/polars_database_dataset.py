@@ -1,6 +1,7 @@
 """``PolarsDatabaseDataset`` to load and save data to a SQL backend using Polars."""
 
 import copy
+import os
 import re
 from pathlib import PurePosixPath
 from typing import Any, NoReturn
@@ -109,7 +110,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttles_table:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         table_name: shuttles
         credentials: db_credentials
     ```
@@ -118,7 +119,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttle_id_dataset:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         sql: "SELECT shuttle, shuttle_id FROM spaceflights.shuttles;"
         credentials: db_credentials
     ```
@@ -128,7 +129,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
 
     ```yaml
     shuttles_configured:
-        type: polars.PolarsDatabaseDataset
+        type: kedro_datasets_experimental.polars.PolarsDatabaseDataset
         table_name: shuttles
         credentials: db_credentials
         load_args:
@@ -178,7 +179,7 @@ class PolarsDatabaseDataset(AbstractDataset[None, pl.DataFrame]):
         credentials: dict[str, Any] | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         table_name: str | None = None,
         save_args: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,

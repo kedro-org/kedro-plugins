@@ -195,4 +195,4 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     def _exists(self) -> bool:
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
-        return file_system.exists(self._filepath)
+        return file_system.exists(str(self._filepath))

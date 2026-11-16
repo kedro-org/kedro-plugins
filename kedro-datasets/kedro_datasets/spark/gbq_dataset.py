@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import os
 from copy import deepcopy
 from typing import Any, NoReturn
 
@@ -70,7 +71,7 @@ class GBQQueryDataset(AbstractDataset[None, DataFrame]):
         self,
         materialization_dataset: str,
         sql: str | None = None,
-        filepath: str | None = None,
+        filepath: str | os.PathLike | None = None,
         materialization_project: str | None = None,
         load_args: dict[str, Any] | None = None,
         fs_args: dict[str, Any] | None = None,

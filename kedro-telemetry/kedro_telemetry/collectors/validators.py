@@ -17,10 +17,16 @@ def collect_validator_properties(catalog: DataCatalog) -> dict[str, Any]:
     """Count the validator declarations of the catalog.
 
     Validator declarations are exposed by the public ``validator_specs`` property
-    on ``kedro >= 1.6`` catalogs. Returns ``number_of_validated_datasets`` and one
-    flat ``validator_type_count.<library>`` property per library. Only public
-    library names are reported; user-defined validators are bucketed as ``custom``.
-    Nothing is returned for catalogs without validators.
+    on ``kedro >= 1.6`` catalogs. Only public library names are reported;
+    user-defined validators are bucketed as ``custom``.
+
+    Args:
+        catalog: The project's data catalog.
+
+    Returns:
+        A flat dict with ``number_of_validated_datasets`` and one
+        ``validator_type_count.<library>`` entry per library, or an empty dict
+        if the catalog has no validators.
     """
     properties: dict[str, Any] = {}
     validator_specs = getattr(catalog, "validator_specs", None)

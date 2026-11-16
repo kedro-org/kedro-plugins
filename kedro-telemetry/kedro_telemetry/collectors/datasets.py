@@ -17,9 +17,16 @@ _PUBLIC_DATASET_PREFIXES = (
 def collect_dataset_properties(catalog: DataCatalog) -> dict[str, Any]:
     """Count the catalog datasets, in total and per dataset type.
 
-    Returns ``number_of_datasets`` and, for ``kedro >= 1.0`` catalogs, one flat
-    ``dataset_type_count.<type>`` property per dataset type. User-defined dataset
+    Parameters (``parameters`` and ``params:*``) are not counted. Dataset types
+    are only collected for ``kedro >= 1.0`` catalogs, and user-defined dataset
     types are reported as ``custom``.
+
+    Args:
+        catalog: The project's data catalog.
+
+    Returns:
+        A flat dict with ``number_of_datasets`` and, for ``kedro >= 1.0``
+        catalogs, one ``dataset_type_count.<type>`` entry per dataset type.
     """
     # Support both catalog.list() for `kedro < 1.0` and catalog.keys() for `kedro >= 1.0`
     dataset_type_counts: dict[str, int] = {}

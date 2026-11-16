@@ -802,6 +802,37 @@ class TestKedroTelemetryHook:
             == ds_nodes_pipes_cnt
         )
 
+    def test_project_statistics_include_validator_properties(
+        self, pipeline_fixture, project_pipelines
+    ):
+        # The validator counting itself is tested in tests/collectors. This
+        # checks that its output is part of the project statistics.
+        class Spec:
+            def __init__(self, class_path):
+                self.class_path = class_path
+
+        catalog = MagicMock()
+        catalog.keys.return_value = ["datasetA", "datasetB"]
+        catalog.get_type.return_value = "kedro.io.memory_dataset.MemoryDataset"
+        catalog.validator_specs = {
+            "datasetA": Spec("pandera.pandas.DataFrameModel"),
+            "datasetB": Spec("my_project.schemas.CompaniesSchema"),
+        }
+
+        result = _format_project_statistics_data(
+            catalog, pipeline_fixture, project_pipelines
+        )
+
+        assert result == {
+            "number_of_datasets": 2,
+            "dataset_type_count.kedro.io.memory_dataset.MemoryDataset": 2,
+            "number_of_nodes": 2,
+            "number_of_pipelines": 2,
+            "number_of_validated_datasets": 2,
+            "validator_type_count.pandera": 1,
+            "validator_type_count.custom": 1,
+        }
+
 
 class TestFormatTools:
     """Tests for `_format_tools`, which normalises the ``[tool.kedro] tools``

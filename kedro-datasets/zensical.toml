@@ -220,7 +220,7 @@ nav = [
           {"video.VideoDataset" = "api/kedro_datasets_experimental/video.VideoDataset.md"}
         ]},
         {"Weaviate" = [
-          {"weaviate.WeaviateDataset" = "api/kedro_datasets_experimental/weaviate.WeaviateVectorStoreDataset.md"}
+          {"weaviate.WeaviateVectorStoreDataset" = "api/kedro_datasets_experimental/weaviate.WeaviateVectorStoreDataset.md"}
         ]}
       ]}
     ]}

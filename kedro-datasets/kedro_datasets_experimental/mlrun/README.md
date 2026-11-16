@@ -1,6 +1,6 @@
 # MLRun Integration
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![Kedro](https://img.shields.io/badge/kedro-compatible-green)](https://kedro.org/)
 [![MLRun](https://img.shields.io/badge/mlrun-integration-orange)](https://www.mlrun.org/)
 
@@ -28,7 +28,7 @@ pip install "kedro-datasets[mlrun]"
 ```
 
 ### Requirements
-- Python 3.10+
+- Python 3.11+
 - Kedro
 - MLRun SDK
 - joblib

@@ -146,6 +146,23 @@ SCHEMA_OVERRIDES: dict[str, dict[str, Any]] = {
     },
     "spark.GBQQueryDataset": _QUERY_SOURCE_OVERRIDE,
     "spark.SparkJDBCDataset": {
+        # Exactly one non-empty source: a table (read/write) or a query (read-only).
+        "oneOf": [
+            {
+                "required": ["table"],
+                "properties": {
+                    "table": {"type": "string", "minLength": 1},
+                    "query": {"type": "null"},
+                },
+            },
+            {
+                "required": ["query"],
+                "properties": {
+                    "query": {"type": "string", "minLength": 1},
+                    "table": {"type": "null"},
+                },
+            },
+        ],
         "anyOf": [
             {
                 "required": ["url"],

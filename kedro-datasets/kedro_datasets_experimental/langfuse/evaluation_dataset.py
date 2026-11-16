@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -227,16 +227,14 @@ class EvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
         if version is None:
             return None
         try:
-            # Python 3.10 doesn't support 'Z' suffix in fromisoformat
-            normalized = version[:-1] + "+00:00" if version.endswith("Z") else version
-            dt = datetime.fromisoformat(normalized)
+            dt = datetime.fromisoformat(version)
         except (ValueError, TypeError) as exc:
             raise DatasetError(
                 f"Invalid version '{version}'. "
                 f"Expected ISO 8601 format (e.g. '2026-01-15T00:00:00Z')."
             ) from exc
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
         return dt
 
     @property

@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Any
 
 import boto3
+import fsspec
 import pandas as pd
 import pytest
+import s3fs
 from kedro.io.catalog_config_resolver import CREDENTIALS_KEY
 from kedro.io.core import AbstractDataset, DatasetError
 from moto import mock_aws
@@ -65,6 +67,47 @@ def dummy_lt_func(value1: str, value2: str):
 
 
 class TestIncrementalDatasetLocal:
+    def test_load_returns_callables(self, local_csvs, mocker):
+        """Test that IncrementalDataset.load returns callable lazy loaders."""
+        pds = IncrementalDataset(path=str(local_csvs), dataset=DATASET)
+        read_csv_spy = mocker.spy(pd, "read_csv")
+
+        loaded = pds.load()
+        assert loaded
+        assert read_csv_spy.call_count == 0
+        assert all(callable(f) for f in loaded.values())
+
+        first_loader = next(iter(loaded.values()))
+        df = first_loader()
+        assert isinstance(df, pd.DataFrame)
+        assert read_csv_spy.call_count == 1
+
+    def test_load_args_and_credentials_reach_callable(self, local_csvs, mocker):
+        """Test that configured load_args and credentials are used when loading."""
+        read_csv_mock = mocker.patch(
+            "pandas.read_csv", return_value=pd.DataFrame({"a": [1]})
+        )
+        fs_spy = mocker.spy(fsspec, "filesystem")
+
+        dataset_config = {
+            "type": DATASET,
+            "load_args": {"sep": ";"},
+            "credentials": {"token": "dummy_token"},
+        }
+        pds = IncrementalDataset(path=str(local_csvs), dataset=dataset_config)
+        loaded = pds.load()
+        assert loaded
+
+        assert any(
+            call.kwargs.get("token") == "dummy_token" for call in fs_spy.call_args_list
+        )
+
+        first_loader = next(iter(loaded.values()))
+        first_loader()
+
+        assert read_csv_mock.called
+        assert read_csv_mock.call_args.kwargs.get("sep") == ";"
+
     def test_pathlike_path(self, local_csvs):
         dataset = IncrementalDataset(path=local_csvs, dataset=DATASET)
 
@@ -77,8 +120,10 @@ class TestIncrementalDatasetLocal:
         pds = IncrementalDataset(path=str(local_csvs), dataset=DATASET)
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
-            assert_frame_equal(data, partitioned_data_pandas[partition_id])
+
+        # Compare loaded partition data before confirm()
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
         checkpoint_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
         assert not checkpoint_path.exists()
@@ -86,12 +131,20 @@ class TestIncrementalDatasetLocal:
         assert checkpoint_path.is_file()
         assert checkpoint_path.read_text() == pds._read_checkpoint() == "p04/data.csv"
 
+        # A loader invoked after confirm() loads the correct partition
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
+
         reloaded = pds.load()
         assert reloaded.keys() == loaded.keys()
 
         pds.release()
         reloaded_after_release = pds.load()
         assert not reloaded_after_release
+
+        # Loaders still work after release()
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
     def test_save(self, local_csvs):
         """Test saving a new partition into an IncrementalDataset"""
@@ -106,7 +159,7 @@ class TestIncrementalDatasetLocal:
         pds.save({new_partition_key: df})
         assert new_partition_path.exists()
         loaded = pds.load()
-        assert_frame_equal(loaded[new_partition_key], df)
+        assert_frame_equal(loaded[new_partition_key](), df)
 
     @pytest.mark.parametrize(
         "filename_suffix,expected_partitions",
@@ -321,7 +374,7 @@ class TestIncrementalDatasetLocal:
             actual_save_versions |= {each.name for each in partition_dir.iterdir()}
             assert partition_dir.is_dir()
             assert_frame_equal(
-                loaded_partitions[part], partitioned_data_pandas[part + suffix]
+                loaded_partitions[part](), partitioned_data_pandas[part + suffix]
             )
 
         if expected_num_parts:
@@ -472,14 +525,38 @@ class TestIncrementalDatasetS3:
         assert pds._checkpoint._protocol == "s3"
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
-            assert_frame_equal(data, partitioned_data_pandas[partition_id])
+        for partition_id, load_func in loaded.items():
+            assert_frame_equal(load_func(), partitioned_data_pandas[partition_id])
 
         assert not pds._checkpoint.exists()
         assert pds._read_checkpoint() is None
         pds.confirm()
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
+
+    def test_load_does_not_fetch_s3_objects(self, mocked_csvs_in_s3, mocker):
+        """Test that IncrementalDataset.load() in S3 does not open partition S3 files at load time."""
+        open_calls = []
+        orig_open = s3fs.S3FileSystem.open
+
+        def spy_open(fs, *args, **kwargs):
+            open_calls.append(args)
+            return orig_open(fs, *args, **kwargs)
+
+        mocker.patch.object(s3fs.S3FileSystem, "open", spy_open)
+        pds = IncrementalDataset(path=mocked_csvs_in_s3, dataset=DATASET)
+
+        loaded = pds.load()
+        assert loaded
+        # Partition data files must not be opened during load()
+        assert not any(args and str(args[0]).endswith(".csv") for args in open_calls)
+
+        # S3 partition object is only opened when a loader is invoked
+        first_loader = next(iter(loaded.values()))
+        assert callable(first_loader)
+        df = first_loader()
+        assert isinstance(df, pd.DataFrame)
+        assert any(args and str(args[0]).endswith(".csv") for args in open_calls)
 
     def test_load_and_confirm_s3a(
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker

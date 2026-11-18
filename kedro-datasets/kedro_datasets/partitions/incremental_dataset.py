@@ -39,25 +39,22 @@ class IncrementalDataset(PartitionedDataset):
     https://github.com/intake/filesystem_spec. ``IncrementalDataset`` also stores
     the information about the last processed partition in so-called `checkpoint`
     that is persisted to the location of the data partitions by default, so that
-    subsequent pipeline run loads only new partitions past the checkpoint.
+    subsequent pipeline run returns lazy loaders for only new partitions past the
+    checkpoint rather than loading the data itself.
 
     Examples:
         Using the [Python API](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/):
 
+        >>> import pandas as pd
         >>> from kedro_datasets.partitions import IncrementalDataset
-        >>>
-        >>> dataset = IncrementalDataset(
-        ...     path=str(tmp_path / "test_data"), dataset="pandas.CSVDataset"
-        ... )
-        >>> loaded = dataset.load()  # loads all available partitions
-        >>> # assert isinstance(loaded, dict)
-        >>>
-        >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = dataset.load()  # still loads all available partitions
-        >>>
-        >>> dataset.release()  # clears load cache
-        >>> # returns an empty dictionary as no new partitions were added
-        >>> assert dataset.load() == {}
+        >>> dataset = IncrementalDataset(path="data/partitions", dataset="pandas.CSVDataset")
+        >>> dataset.save({"p01/data.csv": pd.DataFrame({"a": [1]})})
+        >>> list(dataset.load())  # no checkpoint yet, so every partition is new
+        ['p01/data.csv']
+        >>> dataset.confirm()  # writes "p01/data.csv" to the checkpoint file
+        >>> dataset.release()  # clears the cached partition listing
+        >>> dataset.load()
+        {}
 
     """
 
@@ -265,16 +262,36 @@ class IncrementalDataset(PartitionedDataset):
             return None
 
     def load(self) -> dict[str, Callable[[], Any]]:
-        partitions: dict[str, Any] = {}
+        """Return a lazy loader for each partition not yet confirmed.
+
+        Partitions are selected by applying ``comparison_func`` to each partition ID
+        and the checkpoint. By default, only partitions after the checkpoint are
+        returned. If no checkpoint can be read, every partition is returned. A forced
+        ``checkpoint`` value takes precedence over the stored one. The dataset for
+        each partition is constructed here, but its data is only read when the
+        returned callable is invoked. Calling a loader does not update the
+        checkpoint; use ``confirm()`` for that.
+
+        The partition listing is cached until ``release()``.
+
+        Returns:
+            Dictionary mapping each partition ID (path relative to ``path``, without
+            ``filename_suffix``) to a zero-argument callable that returns that
+            partition's data. Empty if there are no new partitions.
+
+        Raises:
+            DatasetError: If versioning is enabled and a partition path is not a
+                well-formed ``filename/timestamp/filename`` path.
+        """
+        partitions: dict[str, Callable[[], Any]] = {}
 
         for partition in self._list_partitions():
             partition_id = self._path_to_partition(partition)
             kwargs = deepcopy(self._dataset_config)
             # join the protocol back since PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
-            partitions[partition_id] = self._dataset_type(  # type: ignore
-                **kwargs
-            ).load()
+            dataset = self._dataset_type(**kwargs)  # type: ignore
+            partitions[partition_id] = dataset.load
 
         return partitions
 

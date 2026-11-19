@@ -7,6 +7,7 @@
 - `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects. Nodes consuming it must now call each function to get the data, e.g. `{k: f() for k, f in partitions.items()}`.
 
 ## Bug fixes and other changes
+- Filtered `create_table`-only arguments (`format`, `temp`, `partition_by`, `schema`) from `save_args` when appending or upserting to existing tables in `ibis.TableDataset`.
 - Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 - Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 - Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.
@@ -35,7 +36,6 @@
 - Exposed `load` and `save` publicly for `spark.SparkDatasetV2`, `databricks.ManagedTableDataset`, and the experimental vector store datasets, consistent with other datasets.
 - Added the missing `spark-gbqquerydataset` extra for `spark.GBQQueryDataset` and included it in `spark-all`.
 - Fixed the API docs to list public members, including undocumented and inherited ones (such as `load` and `save`), instead of private members.
-- Filtered `create_table`-only arguments (`format`, `temp`, `partition_by`, `schema`) from `save_args` when appending or upserting to existing tables in `ibis.TableDataset`.
 - Fixed Hugging Face `CSVDataset`, `JSONDataset` and `ParquetDataset` writing outside the dataset directory when saving a `DatasetDict` with unsafe split names.
 - Fixed `matplotlib.MatplotlibDataset` writing outside the dataset directory; absolute plot names now raise `DatasetError`.
 - Fixed `pandas.SQLTableDataset.preview()` ignoring the `schema` in `load_args`, which made it fail with `NoSuchTableError` or preview a same-named table from the default schema.

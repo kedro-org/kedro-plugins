@@ -1,0 +1,40 @@
+name: ASV Benchmark for kedro-datasets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "kedro-datasets/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
+          pip install -e "./kedro-datasets[pandas]"
+          pip install asv
+
+      - name: Run ASV benchmarks
+        run: |
+          cd kedro-datasets
+          asv machine --yes --machine=github-actions
+          asv run -v -E existing --quick --machine=github-actions HEAD

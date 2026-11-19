@@ -7,6 +7,7 @@
 - `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects. Nodes consuming it must now call each function to get the data, e.g. `{k: f() for k, f in partitions.items()}`.
 
 ## Bug fixes and other changes
+- Fixed `pandas.ExcelDataset.preview()` to support multiple loaded sheets by previewing the first loaded sheet.
 - Fixed experimental `safetensors.SafetensorsDataset` failing to save on Windows by writing the serialised bytes through the open file handle.
 - Added a pipeline regression test for saving `GeneratorVideo` outputs to `VideoDataset`. The underlying issue (#232) was fixed in Kedro 1.4.0.
 - Fixed `snowflake.SnowparkTableDataset` reporting a table as missing when the existence check failed for another reason, such as a lost session or a suspended warehouse. Only Snowflake's "does not exist or not authorized" error now means the table is missing.

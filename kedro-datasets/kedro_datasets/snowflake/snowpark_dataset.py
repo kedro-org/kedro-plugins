@@ -13,6 +13,9 @@ from snowflake.snowpark import exceptions as sp_exceptions
 
 logger = logging.getLogger(__name__)
 
+# Snowflake error 2003: "Object ... does not exist or not authorized".
+_OBJECT_DOES_NOT_EXIST = 2003
+
 
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark DataFrames.
@@ -266,9 +269,18 @@ class SnowparkTableDataset(AbstractDataset):
                 f"{self._database}.{self._schema}.{self._table_name}"
             ).show()
             return True
-        except Exception as e:
-            logger.debug(f"Table {self._table_name} does not exist: {e}")
-            return False
+        except sp_exceptions.SnowparkSQLException as e:
+            # Snowflake reports a table that is missing, or that the role cannot see,
+            # as "Object ... does not exist or not authorized" (error 2003). Any other
+            # failure, such as a lost connection or a suspended warehouse, is not an
+            # answer about the table and is raised.
+            if (
+                e.sql_error_code == _OBJECT_DOES_NOT_EXIST
+                or "does not exist or not authorized" in str(e)
+            ):
+                logger.debug(f"Table {self._table_name} does not exist: {e}")
+                return False
+            raise
 
     def _validate_and_get_table_name(self) -> str:
         """

@@ -108,6 +108,28 @@ jobs:
         working-directory: kedro-datasets
         run: python -m kedro_datasets._generate_catalog_schema --check
 
+  check-benchmarks:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          python-version: "3.11"
+          activate-environment: true
+      - name: Install dependencies
+        run: |
+          uv pip install "kedro @ git+https://github.com/kedro-org/kedro@main"
+          uv pip install -e "kedro-datasets[pandas]"
+          uv pip install asv
+      - name: Check benchmarks
+        working-directory: kedro-datasets
+        run: asv check -E existing
+
   detect-secrets:
     uses: ./.github/workflows/detect-secrets.yml
     with:

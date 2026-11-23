@@ -219,7 +219,7 @@ class DeltaTableDataset(AbstractDataset):
     @property
     def history(self) -> list[dict[str, Any]] | None:
         """Returns the history of actions on DeltaTableDataset as a list of dictionaries."""
-        return self._delta_table.history() if self._delta_table else None
+        return list(self._delta_table.history()) if self._delta_table else None
 
     def get_loaded_version(self) -> int | None:
         """Returns the version of the DeltaTableDataset that is currently loaded."""

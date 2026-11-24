@@ -375,6 +375,21 @@ class TestSnowparkTableDataset:
         ):
             snowflake_dataset._validate_and_get_table_name()
 
+    def test_session_created_lazily(self, mocker):
+        """The `session` property creates and caches a session on first access."""
+        mock_session = MagicMock()
+        mock_get_session = mocker.patch.object(
+            SnowparkTableDataset, "_get_session", return_value=mock_session
+        )
+        dataset = SnowparkTableDataset(
+            table_name="DUMMY_TABLE", credentials=DUMMY_CREDENTIALS
+        )
+        mock_get_session.assert_not_called()
+
+        assert dataset.session is mock_session
+        assert dataset.session is mock_session
+        mock_get_session.assert_called_once_with(dataset._connection_parameters)
+
     def test_get_session_existing_session(self, mocker, snowflake_dataset):
         """
         Test that `snowflake_dataset._get_session` returns the existing active session.

@@ -477,7 +477,6 @@ omit = [
     "kedro_datasets/databricks/*",
     "kedro_datasets/geopandas/*",  # TODO: remove once fiona supports Python 3.14
     "kedro_datasets/holoviews/*",
-    "kedro_datasets/snowflake/*",
     "kedro_datasets/spark/spark_hive_dataset.py",
     "kedro_datasets/tensorflow/*",
     "tests/*",

@@ -37,4 +37,4 @@ jobs:
         run: |
           cd kedro-datasets
           asv machine --yes --machine=github-actions
-          asv run -v -E existing --quick --machine=github-actions HEAD
+          asv run -v -E existing --quick --machine=github-actions

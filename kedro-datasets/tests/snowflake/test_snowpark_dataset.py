@@ -9,7 +9,7 @@ snowflake = pytest.importorskip("snowflake")
 import pandas as pd
 import pytest
 from kedro.io.core import DatasetError
-from snowflake.snowpark import DataFrame, Session
+from snowflake.snowpark import DataFrame, Session, exceptions
 from snowflake.snowpark.types import (
     DateType,
     FloatType,
@@ -126,6 +126,12 @@ def sample_pd_df() -> pd.DataFrame:
     )
 
 
+def _table_raising(mocker, dataset, error):
+    table = mocker.MagicMock()
+    table.show.side_effect = error
+    mocker.patch.object(dataset.session, "table", return_value=table)
+
+
 class TestSnowparkTableDataset:
     """Tests for the SnowparkTableDataset functionality."""
 
@@ -224,6 +230,53 @@ class TestSnowparkTableDataset:
         snowflake_dataset._table_name = "NON_EXISTENT_TABLE"
         exists = snowflake_dataset._exists()
         assert not exists
+
+    def test_object_does_not_exist_error_is_not_exists(
+        self, mocker, snowflake_dataset: SnowparkTableDataset
+    ) -> None:
+        _table_raising(
+            mocker,
+            snowflake_dataset,
+            exceptions.SnowparkSQLException(
+                "SQL compilation error:\nObject 'DUMMY_DATABASE.DUMMY_SCHEMA.T' "
+                "does not exist or not authorized.",
+                sql_error_code=2003,
+            ),
+        )
+
+        assert snowflake_dataset._exists() is False
+
+    def test_exists_raises_on_lost_session(
+        self, mocker, snowflake_dataset: SnowparkTableDataset
+    ) -> None:
+        """
+        A failed check must not read as a missing table: with
+        ``--only-missing-outputs`` the node would run again and overwrite it.
+        """
+        _table_raising(
+            mocker,
+            snowflake_dataset,
+            exceptions.SnowparkSessionException("Session expired"),
+        )
+
+        with pytest.raises(exceptions.SnowparkSessionException):
+            snowflake_dataset._exists()
+
+    def test_exists_raises_on_other_sql_error(
+        self, mocker, snowflake_dataset: SnowparkTableDataset
+    ) -> None:
+        _table_raising(
+            mocker,
+            snowflake_dataset,
+            exceptions.SnowparkSQLException(
+                "Warehouse 'DUMMY_WAREHOUSE' cannot be resumed because resource "
+                "monitor has exceeded its quota.",
+                sql_error_code=606,
+            ),
+        )
+
+        with pytest.raises(exceptions.SnowparkSQLException):
+            snowflake_dataset._exists()
 
     def test_get_session(self, snowflake_dataset: SnowparkTableDataset) -> None:
         """

@@ -2903,7 +2903,7 @@
               },
               "file_format": {
                 "type": "string",
-                "description": "String which is used to match the appropriate load/save method on a\nbest effort basis. For example if 'csv' is passed, the `polars.read_csv` and\n`polars.DataFrame.write_csv` methods will be identified. An error will\nbe raised unless there is at least one matching `read_<file_format>`\nor `write_<file_format>`."
+                "description": "String which is used to match the appropriate load/save method on a\nbest effort basis. For example if 'csv' is passed, the `polars.read_csv` and\n`polars.DataFrame.write_csv` methods will be identified. An error will\nbe raised unless there is at least one matching `read_<file_format>`\nor `write_<file_format>`.\nIf 'delta' is passed, `filepath` points to the Delta table directory, which\nis read and written by `polars.read_delta` and\n`polars.DataFrame.write_delta` directly rather than through ``fsspec``.\nSaving overwrites the table by default; set `save_args: {mode: append}`\nto append. Kedro versioning is not supported for Delta tables, use\nDelta time travel instead (e.g. `load_args: {version: 0}`)."
               },
               "load_args": {
                 "type": [
@@ -2925,7 +2925,7 @@
                   "string",
                   "null"
                 ],
-                "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+                "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`.\nFor `file_format='delta'`, credentials and `fs_args` are passed to\ndelta-rs as `storage_options` only, so use the key names delta-rs\nexpects (e.g. `aws_access_key_id`, `aws_secret_access_key` and\n`aws_region` for S3) rather than the ``fsspec`` ones."
               },
               "fs_args": {
                 "type": [

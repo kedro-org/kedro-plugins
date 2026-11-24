@@ -54,7 +54,7 @@ Name | Description
 [polars.EagerPolarsDataset](api/kedro_datasets/polars.EagerPolarsDataset.md) | ``EagerPolarsDataset`` loads/saves data from/to a data file using an filesystem (e.g.: local, S3, GCS). It uses polars to handle the type of read/write target.
 [polars.LazyPolarsDataset](api/kedro_datasets/polars.LazyPolarsDataset.md) | ``LazyPolarsDataset`` loads/saves data from/to a data file using an underlying filesystem (e.g.: local, S3, GCS). It uses polars to handle the type of read/write target.
 [redis.PickleDataset](api/kedro_datasets/redis.PickleDataset.md) | ``PickleDataset`` loads/saves data from/to a Redis database. The underlying functionality is supported by the redis library, so it supports all allowed options for instantiating the redis app ``from_url`` and setting a value.
-[snowflake.SnowparkTableDataset](api/kedro_datasets/snowflake.SnowparkTableDataset.md) | ``SnowparkTableDataset`` loads and saves Snowpark DataFrames. As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11. Python 3.12 is not supported yet.
+[snowflake.SnowparkTableDataset](api/kedro_datasets/snowflake.SnowparkTableDataset.md) | ``SnowparkTableDataset`` loads and saves Snowpark DataFrames. The Snowpark connector (`snowflake-snowpark-python`) works with the Python versions supported by `kedro-datasets` (3.11 and above).
 [spark.DeltaTableDataset](api/kedro_datasets/spark.DeltaTableDataset.md) | ``DeltaTableDataset`` loads data into DeltaTable objects.
 [spark.GBQQueryDataset](api/kedro_datasets/spark.GBQQueryDataset.md) | ``GBQQueryDataset`` loads data from Google BigQuery with a SQL query using BigQuery Spark connector.
 [spark.SparkDataset](api/kedro_datasets/spark.SparkDataset.md) | ``SparkDataset`` loads and saves Spark dataframes.

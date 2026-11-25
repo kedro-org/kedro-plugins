@@ -20,8 +20,7 @@ _OBJECT_DOES_NOT_EXIST = 2003
 class SnowparkTableDataset(AbstractDataset):
     """``SnowparkTableDataset`` loads and saves Snowpark DataFrames.
 
-    As of October 2024, the Snowpark connector works with Python 3.9, 3.10, and 3.11.
-    Python 3.12 is not supported yet.
+    The Snowpark connector (`snowflake-snowpark-python`) works with the Python versions supported by `kedro-datasets` (3.11 and above).
 
     Examples:
         Using the [YAML API](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/):

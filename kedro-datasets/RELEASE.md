@@ -2,6 +2,7 @@
 ## Major features and improvements
 - Added a `query` argument to `spark.SparkJDBCDataset` to load the result of a SQL query through Spark's JDBC `query` option instead of a whole table.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+- Enabled `snowflake.SnowparkTableDataset` tests in CI on Python 3.12, 3.13 and 3.14, and updated the docs to remove the note that Python 3.12 is unsupported.
 
 ## Breaking changes
 - `partitions.IncrementalDataset.load()` now returns lazy partition load functions (`dict[str, Callable[[], Any]]`), matching `PartitionedDataset.load()`, rather than eagerly loaded data objects. Nodes consuming it must now call each function to get the data, e.g. `{k: f() for k, f in partitions.items()}`.
